@@ -25,8 +25,11 @@ sudo pip install pynmea2
 ##### Follow this tutorial:
 https://learn.adafruit.com/setting-up-a-raspberry-pi-as-a-wifi-access-point?view=all
 
-##### Copy this repository to /home/pi/.config/openplotter
-
+##### Clone this repository to /home/pi/.config/openplotter
+```sh
+cd .config
+git clone git://github.com/sailoog/openplotter-sailpi.git openplotter
+```
 ##### Set permissions:
 ```sh
 cd /home/pi/.config/openplotter
