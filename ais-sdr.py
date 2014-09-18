@@ -17,10 +17,8 @@ for index,item in enumerate(data):
 	if opcion=='ppm':
 		ppm=valor
 	if opcion=='enable' and valor=='1':
-		subprocess.Popen(['rtl_fm', '-f', '161975000', '-g', gain, '-p', ppm, '-s', '48k'])
-		subprocess.Popen(['aisdecoder', '-h', '127.0.0.1', '-p', '10110', '-a', 'file', '-c', 'mono', '-d', '-f', '/dev/stdin'])
+		rtl_fm=subprocess.Popen(['rtl_fm', '-f', '161975000', '-g', gain, '-p', ppm, '-s', '48k'], stdout = subprocess.PIPE)
+		aisdecoder=subprocess.Popen(['aisdecoder', '-h', '127.0.0.1', '-p', '10110', '-a', 'file', '-c', 'mono', '-d', '-f', '/dev/stdin'], stdin = rtl_fm.stdout)
 	if opcion=='enable' and valor=='0':
-		subprocess.Popen(['pkill', '-9', 'aisdecoder'])
-		subprocess.Popen(['pkill', '-9', 'rtl_fm'])
-           
-
+		aisdecoder=subprocess.Popen(['pkill', '-9', 'aisdecoder'], stdout = subprocess.PIPE)
+		rtl_fm=subprocess.Popen(['pkill', '-9', 'rtl_fm'], stdin = aisdecoder.stdout)
