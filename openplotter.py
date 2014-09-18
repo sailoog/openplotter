@@ -33,6 +33,20 @@ class MyFrame(wx.Frame):
 			estilo.SetWeight(wx.BOLD)
 			server.SetFont(estilo)
 
+			ais_sdr=wx.StaticBox(self, label=' AIS-SDR ', size=(210, 130), pos=(485, 235))
+			estilo = ais_sdr.GetFont()
+			estilo.SetWeight(wx.BOLD)
+			ais_sdr.SetFont(estilo)
+
+			self.ais_sdr_enable = wx.CheckBox(self, label='Enable', pos=(490, 255))
+			self.ais_sdr_enable.Bind(wx.EVT_CHECKBOX, self.OnOffAIS)
+
+			self.gain = wx.TextCtrl(self, -1, size=(50, 30), pos=(490, 285))
+			gain_text = wx.StaticText(self, label='Gain', pos=(550, 290))
+
+			self.ppm = wx.TextCtrl(self, -1, size=(50, 30), pos=(490, 325))
+			ppm_text = wx.StaticText(self, label='Error correction', pos=(550, 330))
+
 			titulo3 = wx.StaticText(self, label='Supported chipsets:\nRT5370, RTL8192CU, RTL8188CUS', pos=(495, 120))
 			estilo = titulo3.GetFont()
 			estilo.SetPointSize(8)
@@ -96,7 +110,7 @@ class MyFrame(wx.Frame):
 			self.button2 =wx.Button(self, label="Restart multiplexer", pos=(240, 210))
 			self.Bind(wx.EVT_BUTTON, self.OnClick2, self.button2)
 
-			self.logger = wx.TextCtrl(self, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_DONTWRAP, size=(680,125), pos=(10, 245))
+			self.logger = wx.TextCtrl(self, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_DONTWRAP, size=(460,125), pos=(10, 245))
 
 			self.CreateStatusBar()
 
@@ -113,6 +127,8 @@ class MyFrame(wx.Frame):
 
 			self.packages = []
 			self.crea_lista_packages()
+
+			self.read_ais_conf()
 
 		def SerialCheck(self,dev):
 			num = 0
@@ -251,8 +267,8 @@ class MyFrame(wx.Frame):
 			data='# For advanced manual configuration, please visit: http://www.stripydog.com/kplex/configuration.html\n# Editing this file by openplotter GUI, can eliminate manual settings.\n# You should not modify Output.\n\n'
 			file = open(home+'/.kplex.conf', 'w')
 			for index,item in enumerate(self.packages):
-				if item[0]!='localhost UDP in':data=data+'#'+item[0]+'\n[serial]\nfilename='+item[1]+'\nbaud='+item[2]+'\ndirection=in\noptional=yes\n\n'
-			data = data + '#localhost UDP in\n[broadcast]\naddress=127.0.0.1\nport=10110\ndirection=in\noptional=yes\n\n'
+				if item[0]!='UDP':data=data+'#'+item[0]+'\n[serial]\nfilename='+item[1]+'\nbaud='+item[2]+'\ndirection=in\noptional=yes\n\n'
+			data = data + '#UDP\n[broadcast]\naddress=127.0.0.1\nport=10110\ndirection=in\noptional=yes\n\n'
 			data = data + '#Output\n[tcp]\nmode=server\nport=10110\ndirection=out\n'
 			file.write(data)
 			file.close()
@@ -276,6 +292,56 @@ class MyFrame(wx.Frame):
 		def OnClick_network_man(self,event):
 			subprocess.Popen('/usr/sbin/wpa_gui')
 			self.SetStatusText('Manage networks in the new window')
+
+		def OnOffAIS(self, e):
+			sender = e.GetEventObject()
+			isChecked = sender.GetValue()
+			if isChecked:
+				self.gain.SetEditable(False)
+				self.gain.SetForegroundColour((180,180,180))
+				self.ppm.SetEditable(False)
+				self.ppm.SetForegroundColour((180,180,180))          
+			else: 
+				self.gain.SetEditable(True)
+				self.gain.SetForegroundColour((wx.NullColor))
+				self.ppm.SetEditable(True)
+				self.ppm.SetForegroundColour((wx.NullColor))
+			self.write_ais_conf()
+			subprocess.Popen(['python', home+'/.config/openplotter/ais-sdr.py'])
+
+		def read_ais_conf(self):
+			file=open(home+'/.config/openplotter/ais-sdr.conf', 'r')
+			data=file.readlines()
+			file.close()
+			for index,item in enumerate(data):
+				item2=item.strip('\n')
+				opcion, valor =item2.split('=')
+				if opcion=='enable' and valor=='1':
+					self.ais_sdr_enable.SetValue(True)
+					self.gain.SetEditable(False)
+					self.gain.SetForegroundColour((180,180,180))
+					self.ppm.SetEditable(False)
+					self.ppm.SetForegroundColour((180,180,180))
+				if opcion=='gain':
+					self.gain.SetValue(valor)
+				if opcion=='ppm':
+					self.ppm.SetValue(valor)
+			subprocess.Popen(['python', home+'/.config/openplotter/ais-sdr.py'])
+
+		def write_ais_conf(self):
+			gain=self.gain.GetValue()
+			gain=gain.strip()
+			ppm=self.ppm.GetValue()
+			ppm=ppm.strip()
+			enable='0'
+			enable_estado=self.ais_sdr_enable.GetValue()
+			if enable_estado==True: enable='1'
+			file = open(home+'/.config/openplotter/ais-sdr.conf', 'w')
+			data='gain='+gain+'\n'+'ppm='+ppm+'\n'+'enable='+enable
+			file.write(data)
+			file.close()
+
+
 
 app = wx.App(False)
 frame = MyFrame(None, 'OpenPlotter Settings')
