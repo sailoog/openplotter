@@ -37,6 +37,7 @@ sudo chmod 755 reset_kplex_cron.sh
 sudo chmod 755 gps_time_cron.sh
 sudo chmod 755 openplotter.py
 sudo chmod 755 gps_time_daemon.py
+sudo chmod 755 ais-sdr.py
 
 cd /home/pi/.config/openplotter/nmea_wifi_server
 sudo chown root:root switch_access_point.sh
