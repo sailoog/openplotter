@@ -62,7 +62,7 @@ class MyFrame(wx.Frame):
 			self.SerialCheck('/dev/ttyUSB')
 			self.SerialCheck('/dev/ttyS')
 			self.deviceComboBox = wx.ComboBox(self, choices=self.SerDevLs, style=wx.CB_DROPDOWN, size=(130, 30), pos=(117, 45))
-			self.deviceComboBox.SetValue(self.SerDevLs[0])
+			if self.SerDevLs : self.deviceComboBox.SetValue(self.SerDevLs[0])
 
 			self.bauds = ['2400', '4800', '9600', '19200', '38400', '57600', '115200']
 			self.baudComboBox = wx.ComboBox(self, choices=self.bauds, style=wx.CB_READONLY, size=(90, 30), pos=(250, 45))
@@ -243,8 +243,9 @@ class MyFrame(wx.Frame):
 			device=self.device.GetValue()
 			port=self.deviceComboBox.GetValue()
 			bauds=self.baudComboBox.GetValue()
-			self.add_item_packages(device,port,bauds)
-			self.construye_lista()
+			if port:
+				self.add_item_packages(device,port,bauds)
+				self.construye_lista()
 
 		def OnClick_apply(self,event):
 			data='# For advanced manual configuration, please visit: http://www.stripydog.com/kplex/configuration.html\n# Editing this file by openplotter GUI, can eliminate manual settings.\n# You should not modify Output.\n\n'
