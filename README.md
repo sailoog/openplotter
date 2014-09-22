@@ -2,6 +2,8 @@ openplotter-sailpi
 ==================
 Project page: http://campus.sailoog.com/course/view.php?id=9
 
+![OpenPlotter-SailPi](http://campus.sailoog.com/pluginfile.php/715/mod_page/intro/OpenPlotter-SailPi.jpg "OpenPlotter-SailPi")
+
 Instructions
 ------------
 
