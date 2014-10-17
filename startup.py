@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import ConfigParser, subprocess
+import ConfigParser, subprocess, time
 from os.path import expanduser
 
 home = expanduser("~")

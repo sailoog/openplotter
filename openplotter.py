@@ -14,7 +14,7 @@ class MyFrame(wx.Frame):
 		
 		def __init__(self, parent, title):
 
-			wx.Frame.__init__(self, parent, title=title, size=(700,400))
+			wx.Frame.__init__(self, parent, title=title, size=(700,420))
 
 			self.read_conf()
 
@@ -143,7 +143,7 @@ class MyFrame(wx.Frame):
 
 ########################################################
 
-			self.png = wx.StaticBitmap(self, -1, wx.Bitmap("openplotter500.png", wx.BITMAP_TYPE_ANY), pos=(540, 250))
+			self.png = wx.StaticBitmap(self, -1, wx.Bitmap(home+'/.config/openplotter/openplotter500.png', wx.BITMAP_TYPE_ANY), pos=(540, 250))
 
 			self.CreateStatusBar()
 
@@ -449,7 +449,7 @@ class MyFrame(wx.Frame):
 			self.SetStatusText('Kplex restarted')
 				
 		def show_output_window(self,event):
-			show_output=subprocess.Popen(['python', 'output.py'])
+			show_output=subprocess.Popen(['python', home+'/.config/openplotter/output.py'])
 
 		def check_startup(self, e):
 			opencpn="0"
