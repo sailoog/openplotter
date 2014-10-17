@@ -67,15 +67,19 @@ git clone git://github.com/sailoog/openplotter-sailpi.git openplotter
 ##### Set permissions:
 ```sh
 cd /home/pi/.config/openplotter
-sudo chmod 755 reset_kplex_cron.sh
 sudo chmod 755 gps_time_cron.sh
-sudo chmod 755 openplotter.py
 sudo chmod 755 gps_time_daemon.py
-sudo chmod 755 ais-sdr.py
+sudo chmod 755 openplotter.py
+sudo chmod 755 output.py
+sudo chmod 755 startup.py
 
 cd /home/pi/.config/openplotter/nmea_wifi_server
 sudo chown root:root switch_access_point.sh
 sudo chmod 755 switch_access_point.sh
+```
+##### Run at startup:
+```sh
+~/.config/openplotter/startup.py
 ```
 ##### Run:
 ```sh
