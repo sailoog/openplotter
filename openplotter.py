@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 
-import wx, subprocess, socket, pynmea2, threading, time, sys, os
-from os.path import expanduser
+import wx, subprocess, socket, pynmea2, time, sys, os, ConfigParser
 from wx.lib.mixins.listctrl import CheckListCtrlMixin
 
-home = expanduser("~")
+home = os.path.expanduser("~")
 
 class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin):
 	def __init__(self, parent):
@@ -15,102 +14,136 @@ class MyFrame(wx.Frame):
 		
 		def __init__(self, parent, title):
 
-			wx.Frame.__init__(self, parent, title=title, size=(700,400))
+			wx.Frame.__init__(self, parent, title=title, size=(700,420))
 
-			hora=wx.StaticBox(self, label=' Time ', size=(210, 90), pos=(485, 5))
-			estilo = hora.GetFont()
-			estilo.SetWeight(wx.BOLD)
-			hora.SetFont(estilo)
+			self.read_conf()
 
-			self.button4 =wx.Button(self, label="Set time zone", pos=(490, 25))
-			self.Bind(wx.EVT_BUTTON, self.OnClick4, self.button4)
+			menubar = wx.MenuBar()
+			self.startup = wx.Menu()
+			self.startup_item1 = self.startup.Append(wx.ID_ANY, 'OpenCPN', 'If selected OpenCPN will run at startup', kind=wx.ITEM_CHECK)
+			self.Bind(wx.EVT_MENU, self.check_startup, self.startup_item1)
+			self.startup_item2 = self.startup.Append(wx.ID_ANY, 'NMEA multiplexor (Kplex)', 'If selected Kplex will run at startup', kind=wx.ITEM_CHECK)
+			self.Bind(wx.EVT_MENU, self.check_startup, self.startup_item2)
+			self.startup_item3 = self.startup.Append(wx.ID_ANY, 'Remote desktop (x11vnc)', 'If selected x11vnc will run at startup', kind=wx.ITEM_CHECK)
+			self.Bind(wx.EVT_MENU, self.check_startup, self.startup_item3)
+			menubar.Append(self.startup, 'Startup')
+			time_ = wx.Menu()
+			time_item1 = time_.Append(wx.ID_ANY, 'Set time zone', 'Set time zone in the new window')
+			self.Bind(wx.EVT_MENU, self.time_zone, time_item1)
+			time_item2 = time_.Append(wx.ID_ANY, 'Set time from GPS', 'Set system time from GPS')
+			self.Bind(wx.EVT_MENU, self.time_gps, time_item2)
+			menubar.Append(time_, 'Time')
+			wifi_server = wx.Menu()
+			wifi_server_item1 = wifi_server.Append(wx.ID_ANY, 'Set Server/Client', 'Switch WiFi between "access point" and "DHCP client"')
+			self.Bind(wx.EVT_MENU, self.OnClick_nmea_server, wifi_server_item1)
+			wifi_server_item2 = wifi_server.Append(wx.ID_ANY, 'Network manager', 'Manage your networks')
+			self.Bind(wx.EVT_MENU, self.OnClick_network_man, wifi_server_item2)
+			menubar.Append(wifi_server, 'WiFi')
+			self.SetMenuBar(menubar)
 
-			self.button3 =wx.Button(self, label="Set time from GPS", pos=(490, 60))
-			self.Bind(wx.EVT_BUTTON, self.OnClick3, self.button3)
+########################################################
 
-			server=wx.StaticBox(self, label=' NMEA WiFi Server ', size=(210, 130), pos=(485, 100))
-			estilo = server.GetFont()
-			estilo.SetWeight(wx.BOLD)
-			server.SetFont(estilo)
-
-			ais_sdr=wx.StaticBox(self, label=' AIS-SDR ', size=(210, 130), pos=(485, 235))
-			estilo = ais_sdr.GetFont()
-			estilo.SetWeight(wx.BOLD)
-			ais_sdr.SetFont(estilo)
-
-			self.ais_sdr_enable = wx.CheckBox(self, label='Enable', pos=(490, 255))
-			self.ais_sdr_enable.Bind(wx.EVT_CHECKBOX, self.OnOffAIS)
-
-			self.gain = wx.TextCtrl(self, -1, size=(50, 30), pos=(490, 285))
-			gain_text = wx.StaticText(self, label='Gain', pos=(550, 290))
-
-			self.ppm = wx.TextCtrl(self, -1, size=(50, 30), pos=(490, 325))
-			ppm_text = wx.StaticText(self, label='Error correction', pos=(550, 330))
-
-			titulo3 = wx.StaticText(self, label='Supported chipsets:\nRT5370, RTL8192CU, RTL8188CUS', pos=(495, 120))
-			estilo = titulo3.GetFont()
-			estilo.SetPointSize(8)
-			titulo3.SetFont(estilo)
-
-			self.button_nmea_server =wx.Button(self, label="Set Server/Client", pos=(490, 160))
-			self.Bind(wx.EVT_BUTTON, self.OnClick_nmea_server, self.button_nmea_server)
-
-			self.button_network_man =wx.Button(self, label="Network manager", pos=(490, 195))
-			self.Bind(wx.EVT_BUTTON, self.OnClick_network_man, self.button_network_man)
-
-			nmea=wx.StaticBox(self, label=' NMEA Multiplexer ', size=(475, 197), pos=(5, 5))
+			nmea=wx.StaticBox(self, label=' Add NMEA input / output ', size=(690, 105), pos=(5, 5))
 			estilo = nmea.GetFont()
 			estilo.SetWeight(wx.BOLD)
 			nmea.SetFont(estilo)
-
-			entradas = wx.StaticText(self, label='Inputs', pos=(10, 25))
-			stilo = entradas.GetFont()
-			estilo.SetWeight(wx.BOLD)
-			estilo.SetPointSize(8)
-			entradas.SetFont(estilo)
-
-			self.device = wx.TextCtrl(self, -1, size=(105, 30), pos=(10, 45))
 
 			self.SerDevLs = []
 			self.SerialCheck('/dev/rfcomm')
 			self.SerialCheck('/dev/ttyUSB')
 			self.SerialCheck('/dev/ttyS')
-			self.deviceComboBox = wx.ComboBox(self, choices=self.SerDevLs, style=wx.CB_DROPDOWN, size=(130, 30), pos=(117, 45))
+			self.deviceComboBox = wx.ComboBox(self, choices=self.SerDevLs, style=wx.CB_DROPDOWN, size=(130, 30), pos=(80, 30))
 			if self.SerDevLs : self.deviceComboBox.SetValue(self.SerDevLs[0])
 
 			self.bauds = ['2400', '4800', '9600', '19200', '38400', '57600', '115200']
-			self.baudComboBox = wx.ComboBox(self, choices=self.bauds, style=wx.CB_READONLY, size=(90, 30), pos=(250, 45))
+			self.baudComboBox = wx.ComboBox(self, choices=self.bauds, style=wx.CB_READONLY, size=(90, 30), pos=(215, 30))
 			self.baudComboBox.SetValue('4800')
 
-			self.button_add_new =wx.Button(self, label=" <- Add input", pos=(345, 45))
-			self.Bind(wx.EVT_BUTTON, self.OnClick_add_new, self.button_add_new)
+			wx.StaticText(self, label='<--', pos=(320, 35))
 
-			self.list = wx.ListCtrl(self, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(330, 110), pos=(10, 85))
-			self.list.InsertColumn(0, 'Device', width=125)
-			self.list.InsertColumn(1, 'Port', width=125)
-			self.list.InsertColumn(2, 'Baud rate', width=75)
+			self.add_serial_in =wx.Button(self, label="Add serial input", pos=(360, 30))
+			self.Bind(wx.EVT_BUTTON, self.add_serial_input, self.add_serial_in)
 
-			self.button_borrar_input =wx.Button(self, label=" <- Delete selec.", pos=(345, 85))
-			self.Bind(wx.EVT_BUTTON, self.OnClick_borrar_input, self.button_borrar_input)
+			self.add_serial_out =wx.Button(self, label="Add serial output", pos=(520, 30))
+			self.Bind(wx.EVT_BUTTON, self.add_serial_output, self.add_serial_out)
 
-			self.button_apply =wx.Button(self, label="Apply changes", pos=(345, 165))
-			self.Bind(wx.EVT_BUTTON, self.OnClick_apply, self.button_apply)
+			self.type = ['TCP', 'UDP']
+			self.typeComboBox = wx.ComboBox(self, choices=self.type, style=wx.CB_READONLY, size=(65, 30), pos=(10, 70))
+			self.typeComboBox.SetValue('TCP')
 
-			salida = wx.StaticText(self, label='Output', pos=(10, 220))
-			estilo = salida.GetFont()
+			self.address = wx.TextCtrl(self, -1, size=(130, 30), pos=(80, 70))
+
+			self.port = wx.TextCtrl(self, -1, size=(90, 30), pos=(215, 70))
+
+			wx.StaticText(self, label='<--', pos=(320, 75))
+
+			self.add_network_in =wx.Button(self, label="Add network input", pos=(360, 70))
+			self.Bind(wx.EVT_BUTTON, self.add_network_input, self.add_network_in)
+
+			self.add_network_out =wx.Button(self, label="Add network output", pos=(520, 70))
+			self.Bind(wx.EVT_BUTTON, self.add_network_output, self.add_network_out)
+
+########################################################
+
+			in_out=wx.StaticBox(self, label=' NMEA inputs / outputs ', size=(475, 260), pos=(5, 115))
+			estilo = in_out.GetFont()
 			estilo.SetWeight(wx.BOLD)
-			estilo.SetPointSize(8)
-			salida.SetFont(estilo)
+			in_out.SetFont(estilo)
 
-			salida2 = wx.StaticText(self, label='TCP -> localhost:10110', pos=(75, 220))
-			estilo = salida2.GetFont()
-			estilo.SetPointSize(8)
-			salida2.SetFont(estilo)
+			self.list_input = wx.ListCtrl(self, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(295, 90), pos=(10, 140))
+			self.list_input.InsertColumn(0, 'Type', width=60)
+			self.list_input.InsertColumn(1, 'Port/Address', width=140)
+			self.list_input.InsertColumn(2, 'Bauds/Port', width=95)
 
-			self.button2 =wx.Button(self, label="Restart multiplexer", pos=(240, 210))
-			self.Bind(wx.EVT_BUTTON, self.OnClick2, self.button2)
+			inputs = wx.StaticText(self, label='Inputs', pos=(320, 145))
+			estilo = inputs.GetFont()
+			estilo.SetWeight(wx.BOLD)
+			inputs.SetFont(estilo)
 
-			self.logger = wx.TextCtrl(self, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_DONTWRAP, size=(460,125), pos=(10, 245))
+			self.button_delete_input =wx.Button(self, label="Delete selected", pos=(315, 165))
+			self.Bind(wx.EVT_BUTTON, self.delete_input, self.button_delete_input)
+
+			self.list_output = wx.ListCtrl(self, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(295, 90), pos=(10, 240))
+			self.list_output.InsertColumn(0, 'Type', width=60)
+			self.list_output.InsertColumn(1, 'Port/Address', width=140)
+			self.list_output.InsertColumn(2, 'Bauds/Port', width=95)
+
+			outputs = wx.StaticText(self, label='Outputs', pos=(320, 245))
+			estilo = outputs.GetFont()
+			estilo.SetWeight(wx.BOLD)
+			outputs.SetFont(estilo)
+
+			self.button_delete_output =wx.Button(self, label="Delete selected", pos=(315, 265))
+			self.Bind(wx.EVT_BUTTON, self.delete_output, self.button_delete_output)
+
+			self.show_output =wx.Button(self, label="Show output", pos=(315, 300))
+			self.Bind(wx.EVT_BUTTON, self.show_output_window, self.show_output)
+
+			self.restart =wx.Button(self, label="Restart", pos=(10, 337))
+			self.Bind(wx.EVT_BUTTON, self.restart_multiplex, self.restart)
+
+			self.button_apply =wx.Button(self, label="Apply changes", pos=(120, 337))
+			self.Bind(wx.EVT_BUTTON, self.apply_changes, self.button_apply)
+
+########################################################
+
+			ais_sdr=wx.StaticBox(self, label=' AIS-SDR ', size=(210, 130), pos=(485, 115))
+			estilo = ais_sdr.GetFont()
+			estilo.SetWeight(wx.BOLD)
+			ais_sdr.SetFont(estilo)
+
+			self.ais_sdr_enable = wx.CheckBox(self, label='Enable', pos=(490, 135))
+			self.ais_sdr_enable.Bind(wx.EVT_CHECKBOX, self.OnOffAIS)
+
+			self.gain = wx.TextCtrl(self, -1, size=(50, 30), pos=(490, 165))
+			gain_text = wx.StaticText(self, label='Gain', pos=(550, 170))
+
+			self.ppm = wx.TextCtrl(self, -1, size=(50, 30), pos=(490, 205))
+			ppm_text = wx.StaticText(self, label='Error correction', pos=(550, 210))
+
+########################################################
+
+			self.png = wx.StaticBitmap(self, -1, wx.Bitmap(home+'/.config/openplotter/openplotter500.png', wx.BITMAP_TYPE_ANY), pos=(540, 250))
 
 			self.CreateStatusBar()
 
@@ -118,17 +151,14 @@ class MyFrame(wx.Frame):
 
 			self.Show(True)
 
-			self.estado=0
+			self.read_kplex_conf()
 
-			self.hilo=threading.Thread(target=self.ventanalog)
-			self.hilo.setDaemon(1)
+			self.set_conf()
 
-			self.conectar()
-
-			self.packages = []
-			self.crea_lista_packages()
-
-			self.read_ais_conf()
+		
+		def read_conf(self):
+			self.data_conf = ConfigParser.SafeConfigParser()
+			self.data_conf.read(home+'/.config/openplotter/openplotter.conf')
 
 		def SerialCheck(self,dev):
 			num = 0
@@ -139,37 +169,243 @@ class MyFrame(wx.Frame):
 					self.SerDevLs.append(s)      
 				num = num + 1
 
-		def conectar(self):
+		def read_kplex_conf(self):
+			self.inputs = []
+			self.outputs = []
 			try:
-				self.s2 = socket.socket()
-				self.s2.connect(("localhost", 10110))
-				if not self.hilo.isAlive():
-					self.hilo.start()
-				self.estado=1
-				self.SetStatusText('Kplex started')
-			except socket.error, error_msg:
-				self.SetStatusText('Failed to connect with localhost:10110. '+'Error code: ' + str(error_msg[0]))
+				file=open(home+'/.kplex.conf', 'r')
+				data=file.readlines()
+				file.close()
+				for index,item in enumerate(data):
+					if '[serial]' in item:
+						if 'direction=in' in data[index+1]:
+							input_tmp=[]
+							input_tmp.append('Serial')
+							item2=self.extract_value(data[index+2])
+							input_tmp.append(item2)
+							item3=self.extract_value(data[index+3])
+							input_tmp.append(item3)
+							self.inputs.append(input_tmp)
+						if 'direction=out' in data[index+1]:
+							output_tmp=[]
+							output_tmp.append('Serial')
+							item2=self.extract_value(data[index+2])
+							output_tmp.append(item2)
+							item3=self.extract_value(data[index+3])
+							output_tmp.append(item3)
+							self.outputs.append(output_tmp)
+					if '[tcp]' in item:
+						if 'direction=in' in data[index+1]:
+							input_tmp=[]
+							input_tmp.append('TCP')
+							item2=self.extract_value(data[index+2])
+							input_tmp.append(item2)
+							item3=self.extract_value(data[index+3])
+							input_tmp.append(item3)
+							self.inputs.append(input_tmp)
+						if 'direction=out' in data[index+1]:
+							output_tmp=[]
+							output_tmp.append('TCP')
+							output_tmp.append('all address')
+							item2=self.extract_value(data[index+2])
+							output_tmp.append(item2)
+							self.outputs.append(output_tmp)
+					if '[broadcast]' in item:
+						if 'direction=in' in data[index+1]:
+							input_tmp=[]
+							input_tmp.append('UDP')
+							input_tmp.append('all address')
+							item2=self.extract_value(data[index+2])
+							input_tmp.append(item2)
+							self.inputs.append(input_tmp)
+				self.write_inputs()
+				self.write_outputs()
 
-		def desconectar(self):
-			self.logger.Clear()
-			self.estado=0
-			self.s2.close()
-			subprocess.Popen(["pkill", "kplex"])
-			self.SetStatusText('Kplex stopped')
-			time.sleep(1)
+			except IOError:
+				self.SetStatusText('Configuration file does not exist. Add inputs and apply changes')
 
-		def reiniciar(self):
-			self.desconectar()
-			subprocess.Popen('kplex')
-			self.SetStatusText('Kplex starting. Please wait...')
-			time.sleep(7)
-			self.conectar()
+		def extract_value(self,data):
+			option, value =data.split('=')
+			value=value.strip()
+			return value
 
-		def OnClick2(self,event):
-			self.reiniciar()
-			self.crea_lista_packages()
+		def write_inputs(self):
+			self.list_input.DeleteAllItems()
+			for i in self.inputs:
+				index = self.list_input.InsertStringItem(sys.maxint, i[0])
+				self.list_input.SetStringItem(index, 1, i[1])
+				self.list_input.SetStringItem(index, 2, i[2])
+		def write_outputs(self):
+			self.list_output.DeleteAllItems()
+			for i in self.outputs:
+				index = self.list_output.InsertStringItem(sys.maxint, i[0])
+				self.list_output.SetStringItem(index, 1, i[1])
+				self.list_output.SetStringItem(index, 2, i[2])
 
-		def OnClick3(self,event):
+		def apply_changes(self,event):
+			data='# For advanced manual configuration, please visit: http://www.stripydog.com/kplex/configuration.html\n# Editing this file by openplotter GUI, can eliminate manual settings.\n# You should not modify defaults.\n\n'
+			for index,item in enumerate(self.inputs):
+				if 'Serial' in item[0]:
+					data=data+'[serial]\ndirection=in\nfilename='+item[1]+'\nbaud='+item[2]+'\noptional=yes\n\n'
+				if 'TCP' in item[0]:
+					data=data+'[tcp]\ndirection=in\naddress='+item[1]+'\nport='+item[2]+'\nmode=client\npersist=yes\nkeepalive=yes\noptional=yes\n\n'
+				if 'UDP' in item[0]:
+					data=data+'[broadcast]\ndirection=in\nport='+item[2]+'\noptional=yes\n\n'
+			if not '[broadcast]\ndirection=in\nport=10110' in data: data=data+'#default input\n[broadcast]\ndirection=in\nport=10110\noptional=yes\n\n'
+			for index,item in enumerate(self.outputs):
+				if 'Serial' in item[0]:
+					data=data+'[serial]\ndirection=out\nfilename='+item[1]+'\nbaud='+item[2]+'\n\n'
+				if 'TCP' in item[0]:
+					data=data+'[tcp]\ndirection=out\nport='+item[2]+'\nmode=server\n\n'
+			if not '[tcp]\ndirection=out\nport=10110' in data: data=data+'#default output\n[tcp]\ndirection=out\nport=10110\nmode=server\n\n'
+			file = open(home+'/.kplex.conf', 'w')
+			file.write(data)
+			file.close()
+			self.restart_kplex()
+			self.read_kplex_conf()
+
+		def delete_input(self,event):
+			num = len(self.inputs)
+			for i in range(num):
+				if self.list_input.IsSelected(i):
+					del self.inputs[i]
+			self.write_inputs()
+
+		def delete_output(self,event):
+			num = len(self.outputs)
+			for i in range(num):
+				if self.list_output.IsSelected(i):
+					del self.outputs[i]
+			self.write_outputs()
+
+		def add_serial_input(self,event):
+			input_tmp=[]
+			found=False
+			input_tmp.append('Serial')
+			port=self.deviceComboBox.GetValue()
+			input_tmp.append(port)
+			bauds=self.baudComboBox.GetValue()
+			input_tmp.append(bauds)
+			for sublist in self.inputs:
+				if sublist[1] == port:found=True
+			for sublist in self.outputs:
+				if sublist[1] == port:found=True
+			if found==False:
+				self.inputs.append(input_tmp)
+				self.write_inputs()
+			else:
+				self.SetStatusText('It is impossible to set "'+port+'" as input because this port is already in use.')
+
+		def add_serial_output(self,event):
+			output_tmp=[]
+			found=False
+			output_tmp.append('Serial')
+			port=self.deviceComboBox.GetValue()
+			output_tmp.append(port)
+			bauds=self.baudComboBox.GetValue()
+			output_tmp.append(bauds)
+			for sublist in self.inputs:
+				if sublist[1] == port:found=True
+			for sublist in self.outputs:
+				if sublist[1] == port:found=True
+			if found==False:
+				self.outputs.append(output_tmp)
+				self.write_outputs()
+			else:
+				self.SetStatusText('It is impossible to set "'+port+'" as output because this port is already in use.')
+		
+		def add_network_input(self,event):
+			input_tmp=[]
+			found=False
+			type_=self.typeComboBox.GetValue()
+			address=self.address.GetValue()
+			port=self.port.GetValue()
+			input_tmp.append(type_)
+			input_tmp.append(address)
+			input_tmp.append(port)
+			if port:
+				self.inputs.append(input_tmp)
+				self.write_inputs()
+			else:
+				self.SetStatusText('You have to enter at least a port number.')
+		
+		def add_network_output(self,event):
+			output_tmp=[]
+			found=False
+			type_=self.typeComboBox.GetValue()
+			address=self.address.GetValue()
+			port=self.port.GetValue()
+			output_tmp.append(type_)
+			output_tmp.append(address)
+			output_tmp.append(port)
+			if port:
+				if 'TCP' in type_:
+					self.outputs.append(output_tmp)
+					self.write_outputs()
+				else:
+					self.SetStatusText('Sorry. It is not possible to create UDP outputs.')
+			else:
+				self.SetStatusText('You have to enter at least a port number.')
+
+		def OnClick_nmea_server(self,event):
+			subprocess.Popen(['lxterminal', '-e', 'sudo '+home+'/.config/openplotter/nmea_wifi_server/switch_access_point.sh'])
+			self.SetStatusText('Set NMEA server in the new window')
+
+		def OnClick_network_man(self,event):
+			subprocess.Popen('/usr/sbin/wpa_gui')
+			self.SetStatusText('Manage networks in the new window')
+
+		def OnOffAIS(self, e):
+			sender = e.GetEventObject()
+			isChecked = sender.GetValue()
+			if isChecked:
+				self.gain.SetEditable(False)
+				self.gain.SetForegroundColour((180,180,180))
+				self.ppm.SetEditable(False)
+				self.ppm.SetForegroundColour((180,180,180)) 
+				gain=self.gain.GetValue()
+				ppm=self.ppm.GetValue()
+				rtl_fm=subprocess.Popen(['rtl_fm', '-f', '161975000', '-g', gain, '-p', ppm, '-s', '48k'], stdout = subprocess.PIPE)
+				aisdecoder=subprocess.Popen(['aisdecoder', '-h', '127.0.0.1', '-p', '10110', '-a', 'file', '-c', 'mono', '-d', '-f', '/dev/stdin'], stdin = rtl_fm.stdout)         
+			else: 
+				self.gain.SetEditable(True)
+				self.gain.SetForegroundColour((wx.NullColor))
+				self.ppm.SetEditable(True)
+				self.ppm.SetForegroundColour((wx.NullColor))
+				aisdecoder=subprocess.Popen(['pkill', '-9', 'aisdecoder'], stdout = subprocess.PIPE)
+				rtl_fm=subprocess.Popen(['pkill', '-9', 'rtl_fm'], stdin = aisdecoder.stdout)
+			self.write_ais_conf()
+
+		def set_conf(self):
+			self.gain.SetValue(self.data_conf.get('AIS-SDR', 'gain'))
+			self.ppm.SetValue(self.data_conf.get('AIS-SDR', 'ppm'))
+			enable=self.data_conf.get('AIS-SDR', 'enable')
+			if enable=='1':
+					self.ais_sdr_enable.SetValue(True)
+					self.gain.SetEditable(False)
+					self.gain.SetForegroundColour((180,180,180))
+					self.ppm.SetEditable(False)
+					self.ppm.SetForegroundColour((180,180,180))
+			opencpn=self.data_conf.get('STARTUP', 'opencpn')
+			kplex=self.data_conf.get('STARTUP', 'kplex')
+			x11vnc=self.data_conf.get('STARTUP', 'x11vnc')
+			if opencpn=='1': self.startup.Check(self.startup_item1.GetId(), True)
+			if kplex=='1': self.startup.Check(self.startup_item2.GetId(), True)
+			if x11vnc=='1': self.startup.Check(self.startup_item3.GetId(), True)
+
+		def write_ais_conf(self):
+			enable_estado=self.ais_sdr_enable.GetValue()
+			gain=self.gain.GetValue()
+			ppm=self.ppm.GetValue()
+			self.data_conf.set('AIS-SDR', 'gain', gain)
+			self.data_conf.set('AIS-SDR', 'ppm', ppm)
+			enable='0'
+			if enable_estado==True: enable='1'
+			self.data_conf.set('AIS-SDR', 'enable', enable)
+			with open(home+'/.config/openplotter/openplotter.conf', 'wb') as configfile:
+				self.data_conf.write(configfile)
+
+		def time_gps(self,event):
 			fecha=""
 			hora=""
 			self.SetStatusText('Waiting for GPS data in localhost:10110 ...')
@@ -198,148 +434,35 @@ class MyFrame(wx.Frame):
 			else:
 				self.SetStatusText("Unable to retrieve date or time from GPS")
 
-		def OnClick4(self,event):
+		def time_zone(self,event):
 			subprocess.Popen(['lxterminal', '-e', 'sudo dpkg-reconfigure tzdata'])
 			self.SetStatusText('Set time zone in the new window')
-
-		def crea_lista_packages(self):
-			try:
-				file=open(home+'/.kplex.conf', 'r')
-				data=file.readlines()
-				file.close()
-				self.packages = []
-				for index,item in enumerate(data):
-					data[index]=item.strip()
-					if '[serial]' in item or '[broadcast]' in item:
-						device=''
-						port=''
-						bauds=''
-						if '#' in data[index-1]: 
-							device=data[index-1].strip('#')
-						cont=1
-						while True:
-							if data[index+cont]==None: break
-							if '[' in data[index+cont]: break
-							if '=' in data[index+cont]: 
-								opcion, valor =data[index+cont].split('=')
-								if opcion=='filename': port= valor.strip()
-								if opcion=='address': port= valor.strip()+':10110'
-								if opcion=='baud': bauds= valor.strip()
-							cont=cont+1
-						self.add_item_packages(device,port,bauds)
-				self.construye_lista()
-			except IOError:
-				self.SetStatusText('Configuration file does not exist. Add inputs and apply changes')
-
-		def add_item_packages(self,device,port,bauds):
-			if device=='': device='Unknow'
-			if port=='': port='Unknow'
-			if bauds=='': bauds='Unknow'
-			temp_list = []
-			temp_list.append(device)
-			temp_list.append(port)
-			temp_list.append(bauds)
-			self.packages.append(temp_list)
-
-		def construye_lista(self):
-			self.list.DeleteAllItems()
-			for i in self.packages:
-				index = self.list.InsertStringItem(sys.maxint, i[0])
-				self.list.SetStringItem(index, 1, i[1])
-				self.list.SetStringItem(index, 2, i[2])
-
-		def OnClick_borrar_input(self,event):
-			num = len(self.packages)
-			for i in range(num):
-				if self.list.IsSelected(i):
-					del self.packages[i]
-			self.construye_lista()
-
-		def OnClick_add_new(self,event):
-			device=self.device.GetValue()
-			port=self.deviceComboBox.GetValue()
-			bauds=self.baudComboBox.GetValue()
-			if port:
-				self.add_item_packages(device,port,bauds)
-				self.construye_lista()
-
-		def OnClick_apply(self,event):
-			data='# For advanced manual configuration, please visit: http://www.stripydog.com/kplex/configuration.html\n# Editing this file by openplotter GUI, can eliminate manual settings.\n# You should not modify Output.\n\n'
-			file = open(home+'/.kplex.conf', 'w')
-			for index,item in enumerate(self.packages):
-				if item[0]!='UDP':data=data+'#'+item[0]+'\n[serial]\nfilename='+item[1]+'\nbaud='+item[2]+'\ndirection=in\noptional=yes\n\n'
-			data = data + '#UDP\n[broadcast]\naddress=127.0.0.1\nport=10110\ndirection=in\noptional=yes\n\n'
-			data = data + '#Output\n[tcp]\nmode=server\nport=10110\ndirection=out\n'
-			file.write(data)
-			file.close()
-			self.reiniciar()
-			self.crea_lista_packages()
-
-		def ventanalog(self):
-			while True:
-				if self.estado==1:
-					frase_nmea = self.s2.recv(512)
-					wx.MutexGuiEnter()
-					self.logger.AppendText(frase_nmea)
-					wx.MutexGuiLeave()
-				else:
-					pass
 		
-		def OnClick_nmea_server(self,event):
-			subprocess.Popen(['lxterminal', '-e', 'sudo '+home+'/.config/openplotter/nmea_wifi_server/switch_access_point.sh'])
-			self.SetStatusText('Set NMEA server in the new window')
+		def restart_multiplex(self,event):
+			self.restart_kplex()
 
-		def OnClick_network_man(self,event):
-			subprocess.Popen('/usr/sbin/wpa_gui')
-			self.SetStatusText('Manage networks in the new window')
+		def restart_kplex(self):
+			self.SetStatusText('Closing Kplex')
+			subprocess.Popen(["pkill", "kplex"])
+			time.sleep(1)
+			subprocess.Popen('kplex')
+			self.SetStatusText('Kplex restarted')
+				
+		def show_output_window(self,event):
+			show_output=subprocess.Popen(['python', home+'/.config/openplotter/output.py'])
 
-		def OnOffAIS(self, e):
-			sender = e.GetEventObject()
-			isChecked = sender.GetValue()
-			if isChecked:
-				self.gain.SetEditable(False)
-				self.gain.SetForegroundColour((180,180,180))
-				self.ppm.SetEditable(False)
-				self.ppm.SetForegroundColour((180,180,180))          
-			else: 
-				self.gain.SetEditable(True)
-				self.gain.SetForegroundColour((wx.NullColor))
-				self.ppm.SetEditable(True)
-				self.ppm.SetForegroundColour((wx.NullColor))
-			self.write_ais_conf()
-			subprocess.Popen(['python', home+'/.config/openplotter/ais-sdr.py'])
-
-		def read_ais_conf(self):
-			file=open(home+'/.config/openplotter/ais-sdr.conf', 'r')
-			data=file.readlines()
-			file.close()
-			for index,item in enumerate(data):
-				item2=item.strip('\n')
-				opcion, valor =item2.split('=')
-				if opcion=='enable' and valor=='1':
-					self.ais_sdr_enable.SetValue(True)
-					self.gain.SetEditable(False)
-					self.gain.SetForegroundColour((180,180,180))
-					self.ppm.SetEditable(False)
-					self.ppm.SetForegroundColour((180,180,180))
-				if opcion=='gain':
-					self.gain.SetValue(valor)
-				if opcion=='ppm':
-					self.ppm.SetValue(valor)
-			subprocess.Popen(['python', home+'/.config/openplotter/ais-sdr.py'])
-
-		def write_ais_conf(self):
-			gain=self.gain.GetValue()
-			gain=gain.strip()
-			ppm=self.ppm.GetValue()
-			ppm=ppm.strip()
-			enable='0'
-			enable_estado=self.ais_sdr_enable.GetValue()
-			if enable_estado==True: enable='1'
-			file = open(home+'/.config/openplotter/ais-sdr.conf', 'w')
-			data='gain='+gain+'\n'+'ppm='+ppm+'\n'+'enable='+enable
-			file.write(data)
-			file.close()
+		def check_startup(self, e):
+			opencpn="0"
+			kplex="0"
+			x11vnc="0"
+			if self.startup_item1.IsChecked(): opencpn="1"
+			if self.startup_item2.IsChecked(): kplex="1"
+			if self.startup_item3.IsChecked(): x11vnc="1"
+			self.data_conf.set('STARTUP', 'opencpn', opencpn)
+			self.data_conf.set('STARTUP', 'kplex', kplex)
+			self.data_conf.set('STARTUP', 'x11vnc', x11vnc)
+			with open(home+'/.config/openplotter/openplotter.conf', 'wb') as configfile:
+				self.data_conf.write(configfile)
 
 
 
