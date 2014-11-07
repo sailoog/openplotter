@@ -1,8 +1,8 @@
-openplotter-sailpi
+openplotter-raspbian
 ==================
 Project page: http://campus.sailoog.com/course/view.php?id=9
 
-![OpenPlotter-SailPi](http://campus.sailoog.com/pluginfile.php/715/mod_page/intro/OpenPlotter-SailPi.jpg "OpenPlotter-SailPi")
+![OpenPlotter-Raspian](http://campus.sailoog.com/pluginfile.php/715/mod_page/intro/OpenPlotter-SailPi.jpg "OpenPlotter-Raspian")
 
 Instructions
 ------------
@@ -62,7 +62,7 @@ blacklist rtl2830
 ##### Clone this repository to /home/pi/.config/openplotter
 ```sh
 cd .config
-git clone git://github.com/sailoog/openplotter-sailpi.git openplotter
+git clone git://github.com/sailoog/openplotter-raspbian.git openplotter
 ```
 ##### Set permissions:
 ```sh
