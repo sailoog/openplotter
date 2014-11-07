@@ -1,10 +1,23 @@
 #!/usr/bin/env python
 
-import wx, socket, threading, time
+import wx, socket, os, threading, time, gettext, ConfigParser
+
+home = os.path.expanduser('~')
 
 class MyFrame(wx.Frame):
 		
 		def __init__(self, parent, title):
+
+			gettext.install('openplotter', home+'/.config/openplotter/locale', unicode=False)
+			self.presLan_en = gettext.translation('openplotter', home+'/.config/openplotter/locale', languages=['en'])
+			self.presLan_ca = gettext.translation('openplotter', home+'/.config/openplotter/locale', languages=['ca'])
+			self.presLan_es = gettext.translation('openplotter', home+'/.config/openplotter/locale', languages=['es'])
+			self.read_conf()
+			language=self.data_conf.get('GENERAL', 'lang')
+			if language=='en':self.presLan_en.install()
+			if language=='ca':self.presLan_ca.install()
+			if language=='es':self.presLan_es.install()
+
 
 			wx.Frame.__init__(self, parent, title=title, size=(500,200))
 
@@ -20,6 +33,11 @@ class MyFrame(wx.Frame):
 			self.hilo.setDaemon(1)
 
 			self.connect()
+
+		
+		def read_conf(self):
+			self.data_conf = ConfigParser.SafeConfigParser()
+			self.data_conf.read(home+'/.config/openplotter/openplotter.conf')
 
 		def connect(self):
 			try:
@@ -39,28 +57,23 @@ class MyFrame(wx.Frame):
 				if frase_nmea:
 					wx.MutexGuiEnter()
 					self.logger.AppendText(frase_nmea)
-					self.SetStatusText('Kplex started')
+					self.SetStatusText(_('Kplex started'))
 					wx.MutexGuiLeave()
 				else:
 					wx.MutexGuiEnter()
 					if self.error_message:
-						self.SetStatusText('Failed to connect with localhost:10110. '+'Error code: ' + self.error_message)
+						self.SetStatusText(_('Failed to connect with localhost:10110. ')+_('Error code: ') + self.error_message)
 						time.sleep(3)
 					else:
-						self.SetStatusText('No data, trying to reconnect...')
+						self.SetStatusText(_('No data, trying to reconnect...'))
 						time.sleep(3)
-					self.SetStatusText('No data, trying to reconnect...')
+					self.SetStatusText(_('No data, trying to reconnect...'))
 					wx.MutexGuiLeave()
 					time.sleep(4)
 					self.connect()
 					
-			
-			
-
-
-
 
 app = wx.App(False)
-frame = MyFrame(None, 'Output TCP localhost:10110')
+frame = MyFrame(None, 'TCP localhost:10110')
 app.MainLoop()
 
