@@ -10,9 +10,12 @@ Instructions
 ##### Create an SD card with the last version of Raspian:
 http://www.raspberrypi.org/downloads/
 
+##### Compile OpenCpn:
+http://opencpn.org/ocpn/compiling_source_linux
+
 ##### Install dependencies:
 ```sh
-sudo apt-get install libusb-1.0-0-dev libasound-dev libpulse-dev python-pip python-wxgtk2.8 isc-dhcp-server hostapd 
+sudo apt-get install libusb-1.0-0-dev libasound-dev libpulse-dev python-pip python-wxgtk2.8 isc-dhcp-server hostapd x11vnc 
 ```
 
 ##### Install kplex:
