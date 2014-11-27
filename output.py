@@ -43,6 +43,7 @@ class MyFrame(wx.Frame):
 			try:
 				self.s2 = socket.socket()
 				self.s2.connect(("localhost", 10110))
+				#self.s2.settimeout(5)
 				self.error_message=""
 			except socket.error, error_msg:
 				self.error_message=str(error_msg[0])

@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: OpenPlotter 1.0\n"
-"POT-Creation-Date: 2014-11-06 19:44+0100\n"
-"PO-Revision-Date: 2014-11-06 20:33+0100\n"
+"POT-Creation-Date: 2014-11-27 19:07+0100\n"
+"PO-Revision-Date: 2014-11-27 19:15+0100\n"
 "Last-Translator: sailoog <info@sailoog.com>\n"
 "Language-Team: Sailoog <info@sailoog.com>\n"
 "Language: ca\n"
@@ -14,262 +14,308 @@ msgstr ""
 "X-Poedit-Basepath: .\n"
 "X-Poedit-SearchPath-0: /home/sailoog/.config/openplotter\n"
 
-#: /home/sailoog/.config/openplotter/openplotter.py:32
+#: /home/sailoog/.config/openplotter/openplotter.py:35
 msgid "OpenCPN"
 msgstr "OpenCPN"
 
-#: /home/sailoog/.config/openplotter/openplotter.py:32
+#: /home/sailoog/.config/openplotter/openplotter.py:35
 msgid "If selected OpenCPN will run at startup"
 msgstr "Si seleccioneu aquesta opció OpenCPN s'executarà a l'inici"
 
-#: /home/sailoog/.config/openplotter/openplotter.py:34
+#: /home/sailoog/.config/openplotter/openplotter.py:37
 msgid "NMEA multiplexor (Kplex)"
 msgstr "Multiplexor NMEA (Kplex)"
 
-#: /home/sailoog/.config/openplotter/openplotter.py:34
+#: /home/sailoog/.config/openplotter/openplotter.py:37
 msgid "If selected Kplex will run at startup"
 msgstr "Si seleccioneu aquesta opció Kplex s'executarà a l'inici"
 
-#: /home/sailoog/.config/openplotter/openplotter.py:36
-msgid "Remote desktop (x11vnc)"
-msgstr "Escriptori remot (x11vnc)"
-
-#: /home/sailoog/.config/openplotter/openplotter.py:36
-msgid "If selected x11vnc will run at startup"
-msgstr "Si seleccioneu aquesta opció x11vnc s'executarà a l'inici"
-
-#: /home/sailoog/.config/openplotter/openplotter.py:38
-msgid "Startup"
-msgstr "Executar en l'inici"
-
-#: /home/sailoog/.config/openplotter/openplotter.py:40
-msgid "Set time zone"
-msgstr "Establir la zona horària"
-
-#: /home/sailoog/.config/openplotter/openplotter.py:40
-#: /home/sailoog/.config/openplotter/openplotter.py:463
-msgid "Set time zone in the new window"
-msgstr "Establir la zona horària en la nova finestra"
-
-#: /home/sailoog/.config/openplotter/openplotter.py:42
-msgid "Set time from GPS"
-msgstr "Establir l'hora des del GPS"
-
-#: /home/sailoog/.config/openplotter/openplotter.py:42
+#: /home/sailoog/.config/openplotter/openplotter.py:39
+#: /home/sailoog/.config/openplotter/openplotter.py:47
 msgid "Set system time from GPS"
 msgstr "Establir l'hora del sistema des del GPS"
 
-#: /home/sailoog/.config/openplotter/openplotter.py:44
-msgid "Time"
-msgstr "Hora"
+#: /home/sailoog/.config/openplotter/openplotter.py:39
+msgid "You need to define a valid GPS input and run kplex at startup"
+msgstr "Necessites definir una entrada de GPS valida i executar Kplez al inici"
 
-#: /home/sailoog/.config/openplotter/openplotter.py:46
-msgid "Set Server/Client"
-msgstr "Establir Servidor/Client"
+#: /home/sailoog/.config/openplotter/openplotter.py:41
+msgid "Remote desktop (x11vnc)"
+msgstr "Escriptori remot (x11vnc)"
 
-#: /home/sailoog/.config/openplotter/openplotter.py:46
+#: /home/sailoog/.config/openplotter/openplotter.py:41
+msgid "If selected x11vnc will run at startup"
+msgstr "Si seleccioneu aquesta opció x11vnc s'executarà a l'inici"
+
+#: /home/sailoog/.config/openplotter/openplotter.py:43
+msgid "Startup"
+msgstr "Executar en l'inici"
+
+#: /home/sailoog/.config/openplotter/openplotter.py:45
+msgid "Set time zone"
+msgstr "Establir la zona horària"
+
+#: /home/sailoog/.config/openplotter/openplotter.py:45
+#: /home/sailoog/.config/openplotter/openplotter.py:538
+msgid "Set time zone in the new window"
+msgstr "Establir la zona horària en la nova finestra"
+
+#: /home/sailoog/.config/openplotter/openplotter.py:47
+msgid "Set time from GPS"
+msgstr "Establir l'hora des del GPS"
+
+#: /home/sailoog/.config/openplotter/openplotter.py:50
+msgid "Set Server/Client WiFi"
+msgstr "Establir WiFi Servidor/Client"
+
+#: /home/sailoog/.config/openplotter/openplotter.py:50
 msgid "Switch WiFi between \"access point\" and \"DHCP client\""
 msgstr "Establir el WiFi com a  \"access point\" o  \"DHCP client\""
 
-#: /home/sailoog/.config/openplotter/openplotter.py:48
-msgid "Network manager"
-msgstr "Administrador de xarxes"
+#: /home/sailoog/.config/openplotter/openplotter.py:53
+msgid "Set GPSD"
+msgstr "Configurar GPSD"
 
-#: /home/sailoog/.config/openplotter/openplotter.py:48
-msgid "Manage your networks"
-msgstr "Administra les teves xarxes"
+#: /home/sailoog/.config/openplotter/openplotter.py:53
+#: /home/sailoog/.config/openplotter/openplotter.py:542
+msgid "Set GPSD in the new window"
+msgstr "Configurar GPSD en la nova finestra"
 
-#: /home/sailoog/.config/openplotter/openplotter.py:50
-msgid "WiFi"
-msgstr "WiFi"
+#: /home/sailoog/.config/openplotter/openplotter.py:55
+msgid "Settings"
+msgstr "Configuració"
 
-#: /home/sailoog/.config/openplotter/openplotter.py:52
+#: /home/sailoog/.config/openplotter/openplotter.py:57
 msgid "English"
 msgstr "Anglès"
 
-#: /home/sailoog/.config/openplotter/openplotter.py:52
+#: /home/sailoog/.config/openplotter/openplotter.py:57
 msgid "Set English language"
 msgstr "Establir l'anglès com a idioma"
 
-#: /home/sailoog/.config/openplotter/openplotter.py:54
+#: /home/sailoog/.config/openplotter/openplotter.py:59
 msgid "Catalan"
 msgstr "Català"
 
-#: /home/sailoog/.config/openplotter/openplotter.py:54
+#: /home/sailoog/.config/openplotter/openplotter.py:59
 msgid "Set Catalan language"
 msgstr "Establir el català com a idioma"
 
-#: /home/sailoog/.config/openplotter/openplotter.py:56
+#: /home/sailoog/.config/openplotter/openplotter.py:61
 msgid "Spanish"
 msgstr "Espanyol"
 
-#: /home/sailoog/.config/openplotter/openplotter.py:56
+#: /home/sailoog/.config/openplotter/openplotter.py:61
 msgid "Set Spanish language"
 msgstr "Establir l'espanyol com a idioma"
 
-#: /home/sailoog/.config/openplotter/openplotter.py:58
+#: /home/sailoog/.config/openplotter/openplotter.py:63
 msgid "Language"
 msgstr "Idioma"
 
-#: /home/sailoog/.config/openplotter/openplotter.py:64
+#: /home/sailoog/.config/openplotter/openplotter.py:69
 msgid " Add NMEA input / output "
 msgstr "Afegir entrades/sortides NMEA"
 
-#: /home/sailoog/.config/openplotter/openplotter.py:82
-msgid "Add serial input"
-msgstr "Afegir entrada serie"
+#: /home/sailoog/.config/openplotter/openplotter.py:87
+#: /home/sailoog/.config/openplotter/openplotter.py:103
+msgid "Input"
+msgstr "Entrada"
 
-#: /home/sailoog/.config/openplotter/openplotter.py:85
-msgid "Add serial output"
-msgstr "Afegir sortida serie"
-
-#: /home/sailoog/.config/openplotter/openplotter.py:98
-msgid "Add network input"
-msgstr "Afegir entrada xarxa"
-
-#: /home/sailoog/.config/openplotter/openplotter.py:101
-msgid "Add network output"
-msgstr "Afegir sortida xarxa"
-
+#: /home/sailoog/.config/openplotter/openplotter.py:90
 #: /home/sailoog/.config/openplotter/openplotter.py:106
+msgid "Output"
+msgstr "Sortida"
+
+#: /home/sailoog/.config/openplotter/openplotter.py:111
+msgid "GPSD"
+msgstr "GPSD"
+
+#: /home/sailoog/.config/openplotter/openplotter.py:116
 msgid " NMEA inputs / outputs "
 msgstr "Entrades/Sortides NMEA"
 
-#: /home/sailoog/.config/openplotter/openplotter.py:112
-#: /home/sailoog/.config/openplotter/openplotter.py:125
+#: /home/sailoog/.config/openplotter/openplotter.py:122
+#: /home/sailoog/.config/openplotter/openplotter.py:135
 msgid "Type"
 msgstr "Tipus"
 
-#: /home/sailoog/.config/openplotter/openplotter.py:113
-#: /home/sailoog/.config/openplotter/openplotter.py:126
+#: /home/sailoog/.config/openplotter/openplotter.py:123
+#: /home/sailoog/.config/openplotter/openplotter.py:136
 msgid "Port/Address"
 msgstr "Port/Adreça"
 
-#: /home/sailoog/.config/openplotter/openplotter.py:114
-#: /home/sailoog/.config/openplotter/openplotter.py:127
+#: /home/sailoog/.config/openplotter/openplotter.py:124
+#: /home/sailoog/.config/openplotter/openplotter.py:137
 msgid "Bauds/Port"
 msgstr "Bauds/Port"
 
-#: /home/sailoog/.config/openplotter/openplotter.py:116
+#: /home/sailoog/.config/openplotter/openplotter.py:126
 msgid "Inputs"
 msgstr "Entrades"
 
-#: /home/sailoog/.config/openplotter/openplotter.py:121
-#: /home/sailoog/.config/openplotter/openplotter.py:134
+#: /home/sailoog/.config/openplotter/openplotter.py:131
+#: /home/sailoog/.config/openplotter/openplotter.py:144
 msgid "Delete selected"
 msgstr "Esborrar seleccionats"
 
-#: /home/sailoog/.config/openplotter/openplotter.py:129
+#: /home/sailoog/.config/openplotter/openplotter.py:139
 msgid "Outputs"
 msgstr "Sortides"
 
-#: /home/sailoog/.config/openplotter/openplotter.py:137
+#: /home/sailoog/.config/openplotter/openplotter.py:147
 msgid "Show output"
 msgstr "Mostrar sortida"
 
-#: /home/sailoog/.config/openplotter/openplotter.py:140
+#: /home/sailoog/.config/openplotter/openplotter.py:150
 msgid "Restart"
 msgstr "Reiniciar"
 
-#: /home/sailoog/.config/openplotter/openplotter.py:143
+#: /home/sailoog/.config/openplotter/openplotter.py:153
 msgid "Apply changes"
 msgstr "Aplicar canvis"
 
-#: /home/sailoog/.config/openplotter/openplotter.py:148
+#: /home/sailoog/.config/openplotter/openplotter.py:158
 msgid " AIS-SDR "
 msgstr " AIS-SDR "
 
-#: /home/sailoog/.config/openplotter/openplotter.py:153
+#: /home/sailoog/.config/openplotter/openplotter.py:163
 msgid "Enable"
 msgstr "Activar"
 
-#: /home/sailoog/.config/openplotter/openplotter.py:157
+#: /home/sailoog/.config/openplotter/openplotter.py:167
 msgid "Gain"
 msgstr "Guany"
 
-#: /home/sailoog/.config/openplotter/openplotter.py:160
+#: /home/sailoog/.config/openplotter/openplotter.py:170
 msgid "Error correction"
 msgstr "Correcció d'error"
 
-#: /home/sailoog/.config/openplotter/openplotter.py:229
-#: /home/sailoog/.config/openplotter/openplotter.py:237
+#: /home/sailoog/.config/openplotter/openplotter.py:174
+msgid "STW simulation"
+msgstr "Simulació STW"
+
+#: /home/sailoog/.config/openplotter/openplotter.py:179
+msgid "SOG  -->  STW"
+msgstr "SOG  -->  STW"
+
+#: /home/sailoog/.config/openplotter/openplotter.py:249
+#: /home/sailoog/.config/openplotter/openplotter.py:257
 msgid "all address"
 msgstr "Totes adreces"
 
-#: /home/sailoog/.config/openplotter/openplotter.py:245
+#: /home/sailoog/.config/openplotter/openplotter.py:265
 msgid "Configuration file does not exist. Add inputs and apply changes"
 msgstr ""
 "El arxiu de configuració no existeix. Afegeix entrades i aplica els canvis."
 
-#: /home/sailoog/.config/openplotter/openplotter.py:317
-#: /home/sailoog/.config/openplotter/openplotter.py:335
-msgid "It is impossible to set \""
-msgstr "És impossible establir \""
+#: /home/sailoog/.config/openplotter/openplotter.py:337
+#: /home/sailoog/.config/openplotter/openplotter.py:355
+msgid "It is impossible to set "
+msgstr "És impossible establir "
 
-#: /home/sailoog/.config/openplotter/openplotter.py:317
-msgid "\" as input because this port is already in use."
-msgstr "\" com a entrada per què aquest port ja s'está fent servir."
+#: /home/sailoog/.config/openplotter/openplotter.py:337
+msgid " as input because this port is already in use."
+msgstr " com a entrada per què aquest port ja s'està fent servir."
 
-#: /home/sailoog/.config/openplotter/openplotter.py:335
-msgid "\" as output because this port is already in use."
-msgstr "\" com a sortida per què aquest port ja s'está fent servir."
+#: /home/sailoog/.config/openplotter/openplotter.py:355
+msgid " as output because this port is already in use."
+msgstr " com a sortida per què aquest port ja s'està fent servir."
 
-#: /home/sailoog/.config/openplotter/openplotter.py:350
-#: /home/sailoog/.config/openplotter/openplotter.py:368
+#: /home/sailoog/.config/openplotter/openplotter.py:369
+#: /home/sailoog/.config/openplotter/openplotter.py:398
 msgid "You have to enter at least a port number."
 msgstr "S'ha d'introduir com a mínim un número de port."
 
-#: /home/sailoog/.config/openplotter/openplotter.py:366
+#: /home/sailoog/.config/openplotter/openplotter.py:396
 msgid "Sorry. It is not possible to create UDP outputs."
 msgstr "Ho sentim. No és possible definir sortides UDP."
 
-#: /home/sailoog/.config/openplotter/openplotter.py:372
+#: /home/sailoog/.config/openplotter/openplotter.py:402
 msgid "Set NMEA server in the new window"
 msgstr "Establir el servidor NMEA en la nova finestra"
 
-#: /home/sailoog/.config/openplotter/openplotter.py:376
-msgid "Manage networks in the new window"
-msgstr "Administrar xarxes en la nova finestra"
-
-#: /home/sailoog/.config/openplotter/openplotter.py:435
+#: /home/sailoog/.config/openplotter/openplotter.py:430
+#: /home/sailoog/.config/openplotter/openplotter.py:508
 msgid "Waiting for GPS data in localhost:10110 ..."
 msgstr "A l'espera de les dades del GPS a localhost: 10110 ..."
 
-#: /home/sailoog/.config/openplotter/openplotter.py:453
-#: /home/sailoog/.config/openplotter/output.py:65
+#: /home/sailoog/.config/openplotter/openplotter.py:448
+#: /home/sailoog/.config/openplotter/openplotter.py:527
+#: /home/sailoog/.config/openplotter/output.py:66
 msgid "Failed to connect with localhost:10110. "
 msgstr "Ha fallat la connexió amb localhost: 10110."
 
-#: /home/sailoog/.config/openplotter/openplotter.py:453
-#: /home/sailoog/.config/openplotter/output.py:65
+#: /home/sailoog/.config/openplotter/openplotter.py:448
+#: /home/sailoog/.config/openplotter/openplotter.py:527
+#: /home/sailoog/.config/openplotter/output.py:66
 msgid "Error code: "
 msgstr "Codi d'error: "
 
+#: /home/sailoog/.config/openplotter/openplotter.py:451
+msgid "Speed Over Ground retrieved from GPS successfully"
+msgstr "Velocitat sobre el fons recuperades des de el GPS amb èxit."
+
+#: /home/sailoog/.config/openplotter/openplotter.py:453
+msgid "Unable to retrieve Speed Over Ground from GPS"
+msgstr "Incapaç d'extreure la velocitat sobre el fons del GPS"
+
 #: /home/sailoog/.config/openplotter/openplotter.py:457
+msgid "Speed Through Water simulation stopped"
+msgstr "Simulació de velocitat sobre l'aigua detinguda"
+
+#: /home/sailoog/.config/openplotter/openplotter.py:532
 msgid "Date and time retrieved from GPS successfully"
 msgstr "Data i hora recuperades des de el GPS amb èxit."
 
-#: /home/sailoog/.config/openplotter/openplotter.py:459
+#: /home/sailoog/.config/openplotter/openplotter.py:534
 msgid "Unable to retrieve date or time from GPS"
 msgstr "Incapaç d'extreure Data o hora del GPS"
 
-#: /home/sailoog/.config/openplotter/openplotter.py:469
+#: /home/sailoog/.config/openplotter/openplotter.py:548
 msgid "Closing Kplex"
 msgstr "Tancant Kplex"
 
-#: /home/sailoog/.config/openplotter/openplotter.py:473
+#: /home/sailoog/.config/openplotter/openplotter.py:552
 msgid "Kplex restarted"
 msgstr "Kplex reiniciat"
 
-#: /home/sailoog/.config/openplotter/openplotter.py:513
+#: /home/sailoog/.config/openplotter/openplotter.py:595
 msgid "The selected language will be enabled when you restart"
 msgstr "L'idioma seleccionat s'activarà quan torni a obrir el programa"
 
-#: /home/sailoog/.config/openplotter/output.py:60
+#: /home/sailoog/.config/openplotter/output.py:61
 msgid "Kplex started"
 msgstr "Kplex iniciat"
 
-#: /home/sailoog/.config/openplotter/output.py:68
-#: /home/sailoog/.config/openplotter/output.py:70
+#: /home/sailoog/.config/openplotter/output.py:69
+#: /home/sailoog/.config/openplotter/output.py:71
 msgid "No data, trying to reconnect..."
 msgstr "Sense dades. Intentant reconnectar..."
+
+#~ msgid "Time"
+#~ msgstr "Hora"
+
+#~ msgid "Network manager"
+#~ msgstr "Administrador de xarxes"
+
+#~ msgid "Manage your networks"
+#~ msgstr "Administra les teves xarxes"
+
+#~ msgid "WiFi"
+#~ msgstr "WiFi"
+
+#~ msgid "Add serial input"
+#~ msgstr "Afegir entrada serie"
+
+#~ msgid "Add serial output"
+#~ msgstr "Afegir sortida serie"
+
+#~ msgid "Add network input"
+#~ msgstr "Afegir entrada xarxa"
+
+#~ msgid "Add network output"
+#~ msgstr "Afegir sortida xarxa"
+
+#~ msgid "Manage networks in the new window"
+#~ msgstr "Administrar xarxes en la nova finestra"
