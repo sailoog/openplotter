@@ -27,27 +27,35 @@ class MyFrame(wx.Frame):
 
 			wx.Frame.__init__(self, parent, title=title, size=(700,420))
 
+			self.icon = wx.Icon(home+'/.config/openplotter/openplotter.ico', wx.BITMAP_TYPE_ICO)
+			self.SetIcon(self.icon)
+
 			menubar = wx.MenuBar()
 			self.startup = wx.Menu()
 			self.startup_item1 = self.startup.Append(wx.ID_ANY, _('OpenCPN'), _('If selected OpenCPN will run at startup'), kind=wx.ITEM_CHECK)
-			self.Bind(wx.EVT_MENU, self.check_startup, self.startup_item1)
+			self.Bind(wx.EVT_MENU, self.opengl, self.startup_item1)
+			self.startup_item1b = self.startup.Append(wx.ID_ANY, _('OpenCPN (No OpenGL)'), _('If selected OpenCPN (No OpenGL) will run at startup'), kind=wx.ITEM_CHECK)
+			self.Bind(wx.EVT_MENU, self.no_opengl, self.startup_item1b)
+			self.startup.AppendSeparator()
 			self.startup_item2 = self.startup.Append(wx.ID_ANY, _('NMEA multiplexor (Kplex)'), _('If selected Kplex will run at startup'), kind=wx.ITEM_CHECK)
 			self.Bind(wx.EVT_MENU, self.check_startup, self.startup_item2)
+			self.startup_item2_2 = self.startup.Append(wx.ID_ANY, _('Set system time from GPS'), _('You need to define a valid GPS input and run kplex at startup'), kind=wx.ITEM_CHECK)
+			self.Bind(wx.EVT_MENU, self.check_startup, self.startup_item2_2)
 			self.startup_item3 = self.startup.Append(wx.ID_ANY, _('Remote desktop (x11vnc)'), _('If selected x11vnc will run at startup'), kind=wx.ITEM_CHECK)
 			self.Bind(wx.EVT_MENU, self.check_startup, self.startup_item3)
 			menubar.Append(self.startup, _('Startup'))
-			time_ = wx.Menu()
-			time_item1 = time_.Append(wx.ID_ANY, _('Set time zone'), _('Set time zone in the new window'))
+			settings = wx.Menu()
+			time_item1 = settings.Append(wx.ID_ANY, _('Set time zone'), _('Set time zone in the new window'))
 			self.Bind(wx.EVT_MENU, self.time_zone, time_item1)
-			time_item2 = time_.Append(wx.ID_ANY, _('Set time from GPS'), _('Set system time from GPS'))
+			time_item2 = settings.Append(wx.ID_ANY, _('Set time from GPS'), _('Set system time from GPS'))
 			self.Bind(wx.EVT_MENU, self.time_gps, time_item2)
-			menubar.Append(time_, _('Time'))
-			wifi_server = wx.Menu()
-			wifi_server_item1 = wifi_server.Append(wx.ID_ANY, _('Set Server/Client'), _('Switch WiFi between "access point" and "DHCP client"'))
+			settings.AppendSeparator()
+			wifi_server_item1 = settings.Append(wx.ID_ANY, _('Set Server/Client WiFi'), _('Switch WiFi between "access point" and "DHCP client"'))
 			self.Bind(wx.EVT_MENU, self.OnClick_nmea_server, wifi_server_item1)
-			wifi_server_item2 = wifi_server.Append(wx.ID_ANY, _('Network manager'), _('Manage your networks'))
-			self.Bind(wx.EVT_MENU, self.OnClick_network_man, wifi_server_item2)
-			menubar.Append(wifi_server, _('WiFi'))
+			settings.AppendSeparator()
+			gpsd_item1 = settings.Append(wx.ID_ANY, _('Set GPSD'), _('Set GPSD in the new window'))
+			self.Bind(wx.EVT_MENU, self.reconfigure_gpsd, gpsd_item1)
+			menubar.Append(settings, _('Settings'))
 			self.lang = wx.Menu()
 			self.lang_item1 = self.lang.Append(wx.ID_ANY, _('English'), _('Set English language'), kind=wx.ITEM_CHECK)
 			self.Bind(wx.EVT_MENU, self.lang_en, self.lang_item1)
@@ -77,12 +85,12 @@ class MyFrame(wx.Frame):
 			self.baudComboBox = wx.ComboBox(self, choices=self.bauds, style=wx.CB_READONLY, size=(90, 30), pos=(215, 30))
 			self.baudComboBox.SetValue('4800')
 
-			wx.StaticText(self, label='<---', pos=(320, 35))
+			wx.StaticText(self, label='Serial  -->', pos=(310, 35))
 
-			self.add_serial_in =wx.Button(self, label=_('Add serial input'), pos=(360, 30))
+			self.add_serial_in =wx.Button(self, label=_('Input'), pos=(395, 30))
 			self.Bind(wx.EVT_BUTTON, self.add_serial_input, self.add_serial_in)
 
-			self.add_serial_out =wx.Button(self, label=_('Add serial output'), pos=(530, 30))
+			self.add_serial_out =wx.Button(self, label=_('Output'), pos=(490, 30))
 			self.Bind(wx.EVT_BUTTON, self.add_serial_output, self.add_serial_out)
 
 			self.type = ['TCP', 'UDP']
@@ -93,13 +101,18 @@ class MyFrame(wx.Frame):
 
 			self.port = wx.TextCtrl(self, -1, size=(90, 30), pos=(215, 70))
 
-			wx.StaticText(self, label='<---', pos=(320, 75))
+			wx.StaticText(self, label='Network  -->', pos=(310, 75))
 
-			self.add_network_in =wx.Button(self, label=_('Add network input'), pos=(360, 70))
+			self.add_network_in =wx.Button(self, label=_('Input'), pos=(395, 70))
 			self.Bind(wx.EVT_BUTTON, self.add_network_input, self.add_network_in)
 
-			self.add_network_out =wx.Button(self, label=_('Add network output'), pos=(530, 70))
+			self.add_network_out =wx.Button(self, label=_('Output'), pos=(490, 70))
 			self.Bind(wx.EVT_BUTTON, self.add_network_output, self.add_network_out)
+
+			wx.StaticText(self, label='|', pos=(585, 75))
+
+			self.add_gpsd_in =wx.Button(self, label=_('GPSD'), pos=(600, 70))
+			self.Bind(wx.EVT_BUTTON, self.add_gpsd_input, self.add_gpsd_in)
 
 ########################################################
 
@@ -145,7 +158,7 @@ class MyFrame(wx.Frame):
 
 ########################################################
 
-			ais_sdr=wx.StaticBox(self, label=_(' AIS-SDR '), size=(210, 130), pos=(485, 115))
+			ais_sdr=wx.StaticBox(self, label=_(' AIS-SDR '), size=(210, 120), pos=(485, 115))
 			estilo = ais_sdr.GetFont()
 			estilo.SetWeight(wx.BOLD)
 			ais_sdr.SetFont(estilo)
@@ -153,17 +166,29 @@ class MyFrame(wx.Frame):
 			self.ais_sdr_enable = wx.CheckBox(self, label=_('Enable'), pos=(490, 135))
 			self.ais_sdr_enable.Bind(wx.EVT_CHECKBOX, self.OnOffAIS)
 
-			self.gain = wx.TextCtrl(self, -1, size=(50, 30), pos=(490, 165))
-			gain_text = wx.StaticText(self, label=_('Gain'), pos=(550, 170))
+			self.gain = wx.TextCtrl(self, -1, size=(45, 30), pos=(595, 165))
+			self.button_test_gain =wx.Button(self, label=_('Gain'), pos=(490, 165))
+			self.Bind(wx.EVT_BUTTON, self.test_gain, self.button_test_gain)
 
-			self.ppm = wx.TextCtrl(self, -1, size=(50, 30), pos=(490, 205))
-			ppm_text = wx.StaticText(self, label=_('Error correction'), pos=(550, 210))
+			self.ppm = wx.TextCtrl(self, -1, size=(45, 30), pos=(595, 200))
+			self.button_test_ppm =wx.Button(self, label=_('Correction'), pos=(490, 200))
+			self.Bind(wx.EVT_BUTTON, self.test_ppm, self.button_test_ppm)
 
 ########################################################
 
-			self.png = wx.StaticBitmap(self, -1, wx.Bitmap(home+'/.config/openplotter/openplotter500.png', wx.BITMAP_TYPE_ANY), pos=(500, 250))
+			water_speed=wx.StaticBox(self, label=_('STW simulation'), size=(210, 50), pos=(485, 240))
+			estilo = water_speed.GetFont()
+			estilo.SetWeight(wx.BOLD)
+			water_speed.SetFont(estilo)
+
+			self.water_speed_enable = wx.CheckBox(self, label=_('SOG  -->  STW'), pos=(490, 260))
+			self.water_speed_enable.Bind(wx.EVT_CHECKBOX, self.onoffwaterspeed)
+
+########################################################
+
+			self.png = wx.StaticBitmap(self, -1, wx.Bitmap(home+'/.config/openplotter/openplotter.png', wx.BITMAP_TYPE_ANY), pos=(510, 295))
 			
-			hyper1 = hl.HyperLinkCtrl(self, -1, 'sailoog.com', URL='http://campus.sailoog.com/course/view.php?id=9', pos=(600, 350))
+			hyper1 = hl.HyperLinkCtrl(self, -1, 'sailoog.com', URL='http://campus.sailoog.com/course/view.php?id=9', pos=(600, 345))
 
 			self.CreateStatusBar()
 
@@ -314,7 +339,7 @@ class MyFrame(wx.Frame):
 				self.inputs.append(input_tmp)
 				self.write_inputs()
 			else:
-				self.SetStatusText(_('It is impossible to set "')+port+_('" as input because this port is already in use.'))
+				self.SetStatusText(_('It is impossible to set input because this port is already in use.'))
 
 		def add_serial_output(self,event):
 			output_tmp=[]
@@ -332,11 +357,10 @@ class MyFrame(wx.Frame):
 				self.outputs.append(output_tmp)
 				self.write_outputs()
 			else:
-				self.SetStatusText(_('It is impossible to set "')+port+_('" as output because this port is already in use.'))
+				self.SetStatusText(_('It is impossible to set output because this port is already in use.'))
 		
 		def add_network_input(self,event):
 			input_tmp=[]
-			found=False
 			type_=self.typeComboBox.GetValue()
 			address=self.address.GetValue()
 			port=self.port.GetValue()
@@ -348,6 +372,17 @@ class MyFrame(wx.Frame):
 				self.write_inputs()
 			else:
 				self.SetStatusText(_('You have to enter at least a port number.'))
+
+		def add_gpsd_input(self,event):
+			input_tmp=[]
+			type_='TCP'
+			address='127.0.0.1'
+			port='2947'
+			input_tmp.append(type_)
+			input_tmp.append(address)
+			input_tmp.append(port)
+			self.inputs.append(input_tmp)
+			self.write_inputs()
 		
 		def add_network_output(self,event):
 			output_tmp=[]
@@ -371,14 +406,11 @@ class MyFrame(wx.Frame):
 			subprocess.Popen(['lxterminal', '-e', 'sudo '+home+'/.config/openplotter/nmea_wifi_server/switch_access_point.sh'])
 			self.SetStatusText(_('Set NMEA server in the new window'))
 
-		def OnClick_network_man(self,event):
-			subprocess.Popen('/usr/sbin/wpa_gui')
-			self.SetStatusText(_('Manage networks in the new window'))
-
 		def OnOffAIS(self, e):
-			sender = e.GetEventObject()
-			isChecked = sender.GetValue()
+			isChecked = self.ais_sdr_enable.GetValue()
 			if isChecked:
+				w_close=subprocess.Popen(['pkill', '-f', 'waterfall.py'])
+				rtl_close=subprocess.Popen(['pkill', '-9', 'rtl_test'])
 				self.gain.SetEditable(False)
 				self.gain.SetForegroundColour((180,180,180))
 				self.ppm.SetEditable(False)
@@ -387,6 +419,7 @@ class MyFrame(wx.Frame):
 				ppm=self.ppm.GetValue()
 				rtl_fm=subprocess.Popen(['rtl_fm', '-f', '161975000', '-g', gain, '-p', ppm, '-s', '48k'], stdout = subprocess.PIPE)
 				aisdecoder=subprocess.Popen(['aisdecoder', '-h', '127.0.0.1', '-p', '10110', '-a', 'file', '-c', 'mono', '-d', '-f', '/dev/stdin'], stdin = rtl_fm.stdout)         
+				self.SetStatusText(_('SDR-AIS reception enabled'))
 			else: 
 				self.gain.SetEditable(True)
 				self.gain.SetForegroundColour((wx.NullColor))
@@ -394,7 +427,51 @@ class MyFrame(wx.Frame):
 				self.ppm.SetForegroundColour((wx.NullColor))
 				aisdecoder=subprocess.Popen(['pkill', '-9', 'aisdecoder'], stdout = subprocess.PIPE)
 				rtl_fm=subprocess.Popen(['pkill', '-9', 'rtl_fm'], stdin = aisdecoder.stdout)
+				self.SetStatusText(_('SDR-AIS reception disabled'))
 			self.write_ais_conf()
+
+		def onoffwaterspeed(self, e):
+			sender = e.GetEventObject()
+			isChecked = sender.GetValue()
+			if isChecked:
+				sog=""
+				self.SetStatusText(_('Waiting for GPS data in localhost:10110 ...'))
+				try:
+					s = socket.socket()
+					s.connect(("localhost", 10110))
+					s.settimeout(10)
+					cont = 0
+					while True:
+						cont = cont + 1
+						frase_nmea = s.recv(512)
+						if frase_nmea[1]=='G':
+							msg = pynmea2.parse(frase_nmea)
+							if msg.sentence_type == 'RMC':
+						   		sog = msg.spd_over_grnd
+						   		break
+						if cont > 15:
+							break
+					s.close()
+				except socket.error, error_msg:
+					self.SetStatusText(_('Failed to connect with localhost:10110. ')+_('Error code: ') + str(error_msg[0]))
+				else:
+					if (sog):
+						self.SetStatusText(_('Speed Over Ground retrieved from GPS successfully'))
+					else:
+						self.SetStatusText(_('Unable to retrieve Speed Over Ground from GPS'))
+					subprocess.Popen(['python', home+'/.config/openplotter/sog2sow.py'])
+			else:
+				subprocess.Popen(['pkill', '-f', 'sog2sow.py'])
+				self.SetStatusText(_('Speed Through Water simulation stopped'))
+			self.sog_sow_conf()
+
+		def sog_sow_conf(self):
+			enable_estado=self.water_speed_enable.GetValue()
+			enable='0'
+			if enable_estado==True: enable='1'
+			self.data_conf.set('STARTUP', 'iivbw', enable)
+			with open(home+'/.config/openplotter/openplotter.conf', 'wb') as configfile:
+				self.data_conf.write(configfile)
 
 		def set_conf(self):
 			self.gain.SetValue(self.data_conf.get('AIS-SDR', 'gain'))
@@ -407,11 +484,17 @@ class MyFrame(wx.Frame):
 					self.ppm.SetEditable(False)
 					self.ppm.SetForegroundColour((180,180,180))
 			opencpn=self.data_conf.get('STARTUP', 'opencpn')
+			opencpn_no=self.data_conf.get('STARTUP', 'opencpn_no_opengl')
 			kplex=self.data_conf.get('STARTUP', 'kplex')
+			gps_time=self.data_conf.get('STARTUP', 'gps_time')
 			x11vnc=self.data_conf.get('STARTUP', 'x11vnc')
+			IIVBW=self.data_conf.get('STARTUP', 'IIVBW')
 			if opencpn=='1': self.startup.Check(self.startup_item1.GetId(), True)
+			if opencpn_no=='1': self.startup.Check(self.startup_item1b.GetId(), True)
 			if kplex=='1': self.startup.Check(self.startup_item2.GetId(), True)
+			if gps_time=='1': self.startup.Check(self.startup_item2_2.GetId(), True)
 			if x11vnc=='1': self.startup.Check(self.startup_item3.GetId(), True)
+			if IIVBW=='1': self.water_speed_enable.SetValue(True)
 			language=self.data_conf.get('GENERAL', 'lang')
 			if language=='en': self.lang.Check(self.lang_item1.GetId(), True)
 			if language=='ca': self.lang.Check(self.lang_item2.GetId(), True)
@@ -436,11 +519,12 @@ class MyFrame(wx.Frame):
 			try:
 				s = socket.socket()
 				s.connect(("localhost", 10110))
+				s.settimeout(10)
 				cont = 0
 				while True:
 					cont = cont + 1
 					frase_nmea = s.recv(512)
-					if frase_nmea[1:3]=='GP':
+					if frase_nmea[1]=='G':
 						msg = pynmea2.parse(frase_nmea)
 						if msg.sentence_type == 'RMC':
 						   fecha = msg.datestamp
@@ -451,16 +535,21 @@ class MyFrame(wx.Frame):
 				s.close()
 			except socket.error, error_msg:
 				self.SetStatusText(_('Failed to connect with localhost:10110. ')+_('Error code: ') + str(error_msg[0]))
-			if (fecha) and (hora):
-				subprocess.call([ 'sudo', 'date', '--set', fecha.strftime('%Y-%m-%d'), '--utc'])
-				subprocess.call([ 'sudo', 'date', '--set', hora.strftime('%H:%M:%S'), '--utc'])
-				self.SetStatusText(_('Date and time retrieved from GPS successfully'))
 			else:
-				self.SetStatusText(_('Unable to retrieve date or time from GPS'))
+				if (fecha) and (hora):
+					subprocess.call([ 'sudo', 'date', '--set', fecha.strftime('%Y-%m-%d'), '--utc'])
+					subprocess.call([ 'sudo', 'date', '--set', hora.strftime('%H:%M:%S'), '--utc'])
+					self.SetStatusText(_('Date and time retrieved from GPS successfully'))
+				else:
+					self.SetStatusText(_('Unable to retrieve date or time from GPS'))
 
 		def time_zone(self,event):
 			subprocess.Popen(['lxterminal', '-e', 'sudo dpkg-reconfigure tzdata'])
 			self.SetStatusText(_('Set time zone in the new window'))
+
+		def reconfigure_gpsd(self,event):
+			subprocess.Popen(['lxterminal', '-e', 'sudo dpkg-reconfigure gpsd'])
+			self.SetStatusText(_('Set GPSD in the new window'))
 		
 		def restart_multiplex(self,event):
 			self.restart_kplex()
@@ -475,15 +564,29 @@ class MyFrame(wx.Frame):
 		def show_output_window(self,event):
 			show_output=subprocess.Popen(['python', home+'/.config/openplotter/output.py'])
 
+		def no_opengl(self, e):
+			self.startup.Check(self.startup_item1.GetId(), False)
+			self.check_startup(e)
+
+		def opengl(self, e):
+			self.startup.Check(self.startup_item1b.GetId(), False)
+			self.check_startup(e)
+
 		def check_startup(self, e):
 			opencpn="0"
+			opencpn_nopengl="0"
 			kplex="0"
 			x11vnc="0"
+			gps_time="0"
 			if self.startup_item1.IsChecked(): opencpn="1"
+			if self.startup_item1b.IsChecked(): opencpn_nopengl="1"
 			if self.startup_item2.IsChecked(): kplex="1"
+			if self.startup_item2_2.IsChecked(): gps_time="1"
 			if self.startup_item3.IsChecked(): x11vnc="1"
 			self.data_conf.set('STARTUP', 'opencpn', opencpn)
+			self.data_conf.set('STARTUP', 'opencpn_no_opengl', opencpn_nopengl)
 			self.data_conf.set('STARTUP', 'kplex', kplex)
+			self.data_conf.set('STARTUP', 'gps_time', gps_time)
 			self.data_conf.set('STARTUP', 'x11vnc', x11vnc)
 			with open(home+'/.config/openplotter/openplotter.conf', 'wb') as configfile:
 				self.data_conf.write(configfile)
@@ -511,6 +614,24 @@ class MyFrame(wx.Frame):
 			with open(home+'/.config/openplotter/openplotter.conf', 'wb') as configfile:
 				self.data_conf.write(configfile)
 			self.SetStatusText(_('The selected language will be enabled when you restart'))
+
+		def test_ppm(self,event):
+			self.ais_sdr_enable.SetValue(False)
+			self.OnOffAIS(event)
+			w_close=subprocess.Popen(['pkill', '-f', 'waterfall.py'])
+			rtl_close=subprocess.Popen(['pkill', '-9', 'rtl_test'])
+			time.sleep(1)
+			w_open=subprocess.Popen(['python', home+'/.config/openplotter/waterfall.py'])
+			self.SetStatusText(_('Check the new window and calculate the ppm value'))
+
+		def test_gain(self,event):
+			self.ais_sdr_enable.SetValue(False)
+			self.OnOffAIS(event)
+			w_close=subprocess.Popen(['pkill', '-f', 'waterfall.py'])
+			rtl_close=subprocess.Popen(['pkill', '-9', 'rtl_test'])
+			time.sleep(1)
+			subprocess.Popen(['lxterminal', '-e', 'rtl_test'])
+			self.SetStatusText(_('Check the new window and copy the maximum supported gain value'))
 
 
 app = wx.App(False)

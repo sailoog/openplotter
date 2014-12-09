@@ -43,6 +43,7 @@ class MyFrame(wx.Frame):
 			try:
 				self.s2 = socket.socket()
 				self.s2.connect(("localhost", 10110))
+				self.s2.settimeout(10)
 				self.error_message=""
 			except socket.error, error_msg:
 				self.error_message=str(error_msg[0])
@@ -53,7 +54,10 @@ class MyFrame(wx.Frame):
 			while True:
 				frase_nmea=""
 				if not self.error_message:
-					frase_nmea = self.s2.recv(512)
+					try:
+						frase_nmea = self.s2.recv(512)
+					except socket.error, error_msg:
+						self.error_message=str(error_msg[0])
 				if frase_nmea:
 					wx.MutexGuiEnter()
 					self.logger.AppendText(frase_nmea)

@@ -11,30 +11,22 @@
 TYPE=SERVER
 SSID=OpenPlotter
 PASSWORD=openplotter
-SUPPORTED="not supported"
-CHIPSET=RT5370
+CHIPSET=regular
 DRIVER=nl80211
 
 if [[ -n $(lsusb | grep RTL8188CUS) ]]; then
-	SUPPORTED="supported"
 	CHIPSET=RTL8188CUS
 	DRIVER=rtl871xdrv
 fi
 
 if [[ -n $(lsusb | grep RTL8192CU) ]]; then
-	SUPPORTED="supported"
 	CHIPSET=RTL8192CU
 	DRIVER=rtl871xdrv
-fi
-
-if [[ -n $(lsusb | grep RT5370) ]]; then
-	SUPPORTED="supported"
 fi
 
 # Get Input from User
 clear
 echo "==========================================================="
-echo "Detected $SUPPORTED chipset."
 echo "$DRIVER driver for $CHIPSET chipset it will be used."
 echo "==========================================================="
 echo "Please answer the following questions."
