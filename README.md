@@ -1,11 +1,10 @@
 OpenPlotter
 ==================
-![OpenPlotter-Raspian](http://campus.sailoog.com/pluginfile.php/715/mod_page/intro/OpenPlotter-SailPi.jpg "OpenPlotter-Raspian")
 
 **OpenPlotter** is a mix of software and hardware with the following main goals:
 
 * Open-source and low-cost
-* Run on x86 laptops and on low-consumption ARM boards (Raspberry, BeagleBone, Cubieboard...)
+* Run on x86 laptops and on low-consumption ARM boards (Raspberry Pi, Banana Pi, BeagleBone, Cubieboard...)
 * Do It Yourself
 
 Features
