@@ -27,13 +27,16 @@ class MyFrame(wx.Frame):
 
 			wx.Frame.__init__(self, parent, title=title, size=(700,420))
 
-			self.icon = wx.Icon('openplotter.ico', wx.BITMAP_TYPE_ICO)
+			self.icon = wx.Icon(home+'/.config/openplotter/openplotter.ico', wx.BITMAP_TYPE_ICO)
 			self.SetIcon(self.icon)
 
 			menubar = wx.MenuBar()
 			self.startup = wx.Menu()
 			self.startup_item1 = self.startup.Append(wx.ID_ANY, _('OpenCPN'), _('If selected OpenCPN will run at startup'), kind=wx.ITEM_CHECK)
-			self.Bind(wx.EVT_MENU, self.check_startup, self.startup_item1)
+			self.Bind(wx.EVT_MENU, self.opengl, self.startup_item1)
+			self.startup_item1b = self.startup.Append(wx.ID_ANY, _('OpenCPN (No OpenGL)'), _('If selected OpenCPN (No OpenGL) will run at startup'), kind=wx.ITEM_CHECK)
+			self.Bind(wx.EVT_MENU, self.no_opengl, self.startup_item1b)
+			self.startup.AppendSeparator()
 			self.startup_item2 = self.startup.Append(wx.ID_ANY, _('NMEA multiplexor (Kplex)'), _('If selected Kplex will run at startup'), kind=wx.ITEM_CHECK)
 			self.Bind(wx.EVT_MENU, self.check_startup, self.startup_item2)
 			self.startup_item2_2 = self.startup.Append(wx.ID_ANY, _('Set system time from GPS'), _('You need to define a valid GPS input and run kplex at startup'), kind=wx.ITEM_CHECK)
@@ -155,7 +158,7 @@ class MyFrame(wx.Frame):
 
 ########################################################
 
-			ais_sdr=wx.StaticBox(self, label=_(' AIS-SDR '), size=(210, 110), pos=(485, 115))
+			ais_sdr=wx.StaticBox(self, label=_(' AIS-SDR '), size=(210, 120), pos=(485, 115))
 			estilo = ais_sdr.GetFont()
 			estilo.SetWeight(wx.BOLD)
 			ais_sdr.SetFont(estilo)
@@ -163,27 +166,29 @@ class MyFrame(wx.Frame):
 			self.ais_sdr_enable = wx.CheckBox(self, label=_('Enable'), pos=(490, 135))
 			self.ais_sdr_enable.Bind(wx.EVT_CHECKBOX, self.OnOffAIS)
 
-			self.gain = wx.TextCtrl(self, -1, size=(50, 30), pos=(490, 165))
-			gain_text = wx.StaticText(self, label=_('Gain'), pos=(490, 200))
+			self.gain = wx.TextCtrl(self, -1, size=(45, 30), pos=(595, 165))
+			self.button_test_gain =wx.Button(self, label=_('Gain'), pos=(490, 165))
+			self.Bind(wx.EVT_BUTTON, self.test_gain, self.button_test_gain)
 
-			self.ppm = wx.TextCtrl(self, -1, size=(50, 30), pos=(560, 165))
-			ppm_text = wx.StaticText(self, label=_('Error correction'), pos=(560, 200))
+			self.ppm = wx.TextCtrl(self, -1, size=(45, 30), pos=(595, 200))
+			self.button_test_ppm =wx.Button(self, label=_('Correction'), pos=(490, 200))
+			self.Bind(wx.EVT_BUTTON, self.test_ppm, self.button_test_ppm)
 
 ########################################################
 
-			water_speed=wx.StaticBox(self, label=_('STW simulation'), size=(210, 50), pos=(485, 230))
+			water_speed=wx.StaticBox(self, label=_('STW simulation'), size=(210, 50), pos=(485, 240))
 			estilo = water_speed.GetFont()
 			estilo.SetWeight(wx.BOLD)
 			water_speed.SetFont(estilo)
 
-			self.water_speed_enable = wx.CheckBox(self, label=_('SOG  -->  STW'), pos=(490, 250))
+			self.water_speed_enable = wx.CheckBox(self, label=_('SOG  -->  STW'), pos=(490, 260))
 			self.water_speed_enable.Bind(wx.EVT_CHECKBOX, self.onoffwaterspeed)
 
 ########################################################
 
-			self.png = wx.StaticBitmap(self, -1, wx.Bitmap(home+'/.config/openplotter/openplotter.png', wx.BITMAP_TYPE_ANY), pos=(500, 285))
+			self.png = wx.StaticBitmap(self, -1, wx.Bitmap(home+'/.config/openplotter/openplotter.png', wx.BITMAP_TYPE_ANY), pos=(510, 295))
 			
-			hyper1 = hl.HyperLinkCtrl(self, -1, 'sailoog.com', URL='http://campus.sailoog.com/course/view.php?id=9', pos=(600, 350))
+			hyper1 = hl.HyperLinkCtrl(self, -1, 'sailoog.com', URL='http://campus.sailoog.com/course/view.php?id=9', pos=(600, 345))
 
 			self.CreateStatusBar()
 
@@ -334,7 +339,7 @@ class MyFrame(wx.Frame):
 				self.inputs.append(input_tmp)
 				self.write_inputs()
 			else:
-				self.SetStatusText(_('It is impossible to set ')+port+_(' as input because this port is already in use.'))
+				self.SetStatusText(_('It is impossible to set input because this port is already in use.'))
 
 		def add_serial_output(self,event):
 			output_tmp=[]
@@ -352,7 +357,7 @@ class MyFrame(wx.Frame):
 				self.outputs.append(output_tmp)
 				self.write_outputs()
 			else:
-				self.SetStatusText(_('It is impossible to set ')+port+_(' as output because this port is already in use.'))
+				self.SetStatusText(_('It is impossible to set output because this port is already in use.'))
 		
 		def add_network_input(self,event):
 			input_tmp=[]
@@ -402,9 +407,10 @@ class MyFrame(wx.Frame):
 			self.SetStatusText(_('Set NMEA server in the new window'))
 
 		def OnOffAIS(self, e):
-			sender = e.GetEventObject()
-			isChecked = sender.GetValue()
+			isChecked = self.ais_sdr_enable.GetValue()
 			if isChecked:
+				w_close=subprocess.Popen(['pkill', '-f', 'waterfall.py'])
+				rtl_close=subprocess.Popen(['pkill', '-9', 'rtl_test'])
 				self.gain.SetEditable(False)
 				self.gain.SetForegroundColour((180,180,180))
 				self.ppm.SetEditable(False)
@@ -413,6 +419,7 @@ class MyFrame(wx.Frame):
 				ppm=self.ppm.GetValue()
 				rtl_fm=subprocess.Popen(['rtl_fm', '-f', '161975000', '-g', gain, '-p', ppm, '-s', '48k'], stdout = subprocess.PIPE)
 				aisdecoder=subprocess.Popen(['aisdecoder', '-h', '127.0.0.1', '-p', '10110', '-a', 'file', '-c', 'mono', '-d', '-f', '/dev/stdin'], stdin = rtl_fm.stdout)         
+				self.SetStatusText(_('SDR-AIS reception enabled'))
 			else: 
 				self.gain.SetEditable(True)
 				self.gain.SetForegroundColour((wx.NullColor))
@@ -420,6 +427,7 @@ class MyFrame(wx.Frame):
 				self.ppm.SetForegroundColour((wx.NullColor))
 				aisdecoder=subprocess.Popen(['pkill', '-9', 'aisdecoder'], stdout = subprocess.PIPE)
 				rtl_fm=subprocess.Popen(['pkill', '-9', 'rtl_fm'], stdin = aisdecoder.stdout)
+				self.SetStatusText(_('SDR-AIS reception disabled'))
 			self.write_ais_conf()
 
 		def onoffwaterspeed(self, e):
@@ -436,7 +444,7 @@ class MyFrame(wx.Frame):
 					while True:
 						cont = cont + 1
 						frase_nmea = s.recv(512)
-						if frase_nmea[1:3]=='GP':
+						if frase_nmea[1]=='G':
 							msg = pynmea2.parse(frase_nmea)
 							if msg.sentence_type == 'RMC':
 						   		sog = msg.spd_over_grnd
@@ -476,11 +484,13 @@ class MyFrame(wx.Frame):
 					self.ppm.SetEditable(False)
 					self.ppm.SetForegroundColour((180,180,180))
 			opencpn=self.data_conf.get('STARTUP', 'opencpn')
+			opencpn_no=self.data_conf.get('STARTUP', 'opencpn_no_opengl')
 			kplex=self.data_conf.get('STARTUP', 'kplex')
 			gps_time=self.data_conf.get('STARTUP', 'gps_time')
 			x11vnc=self.data_conf.get('STARTUP', 'x11vnc')
 			IIVBW=self.data_conf.get('STARTUP', 'IIVBW')
 			if opencpn=='1': self.startup.Check(self.startup_item1.GetId(), True)
+			if opencpn_no=='1': self.startup.Check(self.startup_item1b.GetId(), True)
 			if kplex=='1': self.startup.Check(self.startup_item2.GetId(), True)
 			if gps_time=='1': self.startup.Check(self.startup_item2_2.GetId(), True)
 			if x11vnc=='1': self.startup.Check(self.startup_item3.GetId(), True)
@@ -514,7 +524,7 @@ class MyFrame(wx.Frame):
 				while True:
 					cont = cont + 1
 					frase_nmea = s.recv(512)
-					if frase_nmea[1:3]=='GP':
+					if frase_nmea[1]=='G':
 						msg = pynmea2.parse(frase_nmea)
 						if msg.sentence_type == 'RMC':
 						   fecha = msg.datestamp
@@ -554,16 +564,27 @@ class MyFrame(wx.Frame):
 		def show_output_window(self,event):
 			show_output=subprocess.Popen(['python', home+'/.config/openplotter/output.py'])
 
+		def no_opengl(self, e):
+			self.startup.Check(self.startup_item1.GetId(), False)
+			self.check_startup(e)
+
+		def opengl(self, e):
+			self.startup.Check(self.startup_item1b.GetId(), False)
+			self.check_startup(e)
+
 		def check_startup(self, e):
 			opencpn="0"
+			opencpn_nopengl="0"
 			kplex="0"
 			x11vnc="0"
 			gps_time="0"
 			if self.startup_item1.IsChecked(): opencpn="1"
+			if self.startup_item1b.IsChecked(): opencpn_nopengl="1"
 			if self.startup_item2.IsChecked(): kplex="1"
 			if self.startup_item2_2.IsChecked(): gps_time="1"
 			if self.startup_item3.IsChecked(): x11vnc="1"
 			self.data_conf.set('STARTUP', 'opencpn', opencpn)
+			self.data_conf.set('STARTUP', 'opencpn_no_opengl', opencpn_nopengl)
 			self.data_conf.set('STARTUP', 'kplex', kplex)
 			self.data_conf.set('STARTUP', 'gps_time', gps_time)
 			self.data_conf.set('STARTUP', 'x11vnc', x11vnc)
@@ -593,6 +614,24 @@ class MyFrame(wx.Frame):
 			with open(home+'/.config/openplotter/openplotter.conf', 'wb') as configfile:
 				self.data_conf.write(configfile)
 			self.SetStatusText(_('The selected language will be enabled when you restart'))
+
+		def test_ppm(self,event):
+			self.ais_sdr_enable.SetValue(False)
+			self.OnOffAIS(event)
+			w_close=subprocess.Popen(['pkill', '-f', 'waterfall.py'])
+			rtl_close=subprocess.Popen(['pkill', '-9', 'rtl_test'])
+			time.sleep(1)
+			w_open=subprocess.Popen(['python', home+'/.config/openplotter/waterfall.py'])
+			self.SetStatusText(_('Check the new window and calculate the ppm value'))
+
+		def test_gain(self,event):
+			self.ais_sdr_enable.SetValue(False)
+			self.OnOffAIS(event)
+			w_close=subprocess.Popen(['pkill', '-f', 'waterfall.py'])
+			rtl_close=subprocess.Popen(['pkill', '-9', 'rtl_test'])
+			time.sleep(1)
+			subprocess.Popen(['lxterminal', '-e', 'rtl_test'])
+			self.SetStatusText(_('Check the new window and copy the maximum supported gain value'))
 
 
 app = wx.App(False)

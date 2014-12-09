@@ -10,7 +10,7 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 while True:
 	frase_nmea = sock_in.recv(512)
-	if frase_nmea[1:3]=='GP':
+	if frase_nmea[1]=='G':
 		msg = pynmea2.parse(frase_nmea)
 		if msg.sentence_type == 'RMC':
 			sog = msg.spd_over_grnd

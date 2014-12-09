@@ -10,6 +10,7 @@ data_conf.read(home+'/.config/openplotter/openplotter.conf')
 
 kplex=data_conf.get('STARTUP', 'kplex')
 opencpn=data_conf.get('STARTUP', 'opencpn')
+opencpn_no=data_conf.get('STARTUP', 'opencpn_no_opengl')
 x11vnc=data_conf.get('STARTUP', 'x11vnc')
 gps_time=data_conf.get('STARTUP', 'gps_time')
 sow=data_conf.get('STARTUP', 'iivbw')
@@ -26,9 +27,10 @@ else:
 	stop_kplex=subprocess.Popen(['pkill', '-9', 'kplex'])
 
 if opencpn=='1':
-	start_opencpn=subprocess.Popen(['opencpn', '-no_opengl'])         
-else: 
-	stop_opencpn=subprocess.Popen(['pkill', '-9', 'opencpn'])
+	start_opencpn=subprocess.Popen('opencpn')
+
+if opencpn_no=='1':
+	start_opencpn_no=subprocess.Popen(['opencpn', '-no_opengl'])
 
 if enable=='1':
 	rtl_fm=subprocess.Popen(['rtl_fm', '-f', '161975000', '-g', gain, '-p', ppm, '-s', '48k'], stdout = subprocess.PIPE)
@@ -52,7 +54,7 @@ if gps_time=='1':
 	while True:
 		cont = cont + 1
 		frase_nmea = s.recv(512)
-		if frase_nmea[1:3]=='GP':
+		if frase_nmea[1]=='G':
 			msg = pynmea2.parse(frase_nmea)
 			if msg.sentence_type == 'RMC':
 				fecha = msg.datestamp
