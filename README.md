@@ -1,5 +1,6 @@
 OpenPlotter
 ==================
+![OpenPlotter](http://campus.sailoog.com/pluginfile.php/744/mod_label/intro/openplotter2.png)
 
 **OpenPlotter** is a mix of software and hardware with the following main goals:
 
