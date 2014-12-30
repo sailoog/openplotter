@@ -2,7 +2,6 @@
 
 import wx, subprocess, socket, pynmea2, time, sys, os, ConfigParser, gettext
 from wx.lib.mixins.listctrl import CheckListCtrlMixin
-import wx.lib.agw.hyperlink as hl
 
 home = os.path.expanduser('~')
 
@@ -50,12 +49,10 @@ class MyFrame(wx.Frame):
 			time_item2 = settings.Append(wx.ID_ANY, _('Set time from GPS'), _('Set system time from GPS'))
 			self.Bind(wx.EVT_MENU, self.time_gps, time_item2)
 			settings.AppendSeparator()
-			wifi_server_item1 = settings.Append(wx.ID_ANY, _('Set Server/Client WiFi'), _('Switch WiFi between "access point" and "DHCP client"'))
-			self.Bind(wx.EVT_MENU, self.OnClick_nmea_server, wifi_server_item1)
-			settings.AppendSeparator()
 			gpsd_item1 = settings.Append(wx.ID_ANY, _('Set GPSD'), _('Set GPSD in the new window'))
 			self.Bind(wx.EVT_MENU, self.reconfigure_gpsd, gpsd_item1)
 			menubar.Append(settings, _('Settings'))
+
 			self.lang = wx.Menu()
 			self.lang_item1 = self.lang.Append(wx.ID_ANY, _('English'), _('Set English language'), kind=wx.ITEM_CHECK)
 			self.Bind(wx.EVT_MENU, self.lang_en, self.lang_item1)
@@ -64,6 +61,11 @@ class MyFrame(wx.Frame):
 			self.lang_item3 = self.lang.Append(wx.ID_ANY, _('Spanish'), _('Set Spanish language'), kind=wx.ITEM_CHECK)
 			self.Bind(wx.EVT_MENU, self.lang_es, self.lang_item3)
 			menubar.Append(self.lang, _('Language'))
+
+			self.helpm = wx.Menu()
+			self.helpm_item1=self.helpm.Append(wx.ID_ANY, _('&About'), _('About OpenPlotter'))
+			self.Bind(wx.EVT_MENU, self.OnAboutBox, self.helpm_item1)
+			menubar.Append(self.helpm, _('&Help'))
 
 			self.SetMenuBar(menubar)
 
@@ -116,79 +118,89 @@ class MyFrame(wx.Frame):
 
 ########################################################
 
-			in_out=wx.StaticBox(self, label=_(' NMEA inputs / outputs '), size=(475, 260), pos=(5, 115))
+			in_out=wx.StaticBox(self, label=_(' NMEA inputs / outputs '), size=(475, 260), pos=(5, 110))
 			estilo = in_out.GetFont()
 			estilo.SetWeight(wx.BOLD)
 			in_out.SetFont(estilo)
 
-			self.list_input = wx.ListCtrl(self, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(295, 90), pos=(10, 140))
+			self.list_input = wx.ListCtrl(self, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(295, 90), pos=(10, 130))
 			self.list_input.InsertColumn(0, _('Type'), width=50)
 			self.list_input.InsertColumn(1, _('Port/Address'), width=130)
 			self.list_input.InsertColumn(2, _('Bauds/Port'), width=115)
 
-			inputs = wx.StaticText(self, label=_('Inputs'), pos=(320, 145))
+			inputs = wx.StaticText(self, label=_('Inputs'), pos=(320, 135))
 			estilo = inputs.GetFont()
 			estilo.SetWeight(wx.BOLD)
 			inputs.SetFont(estilo)
 
-			self.button_delete_input =wx.Button(self, label=_('Delete selected'), pos=(315, 165))
+			self.button_delete_input =wx.Button(self, label=_('Delete selected'), pos=(315, 155))
 			self.Bind(wx.EVT_BUTTON, self.delete_input, self.button_delete_input)
 
-			self.list_output = wx.ListCtrl(self, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(295, 90), pos=(10, 240))
+			self.list_output = wx.ListCtrl(self, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(295, 90), pos=(10, 230))
 			self.list_output.InsertColumn(0, _('Type'), width=50)
 			self.list_output.InsertColumn(1, _('Port/Address'), width=130)
 			self.list_output.InsertColumn(2, _('Bauds/Port'), width=115)
 
-			outputs = wx.StaticText(self, label=_('Outputs'), pos=(320, 245))
+			outputs = wx.StaticText(self, label=_('Outputs'), pos=(320, 235))
 			estilo = outputs.GetFont()
 			estilo.SetWeight(wx.BOLD)
 			outputs.SetFont(estilo)
 
-			self.button_delete_output =wx.Button(self, label=_('Delete selected'), pos=(315, 265))
+			self.button_delete_output =wx.Button(self, label=_('Delete selected'), pos=(315, 255))
 			self.Bind(wx.EVT_BUTTON, self.delete_output, self.button_delete_output)
 
-			self.show_output =wx.Button(self, label=_('Show output'), pos=(315, 300))
+			self.show_output =wx.Button(self, label=_('Show output'), pos=(315, 290))
 			self.Bind(wx.EVT_BUTTON, self.show_output_window, self.show_output)
 
-			self.restart =wx.Button(self, label=_('Restart'), pos=(10, 337))
+			self.restart =wx.Button(self, label=_('Restart'), pos=(10, 330))
 			self.Bind(wx.EVT_BUTTON, self.restart_multiplex, self.restart)
 
-			self.button_apply =wx.Button(self, label=_('Apply changes'), pos=(120, 337))
+			self.button_apply =wx.Button(self, label=_('Apply changes'), pos=(120, 330))
 			self.Bind(wx.EVT_BUTTON, self.apply_changes, self.button_apply)
 
 ########################################################
 
-			ais_sdr=wx.StaticBox(self, label=_(' AIS-SDR '), size=(210, 120), pos=(485, 115))
+			ais_sdr=wx.StaticBox(self, label=_('AIS-SDR reception'), size=(210, 110), pos=(485, 110))
 			estilo = ais_sdr.GetFont()
 			estilo.SetWeight(wx.BOLD)
 			ais_sdr.SetFont(estilo)
 
-			self.ais_sdr_enable = wx.CheckBox(self, label=_('Enable'), pos=(490, 135))
+			self.ais_sdr_enable = wx.CheckBox(self, label=_('Enable'), pos=(490, 125))
 			self.ais_sdr_enable.Bind(wx.EVT_CHECKBOX, self.OnOffAIS)
 
-			self.gain = wx.TextCtrl(self, -1, size=(45, 30), pos=(595, 165))
-			self.button_test_gain =wx.Button(self, label=_('Gain'), pos=(490, 165))
+			self.gain = wx.TextCtrl(self, -1, size=(45, 30), pos=(595, 150))
+			self.button_test_gain =wx.Button(self, label=_('Gain'), pos=(490, 150))
 			self.Bind(wx.EVT_BUTTON, self.test_gain, self.button_test_gain)
 
-			self.ppm = wx.TextCtrl(self, -1, size=(45, 30), pos=(595, 200))
-			self.button_test_ppm =wx.Button(self, label=_('Correction'), pos=(490, 200))
+			self.ppm = wx.TextCtrl(self, -1, size=(45, 30), pos=(595, 185))
+			self.button_test_ppm =wx.Button(self, label=_('Correction'), pos=(490, 185))
 			self.Bind(wx.EVT_BUTTON, self.test_ppm, self.button_test_ppm)
 
 ########################################################
 
-			water_speed=wx.StaticBox(self, label=_('STW simulation'), size=(210, 50), pos=(485, 240))
+			water_speed=wx.StaticBox(self, label=_('STW simulation'), size=(210, 50), pos=(485, 220))
 			estilo = water_speed.GetFont()
 			estilo.SetWeight(wx.BOLD)
 			water_speed.SetFont(estilo)
 
-			self.water_speed_enable = wx.CheckBox(self, label=_('SOG  -->  STW'), pos=(490, 260))
+			self.water_speed_enable = wx.CheckBox(self, label=_('SOG  -->  STW'), pos=(490, 235))
 			self.water_speed_enable.Bind(wx.EVT_CHECKBOX, self.onoffwaterspeed)
 
 ########################################################
 
-			self.png = wx.StaticBitmap(self, -1, wx.Bitmap(home+'/.config/openplotter/openplotter.png', wx.BITMAP_TYPE_ANY), pos=(510, 295))
+			wifi=wx.StaticBox(self, label=_('NMEA WiFi server'), size=(210, 100), pos=(485, 270))
+			estilo = wifi.GetFont()
+			estilo.SetWeight(wx.BOLD)
+			wifi.SetFont(estilo)
+
+			self.wifi_enable = wx.CheckBox(self, label=_('Enable'), pos=(490, 285))
+			self.wifi_enable.Bind(wx.EVT_CHECKBOX, self.onwifi_enable)
 			
-			hyper1 = hl.HyperLinkCtrl(self, -1, 'sailoog.com', URL='http://campus.sailoog.com/course/view.php?id=9', pos=(600, 345))
+			self.wlan = wx.TextCtrl(self, -1, size=(55, 25), pos=(490, 310))
+			wx.StaticText(self, label=_('WiFi device'), pos=(550, 315))
+			self.passw = wx.TextCtrl(self, -1, size=(100, 25), pos=(490, 340))
+			wx.StaticText(self, label=_('Password'), pos=(595, 345))
+########################################################
 
 			self.CreateStatusBar()
 
@@ -402,10 +414,6 @@ class MyFrame(wx.Frame):
 			else:
 				self.SetStatusText(_('You have to enter at least a port number.'))
 
-		def OnClick_nmea_server(self,event):
-			subprocess.Popen(['lxterminal', '-e', 'sudo '+home+'/.config/openplotter/nmea_wifi_server/switch_access_point.sh'])
-			self.SetStatusText(_('Set NMEA server in the new window'))
-
 		def OnOffAIS(self, e):
 			isChecked = self.ais_sdr_enable.GetValue()
 			if isChecked:
@@ -428,7 +436,7 @@ class MyFrame(wx.Frame):
 				aisdecoder=subprocess.Popen(['pkill', '-9', 'aisdecoder'], stdout = subprocess.PIPE)
 				rtl_fm=subprocess.Popen(['pkill', '-9', 'rtl_fm'], stdin = aisdecoder.stdout)
 				self.SetStatusText(_('SDR-AIS reception disabled'))
-			self.write_ais_conf()
+			self.write_conf()
 
 		def onoffwaterspeed(self, e):
 			sender = e.GetEventObject()
@@ -447,42 +455,44 @@ class MyFrame(wx.Frame):
 						if frase_nmea[1]=='G':
 							msg = pynmea2.parse(frase_nmea)
 							if msg.sentence_type == 'RMC':
-						   		sog = msg.spd_over_grnd
-						   		break
+								sog = msg.spd_over_grnd
+								break
 						if cont > 15:
 							break
 					s.close()
 				except socket.error, error_msg:
 					self.SetStatusText(_('Failed to connect with localhost:10110. ')+_('Error code: ') + str(error_msg[0]))
+					self.water_speed_enable.SetValue(False)
 				else:
 					if (sog):
 						self.SetStatusText(_('Speed Over Ground retrieved from GPS successfully'))
 					else:
-						self.SetStatusText(_('Unable to retrieve Speed Over Ground from GPS'))
+						self.SetStatusText(_('Unable to retrieve Speed Over Ground from GPS, waiting for fixed data.'))
 					subprocess.Popen(['python', home+'/.config/openplotter/sog2sow.py'])
 			else:
 				subprocess.Popen(['pkill', '-f', 'sog2sow.py'])
 				self.SetStatusText(_('Speed Through Water simulation stopped'))
-			self.sog_sow_conf()
-
-		def sog_sow_conf(self):
-			enable_estado=self.water_speed_enable.GetValue()
-			enable='0'
-			if enable_estado==True: enable='1'
-			self.data_conf.set('STARTUP', 'iivbw', enable)
-			with open(home+'/.config/openplotter/openplotter.conf', 'wb') as configfile:
-				self.data_conf.write(configfile)
+			self.write_conf()
 
 		def set_conf(self):
 			self.gain.SetValue(self.data_conf.get('AIS-SDR', 'gain'))
 			self.ppm.SetValue(self.data_conf.get('AIS-SDR', 'ppm'))
-			enable=self.data_conf.get('AIS-SDR', 'enable')
-			if enable=='1':
+			enable_ais=self.data_conf.get('AIS-SDR', 'enable')
+			self.wlan.SetValue(self.data_conf.get('WIFI', 'device'))
+			self.passw.SetValue(self.data_conf.get('WIFI', 'password'))
+			enable_wifi=self.data_conf.get('WIFI', 'enable')
+			if enable_ais=='1':
 					self.ais_sdr_enable.SetValue(True)
 					self.gain.SetEditable(False)
 					self.gain.SetForegroundColour((180,180,180))
 					self.ppm.SetEditable(False)
 					self.ppm.SetForegroundColour((180,180,180))
+			if enable_wifi=='1':
+					self.wifi_enable.SetValue(True)
+					self.wlan.SetEditable(False)
+					self.wlan.SetForegroundColour((180,180,180))
+					self.passw.SetEditable(False)
+					self.passw.SetForegroundColour((180,180,180))
 			opencpn=self.data_conf.get('STARTUP', 'opencpn')
 			opencpn_no=self.data_conf.get('STARTUP', 'opencpn_no_opengl')
 			kplex=self.data_conf.get('STARTUP', 'kplex')
@@ -500,48 +510,37 @@ class MyFrame(wx.Frame):
 			if language=='ca': self.lang.Check(self.lang_item2.GetId(), True)
 			if language=='es': self.lang.Check(self.lang_item3.GetId(), True)
 
-		def write_ais_conf(self):
-			enable_estado=self.ais_sdr_enable.GetValue()
+		def write_conf(self):
+			enable_stw=self.water_speed_enable.GetValue()
+			enable_ais=self.ais_sdr_enable.GetValue()
+			enable_wifi=self.wifi_enable.GetValue()
+			enable='0'
+			if enable_ais==True: enable='1'
+			self.data_conf.set('AIS-SDR', 'enable', enable)
+			enable='0'
+			if enable_wifi==True: enable='1'
+			self.data_conf.set('WIFI', 'enable', enable)
+			enable='0'
+			if enable_stw==True: enable='1'
+			self.data_conf.set('STARTUP', 'iivbw', enable)
+
 			gain=self.gain.GetValue()
 			ppm=self.ppm.GetValue()
+			wlan=self.wlan.GetValue()
+			passw=self.passw.GetValue()
 			self.data_conf.set('AIS-SDR', 'gain', gain)
 			self.data_conf.set('AIS-SDR', 'ppm', ppm)
-			enable='0'
-			if enable_estado==True: enable='1'
-			self.data_conf.set('AIS-SDR', 'enable', enable)
+			self.data_conf.set('WIFI', 'device', wlan)
+			self.data_conf.set('WIFI', 'password', passw)
+
 			with open(home+'/.config/openplotter/openplotter.conf', 'wb') as configfile:
 				self.data_conf.write(configfile)
 
 		def time_gps(self,event):
-			fecha=""
-			hora=""
 			self.SetStatusText(_('Waiting for GPS data in localhost:10110 ...'))
-			try:
-				s = socket.socket()
-				s.connect(("localhost", 10110))
-				s.settimeout(10)
-				cont = 0
-				while True:
-					cont = cont + 1
-					frase_nmea = s.recv(512)
-					if frase_nmea[1]=='G':
-						msg = pynmea2.parse(frase_nmea)
-						if msg.sentence_type == 'RMC':
-						   fecha = msg.datestamp
-						   hora =  msg.timestamp
-						   break
-					if cont > 15:
-						break
-				s.close()
-			except socket.error, error_msg:
-				self.SetStatusText(_('Failed to connect with localhost:10110. ')+_('Error code: ') + str(error_msg[0]))
-			else:
-				if (fecha) and (hora):
-					subprocess.call([ 'sudo', 'date', '--set', fecha.strftime('%Y-%m-%d'), '--utc'])
-					subprocess.call([ 'sudo', 'date', '--set', hora.strftime('%H:%M:%S'), '--utc'])
-					self.SetStatusText(_('Date and time retrieved from GPS successfully'))
-				else:
-					self.SetStatusText(_('Unable to retrieve date or time from GPS'))
+			time_gps_result=subprocess.check_output(['python', home+'/.config/openplotter/time_gps.py'])
+			self.SetStatusText('')
+			self.ShowMessage(time_gps_result.strip())
 
 		def time_zone(self,event):
 			subprocess.Popen(['lxterminal', '-e', 'sudo dpkg-reconfigure tzdata'])
@@ -592,24 +591,21 @@ class MyFrame(wx.Frame):
 				self.data_conf.write(configfile)
 
 		def lang_en(self, e):
-			self.lang.Check(self.lang_item1.GetId(), True)
-			self.lang.Check(self.lang_item2.GetId(), False)
-			self.lang.Check(self.lang_item3.GetId(), False)
 			self.lang_selected='en'
 			self.write_lang_selected()
+			self.lang.Check(self.lang_item1.GetId(), True)
 		def lang_ca(self, e):
-			self.lang.Check(self.lang_item1.GetId(), False)
-			self.lang.Check(self.lang_item2.GetId(), True)
-			self.lang.Check(self.lang_item3.GetId(), False)
 			self.lang_selected='ca'
 			self.write_lang_selected()
+			self.lang.Check(self.lang_item2.GetId(), True)
 		def lang_es(self, e):
-			self.lang.Check(self.lang_item1.GetId(), False)
-			self.lang.Check(self.lang_item2.GetId(), False)
-			self.lang.Check(self.lang_item3.GetId(), True)
 			self.lang_selected='es'
 			self.write_lang_selected()
+			self.lang.Check(self.lang_item3.GetId(), True)
 		def write_lang_selected (self):
+			self.lang.Check(self.lang_item1.GetId(), False)
+			self.lang.Check(self.lang_item2.GetId(), False)
+			self.lang.Check(self.lang_item3.GetId(), False)
 			self.data_conf.set('GENERAL', 'lang', self.lang_selected)
 			with open(home+'/.config/openplotter/openplotter.conf', 'wb') as configfile:
 				self.data_conf.write(configfile)
@@ -618,10 +614,11 @@ class MyFrame(wx.Frame):
 		def test_ppm(self,event):
 			self.ais_sdr_enable.SetValue(False)
 			self.OnOffAIS(event)
+			ppm=self.ppm.GetValue()
 			w_close=subprocess.Popen(['pkill', '-f', 'waterfall.py'])
 			rtl_close=subprocess.Popen(['pkill', '-9', 'rtl_test'])
 			time.sleep(1)
-			w_open=subprocess.Popen(['python', home+'/.config/openplotter/waterfall.py'])
+			w_open=subprocess.Popen(['python', home+'/.config/openplotter/waterfall.py', ppm])
 			self.SetStatusText(_('Check the new window and calculate the ppm value'))
 
 		def test_gain(self,event):
@@ -632,6 +629,58 @@ class MyFrame(wx.Frame):
 			time.sleep(1)
 			subprocess.Popen(['lxterminal', '-e', 'rtl_test'])
 			self.SetStatusText(_('Check the new window and copy the maximum supported gain value'))
+
+		def onwifi_enable (self, e):
+			self.SetStatusText(_('Configuring NMEA WiFi server, wait please...'))
+			isChecked = self.wifi_enable.GetValue()
+			self.write_conf()
+			wlan=self.wlan.GetValue()
+			passw=self.passw.GetValue()
+			if isChecked:
+				self.wlan.SetEditable(False)
+				self.wlan.SetForegroundColour((180,180,180))
+				self.passw.SetEditable(False)
+				self.passw.SetForegroundColour((180,180,180))
+				wifi_result=subprocess.check_output(['python', home+'/.config/openplotter/wifi_server.py', '1', wlan, passw])
+			else: 
+				self.wlan.SetEditable(True)
+				self.wlan.SetForegroundColour((wx.NullColor))
+				self.passw.SetEditable(True)
+				self.passw.SetForegroundColour((wx.NullColor))
+				wifi_result=subprocess.check_output(['python', home+'/.config/openplotter/wifi_server.py', '0', wlan, passw])
+			self.SetStatusText('')
+			self.ShowMessage(wifi_result.strip())
+
+		def OnAboutBox(self, e):
+			description = _("OpenPlotter is a DIY open-source low-cost low-consumption sailing platform to run on x86 laptops and ARM boards (Raspberry Pi, Banana Pi, BeagleBone, Cubieboard...)")			
+			licence = """This program is free software: you can redistribute it 
+and/or modify it under the terms of the GNU General Public License 
+as published by the Free Software Foundation, either version 2 of 
+the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but 
+WITHOUT ANY WARRANTY; without even the implied warranty of 
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License 
+along with this program.  If not, see http://www.gnu.org/licenses/"""
+
+			info = wx.AboutDialogInfo()
+			info.SetName('OpenPlotter')
+			info.SetVersion('2.0')
+			info.SetDescription(description)
+			info.SetCopyright('(C) 2013 - 2014 Sailoog')
+			info.SetWebSite('http://www.sailoog.com')
+			info.SetLicence(licence)
+			info.AddDeveloper('Sailoog\n\nhttps://github.com/sailoog')
+			info.AddDocWriter('Sailoog\n\nhttps://www.gitbook.com/@sailoog')
+			info.AddArtist('Sailoog')
+			info.AddTranslator('Catalan, English, Spanish by Sailoog')
+			wx.AboutBox(info)
+
+		def ShowMessage(self, w_msg):
+			wx.MessageBox(w_msg, 'Info', wx.OK | wx.ICON_INFORMATION)
 
 
 app = wx.App(False)

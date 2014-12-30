@@ -22,7 +22,6 @@ import pylab as pyl
 import numpy as np
 import sys
 from rtlsdr import RtlSdr
-import ConfigParser, os
 
 # A simple waterfall, spectrum plotter
 #
@@ -166,11 +165,8 @@ class Waterfall(object):
 
 
 def main():
-    home = os.path.expanduser('~')
 
-    data_conf = ConfigParser.SafeConfigParser()
-    data_conf.read(home+'/.config/openplotter/openplotter.conf')
-    ppm=data_conf.get('AIS-SDR', 'ppm')
+    ppm=sys.argv[1]
     if ppm=='0': ppm='1'
 
     sdr = RtlSdr()
