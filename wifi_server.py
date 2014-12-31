@@ -4,8 +4,6 @@ import subprocess, ConfigParser, os, gettext, shutil, sys
 
 home = os.path.expanduser('~')
 
-gettext.install('openplotter', home+'/.config/openplotter/locale', unicode=False)
-
 wifi_server=sys.argv[1]
 wlan = sys.argv[2]
 passw = sys.argv[3]
@@ -22,24 +20,23 @@ if wifi_server=='1':
 	if not original: shutil.copyfile('/usr/sbin/hostapd', '/usr/sbin/hostapd.org')
 
 	driver='nl80211'
-	msg= ''
+	chipset= 'default'
 
 	output=subprocess.check_output('lsusb')
 
 	if arm==1 and 'RTL8188CUS' in output:
 		driver='rtl871xdrv'
+		chipset= 'RTL8188CUS'
 		shutil.copyfile(home+'/.config/openplotter/wifi_drivers/arm/RTL8188CUS/hostapd', '/usr/sbin/hostapd')
 		subprocess.call(['chmod', '755', '/usr/sbin/hostapd'])
-		msg= _('Using RTL8188CUS chipset and rtl871xdrv driver')
 	if arm==1 and 'RTL8192CU' in output:
 		driver='rtl871xdrv'
+		chipset= 'RTL8192CU'
 		shutil.copyfile(home+'/.config/openplotter/wifi_drivers/arm/RTL8192CU/hostapd', '/usr/sbin/hostapd')
 		subprocess.call(['chmod', '755', '/usr/sbin/hostapd'])
-		msg=  _('Using RTL8192CU chipset and rtl871xdrv driver')
 	if driver == 'nl80211':
 		shutil.copyfile('/usr/sbin/hostapd.org', '/usr/sbin/hostapd')
 		subprocess.call(['chmod', '755', '/usr/sbin/hostapd'])
-		msg=  _('Using default chipset and nl80211 driver')
 
 	subprocess.call(['rfkill', 'unblock', 'wifi'])
 
@@ -83,8 +80,15 @@ if wifi_server=='1':
 	print output
 	if 'fail' in output : error=1
 
-	if error==1: print _("NMEA WiFi Server failed.\n")+msg
-	else: print _("NMEA WiFi Server started.\n")+msg+_("\n\nSSID: OpenPlotter\nPassword: ")+passw+_("\n\nAdress: 10.10.10.1\nPort: 10110")
+	print 'Chipset: '+chipset+', driver: '+driver+'.\n'
+
+	if error==1: print "wifi_server.py: NMEA WiFi Server failed."
+	else: 
+		print "wifi_server.py: NMEA WiFi Server started."
+		print "SSID: OpenPlotter"
+		print "Password: "+passw
+		print "Adress: 10.10.10.1" 
+		print "Port: 10110"
 
 
 else:
@@ -100,6 +104,6 @@ else:
 
 	subprocess.call(['restart', 'network-manager'])
 
-	print _("\nNMEA WiFi Server stopped.")
+	print "wifi_server.py: NMEA WiFi Server stopped."
 
 

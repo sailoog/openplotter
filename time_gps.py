@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 
-import socket, pynmea2, subprocess, gettext, os
-
-home = os.path.expanduser('~')
-
-gettext.install('openplotter', home+'/.config/openplotter/locale', unicode=False)
+import socket, pynmea2, subprocess
 
 fecha=""
 hora=""
@@ -27,11 +23,12 @@ try:
 			break
 	s.close()
 except socket.error, error_msg:
-	print _('Failed to connect with localhost:10110. ')+_('Error: ') + str(error_msg[0])
+	print 'time_gps.py: Failed to connect with localhost:10110.'
+	print 'Error: '+ str(error_msg[0])
 else:
 	if (fecha) and (hora):
 		subprocess.call([ 'date', '--set', fecha.strftime('%Y-%m-%d'), '--utc'])
 		subprocess.call([ 'date', '--set', hora.strftime('%H:%M:%S'), '--utc'])
-		print _('Date and time retrieved from GPS successfully')
+		print 'time_gps.py: Date and time retrieved from GPS successfully.'
 	else:
-		print _('Unable to retrieve date or time from GPS')
+		print 'time_gps.py: Unable to retrieve date or time from GPS.'

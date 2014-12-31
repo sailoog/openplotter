@@ -87,12 +87,12 @@ class MyFrame(wx.Frame):
 			self.baudComboBox = wx.ComboBox(self, choices=self.bauds, style=wx.CB_READONLY, size=(90, 30), pos=(215, 30))
 			self.baudComboBox.SetValue('4800')
 
-			wx.StaticText(self, label='Serial  -->', pos=(310, 35))
+			wx.StaticText(self, label='Serial', pos=(320, 36))
 
-			self.add_serial_in =wx.Button(self, label=_('Input'), pos=(395, 30))
+			self.add_serial_in =wx.Button(self, label=_('Input'), pos=(380, 30))
 			self.Bind(wx.EVT_BUTTON, self.add_serial_input, self.add_serial_in)
 
-			self.add_serial_out =wx.Button(self, label=_('Output'), pos=(490, 30))
+			self.add_serial_out =wx.Button(self, label=_('Output'), pos=(475, 30))
 			self.Bind(wx.EVT_BUTTON, self.add_serial_output, self.add_serial_out)
 
 			self.type = ['TCP', 'UDP']
@@ -103,17 +103,17 @@ class MyFrame(wx.Frame):
 
 			self.port = wx.TextCtrl(self, -1, size=(90, 30), pos=(215, 70))
 
-			wx.StaticText(self, label='Network  -->', pos=(310, 75))
+			wx.StaticText(self, label='Network', pos=(313, 76))
 
-			self.add_network_in =wx.Button(self, label=_('Input'), pos=(395, 70))
+			self.add_network_in =wx.Button(self, label=_('Input'), pos=(380, 70))
 			self.Bind(wx.EVT_BUTTON, self.add_network_input, self.add_network_in)
 
-			self.add_network_out =wx.Button(self, label=_('Output'), pos=(490, 70))
+			self.add_network_out =wx.Button(self, label=_('Output'), pos=(475, 70))
 			self.Bind(wx.EVT_BUTTON, self.add_network_output, self.add_network_out)
 
-			wx.StaticText(self, label='|', pos=(585, 75))
+			wx.StaticText(self, label='|', pos=(580, 75))
 
-			self.add_gpsd_in =wx.Button(self, label=_('GPSD'), pos=(600, 70))
+			self.add_gpsd_in =wx.Button(self, label=_('GPSD'), pos=(595, 70))
 			self.Bind(wx.EVT_BUTTON, self.add_gpsd_input, self.add_gpsd_in)
 
 ########################################################
@@ -539,8 +539,13 @@ class MyFrame(wx.Frame):
 		def time_gps(self,event):
 			self.SetStatusText(_('Waiting for GPS data in localhost:10110 ...'))
 			time_gps_result=subprocess.check_output(['sudo', 'python', home+'/.config/openplotter/time_gps.py'])
+			parsed_out = self.parse_msg(time_gps_result, 'time_gps.py')
+			msg=''
+			if 'Failed to connect with localhost:10110.' in parsed_out[1]: msg=_('Failed to connect with localhost:10110.')
+			if 'Date and time retrieved from GPS successfully.' in parsed_out[1]: msg=_('Date and time retrieved from GPS successfully.')
+			if 'Unable to retrieve date or time from GPS.' in parsed_out[1]: msg=_('Unable to retrieve date or time from GPS.')
 			self.SetStatusText('')
-			self.ShowMessage(time_gps_result.strip())
+			self.ShowMessage(parsed_out[0]+'\n'+msg)
 
 		def time_zone(self,event):
 			subprocess.Popen(['lxterminal', '-e', 'sudo dpkg-reconfigure tzdata'])
@@ -648,8 +653,13 @@ class MyFrame(wx.Frame):
 				self.passw.SetEditable(True)
 				self.passw.SetForegroundColour((wx.NullColor))
 				wifi_result=subprocess.check_output(['sudo', 'python', home+'/.config/openplotter/wifi_server.py', '0', wlan, passw])
+			parsed_out = self.parse_msg(wifi_result, 'wifi_server.py')
+			msg=''
+			if 'NMEA WiFi Server failed.' in parsed_out[1]: msg=_('NMEA WiFi Server failed.')
+			if 'NMEA WiFi Server started.' in parsed_out[1]: msg=_('NMEA WiFi Server started.')
+			if 'NMEA WiFi Server stopped.' in parsed_out[1]: msg=_('NMEA WiFi Server stopped.')
 			self.SetStatusText('')
-			self.ShowMessage(wifi_result.strip())
+			self.ShowMessage(parsed_out[0]+'\n'+msg)
 
 		def OnAboutBox(self, e):
 			description = _("OpenPlotter is a DIY open-source low-cost low-consumption sailing platform to run on x86 laptops and ARM boards (Raspberry Pi, Banana Pi, BeagleBone, Cubieboard...)")			
@@ -681,6 +691,17 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		def ShowMessage(self, w_msg):
 			wx.MessageBox(w_msg, 'Info', wx.OK | wx.ICON_INFORMATION)
+
+		def parse_msg(self, output, f):
+			txt=''
+			msg=''
+			re=output.splitlines()
+			for current in re:
+				if f in current:
+					msg=current.replace(f+": ", "")
+				else:
+					txt+=current+"\n"
+			return txt, msg
 
 
 app = wx.App(False)
