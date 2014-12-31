@@ -49,7 +49,7 @@ else:
 	stop_x11vnc=subprocess.Popen(['pkill', '-9', 'x11vnc'])
 
 if gps_time=='1':
-	subprocess.call(['python', home+'/.config/openplotter/time_gps.py'])
+	subprocess.call(['sudo', 'python', home+'/.config/openplotter/time_gps.py'])
 
 if sow=='1':
 	subprocess.Popen(['python', home+'/.config/openplotter/sog2sow.py'])
@@ -57,4 +57,4 @@ else:
 	subprocess.Popen(['pkill', '-f', 'sog2sow.py'])
 
 if wifi_server=='1':
-	subprocess.call(['python', home+'/.config/openplotter/wifi_server.py', '1', wlan, passw])
+	subprocess.call(['sudo', 'python', home+'/.config/openplotter/wifi_server.py', '1', wlan, passw])
