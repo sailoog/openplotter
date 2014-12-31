@@ -538,7 +538,7 @@ class MyFrame(wx.Frame):
 
 		def time_gps(self,event):
 			self.SetStatusText(_('Waiting for GPS data in localhost:10110 ...'))
-			time_gps_result=subprocess.check_output(['python', home+'/.config/openplotter/time_gps.py'])
+			time_gps_result=subprocess.check_output(['sudo', 'python', home+'/.config/openplotter/time_gps.py'])
 			self.SetStatusText('')
 			self.ShowMessage(time_gps_result.strip())
 
@@ -641,13 +641,13 @@ class MyFrame(wx.Frame):
 				self.wlan.SetForegroundColour((180,180,180))
 				self.passw.SetEditable(False)
 				self.passw.SetForegroundColour((180,180,180))
-				wifi_result=subprocess.check_output(['python', home+'/.config/openplotter/wifi_server.py', '1', wlan, passw])
+				wifi_result=subprocess.check_output(['sudo', 'python', home+'/.config/openplotter/wifi_server.py', '1', wlan, passw])
 			else: 
 				self.wlan.SetEditable(True)
 				self.wlan.SetForegroundColour((wx.NullColor))
 				self.passw.SetEditable(True)
 				self.passw.SetForegroundColour((wx.NullColor))
-				wifi_result=subprocess.check_output(['python', home+'/.config/openplotter/wifi_server.py', '0', wlan, passw])
+				wifi_result=subprocess.check_output(['sudo', 'python', home+'/.config/openplotter/wifi_server.py', '0', wlan, passw])
 			self.SetStatusText('')
 			self.ShowMessage(wifi_result.strip())
 
