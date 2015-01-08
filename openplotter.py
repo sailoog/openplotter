@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import wx, subprocess, socket, pynmea2, time, sys, os, ConfigParser, gettext
+import wx, subprocess, time, sys, os, ConfigParser, gettext
 from wx.lib.mixins.listctrl import CheckListCtrlMixin
 
 home = os.path.expanduser('~')
@@ -19,10 +19,10 @@ class MyFrame(wx.Frame):
 			self.presLan_ca = gettext.translation('openplotter', home+'/.config/openplotter/locale', languages=['ca'])
 			self.presLan_es = gettext.translation('openplotter', home+'/.config/openplotter/locale', languages=['es'])
 			self.read_conf()
-			language=self.data_conf.get('GENERAL', 'lang')
-			if language=='en':self.presLan_en.install()
-			if language=='ca':self.presLan_ca.install()
-			if language=='es':self.presLan_es.install()
+			self.language=self.data_conf.get('GENERAL', 'lang')
+			if self.language=='en':self.presLan_en.install()
+			if self.language=='ca':self.presLan_ca.install()
+			if self.language=='es':self.presLan_es.install()
 
 			wx.Frame.__init__(self, parent, title=title, size=(700,420))
 
@@ -38,7 +38,7 @@ class MyFrame(wx.Frame):
 			self.startup.AppendSeparator()
 			self.startup_item2 = self.startup.Append(wx.ID_ANY, _('NMEA multiplexor (Kplex)'), _('If selected Kplex will run at startup'), kind=wx.ITEM_CHECK)
 			self.Bind(wx.EVT_MENU, self.check_startup, self.startup_item2)
-			self.startup_item2_2 = self.startup.Append(wx.ID_ANY, _('Set system time from GPS'), _('You need to define a valid GPS input and run kplex at startup'), kind=wx.ITEM_CHECK)
+			self.startup_item2_2 = self.startup.Append(wx.ID_ANY, _('Set time from NMEA'), _('You need to define a valid NMEA time data input and run kplex at startup'), kind=wx.ITEM_CHECK)
 			self.Bind(wx.EVT_MENU, self.check_startup, self.startup_item2_2)
 			self.startup_item3 = self.startup.Append(wx.ID_ANY, _('Remote desktop (x11vnc)'), _('If selected x11vnc will run at startup'), kind=wx.ITEM_CHECK)
 			self.Bind(wx.EVT_MENU, self.check_startup, self.startup_item3)
@@ -46,7 +46,7 @@ class MyFrame(wx.Frame):
 			settings = wx.Menu()
 			time_item1 = settings.Append(wx.ID_ANY, _('Set time zone'), _('Set time zone in the new window'))
 			self.Bind(wx.EVT_MENU, self.time_zone, time_item1)
-			time_item2 = settings.Append(wx.ID_ANY, _('Set time from GPS'), _('Set system time from GPS'))
+			time_item2 = settings.Append(wx.ID_ANY, _('Set time from NMEA'), _('Set system time from NMEA data'))
 			self.Bind(wx.EVT_MENU, self.time_gps, time_item2)
 			settings.AppendSeparator()
 			gpsd_item1 = settings.Append(wx.ID_ANY, _('Set GPSD'), _('Set GPSD in the new window'))
@@ -417,8 +417,8 @@ class MyFrame(wx.Frame):
 		def OnOffAIS(self, e):
 			isChecked = self.ais_sdr_enable.GetValue()
 			if isChecked:
-				w_close=subprocess.Popen(['pkill', '-f', 'waterfall.py'])
-				rtl_close=subprocess.Popen(['pkill', '-9', 'rtl_test'])
+				w_close=subprocess.call(['pkill', '-f', 'waterfall.py'])
+				rtl_close=subprocess.call(['pkill', '-9', 'rtl_test'])
 				self.gain.SetEditable(False)
 				self.gain.SetForegroundColour((180,180,180))
 				self.ppm.SetEditable(False)
@@ -433,8 +433,8 @@ class MyFrame(wx.Frame):
 				self.gain.SetForegroundColour((wx.NullColor))
 				self.ppm.SetEditable(True)
 				self.ppm.SetForegroundColour((wx.NullColor))
-				aisdecoder=subprocess.Popen(['pkill', '-9', 'aisdecoder'], stdout = subprocess.PIPE)
-				rtl_fm=subprocess.Popen(['pkill', '-9', 'rtl_fm'], stdin = aisdecoder.stdout)
+				aisdecoder=subprocess.call(['pkill', '-9', 'aisdecoder'])
+				rtl_fm=subprocess.call(['pkill', '-9', 'rtl_fm'])
 				self.SetStatusText(_('SDR-AIS reception disabled'))
 			self.write_conf()
 
@@ -442,35 +442,30 @@ class MyFrame(wx.Frame):
 			sender = e.GetEventObject()
 			isChecked = sender.GetValue()
 			if isChecked:
-				sog=""
-				self.SetStatusText(_('Waiting for GPS data in localhost:10110 ...'))
-				try:
-					s = socket.socket()
-					s.connect(("localhost", 10110))
-					s.settimeout(10)
-					cont = 0
-					while True:
-						cont = cont + 1
-						frase_nmea = s.recv(512)
-						if frase_nmea[1]=='G':
-							msg = pynmea2.parse(frase_nmea)
-							if msg.sentence_type == 'RMC':
-								sog = msg.spd_over_grnd
-								break
-						if cont > 15:
-							break
-					s.close()
-				except socket.error, error_msg:
-					self.SetStatusText(_('Failed to connect with localhost:10110. ')+_('Error code: ') + str(error_msg[0]))
-					self.water_speed_enable.SetValue(False)
-				else:
-					if (sog):
-						self.SetStatusText(_('Speed Over Ground retrieved from GPS successfully'))
-					else:
-						self.SetStatusText(_('Unable to retrieve Speed Over Ground from GPS, waiting for fixed data.'))
-					subprocess.Popen(['python', home+'/.config/openplotter/sog2sow.py'])
+				self.SetStatusText(_('Searching NMEA Speed Over Ground data in localhost:10110 ...'))
+				sog_result=subprocess.Popen(['python', home+'/.config/openplotter/sog2sow.py'], stdout=subprocess.PIPE)
+				msg=''
+				while sog_result.poll() is None:
+					l = sog_result.stdout.readline()
+					if 'Failed to connect with localhost:10110.' in l:
+						msg+=_('Failed to connect with localhost:10110.')
+					if 'Error: ' in l: msg+='\n'+l
+					if 'No data, trying to reconnect...' in l:
+						msg+=_('No data, trying to reconnect...')
+						break
+					if 'Speed Over Ground data not found, waiting for NMEA data...' in l:
+						msg+=_('Speed Over Ground data not found, waiting for NMEA data...')
+						break
+					if '$IIVBW' in l: msg+=l
+					if '$IIVHW' in l:
+						msg+=l
+						msg+=_('\nSpeed Over Ground retrieved from NMEA data successfully.')
+						break
+				sog_result.stdout.close()
+				self.SetStatusText('')
+				self.ShowMessage(msg)
 			else:
-				subprocess.Popen(['pkill', '-f', 'sog2sow.py'])
+				subprocess.call(['pkill', '-f', 'sog2sow.py'])
 				self.SetStatusText(_('Speed Through Water simulation stopped'))
 			self.write_conf()
 
@@ -537,15 +532,20 @@ class MyFrame(wx.Frame):
 				self.data_conf.write(configfile)
 
 		def time_gps(self,event):
-			self.SetStatusText(_('Waiting for GPS data in localhost:10110 ...'))
+			self.SetStatusText(_('Waiting for NMEA time data in localhost:10110 ...'))
 			time_gps_result=subprocess.check_output(['sudo', 'python', home+'/.config/openplotter/time_gps.py'])
-			parsed_out = self.parse_msg(time_gps_result, 'time_gps.py')
 			msg=''
-			if 'Failed to connect with localhost:10110.' in parsed_out[1]: msg=_('Failed to connect with localhost:10110.')
-			if 'Date and time retrieved from GPS successfully.' in parsed_out[1]: msg=_('Date and time retrieved from GPS successfully.')
-			if 'Unable to retrieve date or time from GPS.' in parsed_out[1]: msg=_('Unable to retrieve date or time from GPS.')
+			re=time_gps_result.splitlines()
+			for current in re:
+				if 'Failed to connect with localhost:10110.' in current: msg+=_('Failed to connect with localhost:10110.\n')
+				if 'Error: ' in current: msg+=current+'\n'
+				if 'Unable to retrieve date or time from NMEA data.' in current: msg+=_('Unable to retrieve date or time from NMEA data.\n')
+				if 'UTC' in current:
+					if not '00:00:00' in current: msg+=current+'\n'
+				if 'Date and time retrieved from NMEA data successfully.' in current: msg+=_('Date and time retrieved from NMEA data successfully.')
+
 			self.SetStatusText('')
-			self.ShowMessage(parsed_out[0]+'\n'+msg)
+			self.ShowMessage(msg)
 
 		def time_zone(self,event):
 			subprocess.Popen(['lxterminal', '-e', 'sudo dpkg-reconfigure tzdata'])
@@ -560,13 +560,14 @@ class MyFrame(wx.Frame):
 
 		def restart_kplex(self):
 			self.SetStatusText(_('Closing Kplex'))
-			subprocess.Popen(["pkill", "kplex"])
+			subprocess.call(["pkill", "kplex"])
 			time.sleep(1)
 			subprocess.Popen('kplex')
 			self.SetStatusText(_('Kplex restarted'))
 				
 		def show_output_window(self,event):
-			show_output=subprocess.Popen(['python', home+'/.config/openplotter/output.py'])
+			close=subprocess.call(['pkill', '-f', 'output.py'])
+			show_output=subprocess.Popen(['python', home+'/.config/openplotter/output.py', self.language])
 
 		def no_opengl(self, e):
 			self.startup.Check(self.startup_item1.GetId(), False)
@@ -620,8 +621,8 @@ class MyFrame(wx.Frame):
 			self.ais_sdr_enable.SetValue(False)
 			self.OnOffAIS(event)
 			ppm=self.ppm.GetValue()
-			w_close=subprocess.Popen(['pkill', '-f', 'waterfall.py'])
-			rtl_close=subprocess.Popen(['pkill', '-9', 'rtl_test'])
+			w_close=subprocess.call(['pkill', '-f', 'waterfall.py'])
+			rtl_close=subprocess.call(['pkill', '-9', 'rtl_test'])
 			time.sleep(1)
 			w_open=subprocess.Popen(['python', home+'/.config/openplotter/waterfall.py', ppm])
 			self.SetStatusText(_('Check the new window and calculate the ppm value'))
@@ -629,8 +630,8 @@ class MyFrame(wx.Frame):
 		def test_gain(self,event):
 			self.ais_sdr_enable.SetValue(False)
 			self.OnOffAIS(event)
-			w_close=subprocess.Popen(['pkill', '-f', 'waterfall.py'])
-			rtl_close=subprocess.Popen(['pkill', '-9', 'rtl_test'])
+			w_close=subprocess.call(['pkill', '-f', 'waterfall.py'])
+			rtl_close=subprocess.call(['pkill', '-9', 'rtl_test'])
 			time.sleep(1)
 			subprocess.Popen(['lxterminal', '-e', 'rtl_test'])
 			self.SetStatusText(_('Check the new window and copy the maximum supported gain value'))
@@ -638,7 +639,6 @@ class MyFrame(wx.Frame):
 		def onwifi_enable (self, e):
 			self.SetStatusText(_('Configuring NMEA WiFi server, wait please...'))
 			isChecked = self.wifi_enable.GetValue()
-			self.write_conf()
 			wlan=self.wlan.GetValue()
 			passw=self.passw.GetValue()
 			if isChecked:
@@ -646,20 +646,28 @@ class MyFrame(wx.Frame):
 				self.wlan.SetForegroundColour((180,180,180))
 				self.passw.SetEditable(False)
 				self.passw.SetForegroundColour((180,180,180))
-				wifi_result=subprocess.check_output(['sudo', 'python', home+'/.config/openplotter/wifi_server.py', '1', wlan, passw])
+				if len(passw)>=8:
+					wifi_result=subprocess.check_output(['sudo', 'python', home+'/.config/openplotter/wifi_server.py', '1', wlan, passw])
+				else:
+					wifi_result=_('Password must be at least 8 characters long')
+					self.wlan.SetEditable(True)
+					self.wlan.SetForegroundColour((wx.NullColor))
+					self.passw.SetEditable(True)
+					self.passw.SetForegroundColour((wx.NullColor))
+					self.wifi_enable.SetValue(False)
 			else: 
 				self.wlan.SetEditable(True)
 				self.wlan.SetForegroundColour((wx.NullColor))
 				self.passw.SetEditable(True)
 				self.passw.SetForegroundColour((wx.NullColor))
 				wifi_result=subprocess.check_output(['sudo', 'python', home+'/.config/openplotter/wifi_server.py', '0', wlan, passw])
-			parsed_out = self.parse_msg(wifi_result, 'wifi_server.py')
-			msg=''
-			if 'NMEA WiFi Server failed.' in parsed_out[1]: msg=_('NMEA WiFi Server failed.')
-			if 'NMEA WiFi Server started.' in parsed_out[1]: msg=_('NMEA WiFi Server started.')
-			if 'NMEA WiFi Server stopped.' in parsed_out[1]: msg=_('NMEA WiFi Server stopped.')
+			msg=wifi_result
+			msg=msg.replace('NMEA WiFi Server failed.', _('NMEA WiFi Server failed.'))
+			msg=msg.replace('NMEA WiFi Server started.', _('NMEA WiFi Server started.'))
+			msg=msg.replace('NMEA WiFi Server stopped.', _('NMEA WiFi Server stopped.'))
 			self.SetStatusText('')
-			self.ShowMessage(parsed_out[0]+'\n'+msg)
+			self.ShowMessage(msg)
+			self.write_conf()
 
 		def OnAboutBox(self, e):
 			description = _("OpenPlotter is a DIY open-source low-cost low-consumption sailing platform to run on x86 laptops and ARM boards (Raspberry Pi, Banana Pi, BeagleBone, Cubieboard...)")			
@@ -691,17 +699,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		def ShowMessage(self, w_msg):
 			wx.MessageBox(w_msg, 'Info', wx.OK | wx.ICON_INFORMATION)
-
-		def parse_msg(self, output, f):
-			txt=''
-			msg=''
-			re=output.splitlines()
-			for current in re:
-				if f in current:
-					msg=current.replace(f+": ", "")
-				else:
-					txt+=current+"\n"
-			return txt, msg
 
 
 app = wx.App(False)

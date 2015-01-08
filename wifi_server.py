@@ -82,9 +82,9 @@ if wifi_server=='1':
 
 	print 'Chipset: '+chipset+', driver: '+driver+'.\n'
 
-	if error==1: print "wifi_server.py: NMEA WiFi Server failed."
+	if error==1: print "NMEA WiFi Server failed."
 	else: 
-		print "wifi_server.py: NMEA WiFi Server started."
+		print "NMEA WiFi Server started.\n"
 		print "SSID: OpenPlotter"
 		print "Password: "+passw
 		print "Adress: 10.10.10.1" 
@@ -104,6 +104,6 @@ else:
 
 	subprocess.call(['restart', 'network-manager'])
 
-	print "wifi_server.py: NMEA WiFi Server stopped."
+	print "\nNMEA WiFi Server stopped."
 
 

@@ -2,33 +2,45 @@
 
 import socket, pynmea2, subprocess
 
-fecha=""
-hora=""
+fecha=''
+hora=''
 
 try:
-	s = socket.socket()
-	s.connect(("localhost", 10110))
-	s.settimeout(10)
-	cont = 0
-	while True:
-		cont = cont + 1
-		frase_nmea = s.recv(512)
-		if frase_nmea[1]=='G':
-			msg = pynmea2.parse(frase_nmea)
-			if msg.sentence_type == 'RMC':
-				fecha = msg.datestamp
-				hora =  msg.timestamp
-				break
-		if cont > 15:
-			break
-	s.close()
+	sock_in = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	sock_in.settimeout(10)
+	sock_in.connect(('127.0.0.1', 10110))
 except socket.error, error_msg:
-	print 'time_gps.py: Failed to connect with localhost:10110.'
+	print 'Failed to connect with localhost:10110.'
 	print 'Error: '+ str(error_msg[0])
 else:
-	if (fecha) and (hora):
+	cont = 0
+	while True:
+		frase_nmea =''
+		try:
+			frase_nmea = sock_in.recv(512)
+		except socket.error, error_msg:
+			try:
+				print 'Failed to connect with localhost:10110.'
+				print 'Error: '+ str(error_msg[0])
+				sys.stdout.flush()
+			except: pass
+			break
+		else:
+			if frase_nmea:
+				try:
+					msg = pynmea2.parse(frase_nmea)
+					if msg.sentence_type == 'RMC':
+						fecha = msg.datestamp
+						hora =  msg.timestamp
+						break
+					else: 
+						cont=cont+1
+				except: pass
+				if cont >= 30: break
+
+	if fecha and hora:
 		subprocess.call([ 'date', '--set', fecha.strftime('%Y-%m-%d'), '--utc'])
 		subprocess.call([ 'date', '--set', hora.strftime('%H:%M:%S'), '--utc'])
-		print 'time_gps.py: Date and time retrieved from GPS successfully.'
+		print 'Date and time retrieved from NMEA data successfully.'
 	else:
-		print 'time_gps.py: Unable to retrieve date or time from GPS.'
+		print 'Unable to retrieve date or time from NMEA data.'

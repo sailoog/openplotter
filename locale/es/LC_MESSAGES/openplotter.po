@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: OpenPlotter 2.0\n"
-"POT-Creation-Date: 2014-12-31 13:08+0100\n"
-"PO-Revision-Date: 2014-12-31 13:08+0100\n"
+"POT-Creation-Date: 2015-01-08 13:26+0100\n"
+"PO-Revision-Date: 2015-01-08 13:26+0100\n"
 "Last-Translator: sailoog <info@sailoog.com>\n"
 "Language-Team: Sailoog <info@sailoog.com>\n"
 "Language: es\n"
@@ -14,22 +14,21 @@ msgstr ""
 "X-Poedit-Basepath: .\n"
 "X-Poedit-SearchPath-0: /home/nx/.config/openplotter\n"
 
-#: /home/nx/.config/openplotter/output.py:64
+#: /home/nx/.config/openplotter/output.py:60
 msgid "Kplex started"
 msgstr "Kplex iniciado"
 
-#: /home/nx/.config/openplotter/output.py:69
-#: /home/nx/.config/openplotter/openplotter.py:464
+#: /home/nx/.config/openplotter/output.py:65
 msgid "Failed to connect with localhost:10110. "
 msgstr "Error conectando con localhost:10110. "
 
-#: /home/nx/.config/openplotter/output.py:69
-#: /home/nx/.config/openplotter/openplotter.py:464
+#: /home/nx/.config/openplotter/output.py:65
 msgid "Error code: "
 msgstr "Código de error:"
 
-#: /home/nx/.config/openplotter/output.py:72
-#: /home/nx/.config/openplotter/output.py:74
+#: /home/nx/.config/openplotter/output.py:68
+#: /home/nx/.config/openplotter/output.py:70
+#: /home/nx/.config/openplotter/openplotter.py:454
 msgid "No data, trying to reconnect..."
 msgstr "Sin datos. Intentando reconectar..."
 
@@ -59,12 +58,15 @@ msgstr "Si selecciona esta opción Kplex se ejecutará al inicio"
 
 #: /home/nx/.config/openplotter/openplotter.py:41
 #: /home/nx/.config/openplotter/openplotter.py:49
-msgid "Set system time from GPS"
-msgstr "Configurar hora del sistema desde el GPS"
+msgid "Set time from NMEA"
+msgstr "Establecer hora desde NMEA"
 
 #: /home/nx/.config/openplotter/openplotter.py:41
-msgid "You need to define a valid GPS input and run kplex at startup"
-msgstr "Necesitas definir una entrada de GPS válida y ejecutar Kplex al inicio"
+msgid ""
+"You need to define a valid NMEA time data input and run kplex at startup"
+msgstr ""
+"Necesitas definir una entrada NMEA de tiempo válida y ejecutar Kplex al "
+"inicio"
 
 #: /home/nx/.config/openplotter/openplotter.py:43
 msgid "Remote desktop (x11vnc)"
@@ -88,8 +90,8 @@ msgid "Set time zone in the new window"
 msgstr "Configurar zona horaria en la nueva ventana"
 
 #: /home/nx/.config/openplotter/openplotter.py:49
-msgid "Set time from GPS"
-msgstr "Configurar hora desde el GPS"
+msgid "Set system time from NMEA data"
+msgstr "Configurar hora del sistema desde los datos NMEA"
 
 #: /home/nx/.config/openplotter/openplotter.py:52
 msgid "Set GPSD"
@@ -278,36 +280,46 @@ msgstr "Recepción SDR-AIS habilitada"
 msgid "SDR-AIS reception disabled"
 msgstr "Recepción SDR-AIS deshabilitada"
 
-#: /home/nx/.config/openplotter/openplotter.py:446
-#: /home/nx/.config/openplotter/openplotter.py:540
-msgid "Waiting for GPS data in localhost:10110 ..."
-msgstr "Esperando datos del GPS de localhost:10110 ..."
+#: /home/nx/.config/openplotter/openplotter.py:445
+msgid "Searching NMEA Speed Over Ground data in localhost:10110 ..."
+msgstr "Buscando datos de velocidad sobre el fondo en localhost:10110 ..."
 
-#: /home/nx/.config/openplotter/openplotter.py:468
-msgid "Speed Over Ground retrieved from GPS successfully"
-msgstr "Velocidad sobre el fondo extraída del GPS con éxito."
-
-#: /home/nx/.config/openplotter/openplotter.py:470
-msgid "Unable to retrieve Speed Over Ground from GPS, waiting for fixed data."
-msgstr ""
-"Incapaz de extraer velocidad sobre el fondo del GPS, esperando datos "
-"fiables..."
-
-#: /home/nx/.config/openplotter/openplotter.py:474
-msgid "Speed Through Water simulation stopped"
-msgstr "Simulación de velocidad sobre el agua detenida"
-
-#: /home/nx/.config/openplotter/openplotter.py:544
+#: /home/nx/.config/openplotter/openplotter.py:451
 msgid "Failed to connect with localhost:10110."
 msgstr "Error conectando con localhost:10110."
 
-#: /home/nx/.config/openplotter/openplotter.py:545
-msgid "Date and time retrieved from GPS successfully."
-msgstr "Fecha y hora extraída del GPS con éxito."
+#: /home/nx/.config/openplotter/openplotter.py:457
+msgid "Speed Over Ground data not found, waiting for NMEA data..."
+msgstr ""
+"Datos de velocidad sobre el fondo no encontrados, esperando datos NMEA..."
 
-#: /home/nx/.config/openplotter/openplotter.py:546
-msgid "Unable to retrieve date or time from GPS."
-msgstr "Incapaz de extraer fecha u hora del GPS."
+#: /home/nx/.config/openplotter/openplotter.py:462
+msgid ""
+"\n"
+"Speed Over Ground retrieved from NMEA data successfully."
+msgstr ""
+"\n"
+"Velocidad sobre el fondo extraída de datos NMEA con éxito."
+
+#: /home/nx/.config/openplotter/openplotter.py:469
+msgid "Speed Through Water simulation stopped"
+msgstr "Simulación de velocidad sobre el agua detenida"
+
+#: /home/nx/.config/openplotter/openplotter.py:535
+msgid "Waiting for NMEA time data in localhost:10110 ..."
+msgstr "Esperando datos NMEA de tiempo en localhost:10110 ..."
+
+#: /home/nx/.config/openplotter/openplotter.py:540
+msgid "Failed to connect with localhost:10110.\n"
+msgstr "Error conectando con localhost:10110.\n"
+
+#: /home/nx/.config/openplotter/openplotter.py:542
+msgid "Unable to retrieve date or time from NMEA data.\n"
+msgstr "Incapaz de extraer fecha u hora de datos NMEA.\n"
+
+#: /home/nx/.config/openplotter/openplotter.py:545
+msgid "Date and time retrieved from NMEA data successfully."
+msgstr "Fecha y hora extraída de datos NMEA con éxito."
 
 #: /home/nx/.config/openplotter/openplotter.py:562
 msgid "Closing Kplex"
@@ -317,36 +329,40 @@ msgstr "Cerrando Kplex"
 msgid "Kplex restarted"
 msgstr "Kplex reiniciado"
 
-#: /home/nx/.config/openplotter/openplotter.py:617
+#: /home/nx/.config/openplotter/openplotter.py:618
 msgid "The selected language will be enabled when you restart"
 msgstr ""
 "El idioma seleccionado estará activo cuando vuelva a iniciar el programa."
 
-#: /home/nx/.config/openplotter/openplotter.py:627
+#: /home/nx/.config/openplotter/openplotter.py:628
 msgid "Check the new window and calculate the ppm value"
 msgstr "Calcula el valor de ppm en la nueva ventana"
 
-#: /home/nx/.config/openplotter/openplotter.py:636
+#: /home/nx/.config/openplotter/openplotter.py:637
 msgid "Check the new window and copy the maximum supported gain value"
 msgstr "Copia el valor máximo posible de ganancia  de la nueva ventana"
 
-#: /home/nx/.config/openplotter/openplotter.py:639
+#: /home/nx/.config/openplotter/openplotter.py:640
 msgid "Configuring NMEA WiFi server, wait please..."
 msgstr "Configurando el servidor WiFi NMEA, espera por favor..."
 
-#: /home/nx/.config/openplotter/openplotter.py:658
+#: /home/nx/.config/openplotter/openplotter.py:652
+msgid "Password must be at least 8 characters long"
+msgstr "La contraseña tiene que tener por lo menos 8 caracteres"
+
+#: /home/nx/.config/openplotter/openplotter.py:665
 msgid "NMEA WiFi Server failed."
 msgstr "El Servidor WiFi NMEA ha fallado."
 
-#: /home/nx/.config/openplotter/openplotter.py:659
+#: /home/nx/.config/openplotter/openplotter.py:666
 msgid "NMEA WiFi Server started."
 msgstr "Servidor WiFi NMEA iniciado."
 
-#: /home/nx/.config/openplotter/openplotter.py:660
+#: /home/nx/.config/openplotter/openplotter.py:667
 msgid "NMEA WiFi Server stopped."
 msgstr "Servidor WiFi NMEA detenido."
 
-#: /home/nx/.config/openplotter/openplotter.py:665
+#: /home/nx/.config/openplotter/openplotter.py:673
 msgid ""
 "OpenPlotter is a DIY open-source low-cost low-consumption sailing platform "
 "to run on x86 laptops and ARM boards (Raspberry Pi, Banana Pi, BeagleBone, "

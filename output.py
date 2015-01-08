@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import wx, socket, os, threading, time, gettext, ConfigParser
+import wx, socket, os, threading, time, gettext, sys
 
 home = os.path.expanduser('~')
 
@@ -12,8 +12,8 @@ class MyFrame(wx.Frame):
 			self.presLan_en = gettext.translation('openplotter', home+'/.config/openplotter/locale', languages=['en'])
 			self.presLan_ca = gettext.translation('openplotter', home+'/.config/openplotter/locale', languages=['ca'])
 			self.presLan_es = gettext.translation('openplotter', home+'/.config/openplotter/locale', languages=['es'])
-			self.read_conf()
-			language=self.data_conf.get('GENERAL', 'lang')
+
+			language=sys.argv[1]
 			if language=='en':self.presLan_en.install()
 			if language=='ca':self.presLan_ca.install()
 			if language=='es':self.presLan_es.install()
@@ -34,10 +34,6 @@ class MyFrame(wx.Frame):
 
 			self.connect()
 
-		
-		def read_conf(self):
-			self.data_conf = ConfigParser.SafeConfigParser()
-			self.data_conf.read(home+'/.config/openplotter/openplotter.conf')
 
 		def connect(self):
 			try:
