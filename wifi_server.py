@@ -2,11 +2,10 @@
 
 import subprocess, ConfigParser, os, gettext, shutil, sys
 
-home = os.path.expanduser('~')
-
 wifi_server=sys.argv[1]
 wlan = sys.argv[2]
 passw = sys.argv[3]
+home = sys.argv[4]
 
 if wifi_server=='1':
 
@@ -67,7 +66,7 @@ if wifi_server=='1':
 		nm_conf.write(configfile)
 
 
-	output=subprocess.call(['restart', 'network-manager'])
+	output=subprocess.call(['/etc/init.d/network-manager', 'restart'])
 	if output != 0: error=1
 
 	output=subprocess.call(['ifup', wlan])
@@ -102,7 +101,7 @@ else:
 
 	subprocess.call(['ifdown', wlan])
 
-	subprocess.call(['restart', 'network-manager'])
+	subprocess.call(['/etc/init.d/network-manager', 'restart'])
 
 	print "\nNMEA WiFi Server stopped."
 
