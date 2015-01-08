@@ -51,9 +51,9 @@ else:
 	subprocess.call(['pkill', '-f', 'sog2sow.py'])
 
 if wifi_server=='1':
-	subprocess.Popen(['sudo', 'python', home+'/.config/openplotter/wifi_server.py', '1', wlan, passw])
+	subprocess.Popen(['sudo', 'python', home+'/.config/openplotter/wifi_server.py', '1', wlan, passw, home])
 else:
-	subprocess.Popen(['sudo', 'python', home+'/.config/openplotter/wifi_server.py', '0', wlan, passw])
+	subprocess.Popen(['sudo', 'python', home+'/.config/openplotter/wifi_server.py', '0', wlan, passw, home])
 
 if opencpn=='1':
 	subprocess.Popen('opencpn')
