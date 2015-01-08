@@ -647,7 +647,7 @@ class MyFrame(wx.Frame):
 				self.passw.SetEditable(False)
 				self.passw.SetForegroundColour((180,180,180))
 				if len(passw)>=8:
-					wifi_result=subprocess.check_output(['sudo', 'python', home+'/.config/openplotter/wifi_server.py', '1', wlan, passw])
+					wifi_result=subprocess.check_output(['sudo', 'python', home+'/.config/openplotter/wifi_server.py', '1', wlan, passw, home])
 				else:
 					wifi_result=_('Password must be at least 8 characters long')
 					self.wlan.SetEditable(True)
@@ -660,7 +660,7 @@ class MyFrame(wx.Frame):
 				self.wlan.SetForegroundColour((wx.NullColor))
 				self.passw.SetEditable(True)
 				self.passw.SetForegroundColour((wx.NullColor))
-				wifi_result=subprocess.check_output(['sudo', 'python', home+'/.config/openplotter/wifi_server.py', '0', wlan, passw])
+				wifi_result=subprocess.check_output(['sudo', 'python', home+'/.config/openplotter/wifi_server.py', '0', wlan, passw, home])
 			msg=wifi_result
 			msg=msg.replace('NMEA WiFi Server failed.', _('NMEA WiFi Server failed.'))
 			msg=msg.replace('NMEA WiFi Server started.', _('NMEA WiFi Server started.'))
