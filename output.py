@@ -20,6 +20,9 @@ class MyFrame(wx.Frame):
 
 
 			wx.Frame.__init__(self, parent, title=title, size=(500,200))
+			
+			self.icon = wx.Icon(home+'/.config/openplotter/openplotter.ico', wx.BITMAP_TYPE_ICO)
+			self.SetIcon(self.icon)
 
 			self.logger = wx.TextCtrl(self, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_DONTWRAP, size=(500,200), pos=(0,0))
 
