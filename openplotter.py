@@ -25,6 +25,8 @@ class MyFrame(wx.Frame):
 			if self.language=='es':self.presLan_es.install()
 
 			wx.Frame.__init__(self, parent, title=title, size=(700,420))
+			
+			self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 
 			self.icon = wx.Icon(home+'/.config/openplotter/openplotter.ico', wx.BITMAP_TYPE_ICO)
 			self.SetIcon(self.icon)
