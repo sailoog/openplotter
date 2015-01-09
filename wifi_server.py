@@ -7,6 +7,10 @@ wlan = sys.argv[2]
 passw = sys.argv[3]
 home = sys.argv[4]
 
+subprocess.call(['service', 'hostapd', 'stop'])
+subprocess.call(['service', 'dnsmasq', 'stop'])
+subprocess.call(['ifdown', wlan])
+	
 if wifi_server=='1':
 
 	error=0
@@ -91,15 +95,11 @@ if wifi_server=='1':
 
 
 else:
-	subprocess.call(['service', 'hostapd', 'stop'])
-	subprocess.call(['service', 'dnsmasq', 'stop'])
 
 	data='# interfaces(5) file used by ifup(8) and ifdown(8)\nauto lo\niface lo inet loopback'
 	file = open('/etc/network/interfaces', 'w')
 	file.write(data)
 	file.close()
-
-	subprocess.call(['ifdown', wlan])
 
 	subprocess.call(['/etc/init.d/network-manager', 'restart'])
 
