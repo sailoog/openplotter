@@ -91,7 +91,7 @@ class MyFrame(wx.Frame):
 
 			wx.StaticText(self, label='Serial', pos=(320, 36))
 
-			self.add_serial_in =wx.Button(self, label=_('Input'), pos=(380, 30))
+			self.add_serial_in =wx.Button(self, label=_('Input'), pos=(375, 30))
 			self.Bind(wx.EVT_BUTTON, self.add_serial_input, self.add_serial_in)
 
 			self.add_serial_out =wx.Button(self, label=_('Output'), pos=(475, 30))
@@ -107,20 +107,18 @@ class MyFrame(wx.Frame):
 
 			wx.StaticText(self, label='Network', pos=(313, 76))
 
-			self.add_network_in =wx.Button(self, label=_('Input'), pos=(380, 70))
+			self.add_network_in =wx.Button(self, label=_('Input'), pos=(375, 70))
 			self.Bind(wx.EVT_BUTTON, self.add_network_input, self.add_network_in)
 
-			self.add_network_out =wx.Button(self, label=_('Output'), pos=(475, 70))
-			self.Bind(wx.EVT_BUTTON, self.add_network_output, self.add_network_out)
-
-			wx.StaticText(self, label='|', pos=(580, 75))
-
-			self.add_gpsd_in =wx.Button(self, label=_('GPSD'), pos=(595, 70))
+			self.add_gpsd_in =wx.Button(self, label=_('GPSD'), pos=(475, 70))
 			self.Bind(wx.EVT_BUTTON, self.add_gpsd_input, self.add_gpsd_in)
+
+			self.add_network_out =wx.Button(self, label=_('Output'), pos=(575, 70))
+			self.Bind(wx.EVT_BUTTON, self.add_network_output, self.add_network_out)
 
 ########################################################
 
-			in_out=wx.StaticBox(self, label=_(' NMEA inputs / outputs '), size=(475, 260), pos=(5, 110))
+			in_out=wx.StaticBox(self, label=_(' NMEA inputs / outputs '), size=(475, 255), pos=(5, 110))
 			estilo = in_out.GetFont()
 			estilo.SetWeight(wx.BOLD)
 			in_out.SetFont(estilo)
@@ -154,10 +152,10 @@ class MyFrame(wx.Frame):
 			self.show_output =wx.Button(self, label=_('Show output'), pos=(315, 290))
 			self.Bind(wx.EVT_BUTTON, self.show_output_window, self.show_output)
 
-			self.restart =wx.Button(self, label=_('Restart'), pos=(10, 330))
+			self.restart =wx.Button(self, label=_('Restart'), pos=(10, 325))
 			self.Bind(wx.EVT_BUTTON, self.restart_multiplex, self.restart)
 
-			self.button_apply =wx.Button(self, label=_('Apply changes'), pos=(120, 330))
+			self.button_apply =wx.Button(self, label=_('Apply changes'), pos=(120, 325))
 			self.Bind(wx.EVT_BUTTON, self.apply_changes, self.button_apply)
 
 ########################################################
@@ -171,16 +169,16 @@ class MyFrame(wx.Frame):
 			self.ais_sdr_enable.Bind(wx.EVT_CHECKBOX, self.OnOffAIS)
 
 			self.gain = wx.TextCtrl(self, -1, size=(45, 30), pos=(595, 150))
-			self.button_test_gain =wx.Button(self, label=_('Gain'), pos=(490, 150))
+			self.button_test_gain =wx.Button(self, label=_('Gain'), pos=(490, 145))
 			self.Bind(wx.EVT_BUTTON, self.test_gain, self.button_test_gain)
 
 			self.ppm = wx.TextCtrl(self, -1, size=(45, 30), pos=(595, 185))
-			self.button_test_ppm =wx.Button(self, label=_('Correction'), pos=(490, 185))
+			self.button_test_ppm =wx.Button(self, label=_('Correction'), pos=(490, 180))
 			self.Bind(wx.EVT_BUTTON, self.test_ppm, self.button_test_ppm)
 
 ########################################################
 
-			water_speed=wx.StaticBox(self, label=_('STW simulation'), size=(210, 50), pos=(485, 220))
+			water_speed=wx.StaticBox(self, label=_('STW simulation'), size=(210, 45), pos=(485, 220))
 			estilo = water_speed.GetFont()
 			estilo.SetWeight(wx.BOLD)
 			water_speed.SetFont(estilo)
@@ -190,18 +188,18 @@ class MyFrame(wx.Frame):
 
 ########################################################
 
-			wifi=wx.StaticBox(self, label=_('NMEA WiFi server'), size=(210, 100), pos=(485, 270))
+			wifi=wx.StaticBox(self, label=_('NMEA WiFi server'), size=(210, 100), pos=(485, 265))
 			estilo = wifi.GetFont()
 			estilo.SetWeight(wx.BOLD)
 			wifi.SetFont(estilo)
 
-			self.wifi_enable = wx.CheckBox(self, label=_('Enable'), pos=(490, 285))
+			self.wifi_enable = wx.CheckBox(self, label=_('Enable'), pos=(490, 280))
 			self.wifi_enable.Bind(wx.EVT_CHECKBOX, self.onwifi_enable)
 			
-			self.wlan = wx.TextCtrl(self, -1, size=(55, 25), pos=(490, 310))
-			wx.StaticText(self, label=_('WiFi device'), pos=(550, 315))
-			self.passw = wx.TextCtrl(self, -1, size=(100, 25), pos=(490, 340))
-			wx.StaticText(self, label=_('Password'), pos=(595, 345))
+			self.wlan = wx.TextCtrl(self, -1, size=(55, 25), pos=(490, 305))
+			wx.StaticText(self, label=_('WiFi device'), pos=(550, 310))
+			self.passw = wx.TextCtrl(self, -1, size=(100, 25), pos=(490, 335))
+			wx.StaticText(self, label=_('Password'), pos=(595, 340))
 ########################################################
 
 			self.CreateStatusBar()
