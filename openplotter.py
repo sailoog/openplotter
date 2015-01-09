@@ -688,7 +688,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			info.SetName('OpenPlotter')
 			info.SetVersion('2.0')
 			info.SetDescription(description)
-			info.SetCopyright('(C) 2013 - 2014 Sailoog')
+			info.SetCopyright('2013 - 2015 Sailoog')
 			info.SetWebSite('http://www.sailoog.com')
 			info.SetLicence(licence)
 			info.AddDeveloper('Sailoog\n\nhttps://github.com/sailoog')
