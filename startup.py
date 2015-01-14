@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import ConfigParser, subprocess, time
+import ConfigParser, subprocess
 from os.path import expanduser
 
 home = expanduser("~")
@@ -25,7 +25,6 @@ passw=data_conf.get('WIFI', 'password')
 
 if kplex=='1':
 	subprocess.call(["pkill", '-9', "kplex"])
-	time.sleep(1)
 	subprocess.Popen('kplex')        
 else: 
 	subprocess.call(['pkill', '-9', 'kplex'])

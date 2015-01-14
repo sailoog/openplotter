@@ -69,8 +69,8 @@ if wifi_server=='1':
 	with open('/etc/NetworkManager/NetworkManager.conf', 'wb') as configfile:
 		nm_conf.write(configfile)
 
-
-	output=subprocess.call(['/etc/init.d/network-manager', 'restart'])
+	try: output=subprocess.call(['/etc/init.d/network-manager', 'restart'])
+	except: output=subprocess.call(['restart', 'network-manager'])
 	if output != 0: error=1
 
 	output=subprocess.call(['ifup', wlan])
@@ -101,7 +101,8 @@ else:
 	file.write(data)
 	file.close()
 
-	subprocess.call(['/etc/init.d/network-manager', 'restart'])
+	try: subprocess.call(['/etc/init.d/network-manager', 'restart'])
+	except: subprocess.call(['restart', 'network-manager'])
 
 	print "\nNMEA WiFi Server stopped."
 

@@ -40,7 +40,8 @@ def send_data():
 			else:
 				break
 
-			if sog:
+			if sog or sog==0:
+				print sog
 				vbw = pynmea2.VBW('II', 'VBW', (str(sog), '', 'A', str(sog), '', 'A'))
 				vbw1=str(vbw)
 				vbw2=repr(vbw1)+"\r\n"

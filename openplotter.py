@@ -168,11 +168,11 @@ class MyFrame(wx.Frame):
 			self.ais_sdr_enable = wx.CheckBox(self, label=_('Enable'), pos=(490, 125))
 			self.ais_sdr_enable.Bind(wx.EVT_CHECKBOX, self.OnOffAIS)
 
-			self.gain = wx.TextCtrl(self, -1, size=(45, 30), pos=(595, 150))
+			self.gain = wx.TextCtrl(self, -1, size=(45, 30), pos=(595, 145))
 			self.button_test_gain =wx.Button(self, label=_('Gain'), pos=(490, 145))
 			self.Bind(wx.EVT_BUTTON, self.test_gain, self.button_test_gain)
 
-			self.ppm = wx.TextCtrl(self, -1, size=(45, 30), pos=(595, 185))
+			self.ppm = wx.TextCtrl(self, -1, size=(45, 30), pos=(595, 180))
 			self.button_test_ppm =wx.Button(self, label=_('Correction'), pos=(490, 180))
 			self.Bind(wx.EVT_BUTTON, self.test_ppm, self.button_test_ppm)
 
@@ -279,7 +279,7 @@ class MyFrame(wx.Frame):
 				self.write_outputs()
 
 			except IOError:
-				self.SetStatusText(_('Configuration file does not exist. Add inputs and apply changes'))
+				self.ShowMessage(_('Configuration file does not exist. Add inputs and apply changes.'))
 
 		def extract_value(self,data):
 			option, value =data.split('=')
@@ -351,7 +351,7 @@ class MyFrame(wx.Frame):
 				self.inputs.append(input_tmp)
 				self.write_inputs()
 			else:
-				self.SetStatusText(_('It is impossible to set input because this port is already in use.'))
+				self.ShowMessage(_('It is impossible to set input because this port is already in use.'))
 
 		def add_serial_output(self,event):
 			output_tmp=[]
@@ -369,7 +369,7 @@ class MyFrame(wx.Frame):
 				self.outputs.append(output_tmp)
 				self.write_outputs()
 			else:
-				self.SetStatusText(_('It is impossible to set output because this port is already in use.'))
+				self.ShowMessage(_('It is impossible to set output because this port is already in use.'))
 		
 		def add_network_input(self,event):
 			input_tmp=[]
@@ -383,7 +383,7 @@ class MyFrame(wx.Frame):
 				self.inputs.append(input_tmp)
 				self.write_inputs()
 			else:
-				self.SetStatusText(_('You have to enter at least a port number.'))
+				self.ShowMessage(_('You have to enter at least a port number.'))
 
 		def add_gpsd_input(self,event):
 			input_tmp=[]
@@ -410,24 +410,29 @@ class MyFrame(wx.Frame):
 					self.outputs.append(output_tmp)
 					self.write_outputs()
 				else:
-					self.SetStatusText(_('Sorry. It is not possible to create UDP outputs.'))
+					self.ShowMessage(_('Sorry. It is not possible to create UDP outputs.'))
 			else:
-				self.SetStatusText(_('You have to enter at least a port number.'))
+				self.ShowMessage(_('You have to enter at least a port number.'))
 
 		def OnOffAIS(self, e):
+			w_close=subprocess.call(['pkill', '-f', 'waterfall.py'])
+			rtl_close=subprocess.call(['pkill', '-9', 'rtl_test'])
 			isChecked = self.ais_sdr_enable.GetValue()
 			if isChecked:
-				w_close=subprocess.call(['pkill', '-f', 'waterfall.py'])
-				rtl_close=subprocess.call(['pkill', '-9', 'rtl_test'])
-				self.gain.SetEditable(False)
-				self.gain.SetForegroundColour((180,180,180))
-				self.ppm.SetEditable(False)
-				self.ppm.SetForegroundColour((180,180,180)) 
-				gain=self.gain.GetValue()
-				ppm=self.ppm.GetValue()
-				rtl_fm=subprocess.Popen(['rtl_fm', '-f', '161975000', '-g', gain, '-p', ppm, '-s', '48k'], stdout = subprocess.PIPE)
-				aisdecoder=subprocess.Popen(['aisdecoder', '-h', '127.0.0.1', '-p', '10110', '-a', 'file', '-c', 'mono', '-d', '-f', '/dev/stdin'], stdin = rtl_fm.stdout)         
-				self.SetStatusText(_('SDR-AIS reception enabled'))
+				output=subprocess.check_output('lsusb')
+				if 'DVB-T' in output:
+					self.gain.SetEditable(False)
+					self.gain.SetForegroundColour((180,180,180))
+					self.ppm.SetEditable(False)
+					self.ppm.SetForegroundColour((180,180,180)) 
+					gain=self.gain.GetValue()
+					ppm=self.ppm.GetValue()
+					rtl_fm=subprocess.Popen(['rtl_fm', '-f', '161975000', '-g', gain, '-p', ppm, '-s', '48k'], stdout = subprocess.PIPE)
+					aisdecoder=subprocess.Popen(['aisdecoder', '-h', '127.0.0.1', '-p', '10110', '-a', 'file', '-c', 'mono', '-d', '-f', '/dev/stdin'], stdin = rtl_fm.stdout)         
+					msg=_('SDR-AIS reception enabled')
+				else:
+					self.ais_sdr_enable.SetValue(False)
+					msg=_('SDR device not found.\nSDR-AIS reception disabled.')
 			else: 
 				self.gain.SetEditable(True)
 				self.gain.SetForegroundColour((wx.NullColor))
@@ -435,8 +440,10 @@ class MyFrame(wx.Frame):
 				self.ppm.SetForegroundColour((wx.NullColor))
 				aisdecoder=subprocess.call(['pkill', '-9', 'aisdecoder'])
 				rtl_fm=subprocess.call(['pkill', '-9', 'rtl_fm'])
-				self.SetStatusText(_('SDR-AIS reception disabled'))
+				msg=_('SDR-AIS reception disabled')
 			self.write_conf()
+			self.SetStatusText('')
+			self.ShowMessage(msg)
 
 		def onoffwaterspeed(self, e):
 			sender = e.GetEventObject()
@@ -466,7 +473,8 @@ class MyFrame(wx.Frame):
 				self.ShowMessage(msg)
 			else:
 				subprocess.call(['pkill', '-f', 'sog2sow.py'])
-				self.SetStatusText(_('Speed Through Water simulation stopped'))
+				self.SetStatusText('')
+				self.ShowMessage(_('Speed Through Water simulation stopped'))
 			self.write_conf()
 
 		def set_conf(self):
@@ -560,8 +568,7 @@ class MyFrame(wx.Frame):
 
 		def restart_kplex(self):
 			self.SetStatusText(_('Closing Kplex'))
-			subprocess.call(["pkill", "kplex"])
-			time.sleep(1)
+			subprocess.call(["pkill", '-9', "kplex"])
 			subprocess.Popen('kplex')
 			self.SetStatusText(_('Kplex restarted'))
 				
@@ -615,26 +622,41 @@ class MyFrame(wx.Frame):
 			self.data_conf.set('GENERAL', 'lang', self.lang_selected)
 			with open(home+'/.config/openplotter/openplotter.conf', 'wb') as configfile:
 				self.data_conf.write(configfile)
-			self.SetStatusText(_('The selected language will be enabled when you restart'))
+			self.ShowMessage(_('The selected language will be enabled when you restart'))
 
 		def test_ppm(self,event):
-			self.ais_sdr_enable.SetValue(False)
-			self.OnOffAIS(event)
-			ppm=self.ppm.GetValue()
+			aisdecoder=subprocess.call(['pkill', '-9', 'aisdecoder'])
+			rtl_fm=subprocess.call(['pkill', '-9', 'rtl_fm'])
 			w_close=subprocess.call(['pkill', '-f', 'waterfall.py'])
 			rtl_close=subprocess.call(['pkill', '-9', 'rtl_test'])
-			time.sleep(1)
-			w_open=subprocess.Popen(['python', home+'/.config/openplotter/waterfall.py', ppm])
-			self.SetStatusText(_('Check the new window and calculate the ppm value'))
+			self.ais_sdr_enable.SetValue(False)
+			output=subprocess.check_output('lsusb')
+			if 'DVB-T' in output:
+				ppm=self.ppm.GetValue()
+				w_open=subprocess.Popen(['python', home+'/.config/openplotter/waterfall.py', ppm])
+				msg=_('SDR-AIS reception disabled.\nCheck the new window, calculate the ppm value and enable SDR-AIS reception again.')
+			else:
+				msg=_('SDR device not found.\nSDR-AIS reception disabled.')
+				
+			self.ShowMessage(msg)
+			self.write_conf()
+
 
 		def test_gain(self,event):
-			self.ais_sdr_enable.SetValue(False)
-			self.OnOffAIS(event)
+			aisdecoder=subprocess.call(['pkill', '-9', 'aisdecoder'])
+			rtl_fm=subprocess.call(['pkill', '-9', 'rtl_fm'])
 			w_close=subprocess.call(['pkill', '-f', 'waterfall.py'])
 			rtl_close=subprocess.call(['pkill', '-9', 'rtl_test'])
-			time.sleep(1)
-			subprocess.Popen(['lxterminal', '-e', 'rtl_test'])
-			self.SetStatusText(_('Check the new window and copy the maximum supported gain value'))
+			self.ais_sdr_enable.SetValue(False)
+			output=subprocess.check_output('lsusb')
+			if 'DVB-T' in output:
+				subprocess.Popen(['lxterminal', '-e', 'rtl_test'])
+				msg=_('SDR-AIS reception disabled.\nCheck the new window, copy the maximum supported gain value and enable SDR-AIS reception again.')
+			else:
+				msg=_('SDR device not found.\nSDR-AIS reception disabled.')
+
+			self.ShowMessage(msg)
+			self.write_conf()
 
 		def onwifi_enable (self, e):
 			self.SetStatusText(_('Configuring NMEA WiFi server, wait please...'))
@@ -642,33 +664,40 @@ class MyFrame(wx.Frame):
 			wlan=self.wlan.GetValue()
 			passw=self.passw.GetValue()
 			if isChecked:
-				self.wlan.SetEditable(False)
-				self.wlan.SetForegroundColour((180,180,180))
-				self.passw.SetEditable(False)
-				self.passw.SetForegroundColour((180,180,180))
+				self.enable_disable_wifi(1)
 				if len(passw)>=8:
 					wifi_result=subprocess.check_output(['sudo', 'python', home+'/.config/openplotter/wifi_server.py', '1', wlan, passw, home])
 				else:
 					wifi_result=_('Password must be at least 8 characters long')
-					self.wlan.SetEditable(True)
-					self.wlan.SetForegroundColour((wx.NullColor))
-					self.passw.SetEditable(True)
-					self.passw.SetForegroundColour((wx.NullColor))
-					self.wifi_enable.SetValue(False)
+					self.enable_disable_wifi(0)
 			else: 
-				self.wlan.SetEditable(True)
-				self.wlan.SetForegroundColour((wx.NullColor))
-				self.passw.SetEditable(True)
-				self.passw.SetForegroundColour((wx.NullColor))
+				self.enable_disable_wifi(0)
 				wifi_result=subprocess.check_output(['sudo', 'python', home+'/.config/openplotter/wifi_server.py', '0', wlan, passw, home])
+			
 			msg=wifi_result
-			msg=msg.replace('NMEA WiFi Server failed.', _('NMEA WiFi Server failed.'))
+			if 'NMEA WiFi Server failed.' in msg:
+				msg=msg.replace('NMEA WiFi Server failed.', _('NMEA WiFi Server failed.'))
+				self.enable_disable_wifi(0)
 			msg=msg.replace('NMEA WiFi Server started.', _('NMEA WiFi Server started.'))
 			msg=msg.replace('NMEA WiFi Server stopped.', _('NMEA WiFi Server stopped.'))
 			self.SetStatusText('')
 			self.ShowMessage(msg)
 			self.write_conf()
-
+		
+		def enable_disable_wifi(self, s):
+			if s==1:
+				self.wlan.SetEditable(False)
+				self.wlan.SetForegroundColour((180,180,180))
+				self.passw.SetEditable(False)
+				self.passw.SetForegroundColour((180,180,180))
+				self.wifi_enable.SetValue(True)
+			else:
+				self.wlan.SetEditable(True)
+				self.wlan.SetForegroundColour((wx.NullColor))
+				self.passw.SetEditable(True)
+				self.passw.SetForegroundColour((wx.NullColor))
+				self.wifi_enable.SetValue(False)
+		
 		def OnAboutBox(self, e):
 			description = _("OpenPlotter is a DIY open-source low-cost low-consumption sailing platform to run on x86 laptops and ARM boards (Raspberry Pi, Banana Pi, BeagleBone, Cubieboard...)")			
 			licence = """This program is free software: you can redistribute it 
