@@ -12,7 +12,7 @@ Features
 ------------
 * NMEA Multiplexer
 * Reversible WiFi server
-* SDR AIS/FM Receiver
+* SDR-AIS receiver, calibrator and decoder
 * Set system time from NMEA data
 * Set time zone
 * Set GPSD
