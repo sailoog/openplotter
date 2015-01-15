@@ -715,7 +715,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 			info = wx.AboutDialogInfo()
 			info.SetName('OpenPlotter')
-			info.SetVersion('2.0')
+			info.SetVersion('0.0.0')
 			info.SetDescription(description)
 			info.SetCopyright('2013 - 2015 Sailoog')
 			info.SetWebSite('http://www.sailoog.com')
@@ -723,7 +723,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			info.AddDeveloper('Sailoog\n\nhttps://github.com/sailoog')
 			info.AddDocWriter('Sailoog\n\nhttps://www.gitbook.com/@sailoog')
 			info.AddArtist('Sailoog')
-			info.AddTranslator('Catalan, English, Spanish by Sailoog')
+			info.AddTranslator('Catalan, English and Spanish by Sailoog')
 			wx.AboutBox(info)
 
 		def ShowMessage(self, w_msg):
