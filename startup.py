@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
-import ConfigParser, subprocess
-from os.path import expanduser
+import ConfigParser, subprocess, os, sys
 
-home = expanduser("~")
+pathname = os.path.dirname(sys.argv[0])
+currentpath = os.path.abspath(pathname)
 
 data_conf = ConfigParser.SafeConfigParser()
-data_conf.read(home+'/.config/openplotter/openplotter.conf')
+data_conf.read(currentpath+'/openplotter.conf')
 
 kplex=data_conf.get('STARTUP', 'kplex')
 opencpn=data_conf.get('STARTUP', 'opencpn')
@@ -42,17 +42,17 @@ else:
 	subprocess.call(['pkill', '-9', 'x11vnc'])
 
 if gps_time=='1':
-	subprocess.call(['sudo', 'python', home+'/.config/openplotter/time_gps.py'])
+	subprocess.call(['sudo', 'python', currentpath+'/time_gps.py'])
 
 if sow=='1':
-	subprocess.Popen(['python', home+'/.config/openplotter/sog2sow.py'])
+	subprocess.Popen(['python', currentpath+'/sog2sow.py'])
 else:
 	subprocess.call(['pkill', '-f', 'sog2sow.py'])
 
 if wifi_server=='1':
-	subprocess.Popen(['sudo', 'python', home+'/.config/openplotter/wifi_server.py', '1', wlan, passw, home])
+	subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '1', wlan, passw])
 else:
-	subprocess.Popen(['sudo', 'python', home+'/.config/openplotter/wifi_server.py', '0', wlan, passw, home])
+	subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '0', wlan, passw])
 
 if opencpn=='1':
 	subprocess.Popen('opencpn')

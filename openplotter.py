@@ -4,6 +4,8 @@ import wx, subprocess, time, sys, os, ConfigParser, gettext
 from wx.lib.mixins.listctrl import CheckListCtrlMixin
 
 home = os.path.expanduser('~')
+pathname = os.path.dirname(sys.argv[0])
+currentpath = os.path.abspath(pathname)
 
 class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin):
 	def __init__(self, parent):
@@ -14,10 +16,10 @@ class MyFrame(wx.Frame):
 		
 		def __init__(self, parent, title):
 
-			gettext.install('openplotter', home+'/.config/openplotter/locale', unicode=False)
-			self.presLan_en = gettext.translation('openplotter', home+'/.config/openplotter/locale', languages=['en'])
-			self.presLan_ca = gettext.translation('openplotter', home+'/.config/openplotter/locale', languages=['ca'])
-			self.presLan_es = gettext.translation('openplotter', home+'/.config/openplotter/locale', languages=['es'])
+			gettext.install('openplotter', currentpath+'/locale', unicode=False)
+			self.presLan_en = gettext.translation('openplotter', currentpath+'/locale', languages=['en'])
+			self.presLan_ca = gettext.translation('openplotter', currentpath+'/locale', languages=['ca'])
+			self.presLan_es = gettext.translation('openplotter', currentpath+'/locale', languages=['es'])
 			self.read_conf()
 			self.language=self.data_conf.get('GENERAL', 'lang')
 			if self.language=='en':self.presLan_en.install()
@@ -28,7 +30,7 @@ class MyFrame(wx.Frame):
 			
 			self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 
-			self.icon = wx.Icon(home+'/.config/openplotter/openplotter.ico', wx.BITMAP_TYPE_ICO)
+			self.icon = wx.Icon(currentpath+'/openplotter.ico', wx.BITMAP_TYPE_ICO)
 			self.SetIcon(self.icon)
 
 			menubar = wx.MenuBar()
@@ -215,7 +217,7 @@ class MyFrame(wx.Frame):
 		
 		def read_conf(self):
 			self.data_conf = ConfigParser.SafeConfigParser()
-			self.data_conf.read(home+'/.config/openplotter/openplotter.conf')
+			self.data_conf.read(currentpath+'/openplotter.conf')
 
 		def SerialCheck(self,dev):
 			num = 0
@@ -450,7 +452,7 @@ class MyFrame(wx.Frame):
 			isChecked = sender.GetValue()
 			if isChecked:
 				self.SetStatusText(_('Searching NMEA Speed Over Ground data in localhost:10110 ...'))
-				sog_result=subprocess.Popen(['python', home+'/.config/openplotter/sog2sow.py'], stdout=subprocess.PIPE)
+				sog_result=subprocess.Popen(['python', currentpath+'/sog2sow.py'], stdout=subprocess.PIPE)
 				msg=''
 				while sog_result.poll() is None:
 					l = sog_result.stdout.readline()
@@ -536,12 +538,12 @@ class MyFrame(wx.Frame):
 			self.data_conf.set('WIFI', 'device', wlan)
 			self.data_conf.set('WIFI', 'password', passw)
 
-			with open(home+'/.config/openplotter/openplotter.conf', 'wb') as configfile:
+			with open(currentpath+'/openplotter.conf', 'wb') as configfile:
 				self.data_conf.write(configfile)
 
 		def time_gps(self,event):
 			self.SetStatusText(_('Waiting for NMEA time data in localhost:10110 ...'))
-			time_gps_result=subprocess.check_output(['sudo', 'python', home+'/.config/openplotter/time_gps.py'])
+			time_gps_result=subprocess.check_output(['sudo', 'python', currentpath+'/time_gps.py'])
 			msg=''
 			re=time_gps_result.splitlines()
 			for current in re:
@@ -574,7 +576,7 @@ class MyFrame(wx.Frame):
 				
 		def show_output_window(self,event):
 			close=subprocess.call(['pkill', '-f', 'output.py'])
-			show_output=subprocess.Popen(['python', home+'/.config/openplotter/output.py', self.language])
+			show_output=subprocess.Popen(['python', currentpath+'/output.py', self.language])
 
 		def no_opengl(self, e):
 			self.startup.Check(self.startup_item1.GetId(), False)
@@ -600,7 +602,7 @@ class MyFrame(wx.Frame):
 			self.data_conf.set('STARTUP', 'kplex', kplex)
 			self.data_conf.set('STARTUP', 'gps_time', gps_time)
 			self.data_conf.set('STARTUP', 'x11vnc', x11vnc)
-			with open(home+'/.config/openplotter/openplotter.conf', 'wb') as configfile:
+			with open(currentpath+'/openplotter.conf', 'wb') as configfile:
 				self.data_conf.write(configfile)
 
 		def lang_en(self, e):
@@ -620,7 +622,7 @@ class MyFrame(wx.Frame):
 			self.lang.Check(self.lang_item2.GetId(), False)
 			self.lang.Check(self.lang_item3.GetId(), False)
 			self.data_conf.set('GENERAL', 'lang', self.lang_selected)
-			with open(home+'/.config/openplotter/openplotter.conf', 'wb') as configfile:
+			with open(currentpath+'/openplotter.conf', 'wb') as configfile:
 				self.data_conf.write(configfile)
 			self.ShowMessage(_('The selected language will be enabled when you restart'))
 
@@ -633,7 +635,7 @@ class MyFrame(wx.Frame):
 			output=subprocess.check_output('lsusb')
 			if 'DVB-T' in output:
 				ppm=self.ppm.GetValue()
-				w_open=subprocess.Popen(['python', home+'/.config/openplotter/waterfall.py', ppm])
+				w_open=subprocess.Popen(['python', currentpath+'/waterfall.py', ppm])
 				msg=_('SDR-AIS reception disabled.\nCheck the new window, calculate the ppm value and enable SDR-AIS reception again.')
 			else:
 				msg=_('SDR device not found.\nSDR-AIS reception disabled.')
@@ -666,13 +668,13 @@ class MyFrame(wx.Frame):
 			if isChecked:
 				self.enable_disable_wifi(1)
 				if len(passw)>=8:
-					wifi_result=subprocess.check_output(['sudo', 'python', home+'/.config/openplotter/wifi_server.py', '1', wlan, passw, home])
+					wifi_result=subprocess.check_output(['sudo', 'python', currentpath+'/wifi_server.py', '1', wlan, passw])
 				else:
 					wifi_result=_('Password must be at least 8 characters long')
 					self.enable_disable_wifi(0)
 			else: 
 				self.enable_disable_wifi(0)
-				wifi_result=subprocess.check_output(['sudo', 'python', home+'/.config/openplotter/wifi_server.py', '0', wlan, passw, home])
+				wifi_result=subprocess.check_output(['sudo', 'python', currentpath+'/wifi_server.py', '0', wlan, passw])
 			
 			msg=wifi_result
 			if 'NMEA WiFi Server failed.' in msg:
@@ -715,7 +717,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 			info = wx.AboutDialogInfo()
 			info.SetName('OpenPlotter')
-			info.SetVersion('0.0.0')
+			info.SetVersion('0.0.1')
 			info.SetDescription(description)
 			info.SetCopyright('2013 - 2015 Sailoog')
 			info.SetWebSite('http://www.sailoog.com')

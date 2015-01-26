@@ -2,16 +2,17 @@
 
 import wx, socket, os, threading, time, gettext, sys
 
-home = os.path.expanduser('~')
+pathname = os.path.dirname(sys.argv[0])
+currentpath = os.path.abspath(pathname)
 
 class MyFrame(wx.Frame):
 		
 		def __init__(self, parent, title):
 
-			gettext.install('openplotter', home+'/.config/openplotter/locale', unicode=False)
-			self.presLan_en = gettext.translation('openplotter', home+'/.config/openplotter/locale', languages=['en'])
-			self.presLan_ca = gettext.translation('openplotter', home+'/.config/openplotter/locale', languages=['ca'])
-			self.presLan_es = gettext.translation('openplotter', home+'/.config/openplotter/locale', languages=['es'])
+			gettext.install('openplotter', currentpath+'/locale', unicode=False)
+			self.presLan_en = gettext.translation('openplotter', currentpath+'/locale', languages=['en'])
+			self.presLan_ca = gettext.translation('openplotter', currentpath+'/locale', languages=['ca'])
+			self.presLan_es = gettext.translation('openplotter', currentpath+'/locale', languages=['es'])
 
 			language=sys.argv[1]
 			if language=='en':self.presLan_en.install()
@@ -23,7 +24,7 @@ class MyFrame(wx.Frame):
 			
 			self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 			
-			self.icon = wx.Icon(home+'/.config/openplotter/openplotter.ico', wx.BITMAP_TYPE_ICO)
+			self.icon = wx.Icon(currentpath+'/openplotter.ico', wx.BITMAP_TYPE_ICO)
 			self.SetIcon(self.icon)
 
 			self.logger = wx.TextCtrl(self, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_DONTWRAP, size=(500,200), pos=(0,0))

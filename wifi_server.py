@@ -5,7 +5,9 @@ import subprocess, ConfigParser, os, gettext, shutil, sys
 wifi_server=sys.argv[1]
 wlan = sys.argv[2]
 passw = sys.argv[3]
-home = sys.argv[4]
+
+pathname = os.path.dirname(sys.argv[0])
+currentpath = os.path.abspath(pathname)
 
 subprocess.call(['service', 'hostapd', 'stop'])
 subprocess.call(['service', 'dnsmasq', 'stop'])
@@ -30,12 +32,12 @@ if wifi_server=='1':
 	if arm==1 and 'RTL8188CUS' in output:
 		driver='rtl871xdrv'
 		chipset= 'RTL8188CUS'
-		shutil.copyfile(home+'/.config/openplotter/wifi_drivers/arm/RTL8188CUS/hostapd', '/usr/sbin/hostapd')
+		shutil.copyfile(currentpath+'/wifi_drivers/arm/RTL8188CUS/hostapd', '/usr/sbin/hostapd')
 		subprocess.call(['chmod', '755', '/usr/sbin/hostapd'])
 	if arm==1 and 'RTL8192CU' in output:
 		driver='rtl871xdrv'
 		chipset= 'RTL8192CU'
-		shutil.copyfile(home+'/.config/openplotter/wifi_drivers/arm/RTL8192CU/hostapd', '/usr/sbin/hostapd')
+		shutil.copyfile(currentpath+'/wifi_drivers/arm/RTL8192CU/hostapd', '/usr/sbin/hostapd')
 		subprocess.call(['chmod', '755', '/usr/sbin/hostapd'])
 	if driver == 'nl80211':
 		shutil.copyfile('/usr/sbin/hostapd.org', '/usr/sbin/hostapd')
