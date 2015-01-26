@@ -11,6 +11,7 @@ data_conf.read(currentpath+'/openplotter.conf')
 kplex=data_conf.get('STARTUP', 'kplex')
 opencpn=data_conf.get('STARTUP', 'opencpn')
 opencpn_no=data_conf.get('STARTUP', 'opencpn_no_opengl')
+opencpn_fullscreen=data_conf.get('STARTUP', 'opencpn_fullscreen')
 x11vnc=data_conf.get('STARTUP', 'x11vnc')
 gps_time=data_conf.get('STARTUP', 'gps_time')
 sow=data_conf.get('STARTUP', 'iivbw')
@@ -54,8 +55,10 @@ if wifi_server=='1':
 else:
 	subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '0', wlan, passw])
 
-if opencpn=='1':
-	subprocess.Popen('opencpn')
+opencpn_commands=[]
+opencpn_commands.append('opencpn')
+if opencpn_no=='1': opencpn_commands.append('-no_opengl')
+if opencpn_fullscreen=='1': opencpn_commands.append('-fullscreen')
 
-if opencpn_no=='1':
-	subprocess.Popen(['opencpn', '-no_opengl'])
+if opencpn=='1' and len(opencpn_commands)>1: subprocess.Popen(opencpn_commands)
+if opencpn=='1' and len(opencpn_commands)==1: subprocess.Popen('opencpn')

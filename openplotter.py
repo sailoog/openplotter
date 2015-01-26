@@ -36,9 +36,11 @@ class MyFrame(wx.Frame):
 			menubar = wx.MenuBar()
 			self.startup = wx.Menu()
 			self.startup_item1 = self.startup.Append(wx.ID_ANY, _('OpenCPN'), _('If selected OpenCPN will run at startup'), kind=wx.ITEM_CHECK)
-			self.Bind(wx.EVT_MENU, self.opengl, self.startup_item1)
-			self.startup_item1b = self.startup.Append(wx.ID_ANY, _('OpenCPN (No OpenGL)'), _('If selected OpenCPN (No OpenGL) will run at startup'), kind=wx.ITEM_CHECK)
-			self.Bind(wx.EVT_MENU, self.no_opengl, self.startup_item1b)
+			self.Bind(wx.EVT_MENU, self.check_startup, self.startup_item1)
+			self.startup_item1b = self.startup.Append(wx.ID_ANY, _('no OpenGL'), _('If OpenCPN + no OpenGL are selected, OpenCPN will run at startup without OpenGL acceleration'), kind=wx.ITEM_CHECK)
+			self.Bind(wx.EVT_MENU, self.check_startup, self.startup_item1b)
+			self.startup_item1c = self.startup.Append(wx.ID_ANY, _('fullscreen'), _('If OpenCPN + fullscreen are selected, OpenCPN will run at startup in fullscreen mode'), kind=wx.ITEM_CHECK)
+			self.Bind(wx.EVT_MENU, self.check_startup, self.startup_item1c)
 			self.startup.AppendSeparator()
 			self.startup_item2 = self.startup.Append(wx.ID_ANY, _('NMEA multiplexor (Kplex)'), _('If selected Kplex will run at startup'), kind=wx.ITEM_CHECK)
 			self.Bind(wx.EVT_MENU, self.check_startup, self.startup_item2)
@@ -500,12 +502,14 @@ class MyFrame(wx.Frame):
 					self.passw.SetForegroundColour((180,180,180))
 			opencpn=self.data_conf.get('STARTUP', 'opencpn')
 			opencpn_no=self.data_conf.get('STARTUP', 'opencpn_no_opengl')
+			opencpn_fullscreen=self.data_conf.get('STARTUP', 'opencpn_fullscreen')
 			kplex=self.data_conf.get('STARTUP', 'kplex')
 			gps_time=self.data_conf.get('STARTUP', 'gps_time')
 			x11vnc=self.data_conf.get('STARTUP', 'x11vnc')
 			IIVBW=self.data_conf.get('STARTUP', 'IIVBW')
 			if opencpn=='1': self.startup.Check(self.startup_item1.GetId(), True)
 			if opencpn_no=='1': self.startup.Check(self.startup_item1b.GetId(), True)
+			if opencpn_fullscreen=='1': self.startup.Check(self.startup_item1c.GetId(), True)
 			if kplex=='1': self.startup.Check(self.startup_item2.GetId(), True)
 			if gps_time=='1': self.startup.Check(self.startup_item2_2.GetId(), True)
 			if x11vnc=='1': self.startup.Check(self.startup_item3.GetId(), True)
@@ -578,27 +582,22 @@ class MyFrame(wx.Frame):
 			close=subprocess.call(['pkill', '-f', 'output.py'])
 			show_output=subprocess.Popen(['python', currentpath+'/output.py', self.language])
 
-		def no_opengl(self, e):
-			self.startup.Check(self.startup_item1.GetId(), False)
-			self.check_startup(e)
-
-		def opengl(self, e):
-			self.startup.Check(self.startup_item1b.GetId(), False)
-			self.check_startup(e)
-
 		def check_startup(self, e):
 			opencpn="0"
 			opencpn_nopengl="0"
+			opencpn_fullscreen="0"
 			kplex="0"
 			x11vnc="0"
 			gps_time="0"
 			if self.startup_item1.IsChecked(): opencpn="1"
 			if self.startup_item1b.IsChecked(): opencpn_nopengl="1"
+			if self.startup_item1c.IsChecked(): opencpn_fullscreen="1"
 			if self.startup_item2.IsChecked(): kplex="1"
 			if self.startup_item2_2.IsChecked(): gps_time="1"
 			if self.startup_item3.IsChecked(): x11vnc="1"
 			self.data_conf.set('STARTUP', 'opencpn', opencpn)
 			self.data_conf.set('STARTUP', 'opencpn_no_opengl', opencpn_nopengl)
+			self.data_conf.set('STARTUP', 'opencpn_fullscreen', opencpn_fullscreen)
 			self.data_conf.set('STARTUP', 'kplex', kplex)
 			self.data_conf.set('STARTUP', 'gps_time', gps_time)
 			self.data_conf.set('STARTUP', 'x11vnc', x11vnc)
