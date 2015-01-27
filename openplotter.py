@@ -86,6 +86,7 @@ class MyFrame(wx.Frame):
 			self.SerialCheck('/dev/rfcomm')
 			self.SerialCheck('/dev/ttyUSB')
 			self.SerialCheck('/dev/ttyS')
+			self.SerialCheck('/dev/ttyACM')
 			self.deviceComboBox = wx.ComboBox(self, choices=self.SerDevLs, style=wx.CB_DROPDOWN, size=(130, 30), pos=(80, 30))
 			if self.SerDevLs : self.deviceComboBox.SetValue(self.SerDevLs[0])
 
