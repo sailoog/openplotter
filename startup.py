@@ -24,12 +24,6 @@ wifi_server=data_conf.get('WIFI', 'enable')
 wlan=data_conf.get('WIFI', 'device')
 passw=data_conf.get('WIFI', 'password')
 
-if kplex=='1':
-	subprocess.call(["pkill", '-9', "kplex"])
-	subprocess.Popen('kplex')        
-else: 
-	subprocess.call(['pkill', '-9', 'kplex'])
-
 if enable=='1':
 	rtl_fm=subprocess.Popen(['rtl_fm', '-f', '161975000', '-g', gain, '-p', ppm, '-s', '48k'], stdout = subprocess.PIPE)
 	aisdecoder=subprocess.Popen(['aisdecoder', '-h', '127.0.0.1', '-p', '10110', '-a', 'file', '-c', 'mono', '-d', '-f', '/dev/stdin'], stdin = rtl_fm.stdout)         
@@ -42,6 +36,17 @@ if x11vnc=='1':
 else: 
 	subprocess.call(['pkill', '-9', 'x11vnc'])
 
+if wifi_server=='1':
+	subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '1', wlan, passw])
+else:
+	subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '0', wlan, passw])
+
+if kplex=='1':
+	subprocess.call(["pkill", '-9', "kplex"])
+	subprocess.Popen('kplex')        
+else: 
+	subprocess.call(['pkill', '-9', 'kplex'])
+
 if gps_time=='1':
 	subprocess.call(['sudo', 'python', currentpath+'/time_gps.py'])
 
@@ -49,11 +54,6 @@ if sow=='1':
 	subprocess.Popen(['python', currentpath+'/sog2sow.py'])
 else:
 	subprocess.call(['pkill', '-f', 'sog2sow.py'])
-
-if wifi_server=='1':
-	subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '1', wlan, passw])
-else:
-	subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '0', wlan, passw])
 
 opencpn_commands=[]
 opencpn_commands.append('opencpn')
