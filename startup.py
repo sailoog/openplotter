@@ -1,16 +1,17 @@
 #!/usr/bin/env python
 
-import ConfigParser, subprocess
-from os.path import expanduser
+import ConfigParser, subprocess, os, sys, time
 
-home = expanduser("~")
+pathname = os.path.dirname(sys.argv[0])
+currentpath = os.path.abspath(pathname)
 
 data_conf = ConfigParser.SafeConfigParser()
-data_conf.read(home+'/.config/openplotter/openplotter.conf')
+data_conf.read(currentpath+'/openplotter.conf')
 
 kplex=data_conf.get('STARTUP', 'kplex')
 opencpn=data_conf.get('STARTUP', 'opencpn')
 opencpn_no=data_conf.get('STARTUP', 'opencpn_no_opengl')
+opencpn_fullscreen=data_conf.get('STARTUP', 'opencpn_fullscreen')
 x11vnc=data_conf.get('STARTUP', 'x11vnc')
 gps_time=data_conf.get('STARTUP', 'gps_time')
 sow=data_conf.get('STARTUP', 'iivbw')
@@ -23,11 +24,18 @@ wifi_server=data_conf.get('WIFI', 'enable')
 wlan=data_conf.get('WIFI', 'device')
 passw=data_conf.get('WIFI', 'password')
 
-if kplex=='1':
-	subprocess.call(["pkill", '-9', "kplex"])
-	subprocess.Popen('kplex')        
+if x11vnc=='1':
+	subprocess.Popen(['x11vnc', '-forever'])         
 else: 
-	subprocess.call(['pkill', '-9', 'kplex'])
+	subprocess.call(['pkill', '-9', 'x11vnc'])
+
+opencpn_commands=[]
+opencpn_commands.append('opencpn')
+if opencpn_no=='1': opencpn_commands.append('-no_opengl')
+if opencpn_fullscreen=='1': opencpn_commands.append('-fullscreen')
+
+if opencpn=='1' and len(opencpn_commands)>1: subprocess.Popen(opencpn_commands)
+if opencpn=='1' and len(opencpn_commands)==1: subprocess.Popen('opencpn')
 
 if enable=='1':
 	rtl_fm=subprocess.Popen(['rtl_fm', '-f', '161975000', '-g', gain, '-p', ppm, '-s', '48k'], stdout = subprocess.PIPE)
@@ -35,27 +43,25 @@ if enable=='1':
 else: 
 	subprocess.call(['pkill', '-9', 'aisdecoder'])
 	subprocess.call(['pkill', '-9', 'rtl_fm'])
+	
+if wifi_server=='1':
+	subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '1', wlan, passw])
+else:
+	subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '0', wlan, passw])
+	
+time.sleep(11)
 
-if x11vnc=='1':
-	subprocess.Popen(['x11vnc', '-forever'])         
+if kplex=='1':
+	subprocess.call(["pkill", '-9', "kplex"])
+	subprocess.Popen('kplex')        
 else: 
-	subprocess.call(['pkill', '-9', 'x11vnc'])
+	subprocess.call(['pkill', '-9', 'kplex'])
 
 if gps_time=='1':
-	subprocess.call(['sudo', 'python', home+'/.config/openplotter/time_gps.py'])
+	subprocess.call(['sudo', 'python', currentpath+'/time_gps.py'])
 
 if sow=='1':
-	subprocess.Popen(['python', home+'/.config/openplotter/sog2sow.py'])
+	subprocess.Popen(['python', currentpath+'/sog2sow.py'])
 else:
 	subprocess.call(['pkill', '-f', 'sog2sow.py'])
 
-if wifi_server=='1':
-	subprocess.Popen(['sudo', 'python', home+'/.config/openplotter/wifi_server.py', '1', wlan, passw, home])
-else:
-	subprocess.Popen(['sudo', 'python', home+'/.config/openplotter/wifi_server.py', '0', wlan, passw, home])
-
-if opencpn=='1':
-	subprocess.Popen('opencpn')
-
-if opencpn_no=='1':
-	subprocess.Popen(['opencpn', '-no_opengl'])
