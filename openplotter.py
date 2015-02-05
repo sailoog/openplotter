@@ -316,7 +316,7 @@ class MyFrame(wx.Frame):
 			if not '[broadcast]\ndirection=in\nport=10110' in data: data=data+'#default input\n[broadcast]\ndirection=in\nport=10110\noptional=yes\n\n'
 			for index,item in enumerate(self.outputs):
 				if 'Serial' in item[0]:
-					data=data+'[serial]\ndirection=out\nfilename='+item[1]+'\nbaud='+item[2]+'\n\n'
+					data=data+'[serial]\ndirection=out\nfilename='+item[1]+'\nbaud='+item[2]+'\noptional=yes\n\n'
 				if 'TCP' in item[0]:
 					data=data+'[tcp]\ndirection=out\nport='+item[2]+'\nmode=server\n\n'
 			if not '[tcp]\ndirection=out\nport=10110' in data: data=data+'#default output\n[tcp]\ndirection=out\nport=10110\nmode=server\n\n'
