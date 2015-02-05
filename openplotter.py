@@ -717,7 +717,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 			info = wx.AboutDialogInfo()
 			info.SetName('OpenPlotter')
-			info.SetVersion('0.0.1')
+			info.SetVersion('1.0.0')
 			info.SetDescription(description)
 			info.SetCopyright('2013 - 2015 Sailoog')
 			info.SetWebSite('http://www.sailoog.com')
