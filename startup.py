@@ -49,7 +49,7 @@ if wifi_server=='1':
 else:
 	subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '0', wlan, passw])
 	
-time.sleep(11)
+time.sleep(15)
 
 if kplex=='1':
 	subprocess.call(["pkill", '-9', "kplex"])
