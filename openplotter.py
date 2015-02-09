@@ -418,7 +418,19 @@ class MyFrame(wx.Frame):
 					self.ShowMessage(_('Sorry. It is not possible to create UDP outputs.'))
 			else:
 				self.ShowMessage(_('You have to enter at least a port number.'))
-
+		
+		def enableAISconf(self):
+			self.gain.SetEditable(True)
+			self.gain.SetForegroundColour((wx.NullColor))
+			self.ppm.SetEditable(True)
+			self.ppm.SetForegroundColour((wx.NullColor))
+			
+		def disableAISconf(self):
+			self.gain.SetEditable(False)
+			self.gain.SetForegroundColour((180,180,180))
+			self.ppm.SetEditable(False)
+			self.ppm.SetForegroundColour((180,180,180))
+					
 		def OnOffAIS(self, e):
 			w_close=subprocess.call(['pkill', '-f', 'waterfall.py'])
 			rtl_close=subprocess.call(['pkill', '-9', 'rtl_test'])
@@ -426,10 +438,7 @@ class MyFrame(wx.Frame):
 			if isChecked:
 				output=subprocess.check_output('lsusb')
 				if 'DVB-T' in output:
-					self.gain.SetEditable(False)
-					self.gain.SetForegroundColour((180,180,180))
-					self.ppm.SetEditable(False)
-					self.ppm.SetForegroundColour((180,180,180)) 
+					self.disableAISconf() 
 					gain=self.gain.GetValue()
 					ppm=self.ppm.GetValue()
 					rtl_fm=subprocess.Popen(['rtl_fm', '-f', '161975000', '-g', gain, '-p', ppm, '-s', '48k'], stdout = subprocess.PIPE)
@@ -439,10 +448,7 @@ class MyFrame(wx.Frame):
 					self.ais_sdr_enable.SetValue(False)
 					msg=_('SDR device not found.\nSDR-AIS reception disabled.')
 			else: 
-				self.gain.SetEditable(True)
-				self.gain.SetForegroundColour((wx.NullColor))
-				self.ppm.SetEditable(True)
-				self.ppm.SetForegroundColour((wx.NullColor))
+				self.enableAISconf()
 				aisdecoder=subprocess.call(['pkill', '-9', 'aisdecoder'])
 				rtl_fm=subprocess.call(['pkill', '-9', 'rtl_fm'])
 				msg=_('SDR-AIS reception disabled')
@@ -627,6 +633,7 @@ class MyFrame(wx.Frame):
 			self.ShowMessage(_('The selected language will be enabled when you restart'))
 
 		def test_ppm(self,event):
+			self.enableAISconf()
 			aisdecoder=subprocess.call(['pkill', '-9', 'aisdecoder'])
 			rtl_fm=subprocess.call(['pkill', '-9', 'rtl_fm'])
 			w_close=subprocess.call(['pkill', '-f', 'waterfall.py'])
@@ -645,6 +652,7 @@ class MyFrame(wx.Frame):
 
 
 		def test_gain(self,event):
+			self.enableAISconf()
 			aisdecoder=subprocess.call(['pkill', '-9', 'aisdecoder'])
 			rtl_fm=subprocess.call(['pkill', '-9', 'rtl_fm'])
 			w_close=subprocess.call(['pkill', '-f', 'waterfall.py'])
