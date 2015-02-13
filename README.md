@@ -5,8 +5,10 @@ OpenPlotter
 **OpenPlotter** has the following main goals:
 
 * Do It Yourself
-* Open-source and low-cost
-* Run on x86 laptops and on low-consumption ARM boards (Raspberry Pi, BeagleBone Black, Odroid C1...)
+* Open-source
+* Low-cost
+* Low-consumption
+* Run on x86 laptops and ARM boards (Raspberry Pi, BeagleBone Black, Odroid C1...)
 
 Features
 ------------
