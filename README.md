@@ -6,7 +6,7 @@ OpenPlotter
 
 * Do It Yourself
 * Open-source and low-cost
-* Run on x86 laptops and on low-consumption ARM boards (Raspberry Pi, Banana Pi, BeagleBone, Cubieboard...)
+* Run on x86 laptops and on low-consumption ARM boards (Raspberry Pi, BeagleBone Black, Odroid C1...)
 
 Features
 ------------
