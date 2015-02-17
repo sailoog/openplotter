@@ -724,11 +724,11 @@ class MyFrame(wx.Frame):
 				self.wifi_enable.SetValue(False)
 		
 		def OnAboutBox(self, e):
-			description = _("OpenPlotter is a DIY open-source low-cost low-consumption sailing platform to run on x86 laptops and ARM boards (Raspberry Pi, Banana Pi, BeagleBone, Cubieboard...)")			
+			description = _("OpenPlotter is a DIY, open-source, low-cost and low-consumption sailing platform to run on x86 laptops and ARM boards (Raspberry Pi, BeagleBone Black, Odroid C1...)")			
 			licence = """This program is free software: you can redistribute it 
 and/or modify it under the terms of the GNU General Public License 
 as published by the Free Software Foundation, either version 2 of 
-the License, or (at your option) any later version.
+the License, or any later version.
 
 This program is distributed in the hope that it will be useful, but 
 WITHOUT ANY WARRANTY; without even the implied warranty of 
