@@ -166,16 +166,20 @@ class Waterfall(object):
 
 def main():
 
-    ppm=sys.argv[1]
+    gin=sys.argv[1]
+    ppm=sys.argv[2]
+    chn=sys.argv[3]
     if ppm=='0': ppm='1'
+    if chn=='a': frc=161.975e6
+    if chn=='b': frc=162.025e6
 
     sdr = RtlSdr()
     wf = Waterfall(sdr)
 
     # some defaults
     sdr.rs = 1e6
-    sdr.fc = 161.975e6
-    sdr.gain = 40
+    sdr.fc = frc
+    sdr.gain = float(gin)
     sdr.freq_correction = int(ppm)
 
     wf.start()
