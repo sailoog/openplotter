@@ -48,12 +48,13 @@ class MainFrame(wx.Frame):
 		self.page2 = wx.Panel(self.nb)
 		self.page3 = wx.Panel(self.nb)
 		self.page4 = wx.Panel(self.nb)
+		self.page5 = wx.Panel(self.nb)
 
+		self.nb.AddPage(self.page5, _('NMEA multiplexer'))
 		self.nb.AddPage(self.page1, _('Startup'))
 		self.nb.AddPage(self.page4, _('SDR-AIS reception'))
 		self.nb.AddPage(self.page2, _('STW simulation'))
 		self.nb.AddPage(self.page3, _('WiFi access point'))
-
 
 		sizer = wx.BoxSizer()
 		sizer.Add(self.nb, 1, wx.EXPAND)
@@ -125,17 +126,17 @@ class MainFrame(wx.Frame):
 		self.wifi_enable = wx.CheckBox(self.page3, label=_('Enable'), pos=(20, 20))
 		self.wifi_enable.Bind(wx.EVT_CHECKBOX, self.onwifi_enable)
 
-		self.wifi_box=wx.StaticBox(self.page3, label=_(' Settings '), size=(400, 150), pos=(10, 50))
+		wx.StaticBox(self.page3, label=_(' Settings '), size=(400, 150), pos=(10, 50))
 
 		self.available_wireless = []
 		output=subprocess.check_output('iwconfig')
 		for i in range (0, 10):
 			ii=str(i)
 			if 'wlan'+ii in output: self.available_wireless.append('wlan'+ii)
-		self.wlan = wx.ComboBox(self.page3, choices=self.available_wireless, style=wx.CB_READONLY, size=(100, 25), pos=(20, 75))
+		self.wlan = wx.ComboBox(self.page3, choices=self.available_wireless, style=wx.CB_READONLY, size=(100, 30), pos=(20, 75))
 		self.wlan_label=wx.StaticText(self.page3, label=_('WiFi device'), pos=(140, 80))
 
-		self.passw = wx.TextCtrl(self.page3, -1, size=(100, 25), pos=(20, 110))
+		self.passw = wx.TextCtrl(self.page3, -1, size=(100, 30), pos=(20, 110))
 		self.passw_label=wx.StaticText(self.page3, label=_('Password \nminimum 8 characters required'), pos=(140, 115))
 ###########################page3
 ########page4###################
@@ -143,7 +144,7 @@ class MainFrame(wx.Frame):
 		self.ais_sdr_enable = wx.CheckBox(self.page4, label=_('Enable'), pos=(20, 20))
 		self.ais_sdr_enable.Bind(wx.EVT_CHECKBOX, self.OnOffAIS)
 
-		self.gsm_box=wx.StaticBox(self.page4, label=_(' Settings '), size=(400, 150), pos=(10, 50))
+		wx.StaticBox(self.page4, label=_(' Settings '), size=(400, 150), pos=(10, 50))
 
 		self.gain = wx.TextCtrl(self.page4, -1, size=(55, 30), pos=(150, 75))
 		self.gain_label=wx.StaticText(self.page4, label=_('Gain'), pos=(20, 80))
@@ -160,7 +161,7 @@ class MainFrame(wx.Frame):
 		self.ais_frequencies2 = wx.CheckBox(self.page4, label=_('Channel B 162.025Mhz'), pos=(20, 170))
 		self.ais_frequencies2.Bind(wx.EVT_CHECKBOX, self.ais_frequencies)
 
-		self.gsm_box=wx.StaticBox(self.page4, label=_(' Calibrate using GSM base stations '), size=(400, 100), pos=(10, 205))
+		wx.StaticBox(self.page4, label=_(' Calibrate using GSM base stations '), size=(400, 100), pos=(10, 205))
 		self.bands_label=wx.StaticText(self.page4, label=_('Band'), pos=(20, 235))
 		self.bands_list = ['GSM850', 'GSM-R', 'GSM900', 'EGSM', 'DCS', 'PCS']
 		self.band= wx.ComboBox(self.page4, choices=self.bands_list, style=wx.CB_READONLY, size=(100, 30), pos=(150, 230))
@@ -172,7 +173,54 @@ class MainFrame(wx.Frame):
 		self.check_channels =wx.Button(self.page4, label=_('calibrate'), pos=(260, 265))
 		self.Bind(wx.EVT_BUTTON, self.check_channel, self.check_channels)
 ###########################page4
+########page5###################
+		wx.StaticBox(self.page5, label=_(' Inputs '), size=(670, 140), pos=(10, 10))
+		self.list_input = wx.ListCtrl(self.page5, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(295, 112), pos=(15, 30))
+		self.list_input.InsertColumn(0, _('Type'), width=50)
+		self.list_input.InsertColumn(1, _('Port/Address'), width=130)
+		self.list_input.InsertColumn(2, _('Bauds/Port'), width=115)
+		self.add_serial_in =wx.Button(self.page5, label=_('+ Serial'), pos=(315, 30))
+		self.Bind(wx.EVT_BUTTON, self.add_serial_input, self.add_serial_in)
+		self.SerDevLs = []
+		self.SerialCheck('/dev/rfcomm')
+		self.SerialCheck('/dev/ttyUSB')
+		self.SerialCheck('/dev/ttyS')
+		self.SerialCheck('/dev/ttyACM')
+		self.deviceComboBox = wx.ComboBox(self.page5, choices=self.SerDevLs, style=wx.CB_DROPDOWN, size=(130, 30), pos=(445, 30))
+		if self.SerDevLs : self.deviceComboBox.SetValue(self.SerDevLs[0])
+		self.bauds = ['2400', '4800', '9600', '19200', '38400', '57600', '115200']
+		self.baudComboBox = wx.ComboBox(self.page5, choices=self.bauds, style=wx.CB_READONLY, size=(90, 30), pos=(580, 30))
+		self.baudComboBox.SetValue('4800')
+		self.add_network_in =wx.Button(self.page5, label=_('+ Network'), pos=(315, 70))
+		self.Bind(wx.EVT_BUTTON, self.add_network_input, self.add_network_in)
+		self.type = ['TCP', 'UDP']
+		self.typeComboBox = wx.ComboBox(self.page5, choices=self.type, style=wx.CB_READONLY, size=(65, 30), pos=(420, 70))
+		self.typeComboBox.SetValue('TCP')
+		self.address = wx.TextCtrl(self.page5, -1, size=(120, 30), pos=(490, 70))
+		self.port = wx.TextCtrl(self.page5, -1, size=(55, 30), pos=(615, 70))
+		self.button_delete_input =wx.Button(self.page5, label=_('Delete selected'), pos=(315, 110))
+		self.Bind(wx.EVT_BUTTON, self.delete_input, self.button_delete_input)
 
+		wx.StaticBox(self.page5, label=_(' Outputs '), size=(670, 140), pos=(10, 150))
+		self.list_output = wx.ListCtrl(self.page5, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(295, 112), pos=(15, 170))
+		self.list_output.InsertColumn(0, _('Type'), width=50)
+		self.list_output.InsertColumn(1, _('Port/Address'), width=130)
+		self.list_output.InsertColumn(2, _('Bauds/Port'), width=115)
+		self.deviceComboBox2 = wx.ComboBox(self.page5, choices=self.SerDevLs, style=wx.CB_DROPDOWN, size=(130, 30), pos=(445, 170))
+		if self.SerDevLs : self.deviceComboBox2.SetValue(self.SerDevLs[0])
+		self.baudComboBox2 = wx.ComboBox(self.page5, choices=self.bauds, style=wx.CB_READONLY, size=(90, 30), pos=(580, 170))
+		self.baudComboBox2.SetValue('4800')
+		self.button_delete_output =wx.Button(self.page5, label=_('Delete selected'), pos=(315, 250))
+		self.Bind(wx.EVT_BUTTON, self.delete_output, self.button_delete_output)
+
+		self.button_apply =wx.Button(self.page5, label=_('Apply changes'), pos=(200, 293))
+		self.Bind(wx.EVT_BUTTON, self.apply_changes, self.button_apply)
+		self.restart =wx.Button(self.page5, label=_('Restart'), pos=(390, 293))
+		self.Bind(wx.EVT_BUTTON, self.restart_multiplex, self.restart)
+		self.show_output =wx.Button(self.page5, label=_('Show output'), pos=(520, 293))
+		self.Bind(wx.EVT_BUTTON, self.show_output_window, self.show_output)
+###########################page5
+		self.read_kplex_conf()
 		self.set_layout_conf()
 ###########################layout
 
@@ -537,6 +585,177 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.data_conf.set('AIS-SDR', 'gsm_channel', channel)
 			self.write_conf()
 			self.ShowMessage(msg)
+
+########multimpexer###################################	
+
+	def show_output_window(self,event):
+		close=subprocess.call(['pkill', '-f', 'output.py'])
+		show_output=subprocess.Popen(['python', currentpath+'/output.py', self.language])
+
+	def restart_multiplex(self,event):
+		self.restart_kplex()
+
+	def restart_kplex(self):
+		self.SetStatusText(_('Closing Kplex'))
+		subprocess.call(["pkill", '-9', "kplex"])
+		subprocess.Popen('kplex')
+		self.SetStatusText(_('Kplex restarted'))
+
+	def read_kplex_conf(self):
+		self.inputs = []
+		self.outputs = []
+		try:
+			file=open(home+'/.kplex.conf', 'r')
+			data=file.readlines()
+			file.close()
+			for index,item in enumerate(data):
+				if '[serial]' in item:
+					if 'direction=in' in data[index+1]:
+						input_tmp=[]
+						input_tmp.append('Serial')
+						item2=self.extract_value(data[index+2])
+						input_tmp.append(item2)
+						item3=self.extract_value(data[index+3])
+						input_tmp.append(item3)
+						self.inputs.append(input_tmp)
+					if 'direction=out' in data[index+1]:
+						output_tmp=[]
+						output_tmp.append('Serial')
+						item2=self.extract_value(data[index+2])
+						output_tmp.append(item2)
+						item3=self.extract_value(data[index+3])
+						output_tmp.append(item3)
+						self.outputs.append(output_tmp)
+				if '[tcp]' in item:
+					if 'direction=in' in data[index+1]:
+						input_tmp=[]
+						input_tmp.append('TCP')
+						item2=self.extract_value(data[index+2])
+						input_tmp.append(item2)
+						item3=self.extract_value(data[index+3])
+						input_tmp.append(item3)
+						self.inputs.append(input_tmp)
+					if 'direction=out' in data[index+1]:
+						output_tmp=[]
+						output_tmp.append('TCP')
+						output_tmp.append(_('all address'))
+						item2=self.extract_value(data[index+2])
+						output_tmp.append(item2)
+						self.outputs.append(output_tmp)
+				if '[broadcast]' in item:
+					if 'direction=in' in data[index+1]:
+						input_tmp=[]
+						input_tmp.append('UDP')
+						input_tmp.append(_('all address'))
+						item2=self.extract_value(data[index+2])
+						input_tmp.append(item2)
+						self.inputs.append(input_tmp)
+			self.write_inputs()
+			self.write_outputs()
+
+		except IOError:
+			self.ShowMessage(_('Configuration file does not exist. Add inputs and apply changes.'))
+
+	def extract_value(self,data):
+		option, value =data.split('=')
+		value=value.strip()
+		return value
+
+	def write_inputs(self):
+		self.list_input.DeleteAllItems()
+		for i in self.inputs:
+			index = self.list_input.InsertStringItem(sys.maxint, i[0])
+			self.list_input.SetStringItem(index, 1, i[1])
+			self.list_input.SetStringItem(index, 2, i[2])
+	
+	def write_outputs(self):
+		self.list_output.DeleteAllItems()
+		for i in self.outputs:
+			index = self.list_output.InsertStringItem(sys.maxint, i[0])
+			self.list_output.SetStringItem(index, 1, i[1])
+			self.list_output.SetStringItem(index, 2, i[2])
+
+	def apply_changes(self,event):
+		data='# For advanced manual configuration, please visit: http://www.stripydog.com/kplex/configuration.html\n# Editing this file by openplotter GUI, can eliminate manual settings.\n# You should not modify defaults.\n\n'
+		for index,item in enumerate(self.inputs):
+			if 'Serial' in item[0]:
+				data=data+'[serial]\ndirection=in\nfilename='+item[1]+'\nbaud='+item[2]+'\noptional=yes\n\n'
+			if 'TCP' in item[0]:
+				data=data+'[tcp]\ndirection=in\naddress='+item[1]+'\nport='+item[2]+'\nmode=client\npersist=yes\nkeepalive=yes\noptional=yes\n\n'
+			if 'UDP' in item[0]:
+				data=data+'[broadcast]\ndirection=in\nport='+item[2]+'\noptional=yes\n\n'
+		if not '[broadcast]\ndirection=in\nport=10110' in data: data=data+'#default input\n[broadcast]\ndirection=in\nport=10110\noptional=yes\n\n'
+		for index,item in enumerate(self.outputs):
+			if 'Serial' in item[0]:
+				data=data+'[serial]\ndirection=out\nfilename='+item[1]+'\nbaud='+item[2]+'\noptional=yes\n\n'
+			if 'TCP' in item[0]:
+				data=data+'[tcp]\ndirection=out\nport='+item[2]+'\nmode=server\n\n'
+		if not '[tcp]\ndirection=out\nport=10110' in data: data=data+'#default output\n[tcp]\ndirection=out\nport=10110\nmode=server\n\n'
+		file = open(home+'/.kplex.conf', 'w')
+		file.write(data)
+		file.close()
+		self.restart_kplex()
+		self.read_kplex_conf()
+
+	def delete_input(self,event):
+		num = len(self.inputs)
+		for i in range(num):
+			if self.list_input.IsSelected(i):
+				del self.inputs[i]
+		self.write_inputs()
+
+	def delete_output(self,event):
+		num = len(self.outputs)
+		for i in range(num):
+			if self.list_output.IsSelected(i):
+				del self.outputs[i]
+		self.write_outputs()
+
+	def SerialCheck(self,dev):
+		num = 0
+		for _ in range(99):
+			s = dev + str(num)
+			d = os.path.exists(s)
+			if d == True:
+				self.SerDevLs.append(s)      
+			num = num + 1
+	
+	def add_serial_input(self,event):
+		input_tmp=[]
+		found=False
+		input_tmp.append('Serial')
+		port=self.deviceComboBox.GetValue()
+		input_tmp.append(port)
+		bauds=self.baudComboBox.GetValue()
+		input_tmp.append(bauds)
+		for sublist in self.inputs:
+			if sublist[1] == port:found=True
+		for sublist in self.outputs:
+			if sublist[1] == port:found=True
+		if found==False:
+			self.inputs.append(input_tmp)
+			self.write_inputs()
+		else:
+			self.ShowMessage(_('It is impossible to set input because this port is already in use.'))
+	
+	def add_network_input(self,event):
+		input_tmp=[]
+		type_=self.typeComboBox.GetValue()
+		address=self.address.GetValue()
+		port=self.port.GetValue()
+		input_tmp.append(type_)
+		input_tmp.append(address)
+		input_tmp.append(port)
+		if port:
+			self.inputs.append(input_tmp)
+			self.write_inputs()
+		else:
+			self.ShowMessage(_('You have to enter at least a port number.'))
+
+
+
+######################################multiplexer
+
 
 	def write_conf(self):
 		with open(currentpath+'/openplotter.conf', 'wb') as configfile:
