@@ -26,6 +26,9 @@ class MainFrame(wx.Frame):
 ####layout###################
 	def __init__(self):
 		wx.Frame.__init__(self, None, title="OpenPlotter", size=(700,420))
+
+		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
+
 ########reading configuration###################
 		self.read_conf()
 ###########################reading configuration
@@ -59,8 +62,6 @@ class MainFrame(wx.Frame):
 		sizer = wx.BoxSizer()
 		sizer.Add(self.nb, 1, wx.EXPAND)
 		self.p.SetSizer(sizer)
-
-		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 
 		self.icon = wx.Icon(currentpath+'/openplotter.ico', wx.BITMAP_TYPE_ICO)
 		self.SetIcon(self.icon)
@@ -97,85 +98,85 @@ class MainFrame(wx.Frame):
 		self.SetMenuBar(self.menubar)
 ###########################menu
 ########page1###################
-		wx.StaticBox(self.page1, size=(400, 295), pos=(10, 10))
-		self.startup_opencpn = wx.CheckBox(self.page1, label=_('OpenCPN'), pos=(20, 20))
+		wx.StaticBox(self.page1, size=(400, 200), pos=(10, 10))
+		self.startup_opencpn = wx.CheckBox(self.page1, label=_('OpenCPN'), pos=(20, 25))
 		self.startup_opencpn.Bind(wx.EVT_CHECKBOX, self.startup)
 
 		self.startup_opencpn_nopengl = wx.CheckBox(self.page1, label=_('no OpenGL'), pos=(40, 50))
 		self.startup_opencpn_nopengl.Bind(wx.EVT_CHECKBOX, self.startup)
 
-		self.startup_opencpn_fullscreen = wx.CheckBox(self.page1, label=_('fullscreen'), pos=(40, 80))
+		self.startup_opencpn_fullscreen = wx.CheckBox(self.page1, label=_('fullscreen'), pos=(40, 75))
 		self.startup_opencpn_fullscreen.Bind(wx.EVT_CHECKBOX, self.startup)
 
-		self.startup_multiplexer = wx.CheckBox(self.page1, label=_('NMEA-0183 Multiplexer (kplex)'), pos=(20, 120))
+		self.startup_multiplexer = wx.CheckBox(self.page1, label=_('NMEA-0183 Multiplexer (kplex)'), pos=(20, 110))
 		self.startup_multiplexer.Bind(wx.EVT_CHECKBOX, self.startup)
 
-		self.startup_nmea_time = wx.CheckBox(self.page1, label=_('Set time from NMEA'), pos=(40, 150))
+		self.startup_nmea_time = wx.CheckBox(self.page1, label=_('Set time from NMEA'), pos=(40, 135))
 		self.startup_nmea_time.Bind(wx.EVT_CHECKBOX, self.startup)
 
-		self.startup_remote_desktop = wx.CheckBox(self.page1, label=_('Remote desktop (x11vnc)'), pos=(20, 190))
+		self.startup_remote_desktop = wx.CheckBox(self.page1, label=_('Remote desktop (x11vnc)'), pos=(20, 170))
 		self.startup_remote_desktop.Bind(wx.EVT_CHECKBOX, self.startup)
 ###########################page1
 ########page2###################
-		wx.StaticBox(self.page2, size=(400, 35), pos=(10, 10))
-		self.water_speed_enable = wx.CheckBox(self.page2, label=_('Enable'), pos=(20, 20))
+		wx.StaticBox(self.page2, size=(400, 45), pos=(10, 10))
+		self.water_speed_enable = wx.CheckBox(self.page2, label=_('Enable'), pos=(20, 25))
 		self.water_speed_enable.Bind(wx.EVT_CHECKBOX, self.onoffwaterspeed)
 ###########################page2
 ########page3###################
-		wx.StaticBox(self.page3, size=(400, 35), pos=(10, 10))
-		self.wifi_enable = wx.CheckBox(self.page3, label=_('Enable'), pos=(20, 20))
+		wx.StaticBox(self.page3, size=(400, 45), pos=(10, 10))
+		self.wifi_enable = wx.CheckBox(self.page3, label=_('Enable'), pos=(20, 25))
 		self.wifi_enable.Bind(wx.EVT_CHECKBOX, self.onwifi_enable)
 
-		wx.StaticBox(self.page3, label=_(' Settings '), size=(400, 150), pos=(10, 50))
+		wx.StaticBox(self.page3, label=_(' Settings '), size=(400, 115), pos=(10, 60))
 
 		self.available_wireless = []
 		output=subprocess.check_output('iwconfig')
 		for i in range (0, 10):
 			ii=str(i)
 			if 'wlan'+ii in output: self.available_wireless.append('wlan'+ii)
-		self.wlan = wx.ComboBox(self.page3, choices=self.available_wireless, style=wx.CB_READONLY, size=(100, 30), pos=(20, 75))
-		self.wlan_label=wx.StaticText(self.page3, label=_('WiFi device'), pos=(140, 80))
+		self.wlan = wx.ComboBox(self.page3, choices=self.available_wireless, style=wx.CB_READONLY, size=(100, 32), pos=(20, 85))
+		self.wlan_label=wx.StaticText(self.page3, label=_('WiFi device'), pos=(140, 90))
 
-		self.passw = wx.TextCtrl(self.page3, -1, size=(100, 30), pos=(20, 110))
-		self.passw_label=wx.StaticText(self.page3, label=_('Password \nminimum 8 characters required'), pos=(140, 115))
+		self.passw = wx.TextCtrl(self.page3, -1, size=(100, 32), pos=(20, 120))
+		self.passw_label=wx.StaticText(self.page3, label=_('Password \nminimum 8 characters required'), pos=(140, 120))
 ###########################page3
 ########page4###################
-		wx.StaticBox(self.page4, size=(400, 35), pos=(10, 10))
-		self.ais_sdr_enable = wx.CheckBox(self.page4, label=_('Enable'), pos=(20, 20))
+		wx.StaticBox(self.page4, size=(400, 45), pos=(10, 10))
+		self.ais_sdr_enable = wx.CheckBox(self.page4, label=_('Enable'), pos=(20, 25))
 		self.ais_sdr_enable.Bind(wx.EVT_CHECKBOX, self.OnOffAIS)
 
-		wx.StaticBox(self.page4, label=_(' Settings '), size=(400, 150), pos=(10, 50))
+		wx.StaticBox(self.page4, label=_(' Settings '), size=(400, 150), pos=(10, 60))
 
-		self.gain = wx.TextCtrl(self.page4, -1, size=(55, 30), pos=(150, 75))
-		self.gain_label=wx.StaticText(self.page4, label=_('Gain'), pos=(20, 80))
-		self.button_test_gain =wx.Button(self.page4, label=_('check gain'), pos=(260, 75))
+		self.gain = wx.TextCtrl(self.page4, -1, size=(55, 32), pos=(150, 80))
+		self.gain_label=wx.StaticText(self.page4, label=_('Gain'), pos=(20, 85))
+		self.button_test_gain =wx.Button(self.page4, label=_('check gain'), pos=(260, 80))
 		self.Bind(wx.EVT_BUTTON, self.test_gain, self.button_test_gain)
 
-		self.ppm = wx.TextCtrl(self.page4, -1, size=(55, 30), pos=(150, 110))
-		self.correction_label=wx.StaticText(self.page4, label=_('Correction (ppm)'), pos=(20, 115))
-		self.button_test_ppm =wx.Button(self.page4, label=_('take a look'), pos=(260, 110))
+		self.ppm = wx.TextCtrl(self.page4, -1, size=(55, 32), pos=(150, 115))
+		self.correction_label=wx.StaticText(self.page4, label=_('Correction (ppm)'), pos=(20, 120))
+		self.button_test_ppm =wx.Button(self.page4, label=_('take a look'), pos=(260, 115))
 		self.Bind(wx.EVT_BUTTON, self.test_ppm, self.button_test_ppm)
 
-		self.ais_frequencies1 = wx.CheckBox(self.page4, label=_('Channel A 161.975Mhz'), pos=(20, 145))
+		self.ais_frequencies1 = wx.CheckBox(self.page4, label=_('Channel A 161.975Mhz'), pos=(20, 155))
 		self.ais_frequencies1.Bind(wx.EVT_CHECKBOX, self.ais_frequencies)
-		self.ais_frequencies2 = wx.CheckBox(self.page4, label=_('Channel B 162.025Mhz'), pos=(20, 170))
+		self.ais_frequencies2 = wx.CheckBox(self.page4, label=_('Channel B 162.025Mhz'), pos=(20, 180))
 		self.ais_frequencies2.Bind(wx.EVT_CHECKBOX, self.ais_frequencies)
 
-		wx.StaticBox(self.page4, label=_(' Calibrate using GSM base stations '), size=(400, 100), pos=(10, 205))
-		self.bands_label=wx.StaticText(self.page4, label=_('Band'), pos=(20, 235))
+		wx.StaticBox(self.page4, label=_(' Calibrate using GSM base stations '), size=(400, 100), pos=(10, 215))
+		self.bands_label=wx.StaticText(self.page4, label=_('Band'), pos=(20, 245))
 		self.bands_list = ['GSM850', 'GSM-R', 'GSM900', 'EGSM', 'DCS', 'PCS']
-		self.band= wx.ComboBox(self.page4, choices=self.bands_list, style=wx.CB_READONLY, size=(100, 30), pos=(150, 230))
+		self.band= wx.ComboBox(self.page4, choices=self.bands_list, style=wx.CB_READONLY, size=(100, 32), pos=(150, 240))
 		self.band.SetValue('GSM900')
-		self.check_bands =wx.Button(self.page4, label=_('check channels'), pos=(260, 230))
+		self.check_bands =wx.Button(self.page4, label=_('check channels'), pos=(260, 240))
 		self.Bind(wx.EVT_BUTTON, self.check_band, self.check_bands)
-		self.channel_label=wx.StaticText(self.page4, label=_('Channel'), pos=(20, 270))
-		self.channel = wx.TextCtrl(self.page4, -1, size=(55, 30), pos=(150, 265))
-		self.check_channels =wx.Button(self.page4, label=_('calibrate'), pos=(260, 265))
+		self.channel_label=wx.StaticText(self.page4, label=_('Channel'), pos=(20, 280))
+		self.channel = wx.TextCtrl(self.page4, -1, size=(55, 32), pos=(150, 275))
+		self.check_channels =wx.Button(self.page4, label=_('calibrate'), pos=(260, 275))
 		self.Bind(wx.EVT_BUTTON, self.check_channel, self.check_channels)
 ###########################page4
 ########page5###################
-		wx.StaticBox(self.page5, label=_(' Inputs '), size=(670, 140), pos=(10, 10))
-		self.list_input = wx.ListCtrl(self.page5, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(295, 112), pos=(15, 30))
+		wx.StaticBox(self.page5, label=_(' Inputs '), size=(670, 130), pos=(10, 10))
+		self.list_input = wx.ListCtrl(self.page5, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(295, 102), pos=(15, 30))
 		self.list_input.InsertColumn(0, _('Type'), width=50)
 		self.list_input.InsertColumn(1, _('Port/Address'), width=130)
 		self.list_input.InsertColumn(2, _('Bauds/Port'), width=115)
@@ -186,47 +187,47 @@ class MainFrame(wx.Frame):
 		self.SerialCheck('/dev/ttyUSB')
 		self.SerialCheck('/dev/ttyS')
 		self.SerialCheck('/dev/ttyACM')
-		self.deviceComboBox = wx.ComboBox(self.page5, choices=self.SerDevLs, style=wx.CB_DROPDOWN, size=(130, 30), pos=(445, 30))
+		self.deviceComboBox = wx.ComboBox(self.page5, choices=self.SerDevLs, style=wx.CB_DROPDOWN, size=(130, 32), pos=(445, 30))
 		if self.SerDevLs : self.deviceComboBox.SetValue(self.SerDevLs[0])
 		self.bauds = ['2400', '4800', '9600', '19200', '38400', '57600', '115200']
-		self.baudComboBox = wx.ComboBox(self.page5, choices=self.bauds, style=wx.CB_READONLY, size=(90, 30), pos=(580, 30))
+		self.baudComboBox = wx.ComboBox(self.page5, choices=self.bauds, style=wx.CB_READONLY, size=(90, 32), pos=(580, 30))
 		self.baudComboBox.SetValue('4800')
-		self.add_network_in =wx.Button(self.page5, label=_('+ network'), pos=(315, 70))
+		self.add_network_in =wx.Button(self.page5, label=_('+ network'), pos=(315, 65))
 		self.Bind(wx.EVT_BUTTON, self.add_network_input, self.add_network_in)
 		self.type = ['TCP', 'UDP']
-		self.typeComboBox = wx.ComboBox(self.page5, choices=self.type, style=wx.CB_READONLY, size=(65, 30), pos=(420, 70))
+		self.typeComboBox = wx.ComboBox(self.page5, choices=self.type, style=wx.CB_READONLY, size=(65, 32), pos=(420, 65))
 		self.typeComboBox.SetValue('TCP')
-		self.address = wx.TextCtrl(self.page5, -1, size=(120, 30), pos=(490, 70))
-		self.port = wx.TextCtrl(self.page5, -1, size=(55, 30), pos=(615, 70))
-		self.button_delete_input =wx.Button(self.page5, label=_('- selected'), pos=(315, 110))
+		self.address = wx.TextCtrl(self.page5, -1, size=(120, 32), pos=(490, 65))
+		self.port = wx.TextCtrl(self.page5, -1, size=(55, 32), pos=(615, 65))
+		self.button_delete_input =wx.Button(self.page5, label=_('- selected'), pos=(315, 100))
 		self.Bind(wx.EVT_BUTTON, self.delete_input, self.button_delete_input)
-		self.add_gpsd_in =wx.Button(self.page5, label=_('+ GPSD'), pos=(575, 110))
+		self.add_gpsd_in =wx.Button(self.page5, label=_('+ GPSD'), pos=(575, 100))
 		self.Bind(wx.EVT_BUTTON, self.add_gpsd_input, self.add_gpsd_in)
 
-		wx.StaticBox(self.page5, label=_(' Outputs '), size=(670, 140), pos=(10, 150))
-		self.list_output = wx.ListCtrl(self.page5, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(295, 112), pos=(15, 170))
+		wx.StaticBox(self.page5, label=_(' Outputs '), size=(670, 130), pos=(10, 145))
+		self.list_output = wx.ListCtrl(self.page5, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(295, 102), pos=(15, 165))
 		self.list_output.InsertColumn(0, _('Type'), width=50)
 		self.list_output.InsertColumn(1, _('Port/Address'), width=130)
 		self.list_output.InsertColumn(2, _('Bauds/Port'), width=115)
-		self.add_serial_out =wx.Button(self.page5, label=_('+ serial'), pos=(315, 170))
+		self.add_serial_out =wx.Button(self.page5, label=_('+ serial'), pos=(315, 165))
 		self.Bind(wx.EVT_BUTTON, self.add_serial_output, self.add_serial_out)
-		self.deviceComboBox2 = wx.ComboBox(self.page5, choices=self.SerDevLs, style=wx.CB_DROPDOWN, size=(130, 30), pos=(445, 170))
+		self.deviceComboBox2 = wx.ComboBox(self.page5, choices=self.SerDevLs, style=wx.CB_DROPDOWN, size=(130, 32), pos=(445, 165))
 		if self.SerDevLs : self.deviceComboBox2.SetValue(self.SerDevLs[0])
-		self.baudComboBox2 = wx.ComboBox(self.page5, choices=self.bauds, style=wx.CB_READONLY, size=(90, 30), pos=(580, 170))
+		self.baudComboBox2 = wx.ComboBox(self.page5, choices=self.bauds, style=wx.CB_READONLY, size=(90, 32), pos=(580, 165))
 		self.baudComboBox2.SetValue('4800')
-		self.add_network_out =wx.Button(self.page5, label=_('+ network'), pos=(315, 210))
+		self.add_network_out =wx.Button(self.page5, label=_('+ network'), pos=(315, 200))
 		self.Bind(wx.EVT_BUTTON, self.add_network_output, self.add_network_out)
-		self.adress_label=wx.StaticText(self.page5, label=_('TCP'), pos=(435, 215))
-		self.address2 = wx.TextCtrl(self.page5, -1, size=(120, 30), pos=(490, 210))
-		self.port2 = wx.TextCtrl(self.page5, -1, size=(55, 30), pos=(615, 210))
-		self.button_delete_output =wx.Button(self.page5, label=_('- selected'), pos=(315, 250))
+		self.adress_label=wx.StaticText(self.page5, label=_('TCP'), pos=(445, 208))
+		self.address2 = wx.TextCtrl(self.page5, -1, size=(120, 32), pos=(490, 200))
+		self.port2 = wx.TextCtrl(self.page5, -1, size=(55, 32), pos=(615, 200))
+		self.button_delete_output =wx.Button(self.page5, label=_('- selected'), pos=(315, 235))
 		self.Bind(wx.EVT_BUTTON, self.delete_output, self.button_delete_output)
 
-		self.button_apply =wx.Button(self.page5, label=_('Apply changes'), pos=(315, 293))
+		self.button_apply =wx.Button(self.page5, label=_('Apply changes'), pos=(315, 285))
 		self.Bind(wx.EVT_BUTTON, self.apply_changes, self.button_apply)
-		self.restart =wx.Button(self.page5, label=_('Restart'), pos=(490, 293))
+		self.restart =wx.Button(self.page5, label=_('Restart'), pos=(490, 285))
 		self.Bind(wx.EVT_BUTTON, self.restart_multiplex, self.restart)
-		self.show_output =wx.Button(self.page5, label=_('Show output'), pos=(15, 293))
+		self.show_output =wx.Button(self.page5, label=_('Show output'), pos=(15, 285))
 		self.Bind(wx.EVT_BUTTON, self.show_output_window, self.show_output)
 ###########################page5
 		self.read_kplex_conf()
