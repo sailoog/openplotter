@@ -51,10 +51,10 @@ class MainFrame(wx.Frame):
 		self.page5 = wx.Panel(self.nb)
 
 		self.nb.AddPage(self.page5, _('NMEA multiplexer'))
-		self.nb.AddPage(self.page1, _('Startup'))
+		self.nb.AddPage(self.page3, _('WiFi access point'))
 		self.nb.AddPage(self.page4, _('SDR-AIS reception'))
 		self.nb.AddPage(self.page2, _('STW simulation'))
-		self.nb.AddPage(self.page3, _('WiFi access point'))
+		self.nb.AddPage(self.page1, _('Startup'))
 
 		sizer = wx.BoxSizer()
 		sizer.Add(self.nb, 1, wx.EXPAND)
@@ -179,7 +179,7 @@ class MainFrame(wx.Frame):
 		self.list_input.InsertColumn(0, _('Type'), width=50)
 		self.list_input.InsertColumn(1, _('Port/Address'), width=130)
 		self.list_input.InsertColumn(2, _('Bauds/Port'), width=115)
-		self.add_serial_in =wx.Button(self.page5, label=_('+ Serial'), pos=(315, 30))
+		self.add_serial_in =wx.Button(self.page5, label=_('+ serial'), pos=(315, 30))
 		self.Bind(wx.EVT_BUTTON, self.add_serial_input, self.add_serial_in)
 		self.SerDevLs = []
 		self.SerialCheck('/dev/rfcomm')
@@ -191,33 +191,42 @@ class MainFrame(wx.Frame):
 		self.bauds = ['2400', '4800', '9600', '19200', '38400', '57600', '115200']
 		self.baudComboBox = wx.ComboBox(self.page5, choices=self.bauds, style=wx.CB_READONLY, size=(90, 30), pos=(580, 30))
 		self.baudComboBox.SetValue('4800')
-		self.add_network_in =wx.Button(self.page5, label=_('+ Network'), pos=(315, 70))
+		self.add_network_in =wx.Button(self.page5, label=_('+ network'), pos=(315, 70))
 		self.Bind(wx.EVT_BUTTON, self.add_network_input, self.add_network_in)
 		self.type = ['TCP', 'UDP']
 		self.typeComboBox = wx.ComboBox(self.page5, choices=self.type, style=wx.CB_READONLY, size=(65, 30), pos=(420, 70))
 		self.typeComboBox.SetValue('TCP')
 		self.address = wx.TextCtrl(self.page5, -1, size=(120, 30), pos=(490, 70))
 		self.port = wx.TextCtrl(self.page5, -1, size=(55, 30), pos=(615, 70))
-		self.button_delete_input =wx.Button(self.page5, label=_('Delete selected'), pos=(315, 110))
+		self.button_delete_input =wx.Button(self.page5, label=_('- selected'), pos=(315, 110))
 		self.Bind(wx.EVT_BUTTON, self.delete_input, self.button_delete_input)
+		self.add_gpsd_in =wx.Button(self.page5, label=_('+ GPSD'), pos=(575, 110))
+		self.Bind(wx.EVT_BUTTON, self.add_gpsd_input, self.add_gpsd_in)
 
 		wx.StaticBox(self.page5, label=_(' Outputs '), size=(670, 140), pos=(10, 150))
 		self.list_output = wx.ListCtrl(self.page5, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(295, 112), pos=(15, 170))
 		self.list_output.InsertColumn(0, _('Type'), width=50)
 		self.list_output.InsertColumn(1, _('Port/Address'), width=130)
 		self.list_output.InsertColumn(2, _('Bauds/Port'), width=115)
+		self.add_serial_out =wx.Button(self.page5, label=_('+ serial'), pos=(315, 170))
+		self.Bind(wx.EVT_BUTTON, self.add_serial_output, self.add_serial_out)
 		self.deviceComboBox2 = wx.ComboBox(self.page5, choices=self.SerDevLs, style=wx.CB_DROPDOWN, size=(130, 30), pos=(445, 170))
 		if self.SerDevLs : self.deviceComboBox2.SetValue(self.SerDevLs[0])
 		self.baudComboBox2 = wx.ComboBox(self.page5, choices=self.bauds, style=wx.CB_READONLY, size=(90, 30), pos=(580, 170))
 		self.baudComboBox2.SetValue('4800')
-		self.button_delete_output =wx.Button(self.page5, label=_('Delete selected'), pos=(315, 250))
+		self.add_network_out =wx.Button(self.page5, label=_('+ network'), pos=(315, 210))
+		self.Bind(wx.EVT_BUTTON, self.add_network_output, self.add_network_out)
+		self.adress_label=wx.StaticText(self.page5, label=_('TCP'), pos=(435, 215))
+		self.address2 = wx.TextCtrl(self.page5, -1, size=(120, 30), pos=(490, 210))
+		self.port2 = wx.TextCtrl(self.page5, -1, size=(55, 30), pos=(615, 210))
+		self.button_delete_output =wx.Button(self.page5, label=_('- selected'), pos=(315, 250))
 		self.Bind(wx.EVT_BUTTON, self.delete_output, self.button_delete_output)
 
-		self.button_apply =wx.Button(self.page5, label=_('Apply changes'), pos=(200, 293))
+		self.button_apply =wx.Button(self.page5, label=_('Apply changes'), pos=(315, 293))
 		self.Bind(wx.EVT_BUTTON, self.apply_changes, self.button_apply)
-		self.restart =wx.Button(self.page5, label=_('Restart'), pos=(390, 293))
+		self.restart =wx.Button(self.page5, label=_('Restart'), pos=(490, 293))
 		self.Bind(wx.EVT_BUTTON, self.restart_multiplex, self.restart)
-		self.show_output =wx.Button(self.page5, label=_('Show output'), pos=(520, 293))
+		self.show_output =wx.Button(self.page5, label=_('Show output'), pos=(15, 293))
 		self.Bind(wx.EVT_BUTTON, self.show_output_window, self.show_output)
 ###########################page5
 		self.read_kplex_conf()
@@ -752,6 +761,49 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		else:
 			self.ShowMessage(_('You have to enter at least a port number.'))
 
+	def add_serial_output(self,event):
+		output_tmp=[]
+		found=False
+		output_tmp.append('Serial')
+		port=self.deviceComboBox2.GetValue()
+		output_tmp.append(port)
+		bauds=self.baudComboBox2.GetValue()
+		output_tmp.append(bauds)
+		for sublist in self.inputs:
+			if sublist[1] == port:found=True
+		for sublist in self.outputs:
+			if sublist[1] == port:found=True
+		if found==False:
+			self.outputs.append(output_tmp)
+			self.write_outputs()
+		else:
+			self.ShowMessage(_('It is impossible to set output because this port is already in use.'))
+
+	def add_network_output(self,event):
+		output_tmp=[]
+		found=False
+		type_='TCP'
+		address=self.address2.GetValue()
+		port=self.port2.GetValue()
+		output_tmp.append(type_)
+		output_tmp.append(address)
+		output_tmp.append(port)
+		if port:
+			self.outputs.append(output_tmp)
+			self.write_outputs()
+		else:
+			self.ShowMessage(_('You have to enter at least a port number.'))
+	
+	def add_gpsd_input(self,event):
+		input_tmp=[]
+		type_='TCP'
+		address='127.0.0.1'
+		port='2947'
+		input_tmp.append(type_)
+		input_tmp.append(address)
+		input_tmp.append(port)
+		self.inputs.append(input_tmp)
+		self.write_inputs()
 
 
 ######################################multiplexer
