@@ -581,7 +581,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.kill_sdr()
 		self.enable_sdr_controls()
 		subprocess.Popen(("lxterminal -e 'bash -c \"kal -s "+self.band.GetValue()+"; echo 'Press [ENTER] to close the window'; read -p ---------------------------------; exit 0; exec bash\"'"), shell=True)
-		msg=_('Wait for the system to check the band and select the strongest channel (power). If you do not find any channels try another band.')
+		msg=_('Wait for the system to check the band and select the strongest channel (power). If you do not find any channel try another band.')
 		self.ShowMessage(msg)
 
 	def check_channel(self, event):
@@ -590,7 +590,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		channel=self.channel.GetValue()
 		if channel:
 			subprocess.Popen(("lxterminal -e 'bash -c \"kal -c "+self.channel.GetValue()+"; echo 'Press [ENTER] to close the window'; read -p ---------------------------------; exit 0; exec bash\"'"), shell=True)
-			msg=_('Wait for the system to calculate the ppm value for the selected channel. Put the obtained value in the "Correction (ppm)" field and enable SDR-AIS reception again.')
+			msg=_('Wait for the system to calculate the ppm value with the selected channel. Put the obtained value in the "Correction (ppm)" field and enable SDR-AIS reception again.')
 			self.data_conf.set('AIS-SDR', 'gsm_channel', channel)
 			self.write_conf()
 			self.ShowMessage(msg)
