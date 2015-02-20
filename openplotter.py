@@ -121,13 +121,16 @@ class MainFrame(wx.Frame):
 		wx.StaticBox(self.page2, size=(400, 45), pos=(10, 10))
 		self.water_speed_enable = wx.CheckBox(self.page2, label=_('Enable'), pos=(20, 25))
 		self.water_speed_enable.Bind(wx.EVT_CHECKBOX, self.onoffwaterspeed)
+
+		wx.StaticBox(self.page2, label=_(' Info '), size=(270, 80), pos=(415, 10))
+		wx.StaticText(self.page2, label=_('STW NMEA data:\nUDP localhost:10110'), pos=(430, 35))
 ###########################page2
 ########page3###################
 		wx.StaticBox(self.page3, size=(400, 45), pos=(10, 10))
 		self.wifi_enable = wx.CheckBox(self.page3, label=_('Enable'), pos=(20, 25))
 		self.wifi_enable.Bind(wx.EVT_CHECKBOX, self.onwifi_enable)
 
-		wx.StaticBox(self.page3, label=_(' Settings '), size=(400, 115), pos=(10, 60))
+		wx.StaticBox(self.page3, label=_(' Settings '), size=(400, 125), pos=(10, 60))
 
 		self.available_wireless = []
 		output=subprocess.check_output('iwconfig')
@@ -139,6 +142,9 @@ class MainFrame(wx.Frame):
 
 		self.passw = wx.TextCtrl(self.page3, -1, size=(100, 32), pos=(20, 120))
 		self.passw_label=wx.StaticText(self.page3, label=_('Password \nminimum 8 characters required'), pos=(140, 120))
+
+		wx.StaticBox(self.page3, label=_(' Info '), size=(270, 175), pos=(415, 10))
+		wx.StaticText(self.page3, label=_('SSID: OpenPlotter\nPassword: <yourpassword>\n\nNMEA data:\n10.10.10.1:10110\n\nRemote desktop:\n10.10.10.1:5900'), pos=(430, 35))
 ###########################page3
 ########page4###################
 		wx.StaticBox(self.page4, size=(400, 45), pos=(10, 10))
@@ -173,6 +179,9 @@ class MainFrame(wx.Frame):
 		self.channel = wx.TextCtrl(self.page4, -1, size=(55, 32), pos=(150, 275))
 		self.check_channels =wx.Button(self.page4, label=_('calibrate'), pos=(260, 275))
 		self.Bind(wx.EVT_BUTTON, self.check_channel, self.check_channels)
+
+		wx.StaticBox(self.page4, label=_(' Info '), size=(270, 305), pos=(415, 10))
+		wx.StaticText(self.page4, label=_('AIS NMEA data:\nUDP localhost:10110\n\nGSM850: North America,\nWestern South America\n\nGSM900: Rest of the world'), pos=(430, 35))
 ###########################page4
 ########page5###################
 		wx.StaticBox(self.page5, label=_(' Inputs '), size=(670, 130), pos=(10, 10))
@@ -187,7 +196,7 @@ class MainFrame(wx.Frame):
 		self.SerialCheck('/dev/ttyUSB')
 		self.SerialCheck('/dev/ttyS')
 		self.SerialCheck('/dev/ttyACM')
-		self.deviceComboBox = wx.ComboBox(self.page5, choices=self.SerDevLs, style=wx.CB_DROPDOWN, size=(130, 32), pos=(445, 30))
+		self.deviceComboBox = wx.ComboBox(self.page5, choices=self.SerDevLs, style=wx.CB_DROPDOWN, size=(155, 32), pos=(420, 30))
 		if self.SerDevLs : self.deviceComboBox.SetValue(self.SerDevLs[0])
 		self.bauds = ['2400', '4800', '9600', '19200', '38400', '57600', '115200']
 		self.baudComboBox = wx.ComboBox(self.page5, choices=self.bauds, style=wx.CB_READONLY, size=(90, 32), pos=(580, 30))
@@ -199,7 +208,7 @@ class MainFrame(wx.Frame):
 		self.typeComboBox.SetValue('TCP')
 		self.address = wx.TextCtrl(self.page5, -1, size=(120, 32), pos=(490, 65))
 		self.port = wx.TextCtrl(self.page5, -1, size=(55, 32), pos=(615, 65))
-		self.button_delete_input =wx.Button(self.page5, label=_('- selected'), pos=(315, 100))
+		self.button_delete_input =wx.Button(self.page5, label=_('delete'), pos=(315, 100))
 		self.Bind(wx.EVT_BUTTON, self.delete_input, self.button_delete_input)
 		self.add_gpsd_in =wx.Button(self.page5, label=_('+ GPSD'), pos=(575, 100))
 		self.Bind(wx.EVT_BUTTON, self.add_gpsd_input, self.add_gpsd_in)
@@ -211,7 +220,7 @@ class MainFrame(wx.Frame):
 		self.list_output.InsertColumn(2, _('Bauds/Port'), width=115)
 		self.add_serial_out =wx.Button(self.page5, label=_('+ serial'), pos=(315, 165))
 		self.Bind(wx.EVT_BUTTON, self.add_serial_output, self.add_serial_out)
-		self.deviceComboBox2 = wx.ComboBox(self.page5, choices=self.SerDevLs, style=wx.CB_DROPDOWN, size=(130, 32), pos=(445, 165))
+		self.deviceComboBox2 = wx.ComboBox(self.page5, choices=self.SerDevLs, style=wx.CB_DROPDOWN, size=(155, 32), pos=(420, 165))
 		if self.SerDevLs : self.deviceComboBox2.SetValue(self.SerDevLs[0])
 		self.baudComboBox2 = wx.ComboBox(self.page5, choices=self.bauds, style=wx.CB_READONLY, size=(90, 32), pos=(580, 165))
 		self.baudComboBox2.SetValue('4800')
@@ -220,7 +229,7 @@ class MainFrame(wx.Frame):
 		self.adress_label=wx.StaticText(self.page5, label=_('TCP'), pos=(445, 208))
 		self.address2 = wx.TextCtrl(self.page5, -1, size=(120, 32), pos=(490, 200))
 		self.port2 = wx.TextCtrl(self.page5, -1, size=(55, 32), pos=(615, 200))
-		self.button_delete_output =wx.Button(self.page5, label=_('- selected'), pos=(315, 235))
+		self.button_delete_output =wx.Button(self.page5, label=_('delete'), pos=(315, 235))
 		self.Bind(wx.EVT_BUTTON, self.delete_output, self.button_delete_output)
 
 		self.button_apply =wx.Button(self.page5, label=_('Apply changes'), pos=(315, 285))
@@ -691,7 +700,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			if 'Serial' in item[0]:
 				data=data+'[serial]\ndirection=in\nfilename='+item[1]+'\nbaud='+item[2]+'\noptional=yes\n\n'
 			if 'TCP' in item[0]:
-				data=data+'[tcp]\ndirection=in\naddress='+item[1]+'\nport='+item[2]+'\nmode=client\npersist=yes\nkeepalive=yes\noptional=yes\n\n'
+				data=data+'[tcp]\ndirection=in\naddress='+item[1]+'\nport='+item[2]+'\nmode=client\npersist=yes\nretry=20\nkeepalive=yes\noptional=yes\n\n'
 			if 'UDP' in item[0]:
 				data=data+'[broadcast]\ndirection=in\nport='+item[2]+'\noptional=yes\n\n'
 		if not '[broadcast]\ndirection=in\nport=10110' in data: data=data+'#default input\n[broadcast]\ndirection=in\nport=10110\noptional=yes\n\n'
@@ -740,8 +749,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		input_tmp.append(bauds)
 		for sublist in self.inputs:
 			if sublist[1] == port:found=True
-		for sublist in self.outputs:
-			if sublist[1] == port:found=True
 		if found==False:
 			self.inputs.append(input_tmp)
 			self.write_inputs()
@@ -770,8 +777,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		output_tmp.append(port)
 		bauds=self.baudComboBox2.GetValue()
 		output_tmp.append(bauds)
-		for sublist in self.inputs:
-			if sublist[1] == port:found=True
 		for sublist in self.outputs:
 			if sublist[1] == port:found=True
 		if found==False:

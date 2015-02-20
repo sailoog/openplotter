@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenPlotter 0.0.0\n"
 "POT-Creation-Date: 2015-02-19 17:52+0100\n"
-"PO-Revision-Date: 2015-02-19 18:02+0100\n"
+"PO-Revision-Date: 2015-02-19 20:25+0100\n"
 "Last-Translator: Sailoog <info@sailoog.com>\n"
 "Language-Team: Sailoog <info@sailoog.com>\n"
 "Language: es\n"
@@ -24,7 +24,7 @@ msgstr "Punto acceso WiFi"
 
 #: /home/nx/Desktop/openplotter/openplotter.py:55
 msgid "SDR-AIS reception"
-msgstr "Recepción AS-SDR"
+msgstr "Recepción AIS-SDR"
 
 #: /home/nx/Desktop/openplotter/openplotter.py:56
 #: /home/nx/Desktop/openplotter/openplotter0.py:201
