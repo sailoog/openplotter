@@ -181,7 +181,8 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.check_channel, self.check_channels)
 
 		wx.StaticBox(self.page4, label=_(' Info '), size=(270, 305), pos=(415, 10))
-		wx.StaticText(self.page4, label=_('AIS NMEA data:\nUDP localhost:10110\n\nGSM850: North America,\nWestern South America\n\nGSM900: Rest of the world'), pos=(430, 35))
+		wx.StaticText(self.page4, label=_('AIS NMEA data:\nUDP localhost:10110'), pos=(430, 35))
+		wx.StaticText(self.page4, label=_('GSM850: North America,\nWestern South America\n\nGSM900: Rest of the world'), pos=(430, 225))
 ###########################page4
 ########page5###################
 		wx.StaticBox(self.page5, label=_(' Inputs '), size=(670, 130), pos=(10, 10))

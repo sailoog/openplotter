@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: OpenPlotter 0.0.0\n"
-"POT-Creation-Date: 2015-02-19 17:52+0100\n"
-"PO-Revision-Date: 2015-02-19 20:25+0100\n"
+"POT-Creation-Date: 2015-02-23 18:30+0100\n"
+"PO-Revision-Date: 2015-02-23 18:47+0100\n"
 "Last-Translator: Sailoog <info@sailoog.com>\n"
 "Language-Team: Sailoog <info@sailoog.com>\n"
 "Language: es\n"
@@ -14,162 +14,176 @@ msgstr ""
 "X-Poedit-Basepath: .\n"
 "X-Poedit-SearchPath-0: /home/nx/Desktop/openplotter\n"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:53
+#: /home/nx/Desktop/openplotter/openplotter.py:56
 msgid "NMEA multiplexer"
 msgstr "Multiplexor NMEA"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:54
+#: /home/nx/Desktop/openplotter/openplotter.py:57
 msgid "WiFi access point"
 msgstr "Punto acceso WiFi"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:55
+#: /home/nx/Desktop/openplotter/openplotter.py:58
 msgid "SDR-AIS reception"
 msgstr "Recepción AIS-SDR"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:56
+#: /home/nx/Desktop/openplotter/openplotter.py:59
 #: /home/nx/Desktop/openplotter/openplotter0.py:201
 msgid "STW simulation"
 msgstr "Simulación STW"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:57
+#: /home/nx/Desktop/openplotter/openplotter.py:60
 #: /home/nx/Desktop/openplotter/openplotter0.py:66
 msgid "Startup"
 msgstr "Ejecutar al inicio"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:74
+#: /home/nx/Desktop/openplotter/openplotter.py:75
 #: /home/nx/Desktop/openplotter/openplotter0.py:68
 msgid "Set time zone"
 msgstr "Configurar zona horaria"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:74
-#: /home/nx/Desktop/openplotter/openplotter.py:305
+#: /home/nx/Desktop/openplotter/openplotter.py:75
+#: /home/nx/Desktop/openplotter/openplotter.py:316
 #: /home/nx/Desktop/openplotter/openplotter0.py:68
 #: /home/nx/Desktop/openplotter/openplotter0.py:588
 msgid "Set time zone in the new window"
 msgstr "Configurar zona horaria en la nueva ventana"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:76
-#: /home/nx/Desktop/openplotter/openplotter.py:113
+#: /home/nx/Desktop/openplotter/openplotter.py:77
+#: /home/nx/Desktop/openplotter/openplotter.py:114
 #: /home/nx/Desktop/openplotter/openplotter0.py:62
 #: /home/nx/Desktop/openplotter/openplotter0.py:70
 msgid "Set time from NMEA"
 msgstr "establecer hora desde NMEA"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:76
+#: /home/nx/Desktop/openplotter/openplotter.py:77
 #: /home/nx/Desktop/openplotter/openplotter0.py:70
 msgid "Set system time from NMEA data"
 msgstr "Configurar hora del sistema desde los datos NMEA"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:79
+#: /home/nx/Desktop/openplotter/openplotter.py:80
 #: /home/nx/Desktop/openplotter/openplotter0.py:73
 msgid "Set GPSD"
 msgstr "Configurar GPSD"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:79
-#: /home/nx/Desktop/openplotter/openplotter.py:325
+#: /home/nx/Desktop/openplotter/openplotter.py:80
+#: /home/nx/Desktop/openplotter/openplotter.py:336
 #: /home/nx/Desktop/openplotter/openplotter0.py:73
 #: /home/nx/Desktop/openplotter/openplotter0.py:592
 msgid "Set GPSD in the new window"
 msgstr "Configurar GPSD en la nueva ventana"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:81
+#: /home/nx/Desktop/openplotter/openplotter.py:82
 #: /home/nx/Desktop/openplotter/openplotter0.py:75
 msgid "Settings"
 msgstr "Configuración"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:84
+#: /home/nx/Desktop/openplotter/openplotter.py:85
 #: /home/nx/Desktop/openplotter/openplotter0.py:78
 msgid "English"
 msgstr "Inglés"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:84
+#: /home/nx/Desktop/openplotter/openplotter.py:85
 #: /home/nx/Desktop/openplotter/openplotter0.py:78
 msgid "Set English language"
 msgstr "Configurar idioma ingés"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:86
+#: /home/nx/Desktop/openplotter/openplotter.py:87
 #: /home/nx/Desktop/openplotter/openplotter0.py:80
 msgid "Catalan"
 msgstr "Catalán"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:86
+#: /home/nx/Desktop/openplotter/openplotter.py:87
 #: /home/nx/Desktop/openplotter/openplotter0.py:80
 msgid "Set Catalan language"
 msgstr "Configurar idioma catalán"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:88
+#: /home/nx/Desktop/openplotter/openplotter.py:89
 #: /home/nx/Desktop/openplotter/openplotter0.py:82
 msgid "Spanish"
 msgstr "Español"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:88
+#: /home/nx/Desktop/openplotter/openplotter.py:89
 #: /home/nx/Desktop/openplotter/openplotter0.py:82
 msgid "Set Spanish language"
 msgstr "Configurar idioma español"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:90
+#: /home/nx/Desktop/openplotter/openplotter.py:91
 #: /home/nx/Desktop/openplotter/openplotter0.py:84
 msgid "Language"
 msgstr "Idioma"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:93
+#: /home/nx/Desktop/openplotter/openplotter.py:94
 #: /home/nx/Desktop/openplotter/openplotter0.py:87
 msgid "&About"
 msgstr "&Acerca de"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:93
+#: /home/nx/Desktop/openplotter/openplotter.py:94
 #: /home/nx/Desktop/openplotter/openplotter0.py:87
 msgid "About OpenPlotter"
 msgstr "Acerca de OpenPlotter"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:95
+#: /home/nx/Desktop/openplotter/openplotter.py:96
 #: /home/nx/Desktop/openplotter/openplotter0.py:89
 msgid "&Help"
 msgstr "&Ayuda"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:101
+#: /home/nx/Desktop/openplotter/openplotter.py:102
 #: /home/nx/Desktop/openplotter/openplotter0.py:53
 msgid "OpenCPN"
 msgstr "OpenCPN"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:104
+#: /home/nx/Desktop/openplotter/openplotter.py:105
 #: /home/nx/Desktop/openplotter/openplotter0.py:55
 msgid "no OpenGL"
 msgstr "sin OpenGL"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:107
+#: /home/nx/Desktop/openplotter/openplotter.py:108
 #: /home/nx/Desktop/openplotter/openplotter0.py:57
 msgid "fullscreen"
 msgstr "pantalla completa"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:110
+#: /home/nx/Desktop/openplotter/openplotter.py:111
 msgid "NMEA-0183 Multiplexer (kplex)"
 msgstr "Multiplexor NMEA-0183 (Kplex)"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:116
+#: /home/nx/Desktop/openplotter/openplotter.py:117
 #: /home/nx/Desktop/openplotter/openplotter0.py:64
 msgid "Remote desktop (x11vnc)"
 msgstr "Escritorio remoto (x11vnc)"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:121
-#: /home/nx/Desktop/openplotter/openplotter.py:126
-#: /home/nx/Desktop/openplotter/openplotter.py:144
+#: /home/nx/Desktop/openplotter/openplotter.py:122
+#: /home/nx/Desktop/openplotter/openplotter.py:130
+#: /home/nx/Desktop/openplotter/openplotter.py:151
 #: /home/nx/Desktop/openplotter/openplotter0.py:188
 #: /home/nx/Desktop/openplotter/openplotter0.py:216
 msgid "Enable"
 msgstr "Activar"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:129
-#: /home/nx/Desktop/openplotter/openplotter.py:147
+#: /home/nx/Desktop/openplotter/openplotter.py:125
+#: /home/nx/Desktop/openplotter/openplotter.py:146
+#: /home/nx/Desktop/openplotter/openplotter.py:183
+msgid " Info "
+msgstr " Info "
+
+#: /home/nx/Desktop/openplotter/openplotter.py:126
+msgid ""
+"STW NMEA data:\n"
+"UDP localhost:10110"
+msgstr ""
+"Datos NMEA de STW:\n"
+"UDP localhost:10110"
+
+#: /home/nx/Desktop/openplotter/openplotter.py:133
+#: /home/nx/Desktop/openplotter/openplotter.py:154
 msgid " Settings "
 msgstr "Configuración"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:137
+#: /home/nx/Desktop/openplotter/openplotter.py:141
 #: /home/nx/Desktop/openplotter/openplotter0.py:220
 msgid "WiFi device"
 msgstr "Dispositivo WiFi"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:140
+#: /home/nx/Desktop/openplotter/openplotter.py:144
 msgid ""
 "Password \n"
 "minimum 8 characters required"
@@ -177,145 +191,185 @@ msgstr ""
 "Contraseña\n"
 "mínimo 8 caracteres"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:150
+#: /home/nx/Desktop/openplotter/openplotter.py:147
+msgid ""
+"SSID: OpenPlotter\n"
+"Password: <yourpassword>\n"
+"\n"
+"NMEA data:\n"
+"10.10.10.1:10110\n"
+"\n"
+"Remote desktop:\n"
+"10.10.10.1:5900"
+msgstr ""
+"SSID: OpenPlotter\n"
+"Contraseña: <tucontraseña>\n"
+"\n"
+"Datos NMEA:\n"
+"10.10.10.1:10110\n"
+"\n"
+"Escritorio remoto:\n"
+"10.10.10.1:5900"
+
+#: /home/nx/Desktop/openplotter/openplotter.py:157
 #: /home/nx/Desktop/openplotter/openplotter0.py:192
 msgid "Gain"
 msgstr "Ganancia"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:151
+#: /home/nx/Desktop/openplotter/openplotter.py:158
 msgid "check gain"
 msgstr "ver ganancia"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:155
+#: /home/nx/Desktop/openplotter/openplotter.py:162
 msgid "Correction (ppm)"
 msgstr "Corrección (ppm)"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:156
+#: /home/nx/Desktop/openplotter/openplotter.py:163
 msgid "take a look"
 msgstr "echar un vistazo"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:159
+#: /home/nx/Desktop/openplotter/openplotter.py:166
 msgid "Channel A 161.975Mhz"
 msgstr "Canal A 161.975Mhz"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:161
+#: /home/nx/Desktop/openplotter/openplotter.py:168
 msgid "Channel B 162.025Mhz"
 msgstr "Canal B 162.025Mhz"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:164
+#: /home/nx/Desktop/openplotter/openplotter.py:171
 msgid " Calibrate using GSM base stations "
 msgstr "Calibrar usando estaciones base GSM"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:165
+#: /home/nx/Desktop/openplotter/openplotter.py:172
 msgid "Band"
 msgstr "Banda"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:169
+#: /home/nx/Desktop/openplotter/openplotter.py:176
 msgid "check channels"
 msgstr "ver canales"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:171
+#: /home/nx/Desktop/openplotter/openplotter.py:178
 msgid "Channel"
 msgstr "Canal"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:173
+#: /home/nx/Desktop/openplotter/openplotter.py:180
 msgid "calibrate"
 msgstr "Calibrar"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:177
+#: /home/nx/Desktop/openplotter/openplotter.py:184
+msgid ""
+"AIS NMEA data:\n"
+"UDP localhost:10110"
+msgstr ""
+"Datos NMEA de AIS:\n"
+"UDP localhost:10110"
+
+#: /home/nx/Desktop/openplotter/openplotter.py:185
+msgid ""
+"GSM850: North America,\n"
+"Western South America\n"
+"\n"
+"GSM900: Rest of the world"
+msgstr ""
+"GSM850: América del Norte,\n"
+"oeste de América del Sur\n"
+"\n"
+"GSM900: Resto del mundo"
+
+#: /home/nx/Desktop/openplotter/openplotter.py:188
 msgid " Inputs "
 msgstr "Entradas"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:179
-#: /home/nx/Desktop/openplotter/openplotter.py:208
+#: /home/nx/Desktop/openplotter/openplotter.py:190
+#: /home/nx/Desktop/openplotter/openplotter.py:219
 #: /home/nx/Desktop/openplotter/openplotter0.py:147
 #: /home/nx/Desktop/openplotter/openplotter0.py:160
 msgid "Type"
 msgstr "Tipo"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:180
-#: /home/nx/Desktop/openplotter/openplotter.py:209
+#: /home/nx/Desktop/openplotter/openplotter.py:191
+#: /home/nx/Desktop/openplotter/openplotter.py:220
 #: /home/nx/Desktop/openplotter/openplotter0.py:148
 #: /home/nx/Desktop/openplotter/openplotter0.py:161
 msgid "Port/Address"
 msgstr "Puerto/Dirección"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:181
-#: /home/nx/Desktop/openplotter/openplotter.py:210
+#: /home/nx/Desktop/openplotter/openplotter.py:192
+#: /home/nx/Desktop/openplotter/openplotter.py:221
 #: /home/nx/Desktop/openplotter/openplotter0.py:149
 #: /home/nx/Desktop/openplotter/openplotter0.py:162
 msgid "Bauds/Port"
 msgstr "Baudios/Puerto"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:182
-#: /home/nx/Desktop/openplotter/openplotter.py:211
+#: /home/nx/Desktop/openplotter/openplotter.py:193
+#: /home/nx/Desktop/openplotter/openplotter.py:222
 msgid "+ serial"
 msgstr "+ serie"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:194
-#: /home/nx/Desktop/openplotter/openplotter.py:217
+#: /home/nx/Desktop/openplotter/openplotter.py:205
+#: /home/nx/Desktop/openplotter/openplotter.py:228
 msgid "+ network"
 msgstr "+ red"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:201
-#: /home/nx/Desktop/openplotter/openplotter.py:222
-msgid "- selected"
-msgstr "- seleccionada"
+#: /home/nx/Desktop/openplotter/openplotter.py:212
+#: /home/nx/Desktop/openplotter/openplotter.py:233
+msgid "delete"
+msgstr "borrar"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:203
+#: /home/nx/Desktop/openplotter/openplotter.py:214
 msgid "+ GPSD"
 msgstr "+ GPSD"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:206
+#: /home/nx/Desktop/openplotter/openplotter.py:217
 msgid " Outputs "
 msgstr "Salidas"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:219
+#: /home/nx/Desktop/openplotter/openplotter.py:230
 msgid "TCP"
-msgstr ""
+msgstr "TCP"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:225
+#: /home/nx/Desktop/openplotter/openplotter.py:236
 #: /home/nx/Desktop/openplotter/openplotter0.py:178
 msgid "Apply changes"
 msgstr "Aplicar cambios"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:227
+#: /home/nx/Desktop/openplotter/openplotter.py:238
 #: /home/nx/Desktop/openplotter/openplotter0.py:175
 msgid "Restart"
 msgstr "Reiniciar"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:229
+#: /home/nx/Desktop/openplotter/openplotter.py:240
 #: /home/nx/Desktop/openplotter/openplotter0.py:172
 msgid "Show output"
 msgstr "Mostrar salida"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:308
+#: /home/nx/Desktop/openplotter/openplotter.py:319
 #: /home/nx/Desktop/openplotter/openplotter0.py:571
 msgid "Waiting for NMEA time data in localhost:10110 ..."
 msgstr "Esperando datos NMEA de tiempo en localhost:10110 ..."
 
-#: /home/nx/Desktop/openplotter/openplotter.py:313
+#: /home/nx/Desktop/openplotter/openplotter.py:324
 #: /home/nx/Desktop/openplotter/openplotter0.py:576
 msgid "Failed to connect with localhost:10110.\n"
 msgstr "Error conectando con localhost:10110.\n"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:315
+#: /home/nx/Desktop/openplotter/openplotter.py:326
 #: /home/nx/Desktop/openplotter/openplotter0.py:578
 msgid "Unable to retrieve date or time from NMEA data.\n"
 msgstr "Incapaz de extraer fecha u hora de datos NMEA.\n"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:318
+#: /home/nx/Desktop/openplotter/openplotter.py:329
 #: /home/nx/Desktop/openplotter/openplotter0.py:581
 msgid "Date and time retrieved from NMEA data successfully."
 msgstr "Fecha y hora extraída de datos NMEA con éxito."
 
-#: /home/nx/Desktop/openplotter/openplotter.py:331
+#: /home/nx/Desktop/openplotter/openplotter.py:342
 #: /home/nx/Desktop/openplotter/openplotter0.py:648
 msgid "The selected language will be enabled when you restart"
 msgstr ""
 "El idioma seleccionado estará activo cuando vuelva a iniciar el programa."
 
-#: /home/nx/Desktop/openplotter/openplotter.py:350
+#: /home/nx/Desktop/openplotter/openplotter.py:361
 #: /home/nx/Desktop/openplotter/openplotter0.py:727
 msgid ""
 "OpenPlotter is a DIY, open-source, low-cost and low-consumption sailing "
@@ -326,30 +380,30 @@ msgstr ""
 "abierto, bajo consumo y bajo coste. Puede instalarse en ordenadores x86 y "
 "sistemas ARM (Raspberry Pi, BeagleBone Black, Odroid C1...)"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:418
+#: /home/nx/Desktop/openplotter/openplotter.py:429
 #: /home/nx/Desktop/openplotter/openplotter0.py:478
 msgid "Searching NMEA Speed Over Ground data in localhost:10110 ..."
 msgstr "Buscando datos de velocidad sobre el fondo en localhost:10110 ..."
 
-#: /home/nx/Desktop/openplotter/openplotter.py:425
+#: /home/nx/Desktop/openplotter/openplotter.py:436
 #: /home/nx/Desktop/openplotter/openplotter0.py:484
 msgid "Failed to connect with localhost:10110."
 msgstr "Error conectando con localhost:10110."
 
-#: /home/nx/Desktop/openplotter/openplotter.py:428
+#: /home/nx/Desktop/openplotter/openplotter.py:439
 #: /home/nx/Desktop/openplotter/output.py:89
 #: /home/nx/Desktop/openplotter/output.py:91
 #: /home/nx/Desktop/openplotter/openplotter0.py:487
 msgid "No data, trying to reconnect..."
 msgstr "Sin datos. Intentando reconectar..."
 
-#: /home/nx/Desktop/openplotter/openplotter.py:431
+#: /home/nx/Desktop/openplotter/openplotter.py:442
 #: /home/nx/Desktop/openplotter/openplotter0.py:490
 msgid "Speed Over Ground data not found, waiting for NMEA data..."
 msgstr ""
 "Datos de velocidad sobre el fondo no encontrados, esperando datos NMEA..."
 
-#: /home/nx/Desktop/openplotter/openplotter.py:436
+#: /home/nx/Desktop/openplotter/openplotter.py:447
 #: /home/nx/Desktop/openplotter/openplotter0.py:495
 msgid ""
 "\n"
@@ -358,46 +412,46 @@ msgstr ""
 "\n"
 "Velocidad sobre el fondo extraída de datos NMEA con éxito."
 
-#: /home/nx/Desktop/openplotter/openplotter.py:444
+#: /home/nx/Desktop/openplotter/openplotter.py:455
 #: /home/nx/Desktop/openplotter/openplotter0.py:503
 msgid "Speed Through Water simulation stopped"
 msgstr "Simulación de velocidad sobre el agua detenida"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:449
+#: /home/nx/Desktop/openplotter/openplotter.py:460
 #: /home/nx/Desktop/openplotter/openplotter0.py:687
 msgid "Configuring NMEA WiFi server, wait please..."
 msgstr "Configurando el servidor WiFi NMEA, espera por favor..."
 
-#: /home/nx/Desktop/openplotter/openplotter.py:458
+#: /home/nx/Desktop/openplotter/openplotter.py:469
 msgid "Your password must have a minimum of 8 characters"
 msgstr "La contraseña tiene que tener por lo menos 8 caracteres"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:474
+#: /home/nx/Desktop/openplotter/openplotter.py:485
 #: /home/nx/Desktop/openplotter/openplotter0.py:704
 msgid "NMEA WiFi Server failed."
 msgstr "El Servidor WiFi NMEA ha fallado."
 
-#: /home/nx/Desktop/openplotter/openplotter.py:475
+#: /home/nx/Desktop/openplotter/openplotter.py:486
 #: /home/nx/Desktop/openplotter/openplotter0.py:706
 msgid "NMEA WiFi Server started."
 msgstr "Servidor WiFi NMEA iniciado."
 
-#: /home/nx/Desktop/openplotter/openplotter.py:476
+#: /home/nx/Desktop/openplotter/openplotter.py:487
 #: /home/nx/Desktop/openplotter/openplotter0.py:707
 msgid "NMEA WiFi Server stopped."
 msgstr "Servidor WiFi NMEA detenido."
 
-#: /home/nx/Desktop/openplotter/openplotter.py:547
+#: /home/nx/Desktop/openplotter/openplotter.py:558
 #: /home/nx/Desktop/openplotter/openplotter0.py:461
 msgid "SDR-AIS reception enabled"
 msgstr "Recepción SDR-AIS habilitada"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:551
+#: /home/nx/Desktop/openplotter/openplotter.py:562
 #: /home/nx/Desktop/openplotter/openplotter0.py:469
 msgid "SDR-AIS reception disabled"
 msgstr "Recepción SDR-AIS deshabilitada"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:570
+#: /home/nx/Desktop/openplotter/openplotter.py:581
 msgid ""
 "SDR-AIS reception disabled.\n"
 "After checking the new window enable SDR-AIS reception again."
@@ -405,7 +459,7 @@ msgstr ""
 "Recepción AIS-SDR deshabilitada.\n"
 "Después de comprobar la nueva ventana habilita la recepción AIS-SDR de nuevo."
 
-#: /home/nx/Desktop/openplotter/openplotter.py:577
+#: /home/nx/Desktop/openplotter/openplotter.py:588
 #: /home/nx/Desktop/openplotter/openplotter0.py:679
 msgid ""
 "SDR-AIS reception disabled.\n"
@@ -416,7 +470,7 @@ msgstr ""
 "Comprueba la ventana nueva, copia el valor máximo posible de ganancia y "
 "habilita la recepción SDR-AIS de nuevo."
 
-#: /home/nx/Desktop/openplotter/openplotter.py:584
+#: /home/nx/Desktop/openplotter/openplotter.py:595
 msgid ""
 "Wait for the system to check the band and select the strongest channel "
 "(power). If you do not find any channel try another band."
@@ -424,7 +478,7 @@ msgstr ""
 "Espera a que el sistema termine de comprobar la banda y selecciona el canal "
 "más fuerte (power). Si no encuentras ningún canal prueba en otra banda."
 
-#: /home/nx/Desktop/openplotter/openplotter.py:593
+#: /home/nx/Desktop/openplotter/openplotter.py:604
 msgid ""
 "Wait for the system to calculate the ppm value with the selected channel. "
 "Put the obtained value in the \"Correction (ppm)\" field and enable SDR-AIS "
@@ -434,42 +488,42 @@ msgstr ""
 "Copia el valor obtenido en el campo \"Corrección (ppm)\" y habilita la "
 "recepción AIS-SDR de nuevo."
 
-#: /home/nx/Desktop/openplotter/openplotter.py:608
+#: /home/nx/Desktop/openplotter/openplotter.py:619
 #: /home/nx/Desktop/openplotter/openplotter0.py:598
 msgid "Closing Kplex"
 msgstr "Cerrando Kplex"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:611
+#: /home/nx/Desktop/openplotter/openplotter.py:622
 #: /home/nx/Desktop/openplotter/openplotter0.py:601
 msgid "Kplex restarted"
 msgstr "Kplex reiniciado"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:650
-#: /home/nx/Desktop/openplotter/openplotter.py:658
+#: /home/nx/Desktop/openplotter/openplotter.py:661
+#: /home/nx/Desktop/openplotter/openplotter.py:669
 #: /home/nx/Desktop/openplotter/openplotter0.py:286
 #: /home/nx/Desktop/openplotter/openplotter0.py:294
 msgid "all address"
 msgstr "Todas direcciones"
 
-#: /home/nx/Desktop/openplotter/openplotter.py:666
+#: /home/nx/Desktop/openplotter/openplotter.py:677
 #: /home/nx/Desktop/openplotter/openplotter0.py:302
 msgid "Configuration file does not exist. Add inputs and apply changes."
 msgstr ""
 "El archivo de configuración no existe. Añadir entradas y aplicar cambios."
 
-#: /home/nx/Desktop/openplotter/openplotter.py:748
+#: /home/nx/Desktop/openplotter/openplotter.py:757
 #: /home/nx/Desktop/openplotter/openplotter0.py:374
 msgid "It is impossible to set input because this port is already in use."
 msgstr " Es imposible configurar la entrada porque este puerto ya está en uso."
 
-#: /home/nx/Desktop/openplotter/openplotter.py:762
-#: /home/nx/Desktop/openplotter/openplotter.py:795
+#: /home/nx/Desktop/openplotter/openplotter.py:771
+#: /home/nx/Desktop/openplotter/openplotter.py:802
 #: /home/nx/Desktop/openplotter/openplotter0.py:406
 #: /home/nx/Desktop/openplotter/openplotter0.py:435
 msgid "You have to enter at least a port number."
 msgstr "Tienes que introducir por lo menos un número de puerto."
 
-#: /home/nx/Desktop/openplotter/openplotter.py:780
+#: /home/nx/Desktop/openplotter/openplotter.py:787
 #: /home/nx/Desktop/openplotter/openplotter0.py:392
 msgid "It is impossible to set output because this port is already in use."
 msgstr " Es imposible configurar la salida porque este puerto ya está en uso."
@@ -607,6 +661,9 @@ msgstr ""
 #: /home/nx/Desktop/openplotter/openplotter0.py:696
 msgid "Password must be at least 8 characters long"
 msgstr "La contraseña tiene que tener por lo menos 8 caracteres"
+
+#~ msgid "- selected"
+#~ msgstr "- seleccionada"
 
 #~ msgid "If selected OpenCPN (No OpenGL) will run at startup"
 #~ msgstr "Si selecciona esta opción OpenCPN sin OpenGL se ejecutará al inicio"
