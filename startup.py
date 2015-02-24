@@ -34,6 +34,7 @@ sow=data_conf.get('STARTUP', 'iivbw')
 enable=data_conf.get('AIS-SDR', 'enable')
 gain=data_conf.get('AIS-SDR', 'gain')
 ppm=data_conf.get('AIS-SDR', 'ppm')
+channel=data_conf.get('AIS-SDR', 'channel')
 
 wifi_server=data_conf.get('WIFI', 'enable')
 wlan=data_conf.get('WIFI', 'device')
@@ -53,7 +54,9 @@ if opencpn=='1' and len(opencpn_commands)>1: subprocess.Popen(opencpn_commands)
 if opencpn=='1' and len(opencpn_commands)==1: subprocess.Popen('opencpn')
 
 if enable=='1':
-	rtl_fm=subprocess.Popen(['rtl_fm', '-f', '161975000', '-g', gain, '-p', ppm, '-s', '48k'], stdout = subprocess.PIPE)
+	frecuency='161975000'
+	if channel=='b': frecuency='162025000'
+	rtl_fm=subprocess.Popen(['rtl_fm', '-f', frecuency, '-g', gain, '-p', ppm, '-s', '48k'], stdout = subprocess.PIPE)
 	aisdecoder=subprocess.Popen(['aisdecoder', '-h', '127.0.0.1', '-p', '10110', '-a', 'file', '-c', 'mono', '-d', '-f', '/dev/stdin'], stdin = rtl_fm.stdout)         
 else: 
 	subprocess.call(['pkill', '-9', 'aisdecoder'])
