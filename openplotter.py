@@ -143,8 +143,10 @@ class MainFrame(wx.Frame):
 		self.passw = wx.TextCtrl(self.page3, -1, size=(100, 32), pos=(20, 120))
 		self.passw_label=wx.StaticText(self.page3, label=_('Password \nminimum 8 characters required'), pos=(140, 120))
 
-		wx.StaticBox(self.page3, label=_(' Info '), size=(270, 175), pos=(415, 10))
-		wx.StaticText(self.page3, label=_('SSID: OpenPlotter\nPassword: <yourpassword>\n\nNMEA data:\n10.10.10.1:10110\n\nRemote desktop:\n10.10.10.1:5900'), pos=(430, 35))
+		wx.StaticBox(self.page3, label=_(' Info '), size=(270, 220), pos=(415, 10))
+		self.ip_info=wx.StaticText(self.page3, label='', pos=(430, 35))
+		self.button_refresh_ip =wx.Button(self.page3, label=_('Refresh'), pos=(570, 190))
+		self.Bind(wx.EVT_BUTTON, self.show_ip_info, self.button_refresh_ip)
 ###########################page3
 ########page4###################
 		wx.StaticBox(self.page4, size=(400, 45), pos=(10, 10))
@@ -229,7 +231,6 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.add_network_output, self.add_network_out)
 		wx.StaticText(self.page5, label=_('TCP'), pos=(445, 208))
 		wx.StaticText(self.page5, label=_('localhost:'), pos=(540, 208))
-		#self.address2 = wx.TextCtrl(self.page5, -1, size=(120, 32), pos=(490, 200))
 		self.port2 = wx.TextCtrl(self.page5, -1, size=(55, 32), pos=(615, 200))
 		self.button_delete_output =wx.Button(self.page5, label=_('delete'), pos=(315, 235))
 		self.Bind(wx.EVT_BUTTON, self.delete_output, self.button_delete_output)
@@ -289,7 +290,8 @@ class MainFrame(wx.Frame):
 			self.passw.Disable()
 			self.wlan_label.Disable()
 			self.passw_label.Disable()			
-
+		self.show_ip_info('')
+		
 		output=subprocess.check_output('lsusb')
 		if 'DVB-T' in output:
 			self.gain.SetValue(self.data_conf.get('AIS-SDR', 'gain'))
@@ -489,7 +491,19 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.SetStatusText('')
 		self.ShowMessage(msg)
 		self.write_conf()
-		
+		self.show_ip_info('')
+
+	def show_ip_info(self, e):
+		ip_info=subprocess.check_output(['hostname', '-I'])
+		out=_('NMEA data:\n')
+		ips=ip_info.split()
+		for ip in ips:
+			out+=ip+':10110\n'
+		out+=_('\nRemote desktop:\n')
+		for ip in ips:
+			out+=ip+':5900\n'
+		self.ip_info.SetLabel(out)
+
 	def enable_disable_wifi(self, s):
 		if s==1:
 			self.wlan.Disable()
