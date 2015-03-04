@@ -227,8 +227,9 @@ class MainFrame(wx.Frame):
 		self.baudComboBox2.SetValue('4800')
 		self.add_network_out =wx.Button(self.page5, label=_('+ network'), pos=(315, 200))
 		self.Bind(wx.EVT_BUTTON, self.add_network_output, self.add_network_out)
-		self.adress_label=wx.StaticText(self.page5, label=_('TCP'), pos=(445, 208))
-		self.address2 = wx.TextCtrl(self.page5, -1, size=(120, 32), pos=(490, 200))
+		wx.StaticText(self.page5, label=_('TCP'), pos=(445, 208))
+		wx.StaticText(self.page5, label=_('localhost:'), pos=(540, 208))
+		#self.address2 = wx.TextCtrl(self.page5, -1, size=(120, 32), pos=(490, 200))
 		self.port2 = wx.TextCtrl(self.page5, -1, size=(55, 32), pos=(615, 200))
 		self.button_delete_output =wx.Button(self.page5, label=_('delete'), pos=(315, 235))
 		self.Bind(wx.EVT_BUTTON, self.delete_output, self.button_delete_output)
@@ -769,14 +770,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.inputs.append(input_tmp)
 				self.write_inputs()
 			else:
-				self.ShowMessage(_('You must enter address and port.'))
+				self.ShowMessage(_('You must enter an address and a port number.'))
 		if type_=='UDP':
 			if port:
 				input_tmp[1]='localhost'
 				self.inputs.append(input_tmp)
 				self.write_inputs()
 			else:
-				self.ShowMessage(_('You must enter port.'))
+				self.ShowMessage(_('You must enter a port number.'))
 
 	def add_serial_output(self,event):
 		output_tmp=[]
@@ -798,7 +799,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		output_tmp=[]
 		found=False
 		type_='TCP'
-		address=self.address2.GetValue()
+		address='localhost'
 		port=self.port2.GetValue()
 		output_tmp.append(type_)
 		output_tmp.append(address)
@@ -807,7 +808,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.outputs.append(output_tmp)
 			self.write_outputs()
 		else:
-			self.ShowMessage(_('You have to enter at least a port number.'))
+			self.ShowMessage(_('You must enter a port number.'))
 	
 	def add_gpsd_input(self,event):
 		input_tmp=[]
