@@ -658,7 +658,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					if 'direction=out' in data[index+1]:
 						output_tmp=[]
 						output_tmp.append('TCP')
-						output_tmp.append(_('all address'))
+						output_tmp.append(_('localhost'))
 						item2=self.extract_value(data[index+2])
 						output_tmp.append(item2)
 						self.outputs.append(output_tmp)
@@ -666,7 +666,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					if 'direction=in' in data[index+1]:
 						input_tmp=[]
 						input_tmp.append('UDP')
-						input_tmp.append(_('all address'))
+						input_tmp.append(_('localhost'))
 						item2=self.extract_value(data[index+2])
 						input_tmp.append(item2)
 						self.inputs.append(input_tmp)
@@ -764,11 +764,19 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		input_tmp.append(type_)
 		input_tmp.append(address)
 		input_tmp.append(port)
-		if port:
-			self.inputs.append(input_tmp)
-			self.write_inputs()
-		else:
-			self.ShowMessage(_('You have to enter at least a port number.'))
+		if type_=='TCP':
+			if port and address:
+				self.inputs.append(input_tmp)
+				self.write_inputs()
+			else:
+				self.ShowMessage(_('You must enter address and port.'))
+		if type_=='UDP':
+			if port:
+				input_tmp[1]='localhost'
+				self.inputs.append(input_tmp)
+				self.write_inputs()
+			else:
+				self.ShowMessage(_('You must enter port.'))
 
 	def add_serial_output(self,event):
 		output_tmp=[]
@@ -804,7 +812,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def add_gpsd_input(self,event):
 		input_tmp=[]
 		type_='TCP'
-		address='127.0.0.1'
+		address='localhost'
 		port='2947'
 		input_tmp.append(type_)
 		input_tmp.append(address)
