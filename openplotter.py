@@ -56,7 +56,7 @@ class MainFrame(wx.Frame):
 		self.nb.AddPage(self.page5, _('NMEA multiplexer'))
 		self.nb.AddPage(self.page3, _('WiFi access point'))
 		self.nb.AddPage(self.page4, _('SDR-AIS reception'))
-		self.nb.AddPage(self.page2, _('STW simulation'))
+		self.nb.AddPage(self.page2, _('NMEA processing'))
 		self.nb.AddPage(self.page1, _('Startup'))
 
 		sizer = wx.BoxSizer()
@@ -118,12 +118,13 @@ class MainFrame(wx.Frame):
 		self.startup_remote_desktop.Bind(wx.EVT_CHECKBOX, self.startup)
 ###########################page1
 ########page2###################
-		wx.StaticBox(self.page2, size=(400, 45), pos=(10, 10))
-		self.water_speed_enable = wx.CheckBox(self.page2, label=_('Enable'), pos=(20, 25))
-		self.water_speed_enable.Bind(wx.EVT_CHECKBOX, self.onoffwaterspeed)
+		wx.StaticBox(self.page2, size=(400, 100), pos=(10, 10))
 
-		wx.StaticBox(self.page2, label=_(' Info '), size=(270, 80), pos=(415, 10))
-		wx.StaticText(self.page2, label=_('STW NMEA data:\nUDP localhost:10110'), pos=(430, 35))
+		self.mag_var = wx.CheckBox(self.page2, label=_('Add magnetic variation'), pos=(20, 25))
+		self.mag_var.Bind(wx.EVT_CHECKBOX, self.nmea_rmc)
+		wx.StaticText(self.page2, label=_('Required data: Sentence $--RMC.\nGenerated sentence: $OPRMC'), pos=(20, 50))
+
+
 ###########################page2
 ########page3###################
 		wx.StaticBox(self.page3, size=(400, 45), pos=(10, 10))
@@ -183,7 +184,6 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.check_channel, self.check_channels)
 
 		wx.StaticBox(self.page4, label=_(' Info '), size=(270, 305), pos=(415, 10))
-		wx.StaticText(self.page4, label=_('AIS NMEA data:\nUDP localhost:10110'), pos=(430, 35))
 		wx.StaticText(self.page4, label=_('GSM850: North America,\nWestern South America\n\nGSM900: Rest of the world'), pos=(430, 225))
 ###########################page4
 ########page5###################
@@ -273,8 +273,6 @@ class MainFrame(wx.Frame):
 		if self.data_conf.get('STARTUP', 'gps_time')=='1': self.startup_nmea_time.SetValue(True)
 		if self.data_conf.get('STARTUP', 'x11vnc')=='1': self.startup_remote_desktop.SetValue(True)
 
-		if self.data_conf.get('STARTUP', 'iivbw')=='1': self.water_speed_enable.SetValue(True)
-
 		if len(self.available_wireless)>0:
 			self.wlan.SetValue(self.data_conf.get('WIFI', 'device'))
 			self.passw.SetValue(self.data_conf.get('WIFI', 'password'))
@@ -313,6 +311,8 @@ class MainFrame(wx.Frame):
 			self.channel.Disable()
 			self.check_channels.Disable()
 			self.check_bands.Disable()
+
+		if self.data_conf.get('STARTUP', 'nmea_rmc')=='1': self.mag_var.SetValue(True)
 
 	def time_zone(self,event):
 		subprocess.Popen(['lxterminal', '-e', 'sudo dpkg-reconfigure tzdata'])
@@ -427,37 +427,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		self.write_conf()
 
-	def onoffwaterspeed(self, e):
-		if self.water_speed_enable.GetValue():
-			self.SetStatusText(_('Searching NMEA Speed Over Ground data in localhost:10110 ...'))
-			sog_result=subprocess.Popen(['python', currentpath+'/sog2sow.py'], stdout=subprocess.PIPE)
-			msg=''
-			self.data_conf.set('STARTUP', 'iivbw', '1')
-			while sog_result.poll() is None:
-				l = sog_result.stdout.readline()
-				if 'Failed to connect with localhost:10110.' in l:
-					msg+=_('Failed to connect with localhost:10110.')
-				if 'Error: ' in l: msg+='\n'+l
-				if 'No data, trying to reconnect...' in l:
-					msg+=_('No data, trying to reconnect...')
-					break
-				if 'Speed Over Ground data not found, waiting for NMEA data...' in l:
-					msg+=_('Speed Over Ground data not found, waiting for NMEA data...')
-					break
-				if '$IIVBW' in l: msg+=l
-				if '$IIVHW' in l:
-					msg+=l
-					msg+=_('\nSpeed Over Ground retrieved from NMEA data successfully.')
-					break
-			sog_result.stdout.close()
-			self.SetStatusText('')
-			self.ShowMessage(msg)
-		else:
-			subprocess.call(['pkill', '-f', 'sog2sow.py'])
-			self.SetStatusText('')
-			self.ShowMessage(_('Speed Through Water simulation stopped'))
-			self.data_conf.set('STARTUP', 'iivbw', '0')
-		self.write_conf()
 
 	def onwifi_enable (self, e):
 		self.SetStatusText(_('Configuring NMEA WiFi server, wait please...'))
@@ -845,6 +814,24 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def ShowMessage(self, w_msg):
 			wx.MessageBox(w_msg, 'Info', wx.OK | wx.ICON_INFORMATION)
+
+######################################nmea
+
+	def nmea_process(self, sender, nmea_sentence ):
+		subprocess.call(['pkill', '-f', 'nmea_process.py'])
+		isChecked = sender.GetValue()
+		if isChecked:     
+			self.data_conf.set('STARTUP', nmea_sentence, '1')
+		else: 
+			self.data_conf.set('STARTUP', nmea_sentence, '0')
+		self.write_conf()
+		subprocess.Popen(['python', currentpath+'/nmea_process.py'])
+
+	def nmea_rmc(self, e):
+		sender = e.GetEventObject()
+		nmea_sentence='nmea_rmc'
+		self.nmea_process(sender, nmea_sentence)
+
 #######################definitions
 
 
