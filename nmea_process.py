@@ -24,8 +24,15 @@ data_conf = ConfigParser.SafeConfigParser()
 data_conf.read(currentpath+'/openplotter.conf')
 
 #global variables
+global position
 position=[]
+position.append('')
+position.append('')
+position.append('')
+position.append('')
+global date
 date=datetime.date.today()
+global mag_var
 mag_var=[]
 mag_var.append('')
 mag_var.append('')
@@ -66,18 +73,29 @@ def create_mag_var():
 		mag_var.append('')
 
 def create_rmc(msg):
+	create_mag_var()
 	msgstr=str(msg)
 	items=msgstr.split(',')
 	last_item=items[12].split('*')
-	if mag_var[0]: mag_var[0]=str(mag_var[0]).zfill(5)
+	if mag_var[0]: mag_var[0]=str(mag_var[0])
 	rmc = pynmea2.RMC('OP', 'RMC', (items[1],items[2],items[3],items[4],items[5],items[6],items[7],items[8],items[9],mag_var[0],mag_var[1],last_item[0]))
 	rmc1=str(rmc)
 	rmc2=repr(rmc1)+"\r\n"
 	rmc3=rmc2.replace("'", "")
-	sock.sendto(rmc3, ('127.0.0.1', 10110))
+	sock.sendto(rmc3, ('localhost', 10110))
 	print rmc3
 
+def create_hdg():
+	create_mag_var()
+	hdg = pynmea2.HDG('OP', 'HDG', ('100','','',str(mag_var[0]),mag_var[1]))
+	hdg1=str(hdg)
+	hdg2=repr(hdg1)+"\r\n"
+	hdg3=hdg2.replace("'", "")
+	sock.sendto(hdg3, ('localhost', 10110))
+	print hdg3
+
 def check_nmea():
+	tick=time.time()
 	while True:
 		frase_nmea =''
 		try:
@@ -90,27 +108,43 @@ def check_nmea():
 			if frase_nmea:
 				try:
 					msg = pynmea2.parse(frase_nmea)
-					#gathering data
-					if msg.sentence_type == 'RMC' or msg.sentence_type =='RMA' or msg.sentence_type =='GGA' or msg.sentence_type =='GNS' or msg.sentence_type =='GLL':
+
+				###gathering data
+
+					#position
+					if msg.sentence_type == 'RMC' or msg.sentence_type =='GGA' or msg.sentence_type =='GNS' or msg.sentence_type =='GLL':
 						global position
 						position=[]
 						position.append(msg.lat)
 						position.append(msg.lat_dir)
 						position.append(msg.lon)
 						position.append(msg.lon_dir)
-					
+
+					#date
 					if msg.sentence_type == 'RMC':
 						global date
 						date=msg.datestamp
+					
+				####generate nmea
 
-					#generate nmea
+					#$OPRMC
 					if msg.talker != 'OP' and msg.sentence_type == 'RMC' and data_conf.get('STARTUP', 'nmea_rmc')=='1':
-						create_mag_var()
 						create_rmc(msg)
+
 				#except Exception,e: print str(e)
 				except: pass
 			else:
 				break
+
+	####generate nmea frecuency 0.5s
+		tick2=time.time()
+		if tick2-tick > 0.5:
+			tick=time.time()
+			#$OPHDG
+			if data_conf.get('STARTUP', 'nmea_hdg')=='1':
+				create_hdg()
+
+
 
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

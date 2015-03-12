@@ -118,12 +118,20 @@ class MainFrame(wx.Frame):
 		self.startup_remote_desktop.Bind(wx.EVT_CHECKBOX, self.startup)
 ###########################page1
 ########page2###################
-		wx.StaticBox(self.page2, size=(400, 100), pos=(10, 10))
+		wx.StaticBox(self.page2, size=(360, 70), pos=(10, 10))
 
-		self.mag_var = wx.CheckBox(self.page2, label=_('Add magnetic variation'), pos=(20, 25))
+		self.mag_var = wx.CheckBox(self.page2, label=_('Add magnetic variation to $--RMC'), pos=(20, 25))
 		self.mag_var.Bind(wx.EVT_CHECKBOX, self.nmea_rmc)
-		wx.StaticText(self.page2, label=_('Required data: Sentence $--RMC.\nGenerated sentence: $OPRMC'), pos=(20, 50))
+		wx.StaticText(self.page2, label=_('Generated sentence: $OPRMC'), pos=(20, 50))
 
+
+		wx.StaticBox(self.page2, size=(360, 70), pos=(10, 75))
+
+		self.heading = wx.CheckBox(self.page2, label=_('Add heading from IMU sensor'), pos=(20, 90))
+		self.heading.Bind(wx.EVT_CHECKBOX, self.nmea_hdg)
+		wx.StaticText(self.page2, label=_('Generated sentence: $OPHDG'), pos=(20, 115))
+		self.button_calibrate_imu =wx.Button(self.page2, label=_('Calibrate'), pos=(270, 105))
+		self.Bind(wx.EVT_BUTTON, self.calibrate_imu, self.button_calibrate_imu)
 
 ###########################page2
 ########page3###################
@@ -313,6 +321,7 @@ class MainFrame(wx.Frame):
 			self.check_bands.Disable()
 
 		if self.data_conf.get('STARTUP', 'nmea_rmc')=='1': self.mag_var.SetValue(True)
+		if self.data_conf.get('STARTUP', 'nmea_hdg')=='1': self.heading.SetValue(True)
 
 	def time_zone(self,event):
 		subprocess.Popen(['lxterminal', '-e', 'sudo dpkg-reconfigure tzdata'])
@@ -825,12 +834,22 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		else: 
 			self.data_conf.set('STARTUP', nmea_sentence, '0')
 		self.write_conf()
-		subprocess.Popen(['python', currentpath+'/nmea_process.py'])
+		if self.mag_var.GetValue() or self.heading.GetValue():
+			subprocess.Popen(['python', currentpath+'/nmea_process.py'])
 
 	def nmea_rmc(self, e):
 		sender = e.GetEventObject()
 		nmea_sentence='nmea_rmc'
 		self.nmea_process(sender, nmea_sentence)
+
+	def nmea_hdg(self, e):
+		sender = e.GetEventObject()
+		nmea_sentence='nmea_hdg'
+		self.nmea_process(sender, nmea_sentence)
+
+	def calibrate_imu(self, e):
+		subprocess.call(['pkill', 'RTIMULibDemoGL'])
+		subprocess.Popen('RTIMULibDemoGL', cwd=currentpath+'/imu')
 
 #######################definitions
 
