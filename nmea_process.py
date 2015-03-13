@@ -15,13 +15,18 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import sys, ConfigParser, os, socket, time, pynmea2, geomag, datetime
+import sys, ConfigParser, os, socket, time, pynmea2, geomag, datetime, RTIMU, math
 
 pathname = os.path.dirname(sys.argv[0])
 currentpath = os.path.abspath(pathname)
 
 data_conf = ConfigParser.SafeConfigParser()
 data_conf.read(currentpath+'/openplotter.conf')
+
+SETTINGS_FILE = "RTIMULib"
+s = RTIMU.Settings(SETTINGS_FILE)
+imu = RTIMU.RTIMU(s)
+imu.IMUInit()
 
 #global variables
 global position
@@ -86,8 +91,16 @@ def create_rmc(msg):
 	print rmc3
 
 def create_hdg():
+	heading=''
 	create_mag_var()
-	hdg = pynmea2.HDG('OP', 'HDG', ('100','','',str(mag_var[0]),mag_var[1]))
+	if imu.IMURead():
+		data = imu.getIMUData()
+		fusionPose = data["fusionPose"]
+		heading=math.degrees(fusionPose[2])
+		if heading<0:
+			heading=360+heading
+		heading=round(heading,1)
+	hdg = pynmea2.HDG('OP', 'HDG', (str(heading),'','',str(mag_var[0]),mag_var[1]))
 	hdg1=str(hdg)
 	hdg2=repr(hdg1)+"\r\n"
 	hdg3=hdg2.replace("'", "")
@@ -136,9 +149,9 @@ def check_nmea():
 			else:
 				break
 
-	####generate nmea frecuency 0.5s
+	####generate nmea frecuency 0.25s
 		tick2=time.time()
-		if tick2-tick > 0.5:
+		if tick2-tick > 0.1:
 			tick=time.time()
 			#$OPHDG
 			if data_conf.get('STARTUP', 'nmea_hdg')=='1':

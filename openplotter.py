@@ -835,19 +835,20 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.data_conf.set('STARTUP', nmea_sentence, '0')
 		self.write_conf()
 		if self.mag_var.GetValue() or self.heading.GetValue():
-			subprocess.Popen(['python', currentpath+'/nmea_process.py'])
+			subprocess.Popen(['python', currentpath+'/nmea_process.py'], cwd=currentpath+'/imu')
 
 	def nmea_rmc(self, e):
 		sender = e.GetEventObject()
-		nmea_sentence='nmea_rmc'
-		self.nmea_process(sender, nmea_sentence)
+		self.nmea_process(sender, 'nmea_rmc')
 
 	def nmea_hdg(self, e):
+		subprocess.call(['pkill', 'RTIMULibDemoGL'])
 		sender = e.GetEventObject()
-		nmea_sentence='nmea_hdg'
-		self.nmea_process(sender, nmea_sentence)
+		self.nmea_process(sender, 'nmea_hdg')
 
 	def calibrate_imu(self, e):
+		self.heading.SetValue(False)
+		self.nmea_process(self.heading, 'nmea_hdg' )
 		subprocess.call(['pkill', 'RTIMULibDemoGL'])
 		subprocess.Popen('RTIMULibDemoGL', cwd=currentpath+'/imu')
 
