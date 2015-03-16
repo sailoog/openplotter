@@ -29,7 +29,7 @@ Features
 
 TODO
 ------------
-* Pressure and temperature history
+* Pressure and temperature history from sensors
 * Calculate True Wind
 
 Instructions
