@@ -118,19 +118,22 @@ class MainFrame(wx.Frame):
 		self.startup_remote_desktop.Bind(wx.EVT_CHECKBOX, self.startup)
 ###########################page1
 ########page2###################
-		wx.StaticBox(self.page2, size=(360, 70), pos=(10, 10))
-
-		self.mag_var = wx.CheckBox(self.page2, label=_('Add magnetic variation to $--RMC'), pos=(20, 25))
+		wx.StaticText(self.page2, label=_('NMEA rate (seconds)'), pos=(20, 25))
+		self.rate_list = ['0.1', '0.25', '0.5', '0.75', '1']
+		self.rate= wx.ComboBox(self.page2, choices=self.rate_list, style=wx.CB_READONLY, size=(80, 32), pos=(220, 18))
+		self.button_ok_rate =wx.Button(self.page2, label=_('Ok'), pos=(310, 18))
+		self.Bind(wx.EVT_BUTTON, self.ok_rate, self.button_ok_rate)
+		
+		wx.StaticBox(self.page2, size=(340, 70), pos=(10, 50))
+		self.mag_var = wx.CheckBox(self.page2, label=_('Add magnetic variation to $--RMC'), pos=(20, 65))
 		self.mag_var.Bind(wx.EVT_CHECKBOX, self.nmea_rmc)
-		wx.StaticText(self.page2, label=_('Generated sentence: $OPRMC'), pos=(20, 50))
+		wx.StaticText(self.page2, label=_('Generated sentence: $OPRMC'), pos=(20, 90))
 
-
-		wx.StaticBox(self.page2, size=(360, 70), pos=(10, 75))
-
-		self.heading = wx.CheckBox(self.page2, label=_('Add heading from IMU sensor'), pos=(20, 90))
+		wx.StaticBox(self.page2, size=(340, 75), pos=(10, 115))
+		self.heading = wx.CheckBox(self.page2, label=_('Generate heading from IMU sensor'), pos=(20, 130))
 		self.heading.Bind(wx.EVT_CHECKBOX, self.nmea_hdg)
-		wx.StaticText(self.page2, label=_('Generated sentence: $OPHDG'), pos=(20, 115))
-		self.button_calibrate_imu =wx.Button(self.page2, label=_('Calibrate'), pos=(270, 105))
+		wx.StaticText(self.page2, label=_('Generated sentence: $OPHDG'), pos=(20, 155))
+		self.button_calibrate_imu =wx.Button(self.page2, label=_('Calibrate'), pos=(250, 150))
 		self.Bind(wx.EVT_BUTTON, self.calibrate_imu, self.button_calibrate_imu)
 
 ###########################page2
@@ -321,7 +324,12 @@ class MainFrame(wx.Frame):
 			self.check_bands.Disable()
 
 		if self.data_conf.get('STARTUP', 'nmea_rmc')=='1': self.mag_var.SetValue(True)
+
 		if self.data_conf.get('STARTUP', 'nmea_hdg')=='1': self.heading.SetValue(True)
+
+		self.rate.SetValue(self.data_conf.get('STARTUP', 'nmea_rate'))
+
+
 
 	def time_zone(self,event):
 		subprocess.Popen(['lxterminal', '-e', 'sudo dpkg-reconfigure tzdata'])
@@ -834,6 +842,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		else: 
 			self.data_conf.set('STARTUP', nmea_sentence, '0')
 		self.write_conf()
+		self.start_nmea_process()
+
+	def start_nmea_process(self):
 		if self.mag_var.GetValue() or self.heading.GetValue():
 			subprocess.Popen(['python', currentpath+'/nmea_process.py'], cwd=currentpath+'/imu')
 
@@ -851,6 +862,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.nmea_process(self.heading, 'nmea_hdg' )
 		subprocess.call(['pkill', 'RTIMULibDemoGL'])
 		subprocess.Popen('RTIMULibDemoGL', cwd=currentpath+'/imu')
+
+	def ok_rate(self, e):
+		subprocess.call(['pkill', '-f', 'nmea_process.py'])
+		rate=self.rate.GetValue()
+		self.data_conf.set('STARTUP', 'nmea_rate', rate)
+		self.write_conf()
+		self.start_nmea_process()
 
 #######################definitions
 

@@ -29,7 +29,6 @@ opencpn_no=data_conf.get('STARTUP', 'opencpn_no_opengl')
 opencpn_fullscreen=data_conf.get('STARTUP', 'opencpn_fullscreen')
 x11vnc=data_conf.get('STARTUP', 'x11vnc')
 gps_time=data_conf.get('STARTUP', 'gps_time')
-sow=data_conf.get('STARTUP', 'iivbw')
 
 enable=data_conf.get('AIS-SDR', 'enable')
 gain=data_conf.get('AIS-SDR', 'gain')
@@ -39,6 +38,11 @@ channel=data_conf.get('AIS-SDR', 'channel')
 wifi_server=data_conf.get('WIFI', 'enable')
 wlan=data_conf.get('WIFI', 'device')
 passw=data_conf.get('WIFI', 'password')
+
+nmea_rmc=data_conf.get('STARTUP', 'nmea_rmc')
+nmea_hdg=data_conf.get('STARTUP', 'nmea_hdg')
+
+#######################################################
 
 if x11vnc=='1':
 	subprocess.Popen(['x11vnc', '-forever'])         
@@ -78,8 +82,5 @@ else:
 if gps_time=='1':
 	subprocess.call(['sudo', 'python', currentpath+'/time_gps.py'])
 
-if sow=='1':
-	subprocess.Popen(['python', currentpath+'/sog2sow.py'])
-else:
-	subprocess.call(['pkill', '-f', 'sog2sow.py'])
+if nmea_hdg or nmea_rmc: subprocess.Popen(['python', currentpath+'/nmea_process.py'], cwd=currentpath+'/imu')
 

@@ -26,17 +26,11 @@ data_conf.read(currentpath+'/openplotter.conf')
 
 #global variables
 global position
-position=[]
-position.append('')
-position.append('')
-position.append('')
-position.append('')
+position=['','','','']
 global date
 date=datetime.date.today()
 global mag_var
-mag_var=[]
-mag_var.append('')
-mag_var.append('')
+mag_var=['','']
 global heading
 heading=''
 
@@ -53,7 +47,7 @@ def thread_frecuency():
 
  	while True:
  		tick2=time.time()
-		if tick2-tick > 0.2:
+		if tick2-tick > float(data_conf.get('STARTUP', 'nmea_rate')):
 			tick=time.time()
 # mag_var
 			mag_var=[]
@@ -66,14 +60,11 @@ def thread_frecuency():
 				var=float(geomag.declination(lat, lon, 0, now))
 				var=round(var,1)
 				if var >= 0.0:
-					mag_var.append(var)
-					mag_var.append('E')
+					mag_var=[var,'E']
 				if var < 0.0:
-					mag_var.append(var * -1)
-					mag_var.append('W')
+					mag_var=[var*-1,'W']
 			else:
-				mag_var.append('')
-				mag_var.append('')
+				mag_var=['','']
 
 # hdg
 			if data_conf.get('STARTUP', 'nmea_hdg')=='1':
@@ -121,6 +112,8 @@ def create_rmc(msg):
 
 
 def check_nmea():
+	global position
+	global date
 	while True:
 		frase_nmea =''
 		try:
@@ -136,16 +129,10 @@ def check_nmea():
 
 					#position
 					if msg.sentence_type == 'RMC' or msg.sentence_type =='GGA' or msg.sentence_type =='GNS' or msg.sentence_type =='GLL':
-						global position
-						position=[]
-						position.append(msg.lat)
-						position.append(msg.lat_dir)
-						position.append(msg.lon)
-						position.append(msg.lon_dir)
+						position=[msg.lat, msg.lat_dir, msg.lon, msg.lon_dir]
 
 					#date
 					if msg.sentence_type == 'RMC':
-						global date
 						date=msg.datestamp
 
 					#$OPRMC
@@ -168,7 +155,7 @@ while True:
 	try:
 		sock_in = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		sock_in.settimeout(10)
-		sock_in.connect(('127.0.0.1', 10110))
+		sock_in.connect(('localhost', 10110))
 	except socket.error, error_msg:
 		print 'Failed to connect with localhost:10110.'
 		print 'Error: '+ str(error_msg[0])
