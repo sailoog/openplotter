@@ -12,14 +12,25 @@ OpenPlotter
 
 Features
 ------------
+
+* Plotter with OpenCPN
+* Meteo with zyGrib
 * NMEA Multiplexer
-* Reversible WiFi server
-* SDR-AIS receiver, calibrator and decoder
+* WiFi NMEA server/client through the same device
+* Remote desktop
+* SDR-AIS receiver and decoder. Calibration tools.
+* Auto-calculate magnetic variation for date and position
+* Electronic compass from IMU sensor. Tilt compensated. Calibration tools.
 * Set system time from NMEA data
 * Set time zone
 * Set GPSD
-* Speed Through Water (STW) simulation from Speed Over Ground (SOG)
 * Select programs to run at startup
+
+
+TODO
+------------
+* Pressure and temperature history
+* Calculate True Wind
 
 Instructions
 ------------
