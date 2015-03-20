@@ -82,5 +82,5 @@ else:
 if gps_time=='1':
 	subprocess.call(['sudo', 'python', currentpath+'/time_gps.py'])
 
-if nmea_hdg or nmea_rmc: subprocess.Popen(['python', currentpath+'/nmea_process.py'], cwd=currentpath+'/imu')
+if nmea_hdg=='1' or nmea_rmc=='1': subprocess.Popen(['python', currentpath+'/nmea_process.py'], cwd=currentpath+'/imu')
 
