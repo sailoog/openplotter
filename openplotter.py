@@ -133,9 +133,13 @@ class MainFrame(wx.Frame):
 		self.heading = wx.CheckBox(self.page2, label=_('Generate heading from IMU sensor'), pos=(20, 130))
 		self.heading.Bind(wx.EVT_CHECKBOX, self.nmea_hdg)
 		wx.StaticText(self.page2, label=_('Generated sentence: $OPHDG'), pos=(20, 155))
-		self.button_calibrate_imu =wx.Button(self.page2, label=_('Calibrate'), pos=(250, 150))
+		self.button_calibrate_imu =wx.Button(self.page2, label=_('Calibrate'), pos=(245, 150))
 		self.Bind(wx.EVT_BUTTON, self.calibrate_imu, self.button_calibrate_imu)
 
+		wx.StaticBox(self.page2, size=(340, 95), pos=(10, 185))
+		self.press_temp = wx.CheckBox(self.page2, label=_('Generate pressure and temperature\nfrom IMU sensor'), pos=(20, 200))
+		self.press_temp.Bind(wx.EVT_CHECKBOX, self.nmea_mda)
+		wx.StaticText(self.page2, label=_('Generated sentence: $OPMDA'), pos=(20, 240))
 ###########################page2
 ########page3###################
 		wx.StaticBox(self.page3, size=(400, 45), pos=(10, 10))
@@ -323,12 +327,13 @@ class MainFrame(wx.Frame):
 			self.check_channels.Disable()
 			self.check_bands.Disable()
 
+		self.rate.SetValue(self.data_conf.get('STARTUP', 'nmea_rate'))
+
 		if self.data_conf.get('STARTUP', 'nmea_rmc')=='1': self.mag_var.SetValue(True)
 
 		if self.data_conf.get('STARTUP', 'nmea_hdg')=='1': self.heading.SetValue(True)
 
-		self.rate.SetValue(self.data_conf.get('STARTUP', 'nmea_rate'))
-
+		if self.data_conf.get('STARTUP', 'nmea_mda')=='1': self.press_temp.SetValue(True)
 
 
 	def time_zone(self,event):
@@ -845,7 +850,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.start_nmea_process()
 
 	def start_nmea_process(self):
-		if self.mag_var.GetValue() or self.heading.GetValue():
+		if self.mag_var.GetValue() or self.heading.GetValue() or self.press_temp.GetValue():
 			subprocess.Popen(['python', currentpath+'/nmea_process.py'], cwd=currentpath+'/imu')
 
 	def nmea_rmc(self, e):
@@ -869,6 +874,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.data_conf.set('STARTUP', 'nmea_rate', rate)
 		self.write_conf()
 		self.start_nmea_process()
+
+	def nmea_mda(self, e):
+		sender = e.GetEventObject()
+		self.nmea_process(sender, 'nmea_mda')
 
 #######################definitions
 

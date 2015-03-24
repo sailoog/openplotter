@@ -41,6 +41,7 @@ passw=data_conf.get('WIFI', 'password')
 
 nmea_rmc=data_conf.get('STARTUP', 'nmea_rmc')
 nmea_hdg=data_conf.get('STARTUP', 'nmea_hdg')
+nmea_mda=data_conf.get('STARTUP', 'nmea_mda')
 
 #######################################################
 
@@ -82,5 +83,5 @@ else:
 if gps_time=='1':
 	subprocess.call(['sudo', 'python', currentpath+'/time_gps.py'])
 
-if nmea_hdg=='1' or nmea_rmc=='1': subprocess.Popen(['python', currentpath+'/nmea_process.py'], cwd=currentpath+'/imu')
+if nmea_hdg=='1' or nmea_rmc=='1' or nmea_mda=='1': subprocess.Popen(['python', currentpath+'/nmea_process.py'], cwd=currentpath+'/imu')
 

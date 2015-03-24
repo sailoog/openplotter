@@ -33,55 +33,82 @@ global mag_var
 mag_var=['','']
 global heading
 heading=''
+global pressure
+pressure=''
+global temperature
+temperature=''
 
 def thread_frecuency():
 	SETTINGS_FILE = "RTIMULib"
 	s = RTIMU.Settings(SETTINGS_FILE)
 	imu = RTIMU.RTIMU(s)
+	pressure_val = RTIMU.RTPressure(s)
 	imu.IMUInit()
+	pressure_val.pressureInit()
 
- 	global mag_var
  	global heading
+ 	global pressure
+ 	global temperature
 
 	tick=time.time()
 
  	while True:
- 		tick2=time.time()
-		if tick2-tick > float(data_conf.get('STARTUP', 'nmea_rate')):
-			tick=time.time()
-# mag_var
-			mag_var=[]
-			if position[0] and position[2]:
-				lat=lat_DM_to_DD(position[0])
-				if position[1]=='S': lat = lat * -1
-				lon=lon_DM_to_DD(position[2])
-				if position[3]=='W': lon = lon * -1
-				now = date
-				var=float(geomag.declination(lat, lon, 0, now))
-				var=round(var,1)
-				if var >= 0.0:
-					mag_var=[var,'E']
-				if var < 0.0:
-					mag_var=[var*-1,'W']
-			else:
-				mag_var=['','']
 
-# hdg
+ 		tick2=time.time()
+
+ 		if imu.IMURead():
+			data = imu.getIMUData()
+			(data["pressureValid"], data["pressure"], data["temperatureValid"], data["temperature"]) = pressure_val.pressureRead()
+			fusionPose = data["fusionPose"]
+			heading0=math.degrees(fusionPose[2])
+			if heading0<0:
+				heading0=360+heading0
+			heading=round(heading0,1)
+			if (data["pressureValid"]):
+				pressure=data["pressure"]
+			if (data["temperatureValid"]):
+				temperature=data["temperature"]
+
+ 		
+		if tick2-tick > float(data_conf.get('STARTUP', 'nmea_rate')):
+
+			tick=time.time()
+# HDG
 			if data_conf.get('STARTUP', 'nmea_hdg')=='1':
-				if imu.IMURead():
-					data = imu.getIMUData()
-					fusionPose = data["fusionPose"]
-					heading=math.degrees(fusionPose[2])
-					if heading<0:
-						heading=360+heading
-					heading=round(heading,1)
+				calculate_mag_var()
 				hdg = pynmea2.HDG('OP', 'HDG', (str(heading),'','',str(mag_var[0]),mag_var[1]))
 				hdg1=str(hdg)
 				hdg2=repr(hdg1)+"\r\n"
 				hdg3=hdg2.replace("'", "")
 				sock.sendto(hdg3, ('localhost', 10110))
-				print hdg3
+# MDA			
+			if data_conf.get('STARTUP', 'nmea_mda')=='1':
+				press=round(pressure/1000,4)
+				temp= round(temperature,1)
+				mda = pynmea2.MDA('OP', 'MDA', ('','',str(press),'B',str(temp),'C','','','','','','','','','','','','','',''))
+				mda1=str(mda)
+				mda2=repr(mda1)+"\r\n"
+				mda3=mda2.replace("'", "")
+				sock.sendto(mda3, ('localhost', 10110))
 
+
+
+def calculate_mag_var():
+	global mag_var
+	if position[0] and position[2]:
+		lat=lat_DM_to_DD(position[0])
+		if position[1]=='S': lat = lat * -1
+		lon=lon_DM_to_DD(position[2])
+		if position[3]=='W': lon = lon * -1
+		now = date
+		var=float(geomag.declination(lat, lon, 0, now))
+		var=round(var,1)
+		if var >= 0.0:
+			mag_var=[var,'E']
+		if var < 0.0:
+			mag_var=[var*-1,'W']
+	else:
+		mag_var=['','']
 
 def lat_DM_to_DD(DM):
 	degrees=float(DM[0:2])
@@ -97,7 +124,6 @@ def lon_DM_to_DD(DM):
 	DD=degrees+minutes
 	return DD
 
-
 def create_rmc(msg):
 	msgstr=str(msg)
 	items=msgstr.split(',')
@@ -108,8 +134,6 @@ def create_rmc(msg):
 	rmc2=repr(rmc1)+"\r\n"
 	rmc3=rmc2.replace("'", "")
 	sock.sendto(rmc3, ('localhost', 10110))
-	print rmc3
-
 
 def check_nmea():
 	global position
