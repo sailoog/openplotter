@@ -136,10 +136,14 @@ class MainFrame(wx.Frame):
 		self.button_calibrate_imu =wx.Button(self.page2, label=_('Calibrate'), pos=(245, 150))
 		self.Bind(wx.EVT_BUTTON, self.calibrate_imu, self.button_calibrate_imu)
 
-		wx.StaticBox(self.page2, size=(340, 95), pos=(10, 185))
+		wx.StaticBox(self.page2, size=(340, 115), pos=(10, 185))
 		self.press_temp = wx.CheckBox(self.page2, label=_('Generate pressure and temperature\nfrom IMU sensor'), pos=(20, 200))
 		self.press_temp.Bind(wx.EVT_CHECKBOX, self.nmea_mda)
 		wx.StaticText(self.page2, label=_('Generated sentence: $OPMDA'), pos=(20, 240))
+		self.press_temp_log = wx.CheckBox(self.page2, label=_('Data logging'), pos=(20, 265))
+		self.press_temp_log.Bind(wx.EVT_CHECKBOX, self.enable_press_temp_log)
+		self.button_graph =wx.Button(self.page2, label=_('Graph'), pos=(245, 260))
+		self.Bind(wx.EVT_BUTTON, self.show_graph, self.button_graph)
 ###########################page2
 ########page3###################
 		wx.StaticBox(self.page3, size=(400, 45), pos=(10, 10))
@@ -334,6 +338,9 @@ class MainFrame(wx.Frame):
 		if self.data_conf.get('STARTUP', 'nmea_hdg')=='1': self.heading.SetValue(True)
 
 		if self.data_conf.get('STARTUP', 'nmea_mda')=='1': self.press_temp.SetValue(True)
+		else: self.press_temp_log.Disable()
+
+		if self.data_conf.get('STARTUP', 'press_temp_log')=='1': self.press_temp_log.SetValue(True)
 
 
 	def time_zone(self,event):
@@ -877,7 +884,22 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def nmea_mda(self, e):
 		sender = e.GetEventObject()
+		isChecked = sender.GetValue()
+		if isChecked:     
+			self.press_temp_log.Enable()
+		else:
+			self.press_temp_log.SetValue(False)
+			self.press_temp_log.Disable()
 		self.nmea_process(sender, 'nmea_mda')
+		self.nmea_process(self.press_temp_log, 'press_temp_log')
+
+	def enable_press_temp_log(self, e):
+		sender = e.GetEventObject()
+		self.nmea_process(sender, 'press_temp_log')
+
+	def show_graph(self, e):
+		subprocess.call(['pkill', '-f', 'graph.py'])
+		subprocess.Popen(['python', currentpath+'/graph.py'])
 
 #######################definitions
 

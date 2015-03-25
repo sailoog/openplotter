@@ -67,6 +67,7 @@ class Waterfall(object):
         self.fig.canvas.mpl_connect('scroll_event', self.on_scroll)
         self.fig.canvas.mpl_connect('key_press_event', self.on_key_press)
         self.fig.canvas.mpl_connect('key_release_event', self.on_key_release)
+        self.fig.canvas.set_window_title('AIS signal')
 
     def update_plot_labels(self):
         fc = self.sdr.fc

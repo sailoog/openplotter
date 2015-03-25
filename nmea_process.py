@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import sys, ConfigParser, os, socket, time, pynmea2, geomag, datetime, RTIMU, math, threading
+import sys, ConfigParser, os, socket, time, pynmea2, geomag, datetime, RTIMU, math, threading, csv
 
 pathname = os.path.dirname(sys.argv[0])
 currentpath = os.path.abspath(pathname)
@@ -46,17 +46,27 @@ def thread_frecuency():
 	imu.IMUInit()
 	pressure_val.pressureInit()
 
- 	global heading
- 	global pressure
- 	global temperature
+	global heading
+	global pressure
+	global temperature
 
 	tick=time.time()
 
- 	while True:
+	ifile  = open(currentpath+'/weather_log.csv', "r")
+	reader = csv.reader(ifile)
+	log_list = []
+	for row in reader:
+		log_list.append(row)
+	ifile.close()
+	if log_list: last_log=float(log_list[len(log_list)-1][0])
+	else: last_log=0
 
- 		tick2=time.time()
 
- 		if imu.IMURead():
+	while True:
+
+		tick2=time.time()
+
+		if imu.IMURead():
 			data = imu.getIMUData()
 			(data["pressureValid"], data["pressure"], data["temperatureValid"], data["temperature"]) = pressure_val.pressureRead()
 			fusionPose = data["fusionPose"]
@@ -69,7 +79,7 @@ def thread_frecuency():
 			if (data["temperatureValid"]):
 				temperature=data["temperature"]
 
- 		
+		
 		if tick2-tick > float(data_conf.get('STARTUP', 'nmea_rate')):
 
 			tick=time.time()
@@ -90,7 +100,24 @@ def thread_frecuency():
 				mda2=repr(mda1)+"\r\n"
 				mda3=mda2.replace("'", "")
 				sock.sendto(mda3, ('localhost', 10110))
-
+# log temperature pressure
+			if data_conf.get('STARTUP', 'press_temp_log')=='1':
+				if tick-last_log > 300:
+					last_log=tick
+					new_row=[tick,pressure,temperature]
+					if len(log_list) < 288:
+						log_list.append(new_row)
+						ofile = open(currentpath+'/weather_log.csv', "a")
+						writer = csv.writer(ofile)
+						writer.writerow(new_row)
+					if len(log_list) >= 288:
+						del log_list[0]
+						log_list.append(new_row)
+						ofile = open(currentpath+'/weather_log.csv', "w")
+						writer = csv.writer(ofile)
+						for row in log_list:
+							writer.writerow(row)
+					ofile.close()
 
 
 def calculate_mag_var():
