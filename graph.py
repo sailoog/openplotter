@@ -39,6 +39,7 @@ for i in range(0,len(log_list)):
 	temperature.append(round(float(log_list[i][2]),1))
 
 fig=plt.figure()
+plt.rc("font", size=10)
 fig.canvas.set_window_title('Thermograph / Barograph')
 ax1 = fig.add_subplot(211)
 ax2 = fig.add_subplot(212, sharex=ax1)
