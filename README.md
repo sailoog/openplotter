@@ -21,6 +21,7 @@ Features
 * SDR-AIS receiver and decoder. Calibration tools.
 * Auto-calculate magnetic variation for date and position
 * Electronic compass from IMU sensor. Tilt compensated. Calibration tools.
+* Barograph and thermograph from IMU sensor. Generate NMEA pressure and temperature data.
 * Set system time from NMEA data
 * Set time zone
 * Set GPSD
@@ -29,10 +30,9 @@ Features
 
 TODO
 ------------
-* Pressure and temperature history from sensors
 * Calculate True Wind
 
-Instructions
+Build instructions
 ------------
 https://github.com/sailoog/openplotter/wiki
 
