@@ -18,6 +18,7 @@
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import os, sys, datetime, csv
+from matplotlib.widgets import Cursor
 
 pathname = os.path.dirname(sys.argv[0])
 currentpath = os.path.abspath(pathname)
