@@ -55,4 +55,6 @@ ax2.set_title('Pressure (hPa)')
 ax2.grid(True)
 
 plt.tight_layout()
+cursor = Cursor(ax1, useblit=True, color='gray', linewidth=1 )
+cursor2 = Cursor(ax2, useblit=True, color='gray', linewidth=1 )
 plt.show()
