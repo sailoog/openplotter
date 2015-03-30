@@ -142,7 +142,9 @@ class MainFrame(wx.Frame):
 		wx.StaticText(self.page2, label=_('Generated sentence: $OPMDA'), pos=(20, 240))
 		self.press_temp_log = wx.CheckBox(self.page2, label=_('Data logging'), pos=(20, 265))
 		self.press_temp_log.Bind(wx.EVT_CHECKBOX, self.enable_press_temp_log)
-		self.button_graph =wx.Button(self.page2, label=_('Graph'), pos=(245, 260))
+		self.button_reset =wx.Button(self.page2, label=_('Reset'), pos=(145, 260))
+		self.Bind(wx.EVT_BUTTON, self.reset_graph, self.button_reset)
+		self.button_graph =wx.Button(self.page2, label=_('Show'), pos=(245, 260))
 		self.Bind(wx.EVT_BUTTON, self.show_graph, self.button_graph)
 ###########################page2
 ########page3###################
@@ -847,42 +849,31 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 ######################################nmea
 
 	def nmea_process(self, sender, nmea_sentence ):
-		subprocess.call(['pkill', '-f', 'nmea_process.py'])
 		isChecked = sender.GetValue()
 		if isChecked:     
 			self.data_conf.set('STARTUP', nmea_sentence, '1')
 		else: 
 			self.data_conf.set('STARTUP', nmea_sentence, '0')
 		self.write_conf()
-		self.start_nmea_process()
 
 	def start_nmea_process(self):
+		subprocess.call(['pkill', '-f', 'nmea_process.py'])
 		if self.mag_var.GetValue() or self.heading.GetValue() or self.press_temp.GetValue():
 			subprocess.Popen(['python', currentpath+'/nmea_process.py'], cwd=currentpath+'/imu')
 
 	def nmea_rmc(self, e):
 		sender = e.GetEventObject()
 		self.nmea_process(sender, 'nmea_rmc')
+		self.start_nmea_process()
 
 	def nmea_hdg(self, e):
 		subprocess.call(['pkill', 'RTIMULibDemoGL'])
 		sender = e.GetEventObject()
 		self.nmea_process(sender, 'nmea_hdg')
-
-	def calibrate_imu(self, e):
-		self.heading.SetValue(False)
-		self.nmea_process(self.heading, 'nmea_hdg' )
-		subprocess.call(['pkill', 'RTIMULibDemoGL'])
-		subprocess.Popen('RTIMULibDemoGL', cwd=currentpath+'/imu')
-
-	def ok_rate(self, e):
-		subprocess.call(['pkill', '-f', 'nmea_process.py'])
-		rate=self.rate.GetValue()
-		self.data_conf.set('STARTUP', 'nmea_rate', rate)
-		self.write_conf()
 		self.start_nmea_process()
 
 	def nmea_mda(self, e):
+		subprocess.call(['pkill', 'RTIMULibDemoGL'])
 		sender = e.GetEventObject()
 		isChecked = sender.GetValue()
 		if isChecked:     
@@ -892,14 +883,44 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.press_temp_log.Disable()
 		self.nmea_process(sender, 'nmea_mda')
 		self.nmea_process(self.press_temp_log, 'press_temp_log')
+		self.start_nmea_process()
 
 	def enable_press_temp_log(self, e):
 		sender = e.GetEventObject()
 		self.nmea_process(sender, 'press_temp_log')
+		self.start_nmea_process()
+
+	def calibrate_imu(self, e):
+		self.heading.SetValue(False)
+		self.press_temp.SetValue(False)
+		self.press_temp_log.SetValue(False)
+		self.press_temp_log.Disable()
+		self.nmea_process(self.heading, 'nmea_hdg' )
+		self.nmea_process(self.press_temp, 'nmea_mda' )
+		self.nmea_process(self.press_temp_log, 'press_temp_log')
+		self.start_nmea_process()
+		subprocess.call(['pkill', 'RTIMULibDemoGL'])
+		subprocess.Popen('RTIMULibDemoGL', cwd=currentpath+'/imu')
+		msg=_('Heading, temperature and pressure generation disabled.\nAfter calibrating, enable heading, temperature and pressure generation again.')
+		self.ShowMessage(msg)
+
+	def ok_rate(self, e):
+		subprocess.call(['pkill', '-f', 'nmea_process.py'])
+		rate=self.rate.GetValue()
+		self.data_conf.set('STARTUP', 'nmea_rate', rate)
+		self.write_conf()
+		self.start_nmea_process()
 
 	def show_graph(self, e):
 		subprocess.call(['pkill', '-f', 'graph.py'])
 		subprocess.Popen(['python', currentpath+'/graph.py'])
+
+	def	reset_graph(self, e):
+		data=''
+		file = open(currentpath+'/weather_log.csv', 'w')
+		file.write(data)
+		file.close()
+
 
 #######################definitions
 

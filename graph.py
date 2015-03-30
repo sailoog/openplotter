@@ -39,6 +39,11 @@ for i in range(0,len(log_list)):
 	pressure.append(round(float(log_list[i][1]),1))
 	temperature.append(round(float(log_list[i][2]),1))
 
+if len(dates)==0:
+        dates.append(datetime.datetime.now())
+        pressure.append(0)
+        temperature.append(0)
+
 fig=plt.figure()
 plt.rc("font", size=10)
 fig.canvas.set_window_title('Thermograph / Barograph')
@@ -46,12 +51,12 @@ ax1 = fig.add_subplot(211)
 ax2 = fig.add_subplot(212, sharex=ax1)
 
 ax1.plot(dates,temperature,'ro-')
-ax1.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M\n%d-%m'))
+ax1.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M\n%d-%m-%y\n'))
 ax1.set_title('Temperature (Cel)')
 ax1.grid(True)
 
 ax2.plot(dates,pressure,'go-')
-ax2.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M\n%d-%m'))
+ax2.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M\n%d-%m-%y\n'))
 ax2.set_title('Pressure (hPa)')
 ax2.grid(True)
 

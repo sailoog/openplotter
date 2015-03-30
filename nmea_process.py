@@ -66,18 +66,19 @@ def thread_frecuency():
 
 		tick2=time.time()
 
-		if imu.IMURead():
-			data = imu.getIMUData()
-			(data["pressureValid"], data["pressure"], data["temperatureValid"], data["temperature"]) = pressure_val.pressureRead()
-			fusionPose = data["fusionPose"]
-			heading0=math.degrees(fusionPose[2])
-			if heading0<0:
-				heading0=360+heading0
-			heading=round(heading0,1)
-			if (data["pressureValid"]):
-				pressure=data["pressure"]
-			if (data["temperatureValid"]):
-				temperature=data["temperature"]
+		if data_conf.get('STARTUP', 'nmea_mda')=='1' or data_conf.get('STARTUP', 'nmea_hdg')=='1':
+			if imu.IMURead():
+				data = imu.getIMUData()
+				(data["pressureValid"], data["pressure"], data["temperatureValid"], data["temperature"]) = pressure_val.pressureRead()
+				fusionPose = data["fusionPose"]
+				heading0=math.degrees(fusionPose[2])
+				if heading0<0:
+					heading0=360+heading0
+				heading=round(heading0,1)
+				if (data["pressureValid"]):
+					pressure=data["pressure"]
+				if (data["temperatureValid"]):
+					temperature=data["temperature"]
 
 		
 		if tick2-tick > float(data_conf.get('STARTUP', 'nmea_rate')):
