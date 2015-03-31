@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, gettext, os, sys, ConfigParser, subprocess
+import wx, gettext, os, sys, ConfigParser, subprocess, RTIMU
 import wx.lib.scrolledpanel as scrolled
 
 home = os.path.expanduser('~')
@@ -118,33 +118,35 @@ class MainFrame(wx.Frame):
 		self.startup_remote_desktop.Bind(wx.EVT_CHECKBOX, self.startup)
 ###########################page1
 ########page2###################
-		wx.StaticText(self.page2, label=_('NMEA rate (seconds)'), pos=(20, 25))
+		wx.StaticBox(self.page2, size=(675, 50), pos=(10, 10))
+		wx.StaticText(self.page2, label=_('NMEA rate (seconds)'), pos=(20, 30))
 		self.rate_list = ['0.1', '0.25', '0.5', '0.75', '1']
-		self.rate= wx.ComboBox(self.page2, choices=self.rate_list, style=wx.CB_READONLY, size=(80, 32), pos=(220, 18))
-		self.button_ok_rate =wx.Button(self.page2, label=_('Ok'), pos=(310, 18))
+		self.rate= wx.ComboBox(self.page2, choices=self.rate_list, style=wx.CB_READONLY, size=(80, 32), pos=(180, 23))
+		self.button_ok_rate =wx.Button(self.page2, label=_('Ok'),size=(70, 32), pos=(270, 23))
 		self.Bind(wx.EVT_BUTTON, self.ok_rate, self.button_ok_rate)
 		
-		wx.StaticBox(self.page2, size=(340, 70), pos=(10, 50))
-		self.mag_var = wx.CheckBox(self.page2, label=_('Add magnetic variation to $--RMC'), pos=(20, 65))
+		wx.StaticBox(self.page2, size=(340, 65), pos=(10, 55))
+		self.mag_var = wx.CheckBox(self.page2, label=_('Add magnetic variation to $--RMC'), pos=(20, 70))
 		self.mag_var.Bind(wx.EVT_CHECKBOX, self.nmea_rmc)
-		wx.StaticText(self.page2, label=_('Generated sentence: $OPRMC'), pos=(20, 90))
+		wx.StaticText(self.page2, label=_('Generated sentence: $OPRMC'), pos=(20, 95))
 
-		wx.StaticBox(self.page2, size=(340, 75), pos=(10, 115))
-		self.heading = wx.CheckBox(self.page2, label=_('Generate heading from IMU sensor'), pos=(20, 130))
+		self.imu_tag=wx.StaticText(self.page2, label=_('IMU sensor detected: None'), pos=(20, 125))
+		wx.StaticBox(self.page2, size=(340, 75), pos=(10, 135))
+		self.heading = wx.CheckBox(self.page2, label=_('Generate heading from IMU sensor'), pos=(20, 150))
 		self.heading.Bind(wx.EVT_CHECKBOX, self.nmea_hdg)
-		wx.StaticText(self.page2, label=_('Generated sentence: $OPHDG'), pos=(20, 155))
-		self.button_calibrate_imu =wx.Button(self.page2, label=_('Calibrate'), pos=(245, 150))
+		wx.StaticText(self.page2, label=_('Generated sentence: $OPHDG'), pos=(20, 175))
+		self.button_calibrate_imu =wx.Button(self.page2, label=_('Calibrate'), pos=(245, 170))
 		self.Bind(wx.EVT_BUTTON, self.calibrate_imu, self.button_calibrate_imu)
 
-		wx.StaticBox(self.page2, size=(340, 115), pos=(10, 185))
-		self.press_temp = wx.CheckBox(self.page2, label=_('Generate pressure and temperature\nfrom IMU sensor'), pos=(20, 200))
+		wx.StaticBox(self.page2, size=(340, 115), pos=(10, 205))
+		self.press_temp = wx.CheckBox(self.page2, label=_('Generate pressure and temperature\nfrom IMU sensor'), pos=(20, 220))
 		self.press_temp.Bind(wx.EVT_CHECKBOX, self.nmea_mda)
-		wx.StaticText(self.page2, label=_('Generated sentence: $OPMDA'), pos=(20, 240))
-		self.press_temp_log = wx.CheckBox(self.page2, label=_('Data logging'), pos=(20, 265))
+		wx.StaticText(self.page2, label=_('Generated sentence: $OPMDA'), pos=(20, 260))
+		self.press_temp_log = wx.CheckBox(self.page2, label=_('Data logging'), pos=(20, 285))
 		self.press_temp_log.Bind(wx.EVT_CHECKBOX, self.enable_press_temp_log)
-		self.button_reset =wx.Button(self.page2, label=_('Reset'), pos=(145, 260))
+		self.button_reset =wx.Button(self.page2, label=_('Reset'), pos=(145, 280))
 		self.Bind(wx.EVT_BUTTON, self.reset_graph, self.button_reset)
-		self.button_graph =wx.Button(self.page2, label=_('Show'), pos=(245, 260))
+		self.button_graph =wx.Button(self.page2, label=_('Show'), pos=(245, 280))
 		self.Bind(wx.EVT_BUTTON, self.show_graph, self.button_graph)
 ###########################page2
 ########page3###################
@@ -205,7 +207,7 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.check_channel, self.check_channels)
 
 		wx.StaticBox(self.page4, label=_(' Info '), size=(270, 305), pos=(415, 10))
-		wx.StaticText(self.page4, label=_('GSM850: North America,\nWestern South America\n\nGSM900: Rest of the world'), pos=(430, 225))
+		wx.StaticText(self.page4, label=_('GSM850: North America,\nWestern South America\n\nGSM900: Rest of the world'), pos=(430, 235))
 ###########################page4
 ########page5###################
 		wx.StaticBox(self.page5, label=_(' Inputs '), size=(670, 130), pos=(10, 10))
@@ -337,12 +339,23 @@ class MainFrame(wx.Frame):
 
 		if self.data_conf.get('STARTUP', 'nmea_rmc')=='1': self.mag_var.SetValue(True)
 
-		if self.data_conf.get('STARTUP', 'nmea_hdg')=='1': self.heading.SetValue(True)
-
-		if self.data_conf.get('STARTUP', 'nmea_mda')=='1': self.press_temp.SetValue(True)
-		else: self.press_temp_log.Disable()
-
-		if self.data_conf.get('STARTUP', 'press_temp_log')=='1': self.press_temp_log.SetValue(True)
+		SETTINGS_FILE = "RTIMULib"
+		s = RTIMU.Settings(SETTINGS_FILE)
+		imu = RTIMU.RTIMU(s)
+		detected_imu=imu.IMUName()
+		imu=''
+		s=''
+		if detected_imu=='Null IMU':
+			self.heading.Disable()
+			self.button_calibrate_imu.Disable()
+			self.press_temp.Disable()
+			self.press_temp_log.Disable()
+		else:
+			self.imu_tag.SetLabel('IMU sensor detected: '+detected_imu)
+			if self.data_conf.get('STARTUP', 'nmea_hdg')=='1': self.heading.SetValue(True)
+			if self.data_conf.get('STARTUP', 'nmea_mda')=='1': self.press_temp.SetValue(True)
+			else: self.press_temp_log.Disable()
+			if self.data_conf.get('STARTUP', 'press_temp_log')=='1': self.press_temp_log.SetValue(True)
 
 
 	def time_zone(self,event):

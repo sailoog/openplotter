@@ -66,59 +66,65 @@ def thread_frecuency():
 
 		tick2=time.time()
 
-		if data_conf.get('STARTUP', 'nmea_mda')=='1' or data_conf.get('STARTUP', 'nmea_hdg')=='1':
-			if imu.IMURead():
-				data = imu.getIMUData()
-				(data["pressureValid"], data["pressure"], data["temperatureValid"], data["temperature"]) = pressure_val.pressureRead()
-				fusionPose = data["fusionPose"]
-				heading0=math.degrees(fusionPose[2])
-				if heading0<0:
-					heading0=360+heading0
-				heading=round(heading0,1)
-				if (data["pressureValid"]):
-					pressure=data["pressure"]
-				if (data["temperatureValid"]):
-					temperature=data["temperature"]
-
-		
 		if tick2-tick > float(data_conf.get('STARTUP', 'nmea_rate')):
 
 			tick=time.time()
+# read IMU
+			if data_conf.get('STARTUP', 'nmea_mda')=='1' or data_conf.get('STARTUP', 'nmea_hdg')=='1':
+				if imu.IMURead():
+					data = imu.getIMUData()
+					(data["pressureValid"], data["pressure"], data["temperatureValid"], data["temperature"]) = pressure_val.pressureRead()
+					fusionPose = data["fusionPose"]
+					heading0=math.degrees(fusionPose[2])
+					if heading0<0:
+						heading0=360+heading0
+					heading=round(heading0,1)
+					if (data["pressureValid"]):
+						pressure=data["pressure"]
+					if (data["temperatureValid"]):
+						temperature=data["temperature"]
+				else:
+					heading=''
+					pressure=''
+					temperature=''
 # HDG
 			if data_conf.get('STARTUP', 'nmea_hdg')=='1':
-				calculate_mag_var()
-				hdg = pynmea2.HDG('OP', 'HDG', (str(heading),'','',str(mag_var[0]),mag_var[1]))
-				hdg1=str(hdg)
-				hdg2=repr(hdg1)+"\r\n"
-				hdg3=hdg2.replace("'", "")
-				sock.sendto(hdg3, ('localhost', 10110))
+				if heading:
+					calculate_mag_var()
+					hdg = pynmea2.HDG('OP', 'HDG', (str(heading),'','',str(mag_var[0]),mag_var[1]))
+					hdg1=str(hdg)
+					hdg2=repr(hdg1)+"\r\n"
+					hdg3=hdg2.replace("'", "")
+					sock.sendto(hdg3, ('localhost', 10110))
 # MDA			
 			if data_conf.get('STARTUP', 'nmea_mda')=='1':
-				press=round(pressure/1000,4)
-				temp= round(temperature,1)
-				mda = pynmea2.MDA('OP', 'MDA', ('','',str(press),'B',str(temp),'C','','','','','','','','','','','','','',''))
-				mda1=str(mda)
-				mda2=repr(mda1)+"\r\n"
-				mda3=mda2.replace("'", "")
-				sock.sendto(mda3, ('localhost', 10110))
+				if pressure and temperature:
+					press=round(pressure/1000,4)
+					temp= round(temperature,1)
+					mda = pynmea2.MDA('OP', 'MDA', ('','',str(press),'B',str(temp),'C','','','','','','','','','','','','','',''))
+					mda1=str(mda)
+					mda2=repr(mda1)+"\r\n"
+					mda3=mda2.replace("'", "")
+					sock.sendto(mda3, ('localhost', 10110))
 # log temperature pressure
 			if data_conf.get('STARTUP', 'press_temp_log')=='1':
-				if tick-last_log > 300:
-					last_log=tick
-					new_row=[tick,pressure,temperature]
-					if len(log_list) < 288:
-						log_list.append(new_row)
-						ofile = open(currentpath+'/weather_log.csv', "a")
-						writer = csv.writer(ofile)
-						writer.writerow(new_row)
-					if len(log_list) >= 288:
-						del log_list[0]
-						log_list.append(new_row)
-						ofile = open(currentpath+'/weather_log.csv', "w")
-						writer = csv.writer(ofile)
-						for row in log_list:
-							writer.writerow(row)
-					ofile.close()
+				if pressure and temperature:
+					if tick-last_log > 300:
+						last_log=tick
+						new_row=[tick,pressure,temperature]
+						if len(log_list) < 288:
+							log_list.append(new_row)
+							ofile = open(currentpath+'/weather_log.csv', "a")
+							writer = csv.writer(ofile)
+							writer.writerow(new_row)
+						if len(log_list) >= 288:
+							del log_list[0]
+							log_list.append(new_row)
+							ofile = open(currentpath+'/weather_log.csv', "w")
+							writer = csv.writer(ofile)
+							for row in log_list:
+								writer.writerow(row)
+						ofile.close()
 
 
 def calculate_mag_var():
@@ -156,8 +162,8 @@ def create_rmc(msg):
 	msgstr=str(msg)
 	items=msgstr.split(',')
 	last_item=items[12].split('*')
-	if mag_var[0]: mag_var[0]=str(mag_var[0])
-	rmc = pynmea2.RMC('OP', 'RMC', (items[1],items[2],items[3],items[4],items[5],items[6],items[7],items[8],items[9],mag_var[0],mag_var[1],last_item[0]))
+	calculate_mag_var()
+	rmc = pynmea2.RMC('OP', 'RMC', (items[1],items[2],items[3],items[4],items[5],items[6],items[7],items[8],items[9],str(mag_var[0]),mag_var[1],last_item[0]))
 	rmc1=str(rmc)
 	rmc2=repr(rmc1)+"\r\n"
 	rmc3=rmc2.replace("'", "")
