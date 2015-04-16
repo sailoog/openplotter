@@ -130,19 +130,20 @@ def thread_frecuency():
 def calculate_mag_var():
 	global mag_var
 	if position[0] and position[2]:
-		lat=lat_DM_to_DD(position[0])
-		if position[1]=='S': lat = lat * -1
-		lon=lon_DM_to_DD(position[2])
-		if position[3]=='W': lon = lon * -1
-		now = date
-		var=float(geomag.declination(lat, lon, 0, now))
-		var=round(var,1)
-		if var >= 0.0:
-			mag_var=[var,'E']
-		if var < 0.0:
-			mag_var=[var*-1,'W']
-	else:
-		mag_var=['','']
+		try:
+			lat=lat_DM_to_DD(position[0])
+			if position[1]=='S': lat = lat * -1
+			lon=lon_DM_to_DD(position[2])
+			if position[3]=='W': lon = lon * -1
+			now = date
+			var=float(geomag.declination(lat, lon, 0, now))
+			var=round(var,1)
+			if var >= 0.0:
+				mag_var=[var,'E']
+			if var < 0.0:
+				mag_var=[var*-1,'W']
+		except: mag_var=['','']
+	else: mag_var=['','']
 
 def lat_DM_to_DD(DM):
 	degrees=float(DM[0:2])
@@ -187,7 +188,8 @@ def check_nmea():
 
 					#position
 					if msg.sentence_type == 'RMC' or msg.sentence_type =='GGA' or msg.sentence_type =='GNS' or msg.sentence_type =='GLL':
-						position=[msg.lat, msg.lat_dir, msg.lon, msg.lon_dir]
+						position1=[msg.lat, msg.lat_dir, msg.lon, msg.lon_dir]
+						position=position1
 
 					#date
 					if msg.sentence_type == 'RMC':
