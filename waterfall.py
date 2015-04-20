@@ -181,7 +181,7 @@ def main():
     sdr.rs = 1e6
     sdr.fc = frc
     sdr.gain = float(gin)
-    sdr.freq_correction = int(ppm)
+    sdr.freq_correction = int(float(ppm))
 
     wf.start()
 

@@ -174,40 +174,38 @@ class MainFrame(wx.Frame):
 ###########################page3
 ########page4###################
 		wx.StaticBox(self.page4, size=(400, 45), pos=(10, 10))
-		self.ais_sdr_enable = wx.CheckBox(self.page4, label=_('Enable'), pos=(20, 25))
+		self.ais_sdr_enable = wx.CheckBox(self.page4, label=_('Enable (generate AIS NMEA)'), pos=(20, 25))
 		self.ais_sdr_enable.Bind(wx.EVT_CHECKBOX, self.OnOffAIS)
 
 		wx.StaticBox(self.page4, label=_(' Settings '), size=(400, 150), pos=(10, 60))
 
 		self.gain = wx.TextCtrl(self.page4, -1, size=(55, 32), pos=(150, 80))
 		self.gain_label=wx.StaticText(self.page4, label=_('Gain'), pos=(20, 85))
-		self.button_test_gain =wx.Button(self.page4, label=_('check gain'), pos=(260, 80))
-		self.Bind(wx.EVT_BUTTON, self.test_gain, self.button_test_gain)
-
 		self.ppm = wx.TextCtrl(self.page4, -1, size=(55, 32), pos=(150, 115))
 		self.correction_label=wx.StaticText(self.page4, label=_('Correction (ppm)'), pos=(20, 120))
-		self.button_test_ppm =wx.Button(self.page4, label=_('take a look'), pos=(260, 115))
-		self.Bind(wx.EVT_BUTTON, self.test_ppm, self.button_test_ppm)
 
-		self.ais_frequencies1 = wx.CheckBox(self.page4, label=_('Channel A 161.975Mhz'), pos=(20, 155))
+		self.ais_frequencies1 = wx.CheckBox(self.page4, label=_('Channel A 161.975Mhz'), pos=(220, 80))
 		self.ais_frequencies1.Bind(wx.EVT_CHECKBOX, self.ais_frequencies)
-		self.ais_frequencies2 = wx.CheckBox(self.page4, label=_('Channel B 162.025Mhz'), pos=(20, 180))
+		self.ais_frequencies2 = wx.CheckBox(self.page4, label=_('Channel B 162.025Mhz'), pos=(220, 115))
 		self.ais_frequencies2.Bind(wx.EVT_CHECKBOX, self.ais_frequencies)
 
-		wx.StaticBox(self.page4, label=_(' Calibrate using GSM base stations '), size=(400, 100), pos=(10, 215))
+		self.button_test_gain =wx.Button(self.page4, label=_('Calibration'), pos=(275, 165))
+		self.Bind(wx.EVT_BUTTON, self.test_gain, self.button_test_gain)
+		self.button_test_ppm =wx.Button(self.page4, label=_('Take a look'), pos=(150, 165))
+		self.Bind(wx.EVT_BUTTON, self.test_ppm, self.button_test_ppm)
+
+		wx.StaticBox(self.page4, label=_(' Fine calibration using GSM base stations '), size=(400, 100), pos=(10, 215))
 		self.bands_label=wx.StaticText(self.page4, label=_('Band'), pos=(20, 245))
 		self.bands_list = ['GSM850', 'GSM-R', 'GSM900', 'EGSM', 'DCS', 'PCS']
 		self.band= wx.ComboBox(self.page4, choices=self.bands_list, style=wx.CB_READONLY, size=(100, 32), pos=(150, 240))
 		self.band.SetValue('GSM900')
-		self.check_bands =wx.Button(self.page4, label=_('check channels'), pos=(260, 240))
+		self.check_bands =wx.Button(self.page4, label=_('Check band'), pos=(275, 240))
 		self.Bind(wx.EVT_BUTTON, self.check_band, self.check_bands)
 		self.channel_label=wx.StaticText(self.page4, label=_('Channel'), pos=(20, 280))
 		self.channel = wx.TextCtrl(self.page4, -1, size=(55, 32), pos=(150, 275))
-		self.check_channels =wx.Button(self.page4, label=_('calibrate'), pos=(260, 275))
+		self.check_channels =wx.Button(self.page4, label=_('Fine calibration'), pos=(275, 275))
 		self.Bind(wx.EVT_BUTTON, self.check_channel, self.check_channels)
 
-		wx.StaticBox(self.page4, label=_(' Info '), size=(270, 305), pos=(415, 10))
-		wx.StaticText(self.page4, label=_('GSM850: North America,\nWestern South America\n\nGSM900: Rest of the world'), pos=(430, 235))
 ###########################page4
 ########page5###################
 		wx.StaticBox(self.page5, label=_(' Inputs '), size=(670, 130), pos=(10, 10))
@@ -595,41 +593,46 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def test_ppm(self,event):
 		self.kill_sdr()
 		self.enable_sdr_controls()
-		gain=self.gain.GetValue()
-		gain1=gain.replace(',', '.')
-		gain2=float(gain1)
-		gain3=str(gain2)
-		ppm=self.ppm.GetValue()
-		ppm1=ppm.replace(',', '.')
-		ppm2=int(float(ppm1))
-		ppm3=str(ppm2)
+		gain='25'
+		if self.gain.GetValue():
+			gain=self.gain.GetValue()
+			gain=gain.replace(',', '.')
+		ppm='0'
+		if self.ppm.GetValue():
+			ppm=self.ppm.GetValue()
+			ppm=ppm.replace(',', '.')
 		channel='a'
 		if self.ais_frequencies2.GetValue(): channel='b'
-		w_open=subprocess.Popen(['python', currentpath+'/waterfall.py', gain3, ppm3, channel])
+		w_open=subprocess.Popen(['python', currentpath+'/waterfall.py', gain, ppm, channel])
 		msg=_('SDR-AIS reception disabled.\nAfter checking the new window enable SDR-AIS reception again.')
 		self.ShowMessage(msg)
 
 	def test_gain(self,event):
 		self.kill_sdr()
 		self.enable_sdr_controls()
-		subprocess.Popen(['lxterminal', '-e', 'rtl_test'])
-		msg=_('SDR-AIS reception disabled.\nCheck the new window, copy the maximum supported gain value and enable SDR-AIS reception again.')
+		subprocess.Popen(['lxterminal', '-e', 'rtl_test', '-p'])
+		msg=_('SDR-AIS reception disabled.\nCheck the new window. Copy the maximum supported gain value. Wait for ppm value to stabilize and copy it too.')
 		self.ShowMessage(msg)
 
 	def check_band(self, event):
 		self.kill_sdr()
 		self.enable_sdr_controls()
-		subprocess.Popen(("lxterminal -e 'bash -c \"kal -s "+self.band.GetValue()+"; echo 'Press [ENTER] to close the window'; read -p ---------------------------------; exit 0; exec bash\"'"), shell=True)
+		gain=self.gain.GetValue()
+		ppm=self.ppm.GetValue()
+		band=self.band.GetValue()
+		subprocess.Popen(("lxterminal -e 'bash -c \"kal -s "+band+" -g "+gain+" -e "+ppm+"; echo 'Press [ENTER] to close the window'; read -p ---------------------------------; exit 0; exec bash\"'"), shell=True)
 		msg=_('Wait for the system to check the band and select the strongest channel (power). If you do not find any channel try another band.')
 		self.ShowMessage(msg)
 
 	def check_channel(self, event):
 		self.kill_sdr()
 		self.enable_sdr_controls()
+		gain=self.gain.GetValue()
+		ppm=self.ppm.GetValue()
 		channel=self.channel.GetValue()
 		if channel:
-			subprocess.Popen(("lxterminal -e 'bash -c \"kal -c "+self.channel.GetValue()+"; echo 'Press [ENTER] to close the window'; read -p ---------------------------------; exit 0; exec bash\"'"), shell=True)
-			msg=_('Wait for the system to calculate the ppm value with the selected channel. Put the obtained value in the "Correction (ppm)" field and enable SDR-AIS reception again.')
+			subprocess.Popen(("lxterminal -e 'bash -c \"kal -c "+channel+" -g "+gain+" -e "+ppm+"; echo 'Press [ENTER] to close the window'; read -p ---------------------------------; exit 0; exec bash\"'"), shell=True)
+			msg=_('Wait for the system to calculate the ppm value with the selected channel. Put the obtained value in "Correction (ppm)" field and enable SDR-AIS reception again.')
 			self.data_conf.set('AIS-SDR', 'gsm_channel', channel)
 			self.write_conf()
 			self.ShowMessage(msg)

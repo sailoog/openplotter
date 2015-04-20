@@ -51,12 +51,12 @@ ax1 = fig.add_subplot(211)
 ax2 = fig.add_subplot(212, sharex=ax1)
 
 ax1.plot(dates,temperature,'ro-')
-ax1.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M\n%d-%m-%y\n'))
+ax1.xaxis.set_major_formatter(mdates.DateFormatter('%d-%m-%y %H:%M'))
 ax1.set_title('Temperature (Cel)')
 ax1.grid(True)
 
 ax2.plot(dates,pressure,'go-')
-ax2.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M\n%d-%m-%y\n'))
+ax2.xaxis.set_major_formatter(mdates.DateFormatter('%d-%m-%y %H:%M'))
 ax2.set_title('Pressure (hPa)')
 ax2.grid(True)
 
