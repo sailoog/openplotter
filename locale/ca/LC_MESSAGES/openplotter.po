@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: OpenPlotter 0.0.0\n"
-"POT-Creation-Date: 2015-04-20 19:49+0100\n"
-"PO-Revision-Date: 2015-04-20 19:49+0100\n"
+"POT-Creation-Date: 2015-04-24 14:23+0100\n"
+"PO-Revision-Date: 2015-04-24 14:25+0100\n"
 "Last-Translator: sailoog <info@sailoog.com>\n"
 "Language-Team: Sailoog <info@sailoog.com>\n"
 "Language: ca\n"
@@ -15,20 +15,21 @@ msgstr ""
 "X-Poedit-SearchPath-0: /home/sailoog/openplotter\n"
 
 #: /home/sailoog/openplotter/openplotter.py:56
-msgid "NMEA multiplexer"
-msgstr "Multiplexor NMEA"
+#: /home/sailoog/openplotter/openplotter.py:111
+msgid "Multiplexer"
+msgstr "Multiplexor"
 
 #: /home/sailoog/openplotter/openplotter.py:57
-msgid "WiFi access point"
-msgstr "Punt d'accés WiFi"
+msgid "WiFi"
+msgstr "WiFi"
 
 #: /home/sailoog/openplotter/openplotter.py:58
-msgid "SDR-AIS reception"
-msgstr "Recepció AIS-SDR"
+msgid "SDR-AIS"
+msgstr "AIS-SDR"
 
 #: /home/sailoog/openplotter/openplotter.py:59
-msgid "NMEA processing"
-msgstr "Processament NMEA"
+msgid "Calculate"
+msgstr "Calcular"
 
 #: /home/sailoog/openplotter/openplotter.py:60
 msgid "Startup"
@@ -117,17 +118,13 @@ msgstr "sense OpenGL"
 msgid "fullscreen"
 msgstr "pantalla completa"
 
-#: /home/sailoog/openplotter/openplotter.py:111
-msgid "NMEA-0183 Multiplexer (kplex)"
-msgstr "Multiplexor NMEA-0183 (Kplex)"
-
 #: /home/sailoog/openplotter/openplotter.py:117
-msgid "Remote desktop (x11vnc)"
-msgstr "Escriptori remot (x11vnc)"
+msgid "Remote desktop"
+msgstr "Escriptori remot"
 
 #: /home/sailoog/openplotter/openplotter.py:122
-msgid "NMEA rate (seconds)"
-msgstr "Freqüència NMEA (segons)"
+msgid "NMEA generation rate (seconds)"
+msgstr "Freqüència generació NMEA (segons)"
 
 #: /home/sailoog/openplotter/openplotter.py:125
 msgid "Ok"
@@ -182,8 +179,8 @@ msgid "Show"
 msgstr "Mostrar"
 
 #: /home/sailoog/openplotter/openplotter.py:154
-msgid "Enable"
-msgstr "Activar"
+msgid "Enable WiFi access point"
+msgstr "Activar punt d'accés WiFi"
 
 #: /home/sailoog/openplotter/openplotter.py:157
 #: /home/sailoog/openplotter/openplotter.py:180
@@ -211,8 +208,8 @@ msgid "Refresh"
 msgstr "Actualitzar"
 
 #: /home/sailoog/openplotter/openplotter.py:177
-msgid "Enable (generate AIS NMEA)"
-msgstr "Activar (generar NMEA AIS)"
+msgid "Enable AIS NMEA generation"
+msgstr "Activar generació NMEA AIS"
 
 #: /home/sailoog/openplotter/openplotter.py:183
 msgid "Gain"
@@ -487,6 +484,24 @@ msgstr "Codi d'error: "
 msgid "No data, trying to reconnect..."
 msgstr "Sense dades. Intentant reconnectar..."
 
+#~ msgid "SDR-AIS reception"
+#~ msgstr "Recepció AIS-SDR"
+
+#~ msgid "NMEA processing"
+#~ msgstr "Processament NMEA"
+
+#~ msgid "NMEA-0183 Multiplexer (kplex)"
+#~ msgstr "Multiplexor NMEA-0183 (Kplex)"
+
+#~ msgid "Remote desktop (x11vnc)"
+#~ msgstr "Escriptori remot (x11vnc)"
+
+#~ msgid "Enable"
+#~ msgstr "Activar"
+
+#~ msgid "Enable (generate AIS NMEA)"
+#~ msgstr "Activar (generar NMEA AIS)"
+
 #~ msgid "check channels"
 #~ msgstr "veure canals"
 
@@ -722,9 +737,6 @@ msgstr "Sense dades. Intentant reconnectar..."
 
 #~ msgid "Manage your networks"
 #~ msgstr "Administra les teves xarxes"
-
-#~ msgid "WiFi"
-#~ msgstr "WiFi"
 
 #~ msgid "Add serial input"
 #~ msgstr "Afegir entrada serie"

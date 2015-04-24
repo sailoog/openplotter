@@ -53,10 +53,10 @@ class MainFrame(wx.Frame):
 		self.page4 = wx.Panel(self.nb)
 		self.page5 = wx.Panel(self.nb)
 
-		self.nb.AddPage(self.page5, _('NMEA multiplexer'))
-		self.nb.AddPage(self.page3, _('WiFi access point'))
-		self.nb.AddPage(self.page4, _('SDR-AIS reception'))
-		self.nb.AddPage(self.page2, _('NMEA processing'))
+		self.nb.AddPage(self.page5, _('Multiplexer'))
+		self.nb.AddPage(self.page3, _('WiFi'))
+		self.nb.AddPage(self.page4, _('SDR-AIS'))
+		self.nb.AddPage(self.page2, _('Calculate'))
 		self.nb.AddPage(self.page1, _('Startup'))
 
 		sizer = wx.BoxSizer()
@@ -108,21 +108,21 @@ class MainFrame(wx.Frame):
 		self.startup_opencpn_fullscreen = wx.CheckBox(self.page1, label=_('fullscreen'), pos=(40, 75))
 		self.startup_opencpn_fullscreen.Bind(wx.EVT_CHECKBOX, self.startup)
 
-		self.startup_multiplexer = wx.CheckBox(self.page1, label=_('NMEA-0183 Multiplexer (kplex)'), pos=(20, 110))
+		self.startup_multiplexer = wx.CheckBox(self.page1, label=_('Multiplexer'), pos=(20, 110))
 		self.startup_multiplexer.Bind(wx.EVT_CHECKBOX, self.startup)
 
 		self.startup_nmea_time = wx.CheckBox(self.page1, label=_('Set time from NMEA'), pos=(40, 135))
 		self.startup_nmea_time.Bind(wx.EVT_CHECKBOX, self.startup)
 
-		self.startup_remote_desktop = wx.CheckBox(self.page1, label=_('Remote desktop (x11vnc)'), pos=(20, 170))
+		self.startup_remote_desktop = wx.CheckBox(self.page1, label=_('Remote desktop'), pos=(20, 170))
 		self.startup_remote_desktop.Bind(wx.EVT_CHECKBOX, self.startup)
 ###########################page1
 ########page2###################
 		wx.StaticBox(self.page2, size=(675, 50), pos=(10, 10))
-		wx.StaticText(self.page2, label=_('NMEA rate (seconds)'), pos=(20, 30))
+		wx.StaticText(self.page2, label=_('NMEA generation rate (seconds)'), pos=(20, 30))
 		self.rate_list = ['0.1', '0.25', '0.5', '0.75', '1']
-		self.rate= wx.ComboBox(self.page2, choices=self.rate_list, style=wx.CB_READONLY, size=(80, 32), pos=(180, 23))
-		self.button_ok_rate =wx.Button(self.page2, label=_('Ok'),size=(70, 32), pos=(270, 23))
+		self.rate= wx.ComboBox(self.page2, choices=self.rate_list, style=wx.CB_READONLY, size=(80, 32), pos=(260, 23))
+		self.button_ok_rate =wx.Button(self.page2, label=_('Ok'),size=(70, 32), pos=(350, 23))
 		self.Bind(wx.EVT_BUTTON, self.ok_rate, self.button_ok_rate)
 		
 		wx.StaticBox(self.page2, size=(340, 65), pos=(10, 55))
@@ -151,7 +151,7 @@ class MainFrame(wx.Frame):
 ###########################page2
 ########page3###################
 		wx.StaticBox(self.page3, size=(400, 45), pos=(10, 10))
-		self.wifi_enable = wx.CheckBox(self.page3, label=_('Enable'), pos=(20, 25))
+		self.wifi_enable = wx.CheckBox(self.page3, label=_('Enable WiFi access point'), pos=(20, 25))
 		self.wifi_enable.Bind(wx.EVT_CHECKBOX, self.onwifi_enable)
 
 		wx.StaticBox(self.page3, label=_(' Settings '), size=(400, 125), pos=(10, 60))
@@ -174,7 +174,7 @@ class MainFrame(wx.Frame):
 ###########################page3
 ########page4###################
 		wx.StaticBox(self.page4, size=(400, 45), pos=(10, 10))
-		self.ais_sdr_enable = wx.CheckBox(self.page4, label=_('Enable (generate AIS NMEA)'), pos=(20, 25))
+		self.ais_sdr_enable = wx.CheckBox(self.page4, label=_('Enable AIS NMEA generation'), pos=(20, 25))
 		self.ais_sdr_enable.Bind(wx.EVT_CHECKBOX, self.OnOffAIS)
 
 		wx.StaticBox(self.page4, label=_(' Settings '), size=(400, 150), pos=(10, 60))
@@ -424,8 +424,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		info.SetCopyright('2013 - 2015 Sailoog')
 		info.SetWebSite('http://www.sailoog.com')
 		info.SetLicence(licence)
-		info.AddDeveloper('Sailoog\n\nhttps://github.com/sailoog')
-		info.AddDocWriter('Sailoog\n\nhttps://www.gitbook.com/@sailoog')
+		info.AddDeveloper('Sailoog\nhttp://github.com/sailoog\n-------------------\nMultiplexer: http://www.stripydog.com/kplex/index.html\nrtl-sdr: http://sdr.osmocom.org/trac/wiki/rtl-sdr\naisdecoder: http://www.aishub.net/aisdecoder-via-sound-card.html\ngeomag: http://github.com/cmweiss/geomag\nIMU sensor: http://github.com/richards-tech/RTIMULib\nNMEA parser: http://github.com/Knio/pynmea2\n\n')
+		info.AddDocWriter('Sailoog\n\nhttp://sailoog.dozuki.com/c/OpenPlotter')
 		info.AddArtist('Sailoog')
 		info.AddTranslator('Catalan, English and Spanish by Sailoog')
 		wx.AboutBox(info)

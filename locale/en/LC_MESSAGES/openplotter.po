@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: OpenPlotter 0.0.0\n"
-"POT-Creation-Date: 2015-04-20 19:48+0100\n"
-"PO-Revision-Date: 2015-04-20 19:48+0100\n"
+"POT-Creation-Date: 2015-04-24 14:17+0100\n"
+"PO-Revision-Date: 2015-04-24 14:18+0100\n"
 "Last-Translator: sailoog <info@sailoog.com>\n"
 "Language-Team: Sailoog <info@sailoog.com>\n"
 "Language: en\n"
@@ -15,19 +15,20 @@ msgstr ""
 "X-Poedit-SearchPath-0: /home/sailoog/openplotter\n"
 
 #: /home/sailoog/openplotter/openplotter.py:56
-msgid "NMEA multiplexer"
+#: /home/sailoog/openplotter/openplotter.py:111
+msgid "Multiplexer"
 msgstr ""
 
 #: /home/sailoog/openplotter/openplotter.py:57
-msgid "WiFi access point"
+msgid "WiFi"
 msgstr ""
 
 #: /home/sailoog/openplotter/openplotter.py:58
-msgid "SDR-AIS reception"
+msgid "SDR-AIS"
 msgstr ""
 
 #: /home/sailoog/openplotter/openplotter.py:59
-msgid "NMEA processing"
+msgid "Calculate"
 msgstr ""
 
 #: /home/sailoog/openplotter/openplotter.py:60
@@ -117,16 +118,12 @@ msgstr ""
 msgid "fullscreen"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:111
-msgid "NMEA-0183 Multiplexer (kplex)"
-msgstr ""
-
 #: /home/sailoog/openplotter/openplotter.py:117
-msgid "Remote desktop (x11vnc)"
+msgid "Remote desktop"
 msgstr ""
 
 #: /home/sailoog/openplotter/openplotter.py:122
-msgid "NMEA rate (seconds)"
+msgid "NMEA generation rate (seconds)"
 msgstr ""
 
 #: /home/sailoog/openplotter/openplotter.py:125
@@ -180,7 +177,7 @@ msgid "Show"
 msgstr ""
 
 #: /home/sailoog/openplotter/openplotter.py:154
-msgid "Enable"
+msgid "Enable WiFi access point"
 msgstr ""
 
 #: /home/sailoog/openplotter/openplotter.py:157
@@ -207,7 +204,7 @@ msgid "Refresh"
 msgstr ""
 
 #: /home/sailoog/openplotter/openplotter.py:177
-msgid "Enable (generate AIS NMEA)"
+msgid "Enable AIS NMEA generation"
 msgstr ""
 
 #: /home/sailoog/openplotter/openplotter.py:183
