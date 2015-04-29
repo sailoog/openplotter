@@ -43,6 +43,10 @@ nmea_rmc=data_conf.get('STARTUP', 'nmea_rmc')
 nmea_hdg=data_conf.get('STARTUP', 'nmea_hdg')
 nmea_mda=data_conf.get('STARTUP', 'nmea_mda')
 
+TW_STW=data_conf.get('STARTUP', 'tw_stw')
+TW_SOG=data_conf.get('STARTUP', 'tw_sog')
+TW_auto=data_conf.get('STARTUP', 'tw_auto')
+
 #######################################################
 
 if x11vnc=='1':
@@ -83,5 +87,6 @@ else:
 if gps_time=='1':
 	subprocess.call(['sudo', 'python', currentpath+'/time_gps.py'])
 
-if nmea_hdg=='1' or nmea_rmc=='1' or nmea_mda=='1': subprocess.Popen(['python', currentpath+'/nmea_process.py'], cwd=currentpath+'/imu')
+if nmea_hdg=='1' or nmea_mda=='1': subprocess.Popen(['python', currentpath+'/sensors.py'], cwd=currentpath+'/imu')
+if nmea_rmc=='1' or TW_STW=='1' or TW_SOG=='1' or TW_auto=='1': subprocess.Popen(['python', currentpath+'/calculate.py'])
 
