@@ -62,7 +62,9 @@ def check_nmea():
 	heading_t=''
 	STW=''
 	AWS=''
-	AWA=['','']
+	AWA=''
+	SOG=''
+	COG=''
 
 	while True:
 		frase_nmea =''
@@ -82,9 +84,15 @@ def check_nmea():
 						position1=[msg.lat, msg.lat_dir, msg.lon, msg.lon_dir]
 						position=position1
 
-					# refresh date
+					# refresh date / SOG / COG
 					if msg.sentence_type == 'RMC':
 						date=msg.datestamp
+						SOG=msg.spd_over_grnd
+						COG=msg.true_course
+
+					if msg.sentence_type == 'VTG':
+						SOG=msg.spd_over_grnd_kts
+						COG=msg.true_track
 
 					# refresh Speed Trought Water / heading true / heading magnetic
 					if msg.sentence_type == 'VBW':
@@ -144,12 +152,12 @@ def check_nmea():
 					else: 
 						heading_t0=float(heading_t)
 
-					#generate True Wind
+					#generate True Wind STW
 					if data_conf.get('STARTUP', 'tw_stw')=='1' and STW and AWS and AWA:
 						STW0=float(STW)
 						AWS0=float(AWS)
 						AWA0=[float(AWA[0]),AWA[1]]
-						TWS=math.sqrt((STW0**2+AWS**2)-(2*STW0*AWS0*math.cos(math.radians(AWA0[0]))))
+						TWS=math.sqrt((STW0**2+AWS0**2)-(2*STW0*AWS0*math.cos(math.radians(AWA0[0]))))
 						TWA=math.degrees(math.acos((AWS0**2-TWS**2-STW0**2)/(2*TWS*STW0)))
 						TWA0=TWA
 						if AWA0[1]=='L': TWA0=360-TWA0
@@ -174,6 +182,55 @@ def check_nmea():
 							mwd2=repr(mwd1)+"\r\n"
 							mwd3=mwd2.replace("'", "")
 							sock.sendto(mwd3, ('localhost', 10110))
+						heading_m=''
+						heading_t=''
+						heading_t0=''
+						STW=''
+						AWS=''
+						AWA=''
+
+					#generate True Wind SOG
+					if data_conf.get('STARTUP', 'tw_sog')=='1' and SOG and COG and heading_t0 and AWS and AWA:
+						SOG0=float(SOG)
+						COG0=float(COG)
+						AWS0=float(AWS)
+						AWA0=[float(AWA[0]),AWA[1]]
+						D=heading_t0-COG0
+						if AWA0[1]=='R': AWD=AWA0[0]+D
+						if AWA0[1]=='L': AWD=(AWA0[0]*-1)+D
+						if AWD > 0: AWD0=[AWD,'R']
+						if AWD < 0: AWD0=[AWD*-1,'L']
+						TWS=math.sqrt((SOG0**2+AWS0**2)-(2*SOG0*AWS0*math.cos(math.radians(AWD0[0]))))
+						TWAc=math.degrees(math.acos((AWS0**2-TWS**2-SOG0**2)/(2*TWS*SOG0)))
+						if AWD0[1]=='R': TWD=COG0+TWAc
+						if AWD0[1]=='L': TWD=COG0-TWAc
+						if TWD>360: TWD=TWD-360
+						if TWD<0: TWD=360+TWD
+						TWDr=round(TWD,0)
+						TWSr=round(TWS,1)
+						mwd = pynmea2.MWD('OP', 'MWD', (str(TWDr),'T','','M',str(TWSr),'N','',''))
+						mwd1=str(mwd)
+						mwd2=repr(mwd1)+"\r\n"
+						mwd3=mwd2.replace("'", "")
+						sock.sendto(mwd3, ('localhost', 10110))
+
+						TWA=TWD-heading_t0
+						TWA0=TWA
+						if TWA0 < 0: TWA0=360+TWA0
+						TWA0r=round(TWA0,0)
+						mwv = pynmea2.MWV('OP', 'MWV', (str(TWA0r),'T',str(TWSr),'N','A'))
+						mwv1=str(mwv)
+						mwv2=repr(mwv1)+"\r\n"
+						mwv3=mwv2.replace("'", "")
+						sock.sendto(mwv3, ('localhost', 10110))
+
+						heading_m=''
+						heading_t=''
+						heading_t0=''
+						AWS=''
+						AWA=''
+						SOG=''
+						COG=''
 
 				#except Exception,e: print str(e)
 				except: pass

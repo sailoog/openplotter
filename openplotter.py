@@ -125,15 +125,13 @@ class MainFrame(wx.Frame):
 		self.mag_var.Bind(wx.EVT_CHECKBOX, self.nmea_rmc)
 		wx.StaticText(self.page2, label=_('Generated NMEA: $OPRMC'), pos=(20, 50))
 
-		wx.StaticBox(self.page2, size=(300, 155), pos=(10, 75))
+		wx.StaticBox(self.page2, size=(300, 125), pos=(10, 75))
 		wx.StaticText(self.page2, label=_('True wind'), pos=(20, 90))
 		wx.StaticText(self.page2, label=_('Generated NMEA: $OPMWV, $OPMWD'), pos=(20, 110))
-		self.TW_STW = wx.CheckBox(self.page2, label=_('Use speed log (STW, H)'), pos=(20, 135))
+		self.TW_STW = wx.CheckBox(self.page2, label=_('Use speed log'), pos=(20, 135))
 		self.TW_STW.Bind(wx.EVT_CHECKBOX, self.TW)
-		self.TW_SOG = wx.CheckBox(self.page2, label=_('Use GPS (SOG, COG)'), pos=(20, 160))
+		self.TW_SOG = wx.CheckBox(self.page2, label=_('Use GPS'), pos=(20, 160))
 		self.TW_SOG.Bind(wx.EVT_CHECKBOX, self.TW)
-		self.TW_auto = wx.CheckBox(self.page2, label=_('Auto'), pos=(20, 185))
-		self.TW_auto.Bind(wx.EVT_CHECKBOX, self.TW)
 ###########################page2
 ########page3###################
 		wx.StaticBox(self.page3, size=(400, 45), pos=(10, 10))
@@ -367,7 +365,6 @@ class MainFrame(wx.Frame):
 
 		if self.data_conf.get('STARTUP', 'tw_stw')=='1': self.TW_STW.SetValue(True)
 		if self.data_conf.get('STARTUP', 'tw_sog')=='1': self.TW_SOG.SetValue(True)
-		if self.data_conf.get('STARTUP', 'tw_auto')=='1': self.TW_auto.SetValue(True)
 
 	def time_zone(self,event):
 		subprocess.Popen(['lxterminal', '-e', 'sudo dpkg-reconfigure tzdata'])
@@ -940,7 +937,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def start_calculate(self):
 		self.write_conf()
 		subprocess.call(['pkill', '-f', 'calculate.py'])
-		if self.mag_var.GetValue() or self.TW_STW.GetValue() or self.TW_SOG.GetValue() or self.TW_auto.GetValue():
+		if self.mag_var.GetValue() or self.TW_STW.GetValue() or self.TW_SOG.GetValue():
 			subprocess.Popen(['python', currentpath+'/calculate.py'])
 
 	def nmea_rmc(self, e):
@@ -954,14 +951,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		state=sender.GetValue()
 		self.TW_STW.SetValue(False)
 		self.TW_SOG.SetValue(False)
-		self.TW_auto.SetValue(False)
 		self.data_conf.set('STARTUP', 'tw_stw', '0')
 		self.data_conf.set('STARTUP', 'tw_sog', '0')
-		self.data_conf.set('STARTUP', 'tw_auto', '0')
 		if state: sender.SetValue(True)
 		if self.TW_STW.GetValue(): self.data_conf.set('STARTUP', 'tw_stw', '1')
 		if self.TW_SOG.GetValue(): self.data_conf.set('STARTUP', 'tw_sog', '1')
-		if self.TW_auto.GetValue(): self.data_conf.set('STARTUP', 'tw_auto', '1')
 		self.start_calculate()
 #######################definitions
 
