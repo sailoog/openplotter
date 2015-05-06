@@ -39,7 +39,8 @@ wifi_server=data_conf.get('WIFI', 'enable')
 wlan=data_conf.get('WIFI', 'device')
 passw=data_conf.get('WIFI', 'password')
 
-nmea_rmc=data_conf.get('STARTUP', 'nmea_rmc')
+nmea_mag_var=data_conf.get('STARTUP', 'nmea_mag_var')
+nmea_hdt=data_conf.get('STARTUP', 'nmea_hdt')
 nmea_hdg=data_conf.get('STARTUP', 'nmea_hdg')
 nmea_mda=data_conf.get('STARTUP', 'nmea_mda')
 
@@ -87,5 +88,5 @@ if gps_time=='1':
 	subprocess.call(['sudo', 'python', currentpath+'/time_gps.py'])
 
 if nmea_hdg=='1' or nmea_mda=='1': subprocess.Popen(['python', currentpath+'/sensors.py'], cwd=currentpath+'/imu')
-if nmea_rmc=='1' or TW_STW=='1' or TW_SOG=='1': subprocess.Popen(['python', currentpath+'/calculate.py'])
+if nmea_mag_var=='1' or nmea_hdt=='1' or TW_STW=='1' or TW_SOG=='1': subprocess.Popen(['python', currentpath+'/calculate.py'])
 

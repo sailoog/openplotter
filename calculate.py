@@ -65,11 +65,36 @@ def check_nmea():
 	AWA=''
 	SOG=''
 	COG=''
+	tick=time.time()
 
 	while True:
+		tick2=time.time()
+		if tick2-tick > float(data_conf.get('STARTUP', 'nmea_rate')):
+			tick=time.time()
+			#generate magnetic variation
+			if  data_conf.get('STARTUP', 'nmea_mag_var')=='1' and position[0] and position[2] and date:
+				mag_var=calculate_mag_var(position,date)
+				hdg = pynmea2.HDG('OP', 'HDG', ('','','',str(mag_var[0]),mag_var[1]))
+				hdg1=str(hdg)
+				hdg2=hdg1+'\r\n'
+				sock.sendto(hdg2, ('localhost', 10110))
+
+			#generate headint_t
+			if  data_conf.get('STARTUP', 'nmea_hdt')=='1' and position[0] and position[2] and date and heading_m:
+				mag_var=calculate_mag_var(position,date)
+				var=float(mag_var[0])
+				if mag_var[1]=='W':var=var*-1
+				heading_t=float(heading_m)+var
+				if heading_t>360: heading_t=heading_t-360
+				if heading_t<0: heading_t=360+heading_t
+				hdt = pynmea2.HDT('OP', 'HDT', (str(round(heading_t,1)),'T'))
+				hdt1=str(hdt)
+				hdt2=hdt1+'\r\n'
+				sock.sendto(hdt2, ('localhost', 10110))
+
 		frase_nmea =''
 		try:
-			frase_nmea = sock_in.recv(512)
+			frase_nmea = sock_in.recv(1024)
 		except socket.error, error_msg:
 			print 'Failed to connect with localhost:10110.'
 			print 'Error: '+ str(error_msg[0])
@@ -78,44 +103,46 @@ def check_nmea():
 			if frase_nmea:
 				try:
 					msg = pynmea2.parse(frase_nmea)
+					nmea_type=msg.sentence_type
 
 					# refresh position
-					if msg.sentence_type == 'RMC' or msg.sentence_type =='GGA' or msg.sentence_type =='GNS' or msg.sentence_type =='GLL':
+					if nmea_type == 'RMC' or nmea_type =='GGA' or nmea_type =='GNS' or nmea_type =='GLL':
 						position1=[msg.lat, msg.lat_dir, msg.lon, msg.lon_dir]
 						position=position1
 
 					# refresh date / SOG / COG
-					if msg.sentence_type == 'RMC':
+					if nmea_type == 'RMC':
 						date=msg.datestamp
 						SOG=msg.spd_over_grnd
 						COG=msg.true_course
 
-					if msg.sentence_type == 'VTG':
+					if nmea_type == 'VTG':
 						SOG=msg.spd_over_grnd_kts
 						COG=msg.true_track
 
 					# refresh Speed Trought Water / heading true / heading magnetic
-					if msg.sentence_type == 'VBW':
+					if nmea_type == 'VBW':
 						STW=msg.lon_water_spd
 
-					if msg.sentence_type == 'VHW':
+					if nmea_type == 'VHW':
 						STW=msg.water_speed_knots
 						heading_t=msg.heading_true
 						heading_m=msg.heading_magnetic
 					
-					if msg.sentence_type == 'HDT':
+					if nmea_type == 'HDT':
 						heading_t=msg.heading
 					
-					if msg.sentence_type == 'HDM' or msg.sentence_type == 'HDG':
-						heading_m=msg.heading
-
+					if nmea_type == 'HDM' or nmea_type == 'HDG':
+						heading_m0=msg.heading
+						if heading_m0: heading_m=heading_m0
+					
 					# refresh Apparent Wind Speed / Apparent Wind Angle
-					if msg.sentence_type == 'VWR':
+					if nmea_type == 'VWR':
 						AWS=msg.wind_speed_kn
 						AWA1=[msg.deg_r, msg.l_r]
 						AWA=AWA1
 
-					if msg.sentence_type == 'MWV':
+					if nmea_type == 'MWV':
 						if msg.wind_speed_units=='N':
 							AWS=msg.wind_speed
 						if msg.reference=='R':
@@ -126,32 +153,19 @@ def check_nmea():
 								AWA2='L'
 							AWA=[AWA1, AWA2]
 
-
-					#generate $OPRMC
-					if  msg.sentence_type == 'RMC' and data_conf.get('STARTUP', 'nmea_rmc')=='1' and msg.talker != 'OP':
-						msgstr=str(msg)
-						items=msgstr.split(',')
-						last_item=items[12].split('*')
-						mag_var=calculate_mag_var(position,date)
-						rmc = pynmea2.RMC('OP', 'RMC', (items[1],items[2],items[3],items[4],items[5],items[6],items[7],items[8],items[9],str(mag_var[0]),mag_var[1],last_item[0]))
-						rmc1=str(rmc)
-						rmc2=repr(rmc1)+"\r\n"
-						rmc3=rmc2.replace("'", "")
-						sock.sendto(rmc3, ('localhost', 10110))
-
-					#calculate heading_t if not exists
+					#generate heading_t if not exists
 					if not heading_t:
-						if heading_m:
+						if heading_m and position[0] and position[2] and date:
 							mag_var=calculate_mag_var(position,date)
 							var=mag_var[0]
 							if mag_var[1]=='W':var=var*-1
-							heading_t0=float(heading_m)+var
-							if heading_t0>360: heading_t0=heading_t0-360
-							if heading_t0<0: heading_t0=360+heading_t0
-						else: heading_t0=''
+							heading_t=float(heading_m)+var
+							if heading_t>360: heading_t=heading_t-360
+							if heading_t<0: heading_t=360+heading_t
+						else: heading_t=''
 					else: 
-						heading_t0=float(heading_t)
-
+						heading_t=float(heading_t)
+					
 					#generate True Wind STW
 					if data_conf.get('STARTUP', 'tw_stw')=='1' and STW and AWS and AWA:
 						STW0=float(STW)
@@ -165,37 +179,34 @@ def check_nmea():
 						TWA0r=round(TWA0,0)
 						mwv = pynmea2.MWV('OP', 'MWV', (str(TWA0r),'T',str(TWSr),'N','A'))
 						mwv1=str(mwv)
-						mwv2=repr(mwv1)+"\r\n"
-						mwv3=mwv2.replace("'", "")
-						sock.sendto(mwv3, ('localhost', 10110))
+						mwv2=mwv1+'\r\n'
+						sock.sendto(mwv2, ('localhost', 10110))
 
-						if heading_t0:
+						if heading_t:
 							if AWA0[1]=='R':
-								TWD=heading_t0+TWA
+								TWD=heading_t+TWA
 							if AWA0[1]=='L':
-								TWD=heading_t0-TWA
+								TWD=heading_t-TWA
 							if TWD>360: TWD=TWD-360
 							if TWD<0: TWD=360+TWD
 							TWDr=round(TWD,0)
 							mwd = pynmea2.MWD('OP', 'MWD', (str(TWDr),'T','','M',str(TWSr),'N','',''))
 							mwd1=str(mwd)
-							mwd2=repr(mwd1)+"\r\n"
-							mwd3=mwd2.replace("'", "")
-							sock.sendto(mwd3, ('localhost', 10110))
+							mwd2=mwd1+'\r\n'
+							sock.sendto(mwd2, ('localhost', 10110))
 						heading_m=''
 						heading_t=''
-						heading_t0=''
 						STW=''
 						AWS=''
 						AWA=''
 
 					#generate True Wind SOG
-					if data_conf.get('STARTUP', 'tw_sog')=='1' and SOG and COG and heading_t0 and AWS and AWA:
+					if data_conf.get('STARTUP', 'tw_sog')=='1' and SOG and COG and heading_t and AWS and AWA:
 						SOG0=float(SOG)
 						COG0=float(COG)
 						AWS0=float(AWS)
 						AWA0=[float(AWA[0]),AWA[1]]
-						D=heading_t0-COG0
+						D=heading_t-COG0
 						if AWA0[1]=='R': AWD=AWA0[0]+D
 						if AWA0[1]=='L': AWD=(AWA0[0]*-1)+D
 						if AWD > 0: AWD0=[AWD,'R']
@@ -210,33 +221,31 @@ def check_nmea():
 						TWSr=round(TWS,1)
 						mwd = pynmea2.MWD('OP', 'MWD', (str(TWDr),'T','','M',str(TWSr),'N','',''))
 						mwd1=str(mwd)
-						mwd2=repr(mwd1)+"\r\n"
-						mwd3=mwd2.replace("'", "")
-						sock.sendto(mwd3, ('localhost', 10110))
+						mwd2=mwd1+'\r\n'
+						sock.sendto(mwd2, ('localhost', 10110))
 
-						TWA=TWD-heading_t0
+
+						TWA=TWD-heading_t
 						TWA0=TWA
 						if TWA0 < 0: TWA0=360+TWA0
 						TWA0r=round(TWA0,0)
 						mwv = pynmea2.MWV('OP', 'MWV', (str(TWA0r),'T',str(TWSr),'N','A'))
 						mwv1=str(mwv)
-						mwv2=repr(mwv1)+"\r\n"
-						mwv3=mwv2.replace("'", "")
-						sock.sendto(mwv3, ('localhost', 10110))
+						mwv2=mwv1+'\r\n'
+						sock.sendto(mwv2, ('localhost', 10110))
 
 						heading_m=''
 						heading_t=''
-						heading_t0=''
 						AWS=''
 						AWA=''
 						SOG=''
 						COG=''
 
+
 				#except Exception,e: print str(e)
 				except: pass
 			else:
 				break
-
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 

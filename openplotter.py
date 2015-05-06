@@ -122,15 +122,20 @@ class MainFrame(wx.Frame):
 ########page2###################
 		wx.StaticBox(self.page2, size=(300, 65), pos=(10, 10))
 		self.mag_var = wx.CheckBox(self.page2, label=_('Magnetic variation'), pos=(20, 25))
-		self.mag_var.Bind(wx.EVT_CHECKBOX, self.nmea_rmc)
-		wx.StaticText(self.page2, label=_('Generated NMEA: $OPRMC'), pos=(20, 50))
+		self.mag_var.Bind(wx.EVT_CHECKBOX, self.nmea_mag_var)
+		wx.StaticText(self.page2, label=_('Generated NMEA: $OPHDG'), pos=(20, 50))
 
-		wx.StaticBox(self.page2, size=(300, 125), pos=(10, 75))
-		wx.StaticText(self.page2, label=_('True wind'), pos=(20, 90))
-		wx.StaticText(self.page2, label=_('Generated NMEA: $OPMWV, $OPMWD'), pos=(20, 110))
-		self.TW_STW = wx.CheckBox(self.page2, label=_('Use speed log'), pos=(20, 135))
+		wx.StaticBox(self.page2, size=(300, 65), pos=(10, 75))
+		self.heading_t = wx.CheckBox(self.page2, label=_('True heading'), pos=(20, 90))
+		self.heading_t.Bind(wx.EVT_CHECKBOX, self.nmea_hdt)
+		wx.StaticText(self.page2, label=_('Generated NMEA: $OPHDT'), pos=(20, 115))
+
+		wx.StaticBox(self.page2, size=(300, 125), pos=(10, 140))
+		wx.StaticText(self.page2, label=_('True wind'), pos=(20, 155))
+		wx.StaticText(self.page2, label=_('Generated NMEA: $OPMWV, $OPMWD'), pos=(20, 175))
+		self.TW_STW = wx.CheckBox(self.page2, label=_('Use speed log'), pos=(20, 200))
 		self.TW_STW.Bind(wx.EVT_CHECKBOX, self.TW)
-		self.TW_SOG = wx.CheckBox(self.page2, label=_('Use GPS'), pos=(20, 160))
+		self.TW_SOG = wx.CheckBox(self.page2, label=_('Use GPS'), pos=(20, 225))
 		self.TW_SOG.Bind(wx.EVT_CHECKBOX, self.TW)
 ###########################page2
 ########page3###################
@@ -343,7 +348,7 @@ class MainFrame(wx.Frame):
 
 		self.rate.SetValue(self.data_conf.get('STARTUP', 'nmea_rate'))
 
-		if self.data_conf.get('STARTUP', 'nmea_rmc')=='1': self.mag_var.SetValue(True)
+		if self.data_conf.get('STARTUP', 'nmea_mag_var')=='1': self.mag_var.SetValue(True)
 
 		SETTINGS_FILE = "RTIMULib"
 		s = RTIMU.Settings(SETTINGS_FILE)
@@ -883,6 +888,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		rate=self.rate.GetValue()
 		self.data_conf.set('STARTUP', 'nmea_rate', rate)
 		self.start_sensors()
+		self.start_calculate()
 
 	def nmea_hdg(self, e):
 		subprocess.call(['pkill', 'RTIMULibDemoGL'])
@@ -937,13 +943,19 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def start_calculate(self):
 		self.write_conf()
 		subprocess.call(['pkill', '-f', 'calculate.py'])
-		if self.mag_var.GetValue() or self.TW_STW.GetValue() or self.TW_SOG.GetValue():
+		if self.mag_var.GetValue() or self.heading_t.GetValue() or self.TW_STW.GetValue() or self.TW_SOG.GetValue():
 			subprocess.Popen(['python', currentpath+'/calculate.py'])
 
-	def nmea_rmc(self, e):
+	def nmea_mag_var(self, e):
 		sender = e.GetEventObject()
-		if sender.GetValue(): self.data_conf.set('STARTUP', 'nmea_rmc', '1')
-		else: self.data_conf.set('STARTUP', 'nmea_rmc', '0')
+		if sender.GetValue(): self.data_conf.set('STARTUP', 'nmea_mag_var', '1')
+		else: self.data_conf.set('STARTUP', 'nmea_mag_var', '0')
+		self.start_calculate()
+
+	def nmea_hdt(self, e):
+		sender = e.GetEventObject()
+		if sender.GetValue(): self.data_conf.set('STARTUP', 'nmea_hdt', '1')
+		else: self.data_conf.set('STARTUP', 'nmea_hdt', '0')
 		self.start_calculate()
 
 	def	TW(self, e):
