@@ -77,7 +77,7 @@ while True:
 			hdg = pynmea2.HDG('OP', 'HDG', (str(heading_m),'','','',''))
 			hdg1=str(hdg)
 			hdg2=hdg1+"\r\n"
-			sock.sendto(hdg3, ('localhost', 10110))
+			sock.sendto(hdg2, ('localhost', 10110))
 # MDA			
 		if data_conf.get('STARTUP', 'nmea_mda')=='1' and pressure and temperature:
 			press=round(pressure/1000,4)
@@ -85,7 +85,7 @@ while True:
 			mda = pynmea2.MDA('OP', 'MDA', ('','',str(press),'B',str(temp),'C','','','','','','','','','','','','','',''))
 			mda1=str(mda)
 			mda2=mda1+"\r\n"
-			sock.sendto(mda3, ('localhost', 10110))
+			sock.sendto(mda2, ('localhost', 10110))
 # log temperature pressure
 		if data_conf.get('STARTUP', 'press_temp_log')=='1' and pressure and temperature:
 			if tick-last_log > 300:

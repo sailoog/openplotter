@@ -50,12 +50,15 @@ class MyFrame(wx.Frame):
 			self.button_pause =wx.Button(self, label=_('Pause'), pos=(530, 190))
 			self.Bind(wx.EVT_BUTTON, self.pause, self.button_pause)
 
+			self.button_reset =wx.Button(self, label=_('Reset'), pos=(530, 230))
+			self.Bind(wx.EVT_BUTTON, self.reset, self.button_reset)
+
 			self.list = wx.ListCtrl(self, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(500, 220), pos=(5, 155))
 			self.list.InsertColumn(0, _('Type'), width=150)
-			self.list.InsertColumn(1, _('Value'), width=150)
-			self.list.InsertColumn(2, _('Sentence'), width=70)
-			self.list.InsertColumn(3, _('Source'), width=90)
-			self.list.InsertColumn(4, _('Age'), width=40)
+			self.list.InsertColumn(1, _('Value'), width=145)
+			self.list.InsertColumn(2, _('Source'), width=90)
+			self.list.InsertColumn(3, _('NMEA'), width=50)
+			self.list.InsertColumn(4, _('Age'), width=59)
 
 			self.list.InsertStringItem(0,_('Latitude'))
 			self.list.InsertStringItem(1,_('Longitude'))
@@ -77,6 +80,8 @@ class MyFrame(wx.Frame):
 			tick=time.time()
 
 			self.times=[tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick]
+
+			self.pause_all=0
 
 			self.CreateStatusBar()
 
@@ -102,30 +107,32 @@ class MyFrame(wx.Frame):
 
 		def ventanalog(self):
 			while True:
-				frase_nmea=""
-				if not self.error_message:
-					try:
-						frase_nmea = self.s2.recv(1024)
-					except socket.error, error_msg:
-						self.error_message=str(error_msg[0])
-				if frase_nmea:
-					wx.MutexGuiEnter()
-					self.parse_nmea(frase_nmea)
-					self.logger.AppendText(frase_nmea)
-					self.SetStatusText(_('Multiplexer started'))
-					wx.MutexGuiLeave()
+				if self.pause_all==1:pass
 				else:
-					wx.MutexGuiEnter()
-					if self.error_message:
-						self.SetStatusText(_('Failed to connect with localhost:10110. ')+_('Error code: ') + self.error_message)
-						time.sleep(3)
+					frase_nmea=""
+					if not self.error_message:
+						try:
+							frase_nmea = self.s2.recv(1024)
+						except socket.error, error_msg:
+							self.error_message=str(error_msg[0])
+					if frase_nmea:
+						wx.MutexGuiEnter()
+						self.parse_nmea(frase_nmea)
+						self.logger.AppendText(frase_nmea)
+						self.SetStatusText(_('Multiplexer started'))
+						wx.MutexGuiLeave()
 					else:
+						wx.MutexGuiEnter()
+						if self.error_message:
+							self.SetStatusText(_('Failed to connect with localhost:10110. ')+_('Error code: ') + self.error_message)
+							time.sleep(3)
+						else:
+							self.SetStatusText(_('No data, trying to reconnect...'))
+							time.sleep(3)
 						self.SetStatusText(_('No data, trying to reconnect...'))
-						time.sleep(3)
-					self.SetStatusText(_('No data, trying to reconnect...'))
-					wx.MutexGuiLeave()
-					time.sleep(4)
-					self.connect()
+						wx.MutexGuiLeave()
+						time.sleep(4)
+						self.connect()
 					
 		def parse_nmea(self, frase_nmea):
 			try:
@@ -136,144 +143,147 @@ class MyFrame(wx.Frame):
 					if value:
 						seg=now-self.times[i]
 						self.list.SetStringItem(i,4,str(round(seg,1)))
-						
-				msg = pynmea2.parse(frase_nmea)
-				nmea_type=msg.sentence_type
 
-				if nmea_type == 'RMC':
-					#lat lon
-					value='%02d°%07.4f′' % (msg.latitude, msg.latitude_minutes)+' '+msg.lat_dir
-					if value: self.write_item(0, str(value), nmea_type, msg.talker)
-					value='%02d°%07.4f′' % (msg.longitude, msg.longitude_minutes)+' '+msg.lon_dir
-					if value: self.write_item(1, str(value), nmea_type, msg.talker)
-					#date time
-					value0=msg.datestamp
-					value1=msg.timestamp
-					value=str(value0)+' '+str(value1)
-					if value: self.write_item(2, str(value), nmea_type, msg.talker)
-					#magnetic variation
-					value0=msg.mag_variation
-					value1=msg.mag_var_dir
-					value=str(value0)+' '+str(value1)
-					if value0: self.write_item(3, str(value), nmea_type, msg.talker)
-					#course over ground
-					value=msg.true_course
-					if value: self.write_item(6, str(value), nmea_type, msg.talker)
-					#speed over ground
-					value=msg.spd_over_grnd
-					if value: self.write_item(7, str(value), nmea_type, msg.talker)
+				nmea_list=frase_nmea.split()
 
-				if nmea_type == 'GGA':
-					#lat lon
-					value='%02d°%07.4f′' % (msg.latitude, msg.latitude_minutes)+' '+msg.lat_dir
-					if value: self.write_item(0, str(value), nmea_type, msg.talker)
-					value='%02d°%07.4f′' % (msg.longitude, msg.longitude_minutes)+' '+msg.lon_dir
-					if value: self.write_item(1, str(value), nmea_type, msg.talker)
+				for i in nmea_list:
+					msg = pynmea2.parse(i)
+					nmea_type=msg.sentence_type
 
-				if nmea_type == 'GNS':
-					#lat lon
-					value='%02d°%07.4f′' % (msg.latitude, msg.latitude_minutes)+' '+msg.lat_dir
-					if value: self.write_item(0, str(value), nmea_type, msg.talker)
-					value='%02d°%07.4f′' % (msg.longitude, msg.longitude_minutes)+' '+msg.lon_dir
-					if value: self.write_item(1, str(value), nmea_type, msg.talker)
+					if nmea_type == 'RMC':
+						#lat lon
+						value='%02d°%07.4f′' % (msg.latitude, msg.latitude_minutes)+' '+msg.lat_dir
+						if value: self.write_item(0, str(value), nmea_type, msg.talker)
+						value='%02d°%07.4f′' % (msg.longitude, msg.longitude_minutes)+' '+msg.lon_dir
+						if value: self.write_item(1, str(value), nmea_type, msg.talker)
+						#date time
+						value0=msg.datestamp
+						value1=msg.timestamp
+						value=str(value0)+' '+str(value1)
+						if value: self.write_item(2, str(value), nmea_type, msg.talker)
+						#magnetic variation
+						value0=msg.mag_variation
+						value1=msg.mag_var_dir
+						value=str(value0)+' '+str(value1)
+						if value0: self.write_item(3, str(value), nmea_type, msg.talker)
+						#course over ground
+						value=msg.true_course
+						if value: self.write_item(6, str(value), nmea_type, msg.talker)
+						#speed over ground
+						value=msg.spd_over_grnd
+						if value: self.write_item(7, str(value), nmea_type, msg.talker)
 
-				if nmea_type == 'GLL':
-					#lat lon
-					value='%02d°%07.4f′' % (msg.latitude, msg.latitude_minutes)+' '+msg.lat_dir
-					if value: self.write_item(0, str(value), nmea_type, msg.talker)
-					value='%02d°%07.4f′' % (msg.longitude, msg.longitude_minutes)+' '+msg.lon_dir
-					if value: self.write_item(1, str(value), nmea_type, msg.talker)
+					if nmea_type == 'GGA':
+						#lat lon
+						value='%02d°%07.4f′' % (msg.latitude, msg.latitude_minutes)+' '+msg.lat_dir
+						if value: self.write_item(0, str(value), nmea_type, msg.talker)
+						value='%02d°%07.4f′' % (msg.longitude, msg.longitude_minutes)+' '+msg.lon_dir
+						if value: self.write_item(1, str(value), nmea_type, msg.talker)
 
-				if nmea_type == 'HDG':
-					#magnetic variation
-					value0=msg.variation
-					value1=msg.var_dir
-					value=str(value0)+' '+str(value1)
-					if value0: self.write_item(3, str(value), nmea_type, msg.talker)
-					#magnetic heading
-					value=msg.heading
-					if value: self.write_item(4, str(value), nmea_type, msg.talker)
+					if nmea_type == 'GNS':
+						#lat lon
+						value='%02d°%07.4f′' % (msg.latitude, msg.latitude_minutes)+' '+msg.lat_dir
+						if value: self.write_item(0, str(value), nmea_type, msg.talker)
+						value='%02d°%07.4f′' % (msg.longitude, msg.longitude_minutes)+' '+msg.lon_dir
+						if value: self.write_item(1, str(value), nmea_type, msg.talker)
 
-				if nmea_type == 'VHW':
-					#magnetic heading
-					value=msg.heading_magnetic
-					if value: self.write_item(4, str(value), nmea_type, msg.talker)
-					#true heading
-					value=msg.heading_true
-					if value: self.write_item(5, str(value), nmea_type, msg.talker)
-					#speed trought water 
-					value=msg.water_speed_knots
-					if value: self.write_item(8, str(value), nmea_type, msg.talker)
+					if nmea_type == 'GLL':
+						#lat lon
+						value='%02d°%07.4f′' % (msg.latitude, msg.latitude_minutes)+' '+msg.lat_dir
+						if value: self.write_item(0, str(value), nmea_type, msg.talker)
+						value='%02d°%07.4f′' % (msg.longitude, msg.longitude_minutes)+' '+msg.lon_dir
+						if value: self.write_item(1, str(value), nmea_type, msg.talker)
 
-				if nmea_type == 'HDM':
-					#magnetic heading
-					value=msg.heading
-					if value: self.write_item(4, str(value), nmea_type, msg.talker)
+					if nmea_type == 'HDG':
+						#magnetic variation
+						value0=msg.variation
+						value1=msg.var_dir
+						value=str(value0)+' '+str(value1)
+						if value0: self.write_item(3, str(value), nmea_type, msg.talker)
+						#magnetic heading
+						value=msg.heading
+						if value: self.write_item(4, str(value), nmea_type, msg.talker)
 
-				if nmea_type == 'HDT':
-					#true heading
-					value=msg.heading
-					if value: self.write_item(5, str(value), nmea_type, msg.talker)
+					if nmea_type == 'VHW':
+						#magnetic heading
+						value=msg.heading_magnetic
+						if value: self.write_item(4, str(value), nmea_type, msg.talker)
+						#true heading
+						value=msg.heading_true
+						if value: self.write_item(5, str(value), nmea_type, msg.talker)
+						#speed trought water 
+						value=msg.water_speed_knots
+						if value: self.write_item(8, str(value), nmea_type, msg.talker)
 
-				if nmea_type == 'VTG':
-					#course over ground
-					value=msg.true_track
-					if value: self.write_item(6, str(value), nmea_type, msg.talker)
-					#speed over ground
-					value=msg.spd_over_grnd_kts
-					if value: self.write_item(7, str(value), nmea_type, msg.talker)
+					if nmea_type == 'HDM':
+						#magnetic heading
+						value=msg.heading
+						if value: self.write_item(4, str(value), nmea_type, msg.talker)
 
-				if nmea_type == 'VBW':
-					#speed trought water 
-					value=msg.lon_water_spd
-					if value: self.write_item(8, str(value), nmea_type, msg.talker)
+					if nmea_type == 'HDT':
+						#true heading
+						value=msg.heading
+						if value: self.write_item(5, str(value), nmea_type, msg.talker)
 
-				if nmea_type == 'VWR':
-					#apparent wind angle
-					value0=msg.deg_r
-					value1=msg.l_r
-					value=str(value0)+' '+str(value1)
-					if value0: self.write_item(9, str(value), nmea_type, msg.talker)
-					#apparent wind speed
-					value=msg.wind_speed_kn
-					if value: self.write_item(11, str(value), nmea_type, msg.talker)
+					if nmea_type == 'VTG':
+						#course over ground
+						value=msg.true_track
+						if value: self.write_item(6, str(value), nmea_type, msg.talker)
+						#speed over ground
+						value=msg.spd_over_grnd_kts
+						if value: self.write_item(7, str(value), nmea_type, msg.talker)
 
-				if nmea_type == 'MWV':
-					#apparent/true wind angle
-					value0=msg.reference
-					value=msg.wind_angle
-					if value0=='R': self.write_item(9, str(value), nmea_type, msg.talker)
-					if value0=='T': self.write_item(10, str(value), nmea_type, msg.talker)
-					#apparent/true wind speed
-					value=msg.wind_speed
-					if value0=='R': self.write_item(11, str(value), nmea_type, msg.talker)
-					if value0=='T': self.write_item(12, str(value), nmea_type, msg.talker)
+					if nmea_type == 'VBW':
+						#speed trought water 
+						value=msg.lon_water_spd
+						if value: self.write_item(8, str(value), nmea_type, msg.talker)
 
-				if nmea_type == 'VWT':
-					#true wind angle
-					value0=msg.wind_angle_vessel
-					value1=msg.direction
-					value=str(value0)+' '+str(value1)
-					if value0: self.write_item(10, str(value), nmea_type, msg.talker)
-					#true wind speed
-					value=msg.wind_speed_knots
-					if value: self.write_item(12, str(value), nmea_type, msg.talker)
+					if nmea_type == 'VWR':
+						#apparent wind angle
+						value0=msg.deg_r
+						value1=msg.l_r
+						value=str(value0)+' '+str(value1)
+						if value0: self.write_item(9, str(value), nmea_type, msg.talker)
+						#apparent wind speed
+						value=msg.wind_speed_kn
+						if value: self.write_item(11, str(value), nmea_type, msg.talker)
 
-				if nmea_type == 'MWD':
-					#true wind direction
-					value=msg.direction_true
-					if value: self.write_item(13, str(value), nmea_type, msg.talker)
-					#true wind speed
-					value=msg.wind_speed_knots
-					if value: self.write_item(12, str(value), nmea_type, msg.talker)
+					if nmea_type == 'MWV':
+						#apparent/true wind angle
+						value0=msg.reference
+						value=msg.wind_angle
+						if value0=='R': self.write_item(9, str(value), nmea_type, msg.talker)
+						if value0=='T': self.write_item(10, str(value), nmea_type, msg.talker)
+						#apparent/true wind speed
+						value=msg.wind_speed
+						if value0=='R': self.write_item(11, str(value), nmea_type, msg.talker)
+						if value0=='T': self.write_item(12, str(value), nmea_type, msg.talker)
 
-				if nmea_type == 'MDA':
-					#pressure
-					value=msg.b_presure_bar
-					if value: self.write_item(14, str(value), nmea_type, msg.talker)
-					#temperature
-					value=msg.air_temp
-					if value: self.write_item(15, str(value), nmea_type, msg.talker)
+					if nmea_type == 'VWT':
+						#true wind angle
+						value0=msg.wind_angle_vessel
+						value1=msg.direction
+						value=str(value0)+' '+str(value1)
+						if value0: self.write_item(10, str(value), nmea_type, msg.talker)
+						#true wind speed
+						value=msg.wind_speed_knots
+						if value: self.write_item(12, str(value), nmea_type, msg.talker)
+
+					if nmea_type == 'MWD':
+						#true wind direction
+						value=msg.direction_true
+						if value: self.write_item(13, str(value), nmea_type, msg.talker)
+						#true wind speed
+						value=msg.wind_speed_knots
+						if value: self.write_item(12, str(value), nmea_type, msg.talker)
+
+					if nmea_type == 'MDA':
+						#pressure
+						value=msg.b_presure_bar
+						if value: self.write_item(14, str(value), nmea_type, msg.talker)
+						#temperature
+						value=msg.air_temp
+						if value: self.write_item(15, str(value), nmea_type, msg.talker)
 
 
 			#except Exception,e: print str(e)
@@ -281,14 +291,26 @@ class MyFrame(wx.Frame):
 
 		def write_item(self, pos, value, sentence, talker):
 			self.list.SetStringItem(pos,1,value)
-			self.list.SetStringItem(pos,2,sentence)
-			if talker=='OP': self.list.SetStringItem(pos,3,'OpenPlotter')
-			else: self.list.SetStringItem(pos,3,'External')
+			if talker=='OP': self.list.SetStringItem(pos,2,'OpenPlotter')
+			else: self.list.SetStringItem(pos,2,'External')
+			self.list.SetStringItem(pos,3,sentence)
 			self.list.SetStringItem(pos,4,'0')
 			self.times[pos]=time.time()
 
-		def pause(self):
-			pass
+		def pause(self, e):
+			if self.pause_all==0: 
+				self.pause_all=1
+				self.button_pause.SetLabel(_('Resume'))
+			else: 
+				self.pause_all=0
+				self.button_pause.SetLabel(_('Pause'))
+
+		def reset(self, e):
+			for i in range(self.list.GetItemCount()):
+				self.list.SetStringItem(i,1,'')
+				self.list.SetStringItem(i,2,'')
+				self.list.SetStringItem(i,3,'')
+				self.list.SetStringItem(i,4,'')
 
 
 app = wx.App(False)

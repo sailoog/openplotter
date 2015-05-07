@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, gettext, os, sys, ConfigParser, subprocess, RTIMU
+import wx, gettext, os, sys, ConfigParser, subprocess
 import wx.lib.scrolledpanel as scrolled
 
 home = os.path.expanduser('~')
@@ -350,13 +350,9 @@ class MainFrame(wx.Frame):
 
 		if self.data_conf.get('STARTUP', 'nmea_mag_var')=='1': self.mag_var.SetValue(True)
 
-		SETTINGS_FILE = "RTIMULib"
-		s = RTIMU.Settings(SETTINGS_FILE)
-		imu = RTIMU.RTIMU(s)
-		detected_imu=imu.IMUName()
-		imu=''
-		s=''
-		if detected_imu=='Null IMU':
+		detected_imu=subprocess.check_output(['python', currentpath+'/imu/check_imu.py'], cwd=currentpath+'/imu')
+
+		if 'Null IMU' in detected_imu:
 			self.heading.Disable()
 			self.button_calibrate_imu.Disable()
 			self.press_temp.Disable()
