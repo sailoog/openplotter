@@ -32,7 +32,7 @@ else:
 	while True:
 		frase_nmea =''
 		try:
-			frase_nmea = sock_in.recv(512)
+			frase_nmea = sock_in.recv(1024)
 		except socket.error, error_msg:
 			try:
 				print 'Failed to connect with localhost:10110.'
@@ -43,13 +43,17 @@ else:
 		else:
 			if frase_nmea:
 				try:
-					msg = pynmea2.parse(frase_nmea)
-					if msg.sentence_type == 'RMC':
-						fecha = msg.datestamp
-						hora =  msg.timestamp
-						break
-					else: 
-						cont=cont+1
+					nmea_list=frase_nmea.split()
+
+					for i in nmea_list:
+						msg = pynmea2.parse(i)
+						nmea_type=msg.sentence_type
+						if nmea_type == 'RMC':
+							fecha = msg.datestamp
+							hora =  msg.timestamp
+							break
+						else: 
+							cont=cont+1
 				except: pass
 				if cont >= 30: break
 
