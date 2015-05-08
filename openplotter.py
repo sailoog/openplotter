@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, gettext, os, sys, ConfigParser, subprocess
+import wx, gettext, os, sys, ConfigParser, subprocess, webbrowser
 import wx.lib.scrolledpanel as scrolled
 
 home = os.path.expanduser('~')
@@ -95,6 +95,10 @@ class MainFrame(wx.Frame):
 		self.helpm = wx.Menu()
 		self.helpm_item1=self.helpm.Append(wx.ID_ANY, _('&About'), _('About OpenPlotter'))
 		self.Bind(wx.EVT_MENU, self.OnAboutBox, self.helpm_item1)
+		self.helpm_item2=self.helpm.Append(wx.ID_ANY, _('OpenPlotter online documentation'), _('OpenPlotter online documentation'))
+		self.Bind(wx.EVT_MENU, self.op_doc, self.helpm_item2)
+		self.helpm_item3=self.helpm.Append(wx.ID_ANY, _('OpenPlotter online guides'), _('OpenPlotter online guides'))
+		self.Bind(wx.EVT_MENU, self.op_guides, self.helpm_item3)
 		self.menubar.Append(self.helpm, _('&Help'))
 
 		self.SetMenuBar(self.menubar)
@@ -350,6 +354,8 @@ class MainFrame(wx.Frame):
 
 		if self.data_conf.get('STARTUP', 'nmea_mag_var')=='1': self.mag_var.SetValue(True)
 
+		if self.data_conf.get('STARTUP', 'nmea_hdt')=='1': self.heading_t.SetValue(True)
+
 		detected_imu=subprocess.check_output(['python', currentpath+'/imu/check_imu.py'], cwd=currentpath+'/imu')
 
 		if 'Null IMU' in detected_imu:
@@ -366,6 +372,8 @@ class MainFrame(wx.Frame):
 
 		if self.data_conf.get('STARTUP', 'tw_stw')=='1': self.TW_STW.SetValue(True)
 		if self.data_conf.get('STARTUP', 'tw_sog')=='1': self.TW_SOG.SetValue(True)
+
+########MENU###################################	
 
 	def time_zone(self,event):
 		subprocess.Popen(['lxterminal', '-e', 'sudo dpkg-reconfigure tzdata'])
@@ -414,7 +422,7 @@ class MainFrame(wx.Frame):
 		self.write_conf()
 
 	def OnAboutBox(self, e):
-		description = _("OpenPlotter is a DIY, open-source, low-cost and low-consumption sailing platform to run on x86 laptops and ARM boards (Raspberry Pi, BeagleBone Black, Odroid C1...)")			
+		description = _("OpenPlotter is a DIY, open-source, low-cost, low-consumption, modular and scalable sailing platform to run on ARM boards.")			
 		licence = """This program is free software: you can redistribute it 
 and/or modify it under the terms of the GNU General Public License 
 as published by the Free Software Foundation, either version 2 of 
@@ -435,11 +443,21 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		info.SetCopyright('2013 - 2015 Sailoog')
 		info.SetWebSite('http://www.sailoog.com')
 		info.SetLicence(licence)
-		info.AddDeveloper('Sailoog\nhttp://github.com/sailoog\n-------------------\nMultiplexer: http://www.stripydog.com/kplex/index.html\nrtl-sdr: http://sdr.osmocom.org/trac/wiki/rtl-sdr\naisdecoder: http://www.aishub.net/aisdecoder-via-sound-card.html\ngeomag: http://github.com/cmweiss/geomag\nIMU sensor: http://github.com/richards-tech/RTIMULib\nNMEA parser: http://github.com/Knio/pynmea2\n\n')
-		info.AddDocWriter('Sailoog\n\nhttp://sailoog.dozuki.com/c/OpenPlotter')
+		info.AddDeveloper('Sailoog\nhttp://github.com/sailoog/openplotter\n-------------------\nOpenCPN: http://opencpn.org/ocpn/\nzyGrib: http://www.zygrib.org/\nMultiplexer: http://www.stripydog.com/kplex/index.html\nrtl-sdr: http://sdr.osmocom.org/trac/wiki/rtl-sdr\naisdecoder: http://www.aishub.net/aisdecoder-via-sound-card.html\ngeomag: http://github.com/cmweiss/geomag\nIMU sensor: http://github.com/richards-tech/RTIMULib\nNMEA parser: http://github.com/Knio/pynmea2\n\n')
+		info.AddDocWriter('Sailoog\n\nDocumentation: http://sailoog.gitbooks.io/openplotter-documentation/\nGuides: http://sailoog.dozuki.com/c/OpenPlotter')
 		info.AddArtist('Sailoog')
 		info.AddTranslator('Catalan, English and Spanish by Sailoog')
 		wx.AboutBox(info)
+
+	def op_doc(self, e):
+		url = "http://sailoog.gitbooks.io/openplotter-documentation/"
+		webbrowser.open(url,new=2)
+
+	def op_guides(self, e):
+		url = "http://sailoog.dozuki.com/c/OpenPlotter"
+		webbrowser.open(url,new=2)
+
+########startup###################################	
 
 	def startup(self, e):
 		if self.startup_opencpn.GetValue():
@@ -479,6 +497,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.data_conf.set('STARTUP', 'x11vnc', '0')
 
 		self.write_conf()
+
+########WIFI###################################	
 
 
 	def onwifi_enable (self, e):
@@ -541,6 +561,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.passw_label.Enable()
 			self.wifi_enable.SetValue(False)
 			self.data_conf.set('WIFI', 'enable', '0')
+
+########SDR-AIS###################################	
+
 
 	def kill_sdr(self):
 		subprocess.call(['pkill', '-9', 'aisdecoder'])
