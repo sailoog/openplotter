@@ -291,8 +291,8 @@ class MyFrame(wx.Frame):
 
 		def write_item(self, pos, value, sentence, talker):
 			self.list.SetStringItem(pos,1,value)
-			if talker=='OP': self.list.SetStringItem(pos,2,'OpenPlotter')
-			else: self.list.SetStringItem(pos,2,'External')
+			if talker=='OP': self.list.SetStringItem(pos,2,_('OpenPlotter'))
+			else: self.list.SetStringItem(pos,2,_('External'))
 			self.list.SetStringItem(pos,3,sentence)
 			self.list.SetStringItem(pos,4,'0')
 			self.times[pos]=time.time()
