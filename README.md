@@ -22,11 +22,10 @@ OpenPlotter is a combination of software and hardware to be used as navigational
 * **GPSD**. Configure [GPSD](http://www.catb.org/gpsd/).
 * **Startup Programs**. Select some program parameters to launch at start.
 
-## Documentation
+## Project site
 
-Documentation: http://sailoog.gitbooks.io/openplotter-documentation/
+http://www.sailoog.com/openplotter
 
-Guides: http://sailoog.dozuki.com/c/OpenPlotter
 
 ## Build instructions
 
