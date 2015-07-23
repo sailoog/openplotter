@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, socket, os, threading, time, datetime, gettext, sys, pynmea2
+import wx, socket, os, threading, time, datetime, gettext, sys, pynmea2, webbrowser
 
 pathname = os.path.dirname(sys.argv[0])
 currentpath = os.path.abspath(pathname)
@@ -52,6 +52,9 @@ class MyFrame(wx.Frame):
 
 			self.button_reset =wx.Button(self, label=_('Reset'), pos=(530, 230))
 			self.Bind(wx.EVT_BUTTON, self.reset, self.button_reset)
+
+			self.button_nmea =wx.Button(self, label=_('NMEA info'), pos=(530, 270))
+			self.Bind(wx.EVT_BUTTON, self.nmea_info, self.button_nmea)
 
 			self.list = wx.ListCtrl(self, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(500, 220), pos=(5, 155))
 			self.list.InsertColumn(0, _('Type'), width=150)
@@ -292,7 +295,7 @@ class MyFrame(wx.Frame):
 		def write_item(self, pos, value, sentence, talker):
 			self.list.SetStringItem(pos,1,value)
 			if talker=='OP': self.list.SetStringItem(pos,2,_('OpenPlotter'))
-			else: self.list.SetStringItem(pos,2,_('External'))
+			else: self.list.SetStringItem(pos,2,talker)
 			self.list.SetStringItem(pos,3,sentence)
 			self.list.SetStringItem(pos,4,'0')
 			self.times[pos]=time.time()
@@ -311,6 +314,10 @@ class MyFrame(wx.Frame):
 				self.list.SetStringItem(i,2,'')
 				self.list.SetStringItem(i,3,'')
 				self.list.SetStringItem(i,4,'')
+
+		def nmea_info(self, e):
+			url = currentpath+'/docs/NMEA.html'
+			webbrowser.open(url,new=2)
 
 
 app = wx.App(False)
