@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, gettext, os, sys, ConfigParser, subprocess, webbrowser
+import wx, gettext, os, sys, ConfigParser, subprocess, webbrowser, re
 import wx.lib.scrolledpanel as scrolled
 
 home = os.path.expanduser('~')
@@ -201,59 +201,47 @@ class MainFrame(wx.Frame):
 ###########################page4
 ########page5###################
 		wx.StaticBox(self.page5, label=_(' Inputs '), size=(670, 130), pos=(10, 10))
-		self.list_input = wx.ListCtrl(self.page5, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(295, 102), pos=(15, 30))
-		self.list_input.InsertColumn(0, _('Type'), width=50)
-		self.list_input.InsertColumn(1, _('Port/Address'), width=130)
-		self.list_input.InsertColumn(2, _('Bauds/Port'), width=115)
-		self.add_serial_in =wx.Button(self.page5, label=_('+ serial'), pos=(315, 30))
+		self.list_input = wx.ListCtrl(self.page5, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(565, 102), pos=(15, 30))
+		self.list_input.InsertColumn(0, _('Name'), width=105)
+		self.list_input.InsertColumn(1, _('Type'), width=45)
+		self.list_input.InsertColumn(2, _('Port/Address'), width=110)
+		self.list_input.InsertColumn(3, _('Bauds/Port'), width=80)
+		self.list_input.InsertColumn(4, _('Filter'), width=55)
+		self.list_input.InsertColumn(5, _('Filtering'), width=170)
+		self.add_serial_in =wx.Button(self.page5, label=_('+ serial'), pos=(585, 30))
 		self.Bind(wx.EVT_BUTTON, self.add_serial_input, self.add_serial_in)
-		self.SerDevLs = []
-		self.SerialCheck('/dev/rfcomm')
-		self.SerialCheck('/dev/ttyUSB')
-		self.SerialCheck('/dev/ttyS')
-		self.SerialCheck('/dev/ttyACM')
-		self.deviceComboBox = wx.ComboBox(self.page5, choices=self.SerDevLs, style=wx.CB_DROPDOWN, size=(155, 32), pos=(420, 30))
-		if self.SerDevLs : self.deviceComboBox.SetValue(self.SerDevLs[0])
-		self.bauds = ['2400', '4800', '9600', '19200', '38400', '57600', '115200']
-		self.baudComboBox = wx.ComboBox(self.page5, choices=self.bauds, style=wx.CB_READONLY, size=(90, 32), pos=(580, 30))
-		self.baudComboBox.SetValue('4800')
-		self.add_network_in =wx.Button(self.page5, label=_('+ network'), pos=(315, 65))
+
+		self.add_network_in =wx.Button(self.page5, label=_('+ network'), pos=(585, 65))
 		self.Bind(wx.EVT_BUTTON, self.add_network_input, self.add_network_in)
-		self.type = ['TCP', 'UDP']
-		self.typeComboBox = wx.ComboBox(self.page5, choices=self.type, style=wx.CB_READONLY, size=(65, 32), pos=(420, 65))
-		self.typeComboBox.SetValue('TCP')
-		self.address = wx.TextCtrl(self.page5, -1, size=(120, 32), pos=(490, 65))
-		self.port = wx.TextCtrl(self.page5, -1, size=(55, 32), pos=(615, 65))
-		self.button_delete_input =wx.Button(self.page5, label=_('delete'), pos=(315, 100))
+
+		self.button_delete_input =wx.Button(self.page5, label=_('delete'), pos=(585, 100))
 		self.Bind(wx.EVT_BUTTON, self.delete_input, self.button_delete_input)
-		self.add_gpsd_in =wx.Button(self.page5, label=_('+ GPSD'), pos=(575, 100))
-		self.Bind(wx.EVT_BUTTON, self.add_gpsd_input, self.add_gpsd_in)
 
 		wx.StaticBox(self.page5, label=_(' Outputs '), size=(670, 130), pos=(10, 145))
-		self.list_output = wx.ListCtrl(self.page5, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(295, 102), pos=(15, 165))
-		self.list_output.InsertColumn(0, _('Type'), width=50)
-		self.list_output.InsertColumn(1, _('Port/Address'), width=130)
-		self.list_output.InsertColumn(2, _('Bauds/Port'), width=115)
-		self.add_serial_out =wx.Button(self.page5, label=_('+ serial'), pos=(315, 165))
+		self.list_output = wx.ListCtrl(self.page5, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(565, 102), pos=(15, 165))
+		self.list_output.InsertColumn(0, _('Name'), width=105)
+		self.list_output.InsertColumn(1, _('Type'), width=45)
+		self.list_output.InsertColumn(2, _('Port/Address'), width=110)
+		self.list_output.InsertColumn(3, _('Bauds/Port'), width=80)
+		self.list_output.InsertColumn(4, _('Filter'), width=55)
+		self.list_output.InsertColumn(5, _('Filtering'), width=170)
+		self.add_serial_out =wx.Button(self.page5, label=_('+ serial'), pos=(585, 165))
 		self.Bind(wx.EVT_BUTTON, self.add_serial_output, self.add_serial_out)
-		self.deviceComboBox2 = wx.ComboBox(self.page5, choices=self.SerDevLs, style=wx.CB_DROPDOWN, size=(155, 32), pos=(420, 165))
-		if self.SerDevLs : self.deviceComboBox2.SetValue(self.SerDevLs[0])
-		self.baudComboBox2 = wx.ComboBox(self.page5, choices=self.bauds, style=wx.CB_READONLY, size=(90, 32), pos=(580, 165))
-		self.baudComboBox2.SetValue('4800')
-		self.add_network_out =wx.Button(self.page5, label=_('+ network'), pos=(315, 200))
+
+		self.add_network_out =wx.Button(self.page5, label=_('+ network'), pos=(585, 200))
 		self.Bind(wx.EVT_BUTTON, self.add_network_output, self.add_network_out)
-		wx.StaticText(self.page5, label=_('TCP'), pos=(445, 208))
-		wx.StaticText(self.page5, label=_('localhost:'), pos=(540, 208))
-		self.port2 = wx.TextCtrl(self.page5, -1, size=(55, 32), pos=(615, 200))
-		self.button_delete_output =wx.Button(self.page5, label=_('delete'), pos=(315, 235))
+
+		self.button_delete_output =wx.Button(self.page5, label=_('delete'), pos=(585, 235))
 		self.Bind(wx.EVT_BUTTON, self.delete_output, self.button_delete_output)
 
-		self.button_apply =wx.Button(self.page5, label=_('Apply changes'), pos=(315, 285))
-		self.Bind(wx.EVT_BUTTON, self.apply_changes, self.button_apply)
-		self.restart =wx.Button(self.page5, label=_('Restart'), pos=(490, 285))
-		self.Bind(wx.EVT_BUTTON, self.restart_multiplex, self.restart)
-		self.show_output =wx.Button(self.page5, label=_('Show output'), pos=(15, 285))
+		self.show_output =wx.Button(self.page5, label=_('Show output'), pos=(10, 285))
 		self.Bind(wx.EVT_BUTTON, self.show_output_window, self.show_output)
+		self.restart =wx.Button(self.page5, label=_('Restart'), pos=(130, 285))
+		self.Bind(wx.EVT_BUTTON, self.restart_multiplex, self.restart)
+		self.button_apply =wx.Button(self.page5, label=_('Apply changes'), pos=(570, 285))
+		self.Bind(wx.EVT_BUTTON, self.apply_changes, self.button_apply)
+		self.button_cancel =wx.Button(self.page5, label=_('Cancel changes'), pos=(430, 285))
+		self.Bind(wx.EVT_BUTTON, self.cancel_changes, self.button_cancel)
 ###########################page5
 ########page6###################
 		wx.StaticBox(self.page6, size=(420, 50), pos=(10, 10))
@@ -511,7 +499,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			if len(passw)>=8:
 				wifi_result=subprocess.check_output(['sudo', 'python', currentpath+'/wifi_server.py', '1', wlan, passw])
 			else:
-				wifi_result=_('Your password must have a minimum of 8 characters')
+				wifi_result=_('Your password must have a minimum of 8 characters.')
 				self.enable_disable_wifi(0)
 		else: 
 			self.enable_disable_wifi(0)
@@ -679,12 +667,16 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def restart_multiplex(self,event):
 		self.restart_kplex()
+		self.read_kplex_conf()
 
 	def restart_kplex(self):
 		self.SetStatusText(_('Closing Kplex'))
 		subprocess.call(["pkill", '-9', "kplex"])
 		subprocess.Popen('kplex')
 		self.SetStatusText(_('Kplex restarted'))
+
+	def cancel_changes(self,event):
+		self.read_kplex_conf()
 
 	def read_kplex_conf(self):
 		self.inputs = []
@@ -693,53 +685,42 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			file=open(home+'/.kplex.conf', 'r')
 			data=file.readlines()
 			file.close()
-			for index,item in enumerate(data):
-				if '[serial]' in item:
-					if 'direction=in' in data[index+1]:
-						input_tmp=[]
-						input_tmp.append('Serial')
-						item2=self.extract_value(data[index+2])
-						input_tmp.append(item2)
-						item3=self.extract_value(data[index+3])
-						input_tmp.append(item3)
-						self.inputs.append(input_tmp)
-					if 'direction=out' in data[index+1]:
-						output_tmp=[]
-						output_tmp.append('Serial')
-						item2=self.extract_value(data[index+2])
-						output_tmp.append(item2)
-						item3=self.extract_value(data[index+3])
-						output_tmp.append(item3)
-						self.outputs.append(output_tmp)
-				if '[tcp]' in item:
-					if 'direction=in' in data[index+1]:
-						input_tmp=[]
-						input_tmp.append('TCP')
-						item2=self.extract_value(data[index+2])
-						input_tmp.append(item2)
-						item3=self.extract_value(data[index+3])
-						input_tmp.append(item3)
-						self.inputs.append(input_tmp)
-					if 'direction=out' in data[index+1]:
-						output_tmp=[]
-						output_tmp.append('TCP')
-						output_tmp.append(_('localhost'))
-						item2=self.extract_value(data[index+2])
-						output_tmp.append(item2)
-						self.outputs.append(output_tmp)
-				if '[broadcast]' in item:
-					if 'direction=in' in data[index+1]:
-						input_tmp=[]
-						input_tmp.append('UDP')
-						input_tmp.append(_('localhost'))
-						item2=self.extract_value(data[index+2])
-						input_tmp.append(item2)
-						self.inputs.append(input_tmp)
+
+			l_tmp=[None]*7
+			for index, item in enumerate(data):
+				if re.search('\[*\]', item):
+					if l_tmp[0]=='in': self.inputs.append(l_tmp)
+					if l_tmp[0]=='out': self.outputs.append(l_tmp)
+					l_tmp=[None]*7
+					l_tmp[5]='none'
+					l_tmp[6]='nothing'
+					if '[serial]' in item: l_tmp[2]='Serial'
+					if '[tcp]' in item: l_tmp[2]='TCP'
+					if '[udp]' in item: l_tmp[2]='UDP'
+				if 'direction=in' in item:
+					l_tmp[0]='in'
+				if 'direction=out' in item:
+					l_tmp[0]='out'
+				if 'name=' in item and 'filename=' not in item:
+					l_tmp[1]=self.extract_value(item)
+				if 'address=' in item or 'filename=' in item:
+					l_tmp[3]=self.extract_value(item)
+				if 'port=' in item or 'baud=' in item:
+					l_tmp[4]=self.extract_value(item)
+				if 'filter=' in item and '-all' in item:
+					l_tmp[5]='accept'
+					l_tmp[6]=self.extract_value(item)
+				if 'filter=' in item and '-all' not in item:
+					l_tmp[5]='ignore'
+					l_tmp[6]=self.extract_value(item)
+
+			if l_tmp[0]=='in': self.inputs.append(l_tmp)
+			if l_tmp[0]=='out': self.outputs.append(l_tmp)
 			self.write_inputs()
 			self.write_outputs()
 
 		except IOError:
-			self.ShowMessage(_('Configuration file does not exist. Add inputs and apply changes.'))
+			self.ShowMessage(_('Multiplexer configuration file does not exist. Add inputs and apply changes.'))
 
 	def extract_value(self,data):
 		option, value =data.split('=')
@@ -749,33 +730,89 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def write_inputs(self):
 		self.list_input.DeleteAllItems()
 		for i in self.inputs:
-			index = self.list_input.InsertStringItem(sys.maxint, i[0])
-			self.list_input.SetStringItem(index, 1, i[1])
-			self.list_input.SetStringItem(index, 2, i[2])
+			if i[1]: index = self.list_input.InsertStringItem(sys.maxint, i[1])
+			if i[2]: self.list_input.SetStringItem(index, 1, i[2])
+			if i[3]: self.list_input.SetStringItem(index, 2, i[3])
+			else: self.list_input.SetStringItem(index, 2, 'OpenPlotter')
+			if i[4]: self.list_input.SetStringItem(index, 3, i[4])
+			if i[5]:
+				if i[5]=='none': self.list_input.SetStringItem(index, 4, _('none'))
+				if i[5]=='accept': self.list_input.SetStringItem(index, 4, _('accept'))
+				if i[5]=='ignore': self.list_input.SetStringItem(index, 4, _('ignore'))
+			if i[6]=='nothing':
+				self.list_input.SetStringItem(index, 5, _('nothing'))
+			else:
+				filters=i[6].replace(':-all', '')
+				filters=filters.replace('+', '')
+				filters=filters.replace('-', '')
+				filters=filters.replace(':', ',')
+				self.list_input.SetStringItem(index, 5, filters)
 	
 	def write_outputs(self):
 		self.list_output.DeleteAllItems()
 		for i in self.outputs:
-			index = self.list_output.InsertStringItem(sys.maxint, i[0])
-			self.list_output.SetStringItem(index, 1, i[1])
-			self.list_output.SetStringItem(index, 2, i[2])
+			if i[1]: index = self.list_output.InsertStringItem(sys.maxint, i[1])
+			if i[2]: self.list_output.SetStringItem(index, 1, i[2])
+			if i[3]: self.list_output.SetStringItem(index, 2, i[3])
+			else: self.list_output.SetStringItem(index, 2, 'OpenPlotter')
+			if i[4]: self.list_output.SetStringItem(index, 3, i[4])
+			if i[5]:
+				if i[5]=='none': self.list_output.SetStringItem(index, 4, _('none'))
+				if i[5]=='accept': self.list_output.SetStringItem(index, 4, _('accept'))
+				if i[5]=='ignore': self.list_output.SetStringItem(index, 4, _('ignore'))
+			if i[6]=='nothing':
+				self.list_output.SetStringItem(index, 5, _('nothing'))
+			else:
+				filters=i[6].replace(':-all', '')
+				filters=filters.replace('+', '')
+				filters=filters.replace('-', '')
+				filters=filters.replace(':', ',')
+				self.list_output.SetStringItem(index, 5, filters)
 
 	def apply_changes(self,event):
 		data='# For advanced manual configuration, please visit: http://www.stripydog.com/kplex/configuration.html\n# Editing this file by openplotter GUI, can eliminate manual settings.\n# You should not modify defaults.\n\n'
+
+		data=data+'###defaults\n\n[udp]\nname=system_input\ndirection=in\noptional=yes\nport=10110\n\n'
+		data=data+'[tcp]\nname=system_output\ndirection=out\nmode=server\nport=10110\n\n###\n\n'
+
 		for index,item in enumerate(self.inputs):
-			if 'Serial' in item[0]:
-				data=data+'[serial]\ndirection=in\nfilename='+item[1]+'\nbaud='+item[2]+'\noptional=yes\n\n'
-			if 'TCP' in item[0]:
-				data=data+'[tcp]\ndirection=in\naddress='+item[1]+'\nport='+item[2]+'\nmode=client\npersist=yes\nretry=20\nkeepalive=yes\noptional=yes\n\n'
-			if 'UDP' in item[0]:
-				data=data+'[broadcast]\ndirection=in\nport='+item[2]+'\noptional=yes\n\n'
-		if not '[broadcast]\ndirection=in\nport=10110' in data: data=data+'#default input\n[broadcast]\ndirection=in\nport=10110\noptional=yes\n\n'
+			if 'system_input' not in item[1]:
+				if 'Serial' in item[2]:
+					data=data+'[serial]\nname='+item[1]+'\ndirection=in\noptional=yes\n'
+					if item[5]=='ignore':data=data+'ifilter='+item[6]+'\n'
+					if item[5]=='accept':data=data+'ifilter='+item[6]+'\n'
+					data=data+'filename='+item[3]+'\nbaud='+item[4]+'\n\n'
+				if 'TCP' in item[2]:
+					data=data+'[tcp]\nname='+item[1]+'\ndirection=in\noptional=yes\n'
+					if item[5]=='ignore':data=data+'ifilter='+item[6]+'\n'
+					if item[5]=='accept':data=data+'ifilter='+item[6]+'\n'
+					data=data+'mode=client\naddress='+item[3]+'\nport='+item[4]+'\n'
+					data=data+'persist=yes\nretry=10\n\n'				
+				if 'UDP' in item[2]:
+					data=data+'[udp]\nname='+item[1]+'\ndirection=in\noptional=yes\n'
+					if item[5]=='ignore':data=data+'ifilter='+item[6]+'\n'
+					if item[5]=='accept':data=data+'ifilter='+item[6]+'\n'
+					data=data+'address='+item[3]+'\nport='+item[4]+'\n\n'
+		
 		for index,item in enumerate(self.outputs):
-			if 'Serial' in item[0]:
-				data=data+'[serial]\ndirection=out\nfilename='+item[1]+'\nbaud='+item[2]+'\noptional=yes\n\n'
-			if 'TCP' in item[0]:
-				data=data+'[tcp]\ndirection=out\nport='+item[2]+'\nmode=server\n\n'
-		if not '[tcp]\ndirection=out\nport=10110' in data: data=data+'#default output\n[tcp]\ndirection=out\nport=10110\nmode=server\n\n'
+			if 'system_output' not in item[1]:
+				if 'Serial' in item[2]:
+					data=data+'[serial]\nname='+item[1]+'\ndirection=out\noptional=yes\n'
+					if item[5]=='ignore':data=data+'ofilter='+item[6]+'\n'
+					if item[5]=='accept':data=data+'ofilter='+item[6]+'\n'
+					data=data+'filename='+item[3]+'\nbaud='+item[4]+'\n\n'
+				if 'TCP' in item[2]:
+					data=data+'[tcp]\nname='+item[1]+'\ndirection=out\noptional=yes\n'
+					if item[5]=='ignore':data=data+'ofilter='+item[6]+'\n'
+					if item[5]=='accept':data=data+'ofilter='+item[6]+'\n'
+					data=data+'mode=server\naddress='+item[3]+'\nport='+item[4]+'\n\n'				
+				if 'UDP' in item[2]:
+					data=data+'[udp]\nname='+item[1]+'\ndirection=out\noptional=yes\n'
+					if item[5]=='ignore':data=data+'ofilter='+item[6]+'\n'
+					if item[5]=='accept':data=data+'ofilter='+item[6]+'\n'
+					data=data+'address='+item[3]+'\nport='+item[4]+'\n\n'
+		
+		
 		file = open(home+'/.kplex.conf', 'w')
 		file.write(data)
 		file.close()
@@ -796,94 +833,90 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				del self.outputs[i]
 		self.write_outputs()
 
-	def SerialCheck(self,dev):
-		num = 0
-		for _ in range(99):
-			s = dev + str(num)
-			d = os.path.exists(s)
-			if d == True:
-				self.SerDevLs.append(s)      
-			num = num + 1
+	def process_name(self,r):
+		list_tmp=[]
+		l=r.split(',')
+		for item in l:
+			item=item.strip()
+			list_tmp.append(item)
+		name=list_tmp[1]
+		found=False
+		for sublist in self.inputs:
+			if sublist[1] == name:
+				found=True
+		for sublist in self.outputs:
+			if sublist[1] == name:
+				found=True
+		if found==True:
+			self.ShowMessage(_('This name already exists.'))
+			return False
+		else:
+			return list_tmp
 	
 	def add_serial_input(self,event):
-		input_tmp=[]
-		found=False
-		input_tmp.append('Serial')
-		port=self.deviceComboBox.GetValue()
-		input_tmp.append(port)
-		bauds=self.baudComboBox.GetValue()
-		input_tmp.append(bauds)
-		for sublist in self.inputs:
-			if sublist[1] == port:found=True
-		if found==False:
-			self.inputs.append(input_tmp)
-			self.write_inputs()
-		else:
-			self.ShowMessage(_('It is impossible to set input because this port is already in use.'))
-	
-	def add_network_input(self,event):
-		input_tmp=[]
-		type_=self.typeComboBox.GetValue()
-		address=self.address.GetValue()
-		port=self.port.GetValue()
-		input_tmp.append(type_)
-		input_tmp.append(address)
-		input_tmp.append(port)
-		if type_=='TCP':
-			if port and address:
-				self.inputs.append(input_tmp)
+		subprocess.call(['pkill', '-f', 'connection.py'])
+		p=subprocess.Popen(['python', currentpath+'/connection.py', self.language, 'in', 'serial'], stdout=subprocess.PIPE)
+		r=stdout = p.communicate()[0]
+		if r:
+			list_tmp=self.process_name(r)
+			if list_tmp:
+				new_port=list_tmp[3]
+				for sublist in self.inputs:
+					if sublist[3] == new_port: 
+						self.ShowMessage(_('This input is already in use.'))
+						return
+				self.inputs.append(list_tmp)
 				self.write_inputs()
-			else:
-				self.ShowMessage(_('You must enter an address and a port number.'))
-		if type_=='UDP':
-			if port:
-				input_tmp[1]='localhost'
-				self.inputs.append(input_tmp)
-				self.write_inputs()
-			else:
-				self.ShowMessage(_('You must enter a port number.'))
+
 
 	def add_serial_output(self,event):
-		output_tmp=[]
-		found=False
-		output_tmp.append('Serial')
-		port=self.deviceComboBox2.GetValue()
-		output_tmp.append(port)
-		bauds=self.baudComboBox2.GetValue()
-		output_tmp.append(bauds)
-		for sublist in self.outputs:
-			if sublist[1] == port:found=True
-		if found==False:
-			self.outputs.append(output_tmp)
-			self.write_outputs()
-		else:
-			self.ShowMessage(_('It is impossible to set output because this port is already in use.'))
+		subprocess.call(['pkill', '-f', 'connection.py'])
+		p=subprocess.Popen(['python', currentpath+'/connection.py', self.language, 'out', 'serial'], stdout=subprocess.PIPE)
+		r=stdout = p.communicate()[0]
+		if r:
+			list_tmp=self.process_name(r)
+			if list_tmp:
+				new_port=list_tmp[3]
+				for sublist in self.outputs:
+					if sublist[3] == new_port: 
+						self.ShowMessage(_('This output is already in use.'))
+						return
+				self.outputs.append(list_tmp)
+				self.write_outputs()
+
+	
+	def add_network_input(self,event):
+		subprocess.call(['pkill', '-f', 'connection.py'])
+		p=subprocess.Popen(['python', currentpath+'/connection.py', self.language, 'in', 'network'], stdout=subprocess.PIPE)
+		r=stdout = p.communicate()[0]
+		if r:
+			list_tmp=self.process_name(r)
+			if list_tmp:
+				new_address_port=str(list_tmp[2])+str(list_tmp[3])+str(list_tmp[4])
+				for sublist in self.inputs:					
+					old_address_port=str(sublist[2])+str(sublist[3])+str(sublist[4])
+					if old_address_port == new_address_port: 
+						self.ShowMessage(_('This input is already in use.'))
+						return
+				self.inputs.append(list_tmp)
+				self.write_inputs()
+
 
 	def add_network_output(self,event):
-		output_tmp=[]
-		found=False
-		type_='TCP'
-		address='localhost'
-		port=self.port2.GetValue()
-		output_tmp.append(type_)
-		output_tmp.append(address)
-		output_tmp.append(port)
-		if port:
-			self.outputs.append(output_tmp)
-			self.write_outputs()
-		else:
-			self.ShowMessage(_('You must enter a port number.'))
-	
-	def add_gpsd_input(self,event):
-		input_tmp=[]
-		type_='TCP'
-		address='localhost'
-		port='2947'
-		input_tmp.append(type_)
-		input_tmp.append(address)
-		input_tmp.append(port)
-		self.inputs.append(input_tmp)
-		self.write_inputs()
+		subprocess.call(['pkill', '-f', 'connection.py'])
+		p=subprocess.Popen(['python', currentpath+'/connection.py', self.language, 'out', 'network'], stdout=subprocess.PIPE)
+		r=stdout = p.communicate()[0]
+		if r:
+			list_tmp=self.process_name(r)
+			if list_tmp:
+				new_address_port=str(list_tmp[2])+str(list_tmp[3])+str(list_tmp[4])
+				for sublist in self.outputs:					
+					old_address_port=str(sublist[2])+str(sublist[3])+str(sublist[4])
+					if old_address_port == new_address_port: 
+						self.ShowMessage(_('This output is already in use.'))
+						return
+				self.outputs.append(list_tmp)
+				self.write_outputs()
 
 
 ######################################multiplexer
