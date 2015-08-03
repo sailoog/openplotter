@@ -32,10 +32,6 @@ if wifi_server=='1':
 
 	error=0
 
-	arm=0
-	check_arm=os.uname()
-	if check_arm[4].startswith("arm"): arm=1
-
 	original=os.path.isfile('/usr/sbin/hostapd.org')
 	if not original: shutil.copyfile('/usr/sbin/hostapd', '/usr/sbin/hostapd.org')
 
@@ -44,17 +40,22 @@ if wifi_server=='1':
 
 	output=subprocess.check_output('lsusb')
 
-	if arm==1 and 'RTL8188CUS' in output:
+	if 'RTL8188CUS' in output:
 		driver='rtl871xdrv'
 		chipset= 'RTL8188CUS'
-		shutil.copyfile(currentpath+'/wifi_drivers/arm/RTL8188CUS/hostapd', '/usr/sbin/hostapd')
+		shutil.copyfile(currentpath+'/wifi_drivers/RTL8188CUS/hostapd', '/usr/sbin/hostapd')
 		subprocess.call(['chmod', '755', '/usr/sbin/hostapd'])
-	if arm==1 and 'RTL8192CU' in output:
+	if 'RTL8192CU' in output:
 		driver='rtl871xdrv'
 		chipset= 'RTL8192CU'
-		shutil.copyfile(currentpath+'/wifi_drivers/arm/RTL8192CU/hostapd', '/usr/sbin/hostapd')
+		shutil.copyfile(currentpath+'/wifi_drivers/RTL8192CU/hostapd', '/usr/sbin/hostapd')
 		subprocess.call(['chmod', '755', '/usr/sbin/hostapd'])
-	if driver == 'nl80211':
+	if '0bda:818b' in output:
+		driver='rtl871xdrv'
+		chipset= 'RTL8192EU'
+		shutil.copyfile(currentpath+'/wifi_drivers/RTL8192EU/hostapd', '/usr/sbin/hostapd')
+		subprocess.call(['chmod', '755', '/usr/sbin/hostapd'])
+	if chipset == 'default':
 		shutil.copyfile('/usr/sbin/hostapd.org', '/usr/sbin/hostapd')
 		subprocess.call(['chmod', '755', '/usr/sbin/hostapd'])
 
@@ -86,8 +87,7 @@ if wifi_server=='1':
 	with open('/etc/NetworkManager/NetworkManager.conf', 'wb') as configfile:
 		nm_conf.write(configfile)
 
-	try: output=subprocess.call(['/etc/init.d/network-manager', 'restart'])
-	except: output=subprocess.call(['restart', 'network-manager'])
+	output=subprocess.call(['/etc/init.d/network-manager', 'restart'])
 	if output != 0: error=1
 
 	output=subprocess.call(['ifup', wlan])
@@ -118,9 +118,6 @@ else:
 	file.write(data)
 	file.close()
 
-	try: subprocess.call(['/etc/init.d/network-manager', 'restart'])
-	except: subprocess.call(['restart', 'network-manager'])
+	subprocess.call(['/etc/init.d/network-manager', 'restart'])
 
 	print "\nNMEA WiFi Server stopped."
-
-
