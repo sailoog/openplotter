@@ -124,23 +124,29 @@ class MainFrame(wx.Frame):
 		self.startup_remote_desktop.Bind(wx.EVT_CHECKBOX, self.startup)
 ###########################page1
 ########page2###################
-		wx.StaticBox(self.page2, size=(300, 65), pos=(10, 10))
-		self.mag_var = wx.CheckBox(self.page2, label=_('Magnetic variation'), pos=(20, 25))
+		wx.StaticBox(self.page2, size=(670, 50), pos=(10, 10))
+		wx.StaticText(self.page2, label=_('NMEA generation rate (seconds)'), pos=(20, 30))
+		self.rate_list = ['0.1', '0.25', '0.5', '0.75', '1', '1.5', '2']
+		self.rate2= wx.ComboBox(self.page2, choices=self.rate_list, style=wx.CB_READONLY, size=(80, 32), pos=(260, 23))
+		self.button_ok_rate2 =wx.Button(self.page2, label=_('Ok'),size=(70, 32), pos=(350, 23))
+		self.Bind(wx.EVT_BUTTON, self.ok_rate2, self.button_ok_rate2)
+
+		wx.StaticBox(self.page2, size=(330, 65), pos=(10, 70))
+		self.mag_var = wx.CheckBox(self.page2, label=_('Magnetic variation'), pos=(20, 85))
 		self.mag_var.Bind(wx.EVT_CHECKBOX, self.nmea_mag_var)
-		wx.StaticText(self.page2, label=_('Generated NMEA: $OPHDG'), pos=(20, 50))
+		wx.StaticText(self.page2, label=_('Generated NMEA: $OPHDG'), pos=(20, 110))
 
-		wx.StaticBox(self.page2, size=(300, 65), pos=(10, 75))
-		self.heading_t = wx.CheckBox(self.page2, label=_('True heading'), pos=(20, 90))
+		wx.StaticBox(self.page2, size=(330, 65), pos=(10, 135))
+		self.heading_t = wx.CheckBox(self.page2, label=_('True heading'), pos=(20, 150))
 		self.heading_t.Bind(wx.EVT_CHECKBOX, self.nmea_hdt)
-		wx.StaticText(self.page2, label=_('Generated NMEA: $OPHDT'), pos=(20, 115))
+		wx.StaticText(self.page2, label=_('Generated NMEA: $OPHDT'), pos=(20, 175))
 
-		wx.StaticBox(self.page2, size=(300, 125), pos=(10, 140))
-		wx.StaticText(self.page2, label=_('True wind'), pos=(20, 155))
-		wx.StaticText(self.page2, label=_('Generated NMEA: $OPMWV, $OPMWD'), pos=(20, 175))
-		self.TW_STW = wx.CheckBox(self.page2, label=_('Use speed log'), pos=(20, 200))
+		wx.StaticBox(self.page2, label=_(' True wind '), size=(330, 130), pos=(350, 70))
+		self.TW_STW = wx.CheckBox(self.page2, label=_('Use speed log'), pos=(360, 95))
 		self.TW_STW.Bind(wx.EVT_CHECKBOX, self.TW)
-		self.TW_SOG = wx.CheckBox(self.page2, label=_('Use GPS'), pos=(20, 225))
+		self.TW_SOG = wx.CheckBox(self.page2, label=_('Use GPS'), pos=(360, 125))
 		self.TW_SOG.Bind(wx.EVT_CHECKBOX, self.TW)
+		wx.StaticText(self.page2, label=_('Generated NMEA: $OPMWV, $OPMWD'), pos=(360, 155))
 ###########################page2
 ########page3###################
 		wx.StaticBox(self.page3, size=(400, 45), pos=(10, 10))
@@ -244,9 +250,8 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.cancel_changes, self.button_cancel)
 ###########################page5
 ########page6###################
-		wx.StaticBox(self.page6, size=(420, 50), pos=(10, 10))
+		wx.StaticBox(self.page6, size=(670, 50), pos=(10, 10))
 		wx.StaticText(self.page6, label=_('NMEA generation rate (seconds)'), pos=(20, 30))
-		self.rate_list = ['0.1', '0.25', '0.5', '0.75', '1']
 		self.rate= wx.ComboBox(self.page6, choices=self.rate_list, style=wx.CB_READONLY, size=(80, 32), pos=(260, 23))
 		self.button_ok_rate =wx.Button(self.page6, label=_('Ok'),size=(70, 32), pos=(350, 23))
 		self.Bind(wx.EVT_BUTTON, self.ok_rate, self.button_ok_rate)
@@ -338,7 +343,8 @@ class MainFrame(wx.Frame):
 			self.check_channels.Disable()
 			self.check_bands.Disable()
 
-		self.rate.SetValue(self.data_conf.get('STARTUP', 'nmea_rate'))
+		self.rate.SetValue(self.data_conf.get('STARTUP', 'nmea_rate_sen'))
+		self.rate2.SetValue(self.data_conf.get('STARTUP', 'nmea_rate_cal'))
 
 		if self.data_conf.get('STARTUP', 'nmea_mag_var')=='1': self.mag_var.SetValue(True)
 
@@ -938,8 +944,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def ok_rate(self, e):
 		rate=self.rate.GetValue()
-		self.data_conf.set('STARTUP', 'nmea_rate', rate)
+		self.data_conf.set('STARTUP', 'nmea_rate_sen', rate)
 		self.start_sensors()
+
+	def ok_rate2(self, e):
+		rate=self.rate2.GetValue()
+		self.data_conf.set('STARTUP', 'nmea_rate_cal', rate)
 		self.start_calculate()
 
 	def nmea_hdg(self, e):

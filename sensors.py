@@ -51,7 +51,7 @@ while True:
 
 	tick2=time.time()
 
-	if tick2-tick > float(data_conf.get('STARTUP', 'nmea_rate')):
+	if tick2-tick > float(data_conf.get('STARTUP', 'nmea_rate_sen')):
 
 		tick=time.time()
 # read IMU
