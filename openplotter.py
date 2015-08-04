@@ -104,23 +104,29 @@ class MainFrame(wx.Frame):
 		self.SetMenuBar(self.menubar)
 ###########################menu
 ########page1###################
-		wx.StaticBox(self.page1, size=(400, 200), pos=(10, 10))
-		self.startup_opencpn = wx.CheckBox(self.page1, label=_('OpenCPN'), pos=(20, 25))
+		wx.StaticBox(self.page1, size=(670, 50), pos=(10, 10))
+		wx.StaticText(self.page1, label=_('Delay (seconds)'), pos=(20, 30))
+		self.delay = wx.TextCtrl(self.page1, -1, size=(55, 32), pos=(170, 23))
+		self.button_ok_delay =wx.Button(self.page1, label=_('Ok'),size=(70, 32), pos=(250, 23))
+		self.Bind(wx.EVT_BUTTON, self.ok_delay, self.button_ok_delay)
+
+		wx.StaticBox(self.page1, size=(330, 200), pos=(10, 70))
+		self.startup_opencpn = wx.CheckBox(self.page1, label=_('OpenCPN'), pos=(20, 85))
 		self.startup_opencpn.Bind(wx.EVT_CHECKBOX, self.startup)
 
-		self.startup_opencpn_nopengl = wx.CheckBox(self.page1, label=_('no OpenGL'), pos=(40, 50))
+		self.startup_opencpn_nopengl = wx.CheckBox(self.page1, label=_('no OpenGL'), pos=(40, 110))
 		self.startup_opencpn_nopengl.Bind(wx.EVT_CHECKBOX, self.startup)
 
-		self.startup_opencpn_fullscreen = wx.CheckBox(self.page1, label=_('fullscreen'), pos=(40, 75))
+		self.startup_opencpn_fullscreen = wx.CheckBox(self.page1, label=_('fullscreen'), pos=(40, 135))
 		self.startup_opencpn_fullscreen.Bind(wx.EVT_CHECKBOX, self.startup)
 
-		self.startup_multiplexer = wx.CheckBox(self.page1, label=_('Multiplexer'), pos=(20, 110))
+		self.startup_multiplexer = wx.CheckBox(self.page1, label=_('Multiplexer'), pos=(20, 170))
 		self.startup_multiplexer.Bind(wx.EVT_CHECKBOX, self.startup)
 
-		self.startup_nmea_time = wx.CheckBox(self.page1, label=_('Set time from NMEA'), pos=(40, 135))
+		self.startup_nmea_time = wx.CheckBox(self.page1, label=_('Set time from NMEA'), pos=(40, 195))
 		self.startup_nmea_time.Bind(wx.EVT_CHECKBOX, self.startup)
 
-		self.startup_remote_desktop = wx.CheckBox(self.page1, label=_('Remote desktop'), pos=(20, 170))
+		self.startup_remote_desktop = wx.CheckBox(self.page1, label=_('Remote desktop'), pos=(20, 230))
 		self.startup_remote_desktop.Bind(wx.EVT_CHECKBOX, self.startup)
 ###########################page1
 ########page2###################
@@ -290,6 +296,8 @@ class MainFrame(wx.Frame):
 		if language=='ca': self.lang.Check(self.lang_item2.GetId(), True)
 		if language=='es': self.lang.Check(self.lang_item3.GetId(), True)
 
+		self.delay.SetValue(self.data_conf.get('STARTUP', 'delay'))
+
 		if self.data_conf.get('STARTUP', 'opencpn')=='1': 
 			self.startup_opencpn.SetValue(True)
 		else:
@@ -452,8 +460,19 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		webbrowser.open(url,new=2)
 
 ########startup###################################	
+	def ok_delay(self, e):
+		delay=self.delay.GetValue()
+		if not re.match('^[0-9]*$', delay):
+				self.ShowMessage(_('You can enter only numbers.'))
+				return
+		else:
+			if delay != '0': delay = delay.lstrip('0')
+			self.data_conf.set('STARTUP', 'delay', delay)
+			self.ShowMessage(_('Startup delay set to ')+delay+_(' seconds'))
+			self.write_conf()
 
 	def startup(self, e):
+
 		if self.startup_opencpn.GetValue():
 			self.startup_opencpn_nopengl.Enable()
 			self.startup_opencpn_fullscreen.Enable()
@@ -946,12 +965,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		rate=self.rate.GetValue()
 		self.data_conf.set('STARTUP', 'nmea_rate_sen', rate)
 		self.start_sensors()
+		self.ShowMessage(_('Generation rate set to ')+rate+_(' seconds'))
 
 	def ok_rate2(self, e):
 		rate=self.rate2.GetValue()
 		self.data_conf.set('STARTUP', 'nmea_rate_cal', rate)
 		self.start_calculate()
-
+		self.ShowMessage(_('Generation rate set to ')+rate+_(' seconds'))
+		
 	def nmea_hdg(self, e):
 		subprocess.call(['pkill', 'RTIMULibDemoGL'])
 		sender = e.GetEventObject()

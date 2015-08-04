@@ -23,6 +23,8 @@ currentpath = os.path.abspath(pathname)
 data_conf = ConfigParser.SafeConfigParser()
 data_conf.read(currentpath+'/openplotter.conf')
 
+delay=int(data_conf.get('STARTUP', 'delay'))
+
 kplex=data_conf.get('STARTUP', 'kplex')
 opencpn=data_conf.get('STARTUP', 'opencpn')
 opencpn_no=data_conf.get('STARTUP', 'opencpn_no_opengl')
@@ -48,6 +50,7 @@ TW_STW=data_conf.get('STARTUP', 'tw_stw')
 TW_SOG=data_conf.get('STARTUP', 'tw_sog')
 
 #######################################################
+time.sleep(delay)
 
 if x11vnc=='1':
 	subprocess.Popen(['x11vnc', '-forever'])         
