@@ -19,8 +19,16 @@ import RTIMU
 
 SETTINGS_FILE = "RTIMULib"
 s = RTIMU.Settings(SETTINGS_FILE)
+
 imu = RTIMU.RTIMU(s)
+pressure = RTIMU.RTPressure(s)
+
 detected_imu=imu.IMUName()
+detected_pressure=pressure.pressureName()
+
 imu=''
+pressure =''
 s=''
-print detected_imu
+
+print 'IMU='+detected_imu
+print 'pressure='+detected_pressure

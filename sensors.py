@@ -27,19 +27,29 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 SETTINGS_FILE = "RTIMULib"
 s = RTIMU.Settings(SETTINGS_FILE)
-imu = RTIMU.RTIMU(s)
-pressure_val = RTIMU.RTPressure(s)
-imu.IMUInit()
-pressure_val.pressureInit()
 
-ifile  = open(currentpath+'/weather_log.csv', "r")
-reader = csv.reader(ifile)
-log_list = []
-for row in reader:
-	log_list.append(row)
-ifile.close()
-if log_list: last_log=float(log_list[len(log_list)-1][0])
-else: last_log=0
+if data_conf.get('STARTUP', 'nmea_hdg')=='1':
+	imu = RTIMU.RTIMU(s)
+	imu.IMUInit()
+	imu.setSlerpPower(0.02)
+	imu.setGyroEnable(True)
+	imu.setAccelEnable(True)
+	imu.setCompassEnable(True)
+	poll_interval = imu.IMUGetPollInterval()
+
+if data_conf.get('STARTUP', 'nmea_mda')=='1':
+	pressure_val = RTIMU.RTPressure(s)
+	pressure_val.pressureInit()
+
+if data_conf.get('STARTUP', 'press_temp_log')=='1':
+	ifile  = open(currentpath+'/weather_log.csv', "r")
+	reader = csv.reader(ifile)
+	log_list = []
+	for row in reader:
+		log_list.append(row)
+	ifile.close()
+	if log_list: last_log=float(log_list[len(log_list)-1][0])
+	else: last_log=0
 
 heading_m=''
 pressure=''
@@ -48,37 +58,42 @@ temperature=''
 tick=time.time()
 
 while True:
-
 	tick2=time.time()
-
-	if tick2-tick > float(data_conf.get('STARTUP', 'nmea_rate_sen')):
-
-		tick=time.time()
 # read IMU
-		if data_conf.get('STARTUP', 'nmea_mda')=='1' or data_conf.get('STARTUP', 'nmea_hdg')=='1':
-			if imu.IMURead():
-				data = imu.getIMUData()
-				(data["pressureValid"], data["pressure"], data["temperatureValid"], data["temperature"]) = pressure_val.pressureRead()
-				fusionPose = data["fusionPose"]
-				heading_m0=math.degrees(fusionPose[2])
-				if heading_m0<0:
-					heading_m0=360+heading_m0
-				heading_m=round(heading_m0,1)
-				if (data["pressureValid"]):
-					pressure=data["pressure"]
-				if (data["temperatureValid"]):
-					temperature=data["temperature"]
-			else:
-				heading_m=''
-				pressure=''
-				temperature=''
-# HDG
+	if data_conf.get('STARTUP', 'nmea_hdg')=='1':
+		if imu.IMURead():
+			data = imu.getIMUData()
+			fusionPose = data["fusionPose"]
+			heading_m0=math.degrees(fusionPose[2])
+			if heading_m0<0:
+				heading_m0=360+heading_m0
+			heading_m=round(heading_m0,1)
+		else:
+			heading_m=''
+		time.sleep(poll_interval*1.0/1000.0)
+
+	# read Pressure
+	if data_conf.get('STARTUP', 'nmea_mda')=='1':
+		read=pressure_val.pressureRead()
+		if read:
+			if (read[0]):
+				pressure=read[1]
+			if (read[2]):
+				temperature=read[3]
+		else:
+			pressure=''
+			temperature=''
+	
+	#GENERATE
+	if tick2-tick > float(data_conf.get('STARTUP', 'nmea_rate_sen')):
+		tick=time.time()
+		# HDG
 		if data_conf.get('STARTUP', 'nmea_hdg')=='1' and heading_m:
 			hdg = pynmea2.HDG('OP', 'HDG', (str(heading_m),'','','',''))
 			hdg1=str(hdg)
 			hdg2=hdg1+"\r\n"
 			sock.sendto(hdg2, ('localhost', 10110))
-# MDA			
+		# MDA			
 		if data_conf.get('STARTUP', 'nmea_mda')=='1' and pressure and temperature:
 			press=round(pressure/1000,4)
 			temp= round(temperature,1)
@@ -86,7 +101,7 @@ while True:
 			mda1=str(mda)
 			mda2=mda1+"\r\n"
 			sock.sendto(mda2, ('localhost', 10110))
-# log temperature pressure
+		# log temperature pressure
 		if data_conf.get('STARTUP', 'press_temp_log')=='1' and pressure and temperature:
 			if tick-last_log > 300:
 				last_log=tick

@@ -262,21 +262,26 @@ class MainFrame(wx.Frame):
 		self.button_ok_rate =wx.Button(self.page6, label=_('Ok'),size=(70, 32), pos=(350, 23))
 		self.Bind(wx.EVT_BUTTON, self.ok_rate, self.button_ok_rate)
 
-		wx.StaticBox(self.page6, label=_(' IMU sensor '), size=(420, 180), pos=(10, 65))
-		self.imu_tag=wx.StaticText(self.page6, label=_('Sensor detected: None'), pos=(20, 90))
-		self.button_calibrate_imu =wx.Button(self.page6, label=_('Calibrate'), pos=(320, 85))
+		wx.StaticBox(self.page6, size=(330, 90), pos=(10, 70))
+		self.imu_tag=wx.StaticText(self.page6, label=_('Sensor detected: ')+_('none'), pos=(20, 90))
+		self.button_calibrate_imu =wx.Button(self.page6, label=_('Calibrate'), pos=(240, 120))
 		self.Bind(wx.EVT_BUTTON, self.calibrate_imu, self.button_calibrate_imu)
-		self.heading = wx.CheckBox(self.page6, label=_('Heading'), pos=(20, 115))
+		self.heading = wx.CheckBox(self.page6, label=_('Heading'), pos=(20, 110))
 		self.heading.Bind(wx.EVT_CHECKBOX, self.nmea_hdg)
-		wx.StaticText(self.page6, label=_('Generated NMEA: $OPHDG'), pos=(20, 140))
-		self.press_temp = wx.CheckBox(self.page6, label=_('Pressure and temperature'), pos=(20, 165))
+		self.heading_nmea=wx.StaticText(self.page6, label=_('Generated NMEA: $OPHDG'), pos=(20, 135))
+
+		wx.StaticBox(self.page6, size=(330, 90), pos=(10, 160))
+		self.press_tag=wx.StaticText(self.page6, label=_('Sensor detected: ')+_('none'), pos=(20, 180))
+		self.press_temp = wx.CheckBox(self.page6, label=_('Pressure'), pos=(20, 200))
 		self.press_temp.Bind(wx.EVT_CHECKBOX, self.nmea_mda)
-		wx.StaticText(self.page6, label=_('Generated NMEA: $OPMDA'), pos=(20, 190))
-		self.press_temp_log = wx.CheckBox(self.page6, label=_('Data logging'), pos=(35, 210))
+		self.press_nmea=wx.StaticText(self.page6, label=_('Generated NMEA: $OPMDA'), pos=(20, 225))
+
+		wx.StaticBox(self.page6, size=(330, 90), pos=(350, 70))
+		self.press_temp_log = wx.CheckBox(self.page6, label=_('Weather data logging'), pos=(360, 90))
 		self.press_temp_log.Bind(wx.EVT_CHECKBOX, self.enable_press_temp_log)
-		self.button_reset =wx.Button(self.page6, label=_('Reset'), pos=(220, 205))
+		self.button_reset =wx.Button(self.page6, label=_('Reset'), pos=(470, 120))
 		self.Bind(wx.EVT_BUTTON, self.reset_graph, self.button_reset)
-		self.button_graph =wx.Button(self.page6, label=_('Show'), pos=(320, 205))
+		self.button_graph =wx.Button(self.page6, label=_('Show'), pos=(585, 120))
 		self.Bind(wx.EVT_BUTTON, self.show_graph, self.button_graph)
 ###########################page6
 		self.read_kplex_conf()
@@ -358,15 +363,25 @@ class MainFrame(wx.Frame):
 
 		if self.data_conf.get('STARTUP', 'nmea_hdt')=='1': self.heading_t.SetValue(True)
 
-		detected_imu=subprocess.check_output(['python', currentpath+'/imu/check_imu.py'], cwd=currentpath+'/imu')
+		detected=subprocess.check_output(['python', currentpath+'/imu/check_sensors.py'], cwd=currentpath+'/imu')
+		l_detected=detected.split('\n')
+		imu_sensor=self.extract_value(l_detected[0])
+		press_sensor=self.extract_value(l_detected[1])
 
-		if 'Null IMU' in detected_imu:
+		if 'Null IMU' in imu_sensor:
 			self.heading.Disable()
 			self.button_calibrate_imu.Disable()
+			self.heading_nmea.Disable()
+		else:
+			self.imu_tag.SetLabel(_('Sensor detected: ')+imu_sensor)
+			if self.data_conf.get('STARTUP', 'nmea_hdg')=='1': self.heading.SetValue(True)
+
+		if 'none' in press_sensor:
 			self.press_temp.Disable()
+			self.press_nmea.Disable()
 			self.press_temp_log.Disable()
 		else:
-			self.imu_tag.SetLabel('IMU sensor detected: '+detected_imu)
+			self.press_tag.SetLabel(_('Sensor detected: ')+press_sensor)
 			if self.data_conf.get('STARTUP', 'nmea_hdg')=='1': self.heading.SetValue(True)
 			if self.data_conf.get('STARTUP', 'nmea_mda')=='1': self.press_temp.SetValue(True)
 			else: self.press_temp_log.Disable()
@@ -1022,6 +1037,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		file = open(currentpath+'/weather_log.csv', 'w')
 		file.write(data)
 		file.close()
+		self.start_sensors()
+		self.ShowMessage(_('Weather log restarted'))
 ######################################calculate
 	def start_calculate(self):
 		self.write_conf()
