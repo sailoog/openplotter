@@ -365,13 +365,16 @@ class MainFrame(wx.Frame):
 
 		detected=subprocess.check_output(['python', currentpath+'/imu/check_sensors.py'], cwd=currentpath+'/imu')
 		l_detected=detected.split('\n')
-		imu_sensor=self.extract_value(l_detected[0])
-		press_sensor=self.extract_value(l_detected[1])
+		imu_sensor=l_detected[0]
+		press_sensor=l_detected[1]
 
-		if 'Null IMU' in imu_sensor:
+		if 'none' in imu_sensor:
 			self.heading.Disable()
 			self.button_calibrate_imu.Disable()
 			self.heading_nmea.Disable()
+			if self.data_conf.get('STARTUP', 'nmea_hdg')=='1': 
+				self.data_conf.set('STARTUP', 'nmea_hdg', '0')
+				self.write_conf()
 		else:
 			self.imu_tag.SetLabel(_('Sensor detected: ')+imu_sensor)
 			if self.data_conf.get('STARTUP', 'nmea_hdg')=='1': self.heading.SetValue(True)
@@ -380,9 +383,12 @@ class MainFrame(wx.Frame):
 			self.press_temp.Disable()
 			self.press_nmea.Disable()
 			self.press_temp_log.Disable()
+			if self.data_conf.get('STARTUP', 'nmea_mda')=='1' or self.data_conf.get('STARTUP', 'press_temp_log')=='1': 
+				self.data_conf.set('STARTUP', 'nmea_mda', '0')
+				self.data_conf.set('STARTUP', 'press_temp_log', '0')
+				self.write_conf()
 		else:
 			self.press_tag.SetLabel(_('Sensor detected: ')+press_sensor)
-			if self.data_conf.get('STARTUP', 'nmea_hdg')=='1': self.heading.SetValue(True)
 			if self.data_conf.get('STARTUP', 'nmea_mda')=='1': self.press_temp.SetValue(True)
 			else: self.press_temp_log.Disable()
 			if self.data_conf.get('STARTUP', 'press_temp_log')=='1': self.press_temp_log.SetValue(True)

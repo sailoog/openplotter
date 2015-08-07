@@ -90,6 +90,7 @@ else:
 if gps_time=='1':
 	subprocess.call(['sudo', 'python', currentpath+'/time_gps.py'])
 
+subprocess.call(['python', currentpath+'/imu/check_sensors.py'], cwd=currentpath+'/imu')
 if nmea_hdg=='1' or nmea_mda=='1': subprocess.Popen(['python', currentpath+'/sensors.py'], cwd=currentpath+'/imu')
 if nmea_mag_var=='1' or nmea_hdt=='1' or TW_STW=='1' or TW_SOG=='1': subprocess.Popen(['python', currentpath+'/calculate.py'])
 

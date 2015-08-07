@@ -15,20 +15,28 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import RTIMU
+import RTIMU, os
+
+detected_imu=''
+detected_pressure=''
+
 
 SETTINGS_FILE = "RTIMULib"
 s = RTIMU.Settings(SETTINGS_FILE)
-
 imu = RTIMU.RTIMU(s)
-pressure = RTIMU.RTPressure(s)
+if (not imu.IMUInit()) or (imu.IMUName()=='Null IMU'): os.remove('RTIMULib.ini')
+else: detected_imu=imu.IMUName()
 
-detected_imu=imu.IMUName()
-detected_pressure=pressure.pressureName()
 
-imu=''
-pressure =''
-s=''
+SETTINGS_FILE2 = "RTIMULib2"
+s2 = RTIMU.Settings(SETTINGS_FILE2)
+pressure = RTIMU.RTPressure(s2)
+if (not pressure.pressureInit()) or (pressure.pressureName()=='none'): os.remove('RTIMULib2.ini')
+else: detected_pressure=pressure.pressureName()
 
-print 'IMU='+detected_imu
-print 'pressure='+detected_pressure
+
+if detected_imu: print detected_imu
+else: print 'none'
+
+if detected_pressure: print detected_pressure
+else: print 'none'

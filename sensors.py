@@ -25,10 +25,10 @@ data_conf.read(currentpath+'/openplotter.conf')
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-SETTINGS_FILE = "RTIMULib"
-s = RTIMU.Settings(SETTINGS_FILE)
 
 if data_conf.get('STARTUP', 'nmea_hdg')=='1':
+	SETTINGS_FILE = "RTIMULib"
+	s = RTIMU.Settings(SETTINGS_FILE)
 	imu = RTIMU.RTIMU(s)
 	imu.IMUInit()
 	imu.setSlerpPower(0.02)
@@ -38,7 +38,9 @@ if data_conf.get('STARTUP', 'nmea_hdg')=='1':
 	poll_interval = imu.IMUGetPollInterval()
 
 if data_conf.get('STARTUP', 'nmea_mda')=='1':
-	pressure_val = RTIMU.RTPressure(s)
+	SETTINGS_FILE2 = "RTIMULib2"
+	s2 = RTIMU.Settings(SETTINGS_FILE2)
+	pressure_val = RTIMU.RTPressure(s2)
 	pressure_val.pressureInit()
 
 if data_conf.get('STARTUP', 'press_temp_log')=='1':
