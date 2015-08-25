@@ -17,10 +17,17 @@
 
 import wx, gettext, os, sys, ConfigParser, subprocess, webbrowser, re
 import wx.lib.scrolledpanel as scrolled
+from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 
 home = os.path.expanduser('~')
 pathname = os.path.dirname(sys.argv[0])
 currentpath = os.path.abspath(pathname)
+
+class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
+	def __init__(self, parent):
+		wx.ListCtrl.__init__(self, parent, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(565, 102))
+		CheckListCtrlMixin.__init__(self)
+		ListCtrlAutoWidthMixin.__init__(self)
 
 class MainFrame(wx.Frame):
 ####layout###################
@@ -213,13 +220,14 @@ class MainFrame(wx.Frame):
 ###########################page4
 ########page5###################
 		wx.StaticBox(self.page5, label=_(' Inputs '), size=(670, 130), pos=(10, 10))
-		self.list_input = wx.ListCtrl(self.page5, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(565, 102), pos=(15, 30))
-		self.list_input.InsertColumn(0, _('Name'), width=105)
+		self.list_input = CheckListCtrl(self.page5)
+		self.list_input.SetPosition((15, 30))
+		self.list_input.InsertColumn(0, _('Name'), width=130)
 		self.list_input.InsertColumn(1, _('Type'), width=45)
 		self.list_input.InsertColumn(2, _('Port/Address'), width=110)
-		self.list_input.InsertColumn(3, _('Bauds/Port'), width=80)
-		self.list_input.InsertColumn(4, _('Filter'), width=55)
-		self.list_input.InsertColumn(5, _('Filtering'), width=170)
+		self.list_input.InsertColumn(3, _('Bauds/Port'))
+		self.list_input.InsertColumn(4, _('Filter'))
+		self.list_input.InsertColumn(5, _('Filtering'))
 		self.add_serial_in =wx.Button(self.page5, label=_('+ serial'), pos=(585, 30))
 		self.Bind(wx.EVT_BUTTON, self.add_serial_input, self.add_serial_in)
 
@@ -230,13 +238,14 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.delete_input, self.button_delete_input)
 
 		wx.StaticBox(self.page5, label=_(' Outputs '), size=(670, 130), pos=(10, 145))
-		self.list_output = wx.ListCtrl(self.page5, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(565, 102), pos=(15, 165))
-		self.list_output.InsertColumn(0, _('Name'), width=105)
+		self.list_output = CheckListCtrl(self.page5)
+		self.list_output.SetPosition((15, 165))
+		self.list_output.InsertColumn(0, _('Name'), width=130)
 		self.list_output.InsertColumn(1, _('Type'), width=45)
 		self.list_output.InsertColumn(2, _('Port/Address'), width=110)
-		self.list_output.InsertColumn(3, _('Bauds/Port'), width=80)
-		self.list_output.InsertColumn(4, _('Filter'), width=55)
-		self.list_output.InsertColumn(5, _('Filtering'), width=170)
+		self.list_output.InsertColumn(3, _('Bauds/Port'))
+		self.list_output.InsertColumn(4, _('Filter'))
+		self.list_output.InsertColumn(5, _('Filtering'))
 		self.add_serial_out =wx.Button(self.page5, label=_('+ serial'), pos=(585, 165))
 		self.Bind(wx.EVT_BUTTON, self.add_serial_output, self.add_serial_out)
 
@@ -732,17 +741,19 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			data=file.readlines()
 			file.close()
 
-			l_tmp=[None]*7
+			l_tmp=[None]*8
 			for index, item in enumerate(data):
 				if re.search('\[*\]', item):
 					if l_tmp[0]=='in': self.inputs.append(l_tmp)
 					if l_tmp[0]=='out': self.outputs.append(l_tmp)
-					l_tmp=[None]*7
+					l_tmp=[None]*8
 					l_tmp[5]='none'
 					l_tmp[6]='nothing'
 					if '[serial]' in item: l_tmp[2]='Serial'
 					if '[tcp]' in item: l_tmp[2]='TCP'
 					if '[udp]' in item: l_tmp[2]='UDP'
+					if '#[' in item: l_tmp[7]='0'
+					else: l_tmp[7]='1'
 				if 'direction=in' in item:
 					l_tmp[0]='in'
 				if 'direction=out' in item:
@@ -793,6 +804,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				filters=filters.replace('-', '')
 				filters=filters.replace(':', ',')
 				self.list_input.SetStringItem(index, 5, filters)
+			if i[7]=='1': self.list_input.CheckItem(index)
 	
 	def write_outputs(self):
 		self.list_output.DeleteAllItems()
@@ -814,49 +826,55 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				filters=filters.replace('-', '')
 				filters=filters.replace(':', ',')
 				self.list_output.SetStringItem(index, 5, filters)
+			if i[7]=='1': self.list_output.CheckItem(index)
 
 	def apply_changes(self,event):
 		data='# For advanced manual configuration, please visit: http://www.stripydog.com/kplex/configuration.html\n# Editing this file by openplotter GUI, can eliminate manual settings.\n# You should not modify defaults.\n\n'
 
 		data=data+'###defaults\n\n[udp]\nname=system_input\ndirection=in\noptional=yes\nport=10110\n\n'
-		data=data+'[tcp]\nname=system_output\ndirection=out\nmode=server\nport=10110\n\n###\n\n'
+		data=data+'[tcp]\nname=system_output\ndirection=out\nmode=server\nport=10110\n\n###end defaults\n\n'
 
 		for index,item in enumerate(self.inputs):
 			if 'system_input' not in item[1]:
+				if self.list_input.IsChecked(index): state=''
+				else: state='#'
 				if 'Serial' in item[2]:
-					data=data+'[serial]\nname='+item[1]+'\ndirection=in\noptional=yes\n'
-					if item[5]=='ignore':data=data+'ifilter='+item[6]+'\n'
-					if item[5]=='accept':data=data+'ifilter='+item[6]+'\n'
-					data=data+'filename='+item[3]+'\nbaud='+item[4]+'\n\n'
+					data=data+state+'[serial]\n'+state+'name='+item[1]+'\n'+state+'direction=in\n'+state+'optional=yes\n'
+					if item[5]=='ignore':data=data+state+'ifilter='+item[6]+'\n'
+					if item[5]=='accept':data=data+state+'ifilter='+item[6]+'\n'
+					data=data+state+'filename='+item[3]+'\n'+state+'baud='+item[4]+'\n\n'
 				if 'TCP' in item[2]:
-					data=data+'[tcp]\nname='+item[1]+'\ndirection=in\noptional=yes\n'
-					if item[5]=='ignore':data=data+'ifilter='+item[6]+'\n'
-					if item[5]=='accept':data=data+'ifilter='+item[6]+'\n'
-					data=data+'mode=client\naddress='+item[3]+'\nport='+item[4]+'\n'
-					data=data+'persist=yes\nretry=10\n\n'				
+					data=data+state+'[tcp]\n'+state+'name='+item[1]+'\n'+state+'direction=in\n'+state+'optional=yes\n'
+					if item[5]=='ignore':data=data+state+'ifilter='+item[6]+'\n'
+					if item[5]=='accept':data=data+state+'ifilter='+item[6]+'\n'
+					data=data+state+'mode=client\n'+state+'address='+item[3]+'\n'+state+'port='+item[4]+'\n'
+					data=data+state+'persist=yes\n'+state+'retry=10\n\n'				
 				if 'UDP' in item[2]:
-					data=data+'[udp]\nname='+item[1]+'\ndirection=in\noptional=yes\n'
-					if item[5]=='ignore':data=data+'ifilter='+item[6]+'\n'
-					if item[5]=='accept':data=data+'ifilter='+item[6]+'\n'
-					data=data+'address='+item[3]+'\nport='+item[4]+'\n\n'
+					data=data+state+'[udp]\n'+state+'name='+item[1]+'\n'+state+'direction=in\n'+state+'optional=yes\n'
+					if item[5]=='ignore':data=data+state+'ifilter='+item[6]+'\n'
+					if item[5]=='accept':data=data+state+'ifilter='+item[6]+'\n'
+					data=data+state+'address='+item[3]+'\n'+state+'port='+item[4]+'\n\n'
 		
+
 		for index,item in enumerate(self.outputs):
 			if 'system_output' not in item[1]:
+				if self.list_output.IsChecked(index): state=''
+				else: state='#'
 				if 'Serial' in item[2]:
-					data=data+'[serial]\nname='+item[1]+'\ndirection=out\noptional=yes\n'
-					if item[5]=='ignore':data=data+'ofilter='+item[6]+'\n'
-					if item[5]=='accept':data=data+'ofilter='+item[6]+'\n'
-					data=data+'filename='+item[3]+'\nbaud='+item[4]+'\n\n'
+					data=data+state+'[serial]\n'+state+'name='+item[1]+'\n'+state+'direction=out\n'+state+'optional=yes\n'
+					if item[5]=='ignore':data=data+state+'ofilter='+item[6]+'\n'
+					if item[5]=='accept':data=data+state+'ofilter='+item[6]+'\n'
+					data=data+state+'filename='+item[3]+'\n'+state+'baud='+item[4]+'\n\n'
 				if 'TCP' in item[2]:
-					data=data+'[tcp]\nname='+item[1]+'\ndirection=out\noptional=yes\n'
-					if item[5]=='ignore':data=data+'ofilter='+item[6]+'\n'
-					if item[5]=='accept':data=data+'ofilter='+item[6]+'\n'
-					data=data+'mode=server\naddress='+item[3]+'\nport='+item[4]+'\n\n'				
+					data=data+state+'[tcp]\n'+state+'name='+item[1]+'\n'+state+'direction=out\n'+state+'optional=yes\n'
+					if item[5]=='ignore':data=data+state+'ofilter='+item[6]+'\n'
+					if item[5]=='accept':data=data+state+'ofilter='+item[6]+'\n'
+					data=data+state+'mode=server\n'+state+'address='+item[3]+'\n'+state+'port='+item[4]+'\n\n'				
 				if 'UDP' in item[2]:
-					data=data+'[udp]\nname='+item[1]+'\ndirection=out\noptional=yes\n'
-					if item[5]=='ignore':data=data+'ofilter='+item[6]+'\n'
-					if item[5]=='accept':data=data+'ofilter='+item[6]+'\n'
-					data=data+'address='+item[3]+'\nport='+item[4]+'\n\n'
+					data=data+state+'[udp]\n'+state+'name='+item[1]+'\n'+state+'direction=out\n'+state+'optional=yes\n'
+					if item[5]=='ignore':data=data+state+'ofilter='+item[6]+'\n'
+					if item[5]=='accept':data=data+state+'ofilter='+item[6]+'\n'
+					data=data+state+'address='+item[3]+'\n'+state+'port='+item[4]+'\n\n'
 		
 		
 		file = open(home+'/.kplex.conf', 'w')

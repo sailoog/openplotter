@@ -205,7 +205,7 @@ class MainFrame(wx.Frame):
 					filtering+='-'+item
 
 
-			print  self.in_out+','+name+','+type_conn+','+port_address+','+bauds_port+','+filter_type+','+filtering
+			print  self.in_out+','+name+','+type_conn+','+port_address+','+bauds_port+','+filter_type+','+filtering+',1'
 			self.Destroy()
 
 		def cancel_conn(self,event):
