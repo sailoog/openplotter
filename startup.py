@@ -17,6 +17,7 @@
 
 import ConfigParser, subprocess, os, sys, time
 
+home = os.path.expanduser('~')
 pathname = os.path.dirname(sys.argv[0])
 currentpath = os.path.abspath(pathname)
 
@@ -31,6 +32,7 @@ opencpn_no=data_conf.get('STARTUP', 'opencpn_no_opengl')
 opencpn_fullscreen=data_conf.get('STARTUP', 'opencpn_fullscreen')
 x11vnc=data_conf.get('STARTUP', 'x11vnc')
 gps_time=data_conf.get('STARTUP', 'gps_time')
+signalk=data_conf.get('STARTUP', 'signalk')
 
 enable=data_conf.get('AIS-SDR', 'enable')
 gain=data_conf.get('AIS-SDR', 'gain')
@@ -86,6 +88,12 @@ if kplex=='1':
 	subprocess.Popen('kplex')        
 else: 
 	subprocess.call(['pkill', '-9', 'kplex'])
+
+if signalk=='1':
+	subprocess.call(["pkill", '-9', "node"])
+	subprocess.Popen(home+'/.config/signalk-server-node/bin/nmea-from-10110', cwd=home+'/.config/signalk-server-node')       
+else: 
+	subprocess.call(["pkill", '-9', "node"])
 
 if gps_time=='1':
 	subprocess.call(['sudo', 'python', currentpath+'/time_gps.py'])

@@ -60,8 +60,10 @@ class MainFrame(wx.Frame):
 		self.page4 = wx.Panel(self.nb)
 		self.page5 = wx.Panel(self.nb)
 		self.page6 = wx.Panel(self.nb)
+		self.page7 = wx.Panel(self.nb)
 
-		self.nb.AddPage(self.page5, _('Multiplexer'))
+		self.nb.AddPage(self.page5, _('NMEA 0183'))
+		self.nb.AddPage(self.page7, _('Signal K (beta)'))
 		self.nb.AddPage(self.page3, _('WiFi'))
 		self.nb.AddPage(self.page4, _('SDR-AIS'))
 		self.nb.AddPage(self.page2, _('Calculate'))
@@ -117,7 +119,7 @@ class MainFrame(wx.Frame):
 		self.button_ok_delay =wx.Button(self.page1, label=_('Ok'),size=(70, 32), pos=(250, 23))
 		self.Bind(wx.EVT_BUTTON, self.ok_delay, self.button_ok_delay)
 
-		wx.StaticBox(self.page1, size=(330, 200), pos=(10, 70))
+		wx.StaticBox(self.page1, size=(330, 230), pos=(10, 70))
 		self.startup_opencpn = wx.CheckBox(self.page1, label=_('OpenCPN'), pos=(20, 85))
 		self.startup_opencpn.Bind(wx.EVT_CHECKBOX, self.startup)
 
@@ -127,7 +129,7 @@ class MainFrame(wx.Frame):
 		self.startup_opencpn_fullscreen = wx.CheckBox(self.page1, label=_('fullscreen'), pos=(40, 135))
 		self.startup_opencpn_fullscreen.Bind(wx.EVT_CHECKBOX, self.startup)
 
-		self.startup_multiplexer = wx.CheckBox(self.page1, label=_('Multiplexer'), pos=(20, 170))
+		self.startup_multiplexer = wx.CheckBox(self.page1, label=_('NMEA 0183 multiplexer'), pos=(20, 170))
 		self.startup_multiplexer.Bind(wx.EVT_CHECKBOX, self.startup)
 
 		self.startup_nmea_time = wx.CheckBox(self.page1, label=_('Set time from NMEA'), pos=(40, 195))
@@ -135,6 +137,10 @@ class MainFrame(wx.Frame):
 
 		self.startup_remote_desktop = wx.CheckBox(self.page1, label=_('Remote desktop'), pos=(20, 230))
 		self.startup_remote_desktop.Bind(wx.EVT_CHECKBOX, self.startup)
+
+		self.startup_signalk = wx.CheckBox(self.page1, label=_('Signal K server (beta)'), pos=(20, 265))
+		self.startup_signalk.Bind(wx.EVT_CHECKBOX, self.startup)
+
 ###########################page1
 ########page2###################
 		wx.StaticBox(self.page2, size=(670, 50), pos=(10, 10))
@@ -179,9 +185,12 @@ class MainFrame(wx.Frame):
 		self.passw = wx.TextCtrl(self.page3, -1, size=(100, 32), pos=(20, 120))
 		self.passw_label=wx.StaticText(self.page3, label=_('Password \nminimum 8 characters required'), pos=(140, 120))
 
-		wx.StaticBox(self.page3, label=_(' Info '), size=(270, 220), pos=(415, 10))
-		self.ip_info=wx.StaticText(self.page3, label='', pos=(430, 35))
-		self.button_refresh_ip =wx.Button(self.page3, label=_('Refresh'), pos=(570, 190))
+		wx.StaticBox(self.page3, label=_(' Addresses '), size=(270, 265), pos=(415, 10))
+		#self.ip_info=wx.StaticText(self.page3, label='', pos=(430, 35))
+		self.ip_info = wx.TextCtrl(self.page3, -1, style=wx.TE_MULTILINE|wx.TE_READONLY, size=(260, 245), pos=(420, 25))
+		self.ip_info.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_INACTIVECAPTION))
+
+		self.button_refresh_ip =wx.Button(self.page3, label=_('Refresh'), pos=(570, 285))
 		self.Bind(wx.EVT_BUTTON, self.show_ip_info, self.button_refresh_ip)
 ###########################page3
 ########page4###################
@@ -264,6 +273,26 @@ class MainFrame(wx.Frame):
 		self.button_cancel =wx.Button(self.page5, label=_('Cancel changes'), pos=(430, 285))
 		self.Bind(wx.EVT_BUTTON, self.cancel_changes, self.button_cancel)
 ###########################page5
+########page7###################
+		wx.StaticBox(self.page7, label=_(' Inputs '), size=(670, 130), pos=(10, 10))
+		self.inSK = wx.TextCtrl(self.page7, -1, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_DONTWRAP, size=(565, 102), pos=(15, 30))
+		self.inSK.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_INACTIVECAPTION))
+		self.inSK.SetValue(' NMEA 0183 - system_output  TCP  localhost  10110')
+
+		wx.StaticBox(self.page7, label=_(' Outputs '), size=(670, 130), pos=(10, 145))
+		self.outSK = wx.TextCtrl(self.page7, -1, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_DONTWRAP, size=(565, 102), pos=(15, 165))
+		self.outSK.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_INACTIVECAPTION))
+		self.outSK.SetValue(' http://localhost:3000/instrumentpanel\n http://localhost:3000/sailgauge\n http://localhost:3000/signalk/stream/v1?stream=delta')
+		self.showpanels =wx.Button(self.page7, label=_('Panel'), pos=(585, 165))
+		self.Bind(wx.EVT_BUTTON, self.signalKpanels, self.showpanels)
+		self.showgauge =wx.Button(self.page7, label=_('Gauge'), pos=(585, 200))
+		self.Bind(wx.EVT_BUTTON, self.signalKsailgauge, self.showgauge)
+
+		self.show_outputSK =wx.Button(self.page7, label=_('Show output'), pos=(10, 285))
+		self.Bind(wx.EVT_BUTTON, self.signalKout, self.show_outputSK)
+		self.button_restartSK =wx.Button(self.page7, label=_('Restart'), pos=(130, 285))
+		self.Bind(wx.EVT_BUTTON, self.restartSK, self.button_restartSK)
+###########################page7
 ########page6###################
 		wx.StaticBox(self.page6, size=(670, 50), pos=(10, 10))
 		wx.StaticText(self.page6, label=_('NMEA generation rate (seconds)'), pos=(20, 30))
@@ -325,6 +354,7 @@ class MainFrame(wx.Frame):
 			self.startup_nmea_time.Disable()
 		if self.data_conf.get('STARTUP', 'gps_time')=='1': self.startup_nmea_time.SetValue(True)
 		if self.data_conf.get('STARTUP', 'x11vnc')=='1': self.startup_remote_desktop.SetValue(True)
+		if self.data_conf.get('STARTUP', 'signalk')=='1': self.startup_signalk.SetValue(True)
 
 		if len(self.available_wireless)>0:
 			self.wlan.SetValue(self.data_conf.get('WIFI', 'device'))
@@ -539,6 +569,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		else:
 			self.data_conf.set('STARTUP', 'x11vnc', '0')
 
+		if self.startup_signalk.GetValue():
+			self.data_conf.set('STARTUP', 'signalk', '1')
+		else:
+			self.data_conf.set('STARTUP', 'signalk', '0')
+
 		self.write_conf()
 
 ########WIFI###################################	
@@ -580,14 +615,23 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def show_ip_info(self, e):
 		ip_info=subprocess.check_output(['hostname', '-I'])
-		out=_('NMEA data:\n')
+		out=_(' NMEA 0183:\n')
 		ips=ip_info.split()
 		for ip in ips:
 			out+=ip+':10110\n'
-		out+=_('\nRemote desktop:\n')
+		out+=_('\n Remote desktop:\n')
 		for ip in ips:
 			out+=ip+':5900\n'
-		self.ip_info.SetLabel(out)
+		out+=_('\n Signal K panel:\n')
+		for ip in ips:
+			out+=ip+':3000/instrumentpanel\n'
+		out+=_('\n Signal K gauge:\n')
+		for ip in ips:
+			out+=ip+':3000/sailgauge\n'
+		out+=_('\n Signal K WebSocket:\n')
+		for ip in ips:
+			out+=ip+':3000/signalk/stream/v1?stream=delta\n'
+		self.ip_info.SetValue(out)
 
 	def enable_disable_wifi(self, s):
 		if s==1:
@@ -790,7 +834,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			if i[1]: index = self.list_input.InsertStringItem(sys.maxint, i[1])
 			if i[2]: self.list_input.SetStringItem(index, 1, i[2])
 			if i[3]: self.list_input.SetStringItem(index, 2, i[3])
-			else: self.list_input.SetStringItem(index, 2, 'OpenPlotter')
+			else: self.list_input.SetStringItem(index, 2, 'localhost')
 			if i[4]: self.list_input.SetStringItem(index, 3, i[4])
 			if i[5]:
 				if i[5]=='none': self.list_input.SetStringItem(index, 4, _('none'))
@@ -812,7 +856,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			if i[1]: index = self.list_output.InsertStringItem(sys.maxint, i[1])
 			if i[2]: self.list_output.SetStringItem(index, 1, i[2])
 			if i[3]: self.list_output.SetStringItem(index, 2, i[3])
-			else: self.list_output.SetStringItem(index, 2, 'OpenPlotter')
+			else: self.list_output.SetStringItem(index, 2, 'localhost')
 			if i[4]: self.list_output.SetStringItem(index, 3, i[4])
 			if i[5]:
 				if i[5]=='none': self.list_output.SetStringItem(index, 4, _('none'))
@@ -1093,6 +1137,24 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if self.TW_STW.GetValue(): self.data_conf.set('STARTUP', 'tw_stw', '1')
 		if self.TW_SOG.GetValue(): self.data_conf.set('STARTUP', 'tw_sog', '1')
 		self.start_calculate()
+######################################Signal K
+	def signalKpanels(self, e):
+		url = 'http://localhost:3000/instrumentpanel'
+		webbrowser.open(url,new=2)
+
+	def signalKsailgauge(self, e):
+		url = 'http://localhost:3000/sailgauge'
+		webbrowser.open(url,new=2)
+
+	def signalKout(self, e):
+		url = 'http://localhost:3000/examples/consumer-example.html'
+		webbrowser.open(url,new=2)
+
+	def restartSK(self, e):
+		self.SetStatusText(_('Closing Signal K server'))
+		subprocess.call(["pkill", '-9', "node"])
+		subprocess.Popen(home+'/.config/signalk-server-node/bin/nmea-from-10110', cwd=home+'/.config/signalk-server-node')
+		self.SetStatusText(_('Signal K server restarted'))
 #######################definitions
 
 
