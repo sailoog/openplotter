@@ -75,9 +75,7 @@ class MainFrame(wx.Frame):
 				self.address = wx.TextCtrl(self, -1, size=(120, 32), pos=(230, 55))
 				wx.StaticText(self, label=_('Port'), pos=(365, 35))
 				self.port = wx.TextCtrl(self, -1, size=(55, 32), pos=(360, 55))
-				if self.in_out=='in':
-					self.add_gpsd_in =wx.Button(self, label='GPSD', pos=(440, 55))
-					self.Bind(wx.EVT_BUTTON, self.add_gpsd, self.add_gpsd_in)
+
 
 			wx.StaticBox(self, label=_(' Filter '), size=(530, 195), pos=(10, 105))
 			self.mode_filter = [_('none'), _('Accept only sentences:'), _('Ignore sentences:')]
@@ -117,12 +115,6 @@ class MainFrame(wx.Frame):
 				if d == True:
 					self.SerDevLs.append(s)      
 				num = num + 1
-
-		def add_gpsd(self,event):
-			self.name.SetValue('gpsd')
-			self.typeComboBox.SetValue('TCP')
-			self.address.SetValue('localhost')
-			self.port.SetValue('2947')
 
 		def delete_sentences(self,event):
 			self.sentences.SetValue(_('nothing'))
