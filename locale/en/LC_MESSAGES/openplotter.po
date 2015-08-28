@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: OpenPlotter 0.0.0\n"
-"POT-Creation-Date: 2015-05-08 13:46+0100\n"
-"PO-Revision-Date: 2015-05-08 13:46+0100\n"
+"POT-Creation-Date: 2015-08-28 02:18+0100\n"
+"PO-Revision-Date: 2015-08-28 02:18+0100\n"
 "Last-Translator: sailoog <info@sailoog.com>\n"
 "Language-Team: Sailoog <info@sailoog.com>\n"
 "Language: en\n"
@@ -12,588 +12,810 @@ msgstr ""
 "X-Generator: Poedit 1.5.4\n"
 "X-Poedit-KeywordsList: _;gettext;gettext_noop\n"
 "X-Poedit-Basepath: .\n"
-"X-Poedit-SearchPath-0: /home/sailoog/openplotter\n"
+"X-Poedit-SearchPath-0: /home/sailoog/Escritorio/openplotter\n"
 
-#: /home/sailoog/openplotter/openplotter.py:57
-#: /home/sailoog/openplotter/openplotter.py:117
-msgid "Multiplexer"
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:65
+msgid "NMEA 0183"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:58
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:66
+msgid "Signal K (beta)"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:67
 msgid "WiFi"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:59
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:68
 msgid "SDR-AIS"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:60
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:69
 msgid "Calculate"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:61
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:70
 msgid "Sensors"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:62
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:71
 msgid "Startup"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:77
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:86
 msgid "Set time zone"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:77
-#: /home/sailoog/openplotter/openplotter.py:380
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:86
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:442
 msgid "Set time zone in the new window"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:79
-#: /home/sailoog/openplotter/openplotter.py:120
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:88
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:135
 msgid "Set time from NMEA"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:79
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:88
 msgid "Set system time from NMEA data"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:82
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:91
 msgid "Set GPSD"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:82
-#: /home/sailoog/openplotter/openplotter.py:400
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:91
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:462
 msgid "Set GPSD in the new window"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:84
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:93
 msgid "Settings"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:87
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:96
 msgid "English"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:87
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:96
 msgid "Set English language"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:89
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:98
 msgid "Catalan"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:89
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:98
 msgid "Set Catalan language"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:91
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:100
 msgid "Spanish"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:91
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:100
 msgid "Set Spanish language"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:93
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:102
 msgid "Language"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:96
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:105
 msgid "&About"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:96
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:105
 msgid "About OpenPlotter"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:98
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:107
 msgid "OpenPlotter online documentation"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:100
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:109
 msgid "OpenPlotter online guides"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:102
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:111
 msgid "&Help"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:108
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:117
+msgid "Delay (seconds)"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:119
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:150
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:300
+msgid "Ok"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:123
 msgid "OpenCPN"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:111
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:126
 msgid "no OpenGL"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:114
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:129
 msgid "fullscreen"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:123
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:132
+msgid "NMEA 0183 multiplexer"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:138
 msgid "Remote desktop"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:128
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:141
+msgid "Signal K server (beta)"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:147
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:298
+msgid "NMEA generation rate (seconds)"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:154
 msgid "Magnetic variation"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:130
-#: /home/sailoog/openplotter/openplotter.py:272
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:156
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:309
 msgid "Generated NMEA: $OPHDG"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:133
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:159
 msgid "True heading"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:135
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:161
 msgid "Generated NMEA: $OPHDT"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:138
-msgid "True wind"
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:163
+msgid " True wind "
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:139
-msgid "Generated NMEA: $OPMWV, $OPMWD"
-msgstr ""
-
-#: /home/sailoog/openplotter/openplotter.py:140
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:164
 msgid "Use speed log"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:142
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:166
 msgid "Use GPS"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:147
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:168
+msgid "Generated NMEA: $OPMWV, $OPMWD"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:172
 msgid "Enable WiFi access point"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:150
-#: /home/sailoog/openplotter/openplotter.py:173
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:175
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:201
 msgid " Settings "
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:158
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:183
 msgid "WiFi device"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:161
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:186
 msgid ""
 "Password \n"
 "minimum 8 characters required"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:163
-msgid " Info "
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:188
+msgid " Addresses "
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:165
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:193
 msgid "Refresh"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:170
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:198
 msgid "Enable AIS NMEA generation"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:176
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:204
 msgid "Gain"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:178
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:206
 msgid "Correction (ppm)"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:180
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:208
 msgid "Channel A 161.975Mhz"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:182
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:210
 msgid "Channel B 162.025Mhz"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:185
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:213
 msgid "Calibration"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:187
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:215
 msgid "Take a look"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:190
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:218
 msgid " Fine calibration using GSM base stations "
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:191
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:219
 msgid "Band"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:195
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:223
 msgid "Check band"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:197
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:225
 msgid "Channel"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:199
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:227
 msgid "Fine calibration"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:203
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:231
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:277
 msgid " Inputs "
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:205
-#: /home/sailoog/openplotter/openplotter.py:234
-#: /home/sailoog/openplotter/output.py:57
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:234
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:252
+#: /home/sailoog/Escritorio/openplotter/connection.py:48
+msgid "Name"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:235
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:253
+#: /home/sailoog/Escritorio/openplotter/output.py:60
+#: /home/sailoog/Escritorio/openplotter/connection.py:71
 msgid "Type"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:206
-#: /home/sailoog/openplotter/openplotter.py:235
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:236
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:254
 msgid "Port/Address"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:207
-#: /home/sailoog/openplotter/openplotter.py:236
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:237
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:255
 msgid "Bauds/Port"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:208
-#: /home/sailoog/openplotter/openplotter.py:237
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:238
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:256
+msgid "Filter"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:239
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:257
+#: /home/sailoog/Escritorio/openplotter/connection.py:84
+msgid "Filtering"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:240
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:258
 msgid "+ serial"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:220
-#: /home/sailoog/openplotter/openplotter.py:243
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:243
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:261
 msgid "+ network"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:227
-#: /home/sailoog/openplotter/openplotter.py:248
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:246
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:264
 msgid "delete"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:229
-msgid "+ GPSD"
-msgstr ""
-
-#: /home/sailoog/openplotter/openplotter.py:232
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:249
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:282
 msgid " Outputs "
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:245
-msgid "TCP"
-msgstr ""
-
-#: /home/sailoog/openplotter/openplotter.py:246
-msgid "localhost:"
-msgstr ""
-
-#: /home/sailoog/openplotter/openplotter.py:251
-msgid "Apply changes"
-msgstr ""
-
-#: /home/sailoog/openplotter/openplotter.py:253
-msgid "Restart"
-msgstr ""
-
-#: /home/sailoog/openplotter/openplotter.py:255
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:267
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:291
 msgid "Show output"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:260
-msgid "NMEA generation rate (seconds)"
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:269
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:293
+msgid "Restart"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:263
-msgid "Ok"
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:271
+msgid "Apply changes"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:266
-msgid " IMU sensor "
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:273
+msgid "Cancel changes"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:267
-msgid "Sensor detected: None"
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:286
+msgid "Panel"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:268
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:288
+msgid "Gauge"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:304
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:312
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:418
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:430
+msgid "Sensor detected: "
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:304
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:312
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:840
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:862
+#: /home/sailoog/Escritorio/openplotter/connection.py:81
+#: /home/sailoog/Escritorio/openplotter/connection.py:172
+msgid "none"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:305
 msgid "Calibrate"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:270
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:307
 msgid "Heading"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:273
-msgid "Pressure and temperature"
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:313
+#: /home/sailoog/Escritorio/openplotter/output.py:80
+msgid "Pressure"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:275
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:315
 msgid "Generated NMEA: $OPMDA"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:276
-msgid "Data logging"
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:318
+msgid "Weather data logging"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:278
-#: /home/sailoog/openplotter/output.py:53
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:320
+#: /home/sailoog/Escritorio/openplotter/output.py:53
 msgid "Reset"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:280
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:322
 msgid "Show"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:383
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:445
 msgid "Waiting for NMEA time data in localhost:10110 ..."
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:388
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:450
 msgid "Failed to connect with localhost:10110.\n"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:390
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:452
 msgid "Unable to retrieve date or time from NMEA data.\n"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:393
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:455
 msgid "Date and time retrieved from NMEA data successfully."
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:406
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:468
 msgid "The selected language will be enabled when you restart"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:425
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:487
 msgid ""
 "OpenPlotter is a DIY, open-source, low-cost, low-consumption, modular and "
 "scalable sailing platform to run on ARM boards."
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:505
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:526
+msgid "You can enter only numbers."
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:531
+msgid "Startup delay set to "
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:531
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1051
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1057
+msgid " seconds"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:583
 msgid "Configuring NMEA WiFi server, wait please..."
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:514
-msgid "Your password must have a minimum of 8 characters"
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:592
+msgid "Your password must have a minimum of 8 characters."
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:530
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:608
 msgid "NMEA WiFi Server failed."
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:531
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:609
 msgid "NMEA WiFi Server started."
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:532
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:610
 msgid "NMEA WiFi Server stopped."
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:540
-msgid "NMEA data:\n"
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:618
+msgid " NMEA 0183:\n"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:544
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:622
 msgid ""
 "\n"
-"Remote desktop:\n"
+" Remote desktop:\n"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:618
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:625
+msgid ""
+"\n"
+" Signal K panel:\n"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:628
+msgid ""
+"\n"
+" Signal K gauge:\n"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:631
+msgid ""
+"\n"
+" Signal K WebSocket:\n"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:705
 msgid "SDR-AIS reception enabled"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:622
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:709
 msgid "SDR-AIS reception disabled"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:641
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:728
 msgid ""
 "SDR-AIS reception disabled.\n"
 "After checking the new window enable SDR-AIS reception again."
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:648
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:735
 msgid ""
 "SDR-AIS reception disabled.\n"
 "Check the new window. Copy the maximum supported gain value. Wait for ppm "
 "value to stabilize and copy it too."
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:658
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:745
 msgid ""
 "Wait for the system to check the band and select the strongest channel "
 "(power). If you do not find any channel try another band."
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:669
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:756
 msgid ""
 "Wait for the system to calculate the ppm value with the selected channel. "
 "Put the obtained value in \"Correction (ppm)\" field and enable SDR-AIS "
 "reception again."
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:684
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:772
 msgid "Closing Kplex"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:687
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:775
 msgid "Kplex restarted"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:726
-#: /home/sailoog/openplotter/openplotter.py:734
-msgid "localhost"
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:824
+msgid ""
+"Multiplexer configuration file does not exist. Add inputs and apply changes."
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:742
-msgid "Configuration file does not exist. Add inputs and apply changes."
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:841
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:863
+msgid "accept"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:822
-msgid "It is impossible to set input because this port is already in use."
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:842
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:864
+msgid "ignore"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:837
-msgid "You must enter an address and a port number."
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:844
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:866
+#: /home/sailoog/Escritorio/openplotter/connection.py:96
+#: /home/sailoog/Escritorio/openplotter/connection.py:120
+#: /home/sailoog/Escritorio/openplotter/connection.py:140
+#: /home/sailoog/Escritorio/openplotter/connection.py:172
+#: /home/sailoog/Escritorio/openplotter/connection.py:179
+#: /home/sailoog/Escritorio/openplotter/connection.py:190
+msgid "nothing"
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:844
-#: /home/sailoog/openplotter/openplotter.py:875
-msgid "You must enter a port number."
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:959
+msgid "This name already exists."
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:860
-msgid "It is impossible to set output because this port is already in use."
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:974
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1007
+msgid "This input is already in use."
 msgstr ""
 
-#: /home/sailoog/openplotter/openplotter.py:930
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:990
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1024
+msgid "This output is already in use."
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1051
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1057
+msgid "Generation rate set to "
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1077
 msgid ""
 "Heading, temperature and pressure generation disabled.\n"
 "After calibrating, enable heading, temperature and pressure generation again."
 msgstr ""
 
-#: /home/sailoog/openplotter/output.py:48
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1109
+msgid "Weather log restarted"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1154
+msgid "Closing Signal K server"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1157
+msgid "Signal K server restarted"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/output.py:48
 msgid "NMEA inspector"
 msgstr ""
 
-#: /home/sailoog/openplotter/output.py:50
-#: /home/sailoog/openplotter/output.py:306
+#: /home/sailoog/Escritorio/openplotter/output.py:50
+#: /home/sailoog/Escritorio/openplotter/output.py:309
 msgid "Pause"
 msgstr ""
 
-#: /home/sailoog/openplotter/output.py:58
+#: /home/sailoog/Escritorio/openplotter/output.py:56
+msgid "NMEA info"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/output.py:61
 msgid "Value"
 msgstr ""
 
-#: /home/sailoog/openplotter/output.py:59
+#: /home/sailoog/Escritorio/openplotter/output.py:62
 msgid "Source"
 msgstr ""
 
-#: /home/sailoog/openplotter/output.py:60
+#: /home/sailoog/Escritorio/openplotter/output.py:63
 msgid "NMEA"
 msgstr ""
 
-#: /home/sailoog/openplotter/output.py:61
+#: /home/sailoog/Escritorio/openplotter/output.py:64
 msgid "Age"
 msgstr ""
 
-#: /home/sailoog/openplotter/output.py:63
+#: /home/sailoog/Escritorio/openplotter/output.py:66
 msgid "Latitude"
 msgstr ""
 
-#: /home/sailoog/openplotter/output.py:64
+#: /home/sailoog/Escritorio/openplotter/output.py:67
 msgid "Longitude"
 msgstr ""
 
-#: /home/sailoog/openplotter/output.py:65
+#: /home/sailoog/Escritorio/openplotter/output.py:68
 msgid "Date Time"
 msgstr ""
 
-#: /home/sailoog/openplotter/output.py:66
+#: /home/sailoog/Escritorio/openplotter/output.py:69
 msgid "Magnetic Variation"
 msgstr ""
 
-#: /home/sailoog/openplotter/output.py:67
+#: /home/sailoog/Escritorio/openplotter/output.py:70
 msgid "Magnetic Heading"
 msgstr ""
 
-#: /home/sailoog/openplotter/output.py:68
+#: /home/sailoog/Escritorio/openplotter/output.py:71
 msgid "True Heading"
 msgstr ""
 
-#: /home/sailoog/openplotter/output.py:69
+#: /home/sailoog/Escritorio/openplotter/output.py:72
 msgid "Course Over Ground"
 msgstr ""
 
-#: /home/sailoog/openplotter/output.py:70
+#: /home/sailoog/Escritorio/openplotter/output.py:73
 msgid "Speed Over Ground"
 msgstr ""
 
-#: /home/sailoog/openplotter/output.py:71
+#: /home/sailoog/Escritorio/openplotter/output.py:74
 msgid "Speed Trought Water"
 msgstr ""
 
-#: /home/sailoog/openplotter/output.py:72
+#: /home/sailoog/Escritorio/openplotter/output.py:75
 msgid "Apparent Wind Angle"
 msgstr ""
 
-#: /home/sailoog/openplotter/output.py:73
+#: /home/sailoog/Escritorio/openplotter/output.py:76
 msgid "True Wind Angle"
 msgstr ""
 
-#: /home/sailoog/openplotter/output.py:74
+#: /home/sailoog/Escritorio/openplotter/output.py:77
 msgid "Apparent Wind Speed"
 msgstr ""
 
-#: /home/sailoog/openplotter/output.py:75
+#: /home/sailoog/Escritorio/openplotter/output.py:78
 msgid "True Wind Speed"
 msgstr ""
 
-#: /home/sailoog/openplotter/output.py:76
+#: /home/sailoog/Escritorio/openplotter/output.py:79
 msgid "True Wind Direction"
 msgstr ""
 
-#: /home/sailoog/openplotter/output.py:77
-msgid "Pressure"
-msgstr ""
-
-#: /home/sailoog/openplotter/output.py:78
+#: /home/sailoog/Escritorio/openplotter/output.py:81
 msgid "Temperature"
 msgstr ""
 
-#: /home/sailoog/openplotter/output.py:122
+#: /home/sailoog/Escritorio/openplotter/output.py:125
 msgid "Multiplexer started"
 msgstr ""
 
-#: /home/sailoog/openplotter/output.py:127
+#: /home/sailoog/Escritorio/openplotter/output.py:130
 msgid "Failed to connect with localhost:10110. "
 msgstr ""
 
-#: /home/sailoog/openplotter/output.py:127
+#: /home/sailoog/Escritorio/openplotter/output.py:130
 msgid "Error code: "
 msgstr ""
 
-#: /home/sailoog/openplotter/output.py:130
-#: /home/sailoog/openplotter/output.py:132
+#: /home/sailoog/Escritorio/openplotter/output.py:133
+#: /home/sailoog/Escritorio/openplotter/output.py:135
 msgid "No data, trying to reconnect..."
 msgstr ""
 
-#: /home/sailoog/openplotter/output.py:294
+#: /home/sailoog/Escritorio/openplotter/output.py:297
 msgid "OpenPlotter"
 msgstr ""
 
-#: /home/sailoog/openplotter/output.py:295
-msgid "External"
+#: /home/sailoog/Escritorio/openplotter/output.py:306
+msgid "Resume"
 msgstr ""
 
-#: /home/sailoog/openplotter/output.py:303
-msgid "Resume"
+#: /home/sailoog/Escritorio/openplotter/connection.py:38
+msgid "Connection"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/connection.py:52
+msgid " Serial input "
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/connection.py:53
+msgid " Serial output "
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/connection.py:59
+#: /home/sailoog/Escritorio/openplotter/connection.py:76
+msgid "Port"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/connection.py:63
+msgid "Bauds"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/connection.py:68
+msgid " Network input "
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/connection.py:69
+msgid " Network output "
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/connection.py:74
+msgid "Address"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/connection.py:80
+msgid " Filter "
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/connection.py:81
+#: /home/sailoog/Escritorio/openplotter/connection.py:179
+msgid "Accept only sentences:"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/connection.py:81
+#: /home/sailoog/Escritorio/openplotter/connection.py:190
+msgid "Ignore sentences:"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/connection.py:87
+msgid "Delete"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/connection.py:89
+msgid "Talker - Sentence"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/connection.py:91
+msgid "-"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/connection.py:93
+msgid "Add sentence"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/connection.py:100
+msgid "OK"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/connection.py:102
+msgid "Cancel"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/connection.py:127
+msgid ""
+"Talker must have 2 uppercase characters. The symbol * matches any character."
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/connection.py:130
+msgid ""
+"Sentence must have 3 uppercase characters. The symbol * matches any "
+"character."
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/connection.py:135
+msgid ""
+"You must enter 2 uppercase characters for talker or 3 uppercase characters "
+"for sentence. The symbol * matches any character."
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/connection.py:138
+msgid "This sentence already exists."
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/connection.py:149
+msgid ""
+"\"Name\" must be a string between 1 and 13 lowercase letters and/or numbers "
+"which is not used as name for another input/output."
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/connection.py:156
+msgid "You must select a Port."
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/connection.py:165
+msgid "You must enter an Address."
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/connection.py:169
+msgid "You must enter a Port."
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/connection.py:173
+msgid "You must select a Filter type."
 msgstr ""
