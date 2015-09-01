@@ -102,13 +102,12 @@ if wifi_server=='1':
 
 	print 'Chipset: '+chipset+', driver: '+driver+'.\n'
 
-	if error==1: print "NMEA WiFi Server failed."
+	if error==1: print "WiFi access point failed."
 	else: 
-		print "NMEA WiFi Server started.\n"
+		print "WiFi access point started.\n"
 		print "SSID: OpenPlotter"
 		print "Password: "+passw
-		print "Adress: 10.10.10.1" 
-		print "Port: 10110"
+		print "Adress: 10.10.10.1"
 
 
 else:
@@ -120,4 +119,4 @@ else:
 
 	subprocess.call(['/etc/init.d/network-manager', 'restart'])
 
-	print "\nNMEA WiFi Server stopped."
+	print "\nWiFi access point stopped."

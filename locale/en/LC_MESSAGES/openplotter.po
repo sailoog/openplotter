@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: OpenPlotter 0.0.0\n"
-"POT-Creation-Date: 2015-08-28 02:18+0100\n"
-"PO-Revision-Date: 2015-08-28 02:18+0100\n"
+"POT-Creation-Date: 2015-09-01 12:44+0100\n"
+"PO-Revision-Date: 2015-09-01 12:45+0100\n"
 "Last-Translator: sailoog <info@sailoog.com>\n"
 "Language-Team: Sailoog <info@sailoog.com>\n"
 "Language: en\n"
@@ -23,7 +23,7 @@ msgid "Signal K (beta)"
 msgstr ""
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:67
-msgid "WiFi"
+msgid "WiFi access point"
 msgstr ""
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:68
@@ -448,15 +448,15 @@ msgid "Your password must have a minimum of 8 characters."
 msgstr ""
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:608
-msgid "NMEA WiFi Server failed."
+msgid "WiFi access point failed."
 msgstr ""
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:609
-msgid "NMEA WiFi Server started."
+msgid "WiFi access point started."
 msgstr ""
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:610
-msgid "NMEA WiFi Server stopped."
+msgid "WiFi access point stopped."
 msgstr ""
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:618

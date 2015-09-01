@@ -64,7 +64,7 @@ class MainFrame(wx.Frame):
 
 		self.nb.AddPage(self.page5, _('NMEA 0183'))
 		self.nb.AddPage(self.page7, _('Signal K (beta)'))
-		self.nb.AddPage(self.page3, _('WiFi'))
+		self.nb.AddPage(self.page3, _('WiFi access point'))
 		self.nb.AddPage(self.page4, _('SDR-AIS'))
 		self.nb.AddPage(self.page2, _('Calculate'))
 		self.nb.AddPage(self.page6, _('Sensors'))
@@ -596,18 +596,18 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			wifi_result=subprocess.check_output(['sudo', 'python', currentpath+'/wifi_server.py', '0', wlan, passw])
 			
 		msg=wifi_result
-		if 'NMEA WiFi Server failed.' in msg:
+		if 'WiFi access point failed.' in msg:
 			self.enable_disable_wifi(0)
 			self.data_conf.set('WIFI', 'device', '')
 			self.data_conf.set('WIFI', 'password', '')
-		if'NMEA WiFi Server started.' in msg:
+		if'WiFi access point started.' in msg:
 			wlan=self.wlan.GetValue()
 			passw=self.passw.GetValue()
 			self.data_conf.set('WIFI', 'device', wlan)
 			self.data_conf.set('WIFI', 'password', passw)
-		msg=msg.replace('NMEA WiFi Server failed.', _('NMEA WiFi Server failed.'))
-		msg=msg.replace('NMEA WiFi Server started.', _('NMEA WiFi Server started.'))
-		msg=msg.replace('NMEA WiFi Server stopped.', _('NMEA WiFi Server stopped.'))
+		msg=msg.replace('WiFi access point failed.', _('WiFi access point failed.'))
+		msg=msg.replace('WiFi access point started.', _('WiFi access point started.'))
+		msg=msg.replace('WiFi access point stopped.', _('WiFi access point stopped.'))
 		self.SetStatusText('')
 		self.ShowMessage(msg)
 		self.write_conf()

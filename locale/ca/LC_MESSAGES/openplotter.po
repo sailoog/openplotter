@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: OpenPlotter 0.0.0\n"
-"POT-Creation-Date: 2015-08-28 02:19+0100\n"
-"PO-Revision-Date: 2015-08-28 02:30+0100\n"
+"POT-Creation-Date: 2015-09-01 12:48+0100\n"
+"PO-Revision-Date: 2015-09-01 12:51+0100\n"
 "Last-Translator: sailoog <info@sailoog.com>\n"
 "Language-Team: Sailoog <info@sailoog.com>\n"
 "Language: ca\n"
@@ -23,8 +23,8 @@ msgid "Signal K (beta)"
 msgstr "Signal K (beta)"
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:67
-msgid "WiFi"
-msgstr "WiFi"
+msgid "WiFi access point"
+msgstr "Punt d'accés WiFi"
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:68
 msgid "SDR-AIS"
@@ -452,16 +452,16 @@ msgid "Your password must have a minimum of 8 characters."
 msgstr "La contrasenya ha de tenir almenys 8 caràcters."
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:608
-msgid "NMEA WiFi Server failed."
-msgstr "El servidor WiFi NMEA ha fallat."
+msgid "WiFi access point failed."
+msgstr "El punt d'accés WiFi ha fallat."
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:609
-msgid "NMEA WiFi Server started."
-msgstr "Servidor WiFi NMEA iniciat."
+msgid "WiFi access point started."
+msgstr "Punt d'accés WiFi iniciat."
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:610
-msgid "NMEA WiFi Server stopped."
-msgstr "Servidor WiFi NMEA detingut."
+msgid "WiFi access point stopped."
+msgstr "Punt d'accés WiFi aturat."
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:618
 msgid " NMEA 0183:\n"
@@ -855,6 +855,18 @@ msgstr "S'ha d'introduir un Port."
 #: /home/sailoog/Escritorio/openplotter/connection.py:173
 msgid "You must select a Filter type."
 msgstr "Heu de seleccionar un tipus de filtre."
+
+#~ msgid "WiFi"
+#~ msgstr "WiFi"
+
+#~ msgid "NMEA WiFi Server failed."
+#~ msgstr "El servidor WiFi NMEA ha fallat."
+
+#~ msgid "NMEA WiFi Server started."
+#~ msgstr "Servidor WiFi NMEA iniciat."
+
+#~ msgid "NMEA WiFi Server stopped."
+#~ msgstr "Servidor WiFi NMEA detingut."
 
 #~ msgid "Multiplexer"
 #~ msgstr "Multiplexor"

@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: OpenPlotter 0.0.0\n"
-"POT-Creation-Date: 2015-08-28 02:18+0100\n"
-"PO-Revision-Date: 2015-08-28 02:29+0100\n"
+"POT-Creation-Date: 2015-09-01 12:45+0100\n"
+"PO-Revision-Date: 2015-09-01 12:47+0100\n"
 "Last-Translator: sailoog <info@sailoog.com>\n"
 "Language-Team: Sailoog <info@sailoog.com>\n"
 "Language: es\n"
@@ -23,8 +23,8 @@ msgid "Signal K (beta)"
 msgstr "Signal K (beta)"
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:67
-msgid "WiFi"
-msgstr "WiFi"
+msgid "WiFi access point"
+msgstr "Punto de acceso WiFi"
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:68
 msgid "SDR-AIS"
@@ -454,16 +454,16 @@ msgid "Your password must have a minimum of 8 characters."
 msgstr "La contraseña tiene que tener por lo menos 8 caracteres."
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:608
-msgid "NMEA WiFi Server failed."
-msgstr "El Servidor WiFi NMEA ha fallado."
+msgid "WiFi access point failed."
+msgstr "El punto de acceso WiFi ha fallado."
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:609
-msgid "NMEA WiFi Server started."
-msgstr "Servidor WiFi NMEA iniciado."
+msgid "WiFi access point started."
+msgstr "Punto de acceso WiFi activado."
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:610
-msgid "NMEA WiFi Server stopped."
-msgstr "Servidor WiFi NMEA detenido."
+msgid "WiFi access point stopped."
+msgstr "Punto de acceso WiFi detenido."
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:618
 msgid " NMEA 0183:\n"
@@ -856,6 +856,18 @@ msgstr "Tienes que introducir un Puerto."
 #: /home/sailoog/Escritorio/openplotter/connection.py:173
 msgid "You must select a Filter type."
 msgstr "Tienes que seleccionar un tipo de Filtro."
+
+#~ msgid "WiFi"
+#~ msgstr "WiFi"
+
+#~ msgid "NMEA WiFi Server failed."
+#~ msgstr "El Servidor WiFi NMEA ha fallado."
+
+#~ msgid "NMEA WiFi Server started."
+#~ msgstr "Servidor WiFi NMEA iniciado."
+
+#~ msgid "NMEA WiFi Server stopped."
+#~ msgstr "Servidor WiFi NMEA detenido."
 
 #~ msgid "Multiplexer"
 #~ msgstr "Multiplexor"
