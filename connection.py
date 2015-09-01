@@ -29,11 +29,13 @@ class MainFrame(wx.Frame):
 			self.presLan_en = gettext.translation('openplotter', currentpath+'/locale', languages=['en'])
 			self.presLan_ca = gettext.translation('openplotter', currentpath+'/locale', languages=['ca'])
 			self.presLan_es = gettext.translation('openplotter', currentpath+'/locale', languages=['es'])
+			self.presLan_fr = gettext.translation('openplotter', currentpath+'/locale', languages=['fr'])
 
 			language=sys.argv[1]
 			if language=='en':self.presLan_en.install()
 			if language=='ca':self.presLan_ca.install()
 			if language=='es':self.presLan_es.install()
+			if language=='fr':self.presLan_fr.install()
 
 			wx.Frame.__init__(self, None, title=_('Connection'), size=(550,350))
 			

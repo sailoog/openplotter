@@ -44,10 +44,12 @@ class MainFrame(wx.Frame):
 		self.presLan_en = gettext.translation('openplotter', currentpath+'/locale', languages=['en'])
 		self.presLan_ca = gettext.translation('openplotter', currentpath+'/locale', languages=['ca'])
 		self.presLan_es = gettext.translation('openplotter', currentpath+'/locale', languages=['es'])
+		self.presLan_fr = gettext.translation('openplotter', currentpath+'/locale', languages=['fr'])
 		self.language=self.data_conf.get('GENERAL', 'lang')
 		if self.language=='en':self.presLan_en.install()
 		if self.language=='ca':self.presLan_ca.install()
 		if self.language=='es':self.presLan_es.install()
+		if self.language=='fr':self.presLan_fr.install()
 ##########################language
 		self.p = scrolled.ScrolledPanel(self, -1, style = wx.TAB_TRAVERSAL|wx.SUNKEN_BORDER)
 		self.p.SetAutoLayout(1)
@@ -99,6 +101,8 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_MENU, self.lang_ca, self.lang_item2)
 		self.lang_item3 = self.lang.Append(wx.ID_ANY, _('Spanish'), _('Set Spanish language'), kind=wx.ITEM_CHECK)
 		self.Bind(wx.EVT_MENU, self.lang_es, self.lang_item3)
+		self.lang_item4 = self.lang.Append(wx.ID_ANY, _('French'), _('Set French language'), kind=wx.ITEM_CHECK)
+		self.Bind(wx.EVT_MENU, self.lang_fr, self.lang_item4)
 		self.menubar.Append(self.lang, _('Language'))
 
 		self.helpm = wx.Menu()
@@ -465,6 +469,7 @@ class MainFrame(wx.Frame):
 		self.lang.Check(self.lang_item1.GetId(), False)
 		self.lang.Check(self.lang_item2.GetId(), False)
 		self.lang.Check(self.lang_item3.GetId(), False)
+		self.lang.Check(self.lang_item4.GetId(), False)
 		self.ShowMessage(_('The selected language will be enabled when you restart'))
 	
 	def lang_en(self, e):
@@ -481,6 +486,11 @@ class MainFrame(wx.Frame):
 		self.clear_lang()
 		self.lang.Check(self.lang_item3.GetId(), True)
 		self.data_conf.set('GENERAL', 'lang', 'es')
+		self.write_conf()
+	def lang_fr(self, e):
+		self.clear_lang()
+		self.lang.Check(self.lang_item4.GetId(), True)
+		self.data_conf.set('GENERAL', 'lang', 'fr')
 		self.write_conf()
 
 	def OnAboutBox(self, e):
@@ -508,7 +518,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		info.AddDeveloper('Sailoog\nhttp://github.com/sailoog/openplotter\n-------------------\nOpenCPN: http://opencpn.org/ocpn/\nzyGrib: http://www.zygrib.org/\nMultiplexer: http://www.stripydog.com/kplex/index.html\nrtl-sdr: http://sdr.osmocom.org/trac/wiki/rtl-sdr\naisdecoder: http://www.aishub.net/aisdecoder-via-sound-card.html\ngeomag: http://github.com/cmweiss/geomag\nIMU sensor: http://github.com/richards-tech/RTIMULib\nNMEA parser: http://github.com/Knio/pynmea2\n\n')
 		info.AddDocWriter('Sailoog\n\nDocumentation: http://sailoog.gitbooks.io/openplotter-documentation/\nGuides: http://sailoog.dozuki.com/c/OpenPlotter')
 		info.AddArtist('Sailoog')
-		info.AddTranslator('Catalan, English and Spanish by Sailoog')
+		info.AddTranslator('Catalan, English and Spanish by Sailoog\nFrench by Nicolas Janvier.')
 		wx.AboutBox(info)
 
 	def op_doc(self, e):
