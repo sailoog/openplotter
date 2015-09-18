@@ -164,6 +164,11 @@ class MainFrame(wx.Frame):
 		self.heading_t.Bind(wx.EVT_CHECKBOX, self.nmea_hdt)
 		wx.StaticText(self.page2, label=_('Generated NMEA: $OPHDT'), pos=(20, 175))
 
+		wx.StaticBox(self.page2, size=(330, 65), pos=(10, 200))
+		self.rot = wx.CheckBox(self.page2, label=_('Rate of turn'), pos=(20, 215))
+		self.rot.Bind(wx.EVT_CHECKBOX, self.nmea_rot)
+		wx.StaticText(self.page2, label=_('Generated NMEA: $OPROT'), pos=(20, 240))
+
 		wx.StaticBox(self.page2, label=_(' True wind '), size=(330, 130), pos=(350, 70))
 		self.TW_STW = wx.CheckBox(self.page2, label=_('Use speed log'), pos=(360, 95))
 		self.TW_STW.Bind(wx.EVT_CHECKBOX, self.TW)
@@ -405,6 +410,8 @@ class MainFrame(wx.Frame):
 		if self.data_conf.get('STARTUP', 'nmea_mag_var')=='1': self.mag_var.SetValue(True)
 
 		if self.data_conf.get('STARTUP', 'nmea_hdt')=='1': self.heading_t.SetValue(True)
+
+		if self.data_conf.get('STARTUP', 'nmea_rot')=='1': self.rot.SetValue(True)
 
 		detected=subprocess.check_output(['python', currentpath+'/imu/check_sensors.py'], cwd=currentpath+'/imu')
 		l_detected=detected.split('\n')
@@ -1121,7 +1128,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def start_calculate(self):
 		self.write_conf()
 		subprocess.call(['pkill', '-f', 'calculate.py'])
-		if self.mag_var.GetValue() or self.heading_t.GetValue() or self.TW_STW.GetValue() or self.TW_SOG.GetValue():
+		if self.mag_var.GetValue() or self.heading_t.GetValue() or self.rot.GetValue() or self.TW_STW.GetValue() or self.TW_SOG.GetValue():
 			subprocess.Popen(['python', currentpath+'/calculate.py'])
 
 	def nmea_mag_var(self, e):
@@ -1134,6 +1141,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		sender = e.GetEventObject()
 		if sender.GetValue(): self.data_conf.set('STARTUP', 'nmea_hdt', '1')
 		else: self.data_conf.set('STARTUP', 'nmea_hdt', '0')
+		self.start_calculate()
+
+	def nmea_rot(self, e):
+		sender = e.GetEventObject()
+		if sender.GetValue(): self.data_conf.set('STARTUP', 'nmea_rot', '1')
+		else: self.data_conf.set('STARTUP', 'nmea_rot', '0')
 		self.start_calculate()
 
 	def	TW(self, e):
