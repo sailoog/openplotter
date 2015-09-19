@@ -208,11 +208,7 @@ def check_nmea():
 								AWA=''
 							
 							#generate Rate of Turn (ROT)
-<<<<<<< HEAD
 							if data_conf.get('STARTUP', 'nmea_rot')=='1' and heading_t:
-=======
-							if data_conf.get('STARTUP', 'nmea_rot')=='1' and HDT:
->>>>>>> 2750997df54927b05322d25211390331505f8f27
  								if not last_heading: #initialize
  									last_heading = heading_t
  									heading_time = time.time()
@@ -223,7 +219,6 @@ def check_nmea():
 										heading_change = heading_change - 360
 									if heading_change < 0:
 										heading_change = 360 + heading_change
-<<<<<<< HEAD
 									rate_of_turn = (heading_change)/((time.time()-heading_time)/60)	
 									#timing needs to be improved. No point in giving an old measurement a new timestamp
 									last_heading = heading_t
@@ -232,12 +227,6 @@ def check_nmea():
 								rot1=str(rot)
 								rot2=rot1+'\r\n'
 								sock.sendto(rot2, ('localhost', 10110))
-=======
-									rot = (heading_change)/((time.time()-heading_time)/60)	
-									#timing needs to be improved. No point in giving an old measurement a new timestamp
-									last_heading = heading_t
-									heading_time =time.time()
->>>>>>> 2750997df54927b05322d25211390331505f8f27
 							
 							#generate True Wind SOG
 							if data_conf.get('STARTUP', 'tw_sog')=='1' and SOG and COG and heading_t and AWS and AWA:
