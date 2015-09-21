@@ -81,10 +81,18 @@ class MyFrame(wx.Frame):
 			self.list.InsertStringItem(13,_('True Wind Direction'))
 			self.list.InsertStringItem(14,_('Pressure'))
 			self.list.InsertStringItem(15,_('Temperature'))
+<<<<<<< HEAD
+			self.list.InsertStringItem(16,_('Rate of Turn'))
+
+			tick=time.time()
+
+			self.times=[tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick]
+=======
 
 			tick=time.time()
 
 			self.times=[tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick]
+>>>>>>> 2750997df54927b05322d25211390331505f8f27
 
 			self.pause_all=0
 
@@ -290,6 +298,16 @@ class MyFrame(wx.Frame):
 						value=msg.air_temp
 						if value: self.write_item(15, str(value), nmea_type, msg.talker)
 
+<<<<<<< HEAD
+					if nmea_type == 'ROT':
+						#rate of turn
+						value=msg.rate_of_turn
+						if value: self.write_item(16, str(value), nmea_type, msg.talker)
+						
+
+
+=======
+>>>>>>> 2750997df54927b05322d25211390331505f8f27
 
 			#except Exception,e: print str(e)
 			except: pass
