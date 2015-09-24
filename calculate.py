@@ -226,9 +226,8 @@ def check_nmea():
  										heading_change = heading_change - 360
 									if heading_change < -180: 	#if we are "passing north"
 										heading_change = 360 + heading_change
-									rot = int(heading_change)/((heading_time - last_heading_time)/60)	
-									
-									#timing needs to be improved. No point in giving an old measurement a new timestamp
+									rot = float(heading_change)/((heading_time - last_heading_time)/60)					
+									#consider damping ROT values
 									
 								rot = pynmea2.ROT('OP', 'ROT', (str(rot),'A'))
 								rot1=str(rot)
