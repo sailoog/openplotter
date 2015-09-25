@@ -60,7 +60,6 @@ def check_nmea():
 	mag_var=['','']
 	heading_m=''
 	heading_t=''
-	rot=''
 	last_heading=''
 	heading_time=''
 	STW=''
@@ -226,7 +225,8 @@ def check_nmea():
  										heading_change = heading_change - 360
 									if heading_change < -180: 	#if we are "passing north"
 										heading_change = 360 + heading_change
-									rot = float(heading_change)/((heading_time - last_heading_time)/60)					
+									rot = float(heading_change)/((heading_time - last_heading_time)/60)
+									rot= round(rot,1)				
 									#consider damping ROT values
 									
 								rot = pynmea2.ROT('OP', 'ROT', (str(rot),'A'))

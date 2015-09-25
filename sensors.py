@@ -98,26 +98,26 @@ while True:
 			hdg1=str(hdg)
 			hdg2=hdg1+"\r\n"
 			sock.sendto(hdg2, ('localhost', 10110))
-		# XDR			
-		if data_conf.get('STARTUP', 'nmea_press')=='1' or data_conf.get('STARTUP', 'nmea_heel')=='1':
-			list_tmp=[]
-			if pressure and temperature:
-				press=round(pressure/1000,4)
-				list_tmp.append('P')
-				list_tmp.append(str(press))
-				list_tmp.append('B')
-				list_tmp.append('PPRS')
-				temp= round(temperature,1)
-				list_tmp.append('C')
-				list_tmp.append(str(temp))
-				list_tmp.append('C')
-				list_tmp.append('TPRS')
-			if heel:
-				list_tmp.append('A')
-				list_tmp.append(str(heel))
-				list_tmp.append('D')
-				list_tmp.append('RIMS')
-
+		# XDR
+		list_tmp=[]			
+		if data_conf.get('STARTUP', 'nmea_press')=='1' and pressure and temperature:
+			press=round(pressure/1000,4)
+			list_tmp.append('P')
+			list_tmp.append(str(press))
+			list_tmp.append('B')
+			list_tmp.append('AIRP')
+			temp= round(temperature,1)
+			list_tmp.append('C')
+			list_tmp.append(str(temp))
+			list_tmp.append('C')
+			list_tmp.append('AIRT')
+		if data_conf.get('STARTUP', 'nmea_heel')=='1' and heel:
+			heel= round(heel,1)
+			list_tmp.append('A')
+			list_tmp.append(str(heel))
+			list_tmp.append('D')
+			list_tmp.append('ROLL')
+		if list_tmp:
 			xdr = pynmea2.XDR('OP', 'XDR', (list_tmp))
 			xdr1=str(xdr)
 			xdr2=xdr1+"\r\n"
