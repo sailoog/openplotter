@@ -285,7 +285,7 @@ class MyFrame(wx.Frame):
 						if value: self.write_item(12, str(value), nmea_type, msg.talker)
 
 					if nmea_type == 'XDR':
-						n=msg.num_transducer
+						n=msg.num_transducers
 						for i in range(0, n):
 							transducer=msg.get_transducer(i)
 							if transducer.id=='AIRP':		
