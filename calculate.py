@@ -60,6 +60,8 @@ def check_nmea():
 	mag_var=['','']
 	heading_m=''
 	heading_t=''
+	last_heading=''
+	heading_time=''
 	STW=''
 	AWS=''
 	AWA=''
@@ -206,7 +208,32 @@ def check_nmea():
 								STW=''
 								AWS=''
 								AWA=''
+							
+							#generate Rate of Turn (ROT)
+							if data_conf.get('STARTUP', 'nmea_rot')=='1' and heading_m:
+ 								if not last_heading: #initialize
+									last_heading = heading_m
+ 									heading_time = time.time()
+								
+								else:	#normal run
+									heading_change = heading_m-last_heading
+									last_heading_time = heading_time
+									heading_time = time.time()
+									last_heading = heading_m
 
+ 									if heading_change > 180:	#If we are "passing" north
+ 										heading_change = heading_change - 360
+									if heading_change < -180: 	#if we are "passing north"
+										heading_change = 360 + heading_change
+									rot = float(heading_change)/((heading_time - last_heading_time)/60)
+									rot= round(rot,1)				
+									#consider damping ROT values
+									
+								rot = pynmea2.ROT('OP', 'ROT', (str(rot),'A'))
+								rot1=str(rot)
+								rot2=rot1+'\r\n'
+								sock.sendto(rot2, ('localhost', 10110))
+							
 							#generate True Wind SOG
 							if data_conf.get('STARTUP', 'tw_sog')=='1' and SOG and COG and heading_t and AWS and AWA:
 								SOG0=float(SOG)

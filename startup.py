@@ -46,7 +46,9 @@ passw=data_conf.get('WIFI', 'password')
 nmea_mag_var=data_conf.get('STARTUP', 'nmea_mag_var')
 nmea_hdt=data_conf.get('STARTUP', 'nmea_hdt')
 nmea_hdg=data_conf.get('STARTUP', 'nmea_hdg')
-nmea_mda=data_conf.get('STARTUP', 'nmea_mda')
+nmea_heel=data_conf.get('STARTUP', 'nmea_heel')
+nmea_press=data_conf.get('STARTUP', 'nmea_press')
+nmea_rot=data_conf.get('STARTUP', 'nmea_rot')
 
 TW_STW=data_conf.get('STARTUP', 'tw_stw')
 TW_SOG=data_conf.get('STARTUP', 'tw_sog')
@@ -99,6 +101,6 @@ if gps_time=='1':
 	subprocess.call(['sudo', 'python', currentpath+'/time_gps.py'])
 
 subprocess.call(['python', currentpath+'/imu/check_sensors.py'], cwd=currentpath+'/imu')
-if nmea_hdg=='1' or nmea_mda=='1': subprocess.Popen(['python', currentpath+'/sensors.py'], cwd=currentpath+'/imu')
-if nmea_mag_var=='1' or nmea_hdt=='1' or TW_STW=='1' or TW_SOG=='1': subprocess.Popen(['python', currentpath+'/calculate.py'])
+if nmea_hdg=='1' or nmea_heel=='1' or nmea_press=='1': subprocess.Popen(['python', currentpath+'/sensors.py'], cwd=currentpath+'/imu')
+if nmea_mag_var=='1' or nmea_hdt=='1' or nmea_rot=='1' or TW_STW=='1' or TW_SOG=='1': subprocess.Popen(['python', currentpath+'/calculate.py'])
 

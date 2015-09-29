@@ -26,7 +26,7 @@ data_conf.read(currentpath+'/openplotter.conf')
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 
-if data_conf.get('STARTUP', 'nmea_hdg')=='1':
+if data_conf.get('STARTUP', 'nmea_hdg')=='1' or data_conf.get('STARTUP', 'nmea_heel')=='1':
 	SETTINGS_FILE = "RTIMULib"
 	s = RTIMU.Settings(SETTINGS_FILE)
 	imu = RTIMU.RTIMU(s)
@@ -37,7 +37,7 @@ if data_conf.get('STARTUP', 'nmea_hdg')=='1':
 	imu.setCompassEnable(True)
 	poll_interval = imu.IMUGetPollInterval()
 
-if data_conf.get('STARTUP', 'nmea_mda')=='1':
+if data_conf.get('STARTUP', 'nmea_press')=='1':
 	SETTINGS_FILE2 = "RTIMULib2"
 	s2 = RTIMU.Settings(SETTINGS_FILE2)
 	pressure_val = RTIMU.RTPressure(s2)
@@ -54,6 +54,7 @@ if data_conf.get('STARTUP', 'press_temp_log')=='1':
 	else: last_log=0
 
 heading_m=''
+heel=''
 pressure=''
 temperature=''
 
@@ -62,20 +63,22 @@ tick=time.time()
 while True:
 	tick2=time.time()
 # read IMU
-	if data_conf.get('STARTUP', 'nmea_hdg')=='1':
+	if data_conf.get('STARTUP', 'nmea_hdg')=='1' or data_conf.get('STARTUP', 'nmea_heel')=='1':
 		if imu.IMURead():
 			data = imu.getIMUData()
 			fusionPose = data["fusionPose"]
 			heading_m0=math.degrees(fusionPose[2])
+			heel=math.degrees(fusionPose[0])
 			if heading_m0<0:
 				heading_m0=360+heading_m0
 			heading_m=round(heading_m0,1)
 		else:
 			heading_m=''
+			heel=''
 		time.sleep(poll_interval*1.0/1000.0)
 
 	# read Pressure
-	if data_conf.get('STARTUP', 'nmea_mda')=='1':
+	if data_conf.get('STARTUP', 'nmea_press')=='1':
 		read=pressure_val.pressureRead()
 		if read:
 			if (read[0]):
@@ -95,14 +98,30 @@ while True:
 			hdg1=str(hdg)
 			hdg2=hdg1+"\r\n"
 			sock.sendto(hdg2, ('localhost', 10110))
-		# MDA			
-		if data_conf.get('STARTUP', 'nmea_mda')=='1' and pressure and temperature:
+		# XDR
+		list_tmp=[]			
+		if data_conf.get('STARTUP', 'nmea_press')=='1' and pressure and temperature:
 			press=round(pressure/1000,4)
+			list_tmp.append('P')
+			list_tmp.append(str(press))
+			list_tmp.append('B')
+			list_tmp.append('AIRP')
 			temp= round(temperature,1)
-			mda = pynmea2.MDA('OP', 'MDA', ('','',str(press),'B',str(temp),'C','','','','','','','','','','','','','',''))
-			mda1=str(mda)
-			mda2=mda1+"\r\n"
-			sock.sendto(mda2, ('localhost', 10110))
+			list_tmp.append('C')
+			list_tmp.append(str(temp))
+			list_tmp.append('C')
+			list_tmp.append('AIRT')
+		if data_conf.get('STARTUP', 'nmea_heel')=='1' and heel:
+			heel= round(heel,1)
+			list_tmp.append('A')
+			list_tmp.append(str(heel))
+			list_tmp.append('D')
+			list_tmp.append('ROLL')
+		if list_tmp:
+			xdr = pynmea2.XDR('OP', 'XDR', (list_tmp))
+			xdr1=str(xdr)
+			xdr2=xdr1+"\r\n"
+			sock.sendto(xdr2, ('localhost', 10110))
 		# log temperature pressure
 		if data_conf.get('STARTUP', 'press_temp_log')=='1' and pressure and temperature:
 			if tick-last_log > 300:
