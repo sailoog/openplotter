@@ -38,6 +38,26 @@ if wifi_server=='1':
 	driver='nl80211'
 	chipset= 'default'
 
+#Agregado -----------------------------
+	wfap=''
+	archivo = '/home/pi/.config/openplotter/WiFiAP.conf'
+	if os.path.exists(archivo): # si ya fue configurado en openplotter
+		wifiarc=open(archivo,'r')
+		wfap=wifiarc.readline()
+		wifiarc.close()
+	else:
+		# esto permite, para la primera vez, configurar varias microSD sin abrir OpenPlotter, directamente desde el lector, en la raiz
+		archivo = '/boot/WiFiAP.conf'
+		if os.path.exists(archivo): 
+			wifiarc=open(archivo,'r')
+			wfap=wifiarc.readline()
+			wifiarc.close()
+			# ahora grabo en localizacion principal
+			wifiarc=open('/home/pi/.config/openplotter/WiFiAP.conf','w')
+			wifiarc.write(wfap)
+			wifiarc.close()
+#======================================
+
 	output=subprocess.check_output('lsusb')
 
 	if 'RTL8188CUS' in output:
@@ -66,7 +86,10 @@ if wifi_server=='1':
 	file.write(data)
 	file.close()
 
-	data='interface='+wlan+'\ndriver='+driver+'\nssid=OpenPlotter\nchannel=6\nwmm_enabled=1\nwpa=1\nwpa_passphrase='+passw+'\nwpa_key_mgmt=WPA-PSK\nwpa_pairwise=TKIP\nrsn_pairwise=CCMP\nauth_algs=1\nmacaddr_acl=0'
+#Modificado----------------------------
+	data='interface='+wlan+'\ndriver='+driver+'\nssid=OpenPlotter'+wfap.strip()+'\nchannel=6\nwmm_enabled=1\nwpa=1\nwpa_passphrase='+passw+'\nwpa_key_mgmt=WPA-PSK\nwpa_pairwise=TKIP\nrsn_pairwise=CCMP\nauth_algs=1\nmacaddr_acl=0'
+#======================================
+
 	file = open('/etc/hostapd/hostapd.conf', 'w')
 	file.write(data)
 	file.close()

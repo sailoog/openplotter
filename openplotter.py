@@ -194,6 +194,11 @@ class MainFrame(wx.Frame):
 		self.passw = wx.TextCtrl(self.page3, -1, size=(100, 32), pos=(20, 120))
 		self.passw_label=wx.StaticText(self.page3, label=_('Password \nminimum 8 characters required'), pos=(140, 120))
 
+#Agregado----sin acceso a lenguaje (texto puesto en espanol)
+		self.wifiap = wx.TextCtrl(self.page3, -1, size=(100, 32), pos=(20, 155))
+		self.wifiap_label=wx.StaticText(self.page3, label=_('Dejar vacio o escribir un numero\npara el nombre del punto de acceso'), pos=(140, 155))
+#============================================
+
 		wx.StaticBox(self.page3, label=_(' Addresses '), size=(270, 265), pos=(415, 10))
 		#self.ip_info=wx.StaticText(self.page3, label='', pos=(430, 35))
 		self.ip_info = wx.TextCtrl(self.page3, -1, style=wx.TE_MULTILINE|wx.TE_READONLY, size=(260, 245), pos=(420, 25))
@@ -201,6 +206,12 @@ class MainFrame(wx.Frame):
 
 		self.button_refresh_ip =wx.Button(self.page3, label=_('Refresh'), pos=(570, 285))
 		self.Bind(wx.EVT_BUTTON, self.show_ip_info, self.button_refresh_ip)
+		
+#Agregado----sin acceso a lenguaje (texto puesto en espanol)
+		self.button_wifiap =wx.Button(self.page3, label=_('Grabar Nombre'), pos=(20, 285))
+		self.Bind(wx.EVT_BUTTON, self.cambia_wifiap, self.button_wifiap)
+#============================================
+
 ###########################page3
 ########page4###################
 		wx.StaticBox(self.page4, size=(400, 45), pos=(10, 10))
@@ -367,6 +378,15 @@ class MainFrame(wx.Frame):
 		if self.data_conf.get('STARTUP', 'gps_time')=='1': self.startup_nmea_time.SetValue(True)
 		if self.data_conf.get('STARTUP', 'x11vnc')=='1': self.startup_remote_desktop.SetValue(True)
 		if self.data_conf.get('STARTUP', 'signalk')=='1': self.startup_signalk.SetValue(True)
+
+#Agregado----- -------------------------------------
+		archivo = '/home/pi/.config/openplotter/WiFiAP.conf' 
+		if os.path.exists(archivo): 
+			wifiarc=open(archivo,'r')
+			wfap=wifiarc.readline()
+			wifiarc.close()
+			self.wifiap.SetValue(wfap.strip())
+#===================================================
 
 		if len(self.available_wireless)>0:
 			self.wlan.SetValue(self.data_conf.get('WIFI', 'device'))
@@ -608,6 +628,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		isChecked = self.wifi_enable.GetValue()
 		wlan=self.wlan.GetValue()
 		passw=self.passw.GetValue()
+#Agregado -------------------------------
+		self.passw.Show()
+#========================================
 		if isChecked:
 			self.enable_disable_wifi(1)
 			if len(passw)>=8:
@@ -638,6 +661,21 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.show_ip_info('')
 
 	def show_ip_info(self, e):
+#Agregado y Modificado--------------------
+		isChecked = self.wifi_enable.GetValue()
+		if isChecked:
+			self.passw.Hide()
+		else:
+			self.passw.Show()
+		archivo = '/home/pi/.config/openplotter/WiFiAP.conf'
+		wfap=''
+		if os.path.exists(archivo): 
+			wifiarc=open(archivo,'r')
+			wfap=wifiarc.readline()
+			wifiarc.close()
+		out=_('OpenPlotter'+wfap+'\n')
+		out+=_('____________________\n')
+#========================================
 		ip_info=subprocess.check_output(['hostname', '-I'])
 		out=_(' NMEA 0183:\n')
 		ips=ip_info.split()
@@ -672,6 +710,16 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.passw_label.Enable()
 			self.wifi_enable.SetValue(False)
 			self.data_conf.set('WIFI', 'enable', '0')
+
+#Agregado----sin acceso a lenguaje (texto puesto en espanol)
+	def cambia_wifiap(self,event):
+		wfapi=self.wifiap.GetValue()
+		wifiarc=open('/home/pi/.config/openplotter/WiFiAP.conf','w')
+		wifiarc.write(wfapi)
+		wifiarc.close()
+		msg=_('Fue grabado el nombre del punto de acceso WiFi como:   OpenPlotter'+wfapi)
+		self.ShowMessage(msg)
+# =======================================
 
 ########SDR-AIS###################################	
 
