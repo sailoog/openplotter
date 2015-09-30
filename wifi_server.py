@@ -20,6 +20,7 @@ import subprocess, ConfigParser, os, gettext, shutil, sys
 wifi_server=sys.argv[1]
 wlan = sys.argv[2]
 passw = sys.argv[3]
+ssid = sys.argv[4]
 
 pathname = os.path.dirname(sys.argv[0])
 currentpath = os.path.abspath(pathname)
@@ -66,7 +67,7 @@ if wifi_server=='1':
 	file.write(data)
 	file.close()
 
-	data='interface='+wlan+'\ndriver='+driver+'\nssid=OpenPlotter\nchannel=6\nwmm_enabled=1\nwpa=1\nwpa_passphrase='+passw+'\nwpa_key_mgmt=WPA-PSK\nwpa_pairwise=TKIP\nrsn_pairwise=CCMP\nauth_algs=1\nmacaddr_acl=0'
+	data='interface='+wlan+'\ndriver='+driver+'\nssid='+ssid+'\nchannel=6\nwmm_enabled=1\nwpa=1\nwpa_passphrase='+passw+'\nwpa_key_mgmt=WPA-PSK\nwpa_pairwise=TKIP\nrsn_pairwise=CCMP\nauth_algs=1\nmacaddr_acl=0'
 	file = open('/etc/hostapd/hostapd.conf', 'w')
 	file.write(data)
 	file.close()
