@@ -21,23 +21,28 @@ home = os.path.expanduser('~')
 pathname = os.path.dirname(sys.argv[0])
 currentpath = os.path.abspath(pathname)
 
-boot_conf = ConfigParser.SafeConfigParser()
-boot_conf.read(currentpath+'/boot/config.txt')
+device=''
+ssid=''
+passw=''
 
-device=boot_conf.get('openplotter', 'device')
-ssid=boot_conf.get('openplotter', 'ssid')
-passw=boot_conf.get('openplotter', 'pass')
+try:
+	boot_conf = ConfigParser.SafeConfigParser()
+	boot_conf.read('/boot/config.txt')
+	device=boot_conf.get('OPENPLOTTER', 'device')
+	ssid=boot_conf.get('OPENPLOTTER', 'ssid')
+	passw=boot_conf.get('OPENPLOTTER', 'pass')
+except: pass
 
 data_conf = ConfigParser.SafeConfigParser()
 data_conf.read(currentpath+'/openplotter.conf')
 
 if device and ssid and passw:
-	self.data_conf.set('WIFI', 'enable', '1')
-	self.data_conf.set('WIFI', 'device', device)
-	self.data_conf.set('WIFI', 'ssid', ssid)
-	self.data_conf.set('WIFI', 'password', passw)
+	data_conf.set('WIFI', 'enable', '1')
+	data_conf.set('WIFI', 'device', device)
+	data_conf.set('WIFI', 'ssid', ssid)
+	data_conf.set('WIFI', 'password', passw)
 	with open(currentpath+'/openplotter.conf', 'wb') as configfile:
-		self.data_conf.write(configfile)
+		data_conf.write(configfile)
 
 delay=int(data_conf.get('STARTUP', 'delay'))
 
