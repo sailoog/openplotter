@@ -106,7 +106,7 @@ if wifi_server=='1':
 	if error==1: print "WiFi access point failed."
 	else: 
 		print "WiFi access point started.\n"
-		print "SSID: OpenPlotter"
+		print "SSID: "+ssid
 		print "Password: "+passw
 		print "Adress: 10.10.10.1"
 
