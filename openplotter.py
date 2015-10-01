@@ -1113,8 +1113,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.start_sensors()
 
 	def reset_imu(self, e):
-		os.remove(currentpath+'/imu/RTIMULib.ini')
-		os.remove(currentpath+'/imu/RTIMULib2.ini')
+		try:
+			os.remove(currentpath+'/imu/RTIMULib.ini')
+			os.remove(currentpath+'/imu/RTIMULib2.ini')
+		except:pass
 		self.button_calibrate_imu.Enable()
 		self.calibrate_imu()
 
