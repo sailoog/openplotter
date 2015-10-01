@@ -315,7 +315,7 @@ class MainFrame(wx.Frame):
 		self.imu_tag=wx.StaticText(self.page6, label=_('Sensor detected: ')+_('none'), pos=(20, 90))
 		self.button_reset_imu =wx.Button(self.page6, label=_('Reset'), pos=(240, 90))
 		self.Bind(wx.EVT_BUTTON, self.reset_imu, self.button_reset_imu)
-		self.button_calibrate_imu =wx.Button(self.page6, label=_('Calibrate'), pos=(240, 125))
+		self.button_calibrate_imu =wx.Button(self.page6, label=_('Calibrate'), pos=(240, 130))
 		self.Bind(wx.EVT_BUTTON, self.calibrate_imu, self.button_calibrate_imu)
 		self.heading = wx.CheckBox(self.page6, label=_('Heading'), pos=(20, 110))
 		self.heading.Bind(wx.EVT_CHECKBOX, self.nmea_hdg)
@@ -1118,7 +1118,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			os.remove(currentpath+'/imu/RTIMULib2.ini')
 		except:pass
 		self.button_calibrate_imu.Enable()
-		self.calibrate_imu()
+		self.calibrate_imu(e)
 
 	def calibrate_imu(self, e):
 		self.heading.SetValue(False)
