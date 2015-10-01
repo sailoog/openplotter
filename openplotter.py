@@ -181,7 +181,7 @@ class MainFrame(wx.Frame):
 		self.wifi_enable = wx.CheckBox(self.page3, label=_('Enable WiFi access point'), pos=(20, 25))
 		self.wifi_enable.Bind(wx.EVT_CHECKBOX, self.onwifi_enable)
 
-		wx.StaticBox(self.page3, label=_(' Settings '), size=(400, 125), pos=(10, 60))
+		wx.StaticBox(self.page3, label=_(' Settings '), size=(400, 155), pos=(10, 60))
 
 		self.available_wireless = []
 		output=subprocess.check_output('iwconfig')
@@ -191,11 +191,13 @@ class MainFrame(wx.Frame):
 		self.wlan = wx.ComboBox(self.page3, choices=self.available_wireless, style=wx.CB_READONLY, size=(100, 32), pos=(20, 85))
 		self.wlan_label=wx.StaticText(self.page3, label=_('WiFi device'), pos=(140, 90))
 
-		self.passw = wx.TextCtrl(self.page3, -1, size=(100, 32), pos=(20, 120))
-		self.passw_label=wx.StaticText(self.page3, label=_('Password \nminimum 8 characters required'), pos=(140, 120))
+		self.ssid = wx.TextCtrl(self.page3, -1, size=(100, 32), pos=(20, 125))
+		self.ssid_label=wx.StaticText(self.page3, label=_('SSID \nmaximum 32 characters'), pos=(140, 125))
+
+		self.passw = wx.TextCtrl(self.page3, -1, size=(100, 32), pos=(20, 165))
+		self.passw_label=wx.StaticText(self.page3, label=_('Password \nminimum 8 characters required'), pos=(140, 165))
 
 		wx.StaticBox(self.page3, label=_(' Addresses '), size=(270, 265), pos=(415, 10))
-		#self.ip_info=wx.StaticText(self.page3, label='', pos=(430, 35))
 		self.ip_info = wx.TextCtrl(self.page3, -1, style=wx.TE_MULTILINE|wx.TE_READONLY, size=(260, 245), pos=(420, 25))
 		self.ip_info.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_INACTIVECAPTION))
 
@@ -370,6 +372,7 @@ class MainFrame(wx.Frame):
 
 		if len(self.available_wireless)>0:
 			self.wlan.SetValue(self.data_conf.get('WIFI', 'device'))
+			self.ssid.SetValue(self.data_conf.get('WIFI', 'ssid'))
 			self.passw.SetValue(self.data_conf.get('WIFI', 'password'))
 			if self.data_conf.get('WIFI', 'enable')=='1':
 				self.wifi_enable.SetValue(True)
@@ -377,12 +380,16 @@ class MainFrame(wx.Frame):
 				self.passw.Disable()
 				self.wlan_label.Disable()
 				self.passw_label.Disable()
+				self.ssid.Disable()
+				self.ssid_label.Disable()
 		else:
 			self.wifi_enable.Disable()
 			self.wlan.Disable()
 			self.passw.Disable()
 			self.wlan_label.Disable()
-			self.passw_label.Disable()			
+			self.passw_label.Disable()
+			self.ssid.Disable()
+			self.ssid_label.Disable()
 		self.show_ip_info('')
 		
 		output=subprocess.check_output('lsusb')
@@ -607,28 +614,29 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.SetStatusText(_('Configuring NMEA WiFi server, wait please...'))
 		isChecked = self.wifi_enable.GetValue()
 		wlan=self.wlan.GetValue()
+		ssid=self.ssid.GetValue()
 		passw=self.passw.GetValue()
 		if isChecked:
 			self.enable_disable_wifi(1)
-			if len(passw)>=8:
-				wifi_result=subprocess.check_output(['sudo', 'python', currentpath+'/wifi_server.py', '1', wlan, passw])
+			if ssid and len(ssid)<=32 and len(passw)>=8:
+				wifi_result=subprocess.check_output(['sudo', 'python', currentpath+'/wifi_server.py', '1', wlan, passw, ssid])
 			else:
-				wifi_result=_('Your password must have a minimum of 8 characters.')
+				wifi_result=_('Your SSID must have a maximum of 32 characters and your password a minimum of 8.')
 				self.enable_disable_wifi(0)
 		else: 
 			self.enable_disable_wifi(0)
-			wifi_result=subprocess.check_output(['sudo', 'python', currentpath+'/wifi_server.py', '0', wlan, passw])
+			wifi_result=subprocess.check_output(['sudo', 'python', currentpath+'/wifi_server.py', '0', wlan, passw, ssid])
 			
 		msg=wifi_result
 		if 'WiFi access point failed.' in msg:
 			self.enable_disable_wifi(0)
 			self.data_conf.set('WIFI', 'device', '')
 			self.data_conf.set('WIFI', 'password', '')
+			self.data_conf.set('WIFI', 'ssid', '')
 		if'WiFi access point started.' in msg:
-			wlan=self.wlan.GetValue()
-			passw=self.passw.GetValue()
 			self.data_conf.set('WIFI', 'device', wlan)
 			self.data_conf.set('WIFI', 'password', passw)
+			self.data_conf.set('WIFI', 'ssid', ssid)
 		msg=msg.replace('WiFi access point failed.', _('WiFi access point failed.'))
 		msg=msg.replace('WiFi access point started.', _('WiFi access point started.'))
 		msg=msg.replace('WiFi access point stopped.', _('WiFi access point stopped.'))
@@ -661,15 +669,19 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if s==1:
 			self.wlan.Disable()
 			self.passw.Disable()
+			self.ssid.Disable()
 			self.wlan_label.Disable()
 			self.passw_label.Disable()
+			self.ssid_label.Disable()
 			self.wifi_enable.SetValue(True)
 			self.data_conf.set('WIFI', 'enable', '1')
 		else:
 			self.wlan.Enable()
 			self.passw.Enable()
+			self.ssid.Enable()
 			self.wlan_label.Enable()
 			self.passw_label.Enable()
+			self.ssid_label.Enable()
 			self.wifi_enable.SetValue(False)
 			self.data_conf.set('WIFI', 'enable', '0')
 

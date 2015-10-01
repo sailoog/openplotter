@@ -21,8 +21,28 @@ home = os.path.expanduser('~')
 pathname = os.path.dirname(sys.argv[0])
 currentpath = os.path.abspath(pathname)
 
+device=''
+ssid=''
+passw=''
+
+try:
+	boot_conf = ConfigParser.SafeConfigParser()
+	boot_conf.read('/boot/config.txt')
+	device=boot_conf.get('OPENPLOTTER', 'device')
+	ssid=boot_conf.get('OPENPLOTTER', 'ssid')
+	passw=boot_conf.get('OPENPLOTTER', 'pass')
+except: pass
+
 data_conf = ConfigParser.SafeConfigParser()
 data_conf.read(currentpath+'/openplotter.conf')
+
+if device and ssid and passw:
+	data_conf.set('WIFI', 'enable', '1')
+	data_conf.set('WIFI', 'device', device)
+	data_conf.set('WIFI', 'ssid', ssid)
+	data_conf.set('WIFI', 'password', passw)
+	with open(currentpath+'/openplotter.conf', 'wb') as configfile:
+		data_conf.write(configfile)
 
 delay=int(data_conf.get('STARTUP', 'delay'))
 
@@ -41,7 +61,8 @@ channel=data_conf.get('AIS-SDR', 'channel')
 
 wifi_server=data_conf.get('WIFI', 'enable')
 wlan=data_conf.get('WIFI', 'device')
-passw=data_conf.get('WIFI', 'password')
+passw2=data_conf.get('WIFI', 'password')
+ssid2=data_conf.get('WIFI', 'ssid')
 
 nmea_mag_var=data_conf.get('STARTUP', 'nmea_mag_var')
 nmea_hdt=data_conf.get('STARTUP', 'nmea_hdt')
@@ -79,9 +100,9 @@ else:
 	subprocess.call(['pkill', '-9', 'rtl_fm'])
 	
 if wifi_server=='1':
-	subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '1', wlan, passw])
+	subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '1', wlan, passw2, ssid2])
 else:
-	subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '0', wlan, passw])
+	subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '0', wlan, passw2, ssid2])
 	
 time.sleep(16)
 
