@@ -19,24 +19,34 @@ import RTIMU, os
 
 detected_imu=''
 detected_pressure=''
+calibrated=''
 
 
 SETTINGS_FILE = "RTIMULib"
 s = RTIMU.Settings(SETTINGS_FILE)
 imu = RTIMU.RTIMU(s)
-if (not imu.IMUInit()) or (imu.IMUName()=='Null IMU'): os.remove('RTIMULib.ini')
-else: detected_imu=imu.IMUName()
+if (not imu.IMUInit()) or (imu.IMUName()=='Null IMU'): 
+	os.remove('RTIMULib.ini')
+else: 
+	detected_imu=imu.IMUName()
+	if imu.getCompassCalibrationValid() and imu.getCompassCalibrationEllipsoidValid() and imu.getAccelCalibrationValid(): 
+		calibrated=1
 
 
 SETTINGS_FILE2 = "RTIMULib2"
 s2 = RTIMU.Settings(SETTINGS_FILE2)
 pressure = RTIMU.RTPressure(s2)
-if (not pressure.pressureInit()) or (pressure.pressureName()=='none'): os.remove('RTIMULib2.ini')
-else: detected_pressure=pressure.pressureName()
+if (not pressure.pressureInit()) or (pressure.pressureName()=='none'): 
+	os.remove('RTIMULib2.ini')
+else: 
+	detected_pressure=pressure.pressureName()
 
 
 if detected_imu: print detected_imu
 else: print 'none'
+
+if calibrated: print calibrated
+else: print '0'
 
 if detected_pressure: print detected_pressure
 else: print 'none'

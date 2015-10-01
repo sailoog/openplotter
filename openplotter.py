@@ -305,15 +305,17 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.restartSK, self.button_restartSK)
 ###########################page7
 ########page6###################
-		wx.StaticBox(self.page6, size=(670, 50), pos=(10, 10))
-		wx.StaticText(self.page6, label=_('NMEA generation rate (seconds)'), pos=(20, 30))
-		self.rate= wx.ComboBox(self.page6, choices=self.rate_list, style=wx.CB_READONLY, size=(80, 32), pos=(260, 23))
-		self.button_ok_rate =wx.Button(self.page6, label=_('Ok'),size=(70, 32), pos=(350, 23))
+		wx.StaticBox(self.page6, size=(330, 50), pos=(10, 10))
+		wx.StaticText(self.page6, label=_('Rate (sec)'), pos=(20, 30))
+		self.rate= wx.ComboBox(self.page6, choices=self.rate_list, style=wx.CB_READONLY, size=(80, 32), pos=(150, 23))
+		self.button_ok_rate =wx.Button(self.page6, label=_('Ok'),size=(70, 32), pos=(250, 23))
 		self.Bind(wx.EVT_BUTTON, self.ok_rate, self.button_ok_rate)
 
 		wx.StaticBox(self.page6, size=(330, 140), pos=(10, 70))
 		self.imu_tag=wx.StaticText(self.page6, label=_('Sensor detected: ')+_('none'), pos=(20, 90))
-		self.button_calibrate_imu =wx.Button(self.page6, label=_('Calibrate'), pos=(240, 120))
+		self.button_reset_imu =wx.Button(self.page6, label=_('Reset'), pos=(240, 90))
+		self.Bind(wx.EVT_BUTTON, self.reset_imu, self.button_reset_imu)
+		self.button_calibrate_imu =wx.Button(self.page6, label=_('Calibrate'), pos=(240, 125))
 		self.Bind(wx.EVT_BUTTON, self.calibrate_imu, self.button_calibrate_imu)
 		self.heading = wx.CheckBox(self.page6, label=_('Heading'), pos=(20, 110))
 		self.heading.Bind(wx.EVT_CHECKBOX, self.nmea_hdg)
@@ -426,7 +428,8 @@ class MainFrame(wx.Frame):
 		detected=subprocess.check_output(['python', currentpath+'/imu/check_sensors.py'], cwd=currentpath+'/imu')
 		l_detected=detected.split('\n')
 		imu_sensor=l_detected[0]
-		press_sensor=l_detected[1]
+		calibrated=l_detected[1]
+		press_sensor=l_detected[2]
 
 		if 'none' in imu_sensor:
 			self.heading.Disable()
@@ -440,6 +443,7 @@ class MainFrame(wx.Frame):
 				self.write_conf()
 		else:
 			self.imu_tag.SetLabel(_('Sensor detected: ')+imu_sensor)
+			if calibrated=='1':self.button_calibrate_imu.Disable()
 			if self.data_conf.get('STARTUP', 'nmea_hdg')=='1': self.heading.SetValue(True)
 			if self.data_conf.get('STARTUP', 'nmea_heel')=='1': self.heel.SetValue(True)
 
@@ -456,6 +460,8 @@ class MainFrame(wx.Frame):
 			if self.data_conf.get('STARTUP', 'nmea_press')=='1': self.press_temp.SetValue(True)
 			else: self.press_temp_log.Disable()
 			if self.data_conf.get('STARTUP', 'press_temp_log')=='1': self.press_temp_log.SetValue(True)
+		
+		self. start_sensors()
 
 		if self.data_conf.get('STARTUP', 'tw_stw')=='1': self.TW_STW.SetValue(True)
 		if self.data_conf.get('STARTUP', 'tw_sog')=='1': self.TW_SOG.SetValue(True)
@@ -1105,6 +1111,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if sender.GetValue(): self.data_conf.set('STARTUP', 'nmea_heel', '1')
 		else: self.data_conf.set('STARTUP', 'nmea_heel', '0')
 		self.start_sensors()
+
+	def reset_imu(self, e):
+		os.remove(currentpath+'/imu/RTIMULib.ini')
+		os.remove(currentpath+'/imu/RTIMULib2.ini')
+		self.button_calibrate_imu.Enable()
+		self.calibrate_imu()
 
 	def calibrate_imu(self, e):
 		self.heading.SetValue(False)
