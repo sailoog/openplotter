@@ -311,31 +311,39 @@ class MainFrame(wx.Frame):
 		self.button_ok_rate =wx.Button(self.page6, label=_('Ok'),size=(70, 32), pos=(250, 23))
 		self.Bind(wx.EVT_BUTTON, self.ok_rate, self.button_ok_rate)
 
-		wx.StaticBox(self.page6, size=(330, 140), pos=(10, 70))
-		self.imu_tag=wx.StaticText(self.page6, label=_('Sensor detected: ')+_('none'), pos=(20, 90))
-		self.button_reset_imu =wx.Button(self.page6, label=_('Reset'), pos=(240, 90))
+		wx.StaticBox(self.page6, label=_(' IMU '), size=(330, 140), pos=(10, 65))
+		self.imu_tag=wx.StaticText(self.page6, label=_('Sensor detected: ')+_('none'), pos=(20, 85))
+		self.button_reset_imu =wx.Button(self.page6, label=_('Reset'), pos=(240, 85))
 		self.Bind(wx.EVT_BUTTON, self.reset_imu, self.button_reset_imu)
-		self.button_calibrate_imu =wx.Button(self.page6, label=_('Calibrate'), pos=(240, 130))
+		self.button_calibrate_imu =wx.Button(self.page6, label=_('Calibrate'), pos=(240, 125))
 		self.Bind(wx.EVT_BUTTON, self.calibrate_imu, self.button_calibrate_imu)
-		self.heading = wx.CheckBox(self.page6, label=_('Heading'), pos=(20, 110))
+		self.heading = wx.CheckBox(self.page6, label=_('Heading'), pos=(20, 105))
 		self.heading.Bind(wx.EVT_CHECKBOX, self.nmea_hdg)
-		self.heading_nmea=wx.StaticText(self.page6, label=_('Generated NMEA: $OPHDG'), pos=(20, 135))
-		self.heel = wx.CheckBox(self.page6, label=_('Heel'), pos=(20, 160))
+		self.heading_nmea=wx.StaticText(self.page6, label=_('Generated NMEA: $OPHDG'), pos=(20, 130))
+		self.heel = wx.CheckBox(self.page6, label=_('Heel'), pos=(20, 155))
 		self.heel.Bind(wx.EVT_CHECKBOX, self.nmea_heel)
-		self.heel_nmea=wx.StaticText(self.page6, label=_('Generated NMEA: $OPXDR'), pos=(20, 185))
+		self.heel_nmea=wx.StaticText(self.page6, label=_('Generated NMEA: $OPXDR'), pos=(20, 180))
 
-		wx.StaticBox(self.page6, size=(330, 90), pos=(350, 70))
-		self.press_tag=wx.StaticText(self.page6, label=_('Sensor detected: ')+_('none'), pos=(360, 90))
-		self.press_temp = wx.CheckBox(self.page6, label=_('Pressure'), pos=(360, 110))
-		self.press_temp.Bind(wx.EVT_CHECKBOX, self.nmea_press)
-		self.press_nmea=wx.StaticText(self.page6, label=_('Generated NMEA: $OPXDR'), pos=(360, 135))
+		wx.StaticBox(self.page6, label=_(' Weather '), size=(330, 270), pos=(350, 10))
 
-		wx.StaticBox(self.page6, size=(330, 90), pos=(350, 160))
-		self.press_temp_log = wx.CheckBox(self.page6, label=_('Weather data logging'), pos=(360, 180))
+		self.press_tag=wx.StaticText(self.page6, label=_('Sensor detected: ')+_('none'), pos=(360, 30))
+		self.press = wx.CheckBox(self.page6, label=_('Pressure'), pos=(360, 50))
+		self.press.Bind(wx.EVT_CHECKBOX, self.nmea_press)
+		self.temp_p = wx.CheckBox(self.page6, label=_('Temperature'), pos=(360, 75))
+		self.temp_p.Bind(wx.EVT_CHECKBOX, self.nmea_temp_p)
+		self.hum_tag=wx.StaticText(self.page6, label=_('Sensor detected: ')+_('none'), pos=(360, 105))
+		self.hum = wx.CheckBox(self.page6, label=_('Humidity'), pos=(360, 125))
+		self.hum.Bind(wx.EVT_CHECKBOX, self.nmea_hum)
+		self.temp_h = wx.CheckBox(self.page6, label=_('Temperature'), pos=(360, 150))
+		self.temp_h.Bind(wx.EVT_CHECKBOX, self.nmea_temp_h)
+
+		self.press_nmea=wx.StaticText(self.page6, label=_('Generated NMEA: $OPXDR'), pos=(360, 180))
+
+		self.press_temp_log = wx.CheckBox(self.page6, label=_('Weather data logging'), pos=(360, 210))
 		self.press_temp_log.Bind(wx.EVT_CHECKBOX, self.enable_press_temp_log)
-		self.button_reset =wx.Button(self.page6, label=_('Reset'), pos=(470, 210))
+		self.button_reset =wx.Button(self.page6, label=_('Reset'), pos=(470, 240))
 		self.Bind(wx.EVT_BUTTON, self.reset_graph, self.button_reset)
-		self.button_graph =wx.Button(self.page6, label=_('Show'), pos=(585, 210))
+		self.button_graph =wx.Button(self.page6, label=_('Show'), pos=(585, 240))
 		self.Bind(wx.EVT_BUTTON, self.show_graph, self.button_graph)
 ###########################page6
 		self.read_kplex_conf()
@@ -434,6 +442,7 @@ class MainFrame(wx.Frame):
 		if 'none' in imu_sensor:
 			self.heading.Disable()
 			self.button_calibrate_imu.Disable()
+			self.button_reset_imu.Disable()
 			self.heading_nmea.Disable()
 			self.heel.Disable()
 			self.heel_nmea.Disable()
@@ -448,19 +457,20 @@ class MainFrame(wx.Frame):
 			if self.data_conf.get('STARTUP', 'nmea_heel')=='1': self.heel.SetValue(True)
 
 		if 'none' in press_sensor:
-			self.press_temp.Disable()
+			self.press.Disable()
+			self.temp_p.Disable()
 			self.press_nmea.Disable()
-			self.press_temp_log.Disable()
-			if self.data_conf.get('STARTUP', 'nmea_press')=='1' or self.data_conf.get('STARTUP', 'press_temp_log')=='1': 
+			if self.data_conf.get('STARTUP', 'nmea_press')=='1' or self.data_conf.get('STARTUP', 'nmea_temp_p')=='1': 
 				self.data_conf.set('STARTUP', 'nmea_press', '0')
-				self.data_conf.set('STARTUP', 'press_temp_log', '0')
+				self.data_conf.set('STARTUP', 'nmea_temp_p', '0')
 				self.write_conf()
 		else:
 			self.press_tag.SetLabel(_('Sensor detected: ')+press_sensor)
-			if self.data_conf.get('STARTUP', 'nmea_press')=='1': self.press_temp.SetValue(True)
-			else: self.press_temp_log.Disable()
-			if self.data_conf.get('STARTUP', 'press_temp_log')=='1': self.press_temp_log.SetValue(True)
+			if self.data_conf.get('STARTUP', 'nmea_press')=='1': self.press.SetValue(True)
+			if self.data_conf.get('STARTUP', 'nmea_temp_p')=='1': self.temp_p.SetValue(True)
 		
+		if self.data_conf.get('STARTUP', 'press_temp_log')=='1': self.press_temp_log.SetValue(True)
+
 		self. start_sensors()
 
 		if self.data_conf.get('STARTUP', 'tw_stw')=='1': self.TW_STW.SetValue(True)
@@ -1082,8 +1092,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 ######################################sensors
 	def start_sensors(self):
 		self.write_conf()
+		subprocess.call(['pkill', 'RTIMULibDemoGL'])
 		subprocess.call(['pkill', '-f', 'sensors.py'])
-		if self.heading.GetValue() or self.press_temp.GetValue() or self.heel.GetValue():
+		if self.heading.GetValue() or self.heel.GetValue() or self.press.GetValue() or self.temp_p.GetValue() :
 			subprocess.Popen(['python', currentpath+'/sensors.py'], cwd=currentpath+'/imu')
 
 	def ok_rate(self, e):
@@ -1091,22 +1102,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.data_conf.set('STARTUP', 'nmea_rate_sen', rate)
 		self.start_sensors()
 		self.ShowMessage(_('Generation rate set to ')+rate+_(' seconds'))
-
-	def ok_rate2(self, e):
-		rate=self.rate2.GetValue()
-		self.data_conf.set('STARTUP', 'nmea_rate_cal', rate)
-		self.start_calculate()
-		self.ShowMessage(_('Generation rate set to ')+rate+_(' seconds'))
 		
 	def nmea_hdg(self, e):
-		subprocess.call(['pkill', 'RTIMULibDemoGL'])
 		sender = e.GetEventObject()
 		if sender.GetValue(): self.data_conf.set('STARTUP', 'nmea_hdg', '1')
 		else: self.data_conf.set('STARTUP', 'nmea_hdg', '0')
 		self.start_sensors()
 
 	def nmea_heel(self, e):
-		subprocess.call(['pkill', 'RTIMULibDemoGL'])
 		sender = e.GetEventObject()
 		if sender.GetValue(): self.data_conf.set('STARTUP', 'nmea_heel', '1')
 		else: self.data_conf.set('STARTUP', 'nmea_heel', '0')
@@ -1115,7 +1118,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def reset_imu(self, e):
 		try:
 			os.remove(currentpath+'/imu/RTIMULib.ini')
-			os.remove(currentpath+'/imu/RTIMULib2.ini')
 		except:pass
 		self.button_calibrate_imu.Enable()
 		self.calibrate_imu(e)
@@ -1123,31 +1125,34 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def calibrate_imu(self, e):
 		self.heading.SetValue(False)
 		self.heel.SetValue(False)
-		self.press_temp.SetValue(False)
-		self.press_temp_log.SetValue(False)
-		self.press_temp_log.Disable()
+		self.press.SetValue(False)
+		self.temp_p.SetValue(False)
 		self.data_conf.set('STARTUP', 'nmea_hdg', '0')
 		self.data_conf.set('STARTUP', 'nmea_heel', '0')
 		self.data_conf.set('STARTUP', 'nmea_press', '0')
-		self.data_conf.set('STARTUP', 'press_temp_log', '0')
+		self.data_conf.set('STARTUP', 'nmea_temp_p', '0')
 		self.start_sensors()
-		subprocess.call(['pkill', 'RTIMULibDemoGL'])
 		subprocess.Popen('RTIMULibDemoGL', cwd=currentpath+'/imu')
 		msg=_('Heading, heel, temperature and pressure generation disabled.\nAfter calibrating, enable them again.')
 		self.ShowMessage(msg)
 	
 	def nmea_press(self, e):
-		subprocess.call(['pkill', 'RTIMULibDemoGL'])
 		sender = e.GetEventObject()
-		if sender.GetValue():     
-			self.press_temp_log.Enable()
-			self.data_conf.set('STARTUP', 'nmea_press', '1')
-		else:
-			self.press_temp_log.SetValue(False)
-			self.press_temp_log.Disable()
-			self.data_conf.set('STARTUP', 'nmea_press', '0')
-			self.data_conf.set('STARTUP', 'press_temp_log', '0')
+		if sender.GetValue(): self.data_conf.set('STARTUP', 'nmea_press', '1')
+		else: self.data_conf.set('STARTUP', 'nmea_press', '0')
 		self.start_sensors()
+
+	def nmea_temp_p(self, e):
+		sender = e.GetEventObject()
+		if sender.GetValue(): self.data_conf.set('STARTUP', 'nmea_temp_p', '1')
+		else: self.data_conf.set('STARTUP', 'nmea_temp_p', '0')
+		self.start_sensors()
+
+	def nmea_hum(self, e):
+		pass
+
+	def nmea_temp_h(self, e):
+		pass
 
 	def enable_press_temp_log(self, e):
 		sender = e.GetEventObject()
@@ -1167,6 +1172,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.start_sensors()
 		self.ShowMessage(_('Weather log restarted'))
 ######################################calculate
+
+	def ok_rate2(self, e):
+		rate=self.rate2.GetValue()
+		self.data_conf.set('STARTUP', 'nmea_rate_cal', rate)
+		self.start_calculate()
+		self.ShowMessage(_('Generation rate set to ')+rate+_(' seconds'))
+
 	def start_calculate(self):
 		self.write_conf()
 		subprocess.call(['pkill', '-f', 'calculate.py'])
