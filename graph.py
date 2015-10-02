@@ -50,9 +50,9 @@ if len(dates)==0:
 fig=plt.figure()
 plt.rc("font", size=10)
 fig.canvas.set_window_title('Thermograph / Barograph / Hygrograph')
-ax1 = fig.add_subplot(211)
-ax2 = fig.add_subplot(212, sharex=ax1)
-ax3 = fig.add_subplot(213, sharex=ax1)
+ax1 = fig.add_subplot(311)
+ax2 = fig.add_subplot(312, sharex=ax1)
+ax3 = fig.add_subplot(313, sharex=ax1)
 
 ax1.plot(dates,temperature,'ro-')
 ax1.xaxis.set_major_formatter(mdates.DateFormatter('%d-%m-%y %H:%M'))
