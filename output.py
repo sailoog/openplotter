@@ -81,12 +81,13 @@ class MyFrame(wx.Frame):
 			self.list.InsertStringItem(13,_('True Wind Direction'))
 			self.list.InsertStringItem(14,_('Pressure'))
 			self.list.InsertStringItem(15,_('Temperature'))
-			self.list.InsertStringItem(16,_('Rate of Turn'))
-			self.list.InsertStringItem(17,_('Heel'))
+			self.list.InsertStringItem(16,_('R. Humidity'))
+			self.list.InsertStringItem(17,_('Rate of Turn'))
+			self.list.InsertStringItem(18,_('Heel'))
 
 			tick=time.time()
 
-			self.times=[tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick]
+			self.times=[tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick]
 
 			self.pause_all=0
 
@@ -296,15 +297,19 @@ class MyFrame(wx.Frame):
 								#temperature
 								value=transducer.value
 								if value: self.write_item(15, str(value), nmea_type, msg.talker)
+							if transducer.id=='HUMI':		
+								#humidity
+								value=transducer.value
+								if value: self.write_item(16, str(value), nmea_type, msg.talker)
 							if transducer.id=='ROLL':		
 								#heel
 								value=transducer.value
-								if value: self.write_item(17, str(value), nmea_type, msg.talker)						
+								if value: self.write_item(18, str(value), nmea_type, msg.talker)						
 
 					if nmea_type == 'ROT':
 						#rate of turn
 						value=msg.rate_of_turn
-						if value: self.write_item(16, str(value), nmea_type, msg.talker)
+						if value: self.write_item(17, str(value), nmea_type, msg.talker)
 
 
 			#except Exception,e: print str(e)
