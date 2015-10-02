@@ -109,9 +109,6 @@ while True:
 			humidity=''
 			temperature_h=''
 
-	print humidity
-	print temperature_h
-
 	#GENERATE
 	if tick2-tick > float(data_conf.get('STARTUP', 'nmea_rate_sen')):
 		tick=time.time()
@@ -159,8 +156,9 @@ while True:
 			xdr2=xdr1+"\r\n"
 			sock.sendto(xdr2, ('localhost', 10110))
 
-		if if data_conf.get('STARTUP', 'nmea_temp_p')=='1': temperature=temperature_p
-		if if data_conf.get('STARTUP', 'nmea_temp_h')=='1': temperature=temperature_h
+		temperature=''
+		if data_conf.get('STARTUP', 'nmea_temp_p')=='1': temperature=temperature_p
+		if data_conf.get('STARTUP', 'nmea_temp_h')=='1': temperature=temperature_h
 
 		# log temperature pressure
 		if data_conf.get('STARTUP', 'press_temp_log')=='1' and pressure and temperature:
