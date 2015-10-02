@@ -19,6 +19,7 @@ import RTIMU, os
 
 detected_imu=''
 detected_pressure=''
+detected_humidity=''
 calibrated=''
 
 
@@ -42,6 +43,15 @@ else:
 	detected_pressure=pressure.pressureName()
 
 
+SETTINGS_FILE3 = "RTIMULib3"
+s3 = RTIMU.Settings(SETTINGS_FILE3)
+humidity = RTIMU.RTHumidity(s3)
+if (not humidity.humidityInit()) or (humidity.humidityName()=='none'): 
+	os.remove('RTIMULib3.ini')
+else: 
+	detected_humidity=humidity.humidityName()
+
+
 if detected_imu: print detected_imu
 else: print 'none'
 
@@ -49,4 +59,7 @@ if calibrated: print calibrated
 else: print '0'
 
 if detected_pressure: print detected_pressure
+else: print 'none'
+
+if detected_humidity: print detected_humidity
 else: print 'none'

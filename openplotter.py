@@ -341,9 +341,9 @@ class MainFrame(wx.Frame):
 
 		self.press_temp_log = wx.CheckBox(self.page6, label=_('Weather data logging'), pos=(360, 210))
 		self.press_temp_log.Bind(wx.EVT_CHECKBOX, self.enable_press_temp_log)
-		self.button_reset =wx.Button(self.page6, label=_('Reset'), pos=(470, 240))
+		self.button_reset =wx.Button(self.page6, label=_('Reset'), pos=(360, 240))
 		self.Bind(wx.EVT_BUTTON, self.reset_graph, self.button_reset)
-		self.button_graph =wx.Button(self.page6, label=_('Show'), pos=(585, 240))
+		self.button_graph =wx.Button(self.page6, label=_('Show'), pos=(475, 240))
 		self.Bind(wx.EVT_BUTTON, self.show_graph, self.button_graph)
 ###########################page6
 		self.read_kplex_conf()
@@ -438,6 +438,7 @@ class MainFrame(wx.Frame):
 		imu_sensor=l_detected[0]
 		calibrated=l_detected[1]
 		press_sensor=l_detected[2]
+		hum_sensor=l_detected[3]
 
 		if 'none' in imu_sensor:
 			self.heading.Disable()
@@ -459,7 +460,6 @@ class MainFrame(wx.Frame):
 		if 'none' in press_sensor:
 			self.press.Disable()
 			self.temp_p.Disable()
-			self.press_nmea.Disable()
 			if self.data_conf.get('STARTUP', 'nmea_press')=='1' or self.data_conf.get('STARTUP', 'nmea_temp_p')=='1': 
 				self.data_conf.set('STARTUP', 'nmea_press', '0')
 				self.data_conf.set('STARTUP', 'nmea_temp_p', '0')
@@ -468,7 +468,21 @@ class MainFrame(wx.Frame):
 			self.press_tag.SetLabel(_('Sensor detected: ')+press_sensor)
 			if self.data_conf.get('STARTUP', 'nmea_press')=='1': self.press.SetValue(True)
 			if self.data_conf.get('STARTUP', 'nmea_temp_p')=='1': self.temp_p.SetValue(True)
+
+		if 'none' in hum_sensor:
+			self.hum.Disable()
+			self.temp_h.Disable()
+			if self.data_conf.get('STARTUP', 'nmea_hum')=='1' or self.data_conf.get('STARTUP', 'nmea_temp_h')=='1': 
+				self.data_conf.set('STARTUP', 'nmea_hum', '0')
+				self.data_conf.set('STARTUP', 'nmea_temp_h', '0')
+				self.write_conf()
+		else:
+			self.hum_tag.SetLabel(_('Sensor detected: ')+hum_sensor)
+			if self.data_conf.get('STARTUP', 'nmea_hum')=='1': self.hum.SetValue(True)
+			if self.data_conf.get('STARTUP', 'nmea_temp_h')=='1': self.temp_h.SetValue(True)
 		
+		if 'none' in hum_sensor and 'none' in press_sensor: self.press_nmea.Disable()
+
 		if self.data_conf.get('STARTUP', 'press_temp_log')=='1': self.press_temp_log.SetValue(True)
 
 		self. start_sensors()
@@ -1094,7 +1108,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.write_conf()
 		subprocess.call(['pkill', 'RTIMULibDemoGL'])
 		subprocess.call(['pkill', '-f', 'sensors.py'])
-		if self.heading.GetValue() or self.heel.GetValue() or self.press.GetValue() or self.temp_p.GetValue() :
+		if self.heading.GetValue() or self.heel.GetValue() or self.press.GetValue() or self.temp_p.GetValue() or self.hum.GetValue() or self.temp_h.GetValue() :
 			subprocess.Popen(['python', currentpath+'/sensors.py'], cwd=currentpath+'/imu')
 
 	def ok_rate(self, e):
@@ -1127,13 +1141,17 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.heel.SetValue(False)
 		self.press.SetValue(False)
 		self.temp_p.SetValue(False)
+		self.hum.SetValue(False)
+		self.temp_h.SetValue(False)
 		self.data_conf.set('STARTUP', 'nmea_hdg', '0')
 		self.data_conf.set('STARTUP', 'nmea_heel', '0')
 		self.data_conf.set('STARTUP', 'nmea_press', '0')
 		self.data_conf.set('STARTUP', 'nmea_temp_p', '0')
+		self.data_conf.set('STARTUP', 'nmea_hum', '0')
+		self.data_conf.set('STARTUP', 'nmea_temp_h', '0')
 		self.start_sensors()
 		subprocess.Popen('RTIMULibDemoGL', cwd=currentpath+'/imu')
-		msg=_('Heading, heel, temperature and pressure generation disabled.\nAfter calibrating, enable them again.')
+		msg=_('Heading, heel, temperature, humidity and pressure disabled.\nAfter calibrating, enable them again.')
 		self.ShowMessage(msg)
 	
 	def nmea_press(self, e):
@@ -1144,15 +1162,29 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def nmea_temp_p(self, e):
 		sender = e.GetEventObject()
-		if sender.GetValue(): self.data_conf.set('STARTUP', 'nmea_temp_p', '1')
-		else: self.data_conf.set('STARTUP', 'nmea_temp_p', '0')
+		if sender.GetValue(): 
+			self.temp_h.SetValue(False)
+			self.data_conf.set('STARTUP', 'nmea_temp_h', '0')
+			self.data_conf.set('STARTUP', 'nmea_temp_p', '1')
+		else: 
+			self.data_conf.set('STARTUP', 'nmea_temp_p', '0')
 		self.start_sensors()
 
 	def nmea_hum(self, e):
-		pass
+		sender = e.GetEventObject()
+		if sender.GetValue(): self.data_conf.set('STARTUP', 'nmea_hum', '1')
+		else: self.data_conf.set('STARTUP', 'nmea_hum', '0')
+		self.start_sensors()
 
 	def nmea_temp_h(self, e):
-		pass
+		sender = e.GetEventObject()
+		if sender.GetValue(): 
+			self.temp_p.SetValue(False)
+			self.data_conf.set('STARTUP', 'nmea_temp_p', '0')
+			self.data_conf.set('STARTUP', 'nmea_temp_h', '1')
+		else: 
+			self.data_conf.set('STARTUP', 'nmea_temp_h', '0')
+		self.start_sensors()
 
 	def enable_press_temp_log(self, e):
 		sender = e.GetEventObject()
