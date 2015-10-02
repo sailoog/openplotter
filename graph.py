@@ -33,22 +33,26 @@ ifile.close()
 dates=[]
 pressure=[]
 temperature=[]
+humidity=[]
 
 for i in range(0,len(log_list)):
 	dates.append(datetime.datetime.fromtimestamp(float(log_list[i][0])))
 	pressure.append(round(float(log_list[i][1]),1))
 	temperature.append(round(float(log_list[i][2]),1))
+	humidity.append(round(float(log_list[i][3]),1))
 
 if len(dates)==0:
         dates.append(datetime.datetime.now())
         pressure.append(0)
         temperature.append(0)
+        humidity.append(0)
 
 fig=plt.figure()
 plt.rc("font", size=10)
-fig.canvas.set_window_title('Thermograph / Barograph')
+fig.canvas.set_window_title('Thermograph / Barograph / Hygrograph')
 ax1 = fig.add_subplot(211)
 ax2 = fig.add_subplot(212, sharex=ax1)
+ax3 = fig.add_subplot(213, sharex=ax1)
 
 ax1.plot(dates,temperature,'ro-')
 ax1.xaxis.set_major_formatter(mdates.DateFormatter('%d-%m-%y %H:%M'))
@@ -60,8 +64,14 @@ ax2.xaxis.set_major_formatter(mdates.DateFormatter('%d-%m-%y %H:%M'))
 ax2.set_title('Pressure (hPa)')
 ax2.grid(True)
 
+ax3.plot(dates,humidity,'bo-')
+ax3.xaxis.set_major_formatter(mdates.DateFormatter('%d-%m-%y %H:%M'))
+ax3.set_title('Humidity (%)')
+ax3.grid(True)
+
 plt.tight_layout()
 cursor = Cursor(ax1, useblit=True, color='gray', linewidth=1 )
 cursor2 = Cursor(ax2, useblit=True, color='gray', linewidth=1 )
+cursor3 = Cursor(ax3, useblit=True, color='gray', linewidth=1 )
 fig.autofmt_xdate()
 plt.show()

@@ -160,11 +160,17 @@ while True:
 		if data_conf.get('STARTUP', 'nmea_temp_p')=='1': temperature=temperature_p
 		if data_conf.get('STARTUP', 'nmea_temp_h')=='1': temperature=temperature_h
 
-		# log temperature pressure
-		if data_conf.get('STARTUP', 'press_temp_log')=='1' and pressure and temperature:
+		# log temperature pressure humidity
+		if data_conf.get('STARTUP', 'press_temp_log')=='1':
 			if tick-last_log > 300:
 				last_log=tick
-				new_row=[tick,pressure,temperature]
+				press2=0
+				temp2=0
+				hum2=0
+				if pressure: press2=pressure
+				if temperature: temp2=temperature
+				if humidity: hum2=humidity
+				new_row=[tick,press2,temp2,hum2]
 				if len(log_list) < 288:
 					log_list.append(new_row)
 					ofile = open(currentpath+'/weather_log.csv', "a")
