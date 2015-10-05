@@ -148,10 +148,6 @@ while True:
 			xdr1=str(xdr)
 			xdr2=xdr1+"\r\n"
 			sock.sendto(xdr2, ('localhost', 10110))
-			pressure=''
-			temperature_p=''
-			humidity=''
-			temperature_h=''
 			heel=''
 
 		temperature=''
@@ -182,3 +178,8 @@ while True:
 					for row in log_list:
 						writer.writerow(row)
 				ofile.close()
+
+		temperature_p=''
+		temperature_h=''
+		pressure=''
+		humidity=''
