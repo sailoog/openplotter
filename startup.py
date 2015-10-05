@@ -80,10 +80,9 @@ TW_SOG=data_conf.get('STARTUP', 'tw_sog')
 #######################################################
 time.sleep(delay)
 
+subprocess.call(['pkill', '-9', 'x11vnc'])
 if x11vnc=='1':
 	subprocess.Popen(['x11vnc', '-forever'])         
-else: 
-	subprocess.call(['pkill', '-9', 'x11vnc'])
 
 opencpn_commands=[]
 opencpn_commands.append('opencpn')
@@ -93,14 +92,13 @@ if opencpn_fullscreen=='1': opencpn_commands.append('-fullscreen')
 if opencpn=='1' and len(opencpn_commands)>1: subprocess.Popen(opencpn_commands)
 if opencpn=='1' and len(opencpn_commands)==1: subprocess.Popen('opencpn')
 
+subprocess.call(['pkill', '-9', 'aisdecoder'])
+subprocess.call(['pkill', '-9', 'rtl_fm'])
 if enable=='1':
 	frecuency='161975000'
 	if channel=='b': frecuency='162025000'
 	rtl_fm=subprocess.Popen(['rtl_fm', '-f', frecuency, '-g', gain, '-p', ppm, '-s', '48k'], stdout = subprocess.PIPE)
-	aisdecoder=subprocess.Popen(['aisdecoder', '-h', '127.0.0.1', '-p', '10110', '-a', 'file', '-c', 'mono', '-d', '-f', '/dev/stdin'], stdin = rtl_fm.stdout)         
-else: 
-	subprocess.call(['pkill', '-9', 'aisdecoder'])
-	subprocess.call(['pkill', '-9', 'rtl_fm'])
+	aisdecoder=subprocess.Popen(['aisdecoder', '-h', '127.0.0.1', '-p', '10110', '-a', 'file', '-c', 'mono', '-d', '-f', '/dev/stdin'], stdin = rtl_fm.stdout)
 	
 if wifi_server=='1':
 	subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '1', wlan, passw2, ssid2])
@@ -109,21 +107,20 @@ else:
 	
 time.sleep(16)
 
+subprocess.call(['pkill', '-9', 'kplex'])
 if kplex=='1':
 	subprocess.call(["pkill", '-9', "kplex"])
 	subprocess.Popen('kplex')        
-else: 
-	subprocess.call(['pkill', '-9', 'kplex'])
 
+subprocess.call(["pkill", '-9', "node"])
 if signalk=='1':
 	subprocess.call(["pkill", '-9', "node"])
 	subprocess.Popen(home+'/.config/signalk-server-node/bin/nmea-from-10110', cwd=home+'/.config/signalk-server-node')       
-else: 
-	subprocess.call(["pkill", '-9', "node"])
-
+	
 if gps_time=='1':
 	subprocess.call(['sudo', 'python', currentpath+'/time_gps.py'])
 
+subprocess.call(['pkill', '-f', 'sensors.py'])
 if nmea_hdg=='1' or nmea_heel=='1' or nmea_press=='1' or nmea_temp_p=='1' or nmea_hum=='1' or nmea_temp_h=='1': subprocess.Popen(['python', currentpath+'/sensors.py'], cwd=currentpath+'/imu')
+subprocess.call(['pkill', '-f', 'calculate.py'])
 if nmea_mag_var=='1' or nmea_hdt=='1' or nmea_rot=='1' or TW_STW=='1' or TW_SOG=='1': subprocess.Popen(['python', currentpath+'/calculate.py'])
-
