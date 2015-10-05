@@ -37,11 +37,17 @@ if data_conf.get('STARTUP', 'nmea_hdg')=='1' or data_conf.get('STARTUP', 'nmea_h
 	imu.setCompassEnable(True)
 	poll_interval = imu.IMUGetPollInterval()
 
-if data_conf.get('STARTUP', 'nmea_press')=='1':
+if data_conf.get('STARTUP', 'nmea_press')=='1' or data_conf.get('STARTUP', 'nmea_temp_p')=='1':
 	SETTINGS_FILE2 = "RTIMULib2"
 	s2 = RTIMU.Settings(SETTINGS_FILE2)
 	pressure_val = RTIMU.RTPressure(s2)
 	pressure_val.pressureInit()
+
+if data_conf.get('STARTUP', 'nmea_hum')=='1' or data_conf.get('STARTUP', 'nmea_temp_h')=='1':
+	SETTINGS_FILE3 = "RTIMULib3"
+	s3 = RTIMU.Settings(SETTINGS_FILE3)
+	humidity_val = RTIMU.RTHumidity(s3)
+	humidity_val.humidityInit()
 
 if data_conf.get('STARTUP', 'press_temp_log')=='1':
 	ifile  = open(currentpath+'/weather_log.csv', "r")
@@ -56,13 +62,15 @@ if data_conf.get('STARTUP', 'press_temp_log')=='1':
 heading_m=''
 heel=''
 pressure=''
-temperature=''
+temperature_p=''
+humidity=''
+temperature_h=''
 
 tick=time.time()
 
 while True:
 	tick2=time.time()
-# read IMU
+	# read IMU
 	if data_conf.get('STARTUP', 'nmea_hdg')=='1' or data_conf.get('STARTUP', 'nmea_heel')=='1':
 		if imu.IMURead():
 			data = imu.getIMUData()
@@ -78,17 +86,29 @@ while True:
 		time.sleep(poll_interval*1.0/1000.0)
 
 	# read Pressure
-	if data_conf.get('STARTUP', 'nmea_press')=='1':
+	if data_conf.get('STARTUP', 'nmea_press')=='1' or data_conf.get('STARTUP', 'nmea_temp_p')=='1':
 		read=pressure_val.pressureRead()
 		if read:
 			if (read[0]):
 				pressure=read[1]
 			if (read[2]):
-				temperature=read[3]
+				temperature_p=read[3]
 		else:
 			pressure=''
-			temperature=''
-	
+			temperature_p=''
+
+	# read humidity
+	if data_conf.get('STARTUP', 'nmea_hum')=='1' or data_conf.get('STARTUP', 'nmea_temp_h')=='1':
+		read=humidity_val.humidityRead()
+		if read:
+			if (read[0]):
+				humidity=read[1]
+			if (read[2]):
+				temperature_h=read[3]
+		else:
+			humidity=''
+			temperature_h=''
+
 	#GENERATE
 	if tick2-tick > float(data_conf.get('STARTUP', 'nmea_rate_sen')):
 		tick=time.time()
@@ -100,17 +120,30 @@ while True:
 			sock.sendto(hdg2, ('localhost', 10110))
 		# XDR
 		list_tmp=[]			
-		if data_conf.get('STARTUP', 'nmea_press')=='1' and pressure and temperature:
+		if data_conf.get('STARTUP', 'nmea_press')=='1' and pressure:
 			press=round(pressure/1000,4)
 			list_tmp.append('P')
 			list_tmp.append(str(press))
 			list_tmp.append('B')
 			list_tmp.append('AIRP')
-			temp= round(temperature,1)
+		if data_conf.get('STARTUP', 'nmea_temp_p')=='1' and temperature_p:			
+			temp= round(temperature_p,1)
 			list_tmp.append('C')
 			list_tmp.append(str(temp))
 			list_tmp.append('C')
 			list_tmp.append('AIRT')
+		if data_conf.get('STARTUP', 'nmea_temp_h')=='1' and temperature_h:			
+			temp= round(temperature_h,1)
+			list_tmp.append('C')
+			list_tmp.append(str(temp))
+			list_tmp.append('C')
+			list_tmp.append('AIRT')
+		if data_conf.get('STARTUP', 'nmea_hum')=='1' and humidity:
+			hum=round(humidity,1)
+			list_tmp.append('H')
+			list_tmp.append(str(hum))
+			list_tmp.append('R')
+			list_tmp.append('HUMI')
 		if data_conf.get('STARTUP', 'nmea_heel')=='1' and heel:
 			heel= round(heel,1)
 			list_tmp.append('A')
@@ -122,11 +155,22 @@ while True:
 			xdr1=str(xdr)
 			xdr2=xdr1+"\r\n"
 			sock.sendto(xdr2, ('localhost', 10110))
-		# log temperature pressure
-		if data_conf.get('STARTUP', 'press_temp_log')=='1' and pressure and temperature:
+
+		temperature=''
+		if data_conf.get('STARTUP', 'nmea_temp_p')=='1': temperature=temperature_p
+		if data_conf.get('STARTUP', 'nmea_temp_h')=='1': temperature=temperature_h
+
+		# log temperature pressure humidity
+		if data_conf.get('STARTUP', 'press_temp_log')=='1':
 			if tick-last_log > 300:
 				last_log=tick
-				new_row=[tick,pressure,temperature]
+				press2=0
+				temp2=0
+				hum2=0
+				if pressure: press2=pressure
+				if temperature: temp2=temperature
+				if humidity: hum2=humidity
+				new_row=[tick,press2,temp2,hum2]
 				if len(log_list) < 288:
 					log_list.append(new_row)
 					ofile = open(currentpath+'/weather_log.csv', "a")
