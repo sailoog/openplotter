@@ -324,6 +324,11 @@ class MainFrame(wx.Frame):
 		self.heel.Bind(wx.EVT_CHECKBOX, self.nmea_heel)
 		self.heel_nmea=wx.StaticText(self.page6, label=_('Generated NMEA: $OPXDR'), pos=(20, 180))
 
+		wx.StaticBox(self.page6, label=' DS18B20 ', size=(330, 70), pos=(10, 210))
+		self.eng_temp = wx.CheckBox(self.page6, label=_('Engine temperature'), pos=(20, 230))
+		self.eng_temp.Bind(wx.EVT_CHECKBOX, self.nmea_eng_temp)
+		self.eng_temp_nmea=wx.StaticText(self.page6, label=_('Generated NMEA: $OPXDR'), pos=(20, 255))
+
 		wx.StaticBox(self.page6, label=_(' Weather '), size=(330, 270), pos=(350, 10))
 
 		self.press_tag=wx.StaticText(self.page6, label=_('Sensor detected: ')+_('none'), pos=(360, 30))
@@ -439,6 +444,7 @@ class MainFrame(wx.Frame):
 		calibrated=l_detected[1]
 		press_sensor=l_detected[2]
 		hum_sensor=l_detected[3]
+		DS18B20=l_detected[4]
 
 		if 'none' in imu_sensor:
 			self.heading.Disable()
@@ -456,6 +462,15 @@ class MainFrame(wx.Frame):
 			if calibrated=='1':self.button_calibrate_imu.Disable()
 			if self.data_conf.get('STARTUP', 'nmea_hdg')=='1': self.heading.SetValue(True)
 			if self.data_conf.get('STARTUP', 'nmea_heel')=='1': self.heel.SetValue(True)
+
+		if 'none' in DS18B20:
+			self.eng_temp.Disable()
+			self.eng_temp_nmea.Disable()
+			if self.data_conf.get('STARTUP', 'nmea_eng_temp')=='1': 
+				self.data_conf.set('STARTUP', 'nmea_eng_temp', '0')
+				self.write_conf()
+		else:
+			if self.data_conf.get('STARTUP', 'nmea_eng_temp')=='1': self.eng_temp.SetValue(True)
 
 		if 'none' in press_sensor:
 			self.press.Disable()
@@ -484,8 +499,6 @@ class MainFrame(wx.Frame):
 		if 'none' in hum_sensor and 'none' in press_sensor: self.press_nmea.Disable()
 
 		if self.data_conf.get('STARTUP', 'press_temp_log')=='1': self.press_temp_log.SetValue(True)
-
-		self. start_sensors()
 
 		if self.data_conf.get('STARTUP', 'tw_stw')=='1': self.TW_STW.SetValue(True)
 		if self.data_conf.get('STARTUP', 'tw_sog')=='1': self.TW_SOG.SetValue(True)
@@ -1108,13 +1121,20 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.write_conf()
 		subprocess.call(['pkill', 'RTIMULibDemoGL'])
 		subprocess.call(['pkill', '-f', 'sensors.py'])
-		if self.heading.GetValue() or self.heel.GetValue() or self.press.GetValue() or self.temp_p.GetValue() or self.hum.GetValue() or self.temp_h.GetValue() :
+		if self.heading.GetValue() or self.heel.GetValue() or self.press.GetValue() or self.temp_p.GetValue() or self.hum.GetValue() or self.temp_h.GetValue():
 			subprocess.Popen(['python', currentpath+'/sensors.py'], cwd=currentpath+'/imu')
+
+	def start_sensors_b(self):
+		self.write_conf()
+		subprocess.call(['pkill', '-f', 'sensors_b.py'])
+		if self.eng_temp.GetValue():
+			subprocess.Popen(['python', currentpath+'/sensors_b.py'])
 
 	def ok_rate(self, e):
 		rate=self.rate.GetValue()
 		self.data_conf.set('STARTUP', 'nmea_rate_sen', rate)
 		self.start_sensors()
+		self.start_sensors_b()
 		self.ShowMessage(_('Generation rate set to ')+rate+_(' seconds'))
 		
 	def nmea_hdg(self, e):
@@ -1185,6 +1205,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		else: 
 			self.data_conf.set('STARTUP', 'nmea_temp_h', '0')
 		self.start_sensors()
+
+	def nmea_eng_temp(self, e):
+		sender = e.GetEventObject()
+		if sender.GetValue(): self.data_conf.set('STARTUP', 'nmea_eng_temp', '1')
+		else: self.data_conf.set('STARTUP', 'nmea_eng_temp', '0')
+		self.start_sensors_b()		
 
 	def enable_press_temp_log(self, e):
 		sender = e.GetEventObject()

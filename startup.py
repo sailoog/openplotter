@@ -73,6 +73,7 @@ nmea_temp_p=data_conf.get('STARTUP', 'nmea_temp_p')
 nmea_hum=data_conf.get('STARTUP', 'nmea_hum')
 nmea_temp_h=data_conf.get('STARTUP', 'nmea_temp_h')
 nmea_rot=data_conf.get('STARTUP', 'nmea_rot')
+nmea_eng_temp=data_conf.get('STARTUP', 'nmea_eng_temp')
 
 TW_STW=data_conf.get('STARTUP', 'tw_stw')
 TW_SOG=data_conf.get('STARTUP', 'tw_sog')
@@ -122,5 +123,7 @@ if gps_time=='1':
 
 subprocess.call(['pkill', '-f', 'sensors.py'])
 if nmea_hdg=='1' or nmea_heel=='1' or nmea_press=='1' or nmea_temp_p=='1' or nmea_hum=='1' or nmea_temp_h=='1': subprocess.Popen(['python', currentpath+'/sensors.py'], cwd=currentpath+'/imu')
+subprocess.call(['pkill', '-f', 'sensors_b.py'])
+if nmea_eng_temp=='1': subprocess.Popen(['python', currentpath+'/sensors_b.py'])
 subprocess.call(['pkill', '-f', 'calculate.py'])
 if nmea_mag_var=='1' or nmea_hdt=='1' or nmea_rot=='1' or TW_STW=='1' or TW_SOG=='1': subprocess.Popen(['python', currentpath+'/calculate.py'])

@@ -16,41 +16,47 @@
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
 import RTIMU, os
+from w1thermsensor import W1ThermSensor
 
 detected_imu=''
 detected_pressure=''
 detected_humidity=''
 calibrated=''
+DS18B20=''
+
+try:
+
+	SETTINGS_FILE = "RTIMULib"
+	s = RTIMU.Settings(SETTINGS_FILE)
+	imu = RTIMU.RTIMU(s)
+	if (not imu.IMUInit()) or (imu.IMUName()=='Null IMU'): 
+		os.remove('RTIMULib.ini')
+	else: 
+		detected_imu=imu.IMUName()
+		if imu.getCompassCalibrationValid() and imu.getCompassCalibrationEllipsoidValid() and imu.getAccelCalibrationValid(): 
+			calibrated=1
 
 
-SETTINGS_FILE = "RTIMULib"
-s = RTIMU.Settings(SETTINGS_FILE)
-imu = RTIMU.RTIMU(s)
-if (not imu.IMUInit()) or (imu.IMUName()=='Null IMU'): 
-	os.remove('RTIMULib.ini')
-else: 
-	detected_imu=imu.IMUName()
-	if imu.getCompassCalibrationValid() and imu.getCompassCalibrationEllipsoidValid() and imu.getAccelCalibrationValid(): 
-		calibrated=1
+	SETTINGS_FILE2 = "RTIMULib2"
+	s2 = RTIMU.Settings(SETTINGS_FILE2)
+	pressure = RTIMU.RTPressure(s2)
+	if (not pressure.pressureInit()) or (pressure.pressureName()=='none'): 
+		os.remove('RTIMULib2.ini')
+	else: 
+		detected_pressure=pressure.pressureName()
 
 
-SETTINGS_FILE2 = "RTIMULib2"
-s2 = RTIMU.Settings(SETTINGS_FILE2)
-pressure = RTIMU.RTPressure(s2)
-if (not pressure.pressureInit()) or (pressure.pressureName()=='none'): 
-	os.remove('RTIMULib2.ini')
-else: 
-	detected_pressure=pressure.pressureName()
+	SETTINGS_FILE3 = "RTIMULib3"
+	s3 = RTIMU.Settings(SETTINGS_FILE3)
+	humidity = RTIMU.RTHumidity(s3)
+	if (not humidity.humidityInit()) or (humidity.humidityName()=='none'): 
+		os.remove('RTIMULib3.ini')
+	else: 
+		detected_humidity=humidity.humidityName()
 
+	DS18B20=W1ThermSensor.get_available_sensors()
 
-SETTINGS_FILE3 = "RTIMULib3"
-s3 = RTIMU.Settings(SETTINGS_FILE3)
-humidity = RTIMU.RTHumidity(s3)
-if (not humidity.humidityInit()) or (humidity.humidityName()=='none'): 
-	os.remove('RTIMULib3.ini')
-else: 
-	detected_humidity=humidity.humidityName()
-
+except: pass
 
 if detected_imu: print detected_imu
 else: print 'none'
@@ -62,4 +68,7 @@ if detected_pressure: print detected_pressure
 else: print 'none'
 
 if detected_humidity: print detected_humidity
+else: print 'none'
+
+if DS18B20: print DS18B20
 else: print 'none'
