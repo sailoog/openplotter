@@ -84,10 +84,11 @@ class MyFrame(wx.Frame):
 			self.list.InsertStringItem(16,_('R. Humidity'))
 			self.list.InsertStringItem(17,_('Rate of Turn'))
 			self.list.InsertStringItem(18,_('Heel'))
+			self.list.InsertStringItem(19,_('Engine Temperature'))
 
 			tick=time.time()
 
-			self.times=[tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick]
+			self.times=[tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick,tick]
 
 			self.pause_all=0
 
@@ -305,6 +306,10 @@ class MyFrame(wx.Frame):
 								#heel
 								value=transducer.value
 								if value: self.write_item(18, str(value), nmea_type, msg.talker)						
+							if transducer.id=='ENGT':		
+								#engine temperature
+								value=transducer.value
+								if value: self.write_item(19, str(value), nmea_type, msg.talker)
 
 					if nmea_type == 'ROT':
 						#rate of turn

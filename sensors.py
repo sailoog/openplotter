@@ -80,9 +80,7 @@ while True:
 			if heading_m0<0:
 				heading_m0=360+heading_m0
 			heading_m=round(heading_m0,1)
-		else:
-			heading_m=''
-			heel=''
+
 		time.sleep(poll_interval*1.0/1000.0)
 
 	# read Pressure
@@ -93,9 +91,6 @@ while True:
 				pressure=read[1]
 			if (read[2]):
 				temperature_p=read[3]
-		else:
-			pressure=''
-			temperature_p=''
 
 	# read humidity
 	if data_conf.get('STARTUP', 'nmea_hum')=='1' or data_conf.get('STARTUP', 'nmea_temp_h')=='1':
@@ -105,9 +100,6 @@ while True:
 				humidity=read[1]
 			if (read[2]):
 				temperature_h=read[3]
-		else:
-			humidity=''
-			temperature_h=''
 
 	#GENERATE
 	if tick2-tick > float(data_conf.get('STARTUP', 'nmea_rate_sen')):
@@ -118,6 +110,7 @@ while True:
 			hdg1=str(hdg)
 			hdg2=hdg1+"\r\n"
 			sock.sendto(hdg2, ('localhost', 10110))
+			heading_m=''
 		# XDR
 		list_tmp=[]			
 		if data_conf.get('STARTUP', 'nmea_press')=='1' and pressure:
@@ -155,6 +148,7 @@ while True:
 			xdr1=str(xdr)
 			xdr2=xdr1+"\r\n"
 			sock.sendto(xdr2, ('localhost', 10110))
+			heel=''
 
 		temperature=''
 		if data_conf.get('STARTUP', 'nmea_temp_p')=='1': temperature=temperature_p
@@ -184,3 +178,8 @@ while True:
 					for row in log_list:
 						writer.writerow(row)
 				ofile.close()
+
+		temperature_p=''
+		temperature_h=''
+		pressure=''
+		humidity=''
