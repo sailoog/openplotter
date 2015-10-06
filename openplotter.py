@@ -63,13 +63,15 @@ class MainFrame(wx.Frame):
 		self.page5 = wx.Panel(self.nb)
 		self.page6 = wx.Panel(self.nb)
 		self.page7 = wx.Panel(self.nb)
+		self.page8 = wx.Panel(self.nb)
 
 		self.nb.AddPage(self.page5, _('NMEA 0183'))
 		self.nb.AddPage(self.page7, _('Signal K (beta)'))
-		self.nb.AddPage(self.page3, _('WiFi access point'))
+		self.nb.AddPage(self.page3, _('WiFi AP'))
 		self.nb.AddPage(self.page4, _('SDR-AIS'))
 		self.nb.AddPage(self.page2, _('Calculate'))
 		self.nb.AddPage(self.page6, _('Sensors'))
+		self.nb.AddPage(self.page8, _('Switches'))
 		self.nb.AddPage(self.page1, _('Startup'))
 
 		sizer = wx.BoxSizer()
@@ -352,6 +354,31 @@ class MainFrame(wx.Frame):
 		self.button_graph =wx.Button(self.page6, label=_('Show'), pos=(475, 240))
 		self.Bind(wx.EVT_BUTTON, self.show_graph, self.button_graph)
 ###########################page6
+########page8###################
+		self.pin_list = ['22', '23', '24', '25', '26', '27']
+		self.switch_options=[_('command'), _('reset'), _('shutdown'), _('reset NMEA 0183 multiplexer'), _('reset Signal K server'), _('toggle WiFi access point'), _('toggle SDR-AIS'), _('reset calculations'), _('reset sensors') ]
+
+		wx.StaticBox(self.page8, label=_(' Switch 1 '), size=(330, 215), pos=(10, 10))
+		self.switch1_enable = wx.CheckBox(self.page8, label=_('Enable switch 1'), pos=(20, 35))
+		self.switch1_enable.Bind(wx.EVT_CHECKBOX, self.on_switch1_enable)
+		wx.StaticText(self.page8, label=_('GPIO'), pos=(20, 80))
+		self.gpio_pin1= wx.ComboBox(self.page8, choices=self.pin_list, style=wx.CB_READONLY, size=(70, 32), pos=(70, 72))
+		wx.StaticText(self.page8, label=_('Action'), pos=(20, 120))
+		self.action1= wx.ComboBox(self.page8, choices=self.switch_options, style=wx.CB_READONLY, size=(310, 32), pos=(20, 140))
+		wx.StaticText(self.page8, label=_('command'), pos=(20, 185))
+		self.command1 = wx.TextCtrl(self.page8, -1, size=(220, 32), pos=(110, 180))
+
+		wx.StaticBox(self.page8, label=_(' Switch 2 '), size=(330, 215), pos=(350, 10))
+		self.switch2_enable = wx.CheckBox(self.page8, label=_('Enable switch 2'), pos=(360, 35))
+		self.switch2_enable.Bind(wx.EVT_CHECKBOX, self.on_switch2_enable)
+		wx.StaticText(self.page8, label=_('GPIO'), pos=(360, 80))
+		self.gpio_pin2= wx.ComboBox(self.page8, choices=self.pin_list, style=wx.CB_READONLY, size=(70, 32), pos=(410, 72))
+		wx.StaticText(self.page8, label=_('Action'), pos=(360, 120))
+		self.action2= wx.ComboBox(self.page8, choices=self.switch_options, style=wx.CB_READONLY, size=(310, 32), pos=(360, 140))
+		wx.StaticText(self.page8, label=_('command'), pos=(360, 185))
+		self.command2 = wx.TextCtrl(self.page8, -1, size=(220, 32), pos=(450, 180))
+
+###########################page8
 		self.read_kplex_conf()
 		self.set_layout_conf()
 ###########################layout
@@ -1318,6 +1345,20 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		subprocess.call(["pkill", '-9', "node"])
 		subprocess.Popen(home+'/.config/signalk-server-node/bin/nmea-from-10110', cwd=home+'/.config/signalk-server-node')
 		self.SetStatusText(_('Signal K server restarted'))
+######################################Switches
+
+	def on_switch1_enable(self, e):
+		pass
+
+	def on_switch2_enable(self, e):
+		pass
+
+	def	on_predefined1_enable(self, e):
+		pass
+
+
+	def	on_predefined21_enable(self, e):
+		pass
 #######################definitions
 
 
