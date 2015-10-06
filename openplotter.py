@@ -330,8 +330,9 @@ class MainFrame(wx.Frame):
 		self.eng_temp_nmea=wx.StaticText(self.page6, label=_('Generated NMEA: $OPXDR'), pos=(20, 255))
 
 		wx.StaticBox(self.page6, label=_(' Weather '), size=(330, 270), pos=(350, 10))
-
 		self.press_tag=wx.StaticText(self.page6, label=_('Sensor detected: ')+_('none'), pos=(360, 30))
+		self.button_reset_press_hum =wx.Button(self.page6, label=_('Reset'), pos=(580, 30))
+		self.Bind(wx.EVT_BUTTON, self.reset_press_hum, self.button_reset_press_hum)
 		self.press = wx.CheckBox(self.page6, label=_('Pressure'), pos=(360, 50))
 		self.press.Bind(wx.EVT_CHECKBOX, self.nmea_press)
 		self.temp_p = wx.CheckBox(self.page6, label=_('Temperature'), pos=(360, 75))
@@ -496,7 +497,9 @@ class MainFrame(wx.Frame):
 			if self.data_conf.get('STARTUP', 'nmea_hum')=='1': self.hum.SetValue(True)
 			if self.data_conf.get('STARTUP', 'nmea_temp_h')=='1': self.temp_h.SetValue(True)
 		
-		if 'none' in hum_sensor and 'none' in press_sensor: self.press_nmea.Disable()
+		if 'none' in hum_sensor and 'none' in press_sensor: 
+			self.press_nmea.Disable()
+			self.button_reset_press_hum.Disable()
 
 		if self.data_conf.get('STARTUP', 'press_temp_log')=='1': self.press_temp_log.SetValue(True)
 
@@ -1154,7 +1157,35 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			os.remove(currentpath+'/imu/RTIMULib.ini')
 		except:pass
 		self.button_calibrate_imu.Enable()
-		self.calibrate_imu(e)
+		self.imu_tag.Disable()
+		self.heading.SetValue(False)
+		self.heel.SetValue(False)
+		self.data_conf.set('STARTUP', 'nmea_hdg', '0')
+		self.data_conf.set('STARTUP', 'nmea_heel', '0')
+		self.start_sensors()
+		msg=_('Heading and heel disabled.\nClose and open OpenPlotter again to autodetect.')
+		self.ShowMessage(msg)
+
+	def reset_press_hum(self, e):
+		try:
+			os.remove(currentpath+'/imu/RTIMULib2.ini')
+		except:pass
+		try:
+			os.remove(currentpath+'/imu/RTIMULib3.ini')
+		except:pass
+		self.press_tag.Disable()
+		self.hum_tag.Disable()
+		self.press.SetValue(False)
+		self.temp_p.SetValue(False)
+		self.hum.SetValue(False)
+		self.temp_h.SetValue(False)
+		self.data_conf.set('STARTUP', 'nmea_press', '0')
+		self.data_conf.set('STARTUP', 'nmea_temp_p', '0')
+		self.data_conf.set('STARTUP', 'nmea_hum', '0')
+		self.data_conf.set('STARTUP', 'nmea_temp_h', '0')
+		self.start_sensors()
+		msg=_('Temperature, humidity and pressure disabled.\nClose and open OpenPlotter again to autodetect.')
+		self.ShowMessage(msg)
 
 	def calibrate_imu(self, e):
 		self.heading.SetValue(False)
