@@ -24,29 +24,24 @@ detected_humidity=''
 calibrated=''
 DS18B20=''
 
-try:
-	SETTINGS_FILE = "RTIMULib"
-	s = RTIMU.Settings(SETTINGS_FILE)
-	imu = RTIMU.RTIMU(s)
-	if imu.IMUInit() and imu.IMUName()!='Null IMU': 
+
+SETTINGS_FILE = "RTIMULib"
+s = RTIMU.Settings(SETTINGS_FILE)
+imu = RTIMU.RTIMU(s)
+if imu.IMUName()!='Null IMU': 
 		detected_imu=imu.IMUName()
 		if imu.getCompassCalibrationValid() and imu.getCompassCalibrationEllipsoidValid() and imu.getAccelCalibrationValid(): 
 			calibrated=1
-except: pass
 
-try:
-	SETTINGS_FILE2 = "RTIMULib2"
-	s2 = RTIMU.Settings(SETTINGS_FILE2)
-	pressure = RTIMU.RTPressure(s2)
-	if pressure.pressureInit() and pressure.pressureName()!='none': detected_pressure=pressure.pressureName()
-except: pass
+SETTINGS_FILE2 = "RTIMULib2"
+s2 = RTIMU.Settings(SETTINGS_FILE2)
+pressure = RTIMU.RTPressure(s2)
+if pressure.pressureName()!='none': detected_pressure=pressure.pressureName()
 
-try:
-	SETTINGS_FILE3 = "RTIMULib3"
-	s3 = RTIMU.Settings(SETTINGS_FILE3)
-	humidity = RTIMU.RTHumidity(s3)
-	if humidity.humidityInit() and humidity.humidityName()!='none': detected_humidity=humidity.humidityName()
-except: pass
+SETTINGS_FILE3 = "RTIMULib3"
+s3 = RTIMU.Settings(SETTINGS_FILE3)
+humidity = RTIMU.RTHumidity(s3)
+if humidity.humidityName()!='none': detected_humidity=humidity.humidityName()
 
 try:
 	DS18B20=W1ThermSensor.get_available_sensors()

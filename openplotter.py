@@ -450,7 +450,6 @@ class MainFrame(wx.Frame):
 		if 'none' in imu_sensor:
 			self.heading.Disable()
 			self.button_calibrate_imu.Disable()
-			self.button_reset_imu.Disable()
 			self.heading_nmea.Disable()
 			self.heel.Disable()
 			self.heel_nmea.Disable()
@@ -497,9 +496,7 @@ class MainFrame(wx.Frame):
 			if self.data_conf.get('STARTUP', 'nmea_hum')=='1': self.hum.SetValue(True)
 			if self.data_conf.get('STARTUP', 'nmea_temp_h')=='1': self.temp_h.SetValue(True)
 		
-		if 'none' in hum_sensor and 'none' in press_sensor: 
-			self.press_nmea.Disable()
-			self.button_reset_press_hum.Disable()
+		if 'none' in hum_sensor and 'none' in press_sensor: self.press_nmea.Disable()
 
 		if self.data_conf.get('STARTUP', 'press_temp_log')=='1': self.press_temp_log.SetValue(True)
 
