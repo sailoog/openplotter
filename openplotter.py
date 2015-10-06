@@ -117,64 +117,64 @@ class MainFrame(wx.Frame):
 		self.SetMenuBar(self.menubar)
 ###########################menu
 ########page1###################
-		wx.StaticBox(self.page1, size=(670, 50), pos=(10, 10))
+		wx.StaticBox(self.page1, size=(330, 50), pos=(10, 10))
 		wx.StaticText(self.page1, label=_('Delay (seconds)'), pos=(20, 30))
 		self.delay = wx.TextCtrl(self.page1, -1, size=(55, 32), pos=(170, 23))
 		self.button_ok_delay =wx.Button(self.page1, label=_('Ok'),size=(70, 32), pos=(250, 23))
 		self.Bind(wx.EVT_BUTTON, self.ok_delay, self.button_ok_delay)
 
-		wx.StaticBox(self.page1, size=(330, 230), pos=(10, 70))
-		self.startup_opencpn = wx.CheckBox(self.page1, label=_('OpenCPN'), pos=(20, 85))
+		wx.StaticBox(self.page1, size=(330, 230), pos=(10, 65))
+		self.startup_opencpn = wx.CheckBox(self.page1, label=_('OpenCPN'), pos=(20, 80))
 		self.startup_opencpn.Bind(wx.EVT_CHECKBOX, self.startup)
 
-		self.startup_opencpn_nopengl = wx.CheckBox(self.page1, label=_('no OpenGL'), pos=(40, 110))
+		self.startup_opencpn_nopengl = wx.CheckBox(self.page1, label=_('no OpenGL'), pos=(40, 105))
 		self.startup_opencpn_nopengl.Bind(wx.EVT_CHECKBOX, self.startup)
 
-		self.startup_opencpn_fullscreen = wx.CheckBox(self.page1, label=_('fullscreen'), pos=(40, 135))
+		self.startup_opencpn_fullscreen = wx.CheckBox(self.page1, label=_('fullscreen'), pos=(40, 130))
 		self.startup_opencpn_fullscreen.Bind(wx.EVT_CHECKBOX, self.startup)
 
-		self.startup_multiplexer = wx.CheckBox(self.page1, label=_('NMEA 0183 multiplexer'), pos=(20, 170))
+		self.startup_multiplexer = wx.CheckBox(self.page1, label=_('NMEA 0183 multiplexer'), pos=(20, 165))
 		self.startup_multiplexer.Bind(wx.EVT_CHECKBOX, self.startup)
 
-		self.startup_nmea_time = wx.CheckBox(self.page1, label=_('Set time from NMEA'), pos=(40, 195))
+		self.startup_nmea_time = wx.CheckBox(self.page1, label=_('Set time from NMEA'), pos=(40, 190))
 		self.startup_nmea_time.Bind(wx.EVT_CHECKBOX, self.startup)
 
-		self.startup_remote_desktop = wx.CheckBox(self.page1, label=_('Remote desktop'), pos=(20, 230))
+		self.startup_remote_desktop = wx.CheckBox(self.page1, label=_('Remote desktop'), pos=(20, 225))
 		self.startup_remote_desktop.Bind(wx.EVT_CHECKBOX, self.startup)
 
-		self.startup_signalk = wx.CheckBox(self.page1, label=_('Signal K server (beta)'), pos=(20, 265))
+		self.startup_signalk = wx.CheckBox(self.page1, label=_('Signal K server (beta)'), pos=(20, 260))
 		self.startup_signalk.Bind(wx.EVT_CHECKBOX, self.startup)
 
 ###########################page1
 ########page2###################
-		wx.StaticBox(self.page2, size=(670, 50), pos=(10, 10))
-		wx.StaticText(self.page2, label=_('NMEA generation rate (seconds)'), pos=(20, 30))
+		wx.StaticBox(self.page2, size=(330, 50), pos=(10, 10))
+		wx.StaticText(self.page2, label=_('Rate (sec)'), pos=(20, 30))
 		self.rate_list = ['0.1', '0.25', '0.5', '0.75', '1', '1.5', '2']
-		self.rate2= wx.ComboBox(self.page2, choices=self.rate_list, style=wx.CB_READONLY, size=(80, 32), pos=(260, 23))
-		self.button_ok_rate2 =wx.Button(self.page2, label=_('Ok'),size=(70, 32), pos=(350, 23))
+		self.rate2= wx.ComboBox(self.page2, choices=self.rate_list, style=wx.CB_READONLY, size=(80, 32), pos=(150, 23))
+		self.button_ok_rate2 =wx.Button(self.page2, label=_('Ok'),size=(70, 32), pos=(250, 23))
 		self.Bind(wx.EVT_BUTTON, self.ok_rate2, self.button_ok_rate2)
 
-		wx.StaticBox(self.page2, size=(330, 65), pos=(10, 70))
-		self.mag_var = wx.CheckBox(self.page2, label=_('Magnetic variation'), pos=(20, 85))
+		wx.StaticBox(self.page2, size=(330, 65), pos=(10, 65))
+		self.mag_var = wx.CheckBox(self.page2, label=_('Magnetic variation'), pos=(20, 80))
 		self.mag_var.Bind(wx.EVT_CHECKBOX, self.nmea_mag_var)
-		wx.StaticText(self.page2, label=_('Generated NMEA: $OPHDG'), pos=(20, 110))
+		wx.StaticText(self.page2, label=_('Generated NMEA: $OPHDG'), pos=(20, 105))
 
-		wx.StaticBox(self.page2, size=(330, 65), pos=(10, 135))
-		self.heading_t = wx.CheckBox(self.page2, label=_('True heading'), pos=(20, 150))
+		wx.StaticBox(self.page2, size=(330, 65), pos=(10, 130))
+		self.heading_t = wx.CheckBox(self.page2, label=_('True heading'), pos=(20, 145))
 		self.heading_t.Bind(wx.EVT_CHECKBOX, self.nmea_hdt)
-		wx.StaticText(self.page2, label=_('Generated NMEA: $OPHDT'), pos=(20, 175))
+		wx.StaticText(self.page2, label=_('Generated NMEA: $OPHDT'), pos=(20, 170))
 
-		wx.StaticBox(self.page2, size=(330, 65), pos=(10, 200))
-		self.rot = wx.CheckBox(self.page2, label=_('Rate of turn'), pos=(20, 215))
+		wx.StaticBox(self.page2, size=(330, 65), pos=(10, 195))
+		self.rot = wx.CheckBox(self.page2, label=_('Rate of turn'), pos=(20, 210))
 		self.rot.Bind(wx.EVT_CHECKBOX, self.nmea_rot)
-		wx.StaticText(self.page2, label=_('Generated NMEA: $OPROT'), pos=(20, 240))
+		wx.StaticText(self.page2, label=_('Generated NMEA: $OPROT'), pos=(20, 235))
 
-		wx.StaticBox(self.page2, label=_(' True wind '), size=(330, 130), pos=(350, 70))
-		self.TW_STW = wx.CheckBox(self.page2, label=_('Use speed log'), pos=(360, 95))
+		wx.StaticBox(self.page2, label=_(' True wind '), size=(330, 100), pos=(350, 10))
+		self.TW_STW = wx.CheckBox(self.page2, label=_('Use speed log'), pos=(360, 30))
 		self.TW_STW.Bind(wx.EVT_CHECKBOX, self.TW)
-		self.TW_SOG = wx.CheckBox(self.page2, label=_('Use GPS'), pos=(360, 125))
+		self.TW_SOG = wx.CheckBox(self.page2, label=_('Use GPS'), pos=(360, 55))
 		self.TW_SOG.Bind(wx.EVT_CHECKBOX, self.TW)
-		wx.StaticText(self.page2, label=_('Generated NMEA: $OPMWV, $OPMWD'), pos=(360, 155))
+		wx.StaticText(self.page2, label=_('Generated NMEA: $OPMWV, $OPMWD'), pos=(360, 80))
 ###########################page2
 ########page3###################
 		wx.StaticBox(self.page3, size=(400, 45), pos=(10, 10))
