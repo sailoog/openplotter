@@ -355,29 +355,61 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.show_graph, self.button_graph)
 ###########################page6
 ########page8###################
-		self.pin_list = ['22', '23', '24', '25', '26', '27']
-		self.switch_options=[_('command'), _('reset'), _('shutdown'), _('reset NMEA 0183 multiplexer'), _('reset Signal K server'), _('toggle WiFi access point'), _('toggle SDR-AIS'), _('reset calculations'), _('reset sensors') ]
+		self.pin_list = ['22', '23', '24', '25']
+		self.switch_options=[_('command'), _('reset'), _('shutdown'), _('reset NMEA 0183 multiplexer'), _('reset Signal K server'), _('toggle WiFi access point'), _('toggle SDR-AIS') ]
+		self.pull_list = ['Pull Down', 'Pull Up']
 
-		wx.StaticBox(self.page8, label=_(' Switch 1 '), size=(330, 215), pos=(10, 10))
-		self.switch1_enable = wx.CheckBox(self.page8, label=_('Enable switch 1'), pos=(20, 35))
+		wx.StaticBox(self.page8, label=_(' Switch 1 '), size=(330, 145), pos=(10, 10))
+		self.switch1_enable = wx.CheckBox(self.page8, label=_('Enable'), pos=(20, 32))
 		self.switch1_enable.Bind(wx.EVT_CHECKBOX, self.on_switch1_enable)
-		wx.StaticText(self.page8, label=_('GPIO'), pos=(20, 80))
-		self.gpio_pin1= wx.ComboBox(self.page8, choices=self.pin_list, style=wx.CB_READONLY, size=(70, 32), pos=(70, 72))
-		wx.StaticText(self.page8, label=_('Action'), pos=(20, 120))
-		self.action1= wx.ComboBox(self.page8, choices=self.switch_options, style=wx.CB_READONLY, size=(310, 32), pos=(20, 140))
-		wx.StaticText(self.page8, label=_('command'), pos=(20, 185))
-		self.command1 = wx.TextCtrl(self.page8, -1, size=(220, 32), pos=(110, 180))
+		wx.StaticText(self.page8, label=_('GPIO'), pos=(115, 35))
+		self.gpio_pin1= wx.ComboBox(self.page8, choices=self.pin_list, style=wx.CB_READONLY, size=(55, 32), pos=(160, 27))
+		self.gpio_pull1= wx.ComboBox(self.page8, choices=self.pull_list, style=wx.CB_READONLY, size=(105, 32), pos=(225, 27))
+		wx.StaticText(self.page8, label=_('ON action'), pos=(20, 65))
+		self.ONaction1= wx.ComboBox(self.page8, choices=self.switch_options, style=wx.CB_READONLY, size=(150, 32), pos=(20, 80))
+		self.ONcommand1 = wx.TextCtrl(self.page8, -1, size=(150, 32), pos=(20, 115))
+		wx.StaticText(self.page8, label=_('OFF action'), pos=(180, 65))
+		self.OFFaction1= wx.ComboBox(self.page8, choices=self.switch_options, style=wx.CB_READONLY, size=(150, 32), pos=(180, 80))
+		self.OFFcommand1 = wx.TextCtrl(self.page8, -1, size=(150, 32), pos=(180, 115))
 
-		wx.StaticBox(self.page8, label=_(' Switch 2 '), size=(330, 215), pos=(350, 10))
-		self.switch2_enable = wx.CheckBox(self.page8, label=_('Enable switch 2'), pos=(360, 35))
+		wx.StaticBox(self.page8, label=_(' Switch 2 '), size=(330, 145), pos=(350, 10))
+		self.switch2_enable = wx.CheckBox(self.page8, label=_('Enable'), pos=(360, 32))
 		self.switch2_enable.Bind(wx.EVT_CHECKBOX, self.on_switch2_enable)
-		wx.StaticText(self.page8, label=_('GPIO'), pos=(360, 80))
-		self.gpio_pin2= wx.ComboBox(self.page8, choices=self.pin_list, style=wx.CB_READONLY, size=(70, 32), pos=(410, 72))
-		wx.StaticText(self.page8, label=_('Action'), pos=(360, 120))
-		self.action2= wx.ComboBox(self.page8, choices=self.switch_options, style=wx.CB_READONLY, size=(310, 32), pos=(360, 140))
-		wx.StaticText(self.page8, label=_('command'), pos=(360, 185))
-		self.command2 = wx.TextCtrl(self.page8, -1, size=(220, 32), pos=(450, 180))
+		wx.StaticText(self.page8, label=_('GPIO'), pos=(455, 35))
+		self.gpio_pin2= wx.ComboBox(self.page8, choices=self.pin_list, style=wx.CB_READONLY, size=(55, 32), pos=(500, 27))
+		self.gpio_pull2= wx.ComboBox(self.page8, choices=self.pull_list, style=wx.CB_READONLY, size=(105, 32), pos=(565, 27))
+		wx.StaticText(self.page8, label=_('ON action'), pos=(360, 65))
+		self.ONaction2= wx.ComboBox(self.page8, choices=self.switch_options, style=wx.CB_READONLY, size=(150, 32), pos=(360, 80))
+		self.ONcommand2 = wx.TextCtrl(self.page8, -1, size=(150, 32), pos=(360, 115))
+		wx.StaticText(self.page8, label=_('OFF action'), pos=(520, 65))
+		self.OFFaction2= wx.ComboBox(self.page8, choices=self.switch_options, style=wx.CB_READONLY, size=(150, 32), pos=(520, 80))
+		self.OFFcommand2 = wx.TextCtrl(self.page8, -1, size=(150, 32), pos=(520, 115))
 
+		wx.StaticBox(self.page8, label=_(' Switch 3 '), size=(330, 145), pos=(10, 160))
+		self.switch3_enable = wx.CheckBox(self.page8, label=_('Enable'), pos=(20, 182))
+		self.switch3_enable.Bind(wx.EVT_CHECKBOX, self.on_switch3_enable)
+		wx.StaticText(self.page8, label=_('GPIO'), pos=(115, 185))
+		self.gpio_pin3= wx.ComboBox(self.page8, choices=self.pin_list, style=wx.CB_READONLY, size=(55, 32), pos=(160, 177))
+		self.gpio_pull3= wx.ComboBox(self.page8, choices=self.pull_list, style=wx.CB_READONLY, size=(105, 32), pos=(225, 177))
+		wx.StaticText(self.page8, label=_('ON action'), pos=(20, 215))
+		self.ONaction3= wx.ComboBox(self.page8, choices=self.switch_options, style=wx.CB_READONLY, size=(150, 32), pos=(20, 230))
+		self.ONcommand3 = wx.TextCtrl(self.page8, -1, size=(150, 32), pos=(20, 265))
+		wx.StaticText(self.page8, label=_('OFF action'), pos=(180, 215))
+		self.OFFaction3= wx.ComboBox(self.page8, choices=self.switch_options, style=wx.CB_READONLY, size=(150, 32), pos=(180, 230))
+		self.OFFcommand3 = wx.TextCtrl(self.page8, -1, size=(150, 32), pos=(180, 265))
+
+		wx.StaticBox(self.page8, label=_(' Switch 4 '), size=(330, 145), pos=(350, 160))
+		self.switch4_enable = wx.CheckBox(self.page8, label=_('Enable'), pos=(360, 182))
+		self.switch4_enable.Bind(wx.EVT_CHECKBOX, self.on_switch4_enable)
+		wx.StaticText(self.page8, label=_('GPIO'), pos=(455, 185))
+		self.gpio_pin4= wx.ComboBox(self.page8, choices=self.pin_list, style=wx.CB_READONLY, size=(55, 32), pos=(500, 177))
+		self.gpio_pull4= wx.ComboBox(self.page8, choices=self.pull_list, style=wx.CB_READONLY, size=(105, 32), pos=(565, 177))
+		wx.StaticText(self.page8, label=_('ON action'), pos=(360, 215))
+		self.ONaction4= wx.ComboBox(self.page8, choices=self.switch_options, style=wx.CB_READONLY, size=(150, 32), pos=(360, 230))
+		self.ONcommand4 = wx.TextCtrl(self.page8, -1, size=(150, 32), pos=(360, 265))
+		wx.StaticText(self.page8, label=_('OFF action'), pos=(520, 215))
+		self.OFFaction4= wx.ComboBox(self.page8, choices=self.switch_options, style=wx.CB_READONLY, size=(150, 32), pos=(520, 230))
+		self.OFFcommand4 = wx.TextCtrl(self.page8, -1, size=(150, 32), pos=(520, 265))
 ###########################page8
 		self.read_kplex_conf()
 		self.set_layout_conf()
@@ -1353,11 +1385,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def on_switch2_enable(self, e):
 		pass
 
-	def	on_predefined1_enable(self, e):
+	def on_switch3_enable(self, e):
 		pass
 
-
-	def	on_predefined21_enable(self, e):
+	def on_switch4_enable(self, e):
 		pass
 #######################definitions
 
