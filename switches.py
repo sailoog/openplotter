@@ -18,11 +18,20 @@ import ConfigParser, os, sys, subprocess
 import RPi.GPIO as GPIO
 from time import sleep
 
+home = os.path.expanduser('~')
 pathname = os.path.dirname(sys.argv[0])
 currentpath = os.path.abspath(pathname)
 
 data_conf = ConfigParser.SafeConfigParser()
 data_conf.read(currentpath+'/openplotter.conf')
+
+wlan=data_conf.get('WIFI', 'device')
+passw2=data_conf.get('WIFI', 'password')
+ssid2=data_conf.get('WIFI', 'ssid')
+
+gain=data_conf.get('AIS-SDR', 'gain')
+ppm=data_conf.get('AIS-SDR', 'ppm')
+channel=data_conf.get('AIS-SDR', 'channel')
 
 state1=False
 state2=False
@@ -42,53 +51,77 @@ state4=False
 #[10]= _('stop SDR-AIS')
 #[11]= _('start SDR-AIS')
 
-def switch_options(switch,option):
+def switch_options(on_off,switch,option):
 	if option=='0': return
+	if option=='1':
+		command=data_conf.get('SWITCH'+switch, on_off+'_command')
+		command=command.split(' ')
+		subprocess.Popen(command)
 	if option=='2': subprocess.Popen(['sudo', 'reboot'])
 	if option=='3': subprocess.Popen(['sudo', 'halt'])
+	if option=='4': subprocess.Popen(['pkill', '-9', 'kplex'])
+	if option=='5':
+		subprocess.call(['pkill', '-9', 'kplex'])
+		subprocess.Popen('kplex')
+	if option=='6': subprocess.Popen(["pkill", '-9', "node"])
+	if option=='7':
+		subprocess.call(["pkill", '-9', "node"]) 
+		subprocess.Popen(home+'/.config/signalk-server-node/bin/nmea-from-10110', cwd=home+'/.config/signalk-server-node') 
+	if option=='8': subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '0', wlan, passw2, ssid2])
+	if option=='9': subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '1', wlan, passw2, ssid2])
+	if option=='10': 
+		subprocess.Popen(['pkill', '-9', 'aisdecoder'])
+		subprocess.Popen(['pkill', '-9', 'rtl_fm'])
+	if option=='11': 
+		subprocess.call(['pkill', '-9', 'aisdecoder'])
+		subprocess.call(['pkill', '-9', 'rtl_fm'])
+		frecuency='161975000'
+		if channel=='b': frecuency='162025000'
+		rtl_fm=subprocess.Popen(['rtl_fm', '-f', frecuency, '-g', gain, '-p', ppm, '-s', '48k'], stdout = subprocess.PIPE)
+		aisdecoder=subprocess.Popen(['aisdecoder', '-h', '127.0.0.1', '-p', '10110', '-a', 'file', '-c', 'mono', '-d', '-f', '/dev/stdin'], stdin = rtl_fm.stdout)
 
 def switch1(channel):
 	global state1
 	if GPIO.input(channel):
 		if not state1:
-			switch_options('1', data_conf.get('SWITCH1', 'on_action'))
+			switch_options('on', '1', data_conf.get('SWITCH1', 'on_action'))
 			state1=True
 	else:
 		if state1:
-			switch_options('1', data_conf.get('SWITCH1', 'off_action'))
+			switch_options('off', '1', data_conf.get('SWITCH1', 'off_action'))
 			state1=False
 
 def switch2(channel):
 	global state2
 	if GPIO.input(channel):
 		if not state2:
-			switch_options('2', data_conf.get('SWITCH2', 'on_action'))
+			switch_options('on', '2', data_conf.get('SWITCH2', 'on_action'))
 			state2=True
 	else:
 		if state2:
-			switch_options('2', data_conf.get('SWITCH2', 'off_action'))
+			switch_options('off', '2', data_conf.get('SWITCH2', 'off_action'))
 			state2=False
 
 def switch3(channel):
 	global state3
 	if GPIO.input(channel):
 		if not state3:
-			switch_options('3', data_conf.get('SWITCH3', 'on_action'))
+			switch_options('on', '3', data_conf.get('SWITCH3', 'on_action'))
 			state3=True
 	else:
 		if state3:
-			switch_options('3', data_conf.get('SWITCH3', 'off_action'))
+			switch_options('off', '3', data_conf.get('SWITCH3', 'off_action'))
 			state3=False
 
 def switch4(channel):
 	global state4
 	if GPIO.input(channel):
 		if not state4:
-			switch_options('4', data_conf.get('SWITCH4', 'on_action'))
+			switch_options('on', '4', data_conf.get('SWITCH4', 'on_action'))
 			state4=True
 	else:
 		if state4:
-			switch_options('4', data_conf.get('SWITCH4', 'off_action'))
+			switch_options('off', '4', data_conf.get('SWITCH4', 'off_action'))
 			state4=False
 
 GPIO.setmode(GPIO.BCM)

@@ -115,12 +115,10 @@ time.sleep(16)
 
 subprocess.call(['pkill', '-9', 'kplex'])
 if kplex=='1':
-	subprocess.call(["pkill", '-9', "kplex"])
 	subprocess.Popen('kplex')        
 
 subprocess.call(["pkill", '-9', "node"])
 if signalk=='1':
-	subprocess.call(["pkill", '-9', "node"])
 	subprocess.Popen(home+'/.config/signalk-server-node/bin/nmea-from-10110', cwd=home+'/.config/signalk-server-node')       
 	
 if gps_time=='1':
