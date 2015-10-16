@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
-import ConfigParser, os, sys
+import ConfigParser, os, sys, subprocess
 import RPi.GPIO as GPIO
 from time import sleep
 
@@ -29,51 +29,69 @@ state2=False
 state3=False
 state4=False
 
-GPIO.setmode(GPIO.BCM)
+#[0]= _('nothing')
+#[1]= _('command')
+#[2]= _('reset')
+#[3]= _('shutdown')
+#[4]= _('stop NMEA multiplexer')
+#[5]= _('start NMEA multiplexer')
+#[6]= _('stop Signal K server')
+#[7]= _('start Signal K server')
+#[8]= _('stop WiFi access point')
+#[9]= _('start WiFi access point')
+#[10]= _('stop SDR-AIS')
+#[11]= _('start SDR-AIS')
+
+def switch_options(switch,option):
+	if option=='0': return
+	if option=='2': subprocess.Popen(['sudo', 'reboot'])
+	if option=='3': subprocess.Popen(['sudo', 'halt'])
 
 def switch1(channel):
 	global state1
 	if GPIO.input(channel):
 		if not state1:
-			print "on switch 1"
+			switch_options('1', data_conf.get('SWITCH1', 'on_action'))
 			state1=True
 	else:
 		if state1:
-			print "off switch 1"
+			switch_options('1', data_conf.get('SWITCH1', 'off_action'))
 			state1=False
 
 def switch2(channel):
 	global state2
 	if GPIO.input(channel):
 		if not state2:
-			print "on switch 2"
+			switch_options('2', data_conf.get('SWITCH2', 'on_action'))
 			state2=True
 	else:
 		if state2:
-			print "off switch 2"
+			switch_options('2', data_conf.get('SWITCH2', 'off_action'))
 			state2=False
 
 def switch3(channel):
 	global state3
 	if GPIO.input(channel):
 		if not state3:
-			print "on switch 3"
+			switch_options('3', data_conf.get('SWITCH3', 'on_action'))
 			state3=True
 	else:
 		if state3:
-			print "off switch 3"
+			switch_options('3', data_conf.get('SWITCH3', 'off_action'))
 			state3=False
 
 def switch4(channel):
 	global state4
 	if GPIO.input(channel):
 		if not state4:
-			print "on switch 4"
+			switch_options('4', data_conf.get('SWITCH4', 'on_action'))
 			state4=True
 	else:
 		if state4:
-			print "off switch 4"
+			switch_options('4', data_conf.get('SWITCH4', 'off_action'))
 			state4=False
+
+GPIO.setmode(GPIO.BCM)
 
 if data_conf.get('SWITCH1', 'enable')=='1':
 	channel1=int(data_conf.get('SWITCH1', 'gpio'))
@@ -104,6 +122,7 @@ if data_conf.get('SWITCH4', 'enable')=='1':
 	GPIO.add_event_detect(channel4, GPIO.BOTH, callback=switch4)
 
 try:  
-	raw_input() 
+	while True:
+		sleep(1000)
 finally:
     GPIO.cleanup()
