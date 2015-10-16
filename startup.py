@@ -78,6 +78,11 @@ nmea_eng_temp=data_conf.get('STARTUP', 'nmea_eng_temp')
 TW_STW=data_conf.get('STARTUP', 'tw_stw')
 TW_SOG=data_conf.get('STARTUP', 'tw_sog')
 
+switch1=data_conf.get('SWITCH1', 'enable')
+switch2=data_conf.get('SWITCH2', 'enable')
+switch3=data_conf.get('SWITCH3', 'enable')
+switch4=data_conf.get('SWITCH4', 'enable')
+
 #######################################################
 time.sleep(delay)
 
@@ -122,8 +127,17 @@ if gps_time=='1':
 	subprocess.call(['sudo', 'python', currentpath+'/time_gps.py'])
 
 subprocess.call(['pkill', '-f', 'sensors.py'])
-if nmea_hdg=='1' or nmea_heel=='1' or nmea_press=='1' or nmea_temp_p=='1' or nmea_hum=='1' or nmea_temp_h=='1': subprocess.Popen(['python', currentpath+'/sensors.py'], cwd=currentpath+'/imu')
+if nmea_hdg=='1' or nmea_heel=='1' or nmea_press=='1' or nmea_temp_p=='1' or nmea_hum=='1' or nmea_temp_h=='1': 
+	subprocess.Popen(['python', currentpath+'/sensors.py'], cwd=currentpath+'/imu')
+
 subprocess.call(['pkill', '-f', 'sensors_b.py'])
-if nmea_eng_temp=='1': subprocess.Popen(['python', currentpath+'/sensors_b.py'])
+if nmea_eng_temp=='1': 
+	subprocess.Popen(['python', currentpath+'/sensors_b.py'])
+
 subprocess.call(['pkill', '-f', 'calculate.py'])
-if nmea_mag_var=='1' or nmea_hdt=='1' or nmea_rot=='1' or TW_STW=='1' or TW_SOG=='1': subprocess.Popen(['python', currentpath+'/calculate.py'])
+if nmea_mag_var=='1' or nmea_hdt=='1' or nmea_rot=='1' or TW_STW=='1' or TW_SOG=='1': 
+	subprocess.Popen(['python', currentpath+'/calculate.py'])
+
+subprocess.call(['sudo', 'pkill', '-f', 'switches.py'])
+if switch1=='1' or switch2=='1' or switch3=='1' or switch4=='1':
+	subprocess.Popen(['sudo', 'python', currentpath+'/switches.py'])

@@ -1451,9 +1451,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 ######################################Switches
 	def start_switches(self):
 		self.write_conf()
-		subprocess.call(['pkill', '-f', 'switches.py'])
+		subprocess.call(['sudo', 'pkill', '-f', 'switches.py'])
 		if self.switch1_enable.GetValue() or self.switch2_enable.GetValue() or self.switch3_enable.GetValue() or self.switch4_enable.GetValue():
-			subprocess.Popen(['python', currentpath+'/switches.py'])
+			subprocess.Popen(['sudo', 'python', currentpath+'/switches.py'])
 
 	def on_switch1_enable(self, e):
 		if not self.gpio_pull1.GetValue() or not self.gpio_pin1.GetValue():

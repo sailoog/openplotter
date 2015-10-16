@@ -35,20 +35,73 @@ def switch1(channel):
 	global state1
 	if GPIO.input(channel):
 		if not state1:
-			print "on"
+			print "on switch 1"
 			state1=True
 	else:
 		if state1:
-			print "off"
+			print "off switch 1"
 			state1=False
 
+def switch2(channel):
+	global state2
+	if GPIO.input(channel):
+		if not state2:
+			print "on switch 2"
+			state2=True
+	else:
+		if state2:
+			print "off switch 2"
+			state2=False
+
+def switch3(channel):
+	global state3
+	if GPIO.input(channel):
+		if not state3:
+			print "on switch 3"
+			state3=True
+	else:
+		if state3:
+			print "off switch 3"
+			state3=False
+
+def switch4(channel):
+	global state4
+	if GPIO.input(channel):
+		if not state4:
+			print "on switch 4"
+			state4=True
+	else:
+		if state4:
+			print "off switch 4"
+			state4=False
+
 if data_conf.get('SWITCH1', 'enable')=='1':
-	channel=int(data_conf.get('SWITCH1', 'gpio'))
+	channel1=int(data_conf.get('SWITCH1', 'gpio'))
 	pull_up_down=GPIO.PUD_DOWN
 	if data_conf.get('SWITCH1', 'pull_up_down')=='Pull Up': pull_up_down=GPIO.PUD_UP
-	GPIO.setup(channel, GPIO.IN, pull_up_down=pull_up_down)
-	GPIO.add_event_detect(channel, GPIO.BOTH, callback=switch1)
+	GPIO.setup(channel1, GPIO.IN, pull_up_down=pull_up_down)
+	GPIO.add_event_detect(channel1, GPIO.BOTH, callback=switch1)
 
+if data_conf.get('SWITCH2', 'enable')=='1':
+	channel2=int(data_conf.get('SWITCH2', 'gpio'))
+	pull_up_down=GPIO.PUD_DOWN
+	if data_conf.get('SWITCH2', 'pull_up_down')=='Pull Up': pull_up_down=GPIO.PUD_UP
+	GPIO.setup(channel2, GPIO.IN, pull_up_down=pull_up_down)
+	GPIO.add_event_detect(channel2, GPIO.BOTH, callback=switch2)
+
+if data_conf.get('SWITCH3', 'enable')=='1':
+	channel3=int(data_conf.get('SWITCH3', 'gpio'))
+	pull_up_down=GPIO.PUD_DOWN
+	if data_conf.get('SWITCH3', 'pull_up_down')=='Pull Up': pull_up_down=GPIO.PUD_UP
+	GPIO.setup(channel3, GPIO.IN, pull_up_down=pull_up_down)
+	GPIO.add_event_detect(channel3, GPIO.BOTH, callback=switch3)
+
+if data_conf.get('SWITCH4', 'enable')=='1':
+	channel4=int(data_conf.get('SWITCH4', 'gpio'))
+	pull_up_down=GPIO.PUD_DOWN
+	if data_conf.get('SWITCH4', 'pull_up_down')=='Pull Up': pull_up_down=GPIO.PUD_UP
+	GPIO.setup(channel4, GPIO.IN, pull_up_down=pull_up_down)
+	GPIO.add_event_detect(channel4, GPIO.BOTH, callback=switch4)
 
 try:  
 	raw_input() 
