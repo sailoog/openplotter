@@ -55,23 +55,37 @@ def switch_options(on_off,switch,option):
 	if option=='0': return
 	if option=='1':
 		command=data_conf.get('SWITCH'+switch, on_off+'_command')
-		command=command.split(' ')
-		subprocess.Popen(command)
-	if option=='2': subprocess.Popen(['sudo', 'reboot'])
-	if option=='3': subprocess.Popen(['sudo', 'halt'])
-	if option=='4': subprocess.Popen(['pkill', '-9', 'kplex'])
+		if command:
+			command=command.split(' ')
+			subprocess.Popen(command)
+		else: return
+	if option=='2': 
+		subprocess.Popen(['sudo', 'reboot'])
+	if option=='3': 
+		subprocess.Popen(['sudo', 'halt'])
+	if option=='4': 
+		subprocess.Popen(['pkill', '-9', 'kplex'])
 	if option=='5':
 		subprocess.call(['pkill', '-9', 'kplex'])
 		subprocess.Popen('kplex')
-	if option=='6': subprocess.Popen(["pkill", '-9', "node"])
+	if option=='6': 
+		subprocess.Popen(["pkill", '-9', "node"])
 	if option=='7':
 		subprocess.call(["pkill", '-9', "node"]) 
 		subprocess.Popen(home+'/.config/signalk-server-node/bin/nmea-from-10110', cwd=home+'/.config/signalk-server-node') 
-	if option=='8': subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '0', wlan, passw2, ssid2])
-	if option=='9': subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '1', wlan, passw2, ssid2])
+	if option=='8': 
+		subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '0', wlan, passw2, ssid2])
+		data_conf.set('WIFI', 'enable', '0')
+		write_conf()
+	if option=='9': 
+		subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '1', wlan, passw2, ssid2])
+		data_conf.set('WIFI', 'enable', '1')
+		write_conf()
 	if option=='10': 
 		subprocess.Popen(['pkill', '-9', 'aisdecoder'])
 		subprocess.Popen(['pkill', '-9', 'rtl_fm'])
+		data_conf.set('AIS-SDR', 'enable', '0')
+		write_conf()
 	if option=='11': 
 		subprocess.call(['pkill', '-9', 'aisdecoder'])
 		subprocess.call(['pkill', '-9', 'rtl_fm'])
@@ -79,6 +93,12 @@ def switch_options(on_off,switch,option):
 		if channel=='b': frecuency='162025000'
 		rtl_fm=subprocess.Popen(['rtl_fm', '-f', frecuency, '-g', gain, '-p', ppm, '-s', '48k'], stdout = subprocess.PIPE)
 		aisdecoder=subprocess.Popen(['aisdecoder', '-h', '127.0.0.1', '-p', '10110', '-a', 'file', '-c', 'mono', '-d', '-f', '/dev/stdin'], stdin = rtl_fm.stdout)
+		data_conf.set('AIS-SDR', 'enable', '1')
+		write_conf()
+
+def write_conf():
+	with open(currentpath+'/openplotter.conf', 'wb') as configfile:
+		data_conf.write(configfile)
 
 def switch1(channel):
 	global state1
