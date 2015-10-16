@@ -357,23 +357,20 @@ class MainFrame(wx.Frame):
 ########page8###################
 		self.pin_list = ['22', '23', '24', '25']
 
-		self.switch_list=[]
-		self.switch_list.append(['0', _('nothing')])
-		self.switch_list.append(['1', _('command')])
-		self.switch_list.append(['2', _('reset')])
-		self.switch_list.append(['3', _('shutdown')])
-		self.switch_list.append(['4', _('stop NMEA multiplexer')])
-		self.switch_list.append(['5', _('start NMEA multiplexer')])
-		self.switch_list.append(['6', _('stop Signal K server')])
-		self.switch_list.append(['7', _('start Signal K server')])
-		self.switch_list.append(['8', _('stop WiFi access point')])
-		self.switch_list.append(['9', _('start WiFi access point')])
-		self.switch_list.append(['10', _('stop SDR-AIS')])
-		self.switch_list.append(['11', _('start SDR-AIS')])
+		self.switch_options=[None] * 12
 
-		self.switch_options=[]
-		for i in self.switch_list:
-			self.switch_options.append(i[1])
+		self.switch_options[0]= _('nothing')
+		self.switch_options[1]= _('command')
+		self.switch_options[2]= _('reset')
+		self.switch_options[3]= _('shutdown')
+		self.switch_options[4]= _('stop NMEA multiplexer')
+		self.switch_options[5]= _('start NMEA multiplexer')
+		self.switch_options[6]= _('stop Signal K server')
+		self.switch_options[7]= _('start Signal K server')
+		self.switch_options[8]= _('stop WiFi access point')
+		self.switch_options[9]= _('start WiFi access point')
+		self.switch_options[10]= _('stop SDR-AIS')
+		self.switch_options[11]= _('start SDR-AIS')
 
 		self.pull_list = ['Pull Down', 'Pull Up']
 
@@ -580,6 +577,62 @@ class MainFrame(wx.Frame):
 		if self.data_conf.get('STARTUP', 'tw_stw')=='1': self.TW_STW.SetValue(True)
 		if self.data_conf.get('STARTUP', 'tw_sog')=='1': self.TW_SOG.SetValue(True)
 
+		self.gpio_pin1.SetValue(self.data_conf.get('SWITCH1', 'gpio'))
+		self.gpio_pull1.SetValue(self.data_conf.get('SWITCH1', 'pull_up_down'))
+		self.ONaction1.SetValue(self.switch_options[int(self.data_conf.get('SWITCH1', 'on_action'))])
+		self.ONcommand1.SetValue(self.data_conf.get('SWITCH1', 'on_command'))
+		self.OFFaction1.SetValue(self.switch_options[int(self.data_conf.get('SWITCH1', 'off_action'))])
+		self.OFFcommand1.SetValue(self.data_conf.get('SWITCH1', 'off_command'))
+		if self.data_conf.get('SWITCH1', 'enable')=='1':
+			self.switch1_enable.SetValue(True)
+			self.gpio_pin1.Disable()
+			self.gpio_pull1.Disable()
+			self.ONaction1.Disable()
+			self.ONcommand1.Disable()
+			self.OFFaction1.Disable()
+			self.OFFcommand1.Disable()
+		self.gpio_pin2.SetValue(self.data_conf.get('SWITCH2', 'gpio'))
+		self.gpio_pull2.SetValue(self.data_conf.get('SWITCH2', 'pull_up_down'))
+		self.ONaction2.SetValue(self.switch_options[int(self.data_conf.get('SWITCH2', 'on_action'))])
+		self.ONcommand2.SetValue(self.data_conf.get('SWITCH2', 'on_command'))
+		self.OFFaction2.SetValue(self.switch_options[int(self.data_conf.get('SWITCH2', 'off_action'))])
+		self.OFFcommand2.SetValue(self.data_conf.get('SWITCH2', 'off_command'))
+		if self.data_conf.get('SWITCH2', 'enable')=='1':
+			self.switch2_enable.SetValue(True)
+			self.gpio_pin2.Disable()
+			self.gpio_pull2.Disable()
+			self.ONaction2.Disable()
+			self.ONcommand2.Disable()
+			self.OFFaction2.Disable()
+			self.OFFcommand2.Disable()
+		self.gpio_pin3.SetValue(self.data_conf.get('SWITCH3', 'gpio'))
+		self.gpio_pull3.SetValue(self.data_conf.get('SWITCH3', 'pull_up_down'))
+		self.ONaction3.SetValue(self.switch_options[int(self.data_conf.get('SWITCH3', 'on_action'))])
+		self.ONcommand3.SetValue(self.data_conf.get('SWITCH3', 'on_command'))
+		self.OFFaction3.SetValue(self.switch_options[int(self.data_conf.get('SWITCH3', 'off_action'))])
+		self.OFFcommand3.SetValue(self.data_conf.get('SWITCH3', 'off_command'))
+		if self.data_conf.get('SWITCH3', 'enable')=='1':
+			self.switch3_enable.SetValue(True)
+			self.gpio_pin3.Disable()
+			self.gpio_pull3.Disable()
+			self.ONaction3.Disable()
+			self.ONcommand3.Disable()
+			self.OFFaction3.Disable()
+			self.OFFcommand3.Disable()
+		self.gpio_pin4.SetValue(self.data_conf.get('SWITCH4', 'gpio'))
+		self.gpio_pull4.SetValue(self.data_conf.get('SWITCH4', 'pull_up_down'))
+		self.ONaction4.SetValue(self.switch_options[int(self.data_conf.get('SWITCH4', 'on_action'))])
+		self.ONcommand4.SetValue(self.data_conf.get('SWITCH4', 'on_command'))
+		self.OFFaction4.SetValue(self.switch_options[int(self.data_conf.get('SWITCH4', 'off_action'))])
+		self.OFFcommand4.SetValue(self.data_conf.get('SWITCH4', 'off_command'))
+		if self.data_conf.get('SWITCH4', 'enable')=='1':
+			self.switch4_enable.SetValue(True)
+			self.gpio_pin4.Disable()
+			self.gpio_pull4.Disable()
+			self.ONaction4.Disable()
+			self.ONcommand4.Disable()
+			self.OFFaction4.Disable()
+			self.OFFcommand4.Disable()
 ########MENU###################################	
 
 	def time_zone(self,event):
@@ -1396,18 +1449,183 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		subprocess.Popen(home+'/.config/signalk-server-node/bin/nmea-from-10110', cwd=home+'/.config/signalk-server-node')
 		self.SetStatusText(_('Signal K server restarted'))
 ######################################Switches
+	def start_switches(self):
+		self.write_conf()
+		subprocess.call(['pkill', '-f', 'switches.py'])
+		if self.switch1_enable.GetValue() or self.switch2_enable.GetValue() or self.switch3_enable.GetValue() or self.switch4_enable.GetValue():
+			subprocess.Popen(['python', currentpath+'/switches.py'])
 
 	def on_switch1_enable(self, e):
-		pass
+		if not self.gpio_pull1.GetValue() or not self.gpio_pin1.GetValue():
+			self.switch1_enable.SetValue(False)
+			self.ShowMessage(_('Select a GPIO Pin and Pull Down or Pull Up.'))
+			return
+		if self.gpio_pin1.GetValue()==self.gpio_pin2.GetValue() or self.gpio_pin1.GetValue()==self.gpio_pin3.GetValue() or self.gpio_pin1.GetValue()==self.gpio_pin4.GetValue():
+			self.switch1_enable.SetValue(False)
+			self.gpio_pin1.Enable()
+			self.gpio_pull1.Enable()
+			self.ONaction1.Enable()
+			self.ONcommand1.Enable()
+			self.OFFaction1.Enable()
+			self.OFFcommand1.Enable()
+			self.ShowMessage(_('This GPIO Pin is already in use.'))
+			return
+		if self.switch1_enable.GetValue(): 
+			self.data_conf.set('SWITCH1', 'enable', '1')
+			self.data_conf.set('SWITCH1', 'gpio', self.gpio_pin1.GetValue())
+			self.data_conf.set('SWITCH1', 'pull_up_down', self.gpio_pull1.GetValue())
+			self.data_conf.set('SWITCH1', 'on_action', str(self.switch_options.index(self.ONaction1.GetValue())))
+			command=self.ONcommand1.GetValue()
+			command=command.replace('\'', '"')
+			self.data_conf.set('SWITCH1', 'on_command', command )
+			self.data_conf.set('SWITCH1', 'off_action', str(self.switch_options.index(self.OFFaction1.GetValue())))
+			command=self.OFFcommand1.GetValue()
+			command=command.replace('\'', '"')
+			self.data_conf.set('SWITCH1', 'off_command', command )
+			self.gpio_pin1.Disable()
+			self.gpio_pull1.Disable()
+			self.ONaction1.Disable()
+			self.ONcommand1.Disable()
+			self.OFFaction1.Disable()
+			self.OFFcommand1.Disable()
+		else: 
+			self.data_conf.set('SWITCH1', 'enable', '0')
+			self.gpio_pin1.Enable()
+			self.gpio_pull1.Enable()
+			self.ONaction1.Enable()
+			self.ONcommand1.Enable()
+			self.OFFaction1.Enable()
+			self.OFFcommand1.Enable()
+		self.start_switches()
 
 	def on_switch2_enable(self, e):
-		pass
+		if not self.gpio_pull2.GetValue() or not self.gpio_pin2.GetValue():
+			self.switch2_enable.SetValue(False)
+			self.ShowMessage(_('Select a GPIO Pin and Pull Down or Pull Up.'))
+			return
+		if self.gpio_pin2.GetValue()==self.gpio_pin1.GetValue() or self.gpio_pin2.GetValue()==self.gpio_pin3.GetValue() or self.gpio_pin2.GetValue()==self.gpio_pin4.GetValue():
+			self.switch2_enable.SetValue(False)
+			self.gpio_pin2.Enable()
+			self.gpio_pull2.Enable()
+			self.ONaction2.Enable()
+			self.ONcommand2.Enable()
+			self.OFFaction2.Enable()
+			self.OFFcommand2.Enable()
+			self.ShowMessage(_('This GPIO Pin is already in use.'))
+			return
+		if self.switch2_enable.GetValue(): 
+			self.data_conf.set('SWITCH2', 'enable', '1')
+			self.data_conf.set('SWITCH2', 'gpio', self.gpio_pin2.GetValue())
+			self.data_conf.set('SWITCH2', 'pull_up_down', self.gpio_pull2.GetValue())
+			self.data_conf.set('SWITCH2', 'on_action', str(self.switch_options.index(self.ONaction2.GetValue())))
+			command=self.ONcommand2.GetValue()
+			command=command.replace('\'', '"')
+			self.data_conf.set('SWITCH2', 'on_command', command )
+			self.data_conf.set('SWITCH2', 'off_action', str(self.switch_options.index(self.OFFaction2.GetValue())))
+			command=self.OFFcommand2.GetValue()
+			command=command.replace('\'', '"')
+			self.data_conf.set('SWITCH2', 'off_command', command )
+			self.gpio_pin2.Disable()
+			self.gpio_pull2.Disable()
+			self.ONaction2.Disable()
+			self.ONcommand2.Disable()
+			self.OFFaction2.Disable()
+			self.OFFcommand2.Disable()
+		else: 
+			self.data_conf.set('SWITCH2', 'enable', '0')
+			self.gpio_pin2.Enable()
+			self.gpio_pull2.Enable()
+			self.ONaction2.Enable()
+			self.ONcommand2.Enable()
+			self.OFFaction2.Enable()
+			self.OFFcommand2.Enable()
+		self.start_switches()
 
 	def on_switch3_enable(self, e):
-		pass
+		if not self.gpio_pull3.GetValue() or not self.gpio_pin3.GetValue():
+			self.switch3_enable.SetValue(False)
+			self.ShowMessage(_('Select a GPIO Pin and Pull Down or Pull Up.'))
+			return
+		if self.gpio_pin3.GetValue()==self.gpio_pin1.GetValue() or self.gpio_pin3.GetValue()==self.gpio_pin2.GetValue() or self.gpio_pin3.GetValue()==self.gpio_pin4.GetValue():
+			self.switch3_enable.SetValue(False)
+			self.gpio_pin3.Enable()
+			self.gpio_pull3.Enable()
+			self.ONaction3.Enable()
+			self.ONcommand3.Enable()
+			self.OFFaction3.Enable()
+			self.OFFcommand3.Enable()
+			self.ShowMessage(_('This GPIO Pin is already in use.'))
+			return
+		if self.switch3_enable.GetValue(): 
+			self.data_conf.set('SWITCH3', 'enable', '1')
+			self.data_conf.set('SWITCH3', 'gpio', self.gpio_pin3.GetValue())
+			self.data_conf.set('SWITCH3', 'pull_up_down', self.gpio_pull3.GetValue())
+			self.data_conf.set('SWITCH3', 'on_action', str(self.switch_options.index(self.ONaction3.GetValue())))
+			command=self.ONcommand3.GetValue()
+			command=command.replace('\'', '"')
+			self.data_conf.set('SWITCH3', 'on_command', command )
+			self.data_conf.set('SWITCH3', 'off_action', str(self.switch_options.index(self.OFFaction3.GetValue())))
+			command=self.OFFcommand3.GetValue()
+			command=command.replace('\'', '"')
+			self.data_conf.set('SWITCH3', 'off_command', command )
+			self.gpio_pin3.Disable()
+			self.gpio_pull3.Disable()
+			self.ONaction3.Disable()
+			self.ONcommand3.Disable()
+			self.OFFaction3.Disable()
+			self.OFFcommand3.Disable()
+		else: 
+			self.data_conf.set('SWITCH3', 'enable', '0')
+			self.gpio_pin3.Enable()
+			self.gpio_pull3.Enable()
+			self.ONaction3.Enable()
+			self.ONcommand3.Enable()
+			self.OFFaction3.Enable()
+			self.OFFcommand3.Enable()
+		self.start_switches()
 
 	def on_switch4_enable(self, e):
-		pass
+		if not self.gpio_pull4.GetValue() or not self.gpio_pin4.GetValue():
+			self.switch4_enable.SetValue(False)
+			self.ShowMessage(_('Select a GPIO Pin and Pull Down or Pull Up.'))
+			return
+		if self.gpio_pin4.GetValue()==self.gpio_pin1.GetValue() or self.gpio_pin4.GetValue()==self.gpio_pin2.GetValue() or self.gpio_pin4.GetValue()==self.gpio_pin3.GetValue():
+			self.switch4_enable.SetValue(False)
+			self.gpio_pin4.Enable()
+			self.gpio_pull4.Enable()
+			self.ONaction4.Enable()
+			self.ONcommand4.Enable()
+			self.OFFaction4.Enable()
+			self.OFFcommand4.Enable()
+			self.ShowMessage(_('This GPIO Pin is already in use.'))
+			return
+		if self.switch4_enable.GetValue(): 
+			self.data_conf.set('SWITCH4', 'enable', '1')
+			self.data_conf.set('SWITCH4', 'gpio', self.gpio_pin4.GetValue())
+			self.data_conf.set('SWITCH4', 'pull_up_down', self.gpio_pull4.GetValue())
+			self.data_conf.set('SWITCH4', 'on_action', str(self.switch_options.index(self.ONaction4.GetValue())))
+			command=self.ONcommand4.GetValue()
+			command=command.replace('\'', '"')
+			self.data_conf.set('SWITCH4', 'on_command', command )
+			self.data_conf.set('SWITCH4', 'off_action', str(self.switch_options.index(self.OFFaction4.GetValue())))
+			command=self.OFFcommand4.GetValue()
+			command=command.replace('\'', '"')
+			self.data_conf.set('SWITCH4', 'off_command', command )
+			self.gpio_pin4.Disable()
+			self.gpio_pull4.Disable()
+			self.ONaction4.Disable()
+			self.ONcommand4.Disable()
+			self.OFFaction4.Disable()
+			self.OFFcommand4.Disable()
+		else: 
+			self.data_conf.set('SWITCH4', 'enable', '0')
+			self.gpio_pin4.Enable()
+			self.gpio_pull4.Enable()
+			self.ONaction4.Enable()
+			self.ONcommand4.Enable()
+			self.OFFaction4.Enable()
+			self.OFFcommand4.Enable()
+		self.start_switches()
 #######################definitions
 
 
