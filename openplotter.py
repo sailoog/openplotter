@@ -364,13 +364,13 @@ class MainFrame(wx.Frame):
 		self.switch_options[2]= _('reset')
 		self.switch_options[3]= _('shutdown')
 		self.switch_options[4]= _('stop NMEA multiplexer')
-		self.switch_options[5]= _('start NMEA multiplexer')
+		self.switch_options[5]= _('reset NMEA multiplexer')
 		self.switch_options[6]= _('stop Signal K server')
-		self.switch_options[7]= _('start Signal K server')
+		self.switch_options[7]= _('reset Signal K server')
 		self.switch_options[8]= _('stop WiFi access point')
 		self.switch_options[9]= _('start WiFi access point')
 		self.switch_options[10]= _('stop SDR-AIS')
-		self.switch_options[11]= _('start SDR-AIS')
+		self.switch_options[11]= _('reset SDR-AIS')
 
 		self.pull_list = ['Pull Down', 'Pull Up']
 

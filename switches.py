@@ -25,14 +25,6 @@ currentpath = os.path.abspath(pathname)
 data_conf = ConfigParser.SafeConfigParser()
 data_conf.read(currentpath+'/openplotter.conf')
 
-wlan=data_conf.get('WIFI', 'device')
-passw2=data_conf.get('WIFI', 'password')
-ssid2=data_conf.get('WIFI', 'ssid')
-
-gain=data_conf.get('AIS-SDR', 'gain')
-ppm=data_conf.get('AIS-SDR', 'ppm')
-channel=data_conf.get('AIS-SDR', 'channel')
-
 state1=False
 state2=False
 state3=False
@@ -43,13 +35,13 @@ state4=False
 #[2]= _('reset')
 #[3]= _('shutdown')
 #[4]= _('stop NMEA multiplexer')
-#[5]= _('start NMEA multiplexer')
+#[5]= _('reset NMEA multiplexer')
 #[6]= _('stop Signal K server')
-#[7]= _('start Signal K server')
+#[7]= _('reset Signal K server')
 #[8]= _('stop WiFi access point')
 #[9]= _('start WiFi access point')
 #[10]= _('stop SDR-AIS')
-#[11]= _('start SDR-AIS')
+#[11]= _('reset SDR-AIS')
 
 def switch_options(on_off,switch,option):
 	if option=='0': return
@@ -73,20 +65,33 @@ def switch_options(on_off,switch,option):
 	if option=='7':
 		subprocess.call(["pkill", '-9', "node"]) 
 		subprocess.Popen(home+'/.config/signalk-server-node/bin/nmea-from-10110', cwd=home+'/.config/signalk-server-node') 
-	if option=='8': 
+	if option=='8':
+		data_conf.read(currentpath+'/openplotter.conf')
+		wlan=data_conf.get('WIFI', 'device')
+		passw2=data_conf.get('WIFI', 'password')
+		ssid2=data_conf.get('WIFI', 'ssid')
 		subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '0', wlan, passw2, ssid2])
 		data_conf.set('WIFI', 'enable', '0')
 		write_conf()
-	if option=='9': 
+	if option=='9':
+		data_conf.read(currentpath+'/openplotter.conf')
+		wlan=data_conf.get('WIFI', 'device')
+		passw2=data_conf.get('WIFI', 'password')
+		ssid2=data_conf.get('WIFI', 'ssid')
 		subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '1', wlan, passw2, ssid2])
 		data_conf.set('WIFI', 'enable', '1')
 		write_conf()
-	if option=='10': 
+	if option=='10':
+		data_conf.read(currentpath+'/openplotter.conf')
 		subprocess.Popen(['pkill', '-9', 'aisdecoder'])
 		subprocess.Popen(['pkill', '-9', 'rtl_fm'])
 		data_conf.set('AIS-SDR', 'enable', '0')
 		write_conf()
-	if option=='11': 
+	if option=='11':
+		data_conf.read(currentpath+'/openplotter.conf')
+		gain=data_conf.get('AIS-SDR', 'gain')
+		ppm=data_conf.get('AIS-SDR', 'ppm')
+		channel=data_conf.get('AIS-SDR', 'channel')
 		subprocess.call(['pkill', '-9', 'aisdecoder'])
 		subprocess.call(['pkill', '-9', 'rtl_fm'])
 		frecuency='161975000'
