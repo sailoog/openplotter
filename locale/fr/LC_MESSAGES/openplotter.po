@@ -32,7 +32,7 @@ msgstr "SDR-AIS"
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:71
 msgid "Calculate"
-msgstr "Calculer"
+msgstr "Calculs"
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:72
 msgid "Sensors"
@@ -228,7 +228,7 @@ msgstr "Adresses"
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:197
 msgid "Refresh"
-msgstr "Rafraichir"
+msgstr "Rafraîchir"
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:202
 msgid "Enable AIS NMEA generation"
@@ -256,7 +256,7 @@ msgstr "Calibration"
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:219
 msgid "Take a look"
-msgstr "Vérifier"
+msgstr "Visualiser"
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:222
 msgid " Fine calibration using GSM base stations "
@@ -299,7 +299,7 @@ msgstr "Type"
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:240
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:258
 msgid "Port/Address"
-msgstr "Port/Addresse"
+msgstr "Port/Adresse"
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:241
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:259
@@ -320,7 +320,7 @@ msgstr "Filtrage"
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:244
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:262
 msgid "+ serial"
-msgstr "+ serie"
+msgstr "+ série"
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:247
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:265
@@ -335,7 +335,7 @@ msgstr "effacer"
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:253
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:286
 msgid " Outputs "
-msgstr " Sortiess "
+msgstr " Sorties "
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:271
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:295
@@ -345,7 +345,7 @@ msgstr "Voir les trames"
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:273
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:297
 msgid "Restart"
-msgstr "Redémarer"
+msgstr "Redémarrer"
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:275
 msgid "Apply changes"
@@ -357,18 +357,18 @@ msgstr "Annuler"
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:290
 msgid "Panel"
-msgstr "Panel"
+msgstr "Instruments"
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:292
 msgid "Gauge"
-msgstr "Cadran"
+msgstr "Afficheur"
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:308
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:316
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:422
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:434
 msgid "Sensor detected: "
-msgstr "Capteur detecté: "
+msgstr "Capteur détecté: "
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:308
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:316
@@ -398,7 +398,7 @@ msgstr "NMEA généré: $OPMDA"
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:322
 msgid "Weather data logging"
-msgstr "Log infos météo"
+msgstr "Historique météo"
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:324
 #: /home/sailoog/Escritorio/openplotter/output.py:55
@@ -457,11 +457,11 @@ msgstr " Configuration du serveur NMEA WIFI, Veuillez patienter..."
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:602
 msgid "Your password must have a minimum of 8 characters."
-msgstr "Minimum 8 caracteres."
+msgstr "Minimum 8 caractères."
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:618
 msgid "WiFi access point failed."
-msgstr "Point d'accès WIFI - Echec du démarrage."
+msgstr "Point d'accès WIFI: échec du démarrage."
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:619
 msgid "WiFi access point started."
@@ -489,7 +489,7 @@ msgid ""
 " Signal K panel:\n"
 msgstr ""
 "\n"
-" Signal K panel:\n"
+" Instruments Signal K:\n"
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:638
 msgid ""
@@ -497,7 +497,7 @@ msgid ""
 " Signal K gauge:\n"
 msgstr ""
 "\n"
-" Signal K cadran:\n"
+" Afficheur Signal K:\n"
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:641
 msgid ""
@@ -505,7 +505,7 @@ msgid ""
 " Signal K WebSocket:\n"
 msgstr ""
 "\n"
-" Signal K WebSocket:\n"
+" WebSocket Signal K:\n"
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:715
 msgid "SDR-AIS reception enabled"
@@ -521,7 +521,7 @@ msgid ""
 "After checking the new window enable SDR-AIS reception again."
 msgstr ""
 "Réception SDR-AIS desactivée.\n"
-"Après vérification dans la nouvelle fenêtre, relancer la reception SDR-AIS."
+"Après vérification dans la nouvelle fenêtre, relancer la réception SDR-AIS."
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:745
 msgid ""
@@ -531,7 +531,7 @@ msgid ""
 msgstr ""
 "SDR-AIS reception disabled.\n"
 "Vérifier le signal dans la nouvelle fenêtre. Copiez la valeur maximale du "
-"gain.Attendre la stabilisation de la valeur du ppm et la copier également."
+"gain. Attendre la stabilisation et copier également la valeur du ppm."
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:755
 msgid ""
@@ -569,12 +569,12 @@ msgstr ""
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:851
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:873
 msgid "accept"
-msgstr "acceptez"
+msgstr "accepter"
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:852
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:874
 msgid "ignore"
-msgstr "ignorez"
+msgstr "ignorer"
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:854
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:876
@@ -612,7 +612,7 @@ msgid ""
 "After calibrating, enable heading, temperature and pressure generation again."
 msgstr ""
 "Données cap, température et pression désactivées.\n"
-"Après calibration, activez les données cap, temperature et pression. "
+"Après calibration, activez les données cap, température et pression. "
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:1119
 msgid "Weather log restarted"
