@@ -18,6 +18,7 @@
 import wx, gettext, os, sys, ConfigParser, subprocess, webbrowser, re
 import wx.lib.scrolledpanel as scrolled
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
+from classes.datastream import DataStream
 
 home = os.path.expanduser('~')
 pathname = os.path.dirname(sys.argv[0])
@@ -37,8 +38,8 @@ class MainFrame(wx.Frame):
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 
 ########reading configuration###################
-		self.read_conf()
-###########################reading configuration
+		self.data_conf = ConfigParser.SafeConfigParser()
+		self.data_conf.read(currentpath+'/openplotter.conf')
 ########language###################
 		gettext.install('openplotter', currentpath+'/locale', unicode=False)
 		self.presLan_en = gettext.translation('openplotter', currentpath+'/locale', languages=['en'])
@@ -64,6 +65,7 @@ class MainFrame(wx.Frame):
 		self.page6 = wx.Panel(self.nb)
 		self.page7 = wx.Panel(self.nb)
 		self.page8 = wx.Panel(self.nb)
+		self.page9 = wx.Panel(self.nb)
 
 		self.nb.AddPage(self.page5, _('NMEA 0183'))
 		self.nb.AddPage(self.page7, _('Signal K (beta)'))
@@ -72,6 +74,7 @@ class MainFrame(wx.Frame):
 		self.nb.AddPage(self.page2, _('Calculate'))
 		self.nb.AddPage(self.page6, _('Sensors'))
 		self.nb.AddPage(self.page8, _('Switches'))
+		self.nb.AddPage(self.page9, _('Monitoring'))
 		self.nb.AddPage(self.page1, _('Startup'))
 
 		sizer = wx.BoxSizer()
@@ -357,7 +360,7 @@ class MainFrame(wx.Frame):
 ########page8###################
 		self.pin_list = ['22', '23', '24', '25']
 
-		self.switch_options=[None] * 12
+		self.switch_options=[None] * 18
 
 		self.switch_options[0]= _('nothing')
 		self.switch_options[1]= _('command')
@@ -371,6 +374,13 @@ class MainFrame(wx.Frame):
 		self.switch_options[9]= _('start WiFi access point')
 		self.switch_options[10]= _('stop SDR-AIS')
 		self.switch_options[11]= _('reset SDR-AIS')
+		self.switch_options[12]= _('start Twitter monitoring')
+		self.switch_options[13]= _('stop Twitter monitoring')
+		self.switch_options[14]= _('publish Twitter')
+		self.switch_options[15]= _('start Gmail monitoring')
+		self.switch_options[16]= _('stop Gmail monitoring')
+		self.switch_options[17]= _('send e-mail')
+
 
 		self.pull_list = ['Pull Down', 'Pull Up']
 
@@ -382,9 +392,11 @@ class MainFrame(wx.Frame):
 		self.gpio_pull1= wx.ComboBox(self.page8, choices=self.pull_list, style=wx.CB_READONLY, size=(105, 32), pos=(225, 27))
 		wx.StaticText(self.page8, label=_('ON action'), pos=(20, 65))
 		self.ONaction1= wx.ComboBox(self.page8, choices=self.switch_options, style=wx.CB_READONLY, size=(150, 32), pos=(20, 80))
+		self.ONaction1.Bind(wx.EVT_COMBOBOX, self.onSelectOn1)
 		self.ONcommand1 = wx.TextCtrl(self.page8, -1, size=(150, 32), pos=(20, 115))
 		wx.StaticText(self.page8, label=_('OFF action'), pos=(180, 65))
 		self.OFFaction1= wx.ComboBox(self.page8, choices=self.switch_options, style=wx.CB_READONLY, size=(150, 32), pos=(180, 80))
+		self.OFFaction1.Bind(wx.EVT_COMBOBOX, self.onSelectOff1)
 		self.OFFcommand1 = wx.TextCtrl(self.page8, -1, size=(150, 32), pos=(180, 115))
 
 		wx.StaticBox(self.page8, label=_(' Switch 2 '), size=(330, 145), pos=(350, 10))
@@ -395,9 +407,11 @@ class MainFrame(wx.Frame):
 		self.gpio_pull2= wx.ComboBox(self.page8, choices=self.pull_list, style=wx.CB_READONLY, size=(105, 32), pos=(565, 27))
 		wx.StaticText(self.page8, label=_('ON action'), pos=(360, 65))
 		self.ONaction2= wx.ComboBox(self.page8, choices=self.switch_options, style=wx.CB_READONLY, size=(150, 32), pos=(360, 80))
+		self.ONaction2.Bind(wx.EVT_COMBOBOX, self.onSelectOn2)
 		self.ONcommand2 = wx.TextCtrl(self.page8, -1, size=(150, 32), pos=(360, 115))
 		wx.StaticText(self.page8, label=_('OFF action'), pos=(520, 65))
 		self.OFFaction2= wx.ComboBox(self.page8, choices=self.switch_options, style=wx.CB_READONLY, size=(150, 32), pos=(520, 80))
+		self.OFFaction2.Bind(wx.EVT_COMBOBOX, self.onSelectOff2)
 		self.OFFcommand2 = wx.TextCtrl(self.page8, -1, size=(150, 32), pos=(520, 115))
 
 		wx.StaticBox(self.page8, label=_(' Switch 3 '), size=(330, 145), pos=(10, 160))
@@ -408,9 +422,11 @@ class MainFrame(wx.Frame):
 		self.gpio_pull3= wx.ComboBox(self.page8, choices=self.pull_list, style=wx.CB_READONLY, size=(105, 32), pos=(225, 177))
 		wx.StaticText(self.page8, label=_('ON action'), pos=(20, 215))
 		self.ONaction3= wx.ComboBox(self.page8, choices=self.switch_options, style=wx.CB_READONLY, size=(150, 32), pos=(20, 230))
+		self.ONaction3.Bind(wx.EVT_COMBOBOX, self.onSelectOn3)
 		self.ONcommand3 = wx.TextCtrl(self.page8, -1, size=(150, 32), pos=(20, 265))
 		wx.StaticText(self.page8, label=_('OFF action'), pos=(180, 215))
 		self.OFFaction3= wx.ComboBox(self.page8, choices=self.switch_options, style=wx.CB_READONLY, size=(150, 32), pos=(180, 230))
+		self.OFFaction3.Bind(wx.EVT_COMBOBOX, self.onSelectOff3)
 		self.OFFcommand3 = wx.TextCtrl(self.page8, -1, size=(150, 32), pos=(180, 265))
 
 		wx.StaticBox(self.page8, label=_(' Switch 4 '), size=(330, 145), pos=(350, 160))
@@ -421,11 +437,50 @@ class MainFrame(wx.Frame):
 		self.gpio_pull4= wx.ComboBox(self.page8, choices=self.pull_list, style=wx.CB_READONLY, size=(105, 32), pos=(565, 177))
 		wx.StaticText(self.page8, label=_('ON action'), pos=(360, 215))
 		self.ONaction4= wx.ComboBox(self.page8, choices=self.switch_options, style=wx.CB_READONLY, size=(150, 32), pos=(360, 230))
+		self.ONaction4.Bind(wx.EVT_COMBOBOX, self.onSelectOn4)
 		self.ONcommand4 = wx.TextCtrl(self.page8, -1, size=(150, 32), pos=(360, 265))
 		wx.StaticText(self.page8, label=_('OFF action'), pos=(520, 215))
 		self.OFFaction4= wx.ComboBox(self.page8, choices=self.switch_options, style=wx.CB_READONLY, size=(150, 32), pos=(520, 230))
+		self.OFFaction4.Bind(wx.EVT_COMBOBOX, self.onSelectOff4)
 		self.OFFcommand4 = wx.TextCtrl(self.page8, -1, size=(150, 32), pos=(520, 265))
 ###########################page8
+########page9###################
+		self.periodicity=['0','5','10','15','30','45','60','120','360','720','1440','2880']
+		wx.StaticBox(self.page9, label=_(' Twitter '), size=(330, 290), pos=(10, 10))
+		self.twitter_enable = wx.CheckBox(self.page9, label=_('Enable'), pos=(20, 32))
+		self.twitter_enable.Bind(wx.EVT_CHECKBOX, self.on_twitter_enable)
+		self.twitter_periodicity= wx.ComboBox(self.page9, choices=self.periodicity, style=wx.CB_READONLY, size=(80, 32), pos=(115, 27))
+		wx.StaticText(self.page9, label=_('Periodicity (min)'), pos=(210, 35))
+		self.datastream_list=[]
+		a=DataStream()
+		for i in a.DataList:
+			self.datastream_list.append(eval('a.'+i+'[1]')+': '+eval('a.'+i+'[0]'))
+		self.datastream_select = wx.ListBox(self.page9, choices=self.datastream_list, style=wx.LB_MULTIPLE, size=(310, 80), pos=(20, 65))
+		wx.StaticText(self.page9, label=_('apiKey'), pos=(20, 160))
+		self.apiKey = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(150, 155))
+		wx.StaticText(self.page9, label=_('apiSecret'), pos=(20, 195))
+		self.apiSecret = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(150, 190))
+		wx.StaticText(self.page9, label=_('accessToken'), pos=(20, 230))
+		self.accessToken = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(150, 225))
+		wx.StaticText(self.page9, label=_('accessTokenSecret'), pos=(20, 265))
+		self.accessTokenSecret = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(150, 260))
+
+		wx.StaticBox(self.page9, label=_(' Gmail '), size=(330, 200), pos=(350, 10))
+		self.gmail_enable = wx.CheckBox(self.page9, label=_('Enable'), pos=(360, 32))
+		self.gmail_enable.Bind(wx.EVT_CHECKBOX, self.on_gmail_enable)
+		self.gmail_periodicity= wx.ComboBox(self.page9, choices=self.periodicity, style=wx.CB_READONLY, size=(80, 32), pos=(455, 27))
+		wx.StaticText(self.page9, label=_('Periodicity (min)'), pos=(550, 35))
+		wx.StaticText(self.page9, label=_('Gmail account'), pos=(360, 70))
+		self.Gmail_account = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(490, 65))
+		wx.StaticText(self.page9, label=_('Gmail password'), pos=(360, 105))
+		self.Gmail_password = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(490, 100))
+		wx.StaticText(self.page9, label=_('Recipient'), pos=(360, 140))
+		self.Recipient = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(490, 135))
+		wx.StaticText(self.page9, label=_('Subject'), pos=(360, 175))
+		self.Subject = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(490, 170))
+
+
+###########################page9
 		self.read_kplex_conf()
 		self.set_layout_conf()
 ###########################layout
@@ -433,9 +488,6 @@ class MainFrame(wx.Frame):
 
 
 ####definitions###################
-	def read_conf(self):
-		self.data_conf = ConfigParser.SafeConfigParser()
-		self.data_conf.read(currentpath+'/openplotter.conf')
 
 	def set_layout_conf(self):
 		language=self.data_conf.get('GENERAL', 'lang')
@@ -633,6 +685,40 @@ class MainFrame(wx.Frame):
 			self.ONcommand4.Disable()
 			self.OFFaction4.Disable()
 			self.OFFcommand4.Disable()
+
+		if self.data_conf.get('TWITTER', 'periodicity'): self.twitter_periodicity.SetValue(self.data_conf.get('TWITTER', 'periodicity'))
+		else: self.twitter_periodicity.SetValue('0')
+		if self.data_conf.get('TWITTER', 'send_data'):
+			selections=eval(self.data_conf.get('TWITTER', 'send_data'))
+			for i in selections:
+				self.datastream_select.SetSelection(i)
+		if self.data_conf.get('TWITTER', 'apiKey'): self.apiKey.SetValue('********************')
+		if self.data_conf.get('TWITTER', 'apiSecret'): self.apiSecret.SetValue('********************')
+		if self.data_conf.get('TWITTER', 'accessToken'): self.accessToken.SetValue('********************')
+		if self.data_conf.get('TWITTER', 'accessTokenSecret'): self.accessTokenSecret.SetValue('********************')
+		if self.data_conf.get('TWITTER', 'enable')=='1':
+			self.twitter_enable.SetValue(True)
+			self.twitter_periodicity.Disable()
+			self.datastream_select.Disable()
+			self.apiKey.Disable()
+			self.apiSecret.Disable()
+			self.accessToken.Disable()
+			self.accessTokenSecret.Disable()
+
+		if self.data_conf.get('GMAIL', 'periodicity'): self.gmail_periodicity.SetValue(self.data_conf.get('GMAIL', 'periodicity'))
+		else: self.gmail_periodicity.SetValue('0')
+		if self.data_conf.get('GMAIL', 'gmail'): self.Gmail_account.SetValue(self.data_conf.get('GMAIL', 'gmail'))
+		if self.data_conf.get('GMAIL', 'password'): self.Gmail_password.SetValue('********************')
+		if self.data_conf.get('GMAIL', 'recipient'): self.Recipient.SetValue(self.data_conf.get('GMAIL', 'recipient'))
+		if self.data_conf.get('GMAIL', 'subject'): self.Subject.SetValue(self.data_conf.get('GMAIL', 'subject'))
+		if self.data_conf.get('GMAIL', 'enable')=='1':
+			self.gmail_enable.SetValue(True)
+			self.gmail_periodicity.Disable()
+			self.Gmail_account.Disable()
+			self.Gmail_password.Disable()
+			self.Recipient.Disable()
+			self.Subject.Disable()
+
 ########MENU###################################	
 
 	def time_zone(self,event):
@@ -669,21 +755,25 @@ class MainFrame(wx.Frame):
 	def lang_en(self, e):
 		self.clear_lang()
 		self.lang.Check(self.lang_item1.GetId(), True)
+		self.data_conf.read(currentpath+'/openplotter.conf')
 		self.data_conf.set('GENERAL', 'lang', 'en')
 		self.write_conf()
 	def lang_ca(self, e):
 		self.clear_lang()
 		self.lang.Check(self.lang_item2.GetId(), True)
+		self.data_conf.read(currentpath+'/openplotter.conf')
 		self.data_conf.set('GENERAL', 'lang', 'ca')
 		self.write_conf()
 	def lang_es(self, e):
 		self.clear_lang()
 		self.lang.Check(self.lang_item3.GetId(), True)
+		self.data_conf.read(currentpath+'/openplotter.conf')
 		self.data_conf.set('GENERAL', 'lang', 'es')
 		self.write_conf()
 	def lang_fr(self, e):
 		self.clear_lang()
 		self.lang.Check(self.lang_item4.GetId(), True)
+		self.data_conf.read(currentpath+'/openplotter.conf')
 		self.data_conf.set('GENERAL', 'lang', 'fr')
 		self.write_conf()
 
@@ -731,12 +821,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				return
 		else:
 			if delay != '0': delay = delay.lstrip('0')
+			self.data_conf.read(currentpath+'/openplotter.conf')
 			self.data_conf.set('STARTUP', 'delay', delay)
 			self.ShowMessage(_('Startup delay set to ')+delay+_(' seconds'))
 			self.write_conf()
 
 	def startup(self, e):
-
+		self.data_conf.read(currentpath+'/openplotter.conf')
 		if self.startup_opencpn.GetValue():
 			self.startup_opencpn_nopengl.Enable()
 			self.startup_opencpn_fullscreen.Enable()
@@ -784,6 +875,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 
 	def onwifi_enable (self, e):
+		self.data_conf.read(currentpath+'/openplotter.conf')
 		self.SetStatusText(_('Configuring NMEA WiFi server, wait please...'))
 		isChecked = self.wifi_enable.GetValue()
 		wlan=self.wlan.GetValue()
@@ -801,6 +893,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			wifi_result=subprocess.check_output(['sudo', 'python', currentpath+'/wifi_server.py', '0', wlan, passw, ssid])
 			
 		msg=wifi_result
+
 		if 'WiFi access point failed.' in msg:
 			self.enable_disable_wifi(0)
 			self.data_conf.set('WIFI', 'device', '')
@@ -869,6 +962,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		subprocess.call(['pkill', '-9', 'kal'])
 
 	def enable_sdr_controls(self):
+		self.data_conf.read(currentpath+'/openplotter.conf')
 		self.gain.Enable()
 		self.ppm.Enable()
 		self.ais_frequencies1.Enable()
@@ -894,6 +988,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		sender.SetValue(True)
 
 	def OnOffAIS(self, e):
+		self.data_conf.read(currentpath+'/openplotter.conf')
 		self.kill_sdr()
 		isChecked = self.ais_sdr_enable.GetValue()
 		if isChecked:
@@ -955,6 +1050,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.ShowMessage(msg)
 
 	def check_channel(self, event):
+		self.data_conf.read(currentpath+'/openplotter.conf')
 		self.kill_sdr()
 		self.enable_sdr_controls()
 		gain=self.gain.GetValue()
@@ -1261,6 +1357,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			subprocess.Popen(['python', currentpath+'/sensors_b.py'])
 
 	def ok_rate(self, e):
+		self.data_conf.read(currentpath+'/openplotter.conf')
 		rate=self.rate.GetValue()
 		self.data_conf.set('STARTUP', 'nmea_rate_sen', rate)
 		self.start_sensors()
@@ -1268,18 +1365,21 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.ShowMessage(_('Generation rate set to ')+rate+_(' seconds'))
 		
 	def nmea_hdg(self, e):
+		self.data_conf.read(currentpath+'/openplotter.conf')
 		sender = e.GetEventObject()
 		if sender.GetValue(): self.data_conf.set('STARTUP', 'nmea_hdg', '1')
 		else: self.data_conf.set('STARTUP', 'nmea_hdg', '0')
 		self.start_sensors()
 
 	def nmea_heel(self, e):
+		self.data_conf.read(currentpath+'/openplotter.conf')
 		sender = e.GetEventObject()
 		if sender.GetValue(): self.data_conf.set('STARTUP', 'nmea_heel', '1')
 		else: self.data_conf.set('STARTUP', 'nmea_heel', '0')
 		self.start_sensors()
 
 	def reset_imu(self, e):
+		self.data_conf.read(currentpath+'/openplotter.conf')
 		try:
 			os.remove(currentpath+'/imu/RTIMULib.ini')
 		except:pass
@@ -1294,6 +1394,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.ShowMessage(msg)
 
 	def reset_press_hum(self, e):
+		self.data_conf.read(currentpath+'/openplotter.conf')
 		try:
 			os.remove(currentpath+'/imu/RTIMULib2.ini')
 		except:pass
@@ -1315,6 +1416,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.ShowMessage(msg)
 
 	def calibrate_imu(self, e):
+		self.data_conf.read(currentpath+'/openplotter.conf')
 		self.heading.SetValue(False)
 		self.heel.SetValue(False)
 		self.press.SetValue(False)
@@ -1333,12 +1435,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.ShowMessage(msg)
 	
 	def nmea_press(self, e):
+		self.data_conf.read(currentpath+'/openplotter.conf')
 		sender = e.GetEventObject()
 		if sender.GetValue(): self.data_conf.set('STARTUP', 'nmea_press', '1')
 		else: self.data_conf.set('STARTUP', 'nmea_press', '0')
 		self.start_sensors()
 
 	def nmea_temp_p(self, e):
+		self.data_conf.read(currentpath+'/openplotter.conf')
 		sender = e.GetEventObject()
 		if sender.GetValue(): 
 			self.temp_h.SetValue(False)
@@ -1349,12 +1453,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.start_sensors()
 
 	def nmea_hum(self, e):
+		self.data_conf.read(currentpath+'/openplotter.conf')
 		sender = e.GetEventObject()
 		if sender.GetValue(): self.data_conf.set('STARTUP', 'nmea_hum', '1')
 		else: self.data_conf.set('STARTUP', 'nmea_hum', '0')
 		self.start_sensors()
 
 	def nmea_temp_h(self, e):
+		self.data_conf.read(currentpath+'/openplotter.conf')
 		sender = e.GetEventObject()
 		if sender.GetValue(): 
 			self.temp_p.SetValue(False)
@@ -1365,12 +1471,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.start_sensors()
 
 	def nmea_eng_temp(self, e):
+		self.data_conf.read(currentpath+'/openplotter.conf')
 		sender = e.GetEventObject()
 		if sender.GetValue(): self.data_conf.set('STARTUP', 'nmea_eng_temp', '1')
 		else: self.data_conf.set('STARTUP', 'nmea_eng_temp', '0')
 		self.start_sensors_b()		
 
 	def enable_press_temp_log(self, e):
+		self.data_conf.read(currentpath+'/openplotter.conf')
 		sender = e.GetEventObject()
 		if sender.GetValue(): self.data_conf.set('STARTUP', 'press_temp_log', '1')
 		else: self.data_conf.set('STARTUP', 'press_temp_log', '0')
@@ -1390,6 +1498,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 ######################################calculate
 
 	def ok_rate2(self, e):
+		self.data_conf.read(currentpath+'/openplotter.conf')
 		rate=self.rate2.GetValue()
 		self.data_conf.set('STARTUP', 'nmea_rate_cal', rate)
 		self.start_calculate()
@@ -1402,24 +1511,28 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			subprocess.Popen(['python', currentpath+'/calculate.py'])
 
 	def nmea_mag_var(self, e):
+		self.data_conf.read(currentpath+'/openplotter.conf')
 		sender = e.GetEventObject()
 		if sender.GetValue(): self.data_conf.set('STARTUP', 'nmea_mag_var', '1')
 		else: self.data_conf.set('STARTUP', 'nmea_mag_var', '0')
 		self.start_calculate()
 
 	def nmea_hdt(self, e):
+		self.data_conf.read(currentpath+'/openplotter.conf')
 		sender = e.GetEventObject()
 		if sender.GetValue(): self.data_conf.set('STARTUP', 'nmea_hdt', '1')
 		else: self.data_conf.set('STARTUP', 'nmea_hdt', '0')
 		self.start_calculate()
 
 	def nmea_rot(self, e):
+		self.data_conf.read(currentpath+'/openplotter.conf')
 		sender = e.GetEventObject()
 		if sender.GetValue(): self.data_conf.set('STARTUP', 'nmea_rot', '1')
 		else: self.data_conf.set('STARTUP', 'nmea_rot', '0')
 		self.start_calculate()
 
 	def	TW(self, e):
+		self.data_conf.read(currentpath+'/openplotter.conf')
 		sender = e.GetEventObject()
 		state=sender.GetValue()
 		self.TW_STW.SetValue(False)
@@ -1470,6 +1583,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.OFFcommand1.Enable()
 			self.ShowMessage(_('This GPIO Pin is already in use.'))
 			return
+		self.data_conf.read(currentpath+'/openplotter.conf')
 		if self.switch1_enable.GetValue(): 
 			self.data_conf.set('SWITCH1', 'enable', '1')
 			self.data_conf.set('SWITCH1', 'gpio', self.gpio_pin1.GetValue())
@@ -1513,6 +1627,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.OFFcommand2.Enable()
 			self.ShowMessage(_('This GPIO Pin is already in use.'))
 			return
+		self.data_conf.read(currentpath+'/openplotter.conf')
 		if self.switch2_enable.GetValue(): 
 			self.data_conf.set('SWITCH2', 'enable', '1')
 			self.data_conf.set('SWITCH2', 'gpio', self.gpio_pin2.GetValue())
@@ -1556,6 +1671,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.OFFcommand3.Enable()
 			self.ShowMessage(_('This GPIO Pin is already in use.'))
 			return
+		self.data_conf.read(currentpath+'/openplotter.conf')
 		if self.switch3_enable.GetValue(): 
 			self.data_conf.set('SWITCH3', 'enable', '1')
 			self.data_conf.set('SWITCH3', 'gpio', self.gpio_pin3.GetValue())
@@ -1599,6 +1715,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.OFFcommand4.Enable()
 			self.ShowMessage(_('This GPIO Pin is already in use.'))
 			return
+		self.data_conf.read(currentpath+'/openplotter.conf')
 		if self.switch4_enable.GetValue(): 
 			self.data_conf.set('SWITCH4', 'enable', '1')
 			self.data_conf.set('SWITCH4', 'gpio', self.gpio_pin4.GetValue())
@@ -1626,9 +1743,142 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.OFFaction4.Enable()
 			self.OFFcommand4.Enable()
 		self.start_switches()
-#######################definitions
 
+	def onSelectOn1(self,e):
+		if self.ONaction1.GetValue() == _('command'):
+			self.ONcommand1.SetFocus() 
+			self.ShowMessage(_('Enter Linux commands in the field below.'))
+		if self.ONaction1.GetValue() ==_('publish Twitter') or self.ONaction1.GetValue() ==_('send e-mail'):
+			self.ONcommand1.SetFocus() 
+			self.ShowMessage(_('Enter text in the field below.'))
+	def onSelectOff1(self,e):
+		if self.OFFaction1.GetValue() == _('command'):
+			self.OFFcommand1.SetFocus() 
+			self.ShowMessage(_('Enter Linux commands in the field below.'))
+		if self.OFFaction1.GetValue() ==_('publish Twitter') or self.OFFaction1.GetValue() ==_('send e-mail'):
+			self.OFFcommand1.SetFocus() 
+			self.ShowMessage(_('Enter text in the field below.'))
+	def onSelectOn2(self,e):
+		if self.ONaction2.GetValue() == _('command'):
+			self.ONcommand2.SetFocus() 
+			self.ShowMessage(_('Enter Linux commands in the field below.'))
+		if self.ONaction2.GetValue() ==_('publish Twitter') or self.ONaction2.GetValue() ==_('send e-mail'):
+			self.ONcommand2.SetFocus() 
+			self.ShowMessage(_('Enter text in the field below.'))
+	def onSelectOff2(self,e):
+		if self.OFFaction2.GetValue() == _('command'):
+			self.OFFcommand2.SetFocus() 
+			self.ShowMessage(_('Enter Linux commands in the field below.'))
+		if self.OFFaction2.GetValue() ==_('publish Twitter') or self.OFFaction2.GetValue() ==_('send e-mail'):
+			self.OFFcommand2.SetFocus() 
+			self.ShowMessage(_('Enter text in the field below.'))
+	def onSelectOn3(self,e):
+		if self.ONaction3.GetValue() == _('command'):
+			self.ONcommand3.SetFocus() 
+			self.ShowMessage(_('Enter Linux commands in the field below.'))
+		if self.ONaction3.GetValue() ==_('publish Twitter') or self.ONaction3.GetValue() ==_('send e-mail'):
+			self.ONcommand3.SetFocus() 
+			self.ShowMessage(_('Enter text in the field below.'))
+	def onSelectOff3(self,e):
+		if self.OFFaction3.GetValue() == _('command'):
+			self.OFFcommand3.SetFocus() 
+			self.ShowMessage(_('Enter Linux commands in the field below.'))
+		if self.OFFaction3.GetValue() ==_('publish Twitter') or self.OFFaction3.GetValue() ==_('send e-mail'):
+			self.OFFcommand3.SetFocus() 
+			self.ShowMessage(_('Enter text in the field below.'))
+	def onSelectOn4(self,e):
+		if self.ONaction4.GetValue() == _('command'):
+			self.ONcommand4.SetFocus() 
+			self.ShowMessage(_('Enter Linux commands in the field below.'))
+		if self.ONaction4.GetValue() ==_('publish Twitter') or self.ONaction4.GetValue() ==_('send e-mail'):
+			self.ONcommand4.SetFocus() 
+			self.ShowMessage(_('Enter text in the field below.'))
+	def onSelectOff4(self,e):
+		if self.OFFaction4.GetValue() == _('command'):
+			self.OFFcommand4.SetFocus() 
+			self.ShowMessage(_('Enter Linux commands in the field below.'))
+		if self.OFFaction4.GetValue() ==_('publish Twitter') or self.OFFaction4.GetValue() ==_('send e-mail'):
+			self.OFFcommand4.SetFocus() 
+			self.ShowMessage(_('Enter text in the field below.'))
 
+#######################twitterbot
+
+	def start_monitoring(self):
+		self.write_conf()
+		subprocess.call(['pkill', '-f', 'monitoring.py'])
+		if self.twitter_enable.GetValue() or self.gmail_enable.GetValue():
+			subprocess.Popen(['python', currentpath+'/monitoring.py'])
+
+	def on_twitter_enable(self,e):
+		if not self.apiKey.GetValue() or not self.apiSecret.GetValue() or not self.accessToken.GetValue() or not self.accessTokenSecret.GetValue():
+			self.twitter_enable.SetValue(False)
+			self.ShowMessage(_('Enter valid Twitter apiKey, apiSecret, accessToken and accessTokenSecret.'))
+			return
+		if not self.datastream_select.GetSelections():
+			self.twitter_enable.SetValue(False)
+			self.ShowMessage(_('Select some data to publish.'))
+			return
+		self.data_conf.read(currentpath+'/openplotter.conf')
+		if self.twitter_enable.GetValue():
+			self.twitter_periodicity.Disable()
+			self.datastream_select.Disable()
+			self.apiKey.Disable()
+			self.apiSecret.Disable()
+			self.accessToken.Disable()
+			self.accessTokenSecret.Disable()
+			self.data_conf.set('TWITTER', 'enable', '1')
+			self.data_conf.set('TWITTER', 'periodicity', self.twitter_periodicity.GetValue())
+			self.data_conf.set('TWITTER', 'send_data', str(self.datastream_select.GetSelections()))
+			if not '*****' in self.apiKey.GetValue(): 
+				self.data_conf.set('TWITTER', 'apiKey', self.apiKey.GetValue())
+				self.apiKey.SetValue('********************')
+			if not '*****' in self.apiSecret.GetValue(): 
+				self.data_conf.set('TWITTER', 'apiSecret', self.apiSecret.GetValue())
+				self.apiSecret.SetValue('********************')
+			if not '*****' in self.accessToken.GetValue(): 
+				self.data_conf.set('TWITTER', 'accessToken', self.accessToken.GetValue())
+				self.accessToken.SetValue('********************')
+			if not '*****' in self.accessTokenSecret.GetValue(): 
+				self.data_conf.set('TWITTER', 'accessTokenSecret', self.accessTokenSecret.GetValue())
+				self.accessTokenSecret.SetValue('********************')
+		else:
+			self.data_conf.set('TWITTER', 'enable', '0')
+			self.twitter_periodicity.Enable()
+			self.datastream_select.Enable()
+			self.apiKey.Enable()
+			self.apiSecret.Enable()
+			self.accessToken.Enable()
+			self.accessTokenSecret.Enable()
+		self.start_monitoring()
+
+	def on_gmail_enable(self,e):
+		if not self.Gmail_account.GetValue() or not self.Gmail_password.GetValue() or not self.Recipient.GetValue() or not self.Subject.GetValue():
+			self.gmail_enable.SetValue(False)
+			self.ShowMessage(_('Enter valid Gmail account, Gmail password, Recipient and Subject.'))
+			return
+		self.data_conf.read(currentpath+'/openplotter.conf')
+		if self.gmail_enable.GetValue():
+			self.gmail_periodicity.Disable()
+			self.Gmail_account.Disable()
+			self.Gmail_password.Disable()
+			self.Recipient.Disable()
+			self.Subject.Disable()
+			self.data_conf.set('GMAIL', 'enable', '1')
+			self.data_conf.set('GMAIL', 'periodicity', self.gmail_periodicity.GetValue())
+			self.data_conf.set('GMAIL', 'gmail', self.Gmail_account.GetValue())
+			if not '*****' in self.Gmail_password.GetValue(): 
+				self.data_conf.set('GMAIL', 'password', self.Gmail_password.GetValue())
+				self.Gmail_password.SetValue('********************')
+			self.data_conf.set('GMAIL', 'recipient', self.Recipient.GetValue())
+			self.data_conf.set('GMAIL', 'subject', self.Subject.GetValue())
+		else:
+			self.data_conf.set('GMAIL', 'enable', '0')
+			self.gmail_periodicity.Enable()
+			self.Gmail_account.Enable()
+			self.Gmail_password.Enable()
+			self.Recipient.Enable()
+			self.Subject.Enable()
+		self.start_monitoring()
 
 #Main#############################
 if __name__ == "__main__":
