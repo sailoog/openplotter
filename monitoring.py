@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 # This file is part of Openplotter.
 # Copyright (C) 2015 by sailoog <https://github.com/sailoog/openplotter>
 #
@@ -47,22 +46,24 @@ def send_twitter(error):
 	accessToken = data_conf.get('TWITTER', 'accessToken')
 	accessTokenSecret = data_conf.get('TWITTER', 'accessTokenSecret')
 	tweetStr = ''
-	if error == 0:
-		send_data=eval(data_conf.get('TWITTER', 'send_data'))
-		for ii in send_data:
-			data=''
-			value=''
-			unit=''
-			timestamp=''
-			now=''
-			data=eval('a.'+a.DataList[ii]+'[1]')
-			value=eval('a.'+a.DataList[ii]+'[2]')
-			unit=eval('a.'+a.DataList[ii]+'[3]')
-			timestamp=eval('a.'+a.DataList[ii]+'[4]')
+	send_data=eval(data_conf.get('TWITTER', 'send_data'))
+	for ii in send_data:
+		timestamp=eval('a.'+a.DataList[ii]+'[4]')
+		if timestamp:
 			now=time.time()
-			if data and value and now-timestamp < 5:
-				tweetStr += data+':'+str(value)+str(unit)+' '
-	else: tweetStr=error
+			age=now-timestamp
+			if age < 20:
+				data=''
+				value=''
+				unit=''
+				data=eval('a.'+a.DataList[ii]+'[1]')
+				value=eval('a.'+a.DataList[ii]+'[2]')
+				unit=eval('a.'+a.DataList[ii]+'[3]')
+				if a.DataList[ii]=='Lat': value='%02d %07.4f' % (int(value[:2]), float(value[2:]))
+				if a.DataList[ii]=='Lon': value='%02d %07.4f' % (int(value[:3]), float(value[3:]))
+				if unit: tweetStr+= data+':'+str(value)+str(unit)+' '
+				else: tweetStr+= data+':'+str(value)+' '
+	if error !=0 : tweetStr+= error
 	if tweetStr:
 		if len(tweetStr)>140: tweetStr=tweetStr[0:140]
 		try:
@@ -78,21 +79,23 @@ def send_gmail(error):
 	recipient = data_conf.get('GMAIL', 'recipient')
 	subject = data_conf.get('GMAIL', 'subject')
 	body = ''
-	if error == 0:
-		for ii in a.DataList:
-			data=''
-			value=''
-			unit=''
-			timestamp=''
-			now=''
-			data=eval('a.'+ii+'[0]')
-			value=eval('a.'+ii+'[2]')
-			unit=eval('a.'+ii+'[3]')
-			timestamp=eval('a.'+ii+'[4]')
+	for ii in a.DataList:
+		timestamp=eval('a.'+ii+'[4]')
+		if timestamp:
 			now=time.time()
-			if data and value and now-timestamp < 5:
-				body += data+': '+str(value)+' '+str(unit)+'\n'
-	else: body=error
+			age=now-timestamp
+			if age < 20:
+				data=''
+				value=''
+				unit=''
+				data=eval('a.'+ii+'[0]')
+				value=eval('a.'+ii+'[2]')
+				unit=eval('a.'+ii+'[3]')
+				if ii=='Lat': value='%02d %07.4f' % (int(value[:2]), float(value[2:]))
+				if ii=='Lon': value='%02d %07.4f' % (int(value[:3]), float(value[3:]))
+				if unit: body += data+': '+str(value)+' '+str(unit)+'\n'
+				else: body+= data+': '+str(value)+'\n'
+	if error !=0 : body+= error
 	if body:
 		try:
 			msg=GmailBot(GMAIL_USERNAME,GMAIL_PASSWORD,recipient)
@@ -108,11 +111,11 @@ def connect():
 		sock_in = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		sock_in.settimeout(10)
 		sock_in.connect(('localhost', 10110))
-		error=0
 	except socket.error, error_msg:
 		error= _('Failed to connect with localhost:10110. Error: ')+ str(error_msg[0])
 		sock_in=''
 		time.sleep(7)
+	else: error=0
 
 
 
@@ -130,11 +133,18 @@ while True:
 		frase_nmea =''
 		try:
 			frase_nmea = sock_in.recv(1024)
-			error=0
 		except socket.error, error_msg:
 			error= _('Failed to connect with localhost:10110. Error: ')+ str(error_msg[0])
 		else:
-			if frase_nmea: a.parse_nmea(frase_nmea)
+			if frase_nmea: 
+				a.parse_nmea(frase_nmea)
+				error=0
+			else:
+				error=_('No data, trying to reconnect...')
+				sock_in=''
+				time.sleep(7)
+			
+			
 
 	if data_conf.get('GMAIL', 'enable')=='1':
 		if data_conf.get('GMAIL', 'periodicity') and data_conf.get('GMAIL', 'periodicity')!='0':
@@ -165,5 +175,11 @@ while True:
 				data_conf.set('TWITTER', 'last_send', str(now))
 				write_conf()
 				send_twitter(error)
+
+	if data_conf.get('SWITCH1', 'enable')=='1': a.switches_status(1, data_conf.get('SWITCH1', 'gpio'), data_conf.get('SWITCH1', 'pull_up_down'))
+	if data_conf.get('SWITCH2', 'enable')=='1': a.switches_status(2, data_conf.get('SWITCH2', 'gpio'), data_conf.get('SWITCH2', 'pull_up_down'))
+	if data_conf.get('SWITCH3', 'enable')=='1': a.switches_status(3, data_conf.get('SWITCH3', 'gpio'), data_conf.get('SWITCH3', 'pull_up_down'))
+	if data_conf.get('SWITCH4', 'enable')=='1': a.switches_status(4, data_conf.get('SWITCH4', 'gpio'), data_conf.get('SWITCH4', 'pull_up_down'))
+
 
 

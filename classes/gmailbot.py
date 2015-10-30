@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 # This file is part of Openplotter.
 # Copyright (C) 2015 by sailoog <https://github.com/sailoog/openplotter>
 #

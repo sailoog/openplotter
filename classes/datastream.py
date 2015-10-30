@@ -16,12 +16,15 @@
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
 import pynmea2, time
+import RPi.GPIO as GPIO
 
 class DataStream:
 
 	def __init__(self):
 
-		self.DataList=['Lat','Lon','Date','Time','Var','HDM','HDT','COG','SOG','STW','AWA','TWA','AWS','TWS','TWD','AP','AT','ARH','ROT','Heel','ECT']
+		GPIO.setmode(GPIO.BCM)
+
+		self.DataList=['Lat','Lon','Date','Time','Var','HDM','HDT','COG','SOG','STW','AWA','TWA','AWS','TWS','TWD','AP','AT','ARH','ROT','Heel','ECT','SW1','SW2','SW3','SW4']
 		
 		#(0 name, 1 short, 2 value, 3 unit, 4 timestamp, 5 talker, 6 sentence)
 		self.Lat=[_('Latitude'),_('Lat'),None,None,None,None,None]
@@ -45,6 +48,43 @@ class DataStream:
 		self.ROT=[_('Rate of Turn'),_('ROT'),None,None,None,None,None]
 		self.Heel=[_('Heel'),_('Heel'),None,None,None,None,None]
 		self.ECT=[_('Engine Coolant Temperature'),_('ECT'),None,None,None,None,None]
+		self.SW1=[_('Switch 1 status'),_('SW1'),None,None,None,None,None]
+		self.SW2=[_('Switch 2 status'),_('SW2'),None,None,None,None,None]
+		self.SW3=[_('Switch 3 status'),_('SW3'),None,None,None,None,None]
+		self.SW4=[_('Switch 4 status'),_('SW4'),None,None,None,None,None]
+	
+	def switches_status(self, switch, channel, pull_up_down):
+		pull_up_down1=GPIO.PUD_DOWN
+		channel1=int(channel)
+		if pull_up_down=='Pull Up': pull_up_down1=GPIO.PUD_UP
+		GPIO.setup(channel1, GPIO.IN, pull_up_down=pull_up_down1)
+
+		if GPIO.input(channel1):
+			if switch==1: 
+				self.SW1[2]=_('on')
+				self.SW1[4]=time.time()
+			if switch==2: 
+				self.SW2[2]=_('on')
+				self.SW2[4]=time.time()
+			if switch==3: 
+				self.SW3[2]=_('on')
+				self.SW3[4]=time.time()
+			if switch==4: 
+				self.SW4[2]=_('on')
+				self.SW4[4]=time.time()
+		else:
+			if switch==1: 
+				self.SW1[2]=_('off')
+				self.SW1[4]=time.time()
+			if switch==2: 
+				self.SW2[2]=_('off')
+				self.SW2[4]=time.time()
+			if switch==3: 
+				self.SW3[2]=_('off')
+				self.SW3[4]=time.time()
+			if switch==4: 
+				self.SW4[2]=_('off')
+				self.SW4[4]=time.time()
 
 	def parse_nmea(self, frase_nmea):
 		nmea_list=frase_nmea.split()

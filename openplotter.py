@@ -1066,8 +1066,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 ########multimpexer###################################	
 
 	def show_output_window(self,event):
-		close=subprocess.call(['pkill', '-f', 'output.py'])
-		show_output=subprocess.Popen(['python', currentpath+'/output.py', self.language])
+		close=subprocess.call(['sudo','pkill', '-f', 'output.py'])
+		show_output=subprocess.Popen(['sudo','python',currentpath+'/output.py'])
 
 	def restart_multiplex(self,event):
 		self.restart_kplex()
@@ -1805,9 +1805,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def start_monitoring(self):
 		self.write_conf()
-		subprocess.call(['pkill', '-f', 'monitoring.py'])
+		subprocess.call(['sudo','pkill', '-f', 'monitoring.py'])
 		if self.twitter_enable.GetValue() or self.gmail_enable.GetValue():
-			subprocess.Popen(['python', currentpath+'/monitoring.py'])
+			subprocess.Popen(['sudo','python',currentpath+'/monitoring.py'])
 
 	def on_twitter_enable(self,e):
 		if not self.apiKey.GetValue() or not self.apiSecret.GetValue() or not self.accessToken.GetValue() or not self.accessTokenSecret.GetValue():

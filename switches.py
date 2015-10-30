@@ -104,16 +104,16 @@ def switch_options(on_off,switch,option):
 		data_conf.set('AIS-SDR', 'enable', '1')
 		write_conf()
 	if option=='12':
-		subprocess.call(['pkill', '-f', 'monitoring.py'])
+		subprocess.call(['sudo','pkill', '-f', 'monitoring.py'])
 		data_conf.set('TWITTER', 'enable', '1')
 		write_conf()
-		subprocess.Popen(['python', currentpath+'/monitoring.py'])
+		subprocess.Popen(['sudo','python', currentpath+'/monitoring.py'])
 	if option=='13':
-		subprocess.call(['pkill', '-f', 'monitoring.py'])
+		subprocess.call(['sudo','pkill', '-f', 'monitoring.py'])
 		data_conf.set('TWITTER', 'enable', '0')
 		write_conf()
 		if data_conf.get('GMAIL', 'enable')=='1':
-			subprocess.Popen(['python', currentpath+'/monitoring.py'])
+			subprocess.Popen(['sudo','python', currentpath+'/monitoring.py'])
 	if option=='14':
 		apiKey = data_conf.get('TWITTER', 'apiKey')
 		apiSecret = data_conf.get('TWITTER', 'apiSecret')
@@ -129,16 +129,16 @@ def switch_options(on_off,switch,option):
 				msg.send(tweetStr)
 			except: pass
 	if option=='15':
-		subprocess.call(['pkill', '-f', 'monitoring.py'])
+		subprocess.call(['sudo','pkill', '-f', 'monitoring.py'])
 		data_conf.set('GMAIL', 'enable', '1')
 		write_conf()
-		subprocess.Popen(['python', currentpath+'/monitoring.py'])
+		subprocess.Popen(['sudo','python', currentpath+'/monitoring.py'])
 	if option=='16':
-		subprocess.call(['pkill', '-f', 'monitoring.py'])
+		subprocess.call(['sudo','pkill', '-f', 'monitoring.py'])
 		data_conf.set('GMAIL', 'enable', '0')
 		write_conf()
 		if data_conf.get('TWITTER', 'enable')=='1':
-			subprocess.Popen(['python', currentpath+'/monitoring.py'])
+			subprocess.Popen(['sudo','python', currentpath+'/monitoring.py'])
 	if option=='17':
 		GMAIL_USERNAME = data_conf.get('GMAIL', 'gmail')
 		GMAIL_PASSWORD = data_conf.get('GMAIL', 'password')

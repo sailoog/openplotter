@@ -139,9 +139,9 @@ subprocess.call(['pkill', '-f', 'calculate.py'])
 if nmea_mag_var=='1' or nmea_hdt=='1' or nmea_rot=='1' or TW_STW=='1' or TW_SOG=='1': 
 	subprocess.Popen(['python', currentpath+'/calculate.py'])
 
-subprocess.call(['pkill', '-f', 'monitoring.py'])
+subprocess.call(['sudo','pkill', '-f', 'monitoring.py'])
 if twitter=='1' or gmail=='1':
-	subprocess.Popen(['python', currentpath+'/monitoring.py'])
+	subprocess.Popen(['sudo','python',currentpath+'/monitoring.py'])
 	
 subprocess.call(['sudo', 'pkill', '-f', 'switches.py'])
 if switch1=='1' or switch2=='1' or switch3=='1' or switch4=='1':

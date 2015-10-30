@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, socket, os, threading, time, gettext, sys, webbrowser
+import wx, socket, os, threading, time, gettext, sys, webbrowser, ConfigParser
 from classes.datastream import DataStream
 
 pathname = os.path.dirname(sys.argv[0])
@@ -26,17 +26,21 @@ class MyFrame(wx.Frame):
 		
 		def __init__(self, parent, title):
 
+			self.data_conf = ConfigParser.SafeConfigParser()
+			self.data_conf.read(currentpath+'/openplotter.conf')
+
 			gettext.install('openplotter', currentpath+'/locale', unicode=False)
 			self.presLan_en = gettext.translation('openplotter', currentpath+'/locale', languages=['en'])
 			self.presLan_ca = gettext.translation('openplotter', currentpath+'/locale', languages=['ca'])
 			self.presLan_es = gettext.translation('openplotter', currentpath+'/locale', languages=['es'])
 			self.presLan_fr = gettext.translation('openplotter', currentpath+'/locale', languages=['fr'])
 
-			language=sys.argv[1]
-			if language=='en':self.presLan_en.install()
-			if language=='ca':self.presLan_ca.install()
-			if language=='es':self.presLan_es.install()
-			if language=='fr':self.presLan_fr.install()
+			self.language=self.data_conf.get('GENERAL', 'lang')
+
+			if self.language=='en':self.presLan_en.install()
+			if self.language=='ca':self.presLan_ca.install()
+			if self.language=='es':self.presLan_es.install()
+			if self.language=='fr':self.presLan_fr.install()
 
 
 			wx.Frame.__init__(self, parent, title=title, size=(650,400))
@@ -82,47 +86,60 @@ class MyFrame(wx.Frame):
 
 			self.Show(True)
 
-			self.hilo=threading.Thread(target=self.ventanalog)
+			self.thread1=threading.Thread(target=self.parse_data)
+			self.thread2=threading.Thread(target=self.refresh_data)
+			
+			self.s2=''
+			self.error=''
 
-			self.connect()
+			if not self.thread1.isAlive(): self.thread1.start()
+			if not self.thread2.isAlive(): self.thread2.start()
 
 		def connect(self):
 			try:
 				self.s2 = socket.socket()
 				self.s2.connect(("localhost", 10110))
-				self.s2.settimeout(10)
-				self.error_message=""
+				self.s2.settimeout(5)
 			except socket.error, error_msg:
-				self.error_message=str(error_msg[0])
-			if not self.hilo.isAlive():
-				self.hilo.start()
+				self.error= _('Failed to connect with localhost:10110. Error: ')+ str(error_msg[0])+_(', trying to reconnect...')
+				wx.MutexGuiEnter()
+				self.SetStatusText(self.error)
+				wx.MutexGuiLeave()
+				self.s2=''
+				time.sleep(7)
+			else: self.error=''
+			
 
-		def ventanalog(self):
+		def parse_data(self):
 			while True:
-				frase_nmea=""
-				if not self.error_message:
+				if not self.s2: self.connect()
+				else:
+					frase_nmea=''
 					try:
 						frase_nmea = self.s2.recv(1024)
 					except socket.error, error_msg:
-						self.error_message=str(error_msg[0])
-				if frase_nmea:
-					wx.MutexGuiEnter()
-					self.a.parse_nmea(frase_nmea)
-					if self.pause_all==0: self.logger.AppendText(frase_nmea)
-					self.SetStatusText(_('Multiplexer started'))
-					wx.MutexGuiLeave()
-				else:
-					wx.MutexGuiEnter()
-					if self.error_message:
-						self.SetStatusText(_('Failed to connect with localhost:10110. ')+_('Error code: ') + self.error_message)
-						time.sleep(3)
+						self.error= _('Connected with localhost:10110. Error: ')+ str(error_msg[0])+_(', waiting for data...')
+						wx.MutexGuiEnter()
+						self.SetStatusText(self.error)
+						wx.MutexGuiLeave()
 					else:
-						self.SetStatusText(_('No data, trying to reconnect...'))
-						time.sleep(3)
-					self.SetStatusText(_('No data, trying to reconnect...'))
-					wx.MutexGuiLeave()
-					time.sleep(4)
-					self.connect()
+						if frase_nmea:
+							self.a.parse_nmea(frase_nmea)
+							wx.MutexGuiEnter()
+							if self.pause_all==0: self.logger.AppendText(frase_nmea)
+							self.SetStatusText(_('Multiplexer started'))
+							wx.MutexGuiLeave()
+							self.error=''
+						else:
+							self.s2=''
+
+		def refresh_data(self):
+			while True:
+
+				if self.data_conf.get('SWITCH1', 'enable')=='1': self.a.switches_status(1, self.data_conf.get('SWITCH1', 'gpio'), self.data_conf.get('SWITCH1', 'pull_up_down'))
+				if self.data_conf.get('SWITCH2', 'enable')=='1': self.a.switches_status(2, self.data_conf.get('SWITCH2', 'gpio'), self.data_conf.get('SWITCH2', 'pull_up_down'))
+				if self.data_conf.get('SWITCH3', 'enable')=='1': self.a.switches_status(3, self.data_conf.get('SWITCH3', 'gpio'), self.data_conf.get('SWITCH3', 'pull_up_down'))
+				if self.data_conf.get('SWITCH4', 'enable')=='1': self.a.switches_status(4, self.data_conf.get('SWITCH4', 'gpio'), self.data_conf.get('SWITCH4', 'pull_up_down'))	
 
 				if self.pause_all==0:
 					index=0
@@ -131,26 +148,27 @@ class MyFrame(wx.Frame):
 						if timestamp:
 							now=time.time()
 							age=now-timestamp
-							if age < 5:
-								value=eval('self.a.'+i+'[2]')
-								if i=='Lat': value='%02d°%07.4f′' % (int(value[:2]), float(value[2:]))
-								if i=='Lon': value='%02d°%07.4f′' % (int(value[:3]), float(value[3:]))
-								unit=eval('self.a.'+i+'[3]')
-								data= str(value)+' '+str(unit)
-								talker=eval('self.a.'+i+'[5]')
-								if talker=='OP': talker='OpenPlotter'
-								sentence=eval('self.a.'+i+'[6]')
-								wx.MutexGuiEnter()
-								self.list.SetStringItem(index,1,data)
-								self.list.SetStringItem(index,2,talker)
-								self.list.SetStringItem(index,3,sentence)
-								self.list.SetStringItem(index,4,str(round(age,1)))
-								wx.MutexGuiLeave()
-							else:
-								wx.MutexGuiEnter()
-								self.list.SetStringItem(index,4,str(round(age,1)))
-								wx.MutexGuiLeave()
+							value=''
+							unit=''
+							talker=''
+							sentence=''
+							value=eval('self.a.'+i+'[2]')
+							unit=eval('self.a.'+i+'[3]')
+							talker=eval('self.a.'+i+'[5]')
+							sentence=eval('self.a.'+i+'[6]')
+							if i=='Lat': value='%02d°%07.4f′' % (int(value[:2]), float(value[2:]))
+							if i=='Lon': value='%02d°%07.4f′' % (int(value[:3]), float(value[3:]))
+							if talker=='OP': talker='OpenPlotter'
+							if unit: data= str(value)+' '+str(unit)
+							else: data= str(value)
+							wx.MutexGuiEnter()
+							self.list.SetStringItem(index,1,data)
+							if talker: self.list.SetStringItem(index,2,talker)
+							if sentence: self.list.SetStringItem(index,3,sentence)
+							self.list.SetStringItem(index,4,str(round(age,1)))
+							wx.MutexGuiLeave()
 						index=index+1
+
 
 		def pause(self, e):
 			if self.pause_all==0: 
@@ -166,6 +184,10 @@ class MyFrame(wx.Frame):
 				self.list.SetStringItem(i,2,'')
 				self.list.SetStringItem(i,3,'')
 				self.list.SetStringItem(i,4,'')
+			self.data_conf.read(currentpath+'/openplotter.conf')
+			self.a=''
+			self.a=DataStream()
+
 
 		def nmea_info(self, e):
 			url = currentpath+'/docs/NMEA.html'
