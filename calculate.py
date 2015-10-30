@@ -15,13 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import sys, ConfigParser, os, socket, time, pynmea2, geomag, datetime, math
+import socket, time, pynmea2, geomag, datetime, math
+from classes.conf import Conf
 
-pathname = os.path.dirname(sys.argv[0])
-currentpath = os.path.abspath(pathname)
-
-data_conf = ConfigParser.SafeConfigParser()
-data_conf.read(currentpath+'/openplotter.conf')
+conf=Conf()
 
 def calculate_mag_var(position, date):
 	if position[0] and position[2] and date:
@@ -153,10 +150,10 @@ def check_nmea():
 
 						#GENERATE NMEA
 
-						if tick2-tick > float(data_conf.get('STARTUP', 'nmea_rate_cal')):
+						if tick2-tick > float(conf.get('STARTUP', 'nmea_rate_cal')):
 							tick=time.time()
 							#generate magnetic variation
-							if  data_conf.get('STARTUP', 'nmea_mag_var')=='1' and position[0] and position[2] and date:
+							if  conf.get('STARTUP', 'nmea_mag_var')=='1' and position[0] and position[2] and date:
 								mag_var=calculate_mag_var(position,date)
 								hdg = pynmea2.HDG('OP', 'HDG', ('','','',str(mag_var[0]),mag_var[1]))
 								hdg1=str(hdg)
@@ -164,7 +161,7 @@ def check_nmea():
 								sock.sendto(hdg2, ('localhost', 10110))
 
 							#generate headint_t
-							if  data_conf.get('STARTUP', 'nmea_hdt')=='1' and position[0] and position[2] and date and heading_m:
+							if  conf.get('STARTUP', 'nmea_hdt')=='1' and position[0] and position[2] and date and heading_m:
 								mag_var=calculate_mag_var(position,date)
 								var=float(mag_var[0])
 								if mag_var[1]=='W':var=var*-1
@@ -177,7 +174,7 @@ def check_nmea():
 								sock.sendto(hdt2, ('localhost', 10110))
 
 							#generate True Wind STW
-							if data_conf.get('STARTUP', 'tw_stw')=='1' and STW and AWS and AWA:
+							if conf.get('STARTUP', 'tw_stw')=='1' and STW and AWS and AWA:
 								STW0=float(STW)
 								AWS0=float(AWS)
 								AWA0=[float(AWA[0]),AWA[1]]
@@ -210,7 +207,7 @@ def check_nmea():
 								AWA=''
 							
 							#generate Rate of Turn (ROT)
-							if data_conf.get('STARTUP', 'nmea_rot')=='1' and heading_m:
+							if conf.get('STARTUP', 'nmea_rot')=='1' and heading_m:
  								if not last_heading: #initialize
 									last_heading = heading_m
  									heading_time = time.time()
@@ -235,7 +232,7 @@ def check_nmea():
 								sock.sendto(rot2, ('localhost', 10110))
 							
 							#generate True Wind SOG
-							if data_conf.get('STARTUP', 'tw_sog')=='1' and SOG and COG and heading_t and AWS and AWA:
+							if conf.get('STARTUP', 'tw_sog')=='1' and SOG and COG and heading_t and AWS and AWA:
 								SOG0=float(SOG)
 								COG0=float(COG)
 								AWS0=float(AWS)

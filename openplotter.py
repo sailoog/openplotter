@@ -15,14 +15,18 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, gettext, os, sys, ConfigParser, subprocess, webbrowser, re
+import wx, sys, subprocess, webbrowser, re
 import wx.lib.scrolledpanel as scrolled
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 from classes.datastream import DataStream
+from classes.actions import Actions
+from classes.paths import Paths
+from classes.conf import Conf
+from classes.language import Language
 
-home = os.path.expanduser('~')
-pathname = os.path.dirname(sys.argv[0])
-currentpath = os.path.abspath(pathname)
+paths=Paths()
+home=paths.home
+currentpath=paths.currentpath
 
 class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 	def __init__(self, parent):
@@ -38,19 +42,9 @@ class MainFrame(wx.Frame):
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 
 ########reading configuration###################
-		self.data_conf = ConfigParser.SafeConfigParser()
-		self.data_conf.read(currentpath+'/openplotter.conf')
-########language###################
-		gettext.install('openplotter', currentpath+'/locale', unicode=False)
-		self.presLan_en = gettext.translation('openplotter', currentpath+'/locale', languages=['en'])
-		self.presLan_ca = gettext.translation('openplotter', currentpath+'/locale', languages=['ca'])
-		self.presLan_es = gettext.translation('openplotter', currentpath+'/locale', languages=['es'])
-		self.presLan_fr = gettext.translation('openplotter', currentpath+'/locale', languages=['fr'])
-		self.language=self.data_conf.get('GENERAL', 'lang')
-		if self.language=='en':self.presLan_en.install()
-		if self.language=='ca':self.presLan_ca.install()
-		if self.language=='es':self.presLan_es.install()
-		if self.language=='fr':self.presLan_fr.install()
+		self.conf=Conf()
+		self.language=self.conf.get('GENERAL','lang')
+		Language(self.language)
 ##########################language
 		self.p = scrolled.ScrolledPanel(self, -1, style = wx.TAB_TRAVERSAL|wx.SUNKEN_BORDER)
 		self.p.SetAutoLayout(1)
@@ -359,29 +353,7 @@ class MainFrame(wx.Frame):
 ###########################page6
 ########page8###################
 		self.pin_list = ['22', '23', '24', '25']
-
-		self.switch_options=[None] * 18
-
-		self.switch_options[0]= _('nothing')
-		self.switch_options[1]= _('command')
-		self.switch_options[2]= _('reset')
-		self.switch_options[3]= _('shutdown')
-		self.switch_options[4]= _('stop NMEA multiplexer')
-		self.switch_options[5]= _('reset NMEA multiplexer')
-		self.switch_options[6]= _('stop Signal K server')
-		self.switch_options[7]= _('reset Signal K server')
-		self.switch_options[8]= _('stop WiFi access point')
-		self.switch_options[9]= _('start WiFi access point')
-		self.switch_options[10]= _('stop SDR-AIS')
-		self.switch_options[11]= _('reset SDR-AIS')
-		self.switch_options[12]= _('start Twitter monitoring')
-		self.switch_options[13]= _('stop Twitter monitoring')
-		self.switch_options[14]= _('publish Twitter')
-		self.switch_options[15]= _('start Gmail monitoring')
-		self.switch_options[16]= _('stop Gmail monitoring')
-		self.switch_options[17]= _('send e-mail')
-
-
+		self.actions=Actions()
 		self.pull_list = ['Pull Down', 'Pull Up']
 
 		wx.StaticBox(self.page8, label=_(' Switch 1 '), size=(330, 145), pos=(10, 10))
@@ -391,11 +363,11 @@ class MainFrame(wx.Frame):
 		self.gpio_pin1= wx.ComboBox(self.page8, choices=self.pin_list, style=wx.CB_READONLY, size=(60, 32), pos=(155, 27))
 		self.gpio_pull1= wx.ComboBox(self.page8, choices=self.pull_list, style=wx.CB_READONLY, size=(105, 32), pos=(225, 27))
 		wx.StaticText(self.page8, label=_('ON action'), pos=(20, 65))
-		self.ONaction1= wx.ComboBox(self.page8, choices=self.switch_options, style=wx.CB_READONLY, size=(150, 32), pos=(20, 80))
+		self.ONaction1= wx.ComboBox(self.page8, choices=self.actions.options, style=wx.CB_READONLY, size=(150, 32), pos=(20, 80))
 		self.ONaction1.Bind(wx.EVT_COMBOBOX, self.onSelectOn1)
 		self.ONcommand1 = wx.TextCtrl(self.page8, -1, size=(150, 32), pos=(20, 115))
 		wx.StaticText(self.page8, label=_('OFF action'), pos=(180, 65))
-		self.OFFaction1= wx.ComboBox(self.page8, choices=self.switch_options, style=wx.CB_READONLY, size=(150, 32), pos=(180, 80))
+		self.OFFaction1= wx.ComboBox(self.page8, choices=self.actions.options, style=wx.CB_READONLY, size=(150, 32), pos=(180, 80))
 		self.OFFaction1.Bind(wx.EVT_COMBOBOX, self.onSelectOff1)
 		self.OFFcommand1 = wx.TextCtrl(self.page8, -1, size=(150, 32), pos=(180, 115))
 
@@ -406,11 +378,11 @@ class MainFrame(wx.Frame):
 		self.gpio_pin2= wx.ComboBox(self.page8, choices=self.pin_list, style=wx.CB_READONLY, size=(60, 32), pos=(495, 27))
 		self.gpio_pull2= wx.ComboBox(self.page8, choices=self.pull_list, style=wx.CB_READONLY, size=(105, 32), pos=(565, 27))
 		wx.StaticText(self.page8, label=_('ON action'), pos=(360, 65))
-		self.ONaction2= wx.ComboBox(self.page8, choices=self.switch_options, style=wx.CB_READONLY, size=(150, 32), pos=(360, 80))
+		self.ONaction2= wx.ComboBox(self.page8, choices=self.actions.options, style=wx.CB_READONLY, size=(150, 32), pos=(360, 80))
 		self.ONaction2.Bind(wx.EVT_COMBOBOX, self.onSelectOn2)
 		self.ONcommand2 = wx.TextCtrl(self.page8, -1, size=(150, 32), pos=(360, 115))
 		wx.StaticText(self.page8, label=_('OFF action'), pos=(520, 65))
-		self.OFFaction2= wx.ComboBox(self.page8, choices=self.switch_options, style=wx.CB_READONLY, size=(150, 32), pos=(520, 80))
+		self.OFFaction2= wx.ComboBox(self.page8, choices=self.actions.options, style=wx.CB_READONLY, size=(150, 32), pos=(520, 80))
 		self.OFFaction2.Bind(wx.EVT_COMBOBOX, self.onSelectOff2)
 		self.OFFcommand2 = wx.TextCtrl(self.page8, -1, size=(150, 32), pos=(520, 115))
 
@@ -421,11 +393,11 @@ class MainFrame(wx.Frame):
 		self.gpio_pin3= wx.ComboBox(self.page8, choices=self.pin_list, style=wx.CB_READONLY, size=(60, 32), pos=(155, 177))
 		self.gpio_pull3= wx.ComboBox(self.page8, choices=self.pull_list, style=wx.CB_READONLY, size=(105, 32), pos=(225, 177))
 		wx.StaticText(self.page8, label=_('ON action'), pos=(20, 215))
-		self.ONaction3= wx.ComboBox(self.page8, choices=self.switch_options, style=wx.CB_READONLY, size=(150, 32), pos=(20, 230))
+		self.ONaction3= wx.ComboBox(self.page8, choices=self.actions.options, style=wx.CB_READONLY, size=(150, 32), pos=(20, 230))
 		self.ONaction3.Bind(wx.EVT_COMBOBOX, self.onSelectOn3)
 		self.ONcommand3 = wx.TextCtrl(self.page8, -1, size=(150, 32), pos=(20, 265))
 		wx.StaticText(self.page8, label=_('OFF action'), pos=(180, 215))
-		self.OFFaction3= wx.ComboBox(self.page8, choices=self.switch_options, style=wx.CB_READONLY, size=(150, 32), pos=(180, 230))
+		self.OFFaction3= wx.ComboBox(self.page8, choices=self.actions.options, style=wx.CB_READONLY, size=(150, 32), pos=(180, 230))
 		self.OFFaction3.Bind(wx.EVT_COMBOBOX, self.onSelectOff3)
 		self.OFFcommand3 = wx.TextCtrl(self.page8, -1, size=(150, 32), pos=(180, 265))
 
@@ -436,11 +408,11 @@ class MainFrame(wx.Frame):
 		self.gpio_pin4= wx.ComboBox(self.page8, choices=self.pin_list, style=wx.CB_READONLY, size=(60, 32), pos=(495, 177))
 		self.gpio_pull4= wx.ComboBox(self.page8, choices=self.pull_list, style=wx.CB_READONLY, size=(105, 32), pos=(565, 177))
 		wx.StaticText(self.page8, label=_('ON action'), pos=(360, 215))
-		self.ONaction4= wx.ComboBox(self.page8, choices=self.switch_options, style=wx.CB_READONLY, size=(150, 32), pos=(360, 230))
+		self.ONaction4= wx.ComboBox(self.page8, choices=self.actions.options, style=wx.CB_READONLY, size=(150, 32), pos=(360, 230))
 		self.ONaction4.Bind(wx.EVT_COMBOBOX, self.onSelectOn4)
 		self.ONcommand4 = wx.TextCtrl(self.page8, -1, size=(150, 32), pos=(360, 265))
 		wx.StaticText(self.page8, label=_('OFF action'), pos=(520, 215))
-		self.OFFaction4= wx.ComboBox(self.page8, choices=self.switch_options, style=wx.CB_READONLY, size=(150, 32), pos=(520, 230))
+		self.OFFaction4= wx.ComboBox(self.page8, choices=self.actions.options, style=wx.CB_READONLY, size=(150, 32), pos=(520, 230))
 		self.OFFaction4.Bind(wx.EVT_COMBOBOX, self.onSelectOff4)
 		self.OFFcommand4 = wx.TextCtrl(self.page8, -1, size=(150, 32), pos=(520, 265))
 ###########################page8
@@ -490,33 +462,33 @@ class MainFrame(wx.Frame):
 ####definitions###################
 
 	def set_layout_conf(self):
-		language=self.data_conf.get('GENERAL', 'lang')
-		if language=='en': self.lang.Check(self.lang_item1.GetId(), True)
-		if language=='ca': self.lang.Check(self.lang_item2.GetId(), True)
-		if language=='es': self.lang.Check(self.lang_item3.GetId(), True)
+		if self.language=='en': self.lang.Check(self.lang_item1.GetId(), True)
+		if self.language=='ca': self.lang.Check(self.lang_item2.GetId(), True)
+		if self.language=='es': self.lang.Check(self.lang_item3.GetId(), True)
+		if self.language=='fr': self.lang.Check(self.lang_item4.GetId(), True)
 
-		self.delay.SetValue(self.data_conf.get('STARTUP', 'delay'))
+		self.delay.SetValue(self.conf.get('STARTUP', 'delay'))
 
-		if self.data_conf.get('STARTUP', 'opencpn')=='1': 
+		if self.conf.get('STARTUP', 'opencpn')=='1': 
 			self.startup_opencpn.SetValue(True)
 		else:
 			self.startup_opencpn_nopengl.Disable()
 			self.startup_opencpn_fullscreen.Disable()
-		if self.data_conf.get('STARTUP', 'opencpn_no_opengl')=='1': self.startup_opencpn_nopengl.SetValue(True)
-		if self.data_conf.get('STARTUP', 'opencpn_fullscreen')=='1': self.startup_opencpn_fullscreen.SetValue(True)
-		if self.data_conf.get('STARTUP', 'kplex')=='1': 
+		if self.conf.get('STARTUP', 'opencpn_no_opengl')=='1': self.startup_opencpn_nopengl.SetValue(True)
+		if self.conf.get('STARTUP', 'opencpn_fullscreen')=='1': self.startup_opencpn_fullscreen.SetValue(True)
+		if self.conf.get('STARTUP', 'kplex')=='1': 
 			self.startup_multiplexer.SetValue(True)
 		else:
 			self.startup_nmea_time.Disable()
-		if self.data_conf.get('STARTUP', 'gps_time')=='1': self.startup_nmea_time.SetValue(True)
-		if self.data_conf.get('STARTUP', 'x11vnc')=='1': self.startup_remote_desktop.SetValue(True)
-		if self.data_conf.get('STARTUP', 'signalk')=='1': self.startup_signalk.SetValue(True)
+		if self.conf.get('STARTUP', 'gps_time')=='1': self.startup_nmea_time.SetValue(True)
+		if self.conf.get('STARTUP', 'x11vnc')=='1': self.startup_remote_desktop.SetValue(True)
+		if self.conf.get('STARTUP', 'signalk')=='1': self.startup_signalk.SetValue(True)
 
 		if len(self.available_wireless)>0:
-			self.wlan.SetValue(self.data_conf.get('WIFI', 'device'))
-			self.ssid.SetValue(self.data_conf.get('WIFI', 'ssid'))
-			self.passw.SetValue(self.data_conf.get('WIFI', 'password'))
-			if self.data_conf.get('WIFI', 'enable')=='1':
+			self.wlan.SetValue(self.conf.get('WIFI', 'device'))
+			self.ssid.SetValue(self.conf.get('WIFI', 'ssid'))
+			self.passw.SetValue(self.conf.get('WIFI', 'password'))
+			if self.conf.get('WIFI', 'enable')=='1':
 				self.wifi_enable.SetValue(True)
 				self.wlan.Disable()
 				self.passw.Disable()
@@ -536,14 +508,14 @@ class MainFrame(wx.Frame):
 		
 		output=subprocess.check_output('lsusb')
 		if 'DVB-T' in output:
-			self.gain.SetValue(self.data_conf.get('AIS-SDR', 'gain'))
-			self.ppm.SetValue(self.data_conf.get('AIS-SDR', 'ppm'))
-			self.channel.SetValue(self.data_conf.get('AIS-SDR', 'gsm_channel'))
-			if self.data_conf.get('AIS-SDR', 'enable')=='1': 
+			self.gain.SetValue(self.conf.get('AIS-SDR', 'gain'))
+			self.ppm.SetValue(self.conf.get('AIS-SDR', 'ppm'))
+			self.channel.SetValue(self.conf.get('AIS-SDR', 'gsm_channel'))
+			if self.conf.get('AIS-SDR', 'enable')=='1': 
 				self.ais_sdr_enable.SetValue(True)
 				self.disable_sdr_controls()
-			if self.data_conf.get('AIS-SDR', 'channel')=='a': self.ais_frequencies1.SetValue(True)
-			if self.data_conf.get('AIS-SDR', 'channel')=='b': self.ais_frequencies2.SetValue(True)
+			if self.conf.get('AIS-SDR', 'channel')=='a': self.ais_frequencies1.SetValue(True)
+			if self.conf.get('AIS-SDR', 'channel')=='b': self.ais_frequencies2.SetValue(True)
 		else:
 			self.ais_sdr_enable.Disable()
 			self.disable_sdr_controls()
@@ -556,14 +528,14 @@ class MainFrame(wx.Frame):
 			self.check_channels.Disable()
 			self.check_bands.Disable()
 
-		self.rate.SetValue(self.data_conf.get('STARTUP', 'nmea_rate_sen'))
-		self.rate2.SetValue(self.data_conf.get('STARTUP', 'nmea_rate_cal'))
+		self.rate.SetValue(self.conf.get('STARTUP', 'nmea_rate_sen'))
+		self.rate2.SetValue(self.conf.get('STARTUP', 'nmea_rate_cal'))
 
-		if self.data_conf.get('STARTUP', 'nmea_mag_var')=='1': self.mag_var.SetValue(True)
+		if self.conf.get('STARTUP', 'nmea_mag_var')=='1': self.mag_var.SetValue(True)
 
-		if self.data_conf.get('STARTUP', 'nmea_hdt')=='1': self.heading_t.SetValue(True)
+		if self.conf.get('STARTUP', 'nmea_hdt')=='1': self.heading_t.SetValue(True)
 
-		if self.data_conf.get('STARTUP', 'nmea_rot')=='1': self.rot.SetValue(True)
+		if self.conf.get('STARTUP', 'nmea_rot')=='1': self.rot.SetValue(True)
 
 		detected=subprocess.check_output(['python', currentpath+'/imu/check_sensors.py'], cwd=currentpath+'/imu')
 		l_detected=detected.split('\n')
@@ -579,63 +551,59 @@ class MainFrame(wx.Frame):
 			self.heading_nmea.Disable()
 			self.heel.Disable()
 			self.heel_nmea.Disable()
-			if self.data_conf.get('STARTUP', 'nmea_hdg')=='1' or self.data_conf.get('STARTUP', 'nmea_heel')=='1': 
-				self.data_conf.set('STARTUP', 'nmea_hdg', '0')
-				self.data_conf.set('STARTUP', 'nmea_heel', '0')
-				self.write_conf()
+			if self.conf.get('STARTUP', 'nmea_hdg')=='1' or self.conf.get('STARTUP', 'nmea_heel')=='1': 
+				self.conf.set('STARTUP', 'nmea_hdg', '0')
+				self.conf.set('STARTUP', 'nmea_heel', '0')
 		else:
 			self.imu_tag.SetLabel(_('Sensor detected: ')+imu_sensor)
 			if calibrated=='1':self.button_calibrate_imu.Disable()
-			if self.data_conf.get('STARTUP', 'nmea_hdg')=='1': self.heading.SetValue(True)
-			if self.data_conf.get('STARTUP', 'nmea_heel')=='1': self.heel.SetValue(True)
+			if self.conf.get('STARTUP', 'nmea_hdg')=='1': self.heading.SetValue(True)
+			if self.conf.get('STARTUP', 'nmea_heel')=='1': self.heel.SetValue(True)
 
 		if 'none' in DS18B20:
 			self.eng_temp.Disable()
 			self.eng_temp_nmea.Disable()
-			if self.data_conf.get('STARTUP', 'nmea_eng_temp')=='1': 
-				self.data_conf.set('STARTUP', 'nmea_eng_temp', '0')
-				self.write_conf()
+			if self.conf.get('STARTUP', 'nmea_eng_temp')=='1': 
+				self.conf.set('STARTUP', 'nmea_eng_temp', '0')
 		else:
-			if self.data_conf.get('STARTUP', 'nmea_eng_temp')=='1': self.eng_temp.SetValue(True)
+			if self.conf.get('STARTUP', 'nmea_eng_temp')=='1': self.eng_temp.SetValue(True)
 
 		if 'none' in press_sensor:
 			self.press.Disable()
 			self.temp_p.Disable()
-			if self.data_conf.get('STARTUP', 'nmea_press')=='1' or self.data_conf.get('STARTUP', 'nmea_temp_p')=='1': 
-				self.data_conf.set('STARTUP', 'nmea_press', '0')
-				self.data_conf.set('STARTUP', 'nmea_temp_p', '0')
-				self.write_conf()
+			if self.conf.get('STARTUP', 'nmea_press')=='1' or self.conf.get('STARTUP', 'nmea_temp_p')=='1': 
+				self.conf.set('STARTUP', 'nmea_press', '0')
+				self.conf.set('STARTUP', 'nmea_temp_p', '0')
 		else:
 			self.press_tag.SetLabel(_('Sensor detected: ')+press_sensor)
-			if self.data_conf.get('STARTUP', 'nmea_press')=='1': self.press.SetValue(True)
-			if self.data_conf.get('STARTUP', 'nmea_temp_p')=='1': self.temp_p.SetValue(True)
+			if self.conf.get('STARTUP', 'nmea_press')=='1': self.press.SetValue(True)
+			if self.conf.get('STARTUP', 'nmea_temp_p')=='1': self.temp_p.SetValue(True)
 
 		if 'none' in hum_sensor:
 			self.hum.Disable()
 			self.temp_h.Disable()
-			if self.data_conf.get('STARTUP', 'nmea_hum')=='1' or self.data_conf.get('STARTUP', 'nmea_temp_h')=='1': 
-				self.data_conf.set('STARTUP', 'nmea_hum', '0')
-				self.data_conf.set('STARTUP', 'nmea_temp_h', '0')
-				self.write_conf()
+			if self.conf.get('STARTUP', 'nmea_hum')=='1' or self.conf.get('STARTUP', 'nmea_temp_h')=='1': 
+				self.conf.set('STARTUP', 'nmea_hum', '0')
+				self.conf.set('STARTUP', 'nmea_temp_h', '0')
 		else:
 			self.hum_tag.SetLabel(_('Sensor detected: ')+hum_sensor)
-			if self.data_conf.get('STARTUP', 'nmea_hum')=='1': self.hum.SetValue(True)
-			if self.data_conf.get('STARTUP', 'nmea_temp_h')=='1': self.temp_h.SetValue(True)
+			if self.conf.get('STARTUP', 'nmea_hum')=='1': self.hum.SetValue(True)
+			if self.conf.get('STARTUP', 'nmea_temp_h')=='1': self.temp_h.SetValue(True)
 		
 		if 'none' in hum_sensor and 'none' in press_sensor: self.press_nmea.Disable()
 
-		if self.data_conf.get('STARTUP', 'press_temp_log')=='1': self.press_temp_log.SetValue(True)
+		if self.conf.get('STARTUP', 'press_temp_log')=='1': self.press_temp_log.SetValue(True)
 
-		if self.data_conf.get('STARTUP', 'tw_stw')=='1': self.TW_STW.SetValue(True)
-		if self.data_conf.get('STARTUP', 'tw_sog')=='1': self.TW_SOG.SetValue(True)
+		if self.conf.get('STARTUP', 'tw_stw')=='1': self.TW_STW.SetValue(True)
+		if self.conf.get('STARTUP', 'tw_sog')=='1': self.TW_SOG.SetValue(True)
 
-		self.gpio_pin1.SetValue(self.data_conf.get('SWITCH1', 'gpio'))
-		self.gpio_pull1.SetValue(self.data_conf.get('SWITCH1', 'pull_up_down'))
-		self.ONaction1.SetValue(self.switch_options[int(self.data_conf.get('SWITCH1', 'on_action'))])
-		self.ONcommand1.SetValue(self.data_conf.get('SWITCH1', 'on_command'))
-		self.OFFaction1.SetValue(self.switch_options[int(self.data_conf.get('SWITCH1', 'off_action'))])
-		self.OFFcommand1.SetValue(self.data_conf.get('SWITCH1', 'off_command'))
-		if self.data_conf.get('SWITCH1', 'enable')=='1':
+		self.gpio_pin1.SetValue(self.conf.get('SWITCH1', 'gpio'))
+		self.gpio_pull1.SetValue(self.conf.get('SWITCH1', 'pull_up_down'))
+		self.ONaction1.SetValue(self.actions.options[int(self.conf.get('SWITCH1', 'on_action'))])
+		self.ONcommand1.SetValue(self.conf.get('SWITCH1', 'on_command'))
+		self.OFFaction1.SetValue(self.actions.options[int(self.conf.get('SWITCH1', 'off_action'))])
+		self.OFFcommand1.SetValue(self.conf.get('SWITCH1', 'off_command'))
+		if self.conf.get('SWITCH1', 'enable')=='1':
 			self.switch1_enable.SetValue(True)
 			self.gpio_pin1.Disable()
 			self.gpio_pull1.Disable()
@@ -643,13 +611,13 @@ class MainFrame(wx.Frame):
 			self.ONcommand1.Disable()
 			self.OFFaction1.Disable()
 			self.OFFcommand1.Disable()
-		self.gpio_pin2.SetValue(self.data_conf.get('SWITCH2', 'gpio'))
-		self.gpio_pull2.SetValue(self.data_conf.get('SWITCH2', 'pull_up_down'))
-		self.ONaction2.SetValue(self.switch_options[int(self.data_conf.get('SWITCH2', 'on_action'))])
-		self.ONcommand2.SetValue(self.data_conf.get('SWITCH2', 'on_command'))
-		self.OFFaction2.SetValue(self.switch_options[int(self.data_conf.get('SWITCH2', 'off_action'))])
-		self.OFFcommand2.SetValue(self.data_conf.get('SWITCH2', 'off_command'))
-		if self.data_conf.get('SWITCH2', 'enable')=='1':
+		self.gpio_pin2.SetValue(self.conf.get('SWITCH2', 'gpio'))
+		self.gpio_pull2.SetValue(self.conf.get('SWITCH2', 'pull_up_down'))
+		self.ONaction2.SetValue(self.actions.options[int(self.conf.get('SWITCH2', 'on_action'))])
+		self.ONcommand2.SetValue(self.conf.get('SWITCH2', 'on_command'))
+		self.OFFaction2.SetValue(self.actions.options[int(self.conf.get('SWITCH2', 'off_action'))])
+		self.OFFcommand2.SetValue(self.conf.get('SWITCH2', 'off_command'))
+		if self.conf.get('SWITCH2', 'enable')=='1':
 			self.switch2_enable.SetValue(True)
 			self.gpio_pin2.Disable()
 			self.gpio_pull2.Disable()
@@ -657,13 +625,13 @@ class MainFrame(wx.Frame):
 			self.ONcommand2.Disable()
 			self.OFFaction2.Disable()
 			self.OFFcommand2.Disable()
-		self.gpio_pin3.SetValue(self.data_conf.get('SWITCH3', 'gpio'))
-		self.gpio_pull3.SetValue(self.data_conf.get('SWITCH3', 'pull_up_down'))
-		self.ONaction3.SetValue(self.switch_options[int(self.data_conf.get('SWITCH3', 'on_action'))])
-		self.ONcommand3.SetValue(self.data_conf.get('SWITCH3', 'on_command'))
-		self.OFFaction3.SetValue(self.switch_options[int(self.data_conf.get('SWITCH3', 'off_action'))])
-		self.OFFcommand3.SetValue(self.data_conf.get('SWITCH3', 'off_command'))
-		if self.data_conf.get('SWITCH3', 'enable')=='1':
+		self.gpio_pin3.SetValue(self.conf.get('SWITCH3', 'gpio'))
+		self.gpio_pull3.SetValue(self.conf.get('SWITCH3', 'pull_up_down'))
+		self.ONaction3.SetValue(self.actions.options[int(self.conf.get('SWITCH3', 'on_action'))])
+		self.ONcommand3.SetValue(self.conf.get('SWITCH3', 'on_command'))
+		self.OFFaction3.SetValue(self.actions.options[int(self.conf.get('SWITCH3', 'off_action'))])
+		self.OFFcommand3.SetValue(self.conf.get('SWITCH3', 'off_command'))
+		if self.conf.get('SWITCH3', 'enable')=='1':
 			self.switch3_enable.SetValue(True)
 			self.gpio_pin3.Disable()
 			self.gpio_pull3.Disable()
@@ -671,13 +639,13 @@ class MainFrame(wx.Frame):
 			self.ONcommand3.Disable()
 			self.OFFaction3.Disable()
 			self.OFFcommand3.Disable()
-		self.gpio_pin4.SetValue(self.data_conf.get('SWITCH4', 'gpio'))
-		self.gpio_pull4.SetValue(self.data_conf.get('SWITCH4', 'pull_up_down'))
-		self.ONaction4.SetValue(self.switch_options[int(self.data_conf.get('SWITCH4', 'on_action'))])
-		self.ONcommand4.SetValue(self.data_conf.get('SWITCH4', 'on_command'))
-		self.OFFaction4.SetValue(self.switch_options[int(self.data_conf.get('SWITCH4', 'off_action'))])
-		self.OFFcommand4.SetValue(self.data_conf.get('SWITCH4', 'off_command'))
-		if self.data_conf.get('SWITCH4', 'enable')=='1':
+		self.gpio_pin4.SetValue(self.conf.get('SWITCH4', 'gpio'))
+		self.gpio_pull4.SetValue(self.conf.get('SWITCH4', 'pull_up_down'))
+		self.ONaction4.SetValue(self.actions.options[int(self.conf.get('SWITCH4', 'on_action'))])
+		self.ONcommand4.SetValue(self.conf.get('SWITCH4', 'on_command'))
+		self.OFFaction4.SetValue(self.actions.options[int(self.conf.get('SWITCH4', 'off_action'))])
+		self.OFFcommand4.SetValue(self.conf.get('SWITCH4', 'off_command'))
+		if self.conf.get('SWITCH4', 'enable')=='1':
 			self.switch4_enable.SetValue(True)
 			self.gpio_pin4.Disable()
 			self.gpio_pull4.Disable()
@@ -686,17 +654,17 @@ class MainFrame(wx.Frame):
 			self.OFFaction4.Disable()
 			self.OFFcommand4.Disable()
 
-		if self.data_conf.get('TWITTER', 'periodicity'): self.twitter_periodicity.SetValue(self.data_conf.get('TWITTER', 'periodicity'))
+		if self.conf.get('TWITTER', 'periodicity'): self.twitter_periodicity.SetValue(self.conf.get('TWITTER', 'periodicity'))
 		else: self.twitter_periodicity.SetValue('0')
-		if self.data_conf.get('TWITTER', 'send_data'):
-			selections=eval(self.data_conf.get('TWITTER', 'send_data'))
+		if self.conf.get('TWITTER', 'send_data'):
+			selections=eval(self.conf.get('TWITTER', 'send_data'))
 			for i in selections:
 				self.datastream_select.SetSelection(i)
-		if self.data_conf.get('TWITTER', 'apiKey'): self.apiKey.SetValue('********************')
-		if self.data_conf.get('TWITTER', 'apiSecret'): self.apiSecret.SetValue('********************')
-		if self.data_conf.get('TWITTER', 'accessToken'): self.accessToken.SetValue('********************')
-		if self.data_conf.get('TWITTER', 'accessTokenSecret'): self.accessTokenSecret.SetValue('********************')
-		if self.data_conf.get('TWITTER', 'enable')=='1':
+		if self.conf.get('TWITTER', 'apiKey'): self.apiKey.SetValue('********************')
+		if self.conf.get('TWITTER', 'apiSecret'): self.apiSecret.SetValue('********************')
+		if self.conf.get('TWITTER', 'accessToken'): self.accessToken.SetValue('********************')
+		if self.conf.get('TWITTER', 'accessTokenSecret'): self.accessTokenSecret.SetValue('********************')
+		if self.conf.get('TWITTER', 'enable')=='1':
 			self.twitter_enable.SetValue(True)
 			self.twitter_periodicity.Disable()
 			self.datastream_select.Disable()
@@ -705,13 +673,13 @@ class MainFrame(wx.Frame):
 			self.accessToken.Disable()
 			self.accessTokenSecret.Disable()
 
-		if self.data_conf.get('GMAIL', 'periodicity'): self.gmail_periodicity.SetValue(self.data_conf.get('GMAIL', 'periodicity'))
+		if self.conf.get('GMAIL', 'periodicity'): self.gmail_periodicity.SetValue(self.conf.get('GMAIL', 'periodicity'))
 		else: self.gmail_periodicity.SetValue('0')
-		if self.data_conf.get('GMAIL', 'gmail'): self.Gmail_account.SetValue(self.data_conf.get('GMAIL', 'gmail'))
-		if self.data_conf.get('GMAIL', 'password'): self.Gmail_password.SetValue('********************')
-		if self.data_conf.get('GMAIL', 'recipient'): self.Recipient.SetValue(self.data_conf.get('GMAIL', 'recipient'))
-		if self.data_conf.get('GMAIL', 'subject'): self.Subject.SetValue(self.data_conf.get('GMAIL', 'subject'))
-		if self.data_conf.get('GMAIL', 'enable')=='1':
+		if self.conf.get('GMAIL', 'gmail'): self.Gmail_account.SetValue(self.conf.get('GMAIL', 'gmail'))
+		if self.conf.get('GMAIL', 'password'): self.Gmail_password.SetValue('********************')
+		if self.conf.get('GMAIL', 'recipient'): self.Recipient.SetValue(self.conf.get('GMAIL', 'recipient'))
+		if self.conf.get('GMAIL', 'subject'): self.Subject.SetValue(self.conf.get('GMAIL', 'subject'))
+		if self.conf.get('GMAIL', 'enable')=='1':
 			self.gmail_enable.SetValue(True)
 			self.gmail_periodicity.Disable()
 			self.Gmail_account.Disable()
@@ -755,27 +723,19 @@ class MainFrame(wx.Frame):
 	def lang_en(self, e):
 		self.clear_lang()
 		self.lang.Check(self.lang_item1.GetId(), True)
-		self.data_conf.read(currentpath+'/openplotter.conf')
-		self.data_conf.set('GENERAL', 'lang', 'en')
-		self.write_conf()
+		self.conf.set('GENERAL', 'lang', 'en')
 	def lang_ca(self, e):
 		self.clear_lang()
 		self.lang.Check(self.lang_item2.GetId(), True)
-		self.data_conf.read(currentpath+'/openplotter.conf')
-		self.data_conf.set('GENERAL', 'lang', 'ca')
-		self.write_conf()
+		self.conf.set('GENERAL', 'lang', 'ca')
 	def lang_es(self, e):
 		self.clear_lang()
 		self.lang.Check(self.lang_item3.GetId(), True)
-		self.data_conf.read(currentpath+'/openplotter.conf')
-		self.data_conf.set('GENERAL', 'lang', 'es')
-		self.write_conf()
+		self.conf.set('GENERAL', 'lang', 'es')
 	def lang_fr(self, e):
 		self.clear_lang()
 		self.lang.Check(self.lang_item4.GetId(), True)
-		self.data_conf.read(currentpath+'/openplotter.conf')
-		self.data_conf.set('GENERAL', 'lang', 'fr')
-		self.write_conf()
+		self.conf.set('GENERAL', 'lang', 'fr')
 
 	def OnAboutBox(self, e):
 		description = _("OpenPlotter is a DIY, open-source, low-cost, low-consumption, modular and scalable sailing platform to run on ARM boards.")			
@@ -794,7 +754,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		info = wx.AboutDialogInfo()
 		info.SetName('OpenPlotter')
-		info.SetVersion(self.data_conf.get('GENERAL', 'version'))
+		info.SetVersion(self.conf.get('GENERAL', 'version'))
 		info.SetDescription(description)
 		info.SetCopyright('2013 - 2015 Sailoog')
 		info.SetWebSite('http://www.sailoog.com')
@@ -821,61 +781,55 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				return
 		else:
 			if delay != '0': delay = delay.lstrip('0')
-			self.data_conf.read(currentpath+'/openplotter.conf')
-			self.data_conf.set('STARTUP', 'delay', delay)
+			self.conf.set('STARTUP', 'delay', delay)
 			self.ShowMessage(_('Startup delay set to ')+delay+_(' seconds'))
-			self.write_conf()
 
 	def startup(self, e):
-		self.data_conf.read(currentpath+'/openplotter.conf')
 		if self.startup_opencpn.GetValue():
 			self.startup_opencpn_nopengl.Enable()
 			self.startup_opencpn_fullscreen.Enable()
-			self.data_conf.set('STARTUP', 'opencpn', '1')
+			self.conf.set('STARTUP', 'opencpn', '1')
 		else:
 			self.startup_opencpn_nopengl.Disable()
 			self.startup_opencpn_fullscreen.Disable()
-			self.data_conf.set('STARTUP', 'opencpn', '0')
+			self.conf.set('STARTUP', 'opencpn', '0')
 
 		if self.startup_opencpn_nopengl.GetValue():
-			self.data_conf.set('STARTUP', 'opencpn_no_opengl', '1')
+			self.conf.set('STARTUP', 'opencpn_no_opengl', '1')
 		else:
-			self.data_conf.set('STARTUP', 'opencpn_no_opengl', '0')
+			self.conf.set('STARTUP', 'opencpn_no_opengl', '0')
 
 		if self.startup_opencpn_fullscreen.GetValue():
-			self.data_conf.set('STARTUP', 'opencpn_fullscreen', '1')
+			self.conf.set('STARTUP', 'opencpn_fullscreen', '1')
 		else:
-			self.data_conf.set('STARTUP', 'opencpn_fullscreen', '0')
+			self.conf.set('STARTUP', 'opencpn_fullscreen', '0')
 
 		if self.startup_multiplexer.GetValue():
 			self.startup_nmea_time.Enable()
-			self.data_conf.set('STARTUP', 'kplex', '1')
+			self.conf.set('STARTUP', 'kplex', '1')
 		else:
 			self.startup_nmea_time.Disable()
-			self.data_conf.set('STARTUP', 'kplex', '0')
+			self.conf.set('STARTUP', 'kplex', '0')
 
 		if self.startup_nmea_time.GetValue():
-			self.data_conf.set('STARTUP', 'gps_time', '1')
+			self.conf.set('STARTUP', 'gps_time', '1')
 		else:
-			self.data_conf.set('STARTUP', 'gps_time', '0')
+			self.conf.set('STARTUP', 'gps_time', '0')
 
 		if self.startup_remote_desktop.GetValue():
-			self.data_conf.set('STARTUP', 'x11vnc', '1')
+			self.conf.set('STARTUP', 'x11vnc', '1')
 		else:
-			self.data_conf.set('STARTUP', 'x11vnc', '0')
+			self.conf.set('STARTUP', 'x11vnc', '0')
 
 		if self.startup_signalk.GetValue():
-			self.data_conf.set('STARTUP', 'signalk', '1')
+			self.conf.set('STARTUP', 'signalk', '1')
 		else:
-			self.data_conf.set('STARTUP', 'signalk', '0')
-
-		self.write_conf()
+			self.conf.set('STARTUP', 'signalk', '0')
 
 ########WIFI###################################	
 
 
 	def onwifi_enable (self, e):
-		self.data_conf.read(currentpath+'/openplotter.conf')
 		self.SetStatusText(_('Configuring NMEA WiFi server, wait please...'))
 		isChecked = self.wifi_enable.GetValue()
 		wlan=self.wlan.GetValue()
@@ -896,19 +850,18 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		if 'WiFi access point failed.' in msg:
 			self.enable_disable_wifi(0)
-			self.data_conf.set('WIFI', 'device', '')
-			self.data_conf.set('WIFI', 'password', '')
-			self.data_conf.set('WIFI', 'ssid', '')
+			self.conf.set('WIFI', 'device', '')
+			self.conf.set('WIFI', 'password', '')
+			self.conf.set('WIFI', 'ssid', '')
 		if'WiFi access point started.' in msg:
-			self.data_conf.set('WIFI', 'device', wlan)
-			self.data_conf.set('WIFI', 'password', passw)
-			self.data_conf.set('WIFI', 'ssid', ssid)
+			self.conf.set('WIFI', 'device', wlan)
+			self.conf.set('WIFI', 'password', passw)
+			self.conf.set('WIFI', 'ssid', ssid)
 		msg=msg.replace('WiFi access point failed.', _('WiFi access point failed.'))
 		msg=msg.replace('WiFi access point started.', _('WiFi access point started.'))
 		msg=msg.replace('WiFi access point stopped.', _('WiFi access point stopped.'))
 		self.SetStatusText('')
 		self.ShowMessage(msg)
-		self.write_conf()
 		self.show_ip_info('')
 
 	def show_ip_info(self, e):
@@ -940,7 +893,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.passw_label.Disable()
 			self.ssid_label.Disable()
 			self.wifi_enable.SetValue(True)
-			self.data_conf.set('WIFI', 'enable', '1')
+			self.conf.set('WIFI', 'enable', '1')
 		else:
 			self.wlan.Enable()
 			self.passw.Enable()
@@ -949,7 +902,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.passw_label.Enable()
 			self.ssid_label.Enable()
 			self.wifi_enable.SetValue(False)
-			self.data_conf.set('WIFI', 'enable', '0')
+			self.conf.set('WIFI', 'enable', '0')
 
 ########SDR-AIS###################################	
 
@@ -962,7 +915,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		subprocess.call(['pkill', '-9', 'kal'])
 
 	def enable_sdr_controls(self):
-		self.data_conf.read(currentpath+'/openplotter.conf')
 		self.gain.Enable()
 		self.ppm.Enable()
 		self.ais_frequencies1.Enable()
@@ -970,8 +922,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.gain_label.Enable()
 		self.correction_label.Enable()
 		self.ais_sdr_enable.SetValue(False)
-		self.data_conf.set('AIS-SDR', 'enable', '0')
-		self.write_conf()
+		self.conf.set('AIS-SDR', 'enable', '0')
 
 	def disable_sdr_controls(self):
 		self.gain.Disable()
@@ -988,7 +939,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		sender.SetValue(True)
 
 	def OnOffAIS(self, e):
-		self.data_conf.read(currentpath+'/openplotter.conf')
 		self.kill_sdr()
 		isChecked = self.ais_sdr_enable.GetValue()
 		if isChecked:
@@ -1002,16 +952,15 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				channel='b'
 			rtl_fm=subprocess.Popen(['rtl_fm', '-f', frecuency, '-g', gain, '-p', ppm, '-s', '48k'], stdout = subprocess.PIPE)
 			aisdecoder=subprocess.Popen(['aisdecoder', '-h', '127.0.0.1', '-p', '10110', '-a', 'file', '-c', 'mono', '-d', '-f', '/dev/stdin'], stdin = rtl_fm.stdout)         
-			self.data_conf.set('AIS-SDR', 'enable', '1')
-			self.data_conf.set('AIS-SDR', 'gain', gain)
-			self.data_conf.set('AIS-SDR', 'ppm', ppm)
-			self.data_conf.set('AIS-SDR', 'channel', channel)
+			self.conf.set('AIS-SDR', 'enable', '1')
+			self.conf.set('AIS-SDR', 'gain', gain)
+			self.conf.set('AIS-SDR', 'ppm', ppm)
+			self.conf.set('AIS-SDR', 'channel', channel)
 			msg=_('SDR-AIS reception enabled')
 		else: 
 			self.enable_sdr_controls()
-			self.data_conf.set('AIS-SDR', 'enable', '0')
+			self.conf.set('AIS-SDR', 'enable', '0')
 			msg=_('SDR-AIS reception disabled')
-		self.write_conf()
 		self.SetStatusText('')
 		self.ShowMessage(msg)
 
@@ -1050,7 +999,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.ShowMessage(msg)
 
 	def check_channel(self, event):
-		self.data_conf.read(currentpath+'/openplotter.conf')
 		self.kill_sdr()
 		self.enable_sdr_controls()
 		gain=self.gain.GetValue()
@@ -1059,8 +1007,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if channel:
 			subprocess.Popen(("lxterminal -e 'bash -c \"kal -c "+channel+" -g "+gain+" -e "+ppm+"; echo 'Press [ENTER] to close the window'; read -p ---------------------------------; exit 0; exec bash\"'"), shell=True)
 			msg=_('Wait for the system to calculate the ppm value with the selected channel. Put the obtained value in "Correction (ppm)" field and enable SDR-AIS reception again.')
-			self.data_conf.set('AIS-SDR', 'gsm_channel', channel)
-			self.write_conf()
+			self.conf.set('AIS-SDR', 'gsm_channel', channel)
 			self.ShowMessage(msg)
 
 ########multimpexer###################################	
@@ -1268,7 +1215,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	
 	def add_serial_input(self,event):
 		subprocess.call(['pkill', '-f', 'connection.py'])
-		p=subprocess.Popen(['python', currentpath+'/connection.py', self.language, 'in', 'serial'], stdout=subprocess.PIPE)
+		p=subprocess.Popen(['python', currentpath+'/connection.py', 'in', 'serial'], stdout=subprocess.PIPE)
 		r=stdout = p.communicate()[0]
 		if r:
 			list_tmp=self.process_name(r)
@@ -1284,7 +1231,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def add_serial_output(self,event):
 		subprocess.call(['pkill', '-f', 'connection.py'])
-		p=subprocess.Popen(['python', currentpath+'/connection.py', self.language, 'out', 'serial'], stdout=subprocess.PIPE)
+		p=subprocess.Popen(['python', currentpath+'/connection.py', 'out', 'serial'], stdout=subprocess.PIPE)
 		r=stdout = p.communicate()[0]
 		if r:
 			list_tmp=self.process_name(r)
@@ -1300,7 +1247,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	
 	def add_network_input(self,event):
 		subprocess.call(['pkill', '-f', 'connection.py'])
-		p=subprocess.Popen(['python', currentpath+'/connection.py', self.language, 'in', 'network'], stdout=subprocess.PIPE)
+		p=subprocess.Popen(['python', currentpath+'/connection.py', 'in', 'network'], stdout=subprocess.PIPE)
 		r=stdout = p.communicate()[0]
 		if r:
 			list_tmp=self.process_name(r)
@@ -1317,7 +1264,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def add_network_output(self,event):
 		subprocess.call(['pkill', '-f', 'connection.py'])
-		p=subprocess.Popen(['python', currentpath+'/connection.py', self.language, 'out', 'network'], stdout=subprocess.PIPE)
+		p=subprocess.Popen(['python', currentpath+'/connection.py', 'out', 'network'], stdout=subprocess.PIPE)
 		r=stdout = p.communicate()[0]
 		if r:
 			list_tmp=self.process_name(r)
@@ -1334,52 +1281,41 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 ######################################multiplexer
 
-
-	def write_conf(self):
-		with open(currentpath+'/openplotter.conf', 'wb') as configfile:
-			self.data_conf.write(configfile)
-
 	def ShowMessage(self, w_msg):
 			wx.MessageBox(w_msg, 'Info', wx.OK | wx.ICON_INFORMATION)
 
-######################################sensors
+#####sensors#################################
 	def start_sensors(self):
-		self.write_conf()
 		subprocess.call(['pkill', 'RTIMULibDemoGL'])
 		subprocess.call(['pkill', '-f', 'sensors.py'])
 		if self.heading.GetValue() or self.heel.GetValue() or self.press.GetValue() or self.temp_p.GetValue() or self.hum.GetValue() or self.temp_h.GetValue():
 			subprocess.Popen(['python', currentpath+'/sensors.py'], cwd=currentpath+'/imu')
 
 	def start_sensors_b(self):
-		self.write_conf()
 		subprocess.call(['pkill', '-f', 'sensors_b.py'])
 		if self.eng_temp.GetValue():
 			subprocess.Popen(['python', currentpath+'/sensors_b.py'])
 
 	def ok_rate(self, e):
-		self.data_conf.read(currentpath+'/openplotter.conf')
 		rate=self.rate.GetValue()
-		self.data_conf.set('STARTUP', 'nmea_rate_sen', rate)
+		self.conf.set('STARTUP', 'nmea_rate_sen', rate)
 		self.start_sensors()
 		self.start_sensors_b()
 		self.ShowMessage(_('Generation rate set to ')+rate+_(' seconds'))
 		
 	def nmea_hdg(self, e):
-		self.data_conf.read(currentpath+'/openplotter.conf')
 		sender = e.GetEventObject()
-		if sender.GetValue(): self.data_conf.set('STARTUP', 'nmea_hdg', '1')
-		else: self.data_conf.set('STARTUP', 'nmea_hdg', '0')
+		if sender.GetValue(): self.conf.set('STARTUP', 'nmea_hdg', '1')
+		else: self.conf.set('STARTUP', 'nmea_hdg', '0')
 		self.start_sensors()
 
 	def nmea_heel(self, e):
-		self.data_conf.read(currentpath+'/openplotter.conf')
 		sender = e.GetEventObject()
-		if sender.GetValue(): self.data_conf.set('STARTUP', 'nmea_heel', '1')
-		else: self.data_conf.set('STARTUP', 'nmea_heel', '0')
+		if sender.GetValue(): self.conf.set('STARTUP', 'nmea_heel', '1')
+		else: self.conf.set('STARTUP', 'nmea_heel', '0')
 		self.start_sensors()
 
 	def reset_imu(self, e):
-		self.data_conf.read(currentpath+'/openplotter.conf')
 		try:
 			os.remove(currentpath+'/imu/RTIMULib.ini')
 		except:pass
@@ -1387,14 +1323,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.imu_tag.Disable()
 		self.heading.SetValue(False)
 		self.heel.SetValue(False)
-		self.data_conf.set('STARTUP', 'nmea_hdg', '0')
-		self.data_conf.set('STARTUP', 'nmea_heel', '0')
+		self.conf.set('STARTUP', 'nmea_hdg', '0')
+		self.conf.set('STARTUP', 'nmea_heel', '0')
 		self.start_sensors()
 		msg=_('Heading and heel disabled.\nClose and open OpenPlotter again to autodetect.')
 		self.ShowMessage(msg)
 
 	def reset_press_hum(self, e):
-		self.data_conf.read(currentpath+'/openplotter.conf')
 		try:
 			os.remove(currentpath+'/imu/RTIMULib2.ini')
 		except:pass
@@ -1407,81 +1342,74 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.temp_p.SetValue(False)
 		self.hum.SetValue(False)
 		self.temp_h.SetValue(False)
-		self.data_conf.set('STARTUP', 'nmea_press', '0')
-		self.data_conf.set('STARTUP', 'nmea_temp_p', '0')
-		self.data_conf.set('STARTUP', 'nmea_hum', '0')
-		self.data_conf.set('STARTUP', 'nmea_temp_h', '0')
+		self.conf.set('STARTUP', 'nmea_press', '0')
+		self.conf.set('STARTUP', 'nmea_temp_p', '0')
+		self.conf.set('STARTUP', 'nmea_hum', '0')
+		self.conf.set('STARTUP', 'nmea_temp_h', '0')
 		self.start_sensors()
 		msg=_('Temperature, humidity and pressure disabled.\nClose and open OpenPlotter again to autodetect.')
 		self.ShowMessage(msg)
 
 	def calibrate_imu(self, e):
-		self.data_conf.read(currentpath+'/openplotter.conf')
 		self.heading.SetValue(False)
 		self.heel.SetValue(False)
 		self.press.SetValue(False)
 		self.temp_p.SetValue(False)
 		self.hum.SetValue(False)
 		self.temp_h.SetValue(False)
-		self.data_conf.set('STARTUP', 'nmea_hdg', '0')
-		self.data_conf.set('STARTUP', 'nmea_heel', '0')
-		self.data_conf.set('STARTUP', 'nmea_press', '0')
-		self.data_conf.set('STARTUP', 'nmea_temp_p', '0')
-		self.data_conf.set('STARTUP', 'nmea_hum', '0')
-		self.data_conf.set('STARTUP', 'nmea_temp_h', '0')
+		self.conf.set('STARTUP', 'nmea_hdg', '0')
+		self.conf.set('STARTUP', 'nmea_heel', '0')
+		self.conf.set('STARTUP', 'nmea_press', '0')
+		self.conf.set('STARTUP', 'nmea_temp_p', '0')
+		self.conf.set('STARTUP', 'nmea_hum', '0')
+		self.conf.set('STARTUP', 'nmea_temp_h', '0')
 		self.start_sensors()
 		subprocess.Popen('RTIMULibDemoGL', cwd=currentpath+'/imu')
 		msg=_('Heading, heel, temperature, humidity and pressure disabled.\nAfter calibrating, enable them again.')
 		self.ShowMessage(msg)
 	
 	def nmea_press(self, e):
-		self.data_conf.read(currentpath+'/openplotter.conf')
 		sender = e.GetEventObject()
-		if sender.GetValue(): self.data_conf.set('STARTUP', 'nmea_press', '1')
-		else: self.data_conf.set('STARTUP', 'nmea_press', '0')
+		if sender.GetValue(): self.conf.set('STARTUP', 'nmea_press', '1')
+		else: self.conf.set('STARTUP', 'nmea_press', '0')
 		self.start_sensors()
 
 	def nmea_temp_p(self, e):
-		self.data_conf.read(currentpath+'/openplotter.conf')
 		sender = e.GetEventObject()
 		if sender.GetValue(): 
 			self.temp_h.SetValue(False)
-			self.data_conf.set('STARTUP', 'nmea_temp_h', '0')
-			self.data_conf.set('STARTUP', 'nmea_temp_p', '1')
+			self.conf.set('STARTUP', 'nmea_temp_h', '0')
+			self.conf.set('STARTUP', 'nmea_temp_p', '1')
 		else: 
-			self.data_conf.set('STARTUP', 'nmea_temp_p', '0')
+			self.conf.set('STARTUP', 'nmea_temp_p', '0')
 		self.start_sensors()
 
 	def nmea_hum(self, e):
-		self.data_conf.read(currentpath+'/openplotter.conf')
 		sender = e.GetEventObject()
-		if sender.GetValue(): self.data_conf.set('STARTUP', 'nmea_hum', '1')
-		else: self.data_conf.set('STARTUP', 'nmea_hum', '0')
+		if sender.GetValue(): self.conf.set('STARTUP', 'nmea_hum', '1')
+		else: self.conf.set('STARTUP', 'nmea_hum', '0')
 		self.start_sensors()
 
 	def nmea_temp_h(self, e):
-		self.data_conf.read(currentpath+'/openplotter.conf')
 		sender = e.GetEventObject()
 		if sender.GetValue(): 
 			self.temp_p.SetValue(False)
-			self.data_conf.set('STARTUP', 'nmea_temp_p', '0')
-			self.data_conf.set('STARTUP', 'nmea_temp_h', '1')
+			self.conf.set('STARTUP', 'nmea_temp_p', '0')
+			self.conf.set('STARTUP', 'nmea_temp_h', '1')
 		else: 
-			self.data_conf.set('STARTUP', 'nmea_temp_h', '0')
+			self.conf.set('STARTUP', 'nmea_temp_h', '0')
 		self.start_sensors()
 
 	def nmea_eng_temp(self, e):
-		self.data_conf.read(currentpath+'/openplotter.conf')
 		sender = e.GetEventObject()
-		if sender.GetValue(): self.data_conf.set('STARTUP', 'nmea_eng_temp', '1')
-		else: self.data_conf.set('STARTUP', 'nmea_eng_temp', '0')
+		if sender.GetValue(): self.conf.set('STARTUP', 'nmea_eng_temp', '1')
+		else: self.conf.set('STARTUP', 'nmea_eng_temp', '0')
 		self.start_sensors_b()		
 
 	def enable_press_temp_log(self, e):
-		self.data_conf.read(currentpath+'/openplotter.conf')
 		sender = e.GetEventObject()
-		if sender.GetValue(): self.data_conf.set('STARTUP', 'press_temp_log', '1')
-		else: self.data_conf.set('STARTUP', 'press_temp_log', '0')
+		if sender.GetValue(): self.conf.set('STARTUP', 'press_temp_log', '1')
+		else: self.conf.set('STARTUP', 'press_temp_log', '0')
 		self.start_sensors()
 
 	def show_graph(self, e):
@@ -1498,50 +1426,44 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 ######################################calculate
 
 	def ok_rate2(self, e):
-		self.data_conf.read(currentpath+'/openplotter.conf')
 		rate=self.rate2.GetValue()
-		self.data_conf.set('STARTUP', 'nmea_rate_cal', rate)
+		self.conf.set('STARTUP', 'nmea_rate_cal', rate)
 		self.start_calculate()
 		self.ShowMessage(_('Generation rate set to ')+rate+_(' seconds'))
 
 	def start_calculate(self):
-		self.write_conf()
 		subprocess.call(['pkill', '-f', 'calculate.py'])
 		if self.mag_var.GetValue() or self.heading_t.GetValue() or self.rot.GetValue() or self.TW_STW.GetValue() or self.TW_SOG.GetValue():
 			subprocess.Popen(['python', currentpath+'/calculate.py'])
 
 	def nmea_mag_var(self, e):
-		self.data_conf.read(currentpath+'/openplotter.conf')
 		sender = e.GetEventObject()
-		if sender.GetValue(): self.data_conf.set('STARTUP', 'nmea_mag_var', '1')
-		else: self.data_conf.set('STARTUP', 'nmea_mag_var', '0')
+		if sender.GetValue(): self.conf.set('STARTUP', 'nmea_mag_var', '1')
+		else: self.conf.set('STARTUP', 'nmea_mag_var', '0')
 		self.start_calculate()
 
 	def nmea_hdt(self, e):
-		self.data_conf.read(currentpath+'/openplotter.conf')
 		sender = e.GetEventObject()
-		if sender.GetValue(): self.data_conf.set('STARTUP', 'nmea_hdt', '1')
-		else: self.data_conf.set('STARTUP', 'nmea_hdt', '0')
+		if sender.GetValue(): self.conf.set('STARTUP', 'nmea_hdt', '1')
+		else: self.conf.set('STARTUP', 'nmea_hdt', '0')
 		self.start_calculate()
 
 	def nmea_rot(self, e):
-		self.data_conf.read(currentpath+'/openplotter.conf')
 		sender = e.GetEventObject()
-		if sender.GetValue(): self.data_conf.set('STARTUP', 'nmea_rot', '1')
-		else: self.data_conf.set('STARTUP', 'nmea_rot', '0')
+		if sender.GetValue(): self.conf.set('STARTUP', 'nmea_rot', '1')
+		else: self.conf.set('STARTUP', 'nmea_rot', '0')
 		self.start_calculate()
 
 	def	TW(self, e):
-		self.data_conf.read(currentpath+'/openplotter.conf')
 		sender = e.GetEventObject()
 		state=sender.GetValue()
 		self.TW_STW.SetValue(False)
 		self.TW_SOG.SetValue(False)
-		self.data_conf.set('STARTUP', 'tw_stw', '0')
-		self.data_conf.set('STARTUP', 'tw_sog', '0')
+		self.conf.set('STARTUP', 'tw_stw', '0')
+		self.conf.set('STARTUP', 'tw_sog', '0')
 		if state: sender.SetValue(True)
-		if self.TW_STW.GetValue(): self.data_conf.set('STARTUP', 'tw_stw', '1')
-		if self.TW_SOG.GetValue(): self.data_conf.set('STARTUP', 'tw_sog', '1')
+		if self.TW_STW.GetValue(): self.conf.set('STARTUP', 'tw_stw', '1')
+		if self.TW_SOG.GetValue(): self.conf.set('STARTUP', 'tw_sog', '1')
 		self.start_calculate()
 ######################################Signal K
 	def signalKpanels(self, e):
@@ -1563,7 +1485,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.SetStatusText(_('Signal K server restarted'))
 ######################################Switches
 	def start_switches(self):
-		self.write_conf()
 		subprocess.call(['sudo', 'pkill', '-f', 'switches.py'])
 		if self.switch1_enable.GetValue() or self.switch2_enable.GetValue() or self.switch3_enable.GetValue() or self.switch4_enable.GetValue():
 			subprocess.Popen(['sudo', 'python', currentpath+'/switches.py'])
@@ -1583,19 +1504,18 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.OFFcommand1.Enable()
 			self.ShowMessage(_('This GPIO Pin is already in use.'))
 			return
-		self.data_conf.read(currentpath+'/openplotter.conf')
 		if self.switch1_enable.GetValue(): 
-			self.data_conf.set('SWITCH1', 'enable', '1')
-			self.data_conf.set('SWITCH1', 'gpio', self.gpio_pin1.GetValue())
-			self.data_conf.set('SWITCH1', 'pull_up_down', self.gpio_pull1.GetValue())
-			self.data_conf.set('SWITCH1', 'on_action', str(self.switch_options.index(self.ONaction1.GetValue())))
+			self.conf.set('SWITCH1', 'enable', '1')
+			self.conf.set('SWITCH1', 'gpio', self.gpio_pin1.GetValue())
+			self.conf.set('SWITCH1', 'pull_up_down', self.gpio_pull1.GetValue())
+			self.conf.set('SWITCH1', 'on_action', str(self.actions.options.index(self.ONaction1.GetValue())))
 			command=self.ONcommand1.GetValue()
 			command=command.replace('\'', '"')
-			self.data_conf.set('SWITCH1', 'on_command', command )
-			self.data_conf.set('SWITCH1', 'off_action', str(self.switch_options.index(self.OFFaction1.GetValue())))
+			self.conf.set('SWITCH1', 'on_command', command )
+			self.conf.set('SWITCH1', 'off_action', str(self.actions.options.index(self.OFFaction1.GetValue())))
 			command=self.OFFcommand1.GetValue()
 			command=command.replace('\'', '"')
-			self.data_conf.set('SWITCH1', 'off_command', command )
+			self.conf.set('SWITCH1', 'off_command', command )
 			self.gpio_pin1.Disable()
 			self.gpio_pull1.Disable()
 			self.ONaction1.Disable()
@@ -1603,7 +1523,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.OFFaction1.Disable()
 			self.OFFcommand1.Disable()
 		else: 
-			self.data_conf.set('SWITCH1', 'enable', '0')
+			self.conf.set('SWITCH1', 'enable', '0')
 			self.gpio_pin1.Enable()
 			self.gpio_pull1.Enable()
 			self.ONaction1.Enable()
@@ -1627,19 +1547,18 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.OFFcommand2.Enable()
 			self.ShowMessage(_('This GPIO Pin is already in use.'))
 			return
-		self.data_conf.read(currentpath+'/openplotter.conf')
 		if self.switch2_enable.GetValue(): 
-			self.data_conf.set('SWITCH2', 'enable', '1')
-			self.data_conf.set('SWITCH2', 'gpio', self.gpio_pin2.GetValue())
-			self.data_conf.set('SWITCH2', 'pull_up_down', self.gpio_pull2.GetValue())
-			self.data_conf.set('SWITCH2', 'on_action', str(self.switch_options.index(self.ONaction2.GetValue())))
+			self.conf.set('SWITCH2', 'enable', '1')
+			self.conf.set('SWITCH2', 'gpio', self.gpio_pin2.GetValue())
+			self.conf.set('SWITCH2', 'pull_up_down', self.gpio_pull2.GetValue())
+			self.conf.set('SWITCH2', 'on_action', str(self.actions.options.index(self.ONaction2.GetValue())))
 			command=self.ONcommand2.GetValue()
 			command=command.replace('\'', '"')
-			self.data_conf.set('SWITCH2', 'on_command', command )
-			self.data_conf.set('SWITCH2', 'off_action', str(self.switch_options.index(self.OFFaction2.GetValue())))
+			self.conf.set('SWITCH2', 'on_command', command )
+			self.conf.set('SWITCH2', 'off_action', str(self.actions.options.index(self.OFFaction2.GetValue())))
 			command=self.OFFcommand2.GetValue()
 			command=command.replace('\'', '"')
-			self.data_conf.set('SWITCH2', 'off_command', command )
+			self.conf.set('SWITCH2', 'off_command', command )
 			self.gpio_pin2.Disable()
 			self.gpio_pull2.Disable()
 			self.ONaction2.Disable()
@@ -1647,7 +1566,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.OFFaction2.Disable()
 			self.OFFcommand2.Disable()
 		else: 
-			self.data_conf.set('SWITCH2', 'enable', '0')
+			self.conf.set('SWITCH2', 'enable', '0')
 			self.gpio_pin2.Enable()
 			self.gpio_pull2.Enable()
 			self.ONaction2.Enable()
@@ -1671,19 +1590,18 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.OFFcommand3.Enable()
 			self.ShowMessage(_('This GPIO Pin is already in use.'))
 			return
-		self.data_conf.read(currentpath+'/openplotter.conf')
 		if self.switch3_enable.GetValue(): 
-			self.data_conf.set('SWITCH3', 'enable', '1')
-			self.data_conf.set('SWITCH3', 'gpio', self.gpio_pin3.GetValue())
-			self.data_conf.set('SWITCH3', 'pull_up_down', self.gpio_pull3.GetValue())
-			self.data_conf.set('SWITCH3', 'on_action', str(self.switch_options.index(self.ONaction3.GetValue())))
+			self.conf.set('SWITCH3', 'enable', '1')
+			self.conf.set('SWITCH3', 'gpio', self.gpio_pin3.GetValue())
+			self.conf.set('SWITCH3', 'pull_up_down', self.gpio_pull3.GetValue())
+			self.conf.set('SWITCH3', 'on_action', str(self.actions.options.index(self.ONaction3.GetValue())))
 			command=self.ONcommand3.GetValue()
 			command=command.replace('\'', '"')
-			self.data_conf.set('SWITCH3', 'on_command', command )
-			self.data_conf.set('SWITCH3', 'off_action', str(self.switch_options.index(self.OFFaction3.GetValue())))
+			self.conf.set('SWITCH3', 'on_command', command )
+			self.conf.set('SWITCH3', 'off_action', str(self.actions.options.index(self.OFFaction3.GetValue())))
 			command=self.OFFcommand3.GetValue()
 			command=command.replace('\'', '"')
-			self.data_conf.set('SWITCH3', 'off_command', command )
+			self.conf.set('SWITCH3', 'off_command', command )
 			self.gpio_pin3.Disable()
 			self.gpio_pull3.Disable()
 			self.ONaction3.Disable()
@@ -1691,7 +1609,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.OFFaction3.Disable()
 			self.OFFcommand3.Disable()
 		else: 
-			self.data_conf.set('SWITCH3', 'enable', '0')
+			self.conf.set('SWITCH3', 'enable', '0')
 			self.gpio_pin3.Enable()
 			self.gpio_pull3.Enable()
 			self.ONaction3.Enable()
@@ -1715,19 +1633,18 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.OFFcommand4.Enable()
 			self.ShowMessage(_('This GPIO Pin is already in use.'))
 			return
-		self.data_conf.read(currentpath+'/openplotter.conf')
 		if self.switch4_enable.GetValue(): 
-			self.data_conf.set('SWITCH4', 'enable', '1')
-			self.data_conf.set('SWITCH4', 'gpio', self.gpio_pin4.GetValue())
-			self.data_conf.set('SWITCH4', 'pull_up_down', self.gpio_pull4.GetValue())
-			self.data_conf.set('SWITCH4', 'on_action', str(self.switch_options.index(self.ONaction4.GetValue())))
+			self.conf.set('SWITCH4', 'enable', '1')
+			self.conf.set('SWITCH4', 'gpio', self.gpio_pin4.GetValue())
+			self.conf.set('SWITCH4', 'pull_up_down', self.gpio_pull4.GetValue())
+			self.conf.set('SWITCH4', 'on_action', str(self.actions.options.index(self.ONaction4.GetValue())))
 			command=self.ONcommand4.GetValue()
 			command=command.replace('\'', '"')
-			self.data_conf.set('SWITCH4', 'on_command', command )
-			self.data_conf.set('SWITCH4', 'off_action', str(self.switch_options.index(self.OFFaction4.GetValue())))
+			self.conf.set('SWITCH4', 'on_command', command )
+			self.conf.set('SWITCH4', 'off_action', str(self.actions.options.index(self.OFFaction4.GetValue())))
 			command=self.OFFcommand4.GetValue()
 			command=command.replace('\'', '"')
-			self.data_conf.set('SWITCH4', 'off_command', command )
+			self.conf.set('SWITCH4', 'off_command', command )
 			self.gpio_pin4.Disable()
 			self.gpio_pull4.Disable()
 			self.ONaction4.Disable()
@@ -1735,7 +1652,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.OFFaction4.Disable()
 			self.OFFcommand4.Disable()
 		else: 
-			self.data_conf.set('SWITCH4', 'enable', '0')
+			self.conf.set('SWITCH4', 'enable', '0')
 			self.gpio_pin4.Enable()
 			self.gpio_pull4.Enable()
 			self.ONaction4.Enable()
@@ -1804,7 +1721,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 #######################twitterbot
 
 	def start_monitoring(self):
-		self.write_conf()
 		subprocess.call(['sudo','pkill', '-f', 'monitoring.py'])
 		if self.twitter_enable.GetValue() or self.gmail_enable.GetValue():
 			subprocess.Popen(['sudo','python',currentpath+'/monitoring.py'])
@@ -1818,7 +1734,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.twitter_enable.SetValue(False)
 			self.ShowMessage(_('Select some data to publish.'))
 			return
-		self.data_conf.read(currentpath+'/openplotter.conf')
 		if self.twitter_enable.GetValue():
 			self.twitter_periodicity.Disable()
 			self.datastream_select.Disable()
@@ -1826,23 +1741,23 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.apiSecret.Disable()
 			self.accessToken.Disable()
 			self.accessTokenSecret.Disable()
-			self.data_conf.set('TWITTER', 'enable', '1')
-			self.data_conf.set('TWITTER', 'periodicity', self.twitter_periodicity.GetValue())
-			self.data_conf.set('TWITTER', 'send_data', str(self.datastream_select.GetSelections()))
+			self.conf.set('TWITTER', 'enable', '1')
+			self.conf.set('TWITTER', 'periodicity', self.twitter_periodicity.GetValue())
+			self.conf.set('TWITTER', 'send_data', str(self.datastream_select.GetSelections()))
 			if not '*****' in self.apiKey.GetValue(): 
-				self.data_conf.set('TWITTER', 'apiKey', self.apiKey.GetValue())
+				self.conf.set('TWITTER', 'apiKey', self.apiKey.GetValue())
 				self.apiKey.SetValue('********************')
 			if not '*****' in self.apiSecret.GetValue(): 
-				self.data_conf.set('TWITTER', 'apiSecret', self.apiSecret.GetValue())
+				self.conf.set('TWITTER', 'apiSecret', self.apiSecret.GetValue())
 				self.apiSecret.SetValue('********************')
 			if not '*****' in self.accessToken.GetValue(): 
-				self.data_conf.set('TWITTER', 'accessToken', self.accessToken.GetValue())
+				self.conf.set('TWITTER', 'accessToken', self.accessToken.GetValue())
 				self.accessToken.SetValue('********************')
 			if not '*****' in self.accessTokenSecret.GetValue(): 
-				self.data_conf.set('TWITTER', 'accessTokenSecret', self.accessTokenSecret.GetValue())
+				self.conf.set('TWITTER', 'accessTokenSecret', self.accessTokenSecret.GetValue())
 				self.accessTokenSecret.SetValue('********************')
 		else:
-			self.data_conf.set('TWITTER', 'enable', '0')
+			self.conf.set('TWITTER', 'enable', '0')
 			self.twitter_periodicity.Enable()
 			self.datastream_select.Enable()
 			self.apiKey.Enable()
@@ -1856,23 +1771,22 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.gmail_enable.SetValue(False)
 			self.ShowMessage(_('Enter valid Gmail account, Gmail password, Recipient and Subject.'))
 			return
-		self.data_conf.read(currentpath+'/openplotter.conf')
 		if self.gmail_enable.GetValue():
 			self.gmail_periodicity.Disable()
 			self.Gmail_account.Disable()
 			self.Gmail_password.Disable()
 			self.Recipient.Disable()
 			self.Subject.Disable()
-			self.data_conf.set('GMAIL', 'enable', '1')
-			self.data_conf.set('GMAIL', 'periodicity', self.gmail_periodicity.GetValue())
-			self.data_conf.set('GMAIL', 'gmail', self.Gmail_account.GetValue())
+			self.conf.set('GMAIL', 'enable', '1')
+			self.conf.set('GMAIL', 'periodicity', self.gmail_periodicity.GetValue())
+			self.conf.set('GMAIL', 'gmail', self.Gmail_account.GetValue())
 			if not '*****' in self.Gmail_password.GetValue(): 
-				self.data_conf.set('GMAIL', 'password', self.Gmail_password.GetValue())
+				self.conf.set('GMAIL', 'password', self.Gmail_password.GetValue())
 				self.Gmail_password.SetValue('********************')
-			self.data_conf.set('GMAIL', 'recipient', self.Recipient.GetValue())
-			self.data_conf.set('GMAIL', 'subject', self.Subject.GetValue())
+			self.conf.set('GMAIL', 'recipient', self.Recipient.GetValue())
+			self.conf.set('GMAIL', 'subject', self.Subject.GetValue())
 		else:
-			self.data_conf.set('GMAIL', 'enable', '0')
+			self.conf.set('GMAIL', 'enable', '0')
 			self.gmail_periodicity.Enable()
 			self.Gmail_account.Enable()
 			self.Gmail_password.Enable()

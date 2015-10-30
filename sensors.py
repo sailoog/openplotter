@@ -15,18 +15,19 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import sys, ConfigParser, os, socket, time, pynmea2, RTIMU, math, csv
+import socket, time, pynmea2, RTIMU, math, csv
+from classes.paths import Paths
+from classes.conf import Conf
 
-pathname = os.path.dirname(sys.argv[0])
-currentpath = os.path.abspath(pathname)
+paths=Paths()
+currentpath=paths.currentpath
 
-data_conf = ConfigParser.SafeConfigParser()
-data_conf.read(currentpath+'/openplotter.conf')
+conf=Conf()
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 
-if data_conf.get('STARTUP', 'nmea_hdg')=='1' or data_conf.get('STARTUP', 'nmea_heel')=='1':
+if conf.get('STARTUP', 'nmea_hdg')=='1' or conf.get('STARTUP', 'nmea_heel')=='1':
 	SETTINGS_FILE = "RTIMULib"
 	s = RTIMU.Settings(SETTINGS_FILE)
 	imu = RTIMU.RTIMU(s)
@@ -37,19 +38,19 @@ if data_conf.get('STARTUP', 'nmea_hdg')=='1' or data_conf.get('STARTUP', 'nmea_h
 	imu.setCompassEnable(True)
 	poll_interval = imu.IMUGetPollInterval()
 
-if data_conf.get('STARTUP', 'nmea_press')=='1' or data_conf.get('STARTUP', 'nmea_temp_p')=='1':
+if conf.get('STARTUP', 'nmea_press')=='1' or conf.get('STARTUP', 'nmea_temp_p')=='1':
 	SETTINGS_FILE2 = "RTIMULib2"
 	s2 = RTIMU.Settings(SETTINGS_FILE2)
 	pressure_val = RTIMU.RTPressure(s2)
 	pressure_val.pressureInit()
 
-if data_conf.get('STARTUP', 'nmea_hum')=='1' or data_conf.get('STARTUP', 'nmea_temp_h')=='1':
+if conf.get('STARTUP', 'nmea_hum')=='1' or conf.get('STARTUP', 'nmea_temp_h')=='1':
 	SETTINGS_FILE3 = "RTIMULib3"
 	s3 = RTIMU.Settings(SETTINGS_FILE3)
 	humidity_val = RTIMU.RTHumidity(s3)
 	humidity_val.humidityInit()
 
-if data_conf.get('STARTUP', 'press_temp_log')=='1':
+if conf.get('STARTUP', 'press_temp_log')=='1':
 	ifile  = open(currentpath+'/weather_log.csv', "r")
 	reader = csv.reader(ifile)
 	log_list = []
@@ -71,7 +72,7 @@ tick=time.time()
 while True:
 	tick2=time.time()
 	# read IMU
-	if data_conf.get('STARTUP', 'nmea_hdg')=='1' or data_conf.get('STARTUP', 'nmea_heel')=='1':
+	if conf.get('STARTUP', 'nmea_hdg')=='1' or conf.get('STARTUP', 'nmea_heel')=='1':
 		if imu.IMURead():
 			data = imu.getIMUData()
 			fusionPose = data["fusionPose"]
@@ -84,7 +85,7 @@ while True:
 		time.sleep(poll_interval*1.0/1000.0)
 
 	# read Pressure
-	if data_conf.get('STARTUP', 'nmea_press')=='1' or data_conf.get('STARTUP', 'nmea_temp_p')=='1':
+	if conf.get('STARTUP', 'nmea_press')=='1' or conf.get('STARTUP', 'nmea_temp_p')=='1':
 		read=pressure_val.pressureRead()
 		if read:
 			if (read[0]):
@@ -93,7 +94,7 @@ while True:
 				temperature_p=read[3]
 
 	# read humidity
-	if data_conf.get('STARTUP', 'nmea_hum')=='1' or data_conf.get('STARTUP', 'nmea_temp_h')=='1':
+	if conf.get('STARTUP', 'nmea_hum')=='1' or conf.get('STARTUP', 'nmea_temp_h')=='1':
 		read=humidity_val.humidityRead()
 		if read:
 			if (read[0]):
@@ -102,10 +103,10 @@ while True:
 				temperature_h=read[3]
 
 	#GENERATE
-	if tick2-tick > float(data_conf.get('STARTUP', 'nmea_rate_sen')):
+	if tick2-tick > float(conf.get('STARTUP', 'nmea_rate_sen')):
 		tick=time.time()
 		# HDG
-		if data_conf.get('STARTUP', 'nmea_hdg')=='1' and heading_m:
+		if conf.get('STARTUP', 'nmea_hdg')=='1' and heading_m:
 			hdg = pynmea2.HDG('OP', 'HDG', (str(heading_m),'','','',''))
 			hdg1=str(hdg)
 			hdg2=hdg1+"\r\n"
@@ -113,31 +114,31 @@ while True:
 			heading_m=''
 		# XDR
 		list_tmp=[]			
-		if data_conf.get('STARTUP', 'nmea_press')=='1' and pressure:
+		if conf.get('STARTUP', 'nmea_press')=='1' and pressure:
 			press=round(pressure/1000,4)
 			list_tmp.append('P')
 			list_tmp.append(str(press))
 			list_tmp.append('B')
 			list_tmp.append('AIRP')
-		if data_conf.get('STARTUP', 'nmea_temp_p')=='1' and temperature_p:			
+		if conf.get('STARTUP', 'nmea_temp_p')=='1' and temperature_p:			
 			temp= round(temperature_p,1)
 			list_tmp.append('C')
 			list_tmp.append(str(temp))
 			list_tmp.append('C')
 			list_tmp.append('AIRT')
-		if data_conf.get('STARTUP', 'nmea_temp_h')=='1' and temperature_h:			
+		if conf.get('STARTUP', 'nmea_temp_h')=='1' and temperature_h:			
 			temp= round(temperature_h,1)
 			list_tmp.append('C')
 			list_tmp.append(str(temp))
 			list_tmp.append('C')
 			list_tmp.append('AIRT')
-		if data_conf.get('STARTUP', 'nmea_hum')=='1' and humidity:
+		if conf.get('STARTUP', 'nmea_hum')=='1' and humidity:
 			hum=round(humidity,1)
 			list_tmp.append('H')
 			list_tmp.append(str(hum))
 			list_tmp.append('R')
 			list_tmp.append('HUMI')
-		if data_conf.get('STARTUP', 'nmea_heel')=='1' and heel:
+		if conf.get('STARTUP', 'nmea_heel')=='1' and heel:
 			heel= round(heel,1)
 			list_tmp.append('A')
 			list_tmp.append(str(heel))
@@ -151,11 +152,11 @@ while True:
 			heel=''
 
 		temperature=''
-		if data_conf.get('STARTUP', 'nmea_temp_p')=='1': temperature=temperature_p
-		if data_conf.get('STARTUP', 'nmea_temp_h')=='1': temperature=temperature_h
+		if conf.get('STARTUP', 'nmea_temp_p')=='1': temperature=temperature_p
+		if conf.get('STARTUP', 'nmea_temp_h')=='1': temperature=temperature_h
 
 		# log temperature pressure humidity
-		if data_conf.get('STARTUP', 'press_temp_log')=='1':
+		if conf.get('STARTUP', 'press_temp_log')=='1':
 			if tick-last_log > 300:
 				last_log=tick
 				press2=0

@@ -17,12 +17,9 @@
 
 import sys, ConfigParser, os, socket, time, pynmea2
 from w1thermsensor import W1ThermSensor
+from classes.conf import Conf
 
-pathname = os.path.dirname(sys.argv[0])
-currentpath = os.path.abspath(pathname)
-
-data_conf = ConfigParser.SafeConfigParser()
-data_conf.read(currentpath+'/openplotter.conf')
+conf=Conf()
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
@@ -34,17 +31,17 @@ while True:
 	tick2=time.time()
 
 	#GENERATE
-	if tick2-tick > float(data_conf.get('STARTUP', 'nmea_rate_sen')):
+	if tick2-tick > float(conf.get('STARTUP', 'nmea_rate_sen')):
 		tick=time.time()
 
 		# read DS18B20
-		if data_conf.get('STARTUP', 'nmea_eng_temp')=='1':
+		if conf.get('STARTUP', 'nmea_eng_temp')=='1':
 			sensor = W1ThermSensor()
 			eng_temp = sensor.get_temperature()
 
 		# XDR
 		list_tmp=[]			
-		if data_conf.get('STARTUP', 'nmea_eng_temp')=='1' and eng_temp:
+		if conf.get('STARTUP', 'nmea_eng_temp')=='1' and eng_temp:
 			eng_temp=round(eng_temp,1)
 			list_tmp.append('C')
 			list_tmp.append(str(eng_temp))

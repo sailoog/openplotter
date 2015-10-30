@@ -16,26 +16,20 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, os, gettext, sys, re
+import wx, os, sys, re
+from classes.paths import Paths
+from classes.conf import Conf
+from classes.language import Language
 
-pathname = os.path.dirname(sys.argv[0])
-currentpath = os.path.abspath(pathname)
+paths=Paths()
+currentpath=paths.currentpath
 
 class MainFrame(wx.Frame):
 		
 		def __init__(self):
 
-			gettext.install('openplotter', currentpath+'/locale', unicode=False)
-			self.presLan_en = gettext.translation('openplotter', currentpath+'/locale', languages=['en'])
-			self.presLan_ca = gettext.translation('openplotter', currentpath+'/locale', languages=['ca'])
-			self.presLan_es = gettext.translation('openplotter', currentpath+'/locale', languages=['es'])
-			self.presLan_fr = gettext.translation('openplotter', currentpath+'/locale', languages=['fr'])
-
-			language=sys.argv[1]
-			if language=='en':self.presLan_en.install()
-			if language=='ca':self.presLan_ca.install()
-			if language=='es':self.presLan_es.install()
-			if language=='fr':self.presLan_fr.install()
+			self.conf=Conf()
+			Language(self.conf.get('GENERAL','lang'))
 
 			wx.Frame.__init__(self, None, title=_('Connection'), size=(550,350))
 			
@@ -44,8 +38,8 @@ class MainFrame(wx.Frame):
 			self.icon = wx.Icon(currentpath+'/openplotter.ico', wx.BITMAP_TYPE_ICO)
 			self.SetIcon(self.icon)
 
-			self.in_out=sys.argv[2]
-			self.con_type=sys.argv[3]
+			self.in_out=sys.argv[1]
+			self.con_type=sys.argv[2]
 
 			wx.StaticText(self, label=_('Name'), pos=(25, 35))
 			self.name = wx.TextCtrl(self, -1, size=(120, 32), pos=(20, 55))

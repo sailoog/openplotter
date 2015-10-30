@@ -15,11 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import ConfigParser, subprocess, os, sys, time
+import subprocess, time, ConfigParser
+from classes.paths import Paths
+from classes.conf import Conf
 
-home = os.path.expanduser('~')
-pathname = os.path.dirname(sys.argv[0])
-currentpath = os.path.abspath(pathname)
+paths=Paths()
+home=paths.home
+currentpath=paths.currentpath
 
 device=''
 ssid=''
@@ -33,58 +35,55 @@ try:
 	passw=boot_conf.get('OPENPLOTTER', 'pass')
 except: pass
 
-data_conf = ConfigParser.SafeConfigParser()
-data_conf.read(currentpath+'/openplotter.conf')
+conf=Conf()
 
 if device and ssid and passw:
-	data_conf.set('WIFI', 'enable', '1')
-	data_conf.set('WIFI', 'device', device)
-	data_conf.set('WIFI', 'ssid', ssid)
-	data_conf.set('WIFI', 'password', passw)
-	with open(currentpath+'/openplotter.conf', 'wb') as configfile:
-		data_conf.write(configfile)
+	conf.set('WIFI', 'enable', '1')
+	conf.set('WIFI', 'device', device)
+	conf.set('WIFI', 'ssid', ssid)
+	conf.set('WIFI', 'password', passw)
 
-delay=int(data_conf.get('STARTUP', 'delay'))
+delay=int(conf.get('STARTUP', 'delay'))
 
-kplex=data_conf.get('STARTUP', 'kplex')
-opencpn=data_conf.get('STARTUP', 'opencpn')
-opencpn_no=data_conf.get('STARTUP', 'opencpn_no_opengl')
-opencpn_fullscreen=data_conf.get('STARTUP', 'opencpn_fullscreen')
-x11vnc=data_conf.get('STARTUP', 'x11vnc')
-gps_time=data_conf.get('STARTUP', 'gps_time')
-signalk=data_conf.get('STARTUP', 'signalk')
+kplex=conf.get('STARTUP', 'kplex')
+opencpn=conf.get('STARTUP', 'opencpn')
+opencpn_no=conf.get('STARTUP', 'opencpn_no_opengl')
+opencpn_fullscreen=conf.get('STARTUP', 'opencpn_fullscreen')
+x11vnc=conf.get('STARTUP', 'x11vnc')
+gps_time=conf.get('STARTUP', 'gps_time')
+signalk=conf.get('STARTUP', 'signalk')
 
-enable=data_conf.get('AIS-SDR', 'enable')
-gain=data_conf.get('AIS-SDR', 'gain')
-ppm=data_conf.get('AIS-SDR', 'ppm')
-channel=data_conf.get('AIS-SDR', 'channel')
+enable=conf.get('AIS-SDR', 'enable')
+gain=conf.get('AIS-SDR', 'gain')
+ppm=conf.get('AIS-SDR', 'ppm')
+channel=conf.get('AIS-SDR', 'channel')
 
-wifi_server=data_conf.get('WIFI', 'enable')
-wlan=data_conf.get('WIFI', 'device')
-passw2=data_conf.get('WIFI', 'password')
-ssid2=data_conf.get('WIFI', 'ssid')
+wifi_server=conf.get('WIFI', 'enable')
+wlan=conf.get('WIFI', 'device')
+passw2=conf.get('WIFI', 'password')
+ssid2=conf.get('WIFI', 'ssid')
 
-nmea_mag_var=data_conf.get('STARTUP', 'nmea_mag_var')
-nmea_hdt=data_conf.get('STARTUP', 'nmea_hdt')
-nmea_hdg=data_conf.get('STARTUP', 'nmea_hdg')
-nmea_heel=data_conf.get('STARTUP', 'nmea_heel')
-nmea_press=data_conf.get('STARTUP', 'nmea_press')
-nmea_temp_p=data_conf.get('STARTUP', 'nmea_temp_p')
-nmea_hum=data_conf.get('STARTUP', 'nmea_hum')
-nmea_temp_h=data_conf.get('STARTUP', 'nmea_temp_h')
-nmea_rot=data_conf.get('STARTUP', 'nmea_rot')
-nmea_eng_temp=data_conf.get('STARTUP', 'nmea_eng_temp')
+nmea_mag_var=conf.get('STARTUP', 'nmea_mag_var')
+nmea_hdt=conf.get('STARTUP', 'nmea_hdt')
+nmea_hdg=conf.get('STARTUP', 'nmea_hdg')
+nmea_heel=conf.get('STARTUP', 'nmea_heel')
+nmea_press=conf.get('STARTUP', 'nmea_press')
+nmea_temp_p=conf.get('STARTUP', 'nmea_temp_p')
+nmea_hum=conf.get('STARTUP', 'nmea_hum')
+nmea_temp_h=conf.get('STARTUP', 'nmea_temp_h')
+nmea_rot=conf.get('STARTUP', 'nmea_rot')
+nmea_eng_temp=conf.get('STARTUP', 'nmea_eng_temp')
 
-TW_STW=data_conf.get('STARTUP', 'tw_stw')
-TW_SOG=data_conf.get('STARTUP', 'tw_sog')
+TW_STW=conf.get('STARTUP', 'tw_stw')
+TW_SOG=conf.get('STARTUP', 'tw_sog')
 
-switch1=data_conf.get('SWITCH1', 'enable')
-switch2=data_conf.get('SWITCH2', 'enable')
-switch3=data_conf.get('SWITCH3', 'enable')
-switch4=data_conf.get('SWITCH4', 'enable')
+switch1=conf.get('SWITCH1', 'enable')
+switch2=conf.get('SWITCH2', 'enable')
+switch3=conf.get('SWITCH3', 'enable')
+switch4=conf.get('SWITCH4', 'enable')
 
-twitter=data_conf.get('TWITTER', 'enable')
-gmail=data_conf.get('GMAIL', 'enable')
+twitter=conf.get('TWITTER', 'enable')
+gmail=conf.get('GMAIL', 'enable')
 
 #######################################################
 time.sleep(delay)

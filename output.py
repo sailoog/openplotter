@@ -16,32 +16,24 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, socket, os, threading, time, gettext, sys, webbrowser, ConfigParser
+import wx, socket, threading, time, webbrowser
 from classes.datastream import DataStream
+from classes.paths import Paths
+from classes.conf import Conf
+from classes.language import Language
 
-pathname = os.path.dirname(sys.argv[0])
-currentpath = os.path.abspath(pathname)
+
 
 class MyFrame(wx.Frame):
 		
 		def __init__(self, parent, title):
 
-			self.data_conf = ConfigParser.SafeConfigParser()
-			self.data_conf.read(currentpath+'/openplotter.conf')
+			paths=Paths()
+			currentpath=paths.currentpath
 
-			gettext.install('openplotter', currentpath+'/locale', unicode=False)
-			self.presLan_en = gettext.translation('openplotter', currentpath+'/locale', languages=['en'])
-			self.presLan_ca = gettext.translation('openplotter', currentpath+'/locale', languages=['ca'])
-			self.presLan_es = gettext.translation('openplotter', currentpath+'/locale', languages=['es'])
-			self.presLan_fr = gettext.translation('openplotter', currentpath+'/locale', languages=['fr'])
+			self.conf=Conf()
 
-			self.language=self.data_conf.get('GENERAL', 'lang')
-
-			if self.language=='en':self.presLan_en.install()
-			if self.language=='ca':self.presLan_ca.install()
-			if self.language=='es':self.presLan_es.install()
-			if self.language=='fr':self.presLan_fr.install()
-
+			Language(self.conf.get('GENERAL','lang'))
 
 			wx.Frame.__init__(self, parent, title=title, size=(650,400))
 			
@@ -136,10 +128,10 @@ class MyFrame(wx.Frame):
 		def refresh_data(self):
 			while True:
 
-				if self.data_conf.get('SWITCH1', 'enable')=='1': self.a.switches_status(1, self.data_conf.get('SWITCH1', 'gpio'), self.data_conf.get('SWITCH1', 'pull_up_down'))
-				if self.data_conf.get('SWITCH2', 'enable')=='1': self.a.switches_status(2, self.data_conf.get('SWITCH2', 'gpio'), self.data_conf.get('SWITCH2', 'pull_up_down'))
-				if self.data_conf.get('SWITCH3', 'enable')=='1': self.a.switches_status(3, self.data_conf.get('SWITCH3', 'gpio'), self.data_conf.get('SWITCH3', 'pull_up_down'))
-				if self.data_conf.get('SWITCH4', 'enable')=='1': self.a.switches_status(4, self.data_conf.get('SWITCH4', 'gpio'), self.data_conf.get('SWITCH4', 'pull_up_down'))	
+				if self.conf.get('SWITCH1', 'enable')=='1': self.a.switches_status(1, self.conf.get('SWITCH1', 'gpio'), self.conf.get('SWITCH1', 'pull_up_down'))
+				if self.conf.get('SWITCH2', 'enable')=='1': self.a.switches_status(2, self.conf.get('SWITCH2', 'gpio'), self.conf.get('SWITCH2', 'pull_up_down'))
+				if self.conf.get('SWITCH3', 'enable')=='1': self.a.switches_status(3, self.conf.get('SWITCH3', 'gpio'), self.conf.get('SWITCH3', 'pull_up_down'))
+				if self.conf.get('SWITCH4', 'enable')=='1': self.a.switches_status(4, self.conf.get('SWITCH4', 'gpio'), self.conf.get('SWITCH4', 'pull_up_down'))	
 
 				if self.pause_all==0:
 					index=0
@@ -184,7 +176,7 @@ class MyFrame(wx.Frame):
 				self.list.SetStringItem(i,2,'')
 				self.list.SetStringItem(i,3,'')
 				self.list.SetStringItem(i,4,'')
-			self.data_conf.read(currentpath+'/openplotter.conf')
+			self.conf.read()
 			self.a=''
 			self.a=DataStream()
 

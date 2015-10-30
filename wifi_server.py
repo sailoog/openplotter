@@ -15,15 +15,16 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import subprocess, ConfigParser, os, gettext, shutil, sys
+import subprocess, ConfigParser, os, shutil, sys
+from classes.paths import Paths
 
 wifi_server=sys.argv[1]
 wlan = sys.argv[2]
 passw = sys.argv[3]
 ssid = sys.argv[4]
 
-pathname = os.path.dirname(sys.argv[0])
-currentpath = os.path.abspath(pathname)
+paths=Paths()
+currentpath=paths.currentpath
 
 subprocess.call(['service', 'hostapd', 'stop'])
 subprocess.call(['service', 'dnsmasq', 'stop'])

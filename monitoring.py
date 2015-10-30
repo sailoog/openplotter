@@ -14,39 +14,24 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import ConfigParser, os, sys, gettext, time, socket
+import time, socket
 from classes.twitterbot import TwitterBot
 from classes.gmailbot import GmailBot
 from classes.datastream import DataStream
+from classes.conf import Conf
+from classes.language import Language
 
-pathname = os.path.dirname(sys.argv[0])
-currentpath = os.path.abspath(pathname)
+conf=Conf()
 
-data_conf = ConfigParser.SafeConfigParser()
-data_conf.read(currentpath+'/openplotter.conf')
-
-gettext.install('openplotter', currentpath+'/locale', unicode=False)
-presLan_en = gettext.translation('openplotter', currentpath+'/locale', languages=['en'])
-presLan_ca = gettext.translation('openplotter', currentpath+'/locale', languages=['ca'])
-presLan_es = gettext.translation('openplotter', currentpath+'/locale', languages=['es'])
-presLan_fr = gettext.translation('openplotter', currentpath+'/locale', languages=['fr'])
-language=data_conf.get('GENERAL', 'lang')
-if language=='en':presLan_en.install()
-if language=='ca':presLan_ca.install()
-if language=='es':presLan_es.install()
-if language=='fr':presLan_fr.install()
-
-def write_conf():
-	with open(currentpath+'/openplotter.conf', 'wb') as configfile:
-		data_conf.write(configfile)
+Language(conf.get('GENERAL','lang'))
 
 def send_twitter(error):
-	apiKey = data_conf.get('TWITTER', 'apiKey')
-	apiSecret = data_conf.get('TWITTER', 'apiSecret')
-	accessToken = data_conf.get('TWITTER', 'accessToken')
-	accessTokenSecret = data_conf.get('TWITTER', 'accessTokenSecret')
+	apiKey = conf.get('TWITTER', 'apiKey')
+	apiSecret = conf.get('TWITTER', 'apiSecret')
+	accessToken = conf.get('TWITTER', 'accessToken')
+	accessTokenSecret = conf.get('TWITTER', 'accessTokenSecret')
 	tweetStr = ''
-	send_data=eval(data_conf.get('TWITTER', 'send_data'))
+	send_data=eval(conf.get('TWITTER', 'send_data'))
 	for ii in send_data:
 		timestamp=eval('a.'+a.DataList[ii]+'[4]')
 		if timestamp:
@@ -74,10 +59,10 @@ def send_twitter(error):
 		#except Exception,e: print str(e)
 
 def send_gmail(error):
-	GMAIL_USERNAME = data_conf.get('GMAIL', 'gmail')
-	GMAIL_PASSWORD = data_conf.get('GMAIL', 'password')
-	recipient = data_conf.get('GMAIL', 'recipient')
-	subject = data_conf.get('GMAIL', 'subject')
+	GMAIL_USERNAME = conf.get('GMAIL', 'gmail')
+	GMAIL_PASSWORD = conf.get('GMAIL', 'password')
+	recipient = conf.get('GMAIL', 'recipient')
+	subject = conf.get('GMAIL', 'subject')
 	body = ''
 	for ii in a.DataList:
 		timestamp=eval('a.'+ii+'[4]')
@@ -146,40 +131,32 @@ while True:
 			
 			
 
-	if data_conf.get('GMAIL', 'enable')=='1':
-		if data_conf.get('GMAIL', 'periodicity') and data_conf.get('GMAIL', 'periodicity')!='0':
+	if conf.get('GMAIL', 'enable')=='1':
+		if conf.get('GMAIL', 'periodicity') and conf.get('GMAIL', 'periodicity')!='0':
 			now= time.time()
-			if not data_conf.get('GMAIL', 'last_send'):
-				data_conf.read(currentpath+'/openplotter.conf')
-				data_conf.set('GMAIL', 'last_send', str(now))
-				write_conf()
-			last_send = float(data_conf.get('GMAIL', 'last_send')) 
-			periodicity = float(data_conf.get('GMAIL', 'periodicity'))*60
+			if not conf.get('GMAIL', 'last_send'):
+				conf.set('GMAIL', 'last_send', str(now))
+			last_send = float(conf.get('GMAIL', 'last_send')) 
+			periodicity = float(conf.get('GMAIL', 'periodicity'))*60
 			if (now-last_send) > periodicity:
-				data_conf.read(currentpath+'/openplotter.conf')
-				data_conf.set('GMAIL', 'last_send', str(now))
-				write_conf()
+				conf.set('GMAIL', 'last_send', str(now))
 				send_gmail(error)
 
-	if data_conf.get('TWITTER', 'enable')=='1':
-		if data_conf.get('TWITTER', 'periodicity') and data_conf.get('TWITTER', 'periodicity')!='0':
+	if conf.get('TWITTER', 'enable')=='1':
+		if conf.get('TWITTER', 'periodicity') and conf.get('TWITTER', 'periodicity')!='0':
 			now= time.time()
-			if not data_conf.get('TWITTER', 'last_send'):
-				data_conf.read(currentpath+'/openplotter.conf')
-				data_conf.set('TWITTER', 'last_send', str(now))
-				write_conf()
-			last_send = float(data_conf.get('TWITTER', 'last_send')) 
-			periodicity = float(data_conf.get('TWITTER', 'periodicity'))*60
+			if not conf.get('TWITTER', 'last_send'):
+				conf.set('TWITTER', 'last_send', str(now))
+			last_send = float(conf.get('TWITTER', 'last_send')) 
+			periodicity = float(conf.get('TWITTER', 'periodicity'))*60
 			if (now-last_send) > periodicity:
-				data_conf.read(currentpath+'/openplotter.conf')
-				data_conf.set('TWITTER', 'last_send', str(now))
-				write_conf()
+				conf.set('TWITTER', 'last_send', str(now))
 				send_twitter(error)
 
-	if data_conf.get('SWITCH1', 'enable')=='1': a.switches_status(1, data_conf.get('SWITCH1', 'gpio'), data_conf.get('SWITCH1', 'pull_up_down'))
-	if data_conf.get('SWITCH2', 'enable')=='1': a.switches_status(2, data_conf.get('SWITCH2', 'gpio'), data_conf.get('SWITCH2', 'pull_up_down'))
-	if data_conf.get('SWITCH3', 'enable')=='1': a.switches_status(3, data_conf.get('SWITCH3', 'gpio'), data_conf.get('SWITCH3', 'pull_up_down'))
-	if data_conf.get('SWITCH4', 'enable')=='1': a.switches_status(4, data_conf.get('SWITCH4', 'gpio'), data_conf.get('SWITCH4', 'pull_up_down'))
+	if conf.get('SWITCH1', 'enable')=='1': a.switches_status(1, conf.get('SWITCH1', 'gpio'), conf.get('SWITCH1', 'pull_up_down'))
+	if conf.get('SWITCH2', 'enable')=='1': a.switches_status(2, conf.get('SWITCH2', 'gpio'), conf.get('SWITCH2', 'pull_up_down'))
+	if conf.get('SWITCH3', 'enable')=='1': a.switches_status(3, conf.get('SWITCH3', 'gpio'), conf.get('SWITCH3', 'pull_up_down'))
+	if conf.get('SWITCH4', 'enable')=='1': a.switches_status(4, conf.get('SWITCH4', 'gpio'), conf.get('SWITCH4', 'pull_up_down'))
 
 
 
