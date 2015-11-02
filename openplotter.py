@@ -278,6 +278,8 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.show_output_window, self.show_output)
 		self.restart =wx.Button(self.page5, label=_('Restart'), pos=(130, 285))
 		self.Bind(wx.EVT_BUTTON, self.restart_multiplex, self.restart)
+		self.advanced =wx.Button(self.page5, label=_('Advanced'), pos=(280, 285))
+		self.Bind(wx.EVT_BUTTON, self.advanced_multiplex, self.advanced)
 		self.button_apply =wx.Button(self.page5, label=_('Apply changes'), pos=(570, 285))
 		self.Bind(wx.EVT_BUTTON, self.apply_changes, self.button_apply)
 		self.button_cancel =wx.Button(self.page5, label=_('Cancel changes'), pos=(430, 285))
@@ -453,6 +455,7 @@ class MainFrame(wx.Frame):
 
 
 ###########################page9
+		self.manual_settings=''
 		self.read_kplex_conf()
 		self.set_layout_conf()
 ###########################layout
@@ -1020,6 +1023,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.restart_kplex()
 		self.read_kplex_conf()
 
+	def advanced_multiplex(self,event):
+		subprocess.Popen(['leafpad',home+'/.kplex.conf'])
+		self.Close()
+
 	def restart_kplex(self):
 		self.SetStatusText(_('Closing Kplex'))
 		subprocess.call(["pkill", '-9', "kplex"])
@@ -1038,34 +1045,40 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			file.close()
 
 			l_tmp=[None]*8
+			self.manual_settings=''
 			for index, item in enumerate(data):
-				if re.search('\[*\]', item):
-					if l_tmp[0]=='in': self.inputs.append(l_tmp)
-					if l_tmp[0]=='out': self.outputs.append(l_tmp)
-					l_tmp=[None]*8
-					l_tmp[5]='none'
-					l_tmp[6]='nothing'
-					if '[serial]' in item: l_tmp[2]='Serial'
-					if '[tcp]' in item: l_tmp[2]='TCP'
-					if '[udp]' in item: l_tmp[2]='UDP'
-					if '#[' in item: l_tmp[7]='0'
-					else: l_tmp[7]='1'
-				if 'direction=in' in item:
-					l_tmp[0]='in'
-				if 'direction=out' in item:
-					l_tmp[0]='out'
-				if 'name=' in item and 'filename=' not in item:
-					l_tmp[1]=self.extract_value(item)
-				if 'address=' in item or 'filename=' in item:
-					l_tmp[3]=self.extract_value(item)
-				if 'port=' in item or 'baud=' in item:
-					l_tmp[4]=self.extract_value(item)
-				if 'filter=' in item and '-all' in item:
-					l_tmp[5]='accept'
-					l_tmp[6]=self.extract_value(item)
-				if 'filter=' in item and '-all' not in item:
-					l_tmp[5]='ignore'
-					l_tmp[6]=self.extract_value(item)
+				if self.manual_settings:
+					if item!='\n': self.manual_settings+=item
+				else:
+					if re.search('\[*\]', item):
+						if l_tmp[0]=='in': self.inputs.append(l_tmp)
+						if l_tmp[0]=='out': self.outputs.append(l_tmp)
+						l_tmp=[None]*8
+						l_tmp[5]='none'
+						l_tmp[6]='nothing'
+						if '[serial]' in item: l_tmp[2]='Serial'
+						if '[tcp]' in item: l_tmp[2]='TCP'
+						if '[udp]' in item: l_tmp[2]='UDP'
+						if '#[' in item: l_tmp[7]='0'
+						else: l_tmp[7]='1'
+					if 'direction=in' in item:
+						l_tmp[0]='in'
+					if 'direction=out' in item:
+						l_tmp[0]='out'
+					if 'name=' in item and 'filename=' not in item:
+						l_tmp[1]=self.extract_value(item)
+					if 'address=' in item or 'filename=' in item:
+						l_tmp[3]=self.extract_value(item)
+					if 'port=' in item or 'baud=' in item:
+						l_tmp[4]=self.extract_value(item)
+					if 'filter=' in item and '-all' in item:
+						l_tmp[5]='accept'
+						l_tmp[6]=self.extract_value(item)
+					if 'filter=' in item and '-all' not in item:
+						l_tmp[5]='ignore'
+						l_tmp[6]=self.extract_value(item)
+					if '###Manual settings' in item:
+						self.manual_settings='###Manual settings\n\n'
 
 			if l_tmp[0]=='in': self.inputs.append(l_tmp)
 			if l_tmp[0]=='out': self.outputs.append(l_tmp)
@@ -1125,10 +1138,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			if i[7]=='1': self.list_output.CheckItem(index)
 
 	def apply_changes(self,event):
-		data='# For advanced manual configuration, please visit: http://www.stripydog.com/kplex/configuration.html\n# Editing this file by openplotter GUI, can eliminate manual settings.\n# You should not modify defaults.\n\n'
+		data='# For advanced manual configuration, please visit: http://www.stripydog.com/kplex/configuration.html\n# Please do not modify defaults nor OpenPlotter GUI settings.\n# Add manual settings at the end of the document.\n\n'
 
 		data=data+'###defaults\n\n[udp]\nname=system_input\ndirection=in\noptional=yes\nport=10110\n\n'
-		data=data+'[tcp]\nname=system_output\ndirection=out\nmode=server\nport=10110\n\n###end defaults\n\n'
+		data=data+'[tcp]\nname=system_output\ndirection=out\nmode=server\nport=10110\n\n###end of defaults\n\n###OpenPlotter GUI settings\n\n'
 
 		for index,item in enumerate(self.inputs):
 			if 'system_input' not in item[1]:
@@ -1172,6 +1185,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					if item[5]=='accept':data=data+state+'ofilter='+item[6]+'\n'
 					data=data+state+'address='+item[3]+'\n'+state+'port='+item[4]+'\n\n'
 		
+		data=data+'###end of OpenPlotter GUI settings\n\n'
+		if self.manual_settings: data+= self.manual_settings
+		else: data+= '###Manual settings\n\n'
 		
 		file = open(home+'/.kplex.conf', 'w')
 		file.write(data)
