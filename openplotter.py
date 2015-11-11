@@ -153,6 +153,12 @@ class MainFrame(wx.Frame):
 		self.button_ok_rate2 =wx.Button(self.page2, label=_('Ok'),size=(70, 32), pos=(250, 23))
 		self.Bind(wx.EVT_BUTTON, self.ok_rate2, self.button_ok_rate2)
 
+		wx.StaticBox(self.page2, size=(330, 50), pos=(350, 10))
+		wx.StaticText(self.page2, label=_('Accuracy (sec)'), pos=(360, 30))
+		self.accuracy= wx.ComboBox(self.page2, choices=self.rate_list, style=wx.CB_READONLY, size=(80, 32), pos=(500, 23))
+		self.button_ok_accuracy =wx.Button(self.page2, label=_('Ok'),size=(70, 32), pos=(600, 23))
+		self.Bind(wx.EVT_BUTTON, self.ok_accuracy, self.button_ok_accuracy)
+
 		wx.StaticBox(self.page2, size=(330, 65), pos=(10, 65))
 		self.mag_var = wx.CheckBox(self.page2, label=_('Magnetic variation'), pos=(20, 80))
 		self.mag_var.Bind(wx.EVT_CHECKBOX, self.nmea_mag_var)
@@ -168,12 +174,12 @@ class MainFrame(wx.Frame):
 		self.rot.Bind(wx.EVT_CHECKBOX, self.nmea_rot)
 		wx.StaticText(self.page2, label=_('Generated NMEA: $OPROT'), pos=(20, 235))
 
-		wx.StaticBox(self.page2, label=_(' True wind '), size=(330, 100), pos=(350, 10))
-		self.TW_STW = wx.CheckBox(self.page2, label=_('Use speed log'), pos=(360, 30))
+		wx.StaticBox(self.page2, label=_(' True wind '), size=(330, 90), pos=(350, 65))
+		self.TW_STW = wx.CheckBox(self.page2, label=_('Use speed log'), pos=(360, 80))
 		self.TW_STW.Bind(wx.EVT_CHECKBOX, self.TW)
-		self.TW_SOG = wx.CheckBox(self.page2, label=_('Use GPS'), pos=(360, 55))
+		self.TW_SOG = wx.CheckBox(self.page2, label=_('Use GPS'), pos=(360, 105))
 		self.TW_SOG.Bind(wx.EVT_CHECKBOX, self.TW)
-		wx.StaticText(self.page2, label=_('Generated NMEA: $OPMWV, $OPMWD'), pos=(360, 80))
+		wx.StaticText(self.page2, label=_('Generated NMEA: $OPMWV, $OPMWD'), pos=(360, 130))
 ###########################page2
 ########page3###################
 		wx.StaticBox(self.page3, size=(400, 45), pos=(10, 10))
@@ -546,12 +552,12 @@ class MainFrame(wx.Frame):
 
 		self.rate.SetValue(self.conf.get('STARTUP', 'nmea_rate_sen'))
 		self.rate2.SetValue(self.conf.get('STARTUP', 'nmea_rate_cal'))
-
+		self.accuracy.SetValue(self.conf.get('STARTUP', 'cal_accuracy'))
 		if self.conf.get('STARTUP', 'nmea_mag_var')=='1': self.mag_var.SetValue(True)
-
 		if self.conf.get('STARTUP', 'nmea_hdt')=='1': self.heading_t.SetValue(True)
-
 		if self.conf.get('STARTUP', 'nmea_rot')=='1': self.rot.SetValue(True)
+		if self.conf.get('STARTUP', 'tw_stw')=='1': self.TW_STW.SetValue(True)
+		if self.conf.get('STARTUP', 'tw_sog')=='1': self.TW_SOG.SetValue(True)
 
 		detected=subprocess.check_output(['python', currentpath+'/imu/check_sensors.py'], cwd=currentpath+'/imu')
 		l_detected=detected.split('\n')
@@ -609,9 +615,6 @@ class MainFrame(wx.Frame):
 		if 'none' in hum_sensor and 'none' in press_sensor: self.press_nmea.Disable()
 
 		if self.conf.get('STARTUP', 'press_temp_log')=='1': self.press_temp_log.SetValue(True)
-
-		if self.conf.get('STARTUP', 'tw_stw')=='1': self.TW_STW.SetValue(True)
-		if self.conf.get('STARTUP', 'tw_sog')=='1': self.TW_SOG.SetValue(True)
 
 		self.gpio_pin1.SetValue(self.conf.get('SWITCH1', 'gpio'))
 		self.gpio_pull1.SetValue(self.conf.get('SWITCH1', 'pull_up_down'))
@@ -1480,6 +1483,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.conf.set('STARTUP', 'nmea_rate_cal', rate)
 		self.start_monitoring()
 		self.ShowMessage(_('Generation rate set to ')+rate+_(' seconds'))
+
+	def ok_accuracy(self,e):
+		accuracy=self.accuracy.GetValue()
+		self.conf.set('STARTUP', 'cal_accuracy', accuracy)
+		self.start_monitoring()
+		self.ShowMessage(_('Calculation accuracy set to ')+accuracy+_(' seconds'))
 
 	def nmea_mag_var(self, e):
 		sender = e.GetEventObject()
