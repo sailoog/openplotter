@@ -37,7 +37,7 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 class MainFrame(wx.Frame):
 ####layout###################
 	def __init__(self):
-		wx.Frame.__init__(self, None, title="OpenPlotter", size=(700,420))
+		wx.Frame.__init__(self, None, title="OpenPlotter", size=(700,450))
 
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 
@@ -180,21 +180,29 @@ class MainFrame(wx.Frame):
 		self.wifi_enable = wx.CheckBox(self.page3, label=_('Enable WiFi access point'), pos=(20, 25))
 		self.wifi_enable.Bind(wx.EVT_CHECKBOX, self.onwifi_enable)
 
-		wx.StaticBox(self.page3, label=_(' Settings '), size=(400, 155), pos=(10, 60))
+		wx.StaticBox(self.page3, label=_(' Settings '), size=(400, 215), pos=(10, 60))
 
 		self.available_wireless = []
 		output=subprocess.check_output('iwconfig')
 		for i in range (0, 10):
 			ii=str(i)
 			if 'wlan'+ii in output: self.available_wireless.append('wlan'+ii)
+		self.available_share = []
+		self.available_share.append(_('none'))
+		self.available_share.append('eth0')
+		for i in self.available_wireless:
+			self.available_share.append(i)
 		self.wlan = wx.ComboBox(self.page3, choices=self.available_wireless, style=wx.CB_READONLY, size=(100, 32), pos=(20, 85))
-		self.wlan_label=wx.StaticText(self.page3, label=_('WiFi device'), pos=(140, 90))
+		self.wlan_label=wx.StaticText(self.page3, label=_('AP WiFi device'), pos=(140, 90))
 
 		self.ssid = wx.TextCtrl(self.page3, -1, size=(100, 32), pos=(20, 125))
 		self.ssid_label=wx.StaticText(self.page3, label=_('SSID \nmaximum 32 characters'), pos=(140, 125))
 
 		self.passw = wx.TextCtrl(self.page3, -1, size=(100, 32), pos=(20, 165))
 		self.passw_label=wx.StaticText(self.page3, label=_('Password \nminimum 8 characters required'), pos=(140, 165))
+
+		self.share = wx.ComboBox(self.page3, choices=self.available_share, style=wx.CB_READONLY, size=(100, 32), pos=(20, 205))
+		self.share_label=wx.StaticText(self.page3, label=_('Internet connection to share'), pos=(140, 210))
 
 		wx.StaticBox(self.page3, label=_(' Addresses '), size=(270, 265), pos=(415, 10))
 		self.ip_info = wx.TextCtrl(self.page3, -1, style=wx.TE_MULTILINE|wx.TE_READONLY, size=(260, 245), pos=(420, 25))
@@ -490,7 +498,8 @@ class MainFrame(wx.Frame):
 		if len(self.available_wireless)>0:
 			self.wlan.SetValue(self.conf.get('WIFI', 'device'))
 			self.ssid.SetValue(self.conf.get('WIFI', 'ssid'))
-			self.passw.SetValue(self.conf.get('WIFI', 'password'))
+			if self.conf.get('WIFI', 'password'): self.passw.SetValue('**********')
+			self.share.SetValue(self.conf.get('WIFI', 'share'))
 			if self.conf.get('WIFI', 'enable')=='1':
 				self.wifi_enable.SetValue(True)
 				self.wlan.Disable()
@@ -499,6 +508,8 @@ class MainFrame(wx.Frame):
 				self.passw_label.Disable()
 				self.ssid.Disable()
 				self.ssid_label.Disable()
+				self.share.Disable()
+				self.share_label.Disable()
 		else:
 			self.wifi_enable.Disable()
 			self.wlan.Disable()
@@ -507,6 +518,8 @@ class MainFrame(wx.Frame):
 			self.passw_label.Disable()
 			self.ssid.Disable()
 			self.ssid_label.Disable()
+			self.share.Disable()
+			self.share_label.Disable()
 		self.show_ip_info('')
 		
 		output=subprocess.check_output('lsusb')
@@ -713,7 +726,7 @@ class MainFrame(wx.Frame):
 		self.ShowMessage(msg)
 
 	def reconfigure_gpsd(self,event):
-		subprocess.Popen(['lxterminal', '-e', 'sudo dpkg-reconfigure gpsd'])
+		subprocess.Popen(['lxterminal', '-e', 'sudo nano /etc/default/gpsd'])
 		self.SetStatusText(_('Set GPSD in the new window'))
 	
 	def clear_lang(self):
@@ -833,21 +846,33 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 
 	def onwifi_enable (self, e):
-		self.SetStatusText(_('Configuring NMEA WiFi server, wait please...'))
 		isChecked = self.wifi_enable.GetValue()
 		wlan=self.wlan.GetValue()
 		ssid=self.ssid.GetValue()
-		passw=self.passw.GetValue()
+		share=self.share.GetValue()
+		if '*****' in self.passw.GetValue(): passw=self.conf.get('WIFI', 'password')
+		else: passw=self.passw.GetValue()
+		
+		if not wlan or not passw or not ssid or not share:
+			self.ShowMessage(_('You must fill in all of the fields.'))
+			self.enable_disable_wifi(0)
+			return
+		if wlan==share:
+			self.ShowMessage(_('"AP Wifi Device" and "internet connection to share" must be different'))
+			self.enable_disable_wifi(0)
+			return
+		if len(ssid)>32 or len(passw)<8:
+			self.ShowMessage(_('Your SSID must have a maximum of 32 characters and your password a minimum of 8.'))
+			self.enable_disable_wifi(0)
+			return
+		if share==_('none'):share='0'
+		self.SetStatusText(_('Configuring WiFi AP, wait please...'))
 		if isChecked:
 			self.enable_disable_wifi(1)
-			if ssid and len(ssid)<=32 and len(passw)>=8:
-				wifi_result=subprocess.check_output(['sudo', 'python', currentpath+'/wifi_server.py', '1', wlan, passw, ssid])
-			else:
-				wifi_result=_('Your SSID must have a maximum of 32 characters and your password a minimum of 8.')
-				self.enable_disable_wifi(0)
+			wifi_result=subprocess.check_output(['sudo', 'python', currentpath+'/wifi_server.py', '1', wlan, passw, ssid, share])		
 		else: 
 			self.enable_disable_wifi(0)
-			wifi_result=subprocess.check_output(['sudo', 'python', currentpath+'/wifi_server.py', '0', wlan, passw, ssid])
+			wifi_result=subprocess.check_output(['sudo', 'python', currentpath+'/wifi_server.py', '0', wlan, passw, ssid, share])
 			
 		msg=wifi_result
 
@@ -856,10 +881,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.conf.set('WIFI', 'device', '')
 			self.conf.set('WIFI', 'password', '')
 			self.conf.set('WIFI', 'ssid', '')
+			self.conf.set('WIFI', 'share', '')
 		if'WiFi access point started.' in msg:
 			self.conf.set('WIFI', 'device', wlan)
 			self.conf.set('WIFI', 'password', passw)
 			self.conf.set('WIFI', 'ssid', ssid)
+			self.conf.set('WIFI', 'share', share)
+			self.passw.SetValue('**********')
+
 		msg=msg.replace('WiFi access point failed.', _('WiFi access point failed.'))
 		msg=msg.replace('WiFi access point started.', _('WiFi access point started.'))
 		msg=msg.replace('WiFi access point stopped.', _('WiFi access point stopped.'))
@@ -892,18 +921,22 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.wlan.Disable()
 			self.passw.Disable()
 			self.ssid.Disable()
+			self.share.Disable()
 			self.wlan_label.Disable()
 			self.passw_label.Disable()
 			self.ssid_label.Disable()
+			self.share_label.Disable()
 			self.wifi_enable.SetValue(True)
 			self.conf.set('WIFI', 'enable', '1')
 		else:
 			self.wlan.Enable()
 			self.passw.Enable()
 			self.ssid.Enable()
+			self.share.Enable()
 			self.wlan_label.Enable()
 			self.passw_label.Enable()
 			self.ssid_label.Enable()
+			self.share_label.Enable()
 			self.wifi_enable.SetValue(False)
 			self.conf.set('WIFI', 'enable', '0')
 
@@ -1016,8 +1049,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 ########multimpexer###################################	
 
 	def show_output_window(self,event):
-		close=subprocess.call(['sudo','pkill', '-f', 'output.py'])
-		show_output=subprocess.Popen(['sudo','python',currentpath+'/output.py'])
+		close=subprocess.call(['pkill', '-f', 'output.py'])
+		show_output=subprocess.Popen(['python',currentpath+'/output.py'])
 
 	def restart_multiplex(self,event):
 		self.restart_kplex()
@@ -1154,6 +1187,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					data=data+state+'filename='+item[3]+'\n'+state+'baud='+item[4]+'\n\n'
 				if 'TCP' in item[2]:
 					data=data+state+'[tcp]\n'+state+'name='+item[1]+'\n'+state+'direction=in\n'+state+'optional=yes\n'
+					if item[1]=='gpsd':data=data+state+'gpsd=yes\n'
 					if item[5]=='ignore':data=data+state+'ifilter='+item[6]+'\n'
 					if item[5]=='accept':data=data+state+'ifilter='+item[6]+'\n'
 					data=data+state+'mode=client\n'+state+'address='+item[3]+'\n'+state+'port='+item[4]+'\n'
@@ -1444,31 +1478,26 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def ok_rate2(self, e):
 		rate=self.rate2.GetValue()
 		self.conf.set('STARTUP', 'nmea_rate_cal', rate)
-		self.start_calculate()
+		self.start_monitoring()
 		self.ShowMessage(_('Generation rate set to ')+rate+_(' seconds'))
-
-	def start_calculate(self):
-		subprocess.call(['pkill', '-f', 'calculate.py'])
-		if self.mag_var.GetValue() or self.heading_t.GetValue() or self.rot.GetValue() or self.TW_STW.GetValue() or self.TW_SOG.GetValue():
-			subprocess.Popen(['python', currentpath+'/calculate.py'])
 
 	def nmea_mag_var(self, e):
 		sender = e.GetEventObject()
 		if sender.GetValue(): self.conf.set('STARTUP', 'nmea_mag_var', '1')
 		else: self.conf.set('STARTUP', 'nmea_mag_var', '0')
-		self.start_calculate()
+		self.start_monitoring()
 
 	def nmea_hdt(self, e):
 		sender = e.GetEventObject()
 		if sender.GetValue(): self.conf.set('STARTUP', 'nmea_hdt', '1')
 		else: self.conf.set('STARTUP', 'nmea_hdt', '0')
-		self.start_calculate()
+		self.start_monitoring()
 
 	def nmea_rot(self, e):
 		sender = e.GetEventObject()
 		if sender.GetValue(): self.conf.set('STARTUP', 'nmea_rot', '1')
 		else: self.conf.set('STARTUP', 'nmea_rot', '0')
-		self.start_calculate()
+		self.start_monitoring()
 
 	def	TW(self, e):
 		sender = e.GetEventObject()
@@ -1480,7 +1509,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if state: sender.SetValue(True)
 		if self.TW_STW.GetValue(): self.conf.set('STARTUP', 'tw_stw', '1')
 		if self.TW_SOG.GetValue(): self.conf.set('STARTUP', 'tw_sog', '1')
-		self.start_calculate()
+		self.start_monitoring()
 ######################################Signal K
 	def signalKpanels(self, e):
 		url = 'http://localhost:3000/instrumentpanel'
@@ -1500,10 +1529,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		subprocess.Popen(home+'/.config/signalk-server-node/bin/nmea-from-10110', cwd=home+'/.config/signalk-server-node')
 		self.SetStatusText(_('Signal K server restarted'))
 ######################################Switches
-	def start_switches(self):
-		subprocess.call(['sudo', 'pkill', '-f', 'switches.py'])
-		if self.switch1_enable.GetValue() or self.switch2_enable.GetValue() or self.switch3_enable.GetValue() or self.switch4_enable.GetValue():
-			subprocess.Popen(['sudo', 'python', currentpath+'/switches.py'])
 
 	def on_switch1_enable(self, e):
 		if not self.gpio_pull1.GetValue() or not self.gpio_pin1.GetValue():
@@ -1546,7 +1571,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.ONcommand1.Enable()
 			self.OFFaction1.Enable()
 			self.OFFcommand1.Enable()
-		self.start_switches()
+		self.start_monitoring()
 
 	def on_switch2_enable(self, e):
 		if not self.gpio_pull2.GetValue() or not self.gpio_pin2.GetValue():
@@ -1589,7 +1614,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.ONcommand2.Enable()
 			self.OFFaction2.Enable()
 			self.OFFcommand2.Enable()
-		self.start_switches()
+		self.start_monitoring()
 
 	def on_switch3_enable(self, e):
 		if not self.gpio_pull3.GetValue() or not self.gpio_pin3.GetValue():
@@ -1632,7 +1657,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.ONcommand3.Enable()
 			self.OFFaction3.Enable()
 			self.OFFcommand3.Enable()
-		self.start_switches()
+		self.start_monitoring()
 
 	def on_switch4_enable(self, e):
 		if not self.gpio_pull4.GetValue() or not self.gpio_pin4.GetValue():
@@ -1675,7 +1700,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.ONcommand4.Enable()
 			self.OFFaction4.Enable()
 			self.OFFcommand4.Enable()
-		self.start_switches()
+		self.start_monitoring()
 
 	def onSelectOn1(self,e):
 		if self.ONaction1.GetValue() == _('command'):
@@ -1737,9 +1762,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 #######################twitterbot
 
 	def start_monitoring(self):
-		subprocess.call(['sudo','pkill', '-f', 'monitoring.py'])
-		if self.twitter_enable.GetValue() or self.gmail_enable.GetValue():
-			subprocess.Popen(['sudo','python',currentpath+'/monitoring.py'])
+		subprocess.call(['pkill', '-f', 'monitoring.py'])
+		if self.switch1_enable.GetValue() or self.switch2_enable.GetValue() or self.switch3_enable.GetValue() or self.switch4_enable.GetValue() or self.twitter_enable.GetValue() or self.gmail_enable.GetValue() or self.mag_var.GetValue() or self.heading_t.GetValue() or self.rot.GetValue() or self.TW_STW.GetValue() or self.TW_SOG.GetValue():
+			subprocess.Popen(['python',currentpath+'/monitoring.py'])
 
 	def on_twitter_enable(self,e):
 		if not self.apiKey.GetValue() or not self.apiSecret.GetValue() or not self.accessToken.GetValue() or not self.accessTokenSecret.GetValue():

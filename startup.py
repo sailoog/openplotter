@@ -62,6 +62,7 @@ wifi_server=conf.get('WIFI', 'enable')
 wlan=conf.get('WIFI', 'device')
 passw2=conf.get('WIFI', 'password')
 ssid2=conf.get('WIFI', 'ssid')
+share=conf.get('WIFI', 'share')
 
 nmea_mag_var=conf.get('STARTUP', 'nmea_mag_var')
 nmea_hdt=conf.get('STARTUP', 'nmea_hdt')
@@ -109,9 +110,9 @@ if enable=='1':
 	aisdecoder=subprocess.Popen(['aisdecoder', '-h', '127.0.0.1', '-p', '10110', '-a', 'file', '-c', 'mono', '-d', '-f', '/dev/stdin'], stdin = rtl_fm.stdout)
 	
 if wifi_server=='1':
-	subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '1', wlan, passw2, ssid2])
+	subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '1', wlan, passw2, ssid2, share])
 else:
-	subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '0', wlan, passw2, ssid2])
+	subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '0', wlan, passw2, ssid2, share])
 	
 time.sleep(16)
 
@@ -134,14 +135,7 @@ subprocess.call(['pkill', '-f', 'sensors_b.py'])
 if nmea_eng_temp=='1': 
 	subprocess.Popen(['python', currentpath+'/sensors_b.py'])
 
-subprocess.call(['pkill', '-f', 'calculate.py'])
-if nmea_mag_var=='1' or nmea_hdt=='1' or nmea_rot=='1' or TW_STW=='1' or TW_SOG=='1': 
-	subprocess.Popen(['python', currentpath+'/calculate.py'])
+subprocess.call(['pkill', '-f', 'monitoring.py'])
+if switch1=='1' or switch2=='1' or switch3=='1' or switch4=='1' or twitter=='1' or gmail=='1' or nmea_mag_var=='1' or nmea_hdt=='1' or nmea_rot=='1' or TW_STW=='1' or TW_SOG=='1':
+	subprocess.Popen(['python',currentpath+'/monitoring.py'])
 
-subprocess.call(['sudo','pkill', '-f', 'monitoring.py'])
-if twitter=='1' or gmail=='1':
-	subprocess.Popen(['sudo','python',currentpath+'/monitoring.py'])
-	
-subprocess.call(['sudo', 'pkill', '-f', 'switches.py'])
-if switch1=='1' or switch2=='1' or switch3=='1' or switch4=='1':
-	subprocess.Popen(['sudo', 'python', currentpath+'/switches.py'])

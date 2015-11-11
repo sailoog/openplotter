@@ -29,17 +29,17 @@ class MyFrame(wx.Frame):
 		def __init__(self, parent, title):
 
 			paths=Paths()
-			currentpath=paths.currentpath
+			self.currentpath=paths.currentpath
 
 			self.conf=Conf()
 
 			Language(self.conf.get('GENERAL','lang'))
 
-			wx.Frame.__init__(self, parent, title=title, size=(650,400))
+			wx.Frame.__init__(self, parent, title=title, size=(650,435))
 			
 			self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 			
-			self.icon = wx.Icon(currentpath+'/openplotter.ico', wx.BITMAP_TYPE_ICO)
+			self.icon = wx.Icon(self.currentpath+'/openplotter.ico', wx.BITMAP_TYPE_ICO)
 			self.SetIcon(self.icon)
 
 			self.logger = wx.TextCtrl(self, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_DONTWRAP, size=(650,150), pos=(0,0))
@@ -79,14 +79,17 @@ class MyFrame(wx.Frame):
 			self.Show(True)
 
 			self.thread1=threading.Thread(target=self.parse_data)
-			self.thread2=threading.Thread(target=self.refresh_data)
+			self.thread2=threading.Thread(target=self.refresh_loop)
 			
 			self.s2=''
 			self.error=''
+			self.frase_nmea_log=''
+			self.data=[]
 
 			if not self.thread1.isAlive(): self.thread1.start()
 			if not self.thread2.isAlive(): self.thread2.start()
 
+ 		# thread 1
 		def connect(self):
 			try:
 				self.s2 = socket.socket()
@@ -94,9 +97,6 @@ class MyFrame(wx.Frame):
 				self.s2.settimeout(5)
 			except socket.error, error_msg:
 				self.error= _('Failed to connect with localhost:10110. Error: ')+ str(error_msg[0])+_(', trying to reconnect...')
-				wx.MutexGuiEnter()
-				self.SetStatusText(self.error)
-				wx.MutexGuiLeave()
 				self.s2=''
 				time.sleep(7)
 			else: self.error=''
@@ -111,29 +111,23 @@ class MyFrame(wx.Frame):
 						frase_nmea = self.s2.recv(1024)
 					except socket.error, error_msg:
 						self.error= _('Connected with localhost:10110. Error: ')+ str(error_msg[0])+_(', waiting for data...')
-						wx.MutexGuiEnter()
-						self.SetStatusText(self.error)
-						wx.MutexGuiLeave()
 					else:
 						if frase_nmea:
 							self.a.parse_nmea(frase_nmea)
-							wx.MutexGuiEnter()
-							if self.pause_all==0: self.logger.AppendText(frase_nmea)
-							self.SetStatusText(_('Multiplexer started'))
-							wx.MutexGuiLeave()
-							self.error=''
+							self.frase_nmea_log=frase_nmea
+							self.error = _('Connected with localhost:10110.')
 						else:
 							self.s2=''
+		# end thread 1
 
-		def refresh_data(self):
-			while True:
-
-				if self.conf.get('SWITCH1', 'enable')=='1': self.a.switches_status(1, self.conf.get('SWITCH1', 'gpio'), self.conf.get('SWITCH1', 'pull_up_down'))
-				if self.conf.get('SWITCH2', 'enable')=='1': self.a.switches_status(2, self.conf.get('SWITCH2', 'gpio'), self.conf.get('SWITCH2', 'pull_up_down'))
-				if self.conf.get('SWITCH3', 'enable')=='1': self.a.switches_status(3, self.conf.get('SWITCH3', 'gpio'), self.conf.get('SWITCH3', 'pull_up_down'))
-				if self.conf.get('SWITCH4', 'enable')=='1': self.a.switches_status(4, self.conf.get('SWITCH4', 'gpio'), self.conf.get('SWITCH4', 'pull_up_down'))	
-
+		# thread 2
+		def refresh_loop(self):
+			while True:	
 				if self.pause_all==0:
+					if self.conf.get('SWITCH1', 'enable')=='1': self.a.switches_status(1, self.conf.get('SWITCH1', 'gpio'), self.conf.get('SWITCH1', 'pull_up_down'))
+					if self.conf.get('SWITCH2', 'enable')=='1': self.a.switches_status(2, self.conf.get('SWITCH2', 'gpio'), self.conf.get('SWITCH2', 'pull_up_down'))
+					if self.conf.get('SWITCH3', 'enable')=='1': self.a.switches_status(3, self.conf.get('SWITCH3', 'gpio'), self.conf.get('SWITCH3', 'pull_up_down'))
+					if self.conf.get('SWITCH4', 'enable')=='1': self.a.switches_status(4, self.conf.get('SWITCH4', 'gpio'), self.conf.get('SWITCH4', 'pull_up_down'))
 					index=0
 					for i in self.a.DataList:
 						timestamp=eval('self.a.'+i+'[4]')
@@ -148,19 +142,32 @@ class MyFrame(wx.Frame):
 							unit=eval('self.a.'+i+'[3]')
 							talker=eval('self.a.'+i+'[5]')
 							sentence=eval('self.a.'+i+'[6]')
-							if i=='Lat': value='%02d°%07.4f′' % (int(value[:2]), float(value[2:]))
-							if i=='Lon': value='%02d°%07.4f′' % (int(value[:3]), float(value[3:]))
 							if talker=='OP': talker='OpenPlotter'
-							if unit: data= str(value)+' '+str(unit)
-							else: data= str(value)
-							wx.MutexGuiEnter()
-							self.list.SetStringItem(index,1,data)
-							if talker: self.list.SetStringItem(index,2,talker)
-							if sentence: self.list.SetStringItem(index,3,sentence)
-							self.list.SetStringItem(index,4,str(round(age,1)))
-							wx.MutexGuiLeave()
+							if unit: data = str(value)+' '+str(unit)
+							else: data = str(value)
+							self.data=[index,1,data]
+							wx.CallAfter(self.refresh_data)
+							time.sleep(0.001)
+							if talker:
+								self.data=[index,2,talker]
+								wx.CallAfter(self.refresh_data)
+								time.sleep(0.001)
+							if sentence: 
+								self.data=[index,3,sentence]
+								wx.CallAfter(self.refresh_data)
+								time.sleep(0.001)
+							self.data=[index,4,str(round(age,1))]
+							wx.CallAfter(self.refresh_data)
+							time.sleep(0.001)
 						index=index+1
+		# end thread 2
 
+		def refresh_data(self):
+			self.list.SetStringItem(self.data[0],self.data[1],self.data[2])
+			if self.frase_nmea_log: 
+				self.logger.AppendText(self.frase_nmea_log)
+				self.frase_nmea_log=''
+			self.SetStatusText(self.error)
 
 		def pause(self, e):
 			if self.pause_all==0: 
@@ -180,13 +187,10 @@ class MyFrame(wx.Frame):
 			self.a=''
 			self.a=DataStream()
 
-
 		def nmea_info(self, e):
-			url = currentpath+'/docs/NMEA.html'
+			url = self.currentpath+'/docs/NMEA.html'
 			webbrowser.open(url,new=2)
-
 
 app = wx.App(False)
 frame = MyFrame(None, 'TCP localhost:10110')
 app.MainLoop()
-

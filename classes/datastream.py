@@ -53,6 +53,17 @@ class DataStream:
 		self.SW3=[_('Switch 3 status'),_('SW3'),None,None,None,None,None]
 		self.SW4=[_('Switch 4 status'),_('SW4'),None,None,None,None,None]
 	
+	def validate(self,data,now,accuracy):
+		timestamp=eval('self.'+data+'[4]')
+		if timestamp:
+			age=now-timestamp
+			if age <= accuracy: 
+				if data !='Date':
+					return float(eval('self.'+data+'[2]'))
+				else:
+					return self.Date[2]
+			else: return None
+
 	def switches_status(self, switch, channel, pull_up_down):
 		pull_up_down1=GPIO.PUD_DOWN
 		channel1=int(channel)
@@ -96,7 +107,7 @@ class DataStream:
 
 				if nmea_type == 'RMC' or nmea_type =='GGA' or nmea_type =='GNS' or nmea_type =='GLL':
 					#lat
-					value=msg.lat
+					value=round(msg.latitude,4)
 					if value:
 						self.Lat[2]=value
 						self.Lat[3]=msg.lat_dir #N, S
@@ -104,7 +115,7 @@ class DataStream:
 						self.Lat[5]=talker
 						self.Lat[6]=nmea_type
 					#lon
-					value=msg.lon
+					value=round(msg.longitude,4)
 					if value:
 						self.Lon[2]=value
 						self.Lon[3]=msg.lon_dir #E, W
@@ -267,7 +278,8 @@ class DataStream:
 							self.AWA[5]=talker
 							self.AWA[6]=nmea_type
 						#apparent wind speed
-						value=msg.wind_speed
+						if msg.wind_speed_units=='N':
+							value=msg.wind_speed
 						if value:
 							self.AWS[2]=value
 							self.AWS[3]='N'

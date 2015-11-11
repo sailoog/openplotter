@@ -15,13 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import subprocess, ConfigParser, os, shutil, sys
+import subprocess, os, shutil, sys
 from classes.paths import Paths
 
 wifi_server=sys.argv[1]
 wlan = sys.argv[2]
 passw = sys.argv[3]
 ssid = sys.argv[4]
+share = sys.argv[5]
 
 paths=Paths()
 currentpath=paths.currentpath
@@ -82,13 +83,15 @@ if wifi_server=='1':
 	file = open('/etc/dnsmasq.conf', 'w')
 	file.write(data)
 	file.close()
-
-	nm_conf = ConfigParser.SafeConfigParser()
-	nm_conf.read('/etc/NetworkManager/NetworkManager.conf')
-	nm_conf.set('ifupdown', 'managed', 'false')
-	with open('/etc/NetworkManager/NetworkManager.conf', 'wb') as configfile:
-		nm_conf.write(configfile)
-
+	
+	if share!='0':
+		output=subprocess.call(['iptables', '-t', 'nat', '-A', 'POSTROUTING', '-o', share, '-j', 'MASQUERADE'])
+		if output != 0: error=1
+		output=subprocess.call(['iptables', '-A', 'FORWARD', '-i', share, '-o', wlan, '-m', 'state', '--state', 'RELATED,ESTABLISHED', '-j', 'ACCEPT'])
+		if output != 0: error=1
+		output=subprocess.call(['iptables', '-A', 'FORWARD', '-i', wlan, '-o', share, '-j', 'ACCEPT'])
+		if output != 0: error=1
+	
 	output=subprocess.call(['/etc/init.d/network-manager', 'restart'])
 	if output != 0: error=1
 

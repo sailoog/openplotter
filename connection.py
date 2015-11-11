@@ -31,7 +31,7 @@ class MainFrame(wx.Frame):
 			self.conf=Conf()
 			Language(self.conf.get('GENERAL','lang'))
 
-			wx.Frame.__init__(self, None, title=_('Connection'), size=(550,350))
+			wx.Frame.__init__(self, None, title=_('Connection'), size=(550,385))
 			
 			self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 			
@@ -61,7 +61,10 @@ class MainFrame(wx.Frame):
 				self.baudComboBox.SetValue('4800')
 
 			if self.con_type=='network':
-				if self.in_out=='in': wx.StaticBox(self, label=_(' Network input '), size=(530, 90), pos=(10, 10))
+				if self.in_out=='in': 
+					wx.StaticBox(self, label=_(' Network input '), size=(530, 90), pos=(10, 10))
+					self.gpsd =wx.Button(self, label=_('GPSD'), pos=(440, 55))
+					self.Bind(wx.EVT_BUTTON, self.create_gpsd, self.gpsd)
 				if self.in_out=='out': wx.StaticBox(self, label=_(' Network output '), size=(530, 90), pos=(10, 10))
 				self.type = ['TCP', 'UDP']
 				wx.StaticText(self, label=_('Type'), pos=(155, 35))
@@ -71,7 +74,6 @@ class MainFrame(wx.Frame):
 				self.address = wx.TextCtrl(self, -1, size=(120, 32), pos=(230, 55))
 				wx.StaticText(self, label=_('Port'), pos=(365, 35))
 				self.port = wx.TextCtrl(self, -1, size=(55, 32), pos=(360, 55))
-
 
 			wx.StaticBox(self, label=_(' Filter '), size=(530, 195), pos=(10, 105))
 			self.mode_filter = [_('none'), _('Accept only sentences:'), _('Ignore sentences:')]
@@ -137,6 +139,12 @@ class MainFrame(wx.Frame):
 				self.sentences.SetValue(r_sentence)
 			else:
 				self.sentences.SetValue(self.sentences.GetValue()+','+r_sentence)
+		
+		def create_gpsd(self,event):
+			self.name.SetValue('gpsd')
+			self.typeComboBox.SetValue('TCP')
+			self.address.SetValue('localhost')
+			self.port.SetValue('2947')
 
 		def ok_conn(self,event):
 			name= self.name.GetValue()
