@@ -63,6 +63,7 @@ wlan=conf.get('WIFI', 'device')
 passw2=conf.get('WIFI', 'password')
 ssid2=conf.get('WIFI', 'ssid')
 share=conf.get('WIFI', 'share')
+if not share: share='0'
 
 nmea_mag_var=conf.get('STARTUP', 'nmea_mag_var')
 nmea_hdt=conf.get('STARTUP', 'nmea_hdt')

@@ -505,7 +505,8 @@ class MainFrame(wx.Frame):
 			self.wlan.SetValue(self.conf.get('WIFI', 'device'))
 			self.ssid.SetValue(self.conf.get('WIFI', 'ssid'))
 			if self.conf.get('WIFI', 'password'): self.passw.SetValue('**********')
-			self.share.SetValue(self.conf.get('WIFI', 'share'))
+			if self.conf.get('WIFI', 'share')=='0': self.share.SetValue( _('none'))
+			else: self.share.SetValue(self.conf.get('WIFI', 'share'))
 			if self.conf.get('WIFI', 'enable')=='1':
 				self.wifi_enable.SetValue(True)
 				self.wlan.Disable()
