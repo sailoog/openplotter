@@ -29,8 +29,8 @@ home=paths.home
 currentpath=paths.currentpath
 
 class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
-	def __init__(self, parent):
-		wx.ListCtrl.__init__(self, parent, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(565, 102))
+	def __init__(self, parent, height):
+		wx.ListCtrl.__init__(self, parent, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(565, height))
 		CheckListCtrlMixin.__init__(self)
 		ListCtrlAutoWidthMixin.__init__(self)
 
@@ -60,6 +60,7 @@ class MainFrame(wx.Frame):
 		self.page7 = wx.Panel(self.nb)
 		self.page8 = wx.Panel(self.nb)
 		self.page9 = wx.Panel(self.nb)
+		self.page10 = wx.Panel(self.nb)
 
 		self.nb.AddPage(self.page5, _('NMEA 0183'))
 		self.nb.AddPage(self.page7, _('Signal K (beta)'))
@@ -68,6 +69,7 @@ class MainFrame(wx.Frame):
 		self.nb.AddPage(self.page2, _('Calculate'))
 		self.nb.AddPage(self.page6, _('Sensors'))
 		self.nb.AddPage(self.page8, _('Switches'))
+		self.nb.AddPage(self.page10, _('Alarms'))
 		self.nb.AddPage(self.page9, _('Monitoring'))
 		self.nb.AddPage(self.page1, _('Startup'))
 
@@ -253,7 +255,7 @@ class MainFrame(wx.Frame):
 ###########################page4
 ########page5###################
 		wx.StaticBox(self.page5, label=_(' Inputs '), size=(670, 130), pos=(10, 10))
-		self.list_input = CheckListCtrl(self.page5)
+		self.list_input = CheckListCtrl(self.page5, 102)
 		self.list_input.SetPosition((15, 30))
 		self.list_input.InsertColumn(0, _('Name'), width=130)
 		self.list_input.InsertColumn(1, _('Type'), width=45)
@@ -271,7 +273,7 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.delete_input, self.button_delete_input)
 
 		wx.StaticBox(self.page5, label=_(' Outputs '), size=(670, 130), pos=(10, 145))
-		self.list_output = CheckListCtrl(self.page5)
+		self.list_output = CheckListCtrl(self.page5, 102)
 		self.list_output.SetPosition((15, 165))
 		self.list_output.InsertColumn(0, _('Name'), width=130)
 		self.list_output.InsertColumn(1, _('Type'), width=45)
@@ -466,9 +468,38 @@ class MainFrame(wx.Frame):
 		self.Recipient = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(490, 135))
 		wx.StaticText(self.page9, label=_('Subject'), pos=(360, 175))
 		self.Subject = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(490, 170))
-
-
 ###########################page9
+########page10###################
+		wx.StaticBox(self.page10, label=_(' Triggers '), size=(670, 130), pos=(10, 10))
+		
+		self.list_triggers = CheckListCtrl(self.page10, 102)
+		self.list_triggers.SetPosition((15, 30))
+		self.list_triggers.InsertColumn(0, _('trigger'), width=325)
+		self.list_triggers.InsertColumn(1, _('operator'), width=120)
+		self.list_triggers.InsertColumn(2, _('data'), width=120)
+			
+		self.add_trigger_button =wx.Button(self.page10, label=_('add'), pos=(585, 30))
+		self.Bind(wx.EVT_BUTTON, self.add_trigger, self.add_trigger_button)
+
+		self.delete_trigger_button =wx.Button(self.page10, label=_('delete'), pos=(585, 65))
+		self.Bind(wx.EVT_BUTTON, self.delete_trigger, self.delete_trigger_button)
+		
+		wx.StaticBox(self.page10, label=_(' Actions '), size=(670, 130), pos=(10, 145))
+		
+		self.list_actions = CheckListCtrl(self.page10, 102)
+		self.list_actions.SetPosition((15, 165))
+		self.list_actions.InsertColumn(0, _('action'), width=200)
+		self.list_actions.InsertColumn(1, _('data'), width=200)
+		self.list_actions.InsertColumn(2, _('repeat'), width=100)
+		self.list_actions.InsertColumn(3, _('times'), width=65)
+
+		self.add_action_button =wx.Button(self.page10, label=_('add'), pos=(585, 165))
+		self.Bind(wx.EVT_BUTTON, self.add_action, self.add_action_button)
+
+		self.delete_action_button =wx.Button(self.page10, label=_('delete'), pos=(585, 200))
+		self.Bind(wx.EVT_BUTTON, self.delete_action, self.delete_action_button)
+
+###########################page10
 		self.manual_settings=''
 		self.read_kplex_conf()
 		self.set_layout_conf()
@@ -1844,7 +1875,15 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.Recipient.Enable()
 			self.Subject.Enable()
 		self.start_monitoring()
-
+#######################alarms
+	def add_trigger(self,e):
+		pass
+	def delete_trigger(self,e):
+		pass
+	def add_action(self,e):
+		pass
+	def delete_action(self,e):
+		pass
 #Main#############################
 if __name__ == "__main__":
 	app = wx.App()
