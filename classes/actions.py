@@ -39,3 +39,5 @@ class Actions():
 		self.options[15]= _('start Gmail monitoring')
 		self.options[16]= _('stop Gmail monitoring')
 		self.options[17]= _('send e-mail')
+
+		self.time_units=[_('no repeat'),_('second'), _('minute'), _('hour'), _('day')]
