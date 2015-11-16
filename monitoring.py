@@ -14,18 +14,12 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import time, socket, threading, subprocess, datetime, geomag, pynmea2, math
+import time, socket, threading, datetime, geomag, pynmea2, math
 import RPi.GPIO as GPIO
-from classes.twitterbot import TwitterBot
-from classes.gmailbot import GmailBot
 from classes.datastream import DataStream
-from classes.paths import Paths
 from classes.conf import Conf
 from classes.language import Language
-
-paths=Paths()
-home=paths.home
-currentpath=paths.currentpath
+from classes.actions import Actions
 
 conf=Conf()
 
@@ -36,6 +30,7 @@ global error
 sock_in=''
 error=0
 a=DataStream()
+actions=Actions()
 
 global state1
 global state2
@@ -86,89 +81,6 @@ def connect():
 	else: error=0
 #end thread1
 
-#actions
-def actions(option,text):
-	if option=='0': return
-	if option=='1':
-		if text:
-			text=text.split(' ')
-			subprocess.Popen(text)		
-	if option=='2': 
-		subprocess.Popen(['sudo', 'reboot'])
-	if option=='3': 
-		subprocess.Popen(['sudo', 'halt'])
-	if option=='4': 
-		subprocess.Popen(['pkill', '-9', 'kplex'])
-	if option=='5':
-		subprocess.call(['pkill', '-9', 'kplex'])
-		subprocess.Popen('kplex')
-	if option=='6': 
-		subprocess.Popen(["pkill", '-9', "node"])
-	if option=='7':
-		subprocess.call(["pkill", '-9', "node"]) 
-		subprocess.Popen(home+'/.config/signalk-server-node/bin/nmea-from-10110', cwd=home+'/.config/signalk-server-node') 
-	if option=='8':
-		wlan=conf.get('WIFI', 'device')
-		passw2=conf.get('WIFI', 'password')
-		ssid2=conf.get('WIFI', 'ssid')
-		subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '0', wlan, passw2, ssid2])
-		conf.set('WIFI', 'enable', '0')
-	if option=='9':
-		wlan=conf.get('WIFI', 'device')
-		passw2=conf.get('WIFI', 'password')
-		ssid2=conf.get('WIFI', 'ssid')
-		subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '1', wlan, passw2, ssid2])
-		conf.set('WIFI', 'enable', '1')
-	if option=='10':
-		subprocess.Popen(['pkill', '-9', 'aisdecoder'])
-		subprocess.Popen(['pkill', '-9', 'rtl_fm'])
-		conf.set('AIS-SDR', 'enable', '0')
-	if option=='11':
-		gain=conf.get('AIS-SDR', 'gain')
-		ppm=conf.get('AIS-SDR', 'ppm')
-		channel=conf.get('AIS-SDR', 'channel')
-		subprocess.call(['pkill', '-9', 'aisdecoder'])
-		subprocess.call(['pkill', '-9', 'rtl_fm'])
-		frecuency='161975000'
-		if channel=='b': frecuency='162025000'
-		rtl_fm=subprocess.Popen(['rtl_fm', '-f', frecuency, '-g', gain, '-p', ppm, '-s', '48k'], stdout = subprocess.PIPE)
-		aisdecoder=subprocess.Popen(['aisdecoder', '-h', '127.0.0.1', '-p', '10110', '-a', 'file', '-c', 'mono', '-d', '-f', '/dev/stdin'], stdin = rtl_fm.stdout)
-		conf.set('AIS-SDR', 'enable', '1')
-	if option=='12':
-		conf.set('TWITTER', 'enable', '1')
-	if option=='13':
-		conf.set('TWITTER', 'enable', '0')
-	if option=='14':
-		apiKey = conf.get('TWITTER', 'apiKey')
-		apiSecret = conf.get('TWITTER', 'apiSecret')
-		accessToken = conf.get('TWITTER', 'accessToken')
-		accessTokenSecret = conf.get('TWITTER', 'accessTokenSecret')
-		now = time.strftime("%H:%M:%S")
-		tweetStr=text
-		if tweetStr:
-			tweetStr = now+' '+tweetStr
-			if len(tweetStr)>140: tweetStr=tweetStr[0:140]
-			try:
-				msg=TwitterBot(apiKey,apiSecret,accessToken,accessTokenSecret)
-				msg.send(tweetStr)
-			except: pass
-	if option=='15':
-		conf.set('GMAIL', 'enable', '1')
-	if option=='16':
-		conf.set('GMAIL', 'enable', '0')
-	if option=='17':
-		GMAIL_USERNAME = conf.get('GMAIL', 'gmail')
-		GMAIL_PASSWORD = conf.get('GMAIL', 'password')
-		recipient = conf.get('GMAIL', 'recipient')
-		subject=text
-		body = time.strftime("%H:%M:%S")+' '+subject
-		if subject:
-			try:
-				msg=GmailBot(GMAIL_USERNAME,GMAIL_PASSWORD,recipient)
-				msg.send(subject,body)
-			except: pass
-#end actions
-
 #switches
 def switch1(channel):
 	global state1
@@ -176,13 +88,13 @@ def switch1(channel):
 		if not state1:
 			a.SW1[2]=_('on')
 			a.SW1[4]=time.time()
-			actions(conf.get('SWITCH1', 'on_action'), conf.get('SWITCH1', 'on_command'))
+			actions.run_action(conf.get('SWITCH1', 'on_action'), conf.get('SWITCH1', 'on_command'), conf,'')
 			state1=True
 	else:
 		if state1:
 			a.SW1[2]=_('off')
 			a.SW1[4]=time.time()
-			actions(conf.get('SWITCH1', 'off_action'), conf.get('SWITCH1', 'off_command'))
+			actions.run_action(conf.get('SWITCH1', 'off_action'), conf.get('SWITCH1', 'off_command'), conf,'')
 			state1=False
 
 def switch2(channel):
@@ -191,13 +103,13 @@ def switch2(channel):
 		if not state2:
 			a.SW2[2]=_('on')
 			a.SW2[4]=time.time()
-			actions(conf.get('SWITCH2', 'on_action'), conf.get('SWITCH2', 'on_command'))
+			actions.run_action(conf.get('SWITCH2', 'on_action'), conf.get('SWITCH2', 'on_command'), conf,'')
 			state2=True
 	else:
 		if state2:
 			a.SW2[2]=_('off')
 			a.SW2[4]=time.time()
-			actions(conf.get('SWITCH2', 'off_action'), conf.get('SWITCH2', 'off_command'))
+			actions.run_action(conf.get('SWITCH2', 'off_action'), conf.get('SWITCH2', 'off_command'), conf,'')
 			state2=False
 
 def switch3(channel):
@@ -206,13 +118,13 @@ def switch3(channel):
 		if not state3:
 			a.SW3[2]=_('on')
 			a.SW3[4]=time.time()
-			actions(conf.get('SWITCH3', 'on_action'), conf.get('SWITCH3', 'on_command'))
+			actions.run_action(conf.get('SWITCH3', 'on_action'), conf.get('SWITCH3', 'on_command'), conf,'')
 			state3=True
 	else:
 		if state3:
 			a.SW3[2]=_('off')
 			a.SW3[4]=time.time()
-			actions(conf.get('SWITCH3', 'off_action'), conf.get('SWITCH3', 'off_command'))
+			actions.run_action(conf.get('SWITCH3', 'off_action'), conf.get('SWITCH3', 'off_command'), conf,'')
 			state3=False
 
 def switch4(channel):
@@ -221,22 +133,18 @@ def switch4(channel):
 		if not state4:
 			a.SW4[2]=_('on')
 			a.SW4[4]=time.time()
-			actions(conf.get('SWITCH4', 'on_action'), conf.get('SWITCH4', 'on_command'))
+			actions.run_action(conf.get('SWITCH4', 'on_action'), conf.get('SWITCH4', 'on_command'), conf,'')
 			state4=True
 	else:
 		if state4:
 			a.SW4[2]=_('off')
 			a.SW4[4]=time.time()
-			actions(conf.get('SWITCH4', 'off_action'), conf.get('SWITCH4', 'off_command'))
+			actions.run_action(conf.get('SWITCH4', 'off_action'), conf.get('SWITCH4', 'off_command'), conf,'')
 			state4=False
 #end switches
 
 #monitoring
 def send_twitter(error):
-	apiKey = conf.get('TWITTER', 'apiKey')
-	apiSecret = conf.get('TWITTER', 'apiSecret')
-	accessToken = conf.get('TWITTER', 'accessToken')
-	accessTokenSecret = conf.get('TWITTER', 'accessTokenSecret')
 	tweetStr = ''
 	send_data=eval(conf.get('TWITTER', 'send_data'))
 	for ii in send_data:
@@ -254,19 +162,9 @@ def send_twitter(error):
 				if unit: tweetStr+= data+':'+str(value)+str(unit)+' '
 				else: tweetStr+= data+':'+str(value)+' '
 	if error !=0 : tweetStr+= error
-	if tweetStr:
-		if len(tweetStr)>140: tweetStr=tweetStr[0:140]
-		try:
-			msg=TwitterBot(apiKey,apiSecret,accessToken,accessTokenSecret)
-			msg.send(tweetStr)
-
-		except: pass
-		#except Exception,e: print str(e)
+	if tweetStr: actions.run_action('14',tweetStr,conf,'')
 
 def send_gmail(error):
-	GMAIL_USERNAME = conf.get('GMAIL', 'gmail')
-	GMAIL_PASSWORD = conf.get('GMAIL', 'password')
-	recipient = conf.get('GMAIL', 'recipient')
 	subject = conf.get('GMAIL', 'subject')
 	body = ''
 	for ii in a.DataList:
@@ -284,13 +182,7 @@ def send_gmail(error):
 				if unit: body += data+': '+str(value)+' '+str(unit)+'\n'
 				else: body+= data+': '+str(value)+'\n'
 	if error !=0 : body+= error
-	if body:
-		try:
-			msg=GmailBot(GMAIL_USERNAME,GMAIL_PASSWORD,recipient)
-			msg.send(subject,body)
-
-		except: pass
-		#except Exception,e: print str(e)
+	if subject: actions.run_action('17',subject,conf,body)
 #end monitoring
 
 # calculate

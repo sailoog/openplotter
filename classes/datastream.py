@@ -53,7 +53,7 @@ class DataStream:
 		self.SW3=[_('Switch 3 status'),_('SW3'),None,None,None,None,None]
 		self.SW4=[_('Switch 4 status'),_('SW4'),None,None,None,None,None]
 
-		self.operators_list=[_('equal'), _('less than'), _('less than or equal to'), _('greater than'), _('greater than or equal to'), _('on'), _('off')]
+		self.operators_list=[_('equal'), _('less than'), _('less than or equal to'), _('greater than'), _('greater than or equal to'), _('switch on'), _('switch off')]
 
 	def validate(self,data,now,accuracy):
 		timestamp=eval('self.'+data+'[4]')

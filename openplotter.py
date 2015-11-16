@@ -23,7 +23,8 @@ from classes.actions import Actions
 from classes.paths import Paths
 from classes.conf import Conf
 from classes.language import Language
-from classes.trigger import addTrigger
+from classes.add_trigger import addTrigger
+from classes.add_action import addAction
 
 paths=Paths()
 home=paths.home
@@ -475,8 +476,8 @@ class MainFrame(wx.Frame):
 		
 		self.list_triggers = CheckListCtrl(self.page10, 102)
 		self.list_triggers.SetPosition((15, 30))
-		self.list_triggers.InsertColumn(0, _('trigger'), width=325)
-		self.list_triggers.InsertColumn(1, _('operator'), width=120)
+		self.list_triggers.InsertColumn(0, _('trigger'), width=275)
+		self.list_triggers.InsertColumn(1, _('operator'), width=170)
 		self.list_triggers.InsertColumn(2, _('value'), width=120)
 			
 		self.add_trigger_button =wx.Button(self.page10, label=_('add'), pos=(585, 30))
@@ -1749,61 +1750,45 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.start_monitoring()
 
 	def onSelectOn1(self,e):
-		if self.ONaction1.GetValue() == _('command'):
+		res=self.actions.data_message(self.ONaction1.GetCurrentSelection())
+		if res:
 			self.ONcommand1.SetFocus() 
-			self.ShowMessage(_('Enter Linux commands in the field below.'))
-		if self.ONaction1.GetValue() ==_('publish Twitter') or self.ONaction1.GetValue() ==_('send e-mail'):
-			self.ONcommand1.SetFocus() 
-			self.ShowMessage(_('Enter text in the field below.'))
+			self.ShowMessage(res)
 	def onSelectOff1(self,e):
-		if self.OFFaction1.GetValue() == _('command'):
+		res=self.actions.data_message(self.OFFaction1.GetCurrentSelection())
+		if res:
 			self.OFFcommand1.SetFocus() 
-			self.ShowMessage(_('Enter Linux commands in the field below.'))
-		if self.OFFaction1.GetValue() ==_('publish Twitter') or self.OFFaction1.GetValue() ==_('send e-mail'):
-			self.OFFcommand1.SetFocus() 
-			self.ShowMessage(_('Enter text in the field below.'))
+			self.ShowMessage(res)
 	def onSelectOn2(self,e):
-		if self.ONaction2.GetValue() == _('command'):
+		res=self.actions.data_message(self.ONaction2.GetCurrentSelection())
+		if res:
 			self.ONcommand2.SetFocus() 
-			self.ShowMessage(_('Enter Linux commands in the field below.'))
-		if self.ONaction2.GetValue() ==_('publish Twitter') or self.ONaction2.GetValue() ==_('send e-mail'):
-			self.ONcommand2.SetFocus() 
-			self.ShowMessage(_('Enter text in the field below.'))
+			self.ShowMessage(res)
 	def onSelectOff2(self,e):
-		if self.OFFaction2.GetValue() == _('command'):
+		res=self.actions.data_message(self.OFFaction2.GetCurrentSelection())
+		if res:
 			self.OFFcommand2.SetFocus() 
-			self.ShowMessage(_('Enter Linux commands in the field below.'))
-		if self.OFFaction2.GetValue() ==_('publish Twitter') or self.OFFaction2.GetValue() ==_('send e-mail'):
-			self.OFFcommand2.SetFocus() 
-			self.ShowMessage(_('Enter text in the field below.'))
+			self.ShowMessage(res)
 	def onSelectOn3(self,e):
-		if self.ONaction3.GetValue() == _('command'):
+		res=self.actions.data_message(self.ONaction3.GetCurrentSelection())
+		if res:
 			self.ONcommand3.SetFocus() 
-			self.ShowMessage(_('Enter Linux commands in the field below.'))
-		if self.ONaction3.GetValue() ==_('publish Twitter') or self.ONaction3.GetValue() ==_('send e-mail'):
-			self.ONcommand3.SetFocus() 
-			self.ShowMessage(_('Enter text in the field below.'))
+			self.ShowMessage(res)
 	def onSelectOff3(self,e):
-		if self.OFFaction3.GetValue() == _('command'):
+		res=self.actions.data_message(self.OFFaction3.GetCurrentSelection())
+		if res:
 			self.OFFcommand3.SetFocus() 
-			self.ShowMessage(_('Enter Linux commands in the field below.'))
-		if self.OFFaction3.GetValue() ==_('publish Twitter') or self.OFFaction3.GetValue() ==_('send e-mail'):
-			self.OFFcommand3.SetFocus() 
-			self.ShowMessage(_('Enter text in the field below.'))
+			self.ShowMessage(res)
 	def onSelectOn4(self,e):
-		if self.ONaction4.GetValue() == _('command'):
+		res=self.actions.data_message(self.ONaction4.GetCurrentSelection())
+		if res:
 			self.ONcommand4.SetFocus() 
-			self.ShowMessage(_('Enter Linux commands in the field below.'))
-		if self.ONaction4.GetValue() ==_('publish Twitter') or self.ONaction4.GetValue() ==_('send e-mail'):
-			self.ONcommand4.SetFocus() 
-			self.ShowMessage(_('Enter text in the field below.'))
+			self.ShowMessage(res)
 	def onSelectOff4(self,e):
-		if self.OFFaction4.GetValue() == _('command'):
+		res=self.actions.data_message(self.OFFaction4.GetCurrentSelection())
+		if res:
 			self.OFFcommand4.SetFocus() 
-			self.ShowMessage(_('Enter Linux commands in the field below.'))
-		if self.OFFaction4.GetValue() ==_('publish Twitter') or self.OFFaction4.GetValue() ==_('send e-mail'):
-			self.OFFcommand4.SetFocus() 
-			self.ShowMessage(_('Enter text in the field below.'))
+			self.ShowMessage(res)
 
 #######################twitterbot
 
@@ -1885,20 +1870,26 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		dlg = addTrigger(self.datastream_list, self.a.operators_list)
 		res = dlg.ShowModal()
 		if res == wx.ID_OK:
-			print dlg.trigger_select.GetCurrentSelection()
-			print dlg.operator_select.GetCurrentSelection()
-			print dlg.value.GetValue()
+			trigger=self.datastream_list[dlg.trigger_select.GetCurrentSelection()]
+			operator=self.a.operators_list[dlg.operator_select.GetCurrentSelection()]
+			self.list_triggers.Append([trigger,operator,dlg.value.GetValue()])
+			last=self.list_triggers.GetItemCount()-1
+			self.list_triggers.CheckItem(last)
 		dlg.Destroy()
 
 	def add_action(self,e):
 		dlg = addAction(self.actions.options,self.actions.time_units)
 		res = dlg.ShowModal()
 		if res == wx.ID_OK:
-			print dlg.action_select.GetCurrentSelection()
-			print dlg.data.GetValue()
-			print dlg.repeat.GetValue()
-			print dlg.repeat_unit.GetCurrentSelection()
-			print dlg.times.GetValue()
+			action=self.actions.options[dlg.action_select.GetCurrentSelection()]
+			data=dlg.data.GetValue()
+			repeat=dlg.repeat.GetValue()
+			time_units=self.actions.time_units[dlg.repeat_unit.GetCurrentSelection()]
+			repeat2=repeat+' '+time_units
+			times=dlg.times.GetValue()
+			self.list_actions.Append([action,data,repeat2,times])
+			last=self.list_actions.GetItemCount()-1
+			self.list_actions.CheckItem(last)
 		dlg.Destroy()
 
 

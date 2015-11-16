@@ -184,8 +184,6 @@ class MyFrame(wx.Frame):
 				self.list.SetStringItem(i,3,'')
 				self.list.SetStringItem(i,4,'')
 			self.conf.read()
-			self.a=''
-			self.a=DataStream()
 
 		def nmea_info(self, e):
 			url = self.currentpath+'/docs/NMEA.html'
