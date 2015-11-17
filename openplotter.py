@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, sys, subprocess, webbrowser, re
+import wx, sys, os, subprocess, webbrowser, re
 import wx.lib.scrolledpanel as scrolled
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 from classes.datastream import DataStream
@@ -1377,7 +1377,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 #####sensors#################################
 	def start_sensors(self):
-		subprocess.call(['pkill', 'RTIMULibDemoGL'])
+		subprocess.call(['pkill', 'RTIMULibCal'])
 		subprocess.call(['pkill', '-f', 'sensors.py'])
 		if self.heading.GetValue() or self.heel.GetValue() or self.press.GetValue() or self.temp_p.GetValue() or self.hum.GetValue() or self.temp_h.GetValue():
 			subprocess.Popen(['python', currentpath+'/sensors.py'], cwd=currentpath+'/imu')
@@ -1455,7 +1455,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.conf.set('STARTUP', 'nmea_hum', '0')
 		self.conf.set('STARTUP', 'nmea_temp_h', '0')
 		self.start_sensors()
-		subprocess.Popen('RTIMULibDemoGL', cwd=currentpath+'/imu')
+		subprocess.Popen(['lxterminal', '-e', 'RTIMULibCal'], cwd=currentpath+'/imu')
 		msg=_('Heading, heel, temperature, humidity and pressure disabled.\nAfter calibrating, enable them again.')
 		self.ShowMessage(msg)
 	

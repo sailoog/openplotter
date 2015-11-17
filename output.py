@@ -85,6 +85,7 @@ class MyFrame(wx.Frame):
 			self.error=''
 			self.frase_nmea_log=''
 			self.data=[]
+			self.read_conf=0
 
 			if not self.thread1.isAlive(): self.thread1.start()
 			if not self.thread2.isAlive(): self.thread2.start()
@@ -128,6 +129,9 @@ class MyFrame(wx.Frame):
 					if self.conf.get('SWITCH2', 'enable')=='1': self.a.switches_status(2, self.conf.get('SWITCH2', 'gpio'), self.conf.get('SWITCH2', 'pull_up_down'))
 					if self.conf.get('SWITCH3', 'enable')=='1': self.a.switches_status(3, self.conf.get('SWITCH3', 'gpio'), self.conf.get('SWITCH3', 'pull_up_down'))
 					if self.conf.get('SWITCH4', 'enable')=='1': self.a.switches_status(4, self.conf.get('SWITCH4', 'gpio'), self.conf.get('SWITCH4', 'pull_up_down'))
+					if self.read_conf==1: 
+						self.conf.read()
+						self.read_conf=0
 					index=0
 					for i in self.a.DataList:
 						timestamp=eval('self.a.'+i+'[4]')
@@ -160,6 +164,7 @@ class MyFrame(wx.Frame):
 							wx.CallAfter(self.refresh_data)
 							time.sleep(0.001)
 						index=index+1
+				else: time.sleep(0.001)
 		# end thread 2
 
 		def refresh_data(self):
@@ -183,7 +188,8 @@ class MyFrame(wx.Frame):
 				self.list.SetStringItem(i,2,'')
 				self.list.SetStringItem(i,3,'')
 				self.list.SetStringItem(i,4,'')
-			self.conf.read()
+			self.logger.SetValue('')
+			self.read_conf=1
 
 		def nmea_info(self, e):
 			url = self.currentpath+'/docs/NMEA.html'
