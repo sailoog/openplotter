@@ -115,7 +115,7 @@ class MyFrame(wx.Frame):
 					else:
 						if frase_nmea:
 							self.a.parse_nmea(frase_nmea)
-							self.frase_nmea_log=frase_nmea
+							self.frase_nmea_log+=frase_nmea
 							self.error = _('Connected with localhost:10110.')
 						else:
 							self.s2=''
@@ -164,11 +164,13 @@ class MyFrame(wx.Frame):
 							wx.CallAfter(self.refresh_data)
 							time.sleep(0.001)
 						index=index+1
+					wx.CallAfter(self.refresh_data)
+					time.sleep(0.001)
 				else: time.sleep(0.001)
 		# end thread 2
 
 		def refresh_data(self):
-			self.list.SetStringItem(self.data[0],self.data[1],self.data[2])
+			if self.data: self.list.SetStringItem(self.data[0],self.data[1],self.data[2])
 			if self.frase_nmea_log: 
 				self.logger.AppendText(self.frase_nmea_log)
 				self.frase_nmea_log=''

@@ -398,5 +398,5 @@ class DataStream:
 								self.ECT[5]=talker
 								self.ECT[6]=nmea_type
 			
-			#except: pass
-			except Exception,e: print str(e)
+			except: pass
+			#except Exception,e: print str(e)
