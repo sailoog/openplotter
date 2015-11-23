@@ -1875,6 +1875,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.list_triggers.Append([trigger,operator,dlg.value.GetValue()])
 			last=self.list_triggers.GetItemCount()-1
 			self.list_triggers.CheckItem(last)
+			tmp = self.conf.get('ALARMS', 'triggers')
+			tmp += '1,'+str(dlg.trigger_select.GetCurrentSelection())+','+str(dlg.operator_select.GetCurrentSelection())+','+str(dlg.value.GetValue())+'||'
+			self.conf.set('ALARMS', 'triggers', tmp)
 		dlg.Destroy()
 
 	def add_action(self,e):
