@@ -570,6 +570,7 @@ class MainFrame(wx.Frame):
 		if 'DVB-T' in output:
 			self.gain.SetValue(self.conf.get('AIS-SDR', 'gain'))
 			self.ppm.SetValue(self.conf.get('AIS-SDR', 'ppm'))
+			self.band.SetValue(self.conf.get('AIS-SDR', 'band'))
 			self.channel.SetValue(self.conf.get('AIS-SDR', 'gsm_channel'))
 			if self.conf.get('AIS-SDR', 'enable')=='1': 
 				self.ais_sdr_enable.SetValue(True)
@@ -1071,9 +1072,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		gain=self.gain.GetValue()
 		ppm=self.ppm.GetValue()
 		band=self.band.GetValue()
-		subprocess.Popen(("lxterminal -e 'bash -c \"kal -s "+band+" -g "+gain+" -e "+ppm+"; echo 'Press [ENTER] to close the window'; read -p ---------------------------------; exit 0; exec bash\"'"), shell=True)
-		msg=_('Wait for the system to check the band and select the strongest channel (power). If you do not find any channel try another band.')
-		self.ShowMessage(msg)
+		self.conf.set('AIS-SDR', 'gain', gain)
+		self.conf.set('AIS-SDR', 'ppm', ppm)
+		self.conf.set('AIS-SDR', 'band', band)
+		subprocess.Popen(['python',currentpath+'/fine_cal.py', 'b'])
 
 	def check_channel(self, event):
 		self.kill_sdr()
@@ -1081,12 +1083,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		gain=self.gain.GetValue()
 		ppm=self.ppm.GetValue()
 		channel=self.channel.GetValue()
-		if channel:
-			subprocess.Popen(("lxterminal -e 'bash -c \"kal -c "+channel+" -g "+gain+" -e "+ppm+"; echo 'Press [ENTER] to close the window'; read -p ---------------------------------; exit 0; exec bash\"'"), shell=True)
-			msg=_('Wait for the system to calculate the ppm value with the selected channel. Put the obtained value in "Correction (ppm)" field and enable SDR-AIS reception again.')
-			self.conf.set('AIS-SDR', 'gsm_channel', channel)
-			self.ShowMessage(msg)
-
+		self.conf.set('AIS-SDR', 'gain', gain)
+		self.conf.set('AIS-SDR', 'ppm', ppm)
+		self.conf.set('AIS-SDR', 'gsm_channel', channel)
+		if channel: subprocess.Popen(['python',currentpath+'/fine_cal.py', 'c'])
 ########multimpexer###################################	
 
 	def show_output_window(self,event):

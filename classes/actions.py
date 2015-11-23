@@ -52,7 +52,7 @@ class Actions():
 
 	def data_message(self,action_selected):
 		if action_selected==1: return _('Enter Linux command and arguments in the field below.')
-		if action_selected==14 or action_selected==17: return _('Enter text to send in the field below.')
+		if action_selected==14 or action_selected==17: return _('Be sure you have filled in all fields in "Monitoring" tab and enabled Twitter or Gmail checkbox.\n\nEnter text to send in the field below.')
 
 	def run_action(self,option,text,conf,extra):
 		conf.read()
