@@ -21,7 +21,7 @@ class addAction(wx.Dialog):
 
 	def __init__(self,actions_options,time_units):
 
-		wx.Dialog.__init__(self, None, title=_('Add action'), size=(330,365))
+		wx.Dialog.__init__(self, None, title=_('Add action'), size=(330,290))
 
 		panel = wx.Panel(self)
 
@@ -33,16 +33,13 @@ class addAction(wx.Dialog):
 		self.data = wx.TextCtrl(panel, size=(310, 32), pos=(10, 95))
 		wx.StaticText(panel, label=_('repeat after'), pos=(10, 130))
 		self.repeat = wx.TextCtrl(panel, size=(150, 32), pos=(10, 155))
-		self.repeat.SetValue('0')
+		self.repeat.Disable()
 		self.repeat_unit= wx.ComboBox(panel, choices=time_units, style=wx.CB_READONLY, size=(150, 32), pos=(170, 155))
+		self.repeat_unit.Bind(wx.EVT_COMBOBOX, self.onSelectUnit)
 		self.repeat_unit.SetValue(_('no repeat'))
-		wx.StaticText(panel, label=_('times'), pos=(10, 190))
-		self.times = wx.TextCtrl(panel, size=(50, 32), pos=(10, 215))
-		self.times.SetValue('0')
-		wx.StaticText(panel, label=_('0 if you want the action to repeat\nindefinitely until the trigger is false'), pos=(70, 215))
 
-		cancelBtn = wx.Button(panel, wx.ID_CANCEL, pos=(70, 280))
-		okBtn = wx.Button(panel, wx.ID_OK, pos=(180, 280))
+		cancelBtn = wx.Button(panel, wx.ID_CANCEL, pos=(70, 205))
+		okBtn = wx.Button(panel, wx.ID_OK, pos=(180, 205))
 
 	def onSelect(self,e):
 		actions=Actions()
@@ -50,4 +47,10 @@ class addAction(wx.Dialog):
 		if res:
 			wx.MessageBox(res, 'Info', wx.OK | wx.ICON_INFORMATION)
 			self.data.SetFocus() 
-					
+				
+	def onSelectUnit(self,e):
+		if self.repeat_unit.GetCurrentSelection()==0: 
+			self.repeat.Disable()
+			self.repeat.SetValue('')
+		else: 
+			self.repeat.Enable()

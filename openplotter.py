@@ -475,6 +475,7 @@ class MainFrame(wx.Frame):
 		wx.StaticBox(self.page10, label=_(' Triggers '), size=(670, 130), pos=(10, 10))
 		
 		self.list_triggers = CheckListCtrl(self.page10, 102)
+		self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.print_actions, self.list_triggers)
 		self.list_triggers.SetPosition((15, 30))
 		self.list_triggers.InsertColumn(0, _('trigger'), width=275)
 		self.list_triggers.InsertColumn(1, _('operator'), width=170)
@@ -485,15 +486,14 @@ class MainFrame(wx.Frame):
 
 		self.delete_trigger_button =wx.Button(self.page10, label=_('delete'), pos=(585, 65))
 		self.Bind(wx.EVT_BUTTON, self.delete_trigger, self.delete_trigger_button)
-		
+
 		wx.StaticBox(self.page10, label=_(' Actions '), size=(670, 130), pos=(10, 145))
 		
-		self.list_actions = CheckListCtrl(self.page10, 102)
+		self.list_actions = wx.ListCtrl(self.page10, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(565, 102))
 		self.list_actions.SetPosition((15, 165))
 		self.list_actions.InsertColumn(0, _('action'), width=200)
 		self.list_actions.InsertColumn(1, _('data'), width=200)
-		self.list_actions.InsertColumn(2, _('repeat'), width=100)
-		self.list_actions.InsertColumn(3, _('times'), width=65)
+		self.list_actions.InsertColumn(2, _('repeat'), width=165)
 
 		self.add_action_button =wx.Button(self.page10, label=_('add'), pos=(585, 165))
 		self.Bind(wx.EVT_BUTTON, self.add_action, self.add_action_button)
@@ -744,6 +744,9 @@ class MainFrame(wx.Frame):
 			self.Gmail_password.Disable()
 			self.Recipient.Disable()
 			self.Subject.Disable()
+
+		self.read_triggers()
+		self.read_actions()
 
 ########MENU###################################	
 
@@ -1866,44 +1869,160 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.Subject.Enable()
 		self.start_monitoring()
 #######################alarms
+	def read_triggers(self):
+		self.list_triggers.DeleteAllItems()
+		data=self.conf.get('ALARMS', 'triggers')
+		self.triggers=data.split('||')
+		self.triggers.pop()
+		for index,item in enumerate(self.triggers):
+			ii=item.split(',')
+			ii[0]=int(ii[0])
+			ii[1]=int(ii[1])
+			ii[2]=int(ii[2])
+			ii[3]=float(ii[3])
+			self.list_triggers.Append([self.datastream_list[ii[1]],self.a.operators_list[ii[2]],ii[3]])
+			if ii[0]==1:
+				last=self.list_triggers.GetItemCount()-1
+				self.list_triggers.CheckItem(last)
+			self.triggers[index]=ii
+
+	def read_actions(self):
+		data=self.conf.get('ALARMS', 'actions')
+		self.trigger_actions=data.split('||')
+		self.trigger_actions.pop()
+		for index,item in enumerate(self.trigger_actions):
+			ii=item.split(',')
+			ii[0]=int(ii[0])
+			ii[1]=int(ii[1])
+			ii[3]=float(ii[3])
+			ii[4]=int(ii[4])
+			self.trigger_actions[index]=ii
+
+	def print_actions(self, e):
+		selected_trigger=e.GetIndex()
+		self.list_actions.DeleteAllItems()
+		for i in self.trigger_actions:
+			if i[0]==selected_trigger:
+				if i[3]==0.0: repeat=''
+				else: repeat=str(i[3])
+				time_units=self.actions.time_units[i[4]]
+				repeat2=repeat+' '+time_units
+				self.list_actions.Append([self.actions.options[i[1]],i[2],repeat2])
+
 	def add_trigger(self,e):
 		dlg = addTrigger(self.datastream_list, self.a.operators_list)
 		res = dlg.ShowModal()
 		if res == wx.ID_OK:
+			trigger_selection=dlg.trigger_select.GetCurrentSelection()
+			operator_selection=dlg.operator_select.GetCurrentSelection()
+			if dlg.value.GetValue(): value=dlg.value.GetValue()
+			else: value='0'
+			try: value2=float(value)
+			except:
+				self.ShowMessage(_('Failed. Value must be a number.'))
+				dlg.Destroy()
+				return
+			if trigger_selection == -1 or operator_selection == -1:
+				self.ShowMessage(_('Failed. Select trigger and operator.'))
+				dlg.Destroy()
+				return
 			trigger=self.datastream_list[dlg.trigger_select.GetCurrentSelection()]
-			operator=self.a.operators_list[dlg.operator_select.GetCurrentSelection()]
-			self.list_triggers.Append([trigger,operator,dlg.value.GetValue()])
+			operator=self.a.operators_list[operator_selection]
+			self.list_triggers.Append([trigger,operator,value])
 			last=self.list_triggers.GetItemCount()-1
 			self.list_triggers.CheckItem(last)
-			tmp = self.conf.get('ALARMS', 'triggers')
-			tmp += '1,'+str(dlg.trigger_select.GetCurrentSelection())+','+str(dlg.operator_select.GetCurrentSelection())+','+str(dlg.value.GetValue())+'||'
-			self.conf.set('ALARMS', 'triggers', tmp)
+			tmp=[]
+			tmp.append(1)
+			tmp.append(trigger_selection)
+			tmp.append(operator_selection)
+			tmp.append(value2)
+			self.triggers.append(tmp)
 		dlg.Destroy()
 
 	def add_action(self,e):
+		selected_trigger= self.list_triggers.GetFirstSelected()
+		if selected_trigger==-1:
+			self.ShowMessage(_('Select a trigger to add actions.'))
+			return
 		dlg = addAction(self.actions.options,self.actions.time_units)
 		res = dlg.ShowModal()
 		if res == wx.ID_OK:
-			action=self.actions.options[dlg.action_select.GetCurrentSelection()]
+			action_selection=dlg.action_select.GetCurrentSelection()
+			if action_selection == -1:
+				self.ShowMessage(_('Failed. Select an action.'))
+				dlg.Destroy()
+				return
+			if dlg.repeat.GetValue(): repeat=dlg.repeat.GetValue()
+			else: repeat='0'
+			try: repeat=float(repeat)
+			except:
+				self.ShowMessage(_('Failed. "Repeat after" must be a number.'))
+				dlg.Destroy()
+				return
+			action=self.actions.options[action_selection]
 			data=dlg.data.GetValue()
-			repeat=dlg.repeat.GetValue()
-			time_units=self.actions.time_units[dlg.repeat_unit.GetCurrentSelection()]
-			repeat2=repeat+' '+time_units
-			times=dlg.times.GetValue()
-			self.list_actions.Append([action,data,repeat2,times])
-			last=self.list_actions.GetItemCount()-1
-			self.list_actions.CheckItem(last)
+			time_units_selection=dlg.repeat_unit.GetCurrentSelection()
+			time_units=self.actions.time_units[time_units_selection]
+			if repeat==0.0: repeat2=time_units
+			else: repeat2=str(repeat)+' '+time_units
+			self.list_actions.Append([action,data,repeat2])
+			tmp=[]
+			tmp.append(selected_trigger)
+			tmp.append(action_selection)
+			tmp.append(data)
+			tmp.append(repeat)
+			tmp.append(time_units_selection)
+			self.trigger_actions.append(tmp)
 		dlg.Destroy()
 
-
 	def delete_trigger(self,e):
-		pass
+		selected=self.list_triggers.GetFirstSelected()
+		if selected==-1: 
+			self.ShowMessage(_('Select a trigger to delete.'))
+		else:
+			del self.triggers[selected]
+			self.list_triggers.DeleteItem(selected)
+			toRemove=[]
+			for index,item in enumerate(self.trigger_actions):
+				if item[0]==selected: toRemove.append(index)
+			for i in sorted(toRemove, reverse=True):
+				del self.trigger_actions[i]
+			self.list_actions.DeleteAllItems()
+
 	def delete_action(self,e):
-		pass
+		selected_trigger=self.list_triggers.GetFirstSelected()
+		selected_action=self.list_actions.GetFirstSelected()
+		if selected_action==-1: 
+			self.ShowMessage(_('Select an action to delete.'))
+		else:
+			self.list_actions.DeleteItem(selected_action)
+			cont=0
+			for index,item in enumerate(self.trigger_actions):
+				if item[0]==selected_trigger:
+					if cont==selected_action: 
+						del self.trigger_actions[index]
+						return
+					else: cont=cont+1
+
 	def apply_changes_alarms(self,e):
-		pass
+		tmp=''
+		for index,item in enumerate(self.triggers):
+			if self.list_triggers.IsChecked(index): tmp +='1,'
+			else: tmp +='0,'
+			tmp +=str(self.triggers[index][1])+','+str(self.triggers[index][2])+','+str(self.triggers[index][3])+'||'
+		self.conf.set('ALARMS', 'triggers', tmp)
+		
+		tmp=''
+		for index,item in enumerate(self.trigger_actions):
+			tmp +=str(self.trigger_actions[index][0])+','+str(self.trigger_actions[index][1])+','+str(self.trigger_actions[index][2])+','+str(self.trigger_actions[index][3])+','+str(self.trigger_actions[index][4])+'||'
+		self.conf.set('ALARMS', 'actions', tmp)
+		self.SetStatusText(_('Alarms changes applied and restarted'))
+
 	def cancel_changes_alarms(self,e):
-		pass
+		self.read_triggers()
+		self.read_actions()
+		self.list_actions.DeleteAllItems()
+		self.SetStatusText(_('Alarms changes cancelled'))
 #Main#############################
 if __name__ == "__main__":
 	app = wx.App()
