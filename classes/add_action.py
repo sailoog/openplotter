@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 import wx
+from paths import Paths
 from classes.actions import Actions
 
 class addAction(wx.Dialog):
@@ -41,12 +42,24 @@ class addAction(wx.Dialog):
 		cancelBtn = wx.Button(panel, wx.ID_CANCEL, pos=(70, 205))
 		okBtn = wx.Button(panel, wx.ID_OK, pos=(180, 205))
 
+		paths=Paths()
+		self.home=paths.home
+		self.currentpath=paths.currentpath
+
 	def onSelect(self,e):
 		actions=Actions()
 		res=actions.data_message(self.action_select.GetCurrentSelection())
 		if res:
-			wx.MessageBox(res, 'Info', wx.OK | wx.ICON_INFORMATION)
-			self.data.SetFocus() 
+			if res=='OpenFileDialog':
+				path=''
+				dlg = wx.FileDialog(self, message=_('Choose a file'), defaultDir=self.currentpath+'/sounds', defaultFile='', wildcard=_('Audio files')+' (*.mp3)|*.mp3|'+_('All files')+' (*.*)|*.*', style=wx.OPEN | wx.CHANGE_DIR)
+				if dlg.ShowModal() == wx.ID_OK:
+					file_path = dlg.GetPath()
+				dlg.Destroy()
+				self.data.SetValue(file_path)
+			else: 
+				wx.MessageBox(res, 'Info', wx.OK | wx.ICON_INFORMATION)
+				self.data.SetFocus() 
 				
 	def onSelectUnit(self,e):
 		if self.repeat_unit.GetCurrentSelection()==0: 

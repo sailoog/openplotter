@@ -23,7 +23,7 @@ class Actions():
 
 	def __init__(self):
 
-		self.options=[None]*18
+		self.options=[None]*20
 		#ATENTION. If order changes, edit "run_action()", "data_message()" and monitoring.py: "send_twitter(), send_gmail()"
 		self.options[0]= _('nothing')
 		self.options[1]= _('command')
@@ -43,6 +43,8 @@ class Actions():
 		self.options[15]= _('start Gmail monitoring')
 		self.options[16]= _('stop Gmail monitoring')
 		self.options[17]= _('send e-mail')
+		self.options[18]= _('play sound')
+		self.options[19]= _('stop all sounds')
 
 		self.time_units=[_('no repeat'),_('seconds'), _('minutes'), _('hours'), _('days')]
 
@@ -52,7 +54,11 @@ class Actions():
 
 	def data_message(self,action_selected):
 		if action_selected==1: return _('Enter Linux command and arguments in the field below.')
+		if action_selected==9: return _('Be sure you have filled in all fields in "WiFi AP" tab and enabled WiFi access point.')
+		if action_selected==11: return _('Be sure you have filled in Gain and Correction fields in "SDR-AIS" tab and enabled AIS NMEA generation.')
 		if action_selected==14 or action_selected==17: return _('Be sure you have filled in all fields in "Monitoring" tab and enabled Twitter or Gmail checkbox.\n\nEnter text to send in the field below.')
+		if action_selected==12 or action_selected==15: return _('Be sure you have filled in all fields in "Monitoring" tab and enabled Twitter or Gmail checkbox.')
+		if action_selected==18: return 'OpenFileDialog'
 
 	def run_action(self,option,text,conf,extra):
 		conf.read()
@@ -136,3 +142,7 @@ class Actions():
 					msg=GmailBot(GMAIL_USERNAME,GMAIL_PASSWORD,recipient)
 					msg.send(subject,body)
 				except Exception,e: print str(e)
+		if option=='18':
+			subprocess.Popen(['mpg123',text])
+		if option=='19':
+			subprocess.Popen(['pkill', '-9', 'mpg123'])

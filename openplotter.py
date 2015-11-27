@@ -1756,45 +1756,62 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def onSelectOn1(self,e):
 		res=self.actions.data_message(self.ONaction1.GetCurrentSelection())
-		if res:
-			self.ONcommand1.SetFocus() 
-			self.ShowMessage(res)
+		if res: 
+			res2=self.action_dialog(res)
+			if res2: self.ONcommand1.SetValue(res2)
+		self.ONcommand1.SetFocus()
 	def onSelectOff1(self,e):
 		res=self.actions.data_message(self.OFFaction1.GetCurrentSelection())
 		if res:
-			self.OFFcommand1.SetFocus() 
-			self.ShowMessage(res)
+			res2=self.action_dialog(res)
+			if res2: self.OFFcommand1.SetValue(res2)
+		self.OFFcommand1.SetFocus() 
 	def onSelectOn2(self,e):
 		res=self.actions.data_message(self.ONaction2.GetCurrentSelection())
 		if res:
-			self.ONcommand2.SetFocus() 
-			self.ShowMessage(res)
+			res2=self.action_dialog(res)
+			if res2: self.ONcommand2.SetValue(res2)
+		self.ONcommand2.SetFocus() 
 	def onSelectOff2(self,e):
 		res=self.actions.data_message(self.OFFaction2.GetCurrentSelection())
 		if res:
-			self.OFFcommand2.SetFocus() 
-			self.ShowMessage(res)
+			res2=self.action_dialog(res)
+			if res2: self.OFFcommand2.SetValue(res2)
+		self.OFFcommand2.SetFocus() 
 	def onSelectOn3(self,e):
 		res=self.actions.data_message(self.ONaction3.GetCurrentSelection())
 		if res:
-			self.ONcommand3.SetFocus() 
-			self.ShowMessage(res)
+			res2=self.action_dialog(res)
+			if res2: self.ONcommand3.SetValue(res2)
+		self.ONcommand3.SetFocus() 
 	def onSelectOff3(self,e):
 		res=self.actions.data_message(self.OFFaction3.GetCurrentSelection())
 		if res:
-			self.OFFcommand3.SetFocus() 
-			self.ShowMessage(res)
+			res2=self.action_dialog(res)
+			if res2: self.OFFcommand3.SetValue(res2)
+		self.OFFcommand3.SetFocus() 
 	def onSelectOn4(self,e):
 		res=self.actions.data_message(self.ONaction4.GetCurrentSelection())
 		if res:
-			self.ONcommand4.SetFocus() 
-			self.ShowMessage(res)
+			res2=self.action_dialog(res)
+			if res2: self.ONcommand4.SetValue(res2)
+		self.ONcommand4.SetFocus() 
 	def onSelectOff4(self,e):
 		res=self.actions.data_message(self.OFFaction4.GetCurrentSelection())
 		if res:
-			self.OFFcommand4.SetFocus() 
-			self.ShowMessage(res)
+			res2=self.action_dialog(res)
+			if res2: self.OFFcommand4.SetValue(res2)
+		self.OFFcommand4.SetFocus() 
 
+	def action_dialog(self,res):
+		if res=='OpenFileDialog':
+			path=''
+			dlg = wx.FileDialog(self, message=_('Choose a file'), defaultDir=currentpath+'/sounds', defaultFile='', wildcard=_('Audio files')+' (*.mp3)|*.mp3|'+_('All files')+' (*.*)|*.*', style=wx.OPEN | wx.CHANGE_DIR)
+			if dlg.ShowModal() == wx.ID_OK:
+				path = dlg.GetPath()
+			dlg.Destroy()
+			return path
+		else: self.ShowMessage(res)
 #######################twitterbot
 
 	def start_monitoring(self):
