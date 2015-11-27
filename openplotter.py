@@ -479,7 +479,7 @@ class MainFrame(wx.Frame):
 		self.list_triggers.SetPosition((15, 30))
 		self.list_triggers.InsertColumn(0, _('trigger'), width=275)
 		self.list_triggers.InsertColumn(1, _('operator'), width=170)
-		self.list_triggers.InsertColumn(2, _('value'), width=120)
+		self.list_triggers.InsertColumn(2, _('value'))
 			
 		self.add_trigger_button =wx.Button(self.page10, label=_('add'), pos=(585, 30))
 		self.Bind(wx.EVT_BUTTON, self.add_trigger, self.add_trigger_button)
@@ -492,14 +492,19 @@ class MainFrame(wx.Frame):
 		self.list_actions = wx.ListCtrl(self.page10, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(565, 102))
 		self.list_actions.SetPosition((15, 165))
 		self.list_actions.InsertColumn(0, _('action'), width=200)
-		self.list_actions.InsertColumn(1, _('data'), width=200)
-		self.list_actions.InsertColumn(2, _('repeat'), width=165)
+		self.list_actions.InsertColumn(1, _('data'), width=220)
+		self.list_actions.InsertColumn(2, _('repeat'), width=130)
 
 		self.add_action_button =wx.Button(self.page10, label=_('add'), pos=(585, 165))
 		self.Bind(wx.EVT_BUTTON, self.add_action, self.add_action_button)
 
 		self.delete_action_button =wx.Button(self.page10, label=_('delete'), pos=(585, 200))
 		self.Bind(wx.EVT_BUTTON, self.delete_action, self.delete_action_button)
+
+		self.stop_all=wx.Button(self.page10, label=_('Stop all'), pos=(10, 285))
+		self.Bind(wx.EVT_BUTTON, self.stop_alarms, self.stop_all)
+		self.start_all=wx.Button(self.page10, label=_('Start all'), pos=(130, 285))
+		self.Bind(wx.EVT_BUTTON, self.start_alarms, self.start_all)
 
 		self.button_apply_alarms =wx.Button(self.page10, label=_('Apply changes'), pos=(570, 285))
 		self.Bind(wx.EVT_BUTTON, self.apply_changes_alarms, self.button_apply_alarms)
@@ -511,10 +516,7 @@ class MainFrame(wx.Frame):
 		self.set_layout_conf()
 ###########################layout
 
-
-
 ####definitions###################
-
 	def set_layout_conf(self):
 		if self.language=='en': self.lang.Check(self.lang_item1.GetId(), True)
 		if self.language=='ca': self.lang.Check(self.lang_item2.GetId(), True)
@@ -1412,7 +1414,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def reset_imu(self, e):
 		try:
 			os.remove(currentpath+'/imu/RTIMULib.ini')
-		except:pass
+		except Exception,e: print str(e)
 		self.button_calibrate_imu.Enable()
 		self.imu_tag.Disable()
 		self.heading.SetValue(False)
@@ -1426,10 +1428,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def reset_press_hum(self, e):
 		try:
 			os.remove(currentpath+'/imu/RTIMULib2.ini')
-		except:pass
+		except Exception,e: print str(e)
 		try:
 			os.remove(currentpath+'/imu/RTIMULib3.ini')
-		except:pass
+		except Exception,e: print str(e)
 		self.press_tag.Disable()
 		self.hum_tag.Disable()
 		self.press.SetValue(False)
@@ -1797,7 +1799,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def start_monitoring(self):
 		subprocess.call(['pkill', '-f', 'monitoring.py'])
-		if self.switch1_enable.GetValue() or self.switch2_enable.GetValue() or self.switch3_enable.GetValue() or self.switch4_enable.GetValue() or self.twitter_enable.GetValue() or self.gmail_enable.GetValue() or self.mag_var.GetValue() or self.heading_t.GetValue() or self.rot.GetValue() or self.TW_STW.GetValue() or self.TW_SOG.GetValue():
+		start=False
+		for index,item in enumerate(self.triggers):
+			if self.list_triggers.IsChecked(index): start=True
+		if start or self.switch1_enable.GetValue() or self.switch2_enable.GetValue() or self.switch3_enable.GetValue() or self.switch4_enable.GetValue() or self.twitter_enable.GetValue() or self.gmail_enable.GetValue() or self.mag_var.GetValue() or self.heading_t.GetValue() or self.rot.GetValue() or self.TW_STW.GetValue() or self.TW_SOG.GetValue():
 			subprocess.Popen(['python',currentpath+'/monitoring.py'])
 
 	def on_twitter_enable(self,e):
@@ -2017,12 +2022,38 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			tmp +=str(self.trigger_actions[index][0])+','+str(self.trigger_actions[index][1])+','+str(self.trigger_actions[index][2])+','+str(self.trigger_actions[index][3])+','+str(self.trigger_actions[index][4])+'||'
 		self.conf.set('ALARMS', 'actions', tmp)
 		self.SetStatusText(_('Alarms changes applied and restarted'))
+		self.start_monitoring()
 
 	def cancel_changes_alarms(self,e):
 		self.read_triggers()
 		self.read_actions()
 		self.list_actions.DeleteAllItems()
 		self.SetStatusText(_('Alarms changes cancelled'))
+
+	def stop_alarms(self,e):
+		tmp=''
+		for index,item in enumerate(self.triggers):
+			tmp +='0,'
+			tmp +=str(self.triggers[index][1])+','+str(self.triggers[index][2])+','+str(self.triggers[index][3])+'||'
+		self.conf.set('ALARMS', 'triggers', tmp)
+		self.SetStatusText(_('Alarms stopped'))
+		self.read_triggers()
+		self.list_actions.DeleteAllItems()
+		self.read_actions()
+		self.start_monitoring()
+
+	def start_alarms(self,e):
+		tmp=''
+		for index,item in enumerate(self.triggers):
+			tmp +='1,'
+			tmp +=str(self.triggers[index][1])+','+str(self.triggers[index][2])+','+str(self.triggers[index][3])+'||'
+		self.conf.set('ALARMS', 'triggers', tmp)
+		self.SetStatusText(_('Alarms started'))
+		self.read_triggers()
+		self.list_actions.DeleteAllItems()
+		self.read_actions()
+		self.start_monitoring()
+
 #Main#############################
 if __name__ == "__main__":
 	app = wx.App()

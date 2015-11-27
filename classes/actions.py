@@ -24,7 +24,7 @@ class Actions():
 	def __init__(self):
 
 		self.options=[None]*18
-		#ATENTION. If order changes, edit "run_action" and monitoring.py
+		#ATENTION. If order changes, edit "run_action()", "data_message()" and monitoring.py: "send_twitter(), send_gmail()"
 		self.options[0]= _('nothing')
 		self.options[1]= _('command')
 		self.options[2]= _('reset')
@@ -119,7 +119,7 @@ class Actions():
 				try:
 					msg=TwitterBot(apiKey,apiSecret,accessToken,accessTokenSecret)
 					msg.send(tweetStr)
-				except: pass
+				except Exception,e: print str(e)
 		if option=='15':
 			conf.set('GMAIL', 'enable', '1')
 		if option=='16':
@@ -135,4 +135,4 @@ class Actions():
 				try:
 					msg=GmailBot(GMAIL_USERNAME,GMAIL_PASSWORD,recipient)
 					msg.send(subject,body)
-				except: pass
+				except Exception,e: print str(e)

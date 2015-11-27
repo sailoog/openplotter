@@ -53,6 +53,7 @@ class DataStream:
 		self.SW3=[_('Switch 3 status'),_('SW3'),None,None,None,None,None]
 		self.SW4=[_('Switch 4 status'),_('SW4'),None,None,None,None,None]
 
+		#ATENTION. If order changes, edit monitoring.py: "#alarms"
 		self.operators_list=[_('not present for (seconds)'),_('equal'), _('less than'), _('less than or equal to'), _('greater than'), _('greater than or equal to'), _('switch on'), _('switch off')]
 
 	def validate(self,data,now,accuracy):
@@ -397,6 +398,5 @@ class DataStream:
 								self.ECT[4]=time.time()
 								self.ECT[5]=talker
 								self.ECT[6]=nmea_type
-			
-			except: pass
 			#except Exception,e: print str(e)
+			except: pass

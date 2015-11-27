@@ -31,22 +31,77 @@ sock_in=''
 error=0
 a=DataStream()
 actions=Actions()
-
-global state1
-global state2
-global state3
-global state4
-state1=False
-state2=False
-state3=False
-state4=False
-
+nodata=''
+global runSW1on
+global runSW1off
+global runSW2on
+global runSW2off
+global runSW3on
+global runSW3off
+global runSW4on
+global runSW4off
+runSW1on=False
+runSW1off=False
+runSW2on=False
+runSW2off=False
+runSW3on=False
+runSW3off=False
+runSW4on=False
+runSW4off=False
+channel1=''
+channel2=''
+channel3=''
+channel4=''
 last_heading=''
 heading_time=''
 
 GPIO.setmode(GPIO.BCM)
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+data=conf.get('ALARMS', 'triggers')
+triggers=data.split('||')
+triggers.pop()
+for index,item in enumerate(triggers):
+	ii=item.split(',')
+	ii[0]=int(ii[0])
+	ii[1]=int(ii[1])
+	ii[2]=int(ii[2])
+	ii[3]=float(ii[3])
+	triggers[index]=ii
+
+global trigger_actions
+data=conf.get('ALARMS', 'actions')
+trigger_actions=data.split('||')
+trigger_actions.pop()
+for index,item in enumerate(trigger_actions):
+	ii=item.split(',')
+	ii[0]=int(ii[0])
+	ii[1]=int(ii[1])
+	ii[3]=float(ii[3])
+	ii[4]=int(ii[4])
+	if ii[4]==2: ii[3]=ii[3]*60
+	if ii[4]==3: ii[3]=(ii[3]*60)*60
+	if ii[4]==4: ii[3]=((ii[3]*24)*60)*60
+	ii.append('')
+	trigger_actions[index]=ii
+
+# alarms
+def start_actions(trigger):
+	global trigger_actions
+	for index,i in enumerate(trigger_actions):
+		if i[0]==trigger:
+			now= time.time()
+			if not i[5]:
+				trigger_actions[index][5]=now
+				actions.run_action(str(i[1]),i[2],conf,'')
+			else:
+				if i[4]==0: pass
+				else:
+					if now-i[5] > i[3]:
+						trigger_actions[index][5]=now
+						actions.run_action(str(i[1]),i[2],conf,'')
+# end alarms
 
 #thread1
 def parse_nmea():
@@ -83,64 +138,25 @@ def connect():
 
 #switches
 def switch1(channel):
-	global state1
-	if GPIO.input(channel):
-		if not state1:
-			a.SW1[2]=_('on')
-			a.SW1[4]=time.time()
-			actions.run_action(conf.get('SWITCH1', 'on_action'), conf.get('SWITCH1', 'on_command'), conf,'')
-			state1=True
-	else:
-		if state1:
-			a.SW1[2]=_('off')
-			a.SW1[4]=time.time()
-			actions.run_action(conf.get('SWITCH1', 'off_action'), conf.get('SWITCH1', 'off_command'), conf,'')
-			state1=False
-
+	global runSW1on
+	global runSW1off
+	if GPIO.input(channel): runSW1on=True
+	else: runSW1off=True
 def switch2(channel):
-	global state2
-	if GPIO.input(channel):
-		if not state2:
-			a.SW2[2]=_('on')
-			a.SW2[4]=time.time()
-			actions.run_action(conf.get('SWITCH2', 'on_action'), conf.get('SWITCH2', 'on_command'), conf,'')
-			state2=True
-	else:
-		if state2:
-			a.SW2[2]=_('off')
-			a.SW2[4]=time.time()
-			actions.run_action(conf.get('SWITCH2', 'off_action'), conf.get('SWITCH2', 'off_command'), conf,'')
-			state2=False
-
+	global runSW2on
+	global runSW2off
+	if GPIO.input(channel): runSW2on=True
+	else: runSW2off=True
 def switch3(channel):
-	global state3
-	if GPIO.input(channel):
-		if not state3:
-			a.SW3[2]=_('on')
-			a.SW3[4]=time.time()
-			actions.run_action(conf.get('SWITCH3', 'on_action'), conf.get('SWITCH3', 'on_command'), conf,'')
-			state3=True
-	else:
-		if state3:
-			a.SW3[2]=_('off')
-			a.SW3[4]=time.time()
-			actions.run_action(conf.get('SWITCH3', 'off_action'), conf.get('SWITCH3', 'off_command'), conf,'')
-			state3=False
-
+	global runSW3on
+	global runSW3off
+	if GPIO.input(channel): runSW3on=True
+	else: runSW3off=True
 def switch4(channel):
-	global state4
-	if GPIO.input(channel):
-		if not state4:
-			a.SW4[2]=_('on')
-			a.SW4[4]=time.time()
-			actions.run_action(conf.get('SWITCH4', 'on_action'), conf.get('SWITCH4', 'on_command'), conf,'')
-			state4=True
-	else:
-		if state4:
-			a.SW4[2]=_('off')
-			a.SW4[4]=time.time()
-			actions.run_action(conf.get('SWITCH4', 'off_action'), conf.get('SWITCH4', 'off_command'), conf,'')
-			state4=False
+	global runSW4on
+	global runSW4off
+	if GPIO.input(channel): runSW4on=True
+	else: runSW4off=True
 #end switches
 
 #monitoring
@@ -210,198 +226,215 @@ if conf.get('SWITCH1', 'enable')=='1':
 	if conf.get('SWITCH1', 'pull_up_down')=='Pull Up': pull_up_down=GPIO.PUD_UP
 	GPIO.setup(channel1, GPIO.IN, pull_up_down=pull_up_down)
 	GPIO.add_event_detect(channel1, GPIO.BOTH, callback=switch1)
-
+	if GPIO.input(channel1): state1=True
+	else: state1=False
+	switch1(channel1)
 if conf.get('SWITCH2', 'enable')=='1':
 	channel2=int(conf.get('SWITCH2', 'gpio'))
 	pull_up_down=GPIO.PUD_DOWN
 	if conf.get('SWITCH2', 'pull_up_down')=='Pull Up': pull_up_down=GPIO.PUD_UP
 	GPIO.setup(channel2, GPIO.IN, pull_up_down=pull_up_down)
 	GPIO.add_event_detect(channel2, GPIO.BOTH, callback=switch2)
-
+	if GPIO.input(channel2): state2=True
+	else: state2=False
+	switch2(channel2)
 if conf.get('SWITCH3', 'enable')=='1':
 	channel3=int(conf.get('SWITCH3', 'gpio'))
 	pull_up_down=GPIO.PUD_DOWN
 	if conf.get('SWITCH3', 'pull_up_down')=='Pull Up': pull_up_down=GPIO.PUD_UP
 	GPIO.setup(channel3, GPIO.IN, pull_up_down=pull_up_down)
 	GPIO.add_event_detect(channel3, GPIO.BOTH, callback=switch3)
-
+	if GPIO.input(channel3): state3=True
+	else: state3=False
+	switch3(channel3)
 if conf.get('SWITCH4', 'enable')=='1':
 	channel4=int(conf.get('SWITCH4', 'gpio'))
 	pull_up_down=GPIO.PUD_DOWN
 	if conf.get('SWITCH4', 'pull_up_down')=='Pull Up': pull_up_down=GPIO.PUD_UP
 	GPIO.setup(channel4, GPIO.IN, pull_up_down=pull_up_down)
 	GPIO.add_event_detect(channel4, GPIO.BOTH, callback=switch4)
+	if GPIO.input(channel4): state4=True
+	else: state4=False
+	switch4(channel4)
+#end no loop
 
 # loop
-try:
-	while True:		
-		if conf.get('GMAIL', 'enable')=='1':
-			if conf.get('GMAIL', 'periodicity') and conf.get('GMAIL', 'periodicity')!='0':
-				now= time.time()
-				if not conf.get('GMAIL', 'last_send'):
-					conf.set('GMAIL', 'last_send', str(now))
-				last_send = float(conf.get('GMAIL', 'last_send')) 
-				periodicity = float(conf.get('GMAIL', 'periodicity'))*60
-				if (now-last_send) > periodicity:
-					conf.set('GMAIL', 'last_send', str(now))
-					send_gmail(error)
-		if conf.get('TWITTER', 'enable')=='1':
-			if conf.get('TWITTER', 'periodicity') and conf.get('TWITTER', 'periodicity')!='0':
-				now= time.time()
-				if not conf.get('TWITTER', 'last_send'):
-					conf.set('TWITTER', 'last_send', str(now))
-				last_send = float(conf.get('TWITTER', 'last_send')) 
-				periodicity = float(conf.get('TWITTER', 'periodicity'))*60
-				if (now-last_send) > periodicity:
-					conf.set('TWITTER', 'last_send', str(now))
-					send_twitter(error)
+while True:
+	#switches
+	if runSW1on:
+		a.SW1[2]=1
+		a.SW1[4]=time.time()
+		if state1 == True: actions.run_action(conf.get('SWITCH1', 'on_action'), conf.get('SWITCH1', 'on_command'), conf,'')
+		state1= False
+		runSW1on=False
+	if runSW1off:
+		a.SW1[2]=0
+		a.SW1[4]=time.time()
+		if state1 == False: actions.run_action(conf.get('SWITCH1', 'off_action'), conf.get('SWITCH1', 'off_command'), conf,'')
+		state1= True
+		runSW1off=False
+	if runSW2on:
+		a.SW2[2]=1
+		a.SW2[4]=time.time()
+		if state2 == True: actions.run_action(conf.get('SWITCH2', 'on_action'), conf.get('SWITCH2', 'on_command'), conf,'')
+		state2= False
+		runSW2on=False
+	if runSW2off:
+		a.SW2[2]=0
+		a.SW2[4]=time.time()
+		if state2 == False: actions.run_action(conf.get('SWITCH2', 'off_action'), conf.get('SWITCH2', 'off_command'), conf,'')
+		state2= True
+		runSW2off=False
+	if runSW3on:
+		a.SW3[2]=1
+		a.SW3[4]=time.time()
+		if state3 == True: actions.run_action(conf.get('SWITCH3', 'on_action'), conf.get('SWITCH3', 'on_command'), conf,'')
+		state3= False
+		runSW3on=False
+	if runSW3off:
+		a.SW3[2]=0
+		a.SW3[4]=time.time()
+		if state3 == False: actions.run_action(conf.get('SWITCH3', 'off_action'), conf.get('SWITCH3', 'off_command'), conf,'')
+		state3= True
+		runSW3off=False
+	if runSW4on:
+		a.SW4[2]=1
+		a.SW4[4]=time.time()
+		if state4 == True: actions.run_action(conf.get('SWITCH4', 'on_action'), conf.get('SWITCH4', 'on_command'), conf,'')
+		state4= False
+		runSW4on=False
+	if runSW4off:
+		a.SW4[2]=0
+		a.SW4[4]=time.time()
+		if state4 == False: actions.run_action(conf.get('SWITCH4', 'off_action'), conf.get('SWITCH4', 'off_command'), conf,'')
+		state1= True
+		runSW1off=False
+	#end switches
 
-		if  conf.get('STARTUP', 'nmea_mag_var')=='1' or conf.get('STARTUP', 'nmea_hdt')=='1' or conf.get('STARTUP', 'nmea_rot')=='1' or conf.get('STARTUP', 'tw_stw')=='1'  or conf.get('STARTUP', 'tw_sog')=='1':
+	#send mail and twitter
+	if conf.get('GMAIL', 'enable')=='1':
+		if conf.get('GMAIL', 'periodicity') and conf.get('GMAIL', 'periodicity')!='0':
+			now= time.time()
+			if not conf.get('GMAIL', 'last_send'):
+				conf.set('GMAIL', 'last_send', str(now))
+			last_send = float(conf.get('GMAIL', 'last_send')) 
+			periodicity = float(conf.get('GMAIL', 'periodicity'))*60
+			if (now-last_send) > periodicity:
+				conf.set('GMAIL', 'last_send', str(now))
+				send_gmail(error)
+	if conf.get('TWITTER', 'enable')=='1':
+		if conf.get('TWITTER', 'periodicity') and conf.get('TWITTER', 'periodicity')!='0':
+			now= time.time()
+			if not conf.get('TWITTER', 'last_send'):
+				conf.set('TWITTER', 'last_send', str(now))
+			last_send = float(conf.get('TWITTER', 'last_send')) 
+			periodicity = float(conf.get('TWITTER', 'periodicity'))*60
+			if (now-last_send) > periodicity:
+				conf.set('TWITTER', 'last_send', str(now))
+				send_twitter(error)
+	#end send mail and twitter
+
+	#calculations
+	if  conf.get('STARTUP', 'nmea_mag_var')=='1' or conf.get('STARTUP', 'nmea_hdt')=='1' or conf.get('STARTUP', 'nmea_rot')=='1' or conf.get('STARTUP', 'tw_stw')=='1'  or conf.get('STARTUP', 'tw_sog')=='1':
 			
-			time.sleep(float(conf.get('STARTUP', 'nmea_rate_cal')))
+		time.sleep(float(conf.get('STARTUP', 'nmea_rate_cal')))
 
-			accuracy=float(conf.get('STARTUP', 'cal_accuracy'))
-			now=time.time()
-			# refresh values
-			position =[a.validate('Lat',now,accuracy), a.Lat[3], a.validate('Lon',now,accuracy), a.Lon[3]]
-			date = a.validate('Date',now,accuracy)
-			if not date: date = datetime.date.today()
-			heading_m = a.validate('HDM',now,accuracy)
-			mag_var = [a.validate('Var',now,accuracy), a.Var[3]]
-			if not mag_var[0]: mag_var = calculate_mag_var(position,date)
-			heading_t = a.validate('HDT',now,accuracy)
-			if not heading_t:
-				if heading_m and mag_var[0]:
-					var=mag_var[0]
-					if mag_var[1]=='W':var=var*-1
-					heading_t=heading_m+var
-					if heading_t>360: heading_t=heading_t-360
-					if heading_t<0: heading_t=360+heading_t
-			STW = a.validate('STW',now,accuracy)
-			AWS = a.validate('AWS',now,accuracy) 
-			AWA = [a.validate('AWA',now,accuracy), a.AWA[3]]
-			if AWA[0]:
-				if AWA[1]=='D':
-					AWA[1]='R'
-					if AWA[0]>180: 
-						AWA[0]=360-AWA[0]
-						AWA[1]='L'
-			SOG = a.validate('SOG',now,accuracy)
-			COG = a.validate('SOG',now,accuracy)
-			# end refresh values
-			#generate headint_t
-			if  conf.get('STARTUP', 'nmea_hdt')=='1' and heading_t:
-				hdt = pynmea2.HDT('OP', 'HDT', (str(round(heading_t,1)),'T'))
-				hdt1=str(hdt)
-				hdt2=hdt1+'\r\n'
-				sock.sendto(hdt2, ('localhost', 10110))
-			#generate magnetic variation
-			if  conf.get('STARTUP', 'nmea_mag_var')=='1' and mag_var:
-				hdg = pynmea2.HDG('OP', 'HDG', ('','','',str(mag_var[0]),mag_var[1]))
-				hdg1=str(hdg)
-				hdg2=hdg1+'\r\n'
-				sock.sendto(hdg2, ('localhost', 10110))
-			#generate Rate of Turn (ROT)
-			if conf.get('STARTUP', 'nmea_rot')=='1' and heading_m:
- 				if not last_heading: #initialize
-					last_heading = heading_m
- 					heading_time = time.time()					
-				else:	#normal run
-					heading_change = heading_m-last_heading
-					last_heading_time = heading_time
-					heading_time = time.time()
-					last_heading = heading_m
- 					if heading_change > 180:	#If we are "passing" north
- 						heading_change = heading_change - 360
-					if heading_change < -180: 	#if we are "passing north"
-						heading_change = 360 + heading_change
-					rot = float(heading_change)/((heading_time - last_heading_time)/60)
-					rot= round(rot,1)				
-					#consider damping ROT values						
-					rot = pynmea2.ROT('OP', 'ROT', (str(rot),'A'))
-					rot1=str(rot)
-					rot2=rot1+'\r\n'
-					sock.sendto(rot2, ('localhost', 10110))
-			#generate True Wind STW
-			if conf.get('STARTUP', 'tw_stw')=='1' and STW and AWS and AWA:
-				print 'STW '
-				print  STW
-				print 'AWS '
-				print  AWS 
-				print 'AWA '
-				print  AWA
-				print 'heading_t '
-				print  heading_t
-				#TWA
-				TWS=math.sqrt((STW**2+AWS**2)-(2*STW*AWS*math.cos(math.radians(AWA[0]))))
-				TWA=math.degrees(math.acos((AWS**2-TWS**2-STW**2)/(2*TWS*STW)))
-				TWA0=TWA
-				if AWA[1]=='L': TWA0=360-TWA0
-				TWSr=round(TWS,1)
-				TWA0r=round(TWA0,0)
-				mwv = pynmea2.MWV('OP', 'MWV', (str(TWA0r),'T',str(TWSr),'N','A'))
-				mwv1=str(mwv)
-				mwv2=mwv1+'\r\n'
-				sock.sendto(mwv2, ('localhost', 10110))
-				#TWD
-				if heading_t:
-					if AWA[1]=='R':
-						TWD=heading_t+TWA
-					if AWA[1]=='L':
-						TWD=heading_t-TWA
-					if TWD>360: TWD=TWD-360
-					if TWD<0: TWD=360+TWD
-					TWDr=round(TWD,0)
-					mwd = pynmea2.MWD('OP', 'MWD', (str(TWDr),'T','','M',str(TWSr),'N','',''))
-					mwd1=str(mwd)
-					mwd2=mwd1+'\r\n'
-					sock.sendto(mwd2, ('localhost', 10110))
-					print ' '
-					print 'TWA'
-					print TWA0r
-					print 'TWS'
-					print TWSr
-					print 'TWD'
-					print TWDr
-			#generate True Wind SOG
-			if conf.get('STARTUP', 'tw_sog')=='1' and SOG and COG and heading_t and AWS and AWA:
-				print 'SOG '
-				print  SOG
-				print 'COG '
-				print  COG
-				print 'AWS '
-				print  AWS 
-				print 'AWA '
-				print  AWA
-				print 'heading_t '
-				print  heading_t
-				#TWD
-				D=heading_t-COG
-				if AWA[1]=='R': AWD=AWA[0]+D
-				if AWA[1]=='L': AWD=(AWA[0]*-1)+D
-				if AWD > 0: AWD0=[AWD,'R']
-				if AWD < 0: AWD0=[AWD*-1,'L']
-				TWS=math.sqrt((SOG**2+AWS**2)-(2*SOG*AWS*math.cos(math.radians(AWD0[0]))))
-				TWAc=math.degrees(math.acos((AWS**2-TWS**2-SOG**2)/(2*TWS*SOG)))
-				if AWD0[1]=='R': TWD=COG+TWAc
-				if AWD0[1]=='L': TWD=COG-TWAc
+		accuracy=float(conf.get('STARTUP', 'cal_accuracy'))
+		now=time.time()
+		# refresh values
+		position =[a.validate('Lat',now,accuracy), a.Lat[3], a.validate('Lon',now,accuracy), a.Lon[3]]
+		date = a.validate('Date',now,accuracy)
+		if not date: date = datetime.date.today()
+		heading_m = a.validate('HDM',now,accuracy)
+		mag_var = [a.validate('Var',now,accuracy), a.Var[3]]
+		if not mag_var[0]: mag_var = calculate_mag_var(position,date)
+		heading_t = a.validate('HDT',now,accuracy)
+		if not heading_t:
+			if heading_m and mag_var[0]:
+				var=mag_var[0]
+				if mag_var[1]=='W':var=var*-1
+				heading_t=heading_m+var
+				if heading_t>360: heading_t=heading_t-360
+				if heading_t<0: heading_t=360+heading_t
+		STW = a.validate('STW',now,accuracy)
+		AWS = a.validate('AWS',now,accuracy) 
+		AWA = [a.validate('AWA',now,accuracy), a.AWA[3]]
+		if AWA[0]:
+			if AWA[1]=='D':
+				AWA[1]='R'
+				if AWA[0]>180: 
+					AWA[0]=360-AWA[0]
+					AWA[1]='L'
+		SOG = a.validate('SOG',now,accuracy)
+		COG = a.validate('SOG',now,accuracy)
+		# end refresh values
+		#generate headint_t
+		if  conf.get('STARTUP', 'nmea_hdt')=='1' and heading_t:
+			hdt = pynmea2.HDT('OP', 'HDT', (str(round(heading_t,1)),'T'))
+			hdt1=str(hdt)
+			hdt2=hdt1+'\r\n'
+			sock.sendto(hdt2, ('localhost', 10110))
+		#generate magnetic variation
+		if  conf.get('STARTUP', 'nmea_mag_var')=='1' and mag_var:
+			hdg = pynmea2.HDG('OP', 'HDG', ('','','',str(mag_var[0]),mag_var[1]))
+			hdg1=str(hdg)
+			hdg2=hdg1+'\r\n'
+			sock.sendto(hdg2, ('localhost', 10110))
+		#generate Rate of Turn (ROT)
+		if conf.get('STARTUP', 'nmea_rot')=='1' and heading_m:
+			if not last_heading: #initialize
+				last_heading = heading_m
+				heading_time = time.time()					
+			else:	#normal run
+				heading_change = heading_m-last_heading
+				last_heading_time = heading_time
+				heading_time = time.time()
+				last_heading = heading_m
+				if heading_change > 180:	#If we are "passing" north
+					heading_change = heading_change - 360
+				if heading_change < -180: 	#if we are "passing north"
+					heading_change = 360 + heading_change
+				rot = float(heading_change)/((heading_time - last_heading_time)/60)
+				rot= round(rot,1)				
+				#consider damping ROT values						
+				rot = pynmea2.ROT('OP', 'ROT', (str(rot),'A'))
+				rot1=str(rot)
+				rot2=rot1+'\r\n'
+				sock.sendto(rot2, ('localhost', 10110))
+		#generate True Wind STW
+		if conf.get('STARTUP', 'tw_stw')=='1' and STW and AWS and AWA:
+			print 'STW '
+			print  STW
+			print 'AWS '
+			print  AWS 
+			print 'AWA '
+			print  AWA
+			print 'heading_t '
+			print  heading_t
+			#TWA
+			TWS=math.sqrt((STW**2+AWS**2)-(2*STW*AWS*math.cos(math.radians(AWA[0]))))
+			TWA=math.degrees(math.acos((AWS**2-TWS**2-STW**2)/(2*TWS*STW)))
+			TWA0=TWA
+			if AWA[1]=='L': TWA0=360-TWA0
+			TWSr=round(TWS,1)
+			TWA0r=round(TWA0,0)
+			mwv = pynmea2.MWV('OP', 'MWV', (str(TWA0r),'T',str(TWSr),'N','A'))
+			mwv1=str(mwv)
+			mwv2=mwv1+'\r\n'
+			sock.sendto(mwv2, ('localhost', 10110))
+			#TWD
+			if heading_t:
+				if AWA[1]=='R':
+					TWD=heading_t+TWA
+				if AWA[1]=='L':
+					TWD=heading_t-TWA
 				if TWD>360: TWD=TWD-360
 				if TWD<0: TWD=360+TWD
 				TWDr=round(TWD,0)
-				TWSr=round(TWS,1)
 				mwd = pynmea2.MWD('OP', 'MWD', (str(TWDr),'T','','M',str(TWSr),'N','',''))
 				mwd1=str(mwd)
 				mwd2=mwd1+'\r\n'
 				sock.sendto(mwd2, ('localhost', 10110))
-				#TWA
-				TWA=TWD-heading_t
-				TWA0=TWA
-				if TWA0 < 0: TWA0=360+TWA0
-				TWA0r=round(TWA0,0)
-				mwv = pynmea2.MWV('OP', 'MWV', (str(TWA0r),'T',str(TWSr),'N','A'))
-				mwv1=str(mwv)
-				mwv2=mwv1+'\r\n'
-				sock.sendto(mwv2, ('localhost', 10110))
 				print ' '
 				print 'TWA'
 				print TWA0r
@@ -409,7 +442,108 @@ try:
 				print TWSr
 				print 'TWD'
 				print TWDr
+		#generate True Wind SOG
+		if conf.get('STARTUP', 'tw_sog')=='1' and SOG and COG and heading_t and AWS and AWA:
+			print 'SOG '
+			print  SOG
+			print 'COG '
+			print  COG
+			print 'AWS '
+			print  AWS 
+			print 'AWA '
+			print  AWA
+			print 'heading_t '
+			print  heading_t
+			#TWD
+			D=heading_t-COG
+			if AWA[1]=='R': AWD=AWA[0]+D
+			if AWA[1]=='L': AWD=(AWA[0]*-1)+D
+			if AWD > 0: AWD0=[AWD,'R']
+			if AWD < 0: AWD0=[AWD*-1,'L']
+			TWS=math.sqrt((SOG**2+AWS**2)-(2*SOG*AWS*math.cos(math.radians(AWD0[0]))))
+			TWAc=math.degrees(math.acos((AWS**2-TWS**2-SOG**2)/(2*TWS*SOG)))
+			if AWD0[1]=='R': TWD=COG+TWAc
+			if AWD0[1]=='L': TWD=COG-TWAc
+			if TWD>360: TWD=TWD-360
+			if TWD<0: TWD=360+TWD
+			TWDr=round(TWD,0)
+			TWSr=round(TWS,1)
+			mwd = pynmea2.MWD('OP', 'MWD', (str(TWDr),'T','','M',str(TWSr),'N','',''))
+			mwd1=str(mwd)
+			mwd2=mwd1+'\r\n'
+			sock.sendto(mwd2, ('localhost', 10110))
+			#TWA
+			TWA=TWD-heading_t
+			TWA0=TWA
+			if TWA0 < 0: TWA0=360+TWA0
+			TWA0r=round(TWA0,0)
+			mwv = pynmea2.MWV('OP', 'MWV', (str(TWA0r),'T',str(TWSr),'N','A'))
+			mwv1=str(mwv)
+			mwv2=mwv1+'\r\n'
+			sock.sendto(mwv2, ('localhost', 10110))
+			print ' '
+			print 'TWA'
+			print TWA0r
+			print 'TWS'
+			print TWSr
+			print 'TWD'
+			print TWDr
+	else: time.sleep(0.1)
+	#end calculations
 
-		else: time.sleep(1)
-finally:
-    GPIO.cleanup()
+	#alarms
+	for index,item in enumerate(triggers):
+		if item[0]==1:
+			trigger=a.DataList[item[1]]
+			trigger_value=eval('a.'+trigger+'[2]')
+			now = time.time()
+			trigger_value_timestamp=eval('a.'+trigger+'[4]')
+			operator=item[2]
+			data_value=item[3]
+			#not present for
+			if operator==0:
+				if trigger_value_timestamp:
+					if now-trigger_value_timestamp > data_value: start_actions(index)
+					nodata=''
+				else: 
+					if not nodata: nodata=now
+					if now-nodata > data_value: start_actions(index)					
+			if operator==1 or operator==2 or operator==3 or operator==4 or operator==5:
+				if trigger_value_timestamp:
+					if now-trigger_value_timestamp < 20:
+						#equal
+						if operator==1:
+							if trigger_value == data_value: start_actions(index)
+						#less than
+						if operator==2:
+							if trigger_value < data_value: start_actions(index)
+						#less than or equal to
+						if operator==3:
+							if trigger_value <= data_value: start_actions(index)
+						#greater than
+						if operator==4:
+							if trigger_value > data_value: start_actions(index)
+						#greater than or equal to
+						if operator==5:
+							if trigger_value >= data_value: start_actions(index)
+			#switch on
+			if operator==6:
+				if trigger=='SW1' and channel1:
+					if GPIO.input(channel1): start_actions(index)
+				if trigger=='SW2' and channel2:
+					if GPIO.input(channel2): start_actions(index)
+				if trigger=='SW3' and channel3:
+					if GPIO.input(channel3): start_actions(index)
+				if trigger=='SW4' and channel4:
+					if GPIO.input(channel4): start_actions(index)
+			#switch off
+			if operator==7:
+				if trigger=='SW1' and channel1:
+					if not GPIO.input(channel1): start_actions(index)
+				if trigger=='SW2' and channel2:
+					if not GPIO.input(channel2): start_actions(index)
+				if trigger=='SW3' and channel3:
+					if not GPIO.input(channel3): start_actions(index)
+				if trigger=='SW4' and channel4:
+					if not GPIO.input(channel4): start_actions(index)
+	#end alarms

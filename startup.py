@@ -33,7 +33,7 @@ try:
 	device=boot_conf.get('OPENPLOTTER', 'device')
 	ssid=boot_conf.get('OPENPLOTTER', 'ssid')
 	passw=boot_conf.get('OPENPLOTTER', 'pass')
-except: pass
+except Exception,e: print str(e)
 
 conf=Conf()
 
@@ -87,6 +87,15 @@ switch4=conf.get('SWITCH4', 'enable')
 twitter=conf.get('TWITTER', 'enable')
 gmail=conf.get('GMAIL', 'enable')
 
+data=conf.get('ALARMS', 'triggers')
+triggers=data.split('||')
+triggers.pop()
+for index,item in enumerate(triggers):
+	ii=item.split(',')
+	triggers[index]=ii
+start=False
+for i in triggers:
+	if i[0]=='1': start=True
 #######################################################
 time.sleep(delay)
 
@@ -137,6 +146,6 @@ if nmea_eng_temp=='1':
 	subprocess.Popen(['python', currentpath+'/sensors_b.py'])
 
 subprocess.call(['pkill', '-f', 'monitoring.py'])
-if switch1=='1' or switch2=='1' or switch3=='1' or switch4=='1' or twitter=='1' or gmail=='1' or nmea_mag_var=='1' or nmea_hdt=='1' or nmea_rot=='1' or TW_STW=='1' or TW_SOG=='1':
+if start or switch1=='1' or switch2=='1' or switch3=='1' or switch4=='1' or twitter=='1' or gmail=='1' or nmea_mag_var=='1' or nmea_hdt=='1' or nmea_rot=='1' or TW_STW=='1' or TW_SOG=='1':
 	subprocess.Popen(['python',currentpath+'/monitoring.py'])
 

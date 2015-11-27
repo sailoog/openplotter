@@ -36,9 +36,10 @@ while True:
 
 		# read DS18B20
 		if conf.get('STARTUP', 'nmea_eng_temp')=='1':
-			sensor = W1ThermSensor()
-			eng_temp = sensor.get_temperature()
-
+			try:
+				sensor = W1ThermSensor()
+				eng_temp = sensor.get_temperature()
+			except Exception,e: print str(e)
 		# XDR
 		list_tmp=[]			
 		if conf.get('STARTUP', 'nmea_eng_temp')=='1' and eng_temp:
