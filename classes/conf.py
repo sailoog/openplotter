@@ -39,5 +39,5 @@ class Conf:
 
 	def set(self,section,item,value):
 		self.read()
-		self.data_conf.set(section, item, value)
+		self.data_conf.set(section, item, value.encode('utf8'))
 		self.write()
