@@ -23,7 +23,7 @@ class Actions():
 
 	def __init__(self):
 
-		self.options=[None]*20
+		self.options=[None]*21
 		#ATENTION. If order changes, edit "run_action()", "data_message()" and monitoring.py: "send_twitter(), send_gmail()"
 		self.options[0]= _('nothing')
 		self.options[1]= _('command')
@@ -45,6 +45,7 @@ class Actions():
 		self.options[17]= _('send e-mail')
 		self.options[18]= _('play sound')
 		self.options[19]= _('stop all sounds')
+		self.options[20]= _('show message')
 
 		self.time_units=[_('no repeat'),_('seconds'), _('minutes'), _('hours'), _('days')]
 
@@ -59,7 +60,7 @@ class Actions():
 		if action_selected==14 or action_selected==17: return _('Be sure you have filled in all fields in "Monitoring" tab and enabled Twitter or Gmail checkbox.\n\nEnter text to send in the field below.')
 		if action_selected==12 or action_selected==15: return _('Be sure you have filled in all fields in "Monitoring" tab and enabled Twitter or Gmail checkbox.')
 		if action_selected==18: return 'OpenFileDialog'
-
+		if action_selected==20: return _('Enter the message in the field below.')
 	def run_action(self,option,text,conf,extra):
 		conf.read()
 		if option=='0': return
@@ -146,3 +147,5 @@ class Actions():
 			subprocess.Popen(['mpg123',text])
 		if option=='19':
 			subprocess.Popen(['pkill', '-9', 'mpg123'])
+		if option=='20':
+			subprocess.Popen(['python', self.currentpath+'/message.py', text, conf.get('GENERAL','lang')])
