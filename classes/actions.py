@@ -23,7 +23,7 @@ class Actions():
 
 	def __init__(self):
 
-		self.options=[None]*22
+		self.options=[None]*24
 		#ATENTION. If order changes, edit "run_action()", "data_message()" and monitoring.py: "send_twitter(), send_gmail()"
 		self.options[0]= _('nothing')
 		self.options[1]= _('command')
@@ -47,6 +47,8 @@ class Actions():
 		self.options[19]= _('stop all sounds')
 		self.options[20]= _('show message')
 		self.options[21]= _('close all messages')
+		self.options[22]= _('start all alarms')
+		self.options[23]= _('stop all alarms')
 
 		self.time_units=[_('no repeat'),_('seconds'), _('minutes'), _('hours'), _('days')]
 
@@ -152,4 +154,8 @@ class Actions():
 		if option=='20':
 			subprocess.Popen(['python', self.currentpath+'/message.py', text, conf.get('GENERAL','lang')])
 		if option=='21':
-			subprocess.call(['pkill', '-f', 'message.py'])
+			subprocess.Popen(['pkill', '-f', 'message.py'])
+		if option=='22':
+			subprocess.Popen(['python', self.currentpath+'/ctrl_alarms.py', '1'])
+		if option=='23':
+			subprocess.Popen(['python', self.currentpath+'/ctrl_alarms.py', '0'])

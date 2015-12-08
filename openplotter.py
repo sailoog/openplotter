@@ -1524,32 +1524,32 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def ok_rate2(self, e):
 		rate=self.rate2.GetValue()
 		self.conf.set('STARTUP', 'nmea_rate_cal', rate)
-		self.start_monitoring()
+		self.start_monitoring('0')
 		self.ShowMessage(_('Generation rate set to ')+rate+_(' seconds'))
 
 	def ok_accuracy(self,e):
 		accuracy=self.accuracy.GetValue()
 		self.conf.set('STARTUP', 'cal_accuracy', accuracy)
-		self.start_monitoring()
+		self.start_monitoring('0')
 		self.ShowMessage(_('Calculation accuracy set to ')+accuracy+_(' seconds'))
 
 	def nmea_mag_var(self, e):
 		sender = e.GetEventObject()
 		if sender.GetValue(): self.conf.set('STARTUP', 'nmea_mag_var', '1')
 		else: self.conf.set('STARTUP', 'nmea_mag_var', '0')
-		self.start_monitoring()
+		self.start_monitoring('0')
 
 	def nmea_hdt(self, e):
 		sender = e.GetEventObject()
 		if sender.GetValue(): self.conf.set('STARTUP', 'nmea_hdt', '1')
 		else: self.conf.set('STARTUP', 'nmea_hdt', '0')
-		self.start_monitoring()
+		self.start_monitoring('0')
 
 	def nmea_rot(self, e):
 		sender = e.GetEventObject()
 		if sender.GetValue(): self.conf.set('STARTUP', 'nmea_rot', '1')
 		else: self.conf.set('STARTUP', 'nmea_rot', '0')
-		self.start_monitoring()
+		self.start_monitoring('0')
 
 	def	TW(self, e):
 		sender = e.GetEventObject()
@@ -1561,7 +1561,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if state: sender.SetValue(True)
 		if self.TW_STW.GetValue(): self.conf.set('STARTUP', 'tw_stw', '1')
 		if self.TW_SOG.GetValue(): self.conf.set('STARTUP', 'tw_sog', '1')
-		self.start_monitoring()
+		self.start_monitoring('0')
 ######################################Signal K
 	def signalKpanels(self, e):
 		url = 'http://localhost:3000/instrumentpanel'
@@ -1623,7 +1623,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.ONcommand1.Enable()
 			self.OFFaction1.Enable()
 			self.OFFcommand1.Enable()
-		self.start_monitoring()
+		self.start_monitoring('1')
 
 	def on_switch2_enable(self, e):
 		if not self.gpio_pull2.GetValue() or not self.gpio_pin2.GetValue():
@@ -1666,7 +1666,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.ONcommand2.Enable()
 			self.OFFaction2.Enable()
 			self.OFFcommand2.Enable()
-		self.start_monitoring()
+		self.start_monitoring('1')
 
 	def on_switch3_enable(self, e):
 		if not self.gpio_pull3.GetValue() or not self.gpio_pin3.GetValue():
@@ -1709,7 +1709,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.ONcommand3.Enable()
 			self.OFFaction3.Enable()
 			self.OFFcommand3.Enable()
-		self.start_monitoring()
+		self.start_monitoring('1')
 
 	def on_switch4_enable(self, e):
 		if not self.gpio_pull4.GetValue() or not self.gpio_pin4.GetValue():
@@ -1752,7 +1752,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.ONcommand4.Enable()
 			self.OFFaction4.Enable()
 			self.OFFcommand4.Enable()
-		self.start_monitoring()
+		self.start_monitoring('1')
 
 	def onSelectOn1(self,e):
 		res=self.actions.data_message(self.ONaction1.GetCurrentSelection())
@@ -1814,13 +1814,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		else: self.ShowMessage(res)
 #######################twitterbot
 
-	def start_monitoring(self):
+	def start_monitoring(self,resetSW):
 		subprocess.call(['pkill', '-f', 'monitoring.py'])
-		start=False
-		for index,item in enumerate(self.triggers):
-			if self.list_triggers.IsChecked(index): start=True
-		if start or self.switch1_enable.GetValue() or self.switch2_enable.GetValue() or self.switch3_enable.GetValue() or self.switch4_enable.GetValue() or self.twitter_enable.GetValue() or self.gmail_enable.GetValue() or self.mag_var.GetValue() or self.heading_t.GetValue() or self.rot.GetValue() or self.TW_STW.GetValue() or self.TW_SOG.GetValue():
-			subprocess.Popen(['python',currentpath+'/monitoring.py'])
+		subprocess.Popen(['python',currentpath+'/monitoring.py', resetSW])
 
 	def on_twitter_enable(self,e):
 		if not self.apiKey.GetValue() or not self.apiSecret.GetValue() or not self.accessToken.GetValue() or not self.accessTokenSecret.GetValue():
@@ -1861,7 +1857,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.apiSecret.Enable()
 			self.accessToken.Enable()
 			self.accessTokenSecret.Enable()
-		self.start_monitoring()
+		self.start_monitoring('0')
 
 	def on_gmail_enable(self,e):
 		if not self.Gmail_account.GetValue() or not self.Gmail_password.GetValue() or not self.Recipient.GetValue() or not self.Subject.GetValue():
@@ -1889,7 +1885,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.Gmail_password.Enable()
 			self.Recipient.Enable()
 			self.Subject.Enable()
-		self.start_monitoring()
+		self.start_monitoring('0')
 #######################alarms
 	def read_triggers(self):
 		self.list_triggers.DeleteAllItems()
@@ -2039,7 +2035,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			tmp +=str(self.trigger_actions[index][0])+','+str(self.trigger_actions[index][1])+','+str(self.trigger_actions[index][2])+','+str(self.trigger_actions[index][3])+','+str(self.trigger_actions[index][4])+'||'
 		self.conf.set('ALARMS', 'actions', tmp)
 		self.SetStatusText(_('Alarms changes applied and restarted'))
-		self.start_monitoring()
+		self.start_monitoring('0')
 
 	def cancel_changes_alarms(self,e):
 		self.read_triggers()
@@ -2048,28 +2044,21 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.SetStatusText(_('Alarms changes cancelled'))
 
 	def stop_alarms(self,e):
-		tmp=''
-		for index,item in enumerate(self.triggers):
-			tmp +='0,'
-			tmp +=str(self.triggers[index][1])+','+str(self.triggers[index][2])+','+str(self.triggers[index][3])+'||'
-		self.conf.set('ALARMS', 'triggers', tmp)
+		subprocess.call(['python', currentpath+'/ctrl_alarms.py', '0'])
 		self.SetStatusText(_('Alarms stopped'))
+		self.conf.read()
 		self.read_triggers()
 		self.list_actions.DeleteAllItems()
 		self.read_actions()
-		self.start_monitoring()
+
 
 	def start_alarms(self,e):
-		tmp=''
-		for index,item in enumerate(self.triggers):
-			tmp +='1,'
-			tmp +=str(self.triggers[index][1])+','+str(self.triggers[index][2])+','+str(self.triggers[index][3])+'||'
-		self.conf.set('ALARMS', 'triggers', tmp)
+		subprocess.call(['python', currentpath+'/ctrl_alarms.py', '1'])
 		self.SetStatusText(_('Alarms started'))
+		self.conf.read()
 		self.read_triggers()
 		self.list_actions.DeleteAllItems()
 		self.read_actions()
-		self.start_monitoring()
 
 #Main#############################
 if __name__ == "__main__":

@@ -65,37 +65,14 @@ ssid2=conf.get('WIFI', 'ssid')
 share=conf.get('WIFI', 'share')
 if not share: share='0'
 
-nmea_mag_var=conf.get('STARTUP', 'nmea_mag_var')
-nmea_hdt=conf.get('STARTUP', 'nmea_hdt')
 nmea_hdg=conf.get('STARTUP', 'nmea_hdg')
 nmea_heel=conf.get('STARTUP', 'nmea_heel')
 nmea_press=conf.get('STARTUP', 'nmea_press')
 nmea_temp_p=conf.get('STARTUP', 'nmea_temp_p')
 nmea_hum=conf.get('STARTUP', 'nmea_hum')
 nmea_temp_h=conf.get('STARTUP', 'nmea_temp_h')
-nmea_rot=conf.get('STARTUP', 'nmea_rot')
 nmea_eng_temp=conf.get('STARTUP', 'nmea_eng_temp')
 
-TW_STW=conf.get('STARTUP', 'tw_stw')
-TW_SOG=conf.get('STARTUP', 'tw_sog')
-
-switch1=conf.get('SWITCH1', 'enable')
-switch2=conf.get('SWITCH2', 'enable')
-switch3=conf.get('SWITCH3', 'enable')
-switch4=conf.get('SWITCH4', 'enable')
-
-twitter=conf.get('TWITTER', 'enable')
-gmail=conf.get('GMAIL', 'enable')
-
-data=conf.get('ALARMS', 'triggers')
-triggers=data.split('||')
-triggers.pop()
-for index,item in enumerate(triggers):
-	ii=item.split(',')
-	triggers[index]=ii
-start=False
-for i in triggers:
-	if i[0]=='1': start=True
 #######################################################
 time.sleep(delay)
 
@@ -146,6 +123,4 @@ if nmea_eng_temp=='1':
 	subprocess.Popen(['python', currentpath+'/sensors_b.py'])
 
 subprocess.call(['pkill', '-f', 'monitoring.py'])
-if start or switch1=='1' or switch2=='1' or switch3=='1' or switch4=='1' or twitter=='1' or gmail=='1' or nmea_mag_var=='1' or nmea_hdt=='1' or nmea_rot=='1' or TW_STW=='1' or TW_SOG=='1':
-	subprocess.Popen(['python',currentpath+'/monitoring.py'])
-
+subprocess.Popen(['python',currentpath+'/monitoring.py', '1'])

@@ -14,12 +14,14 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import time, socket, threading, datetime, geomag, pynmea2, math
+import time, socket, threading, datetime, geomag, pynmea2, math, sys
 import RPi.GPIO as GPIO
 from classes.datastream import DataStream
 from classes.conf import Conf
 from classes.language import Language
 from classes.actions import Actions
+
+Isstartup=sys.argv[1]
 
 conf=Conf()
 
@@ -228,7 +230,7 @@ if conf.get('SWITCH1', 'enable')=='1':
 	GPIO.add_event_detect(channel1, GPIO.BOTH, callback=switch1)
 	if GPIO.input(channel1): state1=True
 	else: state1=False
-	switch1(channel1)
+	if Isstartup=='1': switch1(channel1)
 if conf.get('SWITCH2', 'enable')=='1':
 	channel2=int(conf.get('SWITCH2', 'gpio'))
 	pull_up_down=GPIO.PUD_DOWN
@@ -237,7 +239,7 @@ if conf.get('SWITCH2', 'enable')=='1':
 	GPIO.add_event_detect(channel2, GPIO.BOTH, callback=switch2)
 	if GPIO.input(channel2): state2=True
 	else: state2=False
-	switch2(channel2)
+	if Isstartup=='1': switch2(channel2)
 if conf.get('SWITCH3', 'enable')=='1':
 	channel3=int(conf.get('SWITCH3', 'gpio'))
 	pull_up_down=GPIO.PUD_DOWN
@@ -246,7 +248,7 @@ if conf.get('SWITCH3', 'enable')=='1':
 	GPIO.add_event_detect(channel3, GPIO.BOTH, callback=switch3)
 	if GPIO.input(channel3): state3=True
 	else: state3=False
-	switch3(channel3)
+	if Isstartup=='1': switch3(channel3)
 if conf.get('SWITCH4', 'enable')=='1':
 	channel4=int(conf.get('SWITCH4', 'gpio'))
 	pull_up_down=GPIO.PUD_DOWN
@@ -255,7 +257,7 @@ if conf.get('SWITCH4', 'enable')=='1':
 	GPIO.add_event_detect(channel4, GPIO.BOTH, callback=switch4)
 	if GPIO.input(channel4): state4=True
 	else: state4=False
-	switch4(channel4)
+	if Isstartup=='1': switch4(channel4)
 #end no loop
 
 # loop
