@@ -14,14 +14,12 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import time, socket, threading, datetime, geomag, pynmea2, math, sys
+import time, socket, threading, datetime, geomag, pynmea2, math
 import RPi.GPIO as GPIO
 from classes.datastream import DataStream
 from classes.conf import Conf
 from classes.language import Language
 from classes.actions import Actions
-
-Isstartup=sys.argv[1]
 
 conf=Conf()
 
@@ -34,22 +32,6 @@ error=0
 a=DataStream()
 actions=Actions()
 nodata=''
-global runSW1on
-global runSW1off
-global runSW2on
-global runSW2off
-global runSW3on
-global runSW3off
-global runSW4on
-global runSW4off
-runSW1on=False
-runSW1off=False
-runSW2on=False
-runSW2off=False
-runSW3on=False
-runSW3off=False
-runSW4on=False
-runSW4off=False
 channel1=''
 channel2=''
 channel3=''
@@ -70,6 +52,7 @@ for index,item in enumerate(triggers):
 	ii[1]=int(ii[1])
 	ii[2]=int(ii[2])
 	ii[3]=float(ii[3])
+	ii.append(False)# 4 state
 	triggers[index]=ii
 
 global trigger_actions
@@ -85,16 +68,17 @@ for index,item in enumerate(trigger_actions):
 	if ii[4]==2: ii[3]=ii[3]*60
 	if ii[4]==3: ii[3]=(ii[3]*60)*60
 	if ii[4]==4: ii[3]=((ii[3]*24)*60)*60
-	ii.append('')
+	ii.append('')# 5 last run
 	trigger_actions[index]=ii
 
 # alarms
 def start_actions(trigger):
 	global trigger_actions
+
 	for index,i in enumerate(trigger_actions):
 		if i[0]==trigger:
-			now= time.time()
-			if not i[5]:
+			now=time.time()
+			if triggers[trigger][4]==False:
 				trigger_actions[index][5]=now
 				actions.run_action(str(i[1]),i[2],conf,'')
 			else:
@@ -137,29 +121,6 @@ def connect():
 		time.sleep(7)
 	else: error=0
 #end thread1
-
-#switches
-def switch1(channel):
-	global runSW1on
-	global runSW1off
-	if GPIO.input(channel): runSW1on=True
-	else: runSW1off=True
-def switch2(channel):
-	global runSW2on
-	global runSW2off
-	if GPIO.input(channel): runSW2on=True
-	else: runSW2off=True
-def switch3(channel):
-	global runSW3on
-	global runSW3off
-	if GPIO.input(channel): runSW3on=True
-	else: runSW3off=True
-def switch4(channel):
-	global runSW4on
-	global runSW4off
-	if GPIO.input(channel): runSW4on=True
-	else: runSW4off=True
-#end switches
 
 #monitoring
 def send_twitter(error):
@@ -227,90 +188,54 @@ if conf.get('SWITCH1', 'enable')=='1':
 	pull_up_down=GPIO.PUD_DOWN
 	if conf.get('SWITCH1', 'pull_up_down')=='Pull Up': pull_up_down=GPIO.PUD_UP
 	GPIO.setup(channel1, GPIO.IN, pull_up_down=pull_up_down)
-	GPIO.add_event_detect(channel1, GPIO.BOTH, callback=switch1)
-	if GPIO.input(channel1): state1=True
-	else: state1=False
-	if Isstartup=='1': switch1(channel1)
 if conf.get('SWITCH2', 'enable')=='1':
 	channel2=int(conf.get('SWITCH2', 'gpio'))
 	pull_up_down=GPIO.PUD_DOWN
 	if conf.get('SWITCH2', 'pull_up_down')=='Pull Up': pull_up_down=GPIO.PUD_UP
 	GPIO.setup(channel2, GPIO.IN, pull_up_down=pull_up_down)
-	GPIO.add_event_detect(channel2, GPIO.BOTH, callback=switch2)
-	if GPIO.input(channel2): state2=True
-	else: state2=False
-	if Isstartup=='1': switch2(channel2)
 if conf.get('SWITCH3', 'enable')=='1':
 	channel3=int(conf.get('SWITCH3', 'gpio'))
 	pull_up_down=GPIO.PUD_DOWN
 	if conf.get('SWITCH3', 'pull_up_down')=='Pull Up': pull_up_down=GPIO.PUD_UP
 	GPIO.setup(channel3, GPIO.IN, pull_up_down=pull_up_down)
-	GPIO.add_event_detect(channel3, GPIO.BOTH, callback=switch3)
-	if GPIO.input(channel3): state3=True
-	else: state3=False
-	if Isstartup=='1': switch3(channel3)
 if conf.get('SWITCH4', 'enable')=='1':
 	channel4=int(conf.get('SWITCH4', 'gpio'))
 	pull_up_down=GPIO.PUD_DOWN
 	if conf.get('SWITCH4', 'pull_up_down')=='Pull Up': pull_up_down=GPIO.PUD_UP
 	GPIO.setup(channel4, GPIO.IN, pull_up_down=pull_up_down)
-	GPIO.add_event_detect(channel4, GPIO.BOTH, callback=switch4)
-	if GPIO.input(channel4): state4=True
-	else: state4=False
-	if Isstartup=='1': switch4(channel4)
 #end no loop
 
 # loop
 while True:
 	#switches
-	if runSW1on:
-		a.SW1[2]=1
-		a.SW1[4]=time.time()
-		if state1 == True: actions.run_action(conf.get('SWITCH1', 'on_action'), conf.get('SWITCH1', 'on_command'), conf,'')
-		state1= False
-		runSW1on=False
-	if runSW1off:
-		a.SW1[2]=0
-		a.SW1[4]=time.time()
-		if state1 == False: actions.run_action(conf.get('SWITCH1', 'off_action'), conf.get('SWITCH1', 'off_command'), conf,'')
-		state1= True
-		runSW1off=False
-	if runSW2on:
-		a.SW2[2]=1
-		a.SW2[4]=time.time()
-		if state2 == True: actions.run_action(conf.get('SWITCH2', 'on_action'), conf.get('SWITCH2', 'on_command'), conf,'')
-		state2= False
-		runSW2on=False
-	if runSW2off:
-		a.SW2[2]=0
-		a.SW2[4]=time.time()
-		if state2 == False: actions.run_action(conf.get('SWITCH2', 'off_action'), conf.get('SWITCH2', 'off_command'), conf,'')
-		state2= True
-		runSW2off=False
-	if runSW3on:
-		a.SW3[2]=1
-		a.SW3[4]=time.time()
-		if state3 == True: actions.run_action(conf.get('SWITCH3', 'on_action'), conf.get('SWITCH3', 'on_command'), conf,'')
-		state3= False
-		runSW3on=False
-	if runSW3off:
-		a.SW3[2]=0
-		a.SW3[4]=time.time()
-		if state3 == False: actions.run_action(conf.get('SWITCH3', 'off_action'), conf.get('SWITCH3', 'off_command'), conf,'')
-		state3= True
-		runSW3off=False
-	if runSW4on:
-		a.SW4[2]=1
-		a.SW4[4]=time.time()
-		if state4 == True: actions.run_action(conf.get('SWITCH4', 'on_action'), conf.get('SWITCH4', 'on_command'), conf,'')
-		state4= False
-		runSW4on=False
-	if runSW4off:
-		a.SW4[2]=0
-		a.SW4[4]=time.time()
-		if state4 == False: actions.run_action(conf.get('SWITCH4', 'off_action'), conf.get('SWITCH4', 'off_command'), conf,'')
-		state1= True
-		runSW1off=False
+	if channel1:
+		if GPIO.input(channel1):
+			a.SW1[2]=1
+			a.SW1[4]=time.time()
+		else:
+			a.SW1[2]=0
+			a.SW1[4]=time.time()
+	if channel2:
+		if GPIO.input(channel2):
+			a.SW2[2]=1
+			a.SW2[4]=time.time()
+		else:
+			a.SW2[2]=0
+			a.SW2[4]=time.time()
+	if channel3:
+		if GPIO.input(channel3):
+			a.SW3[2]=1
+			a.SW3[4]=time.time()
+		else:
+			a.SW3[2]=0
+			a.SW3[4]=time.time()
+	if channel4:
+		if GPIO.input(channel4):
+			a.SW4[2]=1
+			a.SW4[4]=time.time()
+		else:
+			a.SW4[2]=0
+			a.SW4[4]=time.time()
 	#end switches
 
 	#send mail and twitter
@@ -531,21 +456,53 @@ while True:
 			#switch on
 			if operator==6:
 				if trigger=='SW1' and channel1:
-					if GPIO.input(channel1): start_actions(index)
+					if a.SW1[2]==1: 
+						start_actions(index)
+						triggers[index][4]=True
+					else: 
+						triggers[index][4]=False
 				if trigger=='SW2' and channel2:
-					if GPIO.input(channel2): start_actions(index)
+					if a.SW2[2]==1: 
+						start_actions(index)
+						triggers[index][4]=True
+					else: 
+						triggers[index][4]=False
 				if trigger=='SW3' and channel3:
-					if GPIO.input(channel3): start_actions(index)
+					if a.SW3[2]==1: 
+						start_actions(index)
+						triggers[index][4]=True
+					else: 
+						triggers[index][4]=False
 				if trigger=='SW4' and channel4:
-					if GPIO.input(channel4): start_actions(index)
+					if a.SW4[2]==1: 
+						start_actions(index)
+						triggers[index][4]=True
+					else: 
+						triggers[index][4]=False
 			#switch off
 			if operator==7:
 				if trigger=='SW1' and channel1:
-					if not GPIO.input(channel1): start_actions(index)
+					if a.SW1[2]==0: 
+						start_actions(index)
+						triggers[index][4]=True
+					else: 
+						triggers[index][4]=False
 				if trigger=='SW2' and channel2:
-					if not GPIO.input(channel2): start_actions(index)
+					if a.SW2[2]==0: 
+						start_actions(index)
+						triggers[index][4]=True
+					else: 
+						triggers[index][4]=False
 				if trigger=='SW3' and channel3:
-					if not GPIO.input(channel3): start_actions(index)
+					if a.SW3[2]==0: 
+						start_actions(index)
+						triggers[index][4]=True
+					else: 
+						triggers[index][4]=False
 				if trigger=='SW4' and channel4:
-					if not GPIO.input(channel4): start_actions(index)
+					if a.SW4[2]==0: 
+						start_actions(index)
+						triggers[index][4]=True
+					else: 
+						triggers[index][4]=False
 	#end alarms
