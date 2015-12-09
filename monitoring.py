@@ -43,7 +43,7 @@ GPIO.setmode(GPIO.BCM)
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-data=conf.get('ALARMS', 'triggers')
+data=conf.get('ACTIONS', 'triggers')
 triggers=data.split('||')
 triggers.pop()
 for index,item in enumerate(triggers):
@@ -56,7 +56,7 @@ for index,item in enumerate(triggers):
 	triggers[index]=ii
 
 global trigger_actions
-data=conf.get('ALARMS', 'actions')
+data=conf.get('ACTIONS', 'actions')
 trigger_actions=data.split('||')
 trigger_actions.pop()
 for index,item in enumerate(trigger_actions):
@@ -71,7 +71,7 @@ for index,item in enumerate(trigger_actions):
 	ii.append('')# 5 last run
 	trigger_actions[index]=ii
 
-# alarms
+# actions
 def start_actions(trigger):
 	global trigger_actions
 
@@ -80,14 +80,18 @@ def start_actions(trigger):
 			now=time.time()
 			if triggers[trigger][4]==False:
 				trigger_actions[index][5]=now
-				actions.run_action(str(i[1]),i[2],conf,'')
+				if i[1]==12: send_twitter(str(i[1]),i[2])
+				if i[1]==13: send_gmail(str(i[1]),i[2])
+				if i[1]!=12 and i[1]!=13: actions.run_action(str(i[1]),i[2],conf,'')
 			else:
 				if i[4]==0: pass
 				else:
 					if now-i[5] > i[3]:
 						trigger_actions[index][5]=now
-						actions.run_action(str(i[1]),i[2],conf,'')
-# end alarms
+						if i[1]==12: send_twitter(str(i[1]),i[2])
+						if i[1]==13: send_gmail(str(i[1]),i[2])
+						if i[1]!=12 and i[1]!=13: actions.run_action(str(i[1]),i[2],conf,'')
+# end actions
 
 #thread1
 def parse_nmea():
@@ -122,9 +126,10 @@ def connect():
 	else: error=0
 #end thread1
 
-#monitoring
-def send_twitter(error):
-	tweetStr = ''
+#remote
+def send_twitter(option,text):
+	now = time.strftime("%H:%M:%S")
+	tweetStr = now+' '+text
 	send_data=eval(conf.get('TWITTER', 'send_data'))
 	for ii in send_data:
 		timestamp=eval('a.'+a.DataList[ii]+'[4]')
@@ -138,13 +143,13 @@ def send_twitter(error):
 				data=eval('a.'+a.DataList[ii]+'[1]')
 				value=eval('a.'+a.DataList[ii]+'[2]')
 				unit=eval('a.'+a.DataList[ii]+'[3]')
-				if unit: tweetStr+= data+':'+str(value)+str(unit)+' '
-				else: tweetStr+= data+':'+str(value)+' '
-	if error !=0 : tweetStr+= error
-	if tweetStr: actions.run_action('14',tweetStr,conf,'')
+				if unit: tweetStr+= ' '+data+':'+str(value)+str(unit)
+				else: tweetStr+= ' '+data+':'+str(value)+' '
+	if error !=0 : tweetStr+= ' '+error
+	if tweetStr: actions.run_action(option,tweetStr,conf,'')
 
-def send_gmail(error):
-	subject = conf.get('GMAIL', 'subject')
+def send_gmail(option,text):
+	subject = text
 	body = ''
 	for ii in a.DataList:
 		timestamp=eval('a.'+ii+'[4]')
@@ -161,8 +166,8 @@ def send_gmail(error):
 				if unit: body += data+': '+str(value)+' '+str(unit)+'\n'
 				else: body+= data+': '+str(value)+'\n'
 	if error !=0 : body+= error
-	if subject: actions.run_action('17',subject,conf,body)
-#end monitoring
+	if subject: actions.run_action(option,subject,conf,body)
+#end remote
 
 # calculate
 def calculate_mag_var(position, date):
@@ -237,29 +242,6 @@ while True:
 			a.SW4[2]=0
 			a.SW4[4]=time.time()
 	#end switches
-
-	#send mail and twitter
-	if conf.get('GMAIL', 'enable')=='1':
-		if conf.get('GMAIL', 'periodicity') and conf.get('GMAIL', 'periodicity')!='0':
-			now= time.time()
-			if not conf.get('GMAIL', 'last_send'):
-				conf.set('GMAIL', 'last_send', str(now))
-			last_send = float(conf.get('GMAIL', 'last_send')) 
-			periodicity = float(conf.get('GMAIL', 'periodicity'))*60
-			if (now-last_send) > periodicity:
-				conf.set('GMAIL', 'last_send', str(now))
-				send_gmail(error)
-	if conf.get('TWITTER', 'enable')=='1':
-		if conf.get('TWITTER', 'periodicity') and conf.get('TWITTER', 'periodicity')!='0':
-			now= time.time()
-			if not conf.get('TWITTER', 'last_send'):
-				conf.set('TWITTER', 'last_send', str(now))
-			last_send = float(conf.get('TWITTER', 'last_send')) 
-			periodicity = float(conf.get('TWITTER', 'periodicity'))*60
-			if (now-last_send) > periodicity:
-				conf.set('TWITTER', 'last_send', str(now))
-				send_twitter(error)
-	#end send mail and twitter
 
 	#calculations
 	if  conf.get('STARTUP', 'nmea_mag_var')=='1' or conf.get('STARTUP', 'nmea_hdt')=='1' or conf.get('STARTUP', 'nmea_rot')=='1' or conf.get('STARTUP', 'tw_stw')=='1'  or conf.get('STARTUP', 'tw_sog')=='1':
@@ -418,7 +400,7 @@ while True:
 	else: time.sleep(0.1)
 	#end calculations
 
-	#alarms
+	#actions
 	for index,item in enumerate(triggers):
 		if item[0]==1:
 			trigger=a.DataList[item[1]]
@@ -426,35 +408,65 @@ while True:
 			now = time.time()
 			trigger_value_timestamp=eval('a.'+trigger+'[4]')
 			operator=item[2]
-			data_value=item[3]
+			data_value=float(item[3])
 			#not present for
 			if operator==0:
 				if trigger_value_timestamp:
-					if now-trigger_value_timestamp > data_value: start_actions(index)
+					if now-trigger_value_timestamp > data_value: 
+						start_actions(index)
+						triggers[index][4]=True
+					else: 
+						triggers[index][4]=False
 					nodata=''
 				else: 
 					if not nodata: nodata=now
-					if now-nodata > data_value: start_actions(index)					
-			if operator==1 or operator==2 or operator==3 or operator==4 or operator==5:
+					if now-nodata > data_value: 
+						start_actions(index)
+						triggers[index][4]=True
+					else: 
+						triggers[index][4]=False
+			#is present
+			if operator==1: pass
+			if operator==2 or operator==3 or operator==4 or operator==5 or operator==6:
 				if trigger_value_timestamp:
 					if now-trigger_value_timestamp < 20:
 						#equal
-						if operator==1:
-							if trigger_value == data_value: start_actions(index)
-						#less than
 						if operator==2:
-							if trigger_value < data_value: start_actions(index)
-						#less than or equal to
+							if float(trigger_value) == data_value: 
+								start_actions(index)
+								triggers[index][4]=True
+							else: 
+								triggers[index][4]=False
+						#less than
 						if operator==3:
-							if trigger_value <= data_value: start_actions(index)
-						#greater than
+							if float(trigger_value) < data_value: 
+								start_actions(index)
+								triggers[index][4]=True
+							else: 
+								triggers[index][4]=False
+						#less than or equal to
 						if operator==4:
-							if trigger_value > data_value: start_actions(index)
-						#greater than or equal to
+							if float(trigger_value) <= data_value: 
+								start_actions(index)
+								triggers[index][4]=True
+							else: 
+								triggers[index][4]=False
+						#greater than
 						if operator==5:
-							if trigger_value >= data_value: start_actions(index)
+							if float(trigger_value) > data_value:
+								start_actions(index)
+								triggers[index][4]=True
+							else: 
+								triggers[index][4]=False
+						#greater than or equal to
+						if operator==6:
+							if float(trigger_value) >= data_value: 
+								start_actions(index)
+								triggers[index][4]=True
+							else: 
+								triggers[index][4]=False
 			#switch on
-			if operator==6:
+			if operator==7:
 				if trigger=='SW1' and channel1:
 					if a.SW1[2]==1: 
 						start_actions(index)
@@ -480,7 +492,7 @@ while True:
 					else: 
 						triggers[index][4]=False
 			#switch off
-			if operator==7:
+			if operator==8:
 				if trigger=='SW1' and channel1:
 					if a.SW1[2]==0: 
 						start_actions(index)
@@ -505,4 +517,4 @@ while True:
 						triggers[index][4]=True
 					else: 
 						triggers[index][4]=False
-	#end alarms
+	#end actions

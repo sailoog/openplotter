@@ -26,7 +26,7 @@ currentpath=paths.currentpath
 
 conf=Conf()
 
-data=conf.get('ALARMS', 'triggers')
+data=conf.get('ACTIONS', 'triggers')
 triggers=data.split('||')
 triggers.pop()
 
@@ -41,7 +41,7 @@ if action=='0':
 	for index,item in enumerate(triggers):
 		tmp +='0,'
 		tmp +=triggers[index][1]+','+triggers[index][2]+','+triggers[index][3]+'||'
-	conf.set('ALARMS', 'triggers', tmp)
+	conf.set('ACTIONS', 'triggers', tmp)
 	subprocess.Popen(['pkill', '-f', 'message.py'])
 	subprocess.Popen(['pkill', '-9', 'mpg123'])
 	
@@ -50,7 +50,7 @@ if action=='1':
 	for index,item in enumerate(triggers):
 		tmp +='1,'
 		tmp +=triggers[index][1]+','+triggers[index][2]+','+triggers[index][3]+'||'
-	conf.set('ALARMS', 'triggers', tmp)
+	conf.set('ACTIONS', 'triggers', tmp)
 
 subprocess.call(['pkill', '-f', 'monitoring.py'])
 subprocess.Popen(['python',currentpath+'/monitoring.py', '0'])

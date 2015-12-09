@@ -26,9 +26,14 @@ class addAction(wx.Dialog):
 
 		panel = wx.Panel(self)
 
-		
+		self.actions_options=actions_options
+
+		list_actions=[]
+		for i in self.actions_options:
+			list_actions.append(i[0])
+
 		wx.StaticText(panel, label=_('action'), pos=(10, 10))
-		self.action_select= wx.ComboBox(panel, choices=actions_options, style=wx.CB_READONLY, size=(310, 32), pos=(10, 35))
+		self.action_select= wx.ComboBox(panel, choices=list_actions, style=wx.CB_READONLY, size=(310, 32), pos=(10, 35))
 		self.action_select.Bind(wx.EVT_COMBOBOX, self.onSelect)
 		wx.StaticText(panel, label=_('data'), pos=(10, 70))
 		self.data = wx.TextCtrl(panel, size=(310, 32), pos=(10, 95))
@@ -48,19 +53,27 @@ class addAction(wx.Dialog):
 
 	def onSelect(self,e):
 		actions=Actions()
-		res=actions.data_message(self.action_select.GetCurrentSelection())
-		if res:
-			if res=='OpenFileDialog':
+		msg=self.actions_options[self.action_select.GetCurrentSelection()][1]
+		field=self.actions_options[self.action_select.GetCurrentSelection()][2]
+		if msg:
+			if msg=='OpenFileDialog':
 				path=''
 				dlg = wx.FileDialog(self, message=_('Choose a file'), defaultDir=self.currentpath+'/sounds', defaultFile='', wildcard=_('Audio files')+' (*.mp3)|*.mp3|'+_('All files')+' (*.*)|*.*', style=wx.OPEN | wx.CHANGE_DIR)
 				if dlg.ShowModal() == wx.ID_OK:
 					file_path = dlg.GetPath()
 				dlg.Destroy()
 				self.data.SetValue(file_path)
-			else: 
-				wx.MessageBox(res, 'Info', wx.OK | wx.ICON_INFORMATION)
-				self.data.SetFocus() 
-				
+			else:
+				if msg==0: pass
+				else: wx.MessageBox(msg, 'Info', wx.OK | wx.ICON_INFORMATION)
+
+		if field==0: 
+			self.data.Disable()
+			self.data.SetValue('')
+		if field==1: 
+			self.data.Enable()
+			self.data.SetFocus()
+
 	def onSelectUnit(self,e):
 		if self.repeat_unit.GetCurrentSelection()==0: 
 			self.repeat.Disable()

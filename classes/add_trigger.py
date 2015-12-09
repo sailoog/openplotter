@@ -18,20 +18,38 @@ import wx
 
 class addTrigger(wx.Dialog):
 
-	def __init__(self,datastream_list,operators_list):
+	def __init__(self,datastream_list,a):
 
 		wx.Dialog.__init__(self, None, title=_('Add trigger'), size=(330,290))
 
 		panel = wx.Panel(self)
 
-		
+		self.a=a
+
 		wx.StaticText(panel, label=_('trigger'), pos=(10, 10))
 		self.trigger_select= wx.ComboBox(panel, choices=datastream_list, style=wx.CB_READONLY, size=(310, 32), pos=(10, 35))
+		self.trigger_select.Bind(wx.EVT_COMBOBOX, self.onSelect)
 		wx.StaticText(panel, label=_('operator'), pos=(10, 70))
-		self.operator_select= wx.ComboBox(panel, choices=operators_list, style=wx.CB_READONLY, size=(310, 32), pos=(10, 95))
+		self.operator_select= wx.ComboBox(panel, choices=self.a.operators_list, style=wx.CB_READONLY, size=(310, 32), pos=(10, 95))
 		wx.StaticText(panel, label=_('value'), pos=(10, 130))
 		self.value = wx.TextCtrl(panel, size=(310, 32), pos=(10, 155))
 
+		self.value.Disable()
+		
 		cancelBtn = wx.Button(panel, wx.ID_CANCEL, pos=(70, 205))
 		okBtn = wx.Button(panel, wx.ID_OK, pos=(180, 205))
 
+	def onSelect(self,e):
+		trigger=self.a.DataList[self.trigger_select.GetCurrentSelection()]
+		operators_valid_list=eval('self.a.'+trigger+'[7]')
+		new_list=[]
+		for i in operators_valid_list:
+			new_list.append(self.a.operators_list[i])
+		self.operator_select.Clear()
+		self.operator_select.AppendItems(new_list)
+		self.operator_select.SetSelection(0)
+
+		disable_field=eval('self.a.'+trigger+'[8]')
+		self.value.SetValue('')
+		if disable_field==1: self.value.Enable()
+		if disable_field==0: self.value.Disable()

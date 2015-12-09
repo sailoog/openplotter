@@ -70,9 +70,9 @@ class MainFrame(wx.Frame):
 		self.nb.AddPage(self.page4, _('SDR-AIS'))
 		self.nb.AddPage(self.page2, _('Calculate'))
 		self.nb.AddPage(self.page6, _('Sensors'))
-		self.nb.AddPage(self.page8, _('Switches'))
 		self.nb.AddPage(self.page10, _('Actions'))
-		self.nb.AddPage(self.page9, _('Monitoring'))
+		self.nb.AddPage(self.page8, _('Switches'))
+		self.nb.AddPage(self.page9, _('Accounts'))
 		self.nb.AddPage(self.page1, _('Startup'))
 
 		sizer = wx.BoxSizer()
@@ -373,7 +373,6 @@ class MainFrame(wx.Frame):
 ###########################page6
 ########page8###################
 		self.pin_list = ['22', '23', '24', '25']
-		self.actions=Actions()
 		self.pull_list = ['Pull Down', 'Pull Up']
 
 		wx.StaticBox(self.page8, label=_(' Switch 1 '), size=(330, 145), pos=(10, 10))
@@ -405,12 +404,9 @@ class MainFrame(wx.Frame):
 		self.gpio_pull4= wx.ComboBox(self.page8, choices=self.pull_list, style=wx.CB_READONLY, size=(105, 32), pos=(565, 177))
 ###########################page8
 ########page9###################
-		self.periodicity=['0','5','10','15','30','45','60','120','360','720','1440','2880']
 		wx.StaticBox(self.page9, label=_(' Twitter '), size=(330, 290), pos=(10, 10))
 		self.twitter_enable = wx.CheckBox(self.page9, label=_('Enable'), pos=(20, 32))
 		self.twitter_enable.Bind(wx.EVT_CHECKBOX, self.on_twitter_enable)
-		self.twitter_periodicity= wx.ComboBox(self.page9, choices=self.periodicity, style=wx.CB_READONLY, size=(80, 32), pos=(115, 27))
-		wx.StaticText(self.page9, label=_('Periodicity (min)'), pos=(210, 35))
 		self.datastream_list=[]
 		self.a=DataStream()
 		for i in self.a.DataList:
@@ -428,16 +424,12 @@ class MainFrame(wx.Frame):
 		wx.StaticBox(self.page9, label=_(' Gmail '), size=(330, 200), pos=(350, 10))
 		self.gmail_enable = wx.CheckBox(self.page9, label=_('Enable'), pos=(360, 32))
 		self.gmail_enable.Bind(wx.EVT_CHECKBOX, self.on_gmail_enable)
-		self.gmail_periodicity= wx.ComboBox(self.page9, choices=self.periodicity, style=wx.CB_READONLY, size=(80, 32), pos=(455, 27))
-		wx.StaticText(self.page9, label=_('Periodicity (min)'), pos=(550, 35))
 		wx.StaticText(self.page9, label=_('Gmail account'), pos=(360, 70))
 		self.Gmail_account = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(490, 65))
 		wx.StaticText(self.page9, label=_('Gmail password'), pos=(360, 105))
 		self.Gmail_password = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(490, 100))
 		wx.StaticText(self.page9, label=_('Recipient'), pos=(360, 140))
 		self.Recipient = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(490, 135))
-		wx.StaticText(self.page9, label=_('Subject'), pos=(360, 175))
-		self.Subject = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(490, 170))
 ###########################page9
 ########page10###################
 		wx.StaticBox(self.page10, label=_(' Triggers '), size=(670, 130), pos=(10, 10))
@@ -470,15 +462,16 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.delete_action, self.delete_action_button)
 
 		self.stop_all=wx.Button(self.page10, label=_('Stop all'), pos=(10, 285))
-		self.Bind(wx.EVT_BUTTON, self.stop_alarms, self.stop_all)
+		self.Bind(wx.EVT_BUTTON, self.stop_actions, self.stop_all)
 		self.start_all=wx.Button(self.page10, label=_('Start all'), pos=(130, 285))
-		self.Bind(wx.EVT_BUTTON, self.start_alarms, self.start_all)
+		self.Bind(wx.EVT_BUTTON, self.start_actions, self.start_all)
 
-		self.button_apply_alarms =wx.Button(self.page10, label=_('Apply changes'), pos=(570, 285))
-		self.Bind(wx.EVT_BUTTON, self.apply_changes_alarms, self.button_apply_alarms)
-		self.button_cancel_alarms =wx.Button(self.page10, label=_('Cancel changes'), pos=(430, 285))
-		self.Bind(wx.EVT_BUTTON, self.cancel_changes_alarms, self.button_cancel_alarms)
+		self.button_apply_actions =wx.Button(self.page10, label=_('Apply changes'), pos=(570, 285))
+		self.Bind(wx.EVT_BUTTON, self.apply_changes_actions, self.button_apply_actions)
+		self.button_cancel_actions =wx.Button(self.page10, label=_('Cancel changes'), pos=(430, 285))
+		self.Bind(wx.EVT_BUTTON, self.cancel_changes_actions, self.button_cancel_actions)
 ###########################page10
+		self.actions=Actions()
 		self.manual_settings=''
 		self.read_kplex_conf()
 		self.set_layout_conf()
@@ -650,8 +643,6 @@ class MainFrame(wx.Frame):
 			self.gpio_pin4.Disable()
 			self.gpio_pull4.Disable()
 
-		if self.conf.get('TWITTER', 'periodicity'): self.twitter_periodicity.SetValue(self.conf.get('TWITTER', 'periodicity'))
-		else: self.twitter_periodicity.SetValue('0')
 		if self.conf.get('TWITTER', 'send_data'):
 			selections=eval(self.conf.get('TWITTER', 'send_data'))
 			for i in selections:
@@ -662,26 +653,20 @@ class MainFrame(wx.Frame):
 		if self.conf.get('TWITTER', 'accessTokenSecret'): self.accessTokenSecret.SetValue('********************')
 		if self.conf.get('TWITTER', 'enable')=='1':
 			self.twitter_enable.SetValue(True)
-			self.twitter_periodicity.Disable()
 			self.datastream_select.Disable()
 			self.apiKey.Disable()
 			self.apiSecret.Disable()
 			self.accessToken.Disable()
 			self.accessTokenSecret.Disable()
 
-		if self.conf.get('GMAIL', 'periodicity'): self.gmail_periodicity.SetValue(self.conf.get('GMAIL', 'periodicity'))
-		else: self.gmail_periodicity.SetValue('0')
 		if self.conf.get('GMAIL', 'gmail'): self.Gmail_account.SetValue(self.conf.get('GMAIL', 'gmail'))
 		if self.conf.get('GMAIL', 'password'): self.Gmail_password.SetValue('********************')
 		if self.conf.get('GMAIL', 'recipient'): self.Recipient.SetValue(self.conf.get('GMAIL', 'recipient'))
-		if self.conf.get('GMAIL', 'subject'): self.Subject.SetValue(self.conf.get('GMAIL', 'subject'))
 		if self.conf.get('GMAIL', 'enable')=='1':
 			self.gmail_enable.SetValue(True)
-			self.gmail_periodicity.Disable()
 			self.Gmail_account.Disable()
 			self.Gmail_password.Disable()
 			self.Recipient.Disable()
-			self.Subject.Disable()
 
 		self.read_triggers()
 		self.read_actions()
@@ -1625,14 +1610,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.ShowMessage(_('Select some data to publish.'))
 			return
 		if self.twitter_enable.GetValue():
-			self.twitter_periodicity.Disable()
 			self.datastream_select.Disable()
 			self.apiKey.Disable()
 			self.apiSecret.Disable()
 			self.accessToken.Disable()
 			self.accessTokenSecret.Disable()
 			self.conf.set('TWITTER', 'enable', '1')
-			self.conf.set('TWITTER', 'periodicity', self.twitter_periodicity.GetValue())
 			self.conf.set('TWITTER', 'send_data', str(self.datastream_select.GetSelections()))
 			if not '*****' in self.apiKey.GetValue(): 
 				self.conf.set('TWITTER', 'apiKey', self.apiKey.GetValue())
@@ -1648,7 +1631,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.accessTokenSecret.SetValue('********************')
 		else:
 			self.conf.set('TWITTER', 'enable', '0')
-			self.twitter_periodicity.Enable()
 			self.datastream_select.Enable()
 			self.apiKey.Enable()
 			self.apiSecret.Enable()
@@ -1657,36 +1639,30 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.start_monitoring('0')
 
 	def on_gmail_enable(self,e):
-		if not self.Gmail_account.GetValue() or not self.Gmail_password.GetValue() or not self.Recipient.GetValue() or not self.Subject.GetValue():
+		if not self.Gmail_account.GetValue() or not self.Gmail_password.GetValue() or not self.Recipient.GetValue():
 			self.gmail_enable.SetValue(False)
-			self.ShowMessage(_('Enter valid Gmail account, Gmail password, Recipient and Subject.'))
+			self.ShowMessage(_('Enter valid Gmail account, Gmail password and Recipient.'))
 			return
 		if self.gmail_enable.GetValue():
-			self.gmail_periodicity.Disable()
 			self.Gmail_account.Disable()
 			self.Gmail_password.Disable()
 			self.Recipient.Disable()
-			self.Subject.Disable()
 			self.conf.set('GMAIL', 'enable', '1')
-			self.conf.set('GMAIL', 'periodicity', self.gmail_periodicity.GetValue())
 			self.conf.set('GMAIL', 'gmail', self.Gmail_account.GetValue())
 			if not '*****' in self.Gmail_password.GetValue(): 
 				self.conf.set('GMAIL', 'password', self.Gmail_password.GetValue())
 				self.Gmail_password.SetValue('********************')
 			self.conf.set('GMAIL', 'recipient', self.Recipient.GetValue())
-			self.conf.set('GMAIL', 'subject', self.Subject.GetValue())
 		else:
 			self.conf.set('GMAIL', 'enable', '0')
-			self.gmail_periodicity.Enable()
 			self.Gmail_account.Enable()
 			self.Gmail_password.Enable()
 			self.Recipient.Enable()
-			self.Subject.Enable()
 		self.start_monitoring('0')
-#######################alarms
+#######################actions
 	def read_triggers(self):
 		self.list_triggers.DeleteAllItems()
-		data=self.conf.get('ALARMS', 'triggers')
+		data=self.conf.get('ACTIONS', 'triggers')
 		self.triggers=data.split('||')
 		self.triggers.pop()
 		for index,item in enumerate(self.triggers):
@@ -1702,7 +1678,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.triggers[index]=ii
 
 	def read_actions(self):
-		data=self.conf.get('ALARMS', 'actions')
+		data=self.conf.get('ACTIONS', 'actions')
 		self.trigger_actions=data.split('||')
 		self.trigger_actions.pop()
 		for index,item in enumerate(self.trigger_actions):
@@ -1722,14 +1698,15 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				else: repeat=str(i[3])
 				time_units=self.actions.time_units[i[4]]
 				repeat2=repeat+' '+time_units
-				self.list_actions.Append([self.actions.options[i[1]],i[2],repeat2])
+				self.list_actions.Append([self.actions.options[i[1]][0],i[2],repeat2])
 
 	def add_trigger(self,e):
-		dlg = addTrigger(self.datastream_list, self.a.operators_list)
+		dlg = addTrigger(self.datastream_list, self.a)
 		res = dlg.ShowModal()
 		if res == wx.ID_OK:
 			trigger_selection=dlg.trigger_select.GetCurrentSelection()
-			operator_selection=dlg.operator_select.GetCurrentSelection()
+			trigger0=self.a.DataList[trigger_selection]
+			operator_selection=eval('self.a.'+trigger0+'[7]['+str(dlg.operator_select.GetCurrentSelection())+']')
 			if dlg.value.GetValue(): value=dlg.value.GetValue()
 			else: value='0'
 			try: value2=float(value)
@@ -1737,7 +1714,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.ShowMessage(_('Failed. Value must be a number.'))
 				dlg.Destroy()
 				return
-			if trigger_selection == -1 or operator_selection == -1:
+			if trigger_selection == -1 or dlg.operator_select.GetCurrentSelection() == -1:
 				self.ShowMessage(_('Failed. Select trigger and operator.'))
 				dlg.Destroy()
 				return
@@ -1774,7 +1751,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.ShowMessage(_('Failed. "Repeat after" must be a number.'))
 				dlg.Destroy()
 				return
-			action=self.actions.options[action_selection]
+			action=self.actions.options[action_selection][0]
 			data=dlg.data.GetValue()
 			time_units_selection=dlg.repeat_unit.GetCurrentSelection()
 			time_units=self.actions.time_units[time_units_selection]
@@ -1819,39 +1796,39 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 						return
 					else: cont=cont+1
 
-	def apply_changes_alarms(self,e):
+	def apply_changes_actions(self,e):
 		tmp=''
 		for index,item in enumerate(self.triggers):
 			if self.list_triggers.IsChecked(index): tmp +='1,'
 			else: tmp +='0,'
 			tmp +=str(self.triggers[index][1])+','+str(self.triggers[index][2])+','+str(self.triggers[index][3])+'||'
-		self.conf.set('ALARMS', 'triggers', tmp)
+		self.conf.set('ACTIONS', 'triggers', tmp)
 		
 		tmp=''
 		for index,item in enumerate(self.trigger_actions):
 			tmp +=str(self.trigger_actions[index][0])+','+str(self.trigger_actions[index][1])+','+str(self.trigger_actions[index][2])+','+str(self.trigger_actions[index][3])+','+str(self.trigger_actions[index][4])+'||'
-		self.conf.set('ALARMS', 'actions', tmp)
-		self.SetStatusText(_('Alarms changes applied and restarted'))
+		self.conf.set('ACTIONS', 'actions', tmp)
+		self.SetStatusText(_('Actions changes applied and restarted'))
 		self.start_monitoring('0')
 
-	def cancel_changes_alarms(self,e):
+	def cancel_changes_actions(self,e):
 		self.read_triggers()
 		self.read_actions()
 		self.list_actions.DeleteAllItems()
-		self.SetStatusText(_('Alarms changes cancelled'))
+		self.SetStatusText(_('Actions changes cancelled'))
 
-	def stop_alarms(self,e):
-		subprocess.call(['python', currentpath+'/ctrl_alarms.py', '0'])
-		self.SetStatusText(_('Alarms stopped'))
+	def stop_actions(self,e):
+		subprocess.call(['python', currentpath+'/ctrl_actions.py', '0'])
+		self.SetStatusText(_('Actions stopped'))
 		self.conf.read()
 		self.read_triggers()
 		self.list_actions.DeleteAllItems()
 		self.read_actions()
 
 
-	def start_alarms(self,e):
-		subprocess.call(['python', currentpath+'/ctrl_alarms.py', '1'])
-		self.SetStatusText(_('Alarms started'))
+	def start_actions(self,e):
+		subprocess.call(['python', currentpath+'/ctrl_actions.py', '1'])
+		self.SetStatusText(_('Actions started'))
 		self.conf.read()
 		self.read_triggers()
 		self.list_actions.DeleteAllItems()

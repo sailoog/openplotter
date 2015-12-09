@@ -23,32 +23,28 @@ class Actions():
 
 	def __init__(self):
 
-		self.options=[None]*24
-		#ATENTION. If order changes, edit "run_action()", "data_message()" and monitoring.py: "send_twitter(), send_gmail()"
-		self.options[0]= _('nothing')
-		self.options[1]= _('command')
-		self.options[2]= _('reset')
-		self.options[3]= _('shutdown')
-		self.options[4]= _('stop NMEA multiplexer')
-		self.options[5]= _('reset NMEA multiplexer')
-		self.options[6]= _('stop Signal K server')
-		self.options[7]= _('reset Signal K server')
-		self.options[8]= _('stop WiFi access point')
-		self.options[9]= _('start WiFi access point')
-		self.options[10]= _('stop SDR-AIS')
-		self.options[11]= _('reset SDR-AIS')
-		self.options[12]= _('start Twitter monitoring')
-		self.options[13]= _('stop Twitter monitoring')
-		self.options[14]= _('publish Twitter')
-		self.options[15]= _('start Gmail monitoring')
-		self.options[16]= _('stop Gmail monitoring')
-		self.options[17]= _('send e-mail')
-		self.options[18]= _('play sound')
-		self.options[19]= _('stop all sounds')
-		self.options[20]= _('show message')
-		self.options[21]= _('close all messages')
-		self.options[22]= _('start all alarms')
-		self.options[23]= _('stop all alarms')
+		self.options=[None]*20
+		#ATENTION. If order changes, edit "run_action()" and monitoring.py: "start_actions()"
+		self.options[0]= _('wait'),_('Enter seconds to wait in the field below.'),1
+		self.options[1]= _('command'),_('Enter a Linux command and arguments in the field below.'),1
+		self.options[2]= _('reset'),0,0
+		self.options[3]= _('shutdown'),0,0
+		self.options[4]= _('stop NMEA multiplexer'),0,0
+		self.options[5]= _('reset NMEA multiplexer'),0,0
+		self.options[6]= _('stop Signal K server'),0,0
+		self.options[7]= _('reset Signal K server'),0,0
+		self.options[8]= _('stop WiFi access point'),0,0
+		self.options[9]= _('start WiFi access point'),_('Be sure you have filled in all fields in "WiFi AP" tab and enabled WiFi access point.'),0
+		self.options[10]= _('stop SDR-AIS'),0,0
+		self.options[11]= _('reset SDR-AIS'),_('Be sure you have filled in Gain and Correction fields in "SDR-AIS" tab and enabled AIS NMEA generation.'),0
+		self.options[12]= _('publish Twitter'),_('Be sure you have filled in all fields in "Accounts" tab, selected data to publish and enabled Twitter checkbox.\n\nEnter text to publish in the field below (optional).'),1
+		self.options[13]= _('send e-mail'),_('Be sure you have filled in all fields in "Accounts" tab, and enabled Gmail checkbox.\n\nEnter the subject in the field below.'),1
+		self.options[14]= _('play sound'),'OpenFileDialog',1
+		self.options[15]= _('stop all sounds'),0,0
+		self.options[16]= _('show message'),_('Enter the message in the field below.'),1
+		self.options[17]= _('close all messages'),0,0
+		self.options[18]= _('start all actions'),0,0
+		self.options[19]= _('stop all actions'),0,0
 
 		self.time_units=[_('no repeat'),_('seconds'), _('minutes'), _('hours'), _('days')]
 
@@ -56,18 +52,10 @@ class Actions():
 		self.home=paths.home
 		self.currentpath=paths.currentpath
 
-	def data_message(self,action_selected):
-		if action_selected==1: return _('Enter Linux command and arguments in the field below.')
-		if action_selected==9: return _('Be sure you have filled in all fields in "WiFi AP" tab and enabled WiFi access point.')
-		if action_selected==11: return _('Be sure you have filled in Gain and Correction fields in "SDR-AIS" tab and enabled AIS NMEA generation.')
-		if action_selected==14 or action_selected==17: return _('Be sure you have filled in all fields in "Monitoring" tab and enabled Twitter or Gmail checkbox.\n\nEnter text to send in the field below.')
-		if action_selected==12 or action_selected==15: return _('Be sure you have filled in all fields in "Monitoring" tab and enabled Twitter or Gmail checkbox.')
-		if action_selected==18: return 'OpenFileDialog'
-		if action_selected==20: return _('Enter the message in the field below.')
 	
 	def run_action(self,option,text,conf,extra):
 		conf.read()
-		if option=='0': return
+		if option=='0': time.sleep(float(text))
 		if option=='1':
 			if text:
 				text=text.split(' ')
@@ -114,28 +102,18 @@ class Actions():
 			aisdecoder=subprocess.Popen(['aisdecoder', '-h', '127.0.0.1', '-p', '10110', '-a', 'file', '-c', 'mono', '-d', '-f', '/dev/stdin'], stdin = rtl_fm.stdout)
 			conf.set('AIS-SDR', 'enable', '1')
 		if option=='12':
-			conf.set('TWITTER', 'enable', '1')
-		if option=='13':
-			conf.set('TWITTER', 'enable', '0')
-		if option=='14':
 			apiKey = conf.get('TWITTER', 'apiKey')
 			apiSecret = conf.get('TWITTER', 'apiSecret')
 			accessToken = conf.get('TWITTER', 'accessToken')
 			accessTokenSecret = conf.get('TWITTER', 'accessTokenSecret')
-			now = time.strftime("%H:%M:%S")
 			tweetStr=text
 			if tweetStr:
-				tweetStr = now+' '+tweetStr
 				if len(tweetStr)>140: tweetStr=tweetStr[0:140]
 				try:
 					msg=TwitterBot(apiKey,apiSecret,accessToken,accessTokenSecret)
 					msg.send(tweetStr)
 				except Exception,e: print str(e)
-		if option=='15':
-			conf.set('GMAIL', 'enable', '1')
-		if option=='16':
-			conf.set('GMAIL', 'enable', '0')
-		if option=='17':
+		if option=='13':
 			GMAIL_USERNAME = conf.get('GMAIL', 'gmail')
 			GMAIL_PASSWORD = conf.get('GMAIL', 'password')
 			recipient = conf.get('GMAIL', 'recipient')
@@ -147,15 +125,15 @@ class Actions():
 					msg=GmailBot(GMAIL_USERNAME,GMAIL_PASSWORD,recipient)
 					msg.send(subject,body)
 				except Exception,e: print str(e)
-		if option=='18':
+		if option=='14':
 			subprocess.Popen(['mpg123',text])
-		if option=='19':
+		if option=='15':
 			subprocess.Popen(['pkill', '-9', 'mpg123'])
-		if option=='20':
+		if option=='16':
 			subprocess.Popen(['python', self.currentpath+'/message.py', text, conf.get('GENERAL','lang')])
-		if option=='21':
+		if option=='17':
 			subprocess.Popen(['pkill', '-f', 'message.py'])
-		if option=='22':
-			subprocess.Popen(['python', self.currentpath+'/ctrl_alarms.py', '1'])
-		if option=='23':
-			subprocess.Popen(['python', self.currentpath+'/ctrl_alarms.py', '0'])
+		if option=='18':
+			subprocess.Popen(['python', self.currentpath+'/ctrl_actions.py', '1'])
+		if option=='19':
+			subprocess.Popen(['python', self.currentpath+'/ctrl_actions.py', '0'])

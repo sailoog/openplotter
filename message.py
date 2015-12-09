@@ -25,7 +25,7 @@ class MyFrame(wx.Frame):
 	def __init__(self, parent):
 		Language(lang)
 		wx.Frame.__init__(self, parent)
-		dlg = wx.MessageDialog(self, text, _('Alarm'), wx.OK | wx.ICON_WARNING)
+		dlg = wx.MessageDialog(self, text, _('Message'), wx.OK | wx.ICON_WARNING)
 		dlg.ShowModal()
 		sys.exit()
 
