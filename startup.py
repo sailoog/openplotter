@@ -73,6 +73,12 @@ nmea_hum=conf.get('STARTUP', 'nmea_hum')
 nmea_temp_h=conf.get('STARTUP', 'nmea_temp_h')
 nmea_eng_temp=conf.get('STARTUP', 'nmea_eng_temp')
 
+nmea_mag_var=conf.get('STARTUP', 'nmea_mag_var')
+nmea_hdt=conf.get('STARTUP', 'nmea_hdt')
+nmea_rot=conf.get('STARTUP', 'nmea_rot')
+TW_STW=conf.get('STARTUP', 'tw_stw')
+TW_SOG=conf.get('STARTUP', 'tw_sog')
+
 #######################################################
 time.sleep(delay)
 
@@ -122,5 +128,9 @@ subprocess.call(['pkill', '-f', 'sensors_b.py'])
 if nmea_eng_temp=='1': 
 	subprocess.Popen(['python', currentpath+'/sensors_b.py'])
 
+subprocess.call(['pkill', '-f', 'calculate.py'])
+if nmea_mag_var=='1' or nmea_hdt=='1' or nmea_rot=='1' or TW_STW=='1' or TW_SOG=='1': 
+	subprocess.Popen(['python', currentpath+'/calculate.py'])
+
 subprocess.call(['pkill', '-f', 'monitoring.py'])
-subprocess.Popen(['python',currentpath+'/monitoring.py', '1'])
+subprocess.Popen(['python',currentpath+'/monitoring.py'])

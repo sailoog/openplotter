@@ -1442,35 +1442,40 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.ShowMessage(_('Weather log restarted'))
 ######################################calculate
 
+	def start_calculate(self):
+		subprocess.call(['pkill', '-f', 'calculate.py'])
+		if self.mag_var.GetValue() or self.heading_t.GetValue() or self.rot.GetValue() or self.TW_STW.GetValue() or self.TW_SOG.GetValue():
+			subprocess.Popen(['python', currentpath+'/calculate.py'])
+
 	def ok_rate2(self, e):
 		rate=self.rate2.GetValue()
 		self.conf.set('STARTUP', 'nmea_rate_cal', rate)
-		self.start_monitoring('0')
+		self.start_calculate()
 		self.ShowMessage(_('Generation rate set to ')+rate+_(' seconds'))
 
 	def ok_accuracy(self,e):
 		accuracy=self.accuracy.GetValue()
 		self.conf.set('STARTUP', 'cal_accuracy', accuracy)
-		self.start_monitoring('0')
+		self.start_calculate()
 		self.ShowMessage(_('Calculation accuracy set to ')+accuracy+_(' seconds'))
 
 	def nmea_mag_var(self, e):
 		sender = e.GetEventObject()
 		if sender.GetValue(): self.conf.set('STARTUP', 'nmea_mag_var', '1')
 		else: self.conf.set('STARTUP', 'nmea_mag_var', '0')
-		self.start_monitoring('0')
+		self.start_calculate()
 
 	def nmea_hdt(self, e):
 		sender = e.GetEventObject()
 		if sender.GetValue(): self.conf.set('STARTUP', 'nmea_hdt', '1')
 		else: self.conf.set('STARTUP', 'nmea_hdt', '0')
-		self.start_monitoring('0')
+		self.start_calculate()
 
 	def nmea_rot(self, e):
 		sender = e.GetEventObject()
 		if sender.GetValue(): self.conf.set('STARTUP', 'nmea_rot', '1')
 		else: self.conf.set('STARTUP', 'nmea_rot', '0')
-		self.start_monitoring('0')
+		self.start_calculate()
 
 	def	TW(self, e):
 		sender = e.GetEventObject()
@@ -1482,7 +1487,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if state: sender.SetValue(True)
 		if self.TW_STW.GetValue(): self.conf.set('STARTUP', 'tw_stw', '1')
 		if self.TW_SOG.GetValue(): self.conf.set('STARTUP', 'tw_sog', '1')
-		self.start_monitoring('0')
+		self.start_calculate()
 ######################################Signal K
 	def signalKpanels(self, e):
 		url = 'http://localhost:3000/instrumentpanel'
@@ -1524,7 +1529,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.conf.set('SWITCH1', 'enable', '0')
 			self.gpio_pin1.Enable()
 			self.gpio_pull1.Enable()
-		self.start_monitoring('1')
+		self.start_monitoring()
 
 	def on_switch2_enable(self, e):
 		if not self.gpio_pull2.GetValue() or not self.gpio_pin2.GetValue():
@@ -1547,7 +1552,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.conf.set('SWITCH2', 'enable', '0')
 			self.gpio_pin2.Enable()
 			self.gpio_pull2.Enable()
-		self.start_monitoring('1')
+		self.start_monitoring()
 
 	def on_switch3_enable(self, e):
 		if not self.gpio_pull3.GetValue() or not self.gpio_pin3.GetValue():
@@ -1570,7 +1575,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.conf.set('SWITCH3', 'enable', '0')
 			self.gpio_pin3.Enable()
 			self.gpio_pull3.Enable()
-		self.start_monitoring('1')
+		self.start_monitoring()
 
 	def on_switch4_enable(self, e):
 		if not self.gpio_pull4.GetValue() or not self.gpio_pin4.GetValue():
@@ -1593,12 +1598,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.conf.set('SWITCH4', 'enable', '0')
 			self.gpio_pin4.Enable()
 			self.gpio_pull4.Enable()
-		self.start_monitoring('1')
+		self.start_monitoring()
 #######################twitterbot
 
-	def start_monitoring(self,resetSW):
+	def start_monitoring(self):
 		subprocess.call(['pkill', '-f', 'monitoring.py'])
-		subprocess.Popen(['python',currentpath+'/monitoring.py', resetSW])
+		subprocess.Popen(['python',currentpath+'/monitoring.py'])
 
 	def on_twitter_enable(self,e):
 		if not self.apiKey.GetValue() or not self.apiSecret.GetValue() or not self.accessToken.GetValue() or not self.accessTokenSecret.GetValue():
@@ -1636,7 +1641,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.apiSecret.Enable()
 			self.accessToken.Enable()
 			self.accessTokenSecret.Enable()
-		self.start_monitoring('0')
+		self.start_monitoring()
 
 	def on_gmail_enable(self,e):
 		if not self.Gmail_account.GetValue() or not self.Gmail_password.GetValue() or not self.Recipient.GetValue():
@@ -1658,7 +1663,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.Gmail_account.Enable()
 			self.Gmail_password.Enable()
 			self.Recipient.Enable()
-		self.start_monitoring('0')
+		self.start_monitoring()
 #######################actions
 	def read_triggers(self):
 		self.list_triggers.DeleteAllItems()
@@ -1671,7 +1676,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			ii[1]=int(ii[1])
 			ii[2]=int(ii[2])
 			ii[3]=float(ii[3])
-			self.list_triggers.Append([self.datastream_list[ii[1]],self.a.operators_list[ii[2]],ii[3]])
+			if ii[1]==-1:
+				self.list_triggers.Append([_('None (always true)'),'',''])
+			else:
+				self.list_triggers.Append([self.datastream_list[ii[1]],self.a.operators_list[ii[2]],ii[3]])
 			if ii[0]==1:
 				last=self.list_triggers.GetItemCount()-1
 				self.list_triggers.CheckItem(last)
@@ -1705,31 +1713,40 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		res = dlg.ShowModal()
 		if res == wx.ID_OK:
 			trigger_selection=dlg.trigger_select.GetCurrentSelection()
-			trigger0=self.a.DataList[trigger_selection]
-			operator_selection=eval('self.a.'+trigger0+'[7]['+str(dlg.operator_select.GetCurrentSelection())+']')
-			if dlg.value.GetValue(): value=dlg.value.GetValue()
-			else: value='0'
-			try: value2=float(value)
-			except:
-				self.ShowMessage(_('Failed. Value must be a number.'))
-				dlg.Destroy()
-				return
-			if trigger_selection == -1 or dlg.operator_select.GetCurrentSelection() == -1:
-				self.ShowMessage(_('Failed. Select trigger and operator.'))
-				dlg.Destroy()
-				return
-			trigger=self.datastream_list[dlg.trigger_select.GetCurrentSelection()]
-			operator=self.a.operators_list[operator_selection]
-			self.list_triggers.Append([trigger,operator,value])
-			last=self.list_triggers.GetItemCount()-1
-			self.list_triggers.CheckItem(last)
-			tmp=[]
-			tmp.append(1)
-			tmp.append(trigger_selection)
-			tmp.append(operator_selection)
-			tmp.append(value2)
-			self.triggers.append(tmp)
-		dlg.Destroy()
+			if trigger_selection==len(self.datastream_list):
+				self.list_triggers.Append([_('None (always true)'),'',''])
+				tmp=[]
+				tmp.append(1)
+				tmp.append(-1)
+				tmp.append(-1)
+				tmp.append(-1)
+				self.triggers.append(tmp)
+			else:
+				trigger0=self.a.DataList[trigger_selection]
+				operator_selection=eval('self.a.'+trigger0+'[7]['+str(dlg.operator_select.GetCurrentSelection())+']')
+				if dlg.value.GetValue(): value=dlg.value.GetValue()
+				else: value='0'
+				try: value2=float(value)
+				except:
+					self.ShowMessage(_('Failed. Value must be a number.'))
+					dlg.Destroy()
+					return
+				if trigger_selection == -1 or dlg.operator_select.GetCurrentSelection() == -1:
+					self.ShowMessage(_('Failed. Select trigger and operator.'))
+					dlg.Destroy()
+					return
+				trigger=self.datastream_list[dlg.trigger_select.GetCurrentSelection()]
+				operator=self.a.operators_list[operator_selection]
+				self.list_triggers.Append([trigger,operator,value])
+				last=self.list_triggers.GetItemCount()-1
+				self.list_triggers.CheckItem(last)
+				tmp=[]
+				tmp.append(1)
+				tmp.append(trigger_selection)
+				tmp.append(operator_selection)
+				tmp.append(value2)
+				self.triggers.append(tmp)
+			dlg.Destroy()
 
 	def add_action(self,e):
 		selected_trigger= self.list_triggers.GetFirstSelected()
@@ -1779,6 +1796,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				if item[0]==selected: toRemove.append(index)
 			for i in sorted(toRemove, reverse=True):
 				del self.trigger_actions[i]
+			for i in self.trigger_actions:
+				if i[0]>selected: i[0]=(i[0])-1
 			self.list_actions.DeleteAllItems()
 
 	def delete_action(self,e):
@@ -1809,7 +1828,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			tmp +=str(self.trigger_actions[index][0])+','+str(self.trigger_actions[index][1])+','+str(self.trigger_actions[index][2])+','+str(self.trigger_actions[index][3])+','+str(self.trigger_actions[index][4])+'||'
 		self.conf.set('ACTIONS', 'actions', tmp)
 		self.SetStatusText(_('Actions changes applied and restarted'))
-		self.start_monitoring('0')
+		self.start_monitoring()
 
 	def cancel_changes_actions(self,e):
 		self.read_triggers()

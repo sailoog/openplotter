@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import time, socket, threading, datetime, geomag, pynmea2, math
+import time, socket, threading
 import RPi.GPIO as GPIO
 from classes.datastream import DataStream
 from classes.conf import Conf
@@ -25,6 +25,10 @@ conf=Conf()
 
 Language(conf.get('GENERAL','lang'))
 
+global trigger_actions
+global triggers
+trigger_actions=''
+triggers=''
 global sock_in
 global error
 sock_in=''
@@ -36,63 +40,68 @@ channel1=''
 channel2=''
 channel3=''
 channel4=''
-last_heading=''
-heading_time=''
 
 GPIO.setmode(GPIO.BCM)
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-data=conf.get('ACTIONS', 'triggers')
-triggers=data.split('||')
-triggers.pop()
-for index,item in enumerate(triggers):
-	ii=item.split(',')
-	ii[0]=int(ii[0])
-	ii[1]=int(ii[1])
-	ii[2]=int(ii[2])
-	ii[3]=float(ii[3])
-	ii.append(False)# 4 state
-	triggers[index]=ii
+def read_triggers():
+	global triggers
+	data=conf.get('ACTIONS', 'triggers')
+	triggers=data.split('||')
+	triggers.pop()
+	for index,item in enumerate(triggers):
+		ii=item.split(',')
+		ii[0]=int(ii[0])
+		ii[1]=int(ii[1])
+		ii[2]=int(ii[2])
+		ii[3]=float(ii[3])
+		ii.append(False)# 4 state
+		triggers[index]=ii
 
-global trigger_actions
-data=conf.get('ACTIONS', 'actions')
-trigger_actions=data.split('||')
-trigger_actions.pop()
-for index,item in enumerate(trigger_actions):
-	ii=item.split(',')
-	ii[0]=int(ii[0])
-	ii[1]=int(ii[1])
-	ii[3]=float(ii[3])
-	ii[4]=int(ii[4])
-	if ii[4]==2: ii[3]=ii[3]*60
-	if ii[4]==3: ii[3]=(ii[3]*60)*60
-	if ii[4]==4: ii[3]=((ii[3]*24)*60)*60
-	ii.append('')# 5 last run
-	trigger_actions[index]=ii
+def read_actions():
+	global trigger_actions
+	data=conf.get('ACTIONS', 'actions')
+	trigger_actions=data.split('||')
+	trigger_actions.pop()
+	for index,item in enumerate(trigger_actions):
+		ii=item.split(',')
+		ii[0]=int(ii[0])
+		ii[1]=int(ii[1])
+		ii[3]=float(ii[3])
+		ii[4]=int(ii[4])
+		if ii[4]==2: ii[3]=ii[3]*60
+		if ii[4]==3: ii[3]=(ii[3]*60)*60
+		if ii[4]==4: ii[3]=((ii[3]*24)*60)*60
+		ii.append('')# 5 last run
+		trigger_actions[index]=ii
 
-# actions
 def start_actions(trigger):
 	global trigger_actions
-
 	for index,i in enumerate(trigger_actions):
 		if i[0]==trigger:
 			now=time.time()
 			if triggers[trigger][4]==False:
 				trigger_actions[index][5]=now
-				if i[1]==12: send_twitter(str(i[1]),i[2])
-				if i[1]==13: send_gmail(str(i[1]),i[2])
-				if i[1]!=12 and i[1]!=13: actions.run_action(str(i[1]),i[2],conf,'')
+				re=''
+				try:
+					re=actions.run_action(str(i[1]),i[2],conf,a)
+				except Exception,e: print str(e)
+				if re=='read':
+					read_triggers()
+					read_actions()
 			else:
 				if i[4]==0: pass
 				else:
 					if now-i[5] > i[3]:
 						trigger_actions[index][5]=now
-						if i[1]==12: send_twitter(str(i[1]),i[2])
-						if i[1]==13: send_gmail(str(i[1]),i[2])
-						if i[1]!=12 and i[1]!=13: actions.run_action(str(i[1]),i[2],conf,'')
-# end actions
-
+						re=''
+						try:
+							re=actions.run_action(str(i[1]),i[2],conf,a)
+						except Exception,e: print str(e)
+						if re=='read':
+							read_triggers()
+							read_actions()
 #thread1
 def parse_nmea():
 	global sock_in
@@ -105,6 +114,7 @@ def parse_nmea():
 				frase_nmea = sock_in.recv(1024)
 			except socket.error, error_msg:
 				error= _('Failed to connect with localhost:10110. Error: ')+ str(error_msg[0])
+				print error
 			else:
 				if frase_nmea: 
 					a.parse_nmea(frase_nmea)
@@ -121,70 +131,16 @@ def connect():
 		sock_in.connect(('localhost', 10110))
 	except socket.error, error_msg:
 		error= _('Failed to connect with localhost:10110. Error: ')+ str(error_msg[0])
+		print error
 		sock_in=''
 		time.sleep(7)
 	else: error=0
 #end thread1
 
-#remote
-def send_twitter(option,text):
-	now = time.strftime("%H:%M:%S")
-	tweetStr = now+' '+text
-	send_data=eval(conf.get('TWITTER', 'send_data'))
-	for ii in send_data:
-		timestamp=eval('a.'+a.DataList[ii]+'[4]')
-		if timestamp:
-			now=time.time()
-			age=now-timestamp
-			if age < 20:
-				data=''
-				value=''
-				unit=''
-				data=eval('a.'+a.DataList[ii]+'[1]')
-				value=eval('a.'+a.DataList[ii]+'[2]')
-				unit=eval('a.'+a.DataList[ii]+'[3]')
-				if unit: tweetStr+= ' '+data+':'+str(value)+str(unit)
-				else: tweetStr+= ' '+data+':'+str(value)+' '
-	if error !=0 : tweetStr+= ' '+error
-	if tweetStr: actions.run_action(option,tweetStr,conf,'')
-
-def send_gmail(option,text):
-	subject = text
-	body = ''
-	for ii in a.DataList:
-		timestamp=eval('a.'+ii+'[4]')
-		if timestamp:
-			now=time.time()
-			age=now-timestamp
-			if age < 20:
-				data=''
-				value=''
-				unit=''
-				data=eval('a.'+ii+'[0]')
-				value=eval('a.'+ii+'[2]')
-				unit=eval('a.'+ii+'[3]')
-				if unit: body += data+': '+str(value)+' '+str(unit)+'\n'
-				else: body+= data+': '+str(value)+'\n'
-	if error !=0 : body+= error
-	if subject: actions.run_action(option,subject,conf,body)
-#end remote
-
-# calculate
-def calculate_mag_var(position, date):
-	if position[0] and position[2] and date:
-		try:
-			var=float(geomag.declination(position[0], position[2], 0, date))
-			var=round(var,1)
-			if var >= 0.0:
-				mag_var=[var,'E']
-			if var < 0.0:
-				mag_var=[var*-1,'W']
-		except: mag_var=['','']
-	else: mag_var=['','']
-	return mag_var
-# end calculate
-
 # no loop
+read_triggers()
+read_actions()
+
 thread1=threading.Thread(target=parse_nmea)	
 if not thread1.isAlive(): thread1.start()
 
@@ -212,6 +168,7 @@ if conf.get('SWITCH4', 'enable')=='1':
 
 # loop
 while True:
+	time.sleep(0.01)
 	#switches
 	if channel1:
 		if GPIO.input(channel1):
@@ -243,172 +200,20 @@ while True:
 			a.SW4[4]=time.time()
 	#end switches
 
-	#calculations
-	if  conf.get('STARTUP', 'nmea_mag_var')=='1' or conf.get('STARTUP', 'nmea_hdt')=='1' or conf.get('STARTUP', 'nmea_rot')=='1' or conf.get('STARTUP', 'tw_stw')=='1'  or conf.get('STARTUP', 'tw_sog')=='1':
-			
-		time.sleep(float(conf.get('STARTUP', 'nmea_rate_cal')))
-
-		accuracy=float(conf.get('STARTUP', 'cal_accuracy'))
-		now=time.time()
-		# refresh values
-		position =[a.validate('Lat',now,accuracy), a.Lat[3], a.validate('Lon',now,accuracy), a.Lon[3]]
-		date = a.validate('Date',now,accuracy)
-		if not date: date = datetime.date.today()
-		heading_m = a.validate('HDM',now,accuracy)
-		mag_var = [a.validate('Var',now,accuracy), a.Var[3]]
-		if not mag_var[0]: mag_var = calculate_mag_var(position,date)
-		heading_t = a.validate('HDT',now,accuracy)
-		if not heading_t:
-			if heading_m and mag_var[0]:
-				var=mag_var[0]
-				if mag_var[1]=='W':var=var*-1
-				heading_t=heading_m+var
-				if heading_t>360: heading_t=heading_t-360
-				if heading_t<0: heading_t=360+heading_t
-		STW = a.validate('STW',now,accuracy)
-		AWS = a.validate('AWS',now,accuracy) 
-		AWA = [a.validate('AWA',now,accuracy), a.AWA[3]]
-		if AWA[0]:
-			if AWA[1]=='D':
-				AWA[1]='R'
-				if AWA[0]>180: 
-					AWA[0]=360-AWA[0]
-					AWA[1]='L'
-		SOG = a.validate('SOG',now,accuracy)
-		COG = a.validate('SOG',now,accuracy)
-		# end refresh values
-		#generate headint_t
-		if  conf.get('STARTUP', 'nmea_hdt')=='1' and heading_t:
-			hdt = pynmea2.HDT('OP', 'HDT', (str(round(heading_t,1)),'T'))
-			hdt1=str(hdt)
-			hdt2=hdt1+'\r\n'
-			sock.sendto(hdt2, ('localhost', 10110))
-		#generate magnetic variation
-		if  conf.get('STARTUP', 'nmea_mag_var')=='1' and mag_var:
-			hdg = pynmea2.HDG('OP', 'HDG', ('','','',str(mag_var[0]),mag_var[1]))
-			hdg1=str(hdg)
-			hdg2=hdg1+'\r\n'
-			sock.sendto(hdg2, ('localhost', 10110))
-		#generate Rate of Turn (ROT)
-		if conf.get('STARTUP', 'nmea_rot')=='1' and heading_m:
-			if not last_heading: #initialize
-				last_heading = heading_m
-				heading_time = time.time()					
-			else:	#normal run
-				heading_change = heading_m-last_heading
-				last_heading_time = heading_time
-				heading_time = time.time()
-				last_heading = heading_m
-				if heading_change > 180:	#If we are "passing" north
-					heading_change = heading_change - 360
-				if heading_change < -180: 	#if we are "passing north"
-					heading_change = 360 + heading_change
-				rot = float(heading_change)/((heading_time - last_heading_time)/60)
-				rot= round(rot,1)				
-				#consider damping ROT values						
-				rot = pynmea2.ROT('OP', 'ROT', (str(rot),'A'))
-				rot1=str(rot)
-				rot2=rot1+'\r\n'
-				sock.sendto(rot2, ('localhost', 10110))
-		#generate True Wind STW
-		if conf.get('STARTUP', 'tw_stw')=='1' and STW and AWS and AWA:
-			print 'STW '
-			print  STW
-			print 'AWS '
-			print  AWS 
-			print 'AWA '
-			print  AWA
-			print 'heading_t '
-			print  heading_t
-			#TWA
-			TWS=math.sqrt((STW**2+AWS**2)-(2*STW*AWS*math.cos(math.radians(AWA[0]))))
-			TWA=math.degrees(math.acos((AWS**2-TWS**2-STW**2)/(2*TWS*STW)))
-			TWA0=TWA
-			if AWA[1]=='L': TWA0=360-TWA0
-			TWSr=round(TWS,1)
-			TWA0r=round(TWA0,0)
-			mwv = pynmea2.MWV('OP', 'MWV', (str(TWA0r),'T',str(TWSr),'N','A'))
-			mwv1=str(mwv)
-			mwv2=mwv1+'\r\n'
-			sock.sendto(mwv2, ('localhost', 10110))
-			#TWD
-			if heading_t:
-				if AWA[1]=='R':
-					TWD=heading_t+TWA
-				if AWA[1]=='L':
-					TWD=heading_t-TWA
-				if TWD>360: TWD=TWD-360
-				if TWD<0: TWD=360+TWD
-				TWDr=round(TWD,0)
-				mwd = pynmea2.MWD('OP', 'MWD', (str(TWDr),'T','','M',str(TWSr),'N','',''))
-				mwd1=str(mwd)
-				mwd2=mwd1+'\r\n'
-				sock.sendto(mwd2, ('localhost', 10110))
-				print ' '
-				print 'TWA'
-				print TWA0r
-				print 'TWS'
-				print TWSr
-				print 'TWD'
-				print TWDr
-		#generate True Wind SOG
-		if conf.get('STARTUP', 'tw_sog')=='1' and SOG and COG and heading_t and AWS and AWA:
-			print 'SOG '
-			print  SOG
-			print 'COG '
-			print  COG
-			print 'AWS '
-			print  AWS 
-			print 'AWA '
-			print  AWA
-			print 'heading_t '
-			print  heading_t
-			#TWD
-			D=heading_t-COG
-			if AWA[1]=='R': AWD=AWA[0]+D
-			if AWA[1]=='L': AWD=(AWA[0]*-1)+D
-			if AWD > 0: AWD0=[AWD,'R']
-			if AWD < 0: AWD0=[AWD*-1,'L']
-			TWS=math.sqrt((SOG**2+AWS**2)-(2*SOG*AWS*math.cos(math.radians(AWD0[0]))))
-			TWAc=math.degrees(math.acos((AWS**2-TWS**2-SOG**2)/(2*TWS*SOG)))
-			if AWD0[1]=='R': TWD=COG+TWAc
-			if AWD0[1]=='L': TWD=COG-TWAc
-			if TWD>360: TWD=TWD-360
-			if TWD<0: TWD=360+TWD
-			TWDr=round(TWD,0)
-			TWSr=round(TWS,1)
-			mwd = pynmea2.MWD('OP', 'MWD', (str(TWDr),'T','','M',str(TWSr),'N','',''))
-			mwd1=str(mwd)
-			mwd2=mwd1+'\r\n'
-			sock.sendto(mwd2, ('localhost', 10110))
-			#TWA
-			TWA=TWD-heading_t
-			TWA0=TWA
-			if TWA0 < 0: TWA0=360+TWA0
-			TWA0r=round(TWA0,0)
-			mwv = pynmea2.MWV('OP', 'MWV', (str(TWA0r),'T',str(TWSr),'N','A'))
-			mwv1=str(mwv)
-			mwv2=mwv1+'\r\n'
-			sock.sendto(mwv2, ('localhost', 10110))
-			print ' '
-			print 'TWA'
-			print TWA0r
-			print 'TWS'
-			print TWSr
-			print 'TWD'
-			print TWDr
-	else: time.sleep(0.1)
-	#end calculations
-
 	#actions
 	for index,item in enumerate(triggers):
 		if item[0]==1:
-			trigger=a.DataList[item[1]]
-			trigger_value=eval('a.'+trigger+'[2]')
-			now = time.time()
-			trigger_value_timestamp=eval('a.'+trigger+'[4]')
-			operator=item[2]
-			data_value=float(item[3])
+			if item[1]==-1:
+				operator=''
+				start_actions(index)
+				triggers[index][4]=True
+			else:
+				trigger=a.DataList[item[1]]
+				trigger_value=eval('a.'+trigger+'[2]')
+				now = time.time()
+				trigger_value_timestamp=eval('a.'+trigger+'[4]')
+				operator=item[2]
+				data_value=float(item[3])
 			#not present for
 			if operator==0:
 				if trigger_value_timestamp:
@@ -425,8 +230,14 @@ while True:
 						triggers[index][4]=True
 					else: 
 						triggers[index][4]=False
-			#is present
-			if operator==1: pass
+			#present in the last
+			if operator==1: 
+				if trigger_value_timestamp:
+					if now-trigger_value_timestamp < data_value:
+						start_actions(index)
+						triggers[index][4]=True
+					else: 
+						triggers[index][4]=False
 			if operator==2 or operator==3 or operator==4 or operator==5 or operator==6:
 				if trigger_value_timestamp:
 					if now-trigger_value_timestamp < 20:

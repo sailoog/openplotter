@@ -29,8 +29,8 @@ class DataStream:
 		#(0 name, 1 short, 2 value, 3 unit, 4 timestamp, 5 talker, 6 sentence, 7 valid operators, 8 disable field)
 		self.Lat=[_('Latitude'),_('Lat'),None,None,None,None,None,(0,1,2,3,4,5,6),1]
 		self.Lon=[_('Longitude'),_('Lon'),None,None,None,None,None,(0,1,2,3,4,5,6),1]
-		self.Date=[_('Date'),_('Date'),None,None,None,None,None,(0,1),0]
-		self.Time=[_('Time'),_('Time'),None,None,None,None,None,(0,1),0]
+		self.Date=[_('Date'),_('Date'),None,None,None,None,None,(0,1),1]
+		self.Time=[_('Time'),_('Time'),None,None,None,None,None,(0,1),1]
 		self.Var=[_('Magnetic Variation'),_('Var'),None,None,None,None,None,(0,1,2,3,4,5,6),1]
 		self.HDM=[_('Magnetic Heading'),_('HDM'),None,None,None,None,None,(0,1,2,3,4,5,6),1]
 		self.HDT=[_('True Heading'),_('HDT'),None,None,None,None,None,(0,1,2,3,4,5,6),1]
@@ -54,7 +54,7 @@ class DataStream:
 		self.SW4=[_('Switch 4 status'),_('SW4'),None,None,None,None,None,(7,8),0]
 
 		#ATENTION. If order changes, edit monitoring.py: "#actions"
-		self.operators_list=[_('is not present for (seconds)'),_('is present'),_('equal to'), _('less than'), _('less than or equal to'), _('greater than'), _('greater than or equal to'), _('switch on'), _('switch off')]
+		self.operators_list=[_('was not present in the last (sec.)'),_('was present in the last (sec.)'),_('is equal to'), _('is less than'), _('is less than or equal to'), _('is greater than'), _('is greater than or equal to'), _('is on'), _('is off')]
 
 	def validate(self,data,now,accuracy):
 		timestamp=eval('self.'+data+'[4]')

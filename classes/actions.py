@@ -24,7 +24,8 @@ class Actions():
 	def __init__(self):
 
 		self.options=[None]*20
-		#ATENTION. If order changes, edit "run_action()" and monitoring.py: "start_actions()"
+		#ATENTION. If order changes, edit "run_action()" and ctrl_actions.py
+		# 0 name, 1 message, 2 field data
 		self.options[0]= _('wait'),_('Enter seconds to wait in the field below.'),1
 		self.options[1]= _('command'),_('Enter a Linux command and arguments in the field below.'),1
 		self.options[2]= _('reset'),0,0
@@ -44,7 +45,7 @@ class Actions():
 		self.options[16]= _('show message'),_('Enter the message in the field below.'),1
 		self.options[17]= _('close all messages'),0,0
 		self.options[18]= _('start all actions'),0,0
-		self.options[19]= _('stop all actions'),0,0
+		self.options[19]= _('stop all actions'),_('This action will stop all the triggers except the trigger which has an action "start all actions" defined.'),0
 
 		self.time_units=[_('no repeat'),_('seconds'), _('minutes'), _('hours'), _('days')]
 
@@ -53,7 +54,7 @@ class Actions():
 		self.currentpath=paths.currentpath
 
 	
-	def run_action(self,option,text,conf,extra):
+	def run_action(self,option,text,conf,a):
 		conf.read()
 		if option=='0': time.sleep(float(text))
 		if option=='1':
@@ -102,29 +103,57 @@ class Actions():
 			aisdecoder=subprocess.Popen(['aisdecoder', '-h', '127.0.0.1', '-p', '10110', '-a', 'file', '-c', 'mono', '-d', '-f', '/dev/stdin'], stdin = rtl_fm.stdout)
 			conf.set('AIS-SDR', 'enable', '1')
 		if option=='12':
+			now = time.strftime("%H:%M:%S")
+			tweetStr = now+' '+text
+			send_data=eval(conf.get('TWITTER', 'send_data'))
+			for ii in send_data:
+				timestamp=eval('a.'+a.DataList[ii]+'[4]')
+				if timestamp:
+					now=time.time()
+					age=now-timestamp
+					if age < 20:
+						data=''
+						value=''
+						unit=''
+						data=eval('a.'+a.DataList[ii]+'[1]')
+						value=eval('a.'+a.DataList[ii]+'[2]')
+						unit=eval('a.'+a.DataList[ii]+'[3]')
+						if unit: tweetStr+= ' '+data+':'+str(value)+str(unit)
+						else: tweetStr+= ' '+data+':'+str(value)+' '
 			apiKey = conf.get('TWITTER', 'apiKey')
 			apiSecret = conf.get('TWITTER', 'apiSecret')
 			accessToken = conf.get('TWITTER', 'accessToken')
 			accessTokenSecret = conf.get('TWITTER', 'accessTokenSecret')
-			tweetStr=text
-			if tweetStr:
-				if len(tweetStr)>140: tweetStr=tweetStr[0:140]
-				try:
-					msg=TwitterBot(apiKey,apiSecret,accessToken,accessTokenSecret)
-					msg.send(tweetStr)
-				except Exception,e: print str(e)
+			if len(tweetStr)>140: tweetStr=tweetStr[0:140]
+			try:
+				msg=TwitterBot(apiKey,apiSecret,accessToken,accessTokenSecret)
+				msg.send(tweetStr)
+			except Exception,e: print str(e)
 		if option=='13':
+			subject = text
+			body = ''
+			for ii in a.DataList:
+				timestamp=eval('a.'+ii+'[4]')
+				if timestamp:
+					now=time.time()
+					age=now-timestamp
+					if age < 20:
+						data=''
+						value=''
+						unit=''
+						data=eval('a.'+ii+'[0]')
+						value=eval('a.'+ii+'[2]')
+						unit=eval('a.'+ii+'[3]')
+						if unit: body += data+': '+str(value)+' '+str(unit)+'\n'
+						else: body+= data+': '+str(value)+'\n'
 			GMAIL_USERNAME = conf.get('GMAIL', 'gmail')
 			GMAIL_PASSWORD = conf.get('GMAIL', 'password')
 			recipient = conf.get('GMAIL', 'recipient')
-			subject = text
-			body = extra
 			if not body: body = time.strftime("%H:%M:%S")+' '+subject
-			if subject:
-				try:
-					msg=GmailBot(GMAIL_USERNAME,GMAIL_PASSWORD,recipient)
-					msg.send(subject,body)
-				except Exception,e: print str(e)
+			try:
+				msg=GmailBot(GMAIL_USERNAME,GMAIL_PASSWORD,recipient)
+				msg.send(subject,body)
+			except Exception,e: print str(e)
 		if option=='14':
 			subprocess.Popen(['mpg123',text])
 		if option=='15':
@@ -134,6 +163,17 @@ class Actions():
 		if option=='17':
 			subprocess.Popen(['pkill', '-f', 'message.py'])
 		if option=='18':
-			subprocess.Popen(['python', self.currentpath+'/ctrl_actions.py', '1'])
+			tmp=''
+			data=conf.get('ACTIONS', 'triggers')
+			triggers=data.split('||')
+			triggers.pop()
+			for index,item in enumerate(triggers):
+				ii=item.split(',')
+				triggers[index]=ii
+			for index,item in enumerate(triggers):
+				tmp +='1,'
+				tmp +=triggers[index][1]+','+triggers[index][2]+','+triggers[index][3]+'||'
+			conf.set('ACTIONS', 'triggers', tmp)
+			return 'read'
 		if option=='19':
 			subprocess.Popen(['python', self.currentpath+'/ctrl_actions.py', '0'])
