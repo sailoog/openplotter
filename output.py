@@ -128,6 +128,8 @@ class MyFrame(wx.Frame):
 					if self.conf.get('SWITCH2', 'enable')=='1': self.a.switches_status(2, self.conf.get('SWITCH2', 'gpio'), self.conf.get('SWITCH2', 'pull_up_down'))
 					if self.conf.get('SWITCH3', 'enable')=='1': self.a.switches_status(3, self.conf.get('SWITCH3', 'gpio'), self.conf.get('SWITCH3', 'pull_up_down'))
 					if self.conf.get('SWITCH4', 'enable')=='1': self.a.switches_status(4, self.conf.get('SWITCH4', 'gpio'), self.conf.get('SWITCH4', 'pull_up_down'))
+					if self.conf.get('SWITCH5', 'enable')=='1': self.a.switches_status(5, self.conf.get('SWITCH5', 'gpio'), self.conf.get('SWITCH5', 'pull_up_down'))
+					if self.conf.get('SWITCH6', 'enable')=='1': self.a.switches_status(6, self.conf.get('SWITCH6', 'gpio'), self.conf.get('SWITCH6', 'pull_up_down'))
 					if self.read_conf==1: 
 						self.conf.read()
 						self.read_conf=0

@@ -372,36 +372,55 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.show_graph, self.button_graph)
 ###########################page6
 ########page8###################
-		self.pin_list = ['22', '23', '24', '25']
+		self.pin_list = ['5', '6', '12', '13','16', '17', '18', '19','20', '21', '22', '23','24', '25', '26', '27']
 		self.pull_list = ['Pull Down', 'Pull Up']
 
-		wx.StaticBox(self.page8, label=_(' Switch 1 '), size=(330, 145), pos=(10, 10))
+		wx.StaticBox(self.page8, label=_(' Switch 1 '), size=(330, 60), pos=(10, 10))
 		self.switch1_enable = wx.CheckBox(self.page8, label=_('Enable'), pos=(20, 32))
 		self.switch1_enable.Bind(wx.EVT_CHECKBOX, self.on_switch1_enable)
 		wx.StaticText(self.page8, label=_('GPIO'), pos=(115, 35))
 		self.gpio_pin1= wx.ComboBox(self.page8, choices=self.pin_list, style=wx.CB_READONLY, size=(60, 32), pos=(155, 27))
 		self.gpio_pull1= wx.ComboBox(self.page8, choices=self.pull_list, style=wx.CB_READONLY, size=(105, 32), pos=(225, 27))
 
-		wx.StaticBox(self.page8, label=_(' Switch 2 '), size=(330, 145), pos=(350, 10))
+		wx.StaticBox(self.page8, label=_(' Switch 2 '), size=(330, 60), pos=(350, 10))
 		self.switch2_enable = wx.CheckBox(self.page8, label=_('Enable'), pos=(360, 32))
 		self.switch2_enable.Bind(wx.EVT_CHECKBOX, self.on_switch2_enable)
 		wx.StaticText(self.page8, label=_('GPIO'), pos=(455, 35))
 		self.gpio_pin2= wx.ComboBox(self.page8, choices=self.pin_list, style=wx.CB_READONLY, size=(60, 32), pos=(495, 27))
 		self.gpio_pull2= wx.ComboBox(self.page8, choices=self.pull_list, style=wx.CB_READONLY, size=(105, 32), pos=(565, 27))
 		
-		wx.StaticBox(self.page8, label=_(' Switch 3 '), size=(330, 145), pos=(10, 160))
-		self.switch3_enable = wx.CheckBox(self.page8, label=_('Enable'), pos=(20, 182))
+		wx.StaticBox(self.page8, label=_(' Switch 3 '), size=(330, 60), pos=(10, 80))
+		self.switch3_enable = wx.CheckBox(self.page8, label=_('Enable'), pos=(20, 102))
 		self.switch3_enable.Bind(wx.EVT_CHECKBOX, self.on_switch3_enable)
-		wx.StaticText(self.page8, label=_('GPIO'), pos=(115, 185))
-		self.gpio_pin3= wx.ComboBox(self.page8, choices=self.pin_list, style=wx.CB_READONLY, size=(60, 32), pos=(155, 177))
-		self.gpio_pull3= wx.ComboBox(self.page8, choices=self.pull_list, style=wx.CB_READONLY, size=(105, 32), pos=(225, 177))
+		wx.StaticText(self.page8, label=_('GPIO'), pos=(115, 105))
+		self.gpio_pin3= wx.ComboBox(self.page8, choices=self.pin_list, style=wx.CB_READONLY, size=(60, 32), pos=(155, 97))
+		self.gpio_pull3= wx.ComboBox(self.page8, choices=self.pull_list, style=wx.CB_READONLY, size=(105, 32), pos=(225, 97))
 		
-		wx.StaticBox(self.page8, label=_(' Switch 4 '), size=(330, 145), pos=(350, 160))
-		self.switch4_enable = wx.CheckBox(self.page8, label=_('Enable'), pos=(360, 182))
+		wx.StaticBox(self.page8, label=_(' Switch 4 '), size=(330, 60), pos=(350, 80))
+		self.switch4_enable = wx.CheckBox(self.page8, label=_('Enable'), pos=(360, 102))
 		self.switch4_enable.Bind(wx.EVT_CHECKBOX, self.on_switch4_enable)
-		wx.StaticText(self.page8, label=_('GPIO'), pos=(455, 185))
-		self.gpio_pin4= wx.ComboBox(self.page8, choices=self.pin_list, style=wx.CB_READONLY, size=(60, 32), pos=(495, 177))
-		self.gpio_pull4= wx.ComboBox(self.page8, choices=self.pull_list, style=wx.CB_READONLY, size=(105, 32), pos=(565, 177))
+		wx.StaticText(self.page8, label=_('GPIO'), pos=(455, 105))
+		self.gpio_pin4= wx.ComboBox(self.page8, choices=self.pin_list, style=wx.CB_READONLY, size=(60, 32), pos=(495, 97))
+		self.gpio_pull4= wx.ComboBox(self.page8, choices=self.pull_list, style=wx.CB_READONLY, size=(105, 32), pos=(565, 97))
+
+		wx.StaticBox(self.page8, label=_(' Switch 5 '), size=(330, 60), pos=(10, 150))
+		self.switch5_enable = wx.CheckBox(self.page8, label=_('Enable'), pos=(20, 172))
+		self.switch5_enable.Bind(wx.EVT_CHECKBOX, self.on_switch5_enable)
+		wx.StaticText(self.page8, label=_('GPIO'), pos=(115, 175))
+		self.gpio_pin5= wx.ComboBox(self.page8, choices=self.pin_list, style=wx.CB_READONLY, size=(60, 32), pos=(155, 167))
+		self.gpio_pull5= wx.ComboBox(self.page8, choices=self.pull_list, style=wx.CB_READONLY, size=(105, 32), pos=(225, 167))
+		
+		wx.StaticBox(self.page8, label=_(' Switch 6 '), size=(330, 60), pos=(350, 150))
+		self.switch6_enable = wx.CheckBox(self.page8, label=_('Enable'), pos=(360, 172))
+		self.switch6_enable.Bind(wx.EVT_CHECKBOX, self.on_switch6_enable)
+		wx.StaticText(self.page8, label=_('GPIO'), pos=(455, 175))
+		self.gpio_pin6= wx.ComboBox(self.page8, choices=self.pin_list, style=wx.CB_READONLY, size=(60, 32), pos=(495, 167))
+		self.gpio_pull6= wx.ComboBox(self.page8, choices=self.pull_list, style=wx.CB_READONLY, size=(105, 32), pos=(565, 167))
+
+		self.button_apply_switches =wx.Button(self.page8, label=_('Apply changes'), pos=(570, 285))
+		self.Bind(wx.EVT_BUTTON, self.apply_changes_switches, self.button_apply_switches)
+		self.button_cancel_switches =wx.Button(self.page8, label=_('Cancel changes'), pos=(430, 285))
+		self.Bind(wx.EVT_BUTTON, self.cancel_changes_switches, self.button_cancel_switches)
 ###########################page8
 ########page9###################
 		wx.StaticBox(self.page9, label=_(' Twitter '), size=(330, 290), pos=(10, 10))
@@ -618,31 +637,6 @@ class MainFrame(wx.Frame):
 
 		if self.conf.get('STARTUP', 'press_temp_log')=='1': self.press_temp_log.SetValue(True)
 
-		self.gpio_pin1.SetValue(self.conf.get('SWITCH1', 'gpio'))
-		self.gpio_pull1.SetValue(self.conf.get('SWITCH1', 'pull_up_down'))
-		if self.conf.get('SWITCH1', 'enable')=='1':
-			self.switch1_enable.SetValue(True)
-			self.gpio_pin1.Disable()
-			self.gpio_pull1.Disable()
-		self.gpio_pin2.SetValue(self.conf.get('SWITCH2', 'gpio'))
-		self.gpio_pull2.SetValue(self.conf.get('SWITCH2', 'pull_up_down'))
-		if self.conf.get('SWITCH2', 'enable')=='1':
-			self.switch2_enable.SetValue(True)
-			self.gpio_pin2.Disable()
-			self.gpio_pull2.Disable()
-		self.gpio_pin3.SetValue(self.conf.get('SWITCH3', 'gpio'))
-		self.gpio_pull3.SetValue(self.conf.get('SWITCH3', 'pull_up_down'))
-		if self.conf.get('SWITCH3', 'enable')=='1':
-			self.switch3_enable.SetValue(True)
-			self.gpio_pin3.Disable()
-			self.gpio_pull3.Disable()
-		self.gpio_pin4.SetValue(self.conf.get('SWITCH4', 'gpio'))
-		self.gpio_pull4.SetValue(self.conf.get('SWITCH4', 'pull_up_down'))
-		if self.conf.get('SWITCH4', 'enable')=='1':
-			self.switch4_enable.SetValue(True)
-			self.gpio_pin4.Disable()
-			self.gpio_pull4.Disable()
-
 		if self.conf.get('TWITTER', 'send_data'):
 			selections=eval(self.conf.get('TWITTER', 'send_data'))
 			for i in selections:
@@ -668,6 +662,7 @@ class MainFrame(wx.Frame):
 			self.Gmail_password.Disable()
 			self.Recipient.Disable()
 
+		self.read_switches()
 		self.read_triggers()
 		self.read_actions()
 
@@ -1507,98 +1502,216 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		subprocess.Popen(home+'/.config/signalk-server-node/bin/nmea-from-10110', cwd=home+'/.config/signalk-server-node')
 		self.SetStatusText(_('Signal K server restarted'))
 ######################################Switches
-
-	def on_switch1_enable(self, e):
-		if not self.gpio_pull1.GetValue() or not self.gpio_pin1.GetValue():
-			self.switch1_enable.SetValue(False)
-			self.ShowMessage(_('Select a GPIO Pin and Pull Down or Pull Up.'))
-			return
-		if self.gpio_pin1.GetValue()==self.gpio_pin2.GetValue() or self.gpio_pin1.GetValue()==self.gpio_pin3.GetValue() or self.gpio_pin1.GetValue()==self.gpio_pin4.GetValue():
-			self.switch1_enable.SetValue(False)
-			self.gpio_pin1.Enable()
-			self.gpio_pull1.Enable()
-			self.ShowMessage(_('This GPIO Pin is already in use.'))
-			return
-		if self.switch1_enable.GetValue(): 
-			self.conf.set('SWITCH1', 'enable', '1')
-			self.conf.set('SWITCH1', 'gpio', self.gpio_pin1.GetValue())
-			self.conf.set('SWITCH1', 'pull_up_down', self.gpio_pull1.GetValue())
+	def read_switches(self):
+		if self.conf.get('SWITCH1', 'enable')=='1':
+			self.gpio_pin1.SetValue(self.conf.get('SWITCH1', 'gpio'))
+			self.gpio_pull1.SetValue(self.conf.get('SWITCH1', 'pull_up_down'))
+			self.switch1_enable.SetValue(True)
 			self.gpio_pin1.Disable()
 			self.gpio_pull1.Disable()
-		else: 
-			self.conf.set('SWITCH1', 'enable', '0')
-			self.gpio_pin1.Enable()
-			self.gpio_pull1.Enable()
-		self.start_monitoring()
-
-	def on_switch2_enable(self, e):
-		if not self.gpio_pull2.GetValue() or not self.gpio_pin2.GetValue():
-			self.switch2_enable.SetValue(False)
-			self.ShowMessage(_('Select a GPIO Pin and Pull Down or Pull Up.'))
-			return
-		if self.gpio_pin2.GetValue()==self.gpio_pin1.GetValue() or self.gpio_pin2.GetValue()==self.gpio_pin3.GetValue() or self.gpio_pin2.GetValue()==self.gpio_pin4.GetValue():
-			self.switch2_enable.SetValue(False)
-			self.gpio_pin2.Enable()
-			self.gpio_pull2.Enable()
-			self.ShowMessage(_('This GPIO Pin is already in use.'))
-			return
-		if self.switch2_enable.GetValue(): 
-			self.conf.set('SWITCH2', 'enable', '1')
-			self.conf.set('SWITCH2', 'gpio', self.gpio_pin2.GetValue())
-			self.conf.set('SWITCH2', 'pull_up_down', self.gpio_pull2.GetValue())
+		if self.conf.get('SWITCH2', 'enable')=='1':
+			self.gpio_pin2.SetValue(self.conf.get('SWITCH2', 'gpio'))
+			self.gpio_pull2.SetValue(self.conf.get('SWITCH2', 'pull_up_down'))
+			self.switch2_enable.SetValue(True)
 			self.gpio_pin2.Disable()
 			self.gpio_pull2.Disable()
-		else: 
-			self.conf.set('SWITCH2', 'enable', '0')
-			self.gpio_pin2.Enable()
-			self.gpio_pull2.Enable()
-		self.start_monitoring()
-
-	def on_switch3_enable(self, e):
-		if not self.gpio_pull3.GetValue() or not self.gpio_pin3.GetValue():
-			self.switch3_enable.SetValue(False)
-			self.ShowMessage(_('Select a GPIO Pin and Pull Down or Pull Up.'))
-			return
-		if self.gpio_pin3.GetValue()==self.gpio_pin1.GetValue() or self.gpio_pin3.GetValue()==self.gpio_pin2.GetValue() or self.gpio_pin3.GetValue()==self.gpio_pin4.GetValue():
-			self.switch3_enable.SetValue(False)
-			self.gpio_pin3.Enable()
-			self.gpio_pull3.Enable()
-			self.ShowMessage(_('This GPIO Pin is already in use.'))
-			return
-		if self.switch3_enable.GetValue(): 
-			self.conf.set('SWITCH3', 'enable', '1')
-			self.conf.set('SWITCH3', 'gpio', self.gpio_pin3.GetValue())
-			self.conf.set('SWITCH3', 'pull_up_down', self.gpio_pull3.GetValue())
+		if self.conf.get('SWITCH3', 'enable')=='1':
+			self.gpio_pin3.SetValue(self.conf.get('SWITCH3', 'gpio'))
+			self.gpio_pull3.SetValue(self.conf.get('SWITCH3', 'pull_up_down'))
+			self.switch3_enable.SetValue(True)
 			self.gpio_pin3.Disable()
 			self.gpio_pull3.Disable()
-		else: 
-			self.conf.set('SWITCH3', 'enable', '0')
-			self.gpio_pin3.Enable()
-			self.gpio_pull3.Enable()
-		self.start_monitoring()
-
-	def on_switch4_enable(self, e):
-		if not self.gpio_pull4.GetValue() or not self.gpio_pin4.GetValue():
-			self.switch4_enable.SetValue(False)
-			self.ShowMessage(_('Select a GPIO Pin and Pull Down or Pull Up.'))
-			return
-		if self.gpio_pin4.GetValue()==self.gpio_pin1.GetValue() or self.gpio_pin4.GetValue()==self.gpio_pin2.GetValue() or self.gpio_pin4.GetValue()==self.gpio_pin3.GetValue():
-			self.switch4_enable.SetValue(False)
-			self.gpio_pin4.Enable()
-			self.gpio_pull4.Enable()
-			self.ShowMessage(_('This GPIO Pin is already in use.'))
-			return
-		if self.switch4_enable.GetValue(): 
-			self.conf.set('SWITCH4', 'enable', '1')
-			self.conf.set('SWITCH4', 'gpio', self.gpio_pin4.GetValue())
-			self.conf.set('SWITCH4', 'pull_up_down', self.gpio_pull4.GetValue())
+		if self.conf.get('SWITCH4', 'enable')=='1':
+			self.gpio_pin4.SetValue(self.conf.get('SWITCH4', 'gpio'))
+			self.gpio_pull4.SetValue(self.conf.get('SWITCH4', 'pull_up_down'))
+			self.switch4_enable.SetValue(True)
 			self.gpio_pin4.Disable()
 			self.gpio_pull4.Disable()
+		if self.conf.get('SWITCH5', 'enable')=='1':
+			self.gpio_pin5.SetValue(self.conf.get('SWITCH5', 'gpio'))
+			self.gpio_pull5.SetValue(self.conf.get('SWITCH5', 'pull_up_down'))
+			self.switch5_enable.SetValue(True)
+			self.gpio_pin5.Disable()
+			self.gpio_pull5.Disable()
+		if self.conf.get('SWITCH6', 'enable')=='1':
+			self.gpio_pin6.SetValue(self.conf.get('SWITCH6', 'gpio'))
+			self.gpio_pull6.SetValue(self.conf.get('SWITCH6', 'pull_up_down'))
+			self.switch6_enable.SetValue(True)
+			self.gpio_pin6.Disable()
+			self.gpio_pull6.Disable()
+
+	def on_switch1_enable(self, e):
+		if self.switch1_enable.GetValue(): 
+			if self.gpio_pin1.GetValue() and self.gpio_pull1.GetValue(): 
+				self.gpio_pin1.Disable()
+				self.gpio_pull1.Disable()
+			else:
+				self.switch1_enable.SetValue(False)
 		else: 
-			self.conf.set('SWITCH4', 'enable', '0')
+			self.gpio_pin1.Enable()
+			self.gpio_pull1.Enable()
+
+	def on_switch2_enable(self, e):
+		if self.switch2_enable.GetValue(): 
+			if self.gpio_pin2.GetValue() and self.gpio_pull2.GetValue(): 
+				self.gpio_pin2.Disable()
+				self.gpio_pull2.Disable()
+			else:
+				self.switch2_enable.SetValue(False)
+		else: 
+			self.gpio_pin2.Enable()
+			self.gpio_pull2.Enable()
+
+	def on_switch3_enable(self, e):
+		if self.switch3_enable.GetValue(): 
+			if self.gpio_pin3.GetValue() and self.gpio_pull3.GetValue(): 
+				self.gpio_pin3.Disable()
+				self.gpio_pull3.Disable()
+			else:
+				self.switch3_enable.SetValue(False)
+		else: 
+			self.gpio_pin3.Enable()
+			self.gpio_pull3.Enable()
+
+	def on_switch4_enable(self, e):
+		if self.switch4_enable.GetValue(): 
+			if self.gpio_pin4.GetValue() and self.gpio_pull4.GetValue(): 
+				self.gpio_pin4.Disable()
+				self.gpio_pull4.Disable()
+			else:
+				self.switch4_enable.SetValue(False)
+		else: 
 			self.gpio_pin4.Enable()
 			self.gpio_pull4.Enable()
+
+	def on_switch5_enable(self, e):
+		if self.switch5_enable.GetValue(): 
+			if self.gpio_pin5.GetValue() and self.gpio_pull5.GetValue(): 
+				self.gpio_pin5.Disable()
+				self.gpio_pull5.Disable()
+			else:
+				self.switch5_enable.SetValue(False)
+		else: 
+			self.gpio_pin5.Enable()
+			self.gpio_pull5.Enable()
+
+	def on_switch6_enable(self, e):
+		if self.switch6_enable.GetValue(): 
+			if self.gpio_pin6.GetValue() and self.gpio_pull6.GetValue(): 
+				self.gpio_pin6.Disable()
+				self.gpio_pull6.Disable()
+			else:
+				self.switch6_enable.SetValue(False)
+		else: 
+			self.gpio_pin6.Enable()
+			self.gpio_pull6.Enable()
+
+	def apply_changes_switches(self, e):
+		enabled=[]
+		repeated=[]
+		if self.switch1_enable.GetValue() and self.gpio_pin1.GetValue() and self.gpio_pull1.GetValue():
+			if self.gpio_pin1.GetValue() in enabled: 
+				if not self.gpio_pin1.GetValue() in repeated: repeated.append(self.gpio_pin1.GetValue())
+				self.switch1_enable.SetValue(False)
+				self.gpio_pin1.Enable()
+				self.gpio_pull1.Enable()
+				self.conf.set('SWITCH1', 'enable', '0')
+			else: 
+				enabled.append(self.gpio_pin1.GetValue())
+				self.conf.set('SWITCH1', 'enable', '1')
+				self.conf.set('SWITCH1', 'gpio', self.gpio_pin1.GetValue())
+				self.conf.set('SWITCH1', 'pull_up_down', self.gpio_pull1.GetValue())
+		else: self.conf.set('SWITCH1', 'enable', '0')
+		if self.switch2_enable.GetValue() and self.gpio_pin2.GetValue() and self.gpio_pull2.GetValue():
+			if self.gpio_pin2.GetValue() in enabled: 
+				if not self.gpio_pin2.GetValue() in repeated: repeated.append(self.gpio_pin2.GetValue())
+				self.switch2_enable.SetValue(False)
+				self.gpio_pin2.Enable()
+				self.gpio_pull2.Enable()
+				self.conf.set('SWITCH2', 'enable', '0')
+			else: 
+				enabled.append(self.gpio_pin2.GetValue())
+				self.conf.set('SWITCH2', 'enable', '1')
+				self.conf.set('SWITCH2', 'gpio', self.gpio_pin2.GetValue())
+				self.conf.set('SWITCH2', 'pull_up_down', self.gpio_pull2.GetValue())
+		else: self.conf.set('SWITCH2', 'enable', '0')
+		if self.switch3_enable.GetValue() and self.gpio_pin3.GetValue() and self.gpio_pull3.GetValue():
+			if self.gpio_pin3.GetValue() in enabled: 
+				if not self.gpio_pin3.GetValue() in repeated: repeated.append(self.gpio_pin3.GetValue())
+				self.switch3_enable.SetValue(False)
+				self.gpio_pin3.Enable()
+				self.gpio_pull3.Enable()
+				self.conf.set('SWITCH3', 'enable', '0')
+			else: 
+				enabled.append(self.gpio_pin3.GetValue())
+				self.conf.set('SWITCH3', 'enable', '1')
+				self.conf.set('SWITCH3', 'gpio', self.gpio_pin3.GetValue())
+				self.conf.set('SWITCH3', 'pull_up_down', self.gpio_pull3.GetValue())
+		else: self.conf.set('SWITCH3', 'enable', '0')
+		if self.switch4_enable.GetValue() and self.gpio_pin4.GetValue() and self.gpio_pull4.GetValue():
+			if self.gpio_pin4.GetValue() in enabled: 
+				if not self.gpio_pin4.GetValue() in repeated: repeated.append(self.gpio_pin4.GetValue())
+				self.switch4_enable.SetValue(False)
+				self.gpio_pin4.Enable()
+				self.gpio_pull4.Enable()
+				self.conf.set('SWITCH4', 'enable', '0')
+			else: 
+				enabled.append(self.gpio_pin4.GetValue())
+				self.conf.set('SWITCH4', 'enable', '1')
+				self.conf.set('SWITCH4', 'gpio', self.gpio_pin4.GetValue())
+				self.conf.set('SWITCH4', 'pull_up_down', self.gpio_pull4.GetValue())
+		else: self.conf.set('SWITCH4', 'enable', '0')
+		if self.switch5_enable.GetValue() and self.gpio_pin5.GetValue() and self.gpio_pull5.GetValue():
+			if self.gpio_pin5.GetValue() in enabled: 
+				if not self.gpio_pin5.GetValue() in repeated: repeated.append(self.gpio_pin5.GetValue())
+				self.switch5_enable.SetValue(False)
+				self.gpio_pin5.Enable()
+				self.gpio_pull5.Enable()
+				self.conf.set('SWITCH5', 'enable', '0')
+			else: 
+				enabled.append(self.gpio_pin5.GetValue())
+				self.conf.set('SWITCH5', 'enable', '1')
+				self.conf.set('SWITCH5', 'gpio', self.gpio_pin5.GetValue())
+				self.conf.set('SWITCH5', 'pull_up_down', self.gpio_pull5.GetValue())
+		else: self.conf.set('SWITCH5', 'enable', '0')
+		if self.switch6_enable.GetValue() and self.gpio_pin6.GetValue() and self.gpio_pull6.GetValue():
+			if self.gpio_pin6.GetValue() in enabled: 
+				if not self.gpio_pin6.GetValue() in repeated: repeated.append(self.gpio_pin6.GetValue())
+				self.switch6_enable.SetValue(False)
+				self.gpio_pin6.Enable()
+				self.gpio_pull6.Enable()
+				self.conf.set('SWITCH6', 'enable', '0')
+			else: 
+				enabled.append(self.gpio_pin6.GetValue())
+				self.conf.set('SWITCH6', 'enable', '1')
+				self.conf.set('SWITCH6', 'gpio', self.gpio_pin6.GetValue())
+				self.conf.set('SWITCH6', 'pull_up_down', self.gpio_pull6.GetValue())
+		else: self.conf.set('SWITCH6', 'enable', '0')
+		if repeated: self.ShowMessage(_('GPIO pins must be unique. Repeated pins: ')+', '.join(repeated)+'.')
+		self.SetStatusText(_('Switches changes applied and restarted'))
 		self.start_monitoring()
+
+	def cancel_changes_switches(self, e):
+		self.switch1_enable.SetValue(False)
+		self.gpio_pin1.Enable()
+		self.gpio_pull1.Enable()
+		self.switch2_enable.SetValue(False)
+		self.gpio_pin2.Enable()
+		self.gpio_pull2.Enable()
+		self.switch3_enable.SetValue(False)
+		self.gpio_pin3.Enable()
+		self.gpio_pull3.Enable()
+		self.switch4_enable.SetValue(False)
+		self.gpio_pin4.Enable()
+		self.gpio_pull4.Enable()
+		self.switch5_enable.SetValue(False)
+		self.gpio_pin5.Enable()
+		self.gpio_pull5.Enable()
+		self.switch6_enable.SetValue(False)
+		self.gpio_pin6.Enable()
+		self.gpio_pull6.Enable()
+		self.read_switches()
+		self.SetStatusText(_('Switches changes cancelled'))
 #######################twitterbot
 
 	def start_monitoring(self):
@@ -1722,6 +1835,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				tmp.append(-1)
 				self.triggers.append(tmp)
 			else:
+				if trigger_selection == -1 or dlg.operator_select.GetCurrentSelection() == -1:
+					self.ShowMessage(_('Failed. Select trigger and operator.'))
+					dlg.Destroy()
+					return
 				trigger0=self.a.DataList[trigger_selection]
 				operator_selection=eval('self.a.'+trigger0+'[7]['+str(dlg.operator_select.GetCurrentSelection())+']')
 				if dlg.value.GetValue(): value=dlg.value.GetValue()
@@ -1731,15 +1848,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					self.ShowMessage(_('Failed. Value must be a number.'))
 					dlg.Destroy()
 					return
-				if trigger_selection == -1 or dlg.operator_select.GetCurrentSelection() == -1:
-					self.ShowMessage(_('Failed. Select trigger and operator.'))
-					dlg.Destroy()
-					return
 				trigger=self.datastream_list[dlg.trigger_select.GetCurrentSelection()]
 				operator=self.a.operators_list[operator_selection]
 				self.list_triggers.Append([trigger,operator,value])
-				last=self.list_triggers.GetItemCount()-1
-				self.list_triggers.CheckItem(last)
 				tmp=[]
 				tmp.append(1)
 				tmp.append(trigger_selection)
@@ -1747,6 +1858,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				tmp.append(value2)
 				self.triggers.append(tmp)
 			dlg.Destroy()
+			total=self.list_triggers.GetItemCount()
+			for x in xrange(0, total, 1):
+				self.list_triggers.Select(x, on=0)
+			self.list_triggers.Select(total-1, on=1)
+			self.list_triggers.CheckItem(total-1)
 
 	def add_action(self,e):
 		selected_trigger= self.list_triggers.GetFirstSelected()

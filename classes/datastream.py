@@ -24,7 +24,7 @@ class DataStream:
 
 		GPIO.setmode(GPIO.BCM)
 
-		self.DataList=['Lat','Lon','Date','Time','Var','HDM','HDT','COG','SOG','STW','AWA','TWA','AWS','TWS','TWD','AP','AT','ARH','ROT','Heel','ECT','SW1','SW2','SW3','SW4']
+		self.DataList=['Lat','Lon','Date','Time','Var','HDM','HDT','COG','SOG','STW','AWA','TWA','AWS','TWS','TWD','AP','AT','ARH','ROT','Heel','ECT','SW1','SW2','SW3','SW4','SW5','SW6']
 		
 		#(0 name, 1 short, 2 value, 3 unit, 4 timestamp, 5 talker, 6 sentence, 7 valid operators, 8 disable field)
 		self.Lat=[_('Latitude'),_('Lat'),None,None,None,None,None,(0,1,2,3,4,5,6),1]
@@ -52,6 +52,8 @@ class DataStream:
 		self.SW2=[_('Switch 2 status'),_('SW2'),None,None,None,None,None,(7,8),0]
 		self.SW3=[_('Switch 3 status'),_('SW3'),None,None,None,None,None,(7,8),0]
 		self.SW4=[_('Switch 4 status'),_('SW4'),None,None,None,None,None,(7,8),0]
+		self.SW5=[_('Switch 5 status'),_('SW5'),None,None,None,None,None,(7,8),0]
+		self.SW6=[_('Switch 6 status'),_('SW6'),None,None,None,None,None,(7,8),0]
 
 		#ATENTION. If order changes, edit monitoring.py: "#actions"
 		self.operators_list=[_('was not present in the last (sec.)'),_('was present in the last (sec.)'),_('is equal to'), _('is less than'), _('is less than or equal to'), _('is greater than'), _('is greater than or equal to'), _('is on'), _('is off')]
@@ -86,6 +88,12 @@ class DataStream:
 			if switch==4: 
 				self.SW4[2]=_('on')
 				self.SW4[4]=time.time()
+			if switch==5: 
+				self.SW5[2]=_('on')
+				self.SW5[4]=time.time()
+			if switch==6: 
+				self.SW6[2]=_('on')
+				self.SW6[4]=time.time()
 		else:
 			if switch==1: 
 				self.SW1[2]=_('off')
@@ -99,6 +107,12 @@ class DataStream:
 			if switch==4: 
 				self.SW4[2]=_('off')
 				self.SW4[4]=time.time()
+			if switch==5: 
+				self.SW5[2]=_('off')
+				self.SW5[4]=time.time()
+			if switch==6: 
+				self.SW6[2]=_('off')
+				self.SW6[4]=time.time()
 
 	def parse_nmea(self, frase_nmea):
 		nmea_list=frase_nmea.split()

@@ -40,6 +40,8 @@ channel1=''
 channel2=''
 channel3=''
 channel4=''
+channel5=''
+channel6=''
 
 GPIO.setmode(GPIO.BCM)
 
@@ -164,6 +166,16 @@ if conf.get('SWITCH4', 'enable')=='1':
 	pull_up_down=GPIO.PUD_DOWN
 	if conf.get('SWITCH4', 'pull_up_down')=='Pull Up': pull_up_down=GPIO.PUD_UP
 	GPIO.setup(channel4, GPIO.IN, pull_up_down=pull_up_down)
+if conf.get('SWITCH5', 'enable')=='1':
+	channel5=int(conf.get('SWITCH5', 'gpio'))
+	pull_up_down=GPIO.PUD_DOWN
+	if conf.get('SWITCH5', 'pull_up_down')=='Pull Up': pull_up_down=GPIO.PUD_UP
+	GPIO.setup(channel5, GPIO.IN, pull_up_down=pull_up_down)
+if conf.get('SWITCH6', 'enable')=='1':
+	channel6=int(conf.get('SWITCH6', 'gpio'))
+	pull_up_down=GPIO.PUD_DOWN
+	if conf.get('SWITCH6', 'pull_up_down')=='Pull Up': pull_up_down=GPIO.PUD_UP
+	GPIO.setup(channel6, GPIO.IN, pull_up_down=pull_up_down)
 #end no loop
 
 # loop
@@ -198,6 +210,20 @@ while True:
 		else:
 			a.SW4[2]=0
 			a.SW4[4]=time.time()
+	if channel5:
+		if GPIO.input(channel5):
+			a.SW5[2]=1
+			a.SW5[4]=time.time()
+		else:
+			a.SW5[2]=0
+			a.SW5[4]=time.time()
+	if channel6:
+		if GPIO.input(channel6):
+			a.SW6[2]=1
+			a.SW6[4]=time.time()
+		else:
+			a.SW6[2]=0
+			a.SW6[4]=time.time()
 	#end switches
 
 	#actions
@@ -302,6 +328,18 @@ while True:
 						triggers[index][4]=True
 					else: 
 						triggers[index][4]=False
+				if trigger=='SW5' and channel5:
+					if a.SW5[2]==1: 
+						start_actions(index)
+						triggers[index][4]=True
+					else: 
+						triggers[index][4]=False
+				if trigger=='SW6' and channel6:
+					if a.SW6[2]==1: 
+						start_actions(index)
+						triggers[index][4]=True
+					else: 
+						triggers[index][4]=False
 			#switch off
 			if operator==8:
 				if trigger=='SW1' and channel1:
@@ -324,6 +362,18 @@ while True:
 						triggers[index][4]=False
 				if trigger=='SW4' and channel4:
 					if a.SW4[2]==0: 
+						start_actions(index)
+						triggers[index][4]=True
+					else: 
+						triggers[index][4]=False
+				if trigger=='SW5' and channel5:
+					if a.SW5[2]==0: 
+						start_actions(index)
+						triggers[index][4]=True
+					else: 
+						triggers[index][4]=False
+				if trigger=='SW6' and channel6:
+					if a.SW6[2]==0: 
 						start_actions(index)
 						triggers[index][4]=True
 					else: 

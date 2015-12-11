@@ -63,3 +63,5 @@ class addTrigger(wx.Dialog):
 			self.value.SetValue('')
 			if disable_field==1: self.value.Enable()
 			if disable_field==0: self.value.Disable()
+			if trigger=='SW1' or trigger=='SW2' or trigger=='SW3' or trigger=='SW4' or trigger=='SW5' or trigger=='SW6':
+				wx.MessageBox(_('Be sure you have filled in GPIO and Pull Down/Up fields in "Switches" tab and enabled the desired switch.'), 'Info', wx.OK | wx.ICON_INFORMATION)
