@@ -55,6 +55,12 @@ class addAction(wx.Dialog):
 		actions=Actions()
 		msg=self.actions_options[self.action_select.GetCurrentSelection()][1]
 		field=self.actions_options[self.action_select.GetCurrentSelection()][2]
+		self.data.SetValue('')
+		if field==0: 
+			self.data.Disable()
+		if field==1: 
+			self.data.Enable()
+			self.data.SetFocus()
 		if msg:
 			if msg=='OpenFileDialog':
 				path=''
@@ -66,13 +72,6 @@ class addAction(wx.Dialog):
 			else:
 				if msg==0: pass
 				else: wx.MessageBox(msg, 'Info', wx.OK | wx.ICON_INFORMATION)
-
-		if field==0: 
-			self.data.Disable()
-			self.data.SetValue('')
-		if field==1: 
-			self.data.Enable()
-			self.data.SetFocus()
 
 	def onSelectUnit(self,e):
 		if self.repeat_unit.GetCurrentSelection()==0: 

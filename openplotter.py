@@ -166,24 +166,24 @@ class MainFrame(wx.Frame):
 		wx.StaticBox(self.page2, size=(330, 65), pos=(10, 65))
 		self.mag_var = wx.CheckBox(self.page2, label=_('Magnetic variation'), pos=(20, 80))
 		self.mag_var.Bind(wx.EVT_CHECKBOX, self.nmea_mag_var)
-		wx.StaticText(self.page2, label=_('Generated NMEA: $OPHDG'), pos=(20, 105))
+		wx.StaticText(self.page2, label=_('Generated NMEA: $OCHDG'), pos=(20, 105))
 
 		wx.StaticBox(self.page2, size=(330, 65), pos=(10, 130))
 		self.heading_t = wx.CheckBox(self.page2, label=_('True heading'), pos=(20, 145))
 		self.heading_t.Bind(wx.EVT_CHECKBOX, self.nmea_hdt)
-		wx.StaticText(self.page2, label=_('Generated NMEA: $OPHDT'), pos=(20, 170))
+		wx.StaticText(self.page2, label=_('Generated NMEA: $OCHDT'), pos=(20, 170))
 
 		wx.StaticBox(self.page2, size=(330, 65), pos=(10, 195))
 		self.rot = wx.CheckBox(self.page2, label=_('Rate of turn'), pos=(20, 210))
 		self.rot.Bind(wx.EVT_CHECKBOX, self.nmea_rot)
-		wx.StaticText(self.page2, label=_('Generated NMEA: $OPROT'), pos=(20, 235))
+		wx.StaticText(self.page2, label=_('Generated NMEA: $OCROT'), pos=(20, 235))
 
 		wx.StaticBox(self.page2, label=_(' True wind '), size=(330, 90), pos=(350, 65))
 		self.TW_STW = wx.CheckBox(self.page2, label=_('Use speed log'), pos=(360, 80))
 		self.TW_STW.Bind(wx.EVT_CHECKBOX, self.TW)
 		self.TW_SOG = wx.CheckBox(self.page2, label=_('Use GPS'), pos=(360, 105))
 		self.TW_SOG.Bind(wx.EVT_CHECKBOX, self.TW)
-		wx.StaticText(self.page2, label=_('Generated NMEA: $OPMWV, $OPMWD'), pos=(360, 130))
+		wx.StaticText(self.page2, label=_('Generated NMEA: $OCMWV, $OCMWD'), pos=(360, 130))
 ###########################page2
 ########page3###################
 		wx.StaticBox(self.page3, size=(400, 45), pos=(10, 10))
@@ -338,15 +338,15 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.calibrate_imu, self.button_calibrate_imu)
 		self.heading = wx.CheckBox(self.page6, label=_('Heading'), pos=(20, 105))
 		self.heading.Bind(wx.EVT_CHECKBOX, self.nmea_hdg)
-		self.heading_nmea=wx.StaticText(self.page6, label=_('Generated NMEA: $OPHDG'), pos=(20, 130))
+		self.heading_nmea=wx.StaticText(self.page6, label=_('Generated NMEA: $OSHDG'), pos=(20, 130))
 		self.heel = wx.CheckBox(self.page6, label=_('Heel'), pos=(20, 155))
 		self.heel.Bind(wx.EVT_CHECKBOX, self.nmea_heel)
-		self.heel_nmea=wx.StaticText(self.page6, label=_('Generated NMEA: $OPXDR'), pos=(20, 180))
+		self.heel_nmea=wx.StaticText(self.page6, label=_('Generated NMEA: $OSXDR'), pos=(20, 180))
 
 		wx.StaticBox(self.page6, label=' DS18B20 ', size=(330, 70), pos=(10, 210))
 		self.eng_temp = wx.CheckBox(self.page6, label=_('Engine temperature'), pos=(20, 230))
 		self.eng_temp.Bind(wx.EVT_CHECKBOX, self.nmea_eng_temp)
-		self.eng_temp_nmea=wx.StaticText(self.page6, label=_('Generated NMEA: $OPXDR'), pos=(20, 255))
+		self.eng_temp_nmea=wx.StaticText(self.page6, label=_('Generated NMEA: $OSXDR'), pos=(20, 255))
 
 		wx.StaticBox(self.page6, label=_(' Weather '), size=(330, 270), pos=(350, 10))
 		self.press_tag=wx.StaticText(self.page6, label=_('Sensor detected: ')+_('none'), pos=(360, 30))
@@ -362,7 +362,7 @@ class MainFrame(wx.Frame):
 		self.temp_h = wx.CheckBox(self.page6, label=_('Temperature'), pos=(360, 150))
 		self.temp_h.Bind(wx.EVT_CHECKBOX, self.nmea_temp_h)
 
-		self.press_nmea=wx.StaticText(self.page6, label=_('Generated NMEA: $OPXDR'), pos=(360, 180))
+		self.press_nmea=wx.StaticText(self.page6, label=_('Generated NMEA: $OSXDR'), pos=(360, 180))
 
 		self.press_temp_log = wx.CheckBox(self.page6, label=_('Weather data logging'), pos=(360, 210))
 		self.press_temp_log.Bind(wx.EVT_CHECKBOX, self.enable_press_temp_log)

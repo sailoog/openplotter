@@ -33,6 +33,9 @@ heading_time=''
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
+accuracy=float(conf.get('STARTUP', 'cal_accuracy'))
+rate=float(conf.get('STARTUP', 'nmea_rate_cal'))
+
 #thread1
 def parse_nmea():
 	global sock_in
@@ -68,7 +71,6 @@ def connect():
 	else: error=0
 #end thread1
 
-# calculate
 def calculate_mag_var(position, date):
 	if position[0] and position[2] and date:
 		try:
@@ -81,59 +83,62 @@ def calculate_mag_var(position, date):
 		except: mag_var=['','']
 	else: mag_var=['','']
 	return mag_var
-# end calculate
 
 thread1=threading.Thread(target=parse_nmea)	
-if not thread1.isAlive(): thread1.start()
+thread1.start()
 
+sent=time.time()
 # loop
 while True:
-	#calculations
-	if  conf.get('STARTUP', 'nmea_mag_var')=='1' or conf.get('STARTUP', 'nmea_hdt')=='1' or conf.get('STARTUP', 'nmea_rot')=='1' or conf.get('STARTUP', 'tw_stw')=='1'  or conf.get('STARTUP', 'tw_sog')=='1':
-			
-		time.sleep(float(conf.get('STARTUP', 'nmea_rate_cal')))
-
-		accuracy=float(conf.get('STARTUP', 'cal_accuracy'))
-		now=time.time()
-		# refresh values
-		position =[a.validate('Lat',now,accuracy), a.Lat[3], a.validate('Lon',now,accuracy), a.Lon[3]]
-		date = a.validate('Date',now,accuracy)
-		if not date: date = datetime.date.today()
-		heading_m = a.validate('HDM',now,accuracy)
-		mag_var = [a.validate('Var',now,accuracy), a.Var[3]]
-		if not mag_var[0]: mag_var = calculate_mag_var(position,date)
-		heading_t = a.validate('HDT',now,accuracy)
-		if not heading_t:
-			if heading_m and mag_var[0]:
-				var=mag_var[0]
-				if mag_var[1]=='W':var=var*-1
-				heading_t=heading_m+var
-				if heading_t>360: heading_t=heading_t-360
-				if heading_t<0: heading_t=360+heading_t
-		STW = a.validate('STW',now,accuracy)
-		AWS = a.validate('AWS',now,accuracy) 
-		AWA = [a.validate('AWA',now,accuracy), a.AWA[3]]
-		if AWA[0]:
-			if AWA[1]=='D':
-				AWA[1]='R'
-				if AWA[0]>180: 
-					AWA[0]=360-AWA[0]
-					AWA[1]='L'
-		SOG = a.validate('SOG',now,accuracy)
-		COG = a.validate('SOG',now,accuracy)
-		# end refresh values
-		#generate headint_t
-		if  conf.get('STARTUP', 'nmea_hdt')=='1' and heading_t:
-			hdt = pynmea2.HDT('OP', 'HDT', (str(round(heading_t,1)),'T'))
-			hdt1=str(hdt)
-			hdt2=hdt1+'\r\n'
-			sock.sendto(hdt2, ('localhost', 10110))
+	#calculations			
+	time.sleep(0.01)
+	now=time.time()
+	# refresh values
+	position =[a.validate('Lat',now,accuracy), a.Lat[3], a.validate('Lon',now,accuracy), a.Lon[3]]
+	date = a.validate('Date',now,accuracy)
+	if not date: date = datetime.date.today()
+	heading_m = a.validate('HDM',now,accuracy)
+	if a.Var[5] == 'OC': mag_var=['','']
+	else: mag_var = [a.validate('Var',now,accuracy), a.Var[3]]
+	if not mag_var[0]: mag_var = calculate_mag_var(position,date)
+	if a.HDT[5] == 'OC': heading_t=''
+	else: heading_t = a.validate('HDT',now,accuracy)
+	if not heading_t:
+		if heading_m and mag_var[0]:
+			var=mag_var[0]
+			if mag_var[1]=='W':var=var*-1
+			heading_t=heading_m+var
+			if heading_t>360: heading_t=heading_t-360
+			if heading_t<0: heading_t=360+heading_t
+	STW = a.validate('STW',now,accuracy)
+	AWS = a.validate('AWS',now,accuracy) 
+	AWA = [a.validate('AWA',now,accuracy), a.AWA[3]]
+	if AWA[0]:
+		if AWA[1]=='D':
+			AWA[1]='R'
+			if AWA[0]>180: 
+				AWA[0]=360-AWA[0]
+				AWA[1]='L'
+	SOG = a.validate('SOG',now,accuracy)
+	COG = a.validate('SOG',now,accuracy)
+	# end refresh values
+	# generate NMEA
+	if now-sent >= rate:
+		sent=now
 		#generate magnetic variation
-		if  conf.get('STARTUP', 'nmea_mag_var')=='1' and mag_var:
-			hdg = pynmea2.HDG('OP', 'HDG', ('','','',str(mag_var[0]),mag_var[1]))
+		if  conf.get('STARTUP', 'nmea_mag_var')=='1' and mag_var[0]:
+			if heading_m: value=str(heading_m)
+			else: value=''
+			hdg = pynmea2.HDG('OC', 'HDG', (value,'','',str(mag_var[0]),mag_var[1]))
 			hdg1=str(hdg)
 			hdg2=hdg1+'\r\n'
 			sock.sendto(hdg2, ('localhost', 10110))
+		#generate headint_t
+		if  conf.get('STARTUP', 'nmea_hdt')=='1' and heading_t:
+			hdt = pynmea2.HDT('OC', 'HDT', (str(round(heading_t,1)),'T'))
+			hdt1=str(hdt)
+			hdt2=hdt1+'\r\n'
+			sock.sendto(hdt2, ('localhost', 10110))
 		#generate Rate of Turn (ROT)
 		if conf.get('STARTUP', 'nmea_rot')=='1' and heading_m:
 			if not last_heading: #initialize
@@ -151,7 +156,7 @@ while True:
 				rot = float(heading_change)/((heading_time - last_heading_time)/60)
 				rot= round(rot,1)				
 				#consider damping ROT values						
-				rot = pynmea2.ROT('OP', 'ROT', (str(rot),'A'))
+				rot = pynmea2.ROT('OC', 'ROT', (str(rot),'A'))
 				rot1=str(rot)
 				rot2=rot1+'\r\n'
 				sock.sendto(rot2, ('localhost', 10110))
@@ -172,7 +177,7 @@ while True:
 			if AWA[1]=='L': TWA0=360-TWA0
 			TWSr=round(TWS,1)
 			TWA0r=round(TWA0,0)
-			mwv = pynmea2.MWV('OP', 'MWV', (str(TWA0r),'T',str(TWSr),'N','A'))
+			mwv = pynmea2.MWV('OC', 'MWV', (str(TWA0r),'T',str(TWSr),'N','A'))
 			mwv1=str(mwv)
 			mwv2=mwv1+'\r\n'
 			sock.sendto(mwv2, ('localhost', 10110))
@@ -185,7 +190,7 @@ while True:
 				if TWD>360: TWD=TWD-360
 				if TWD<0: TWD=360+TWD
 				TWDr=round(TWD,0)
-				mwd = pynmea2.MWD('OP', 'MWD', (str(TWDr),'T','','M',str(TWSr),'N','',''))
+				mwd = pynmea2.MWD('OC', 'MWD', (str(TWDr),'T','','M',str(TWSr),'N','',''))
 				mwd1=str(mwd)
 				mwd2=mwd1+'\r\n'
 				sock.sendto(mwd2, ('localhost', 10110))
@@ -222,7 +227,7 @@ while True:
 			if TWD<0: TWD=360+TWD
 			TWDr=round(TWD,0)
 			TWSr=round(TWS,1)
-			mwd = pynmea2.MWD('OP', 'MWD', (str(TWDr),'T','','M',str(TWSr),'N','',''))
+			mwd = pynmea2.MWD('OC', 'MWD', (str(TWDr),'T','','M',str(TWSr),'N','',''))
 			mwd1=str(mwd)
 			mwd2=mwd1+'\r\n'
 			sock.sendto(mwd2, ('localhost', 10110))
@@ -231,7 +236,7 @@ while True:
 			TWA0=TWA
 			if TWA0 < 0: TWA0=360+TWA0
 			TWA0r=round(TWA0,0)
-			mwv = pynmea2.MWV('OP', 'MWV', (str(TWA0r),'T',str(TWSr),'N','A'))
+			mwv = pynmea2.MWV('OC', 'MWV', (str(TWA0r),'T',str(TWSr),'N','A'))
 			mwv1=str(mwv)
 			mwv2=mwv1+'\r\n'
 			sock.sendto(mwv2, ('localhost', 10110))
@@ -242,4 +247,3 @@ while True:
 			print TWSr
 			print 'TWD'
 			print TWDr
-	else: time.sleep(0.1)

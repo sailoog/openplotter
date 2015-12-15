@@ -49,7 +49,7 @@ while True:
 			list_tmp.append('C')
 			list_tmp.append('ENGT')
 		if list_tmp:
-			xdr = pynmea2.XDR('OP', 'XDR', (list_tmp))
+			xdr = pynmea2.XDR('OS', 'XDR', (list_tmp))
 			xdr1=str(xdr)
 			xdr2=xdr1+"\r\n"
 			sock.sendto(xdr2, ('localhost', 10110))
