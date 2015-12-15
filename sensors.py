@@ -107,7 +107,7 @@ while True:
 		tick=time.time()
 		# HDG
 		if conf.get('STARTUP', 'nmea_hdg')=='1' and heading_m:
-			hdg = pynmea2.HDG('OP', 'HDG', (str(heading_m),'','','',''))
+			hdg = pynmea2.HDG('OS', 'HDG', (str(heading_m),'','','',''))
 			hdg1=str(hdg)
 			hdg2=hdg1+"\r\n"
 			sock.sendto(hdg2, ('localhost', 10110))
@@ -145,7 +145,7 @@ while True:
 			list_tmp.append('D')
 			list_tmp.append('ROLL')
 		if list_tmp:
-			xdr = pynmea2.XDR('OP', 'XDR', (list_tmp))
+			xdr = pynmea2.XDR('OS', 'XDR', (list_tmp))
 			xdr1=str(xdr)
 			xdr2=xdr1+"\r\n"
 			sock.sendto(xdr2, ('localhost', 10110))

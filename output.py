@@ -147,7 +147,8 @@ class MyFrame(wx.Frame):
 							unit=eval('self.a.'+i+'[3]')
 							talker=eval('self.a.'+i+'[5]')
 							sentence=eval('self.a.'+i+'[6]')
-							if talker=='OP': talker='OpenPlotter'
+							if talker=='OC': talker=_('Calculated')
+							if talker=='OS': talker=_('Sensor')
 							if unit: data = str(value)+' '+str(unit)
 							else: data = str(value)
 							self.data=[index,1,data]

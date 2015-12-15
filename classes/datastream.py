@@ -24,7 +24,7 @@ class DataStream:
 
 		GPIO.setmode(GPIO.BCM)
 
-		self.DataList=['Lat','Lon','Date','Time','Var','HDM','HDT','COG','SOG','STW','AWA','TWA','AWS','TWS','TWD','AP','AT','ARH','ROT','Heel','ECT','SW1','SW2','SW3','SW4','SW5','SW6']
+		self.DataList=['Lat','Lon','Date','Time','Var','HDM','HDT','COG','SOG','STW','DPT','AWA','TWA','AWS','TWS','TWD','AP','AT','ARH','ROT','Heel','ECT','SW1','SW2','SW3','SW4','SW5','SW6']
 		
 		#(0 name, 1 short, 2 value, 3 unit, 4 timestamp, 5 talker, 6 sentence, 7 valid operators, 8 disable field)
 		self.Lat=[_('Latitude'),_('Lat'),None,None,None,None,None,(0,1,2,3,4,5,6),1]
@@ -37,6 +37,7 @@ class DataStream:
 		self.COG=[_('Course Over Ground'),_('COG'),None,None,None,None,None,(0,1,2,3,4,5,6),1]
 		self.SOG=[_('Speed Over Ground'),_('SOG'),None,None,None,None,None,(0,1,2,3,4,5,6),1]
 		self.STW=[_('Speed Trought Water'),_('STW'),None,None,None,None,None,(0,1,2,3,4,5,6),1]
+		self.DPT=[_('Water Depth (from transducer)'),_('DPT'),None,None,None,None,None,(0,1,2,3,4,5,6),1]
 		self.AWA=[_('Apparent Wind Angle'),_('AWA'),None,None,None,None,None,(0,1,2,3,4,5,6),1]
 		self.TWA=[_('True Wind Angle'),_('TWA'),None,None,None,None,None,(0,1,2,3,4,5,6),1]
 		self.AWS=[_('Apparent Wind Speed'),_('AWS'),None,None,None,None,None,(0,1,2,3,4,5,6),1]
@@ -363,6 +364,24 @@ class DataStream:
 						self.ROT[4]=time.time()
 						self.ROT[5]=talker
 						self.ROT[6]=nmea_type
+				if nmea_type == 'DPT':
+					#water Depth
+					value=msg.depth
+					if value:
+						self.DPT[2]=value
+						self.DPT[3]='M'
+						self.DPT[4]=time.time()
+						self.DPT[5]=talker
+						self.DPT[6]=nmea_type
+				if nmea_type == 'DBT':
+					#water Depth
+					value=msg.depth_meters
+					if value:
+						self.DPT[2]=value
+						self.DPT[3]='M'
+						self.DPT[4]=time.time()
+						self.DPT[5]=talker
+						self.DPT[6]=nmea_type
 				if nmea_type == 'XDR':
 					n=msg.num_transducers
 					for i in range(0, n):
