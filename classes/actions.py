@@ -18,12 +18,13 @@ import subprocess, time
 from paths import Paths
 from classes.twitterbot import TwitterBot
 from classes.gmailbot import GmailBot
+import RPi.GPIO as GPIO
 
 class Actions():
 
 	def __init__(self):
 
-		self.options=[None]*20
+		self.options=[None]*28
 		#ATENTION. If order changes, edit "run_action()" and ctrl_actions.py
 		# 0 name, 1 message, 2 field data
 		self.options[0]= _('wait'),_('Enter seconds to wait in the field below.'),1
@@ -46,6 +47,14 @@ class Actions():
 		self.options[17]= _('close all messages'),0,0
 		self.options[18]= _('start all actions'),0,0
 		self.options[19]= _('stop all actions'),_('This action will stop all the triggers except the trigger which has an action "start all actions" defined.'),0
+		self.options[20]= _('Set Output 1 to High'),_('ATTENTION! if you set this output to "High" and there is not a resistor or a circuit connected to the selected GPIO pin, YOU CAN DAMAGE YOUR BOARD.'),0
+		self.options[21]= _('Set Output 1 to Low'),0,0
+		self.options[22]= _('Set Output 2 to High'),_('ATTENTION! if you set this output to "High" and there is not a resistor or a circuit connected to the selected GPIO pin, YOU CAN DAMAGE YOUR BOARD.'),0
+		self.options[23]= _('Set Output 2 to Low'),0,0
+		self.options[24]= _('Set Output 3 to High'),_('ATTENTION! if you set this output to "High" and there is not a resistor or a circuit connected to the selected GPIO pin, YOU CAN DAMAGE YOUR BOARD.'),0
+		self.options[25]= _('Set Output 3 to Low'),0,0
+		self.options[26]= _('Set Output 4 to High'),_('ATTENTION! if you set this output to "High" and there is not a resistor or a circuit connected to the selected GPIO pin, YOU CAN DAMAGE YOUR BOARD.'),0
+		self.options[27]= _('Set Output 4 to Low'),0,0
 
 		self.time_units=[_('no repeat'),_('seconds'), _('minutes'), _('hours'), _('days')]
 
@@ -64,7 +73,7 @@ class Actions():
 		if option=='2': 
 			subprocess.Popen(['sudo', 'reboot'])
 		if option=='3': 
-			subprocess.Popen(['sudo', 'halt'])
+			subprocess.Popen(['sudo', 'shutdown', '-h', 'now'])
 		if option=='4': 
 			subprocess.Popen(['pkill', '-9', 'kplex'])
 		if option=='5':
@@ -177,3 +186,35 @@ class Actions():
 			return 'read'
 		if option=='19':
 			subprocess.Popen(['python', self.currentpath+'/ctrl_actions.py', '0'])
+		if option=='20':
+			if conf.get('OUTPUT1', 'enable')=='1':
+				channel=int(conf.get('OUTPUT1', 'gpio'))
+				GPIO.output(channel, 1)
+		if option=='21':
+			if conf.get('OUTPUT1', 'enable')=='1':
+				channel=int(conf.get('OUTPUT1', 'gpio'))
+				GPIO.output(channel, 0)
+		if option=='22':
+			if conf.get('OUTPUT2', 'enable')=='1':
+				channel=int(conf.get('OUTPUT2', 'gpio'))
+				GPIO.output(channel, 1)
+		if option=='23':
+			if conf.get('OUTPUT2', 'enable')=='1':
+				channel=int(conf.get('OUTPUT2', 'gpio'))
+				GPIO.output(channel, 0)
+		if option=='24':
+			if conf.get('OUTPUT3', 'enable')=='1':
+				channel=int(conf.get('OUTPUT3', 'gpio'))
+				GPIO.output(channel, 1)
+		if option=='25':
+			if conf.get('OUTPUT3', 'enable')=='1':
+				channel=int(conf.get('OUTPUT3', 'gpio'))
+				GPIO.output(channel, 0)
+		if option=='26':
+			if conf.get('OUTPUT4', 'enable')=='1':
+				channel=int(conf.get('OUTPUT4', 'gpio'))
+				GPIO.output(channel, 1)
+		if option=='27':
+			if conf.get('OUTPUT4', 'enable')=='1':
+				channel=int(conf.get('OUTPUT4', 'gpio'))
+				GPIO.output(channel, 0)

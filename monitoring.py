@@ -42,8 +42,13 @@ channel3=''
 channel4=''
 channel5=''
 channel6=''
+channel7=''
+channel8=''
+channel9=''
+channel10=''
 
 GPIO.setmode(GPIO.BCM)
+GPIO.setwarnings(False)
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
@@ -176,6 +181,18 @@ if conf.get('SWITCH6', 'enable')=='1':
 	pull_up_down=GPIO.PUD_DOWN
 	if conf.get('SWITCH6', 'pull_up_down')=='Pull Up': pull_up_down=GPIO.PUD_UP
 	GPIO.setup(channel6, GPIO.IN, pull_up_down=pull_up_down)
+if conf.get('OUTPUT1', 'enable')=='1':
+	channel7=int(conf.get('OUTPUT1', 'gpio'))
+	GPIO.setup(channel7, GPIO.OUT)
+if conf.get('OUTPUT2', 'enable')=='1':
+	channel8=int(conf.get('OUTPUT2', 'gpio'))
+	GPIO.setup(channel8, GPIO.OUT)
+if conf.get('OUTPUT3', 'enable')=='1':
+	channel9=int(conf.get('OUTPUT3', 'gpio'))
+	GPIO.setup(channel9, GPIO.OUT)
+if conf.get('OUTPUT4', 'enable')=='1':
+	channel10=int(conf.get('OUTPUT4', 'gpio'))
+	GPIO.setup(channel10, GPIO.OUT)
 #end no loop
 
 # loop
@@ -224,6 +241,34 @@ while True:
 		else:
 			a.SW6[2]=0
 			a.SW6[4]=time.time()
+	if channel7:
+		if GPIO.input(channel7):
+			a.OUT1[2]=1
+			a.OUT1[4]=time.time()
+		else:
+			a.OUT1[2]=0
+			a.OUT1[4]=time.time()
+	if channel8:
+		if GPIO.input(channel8):
+			a.OUT2[2]=1
+			a.OUT2[4]=time.time()
+		else:
+			a.OUT2[2]=0
+			a.OUT2[4]=time.time()
+	if channel9:
+		if GPIO.input(channel9):
+			a.OUT3[2]=1
+			a.OUT3[4]=time.time()
+		else:
+			a.OUT3[2]=0
+			a.OUT3[4]=time.time()
+	if channel10:
+		if GPIO.input(channel10):
+			a.OUT4[2]=1
+			a.OUT4[4]=time.time()
+		else:
+			a.OUT4[2]=0
+			a.OUT4[4]=time.time()
 	#end switches
 
 	#actions
@@ -340,6 +385,30 @@ while True:
 						triggers[index][4]=True
 					else: 
 						triggers[index][4]=False
+				if trigger=='OUT1' and channel7:
+					if a.OUT1[2]==1: 
+						start_actions(index)
+						triggers[index][4]=True
+					else: 
+						triggers[index][4]=False
+				if trigger=='OUT2' and channel8:
+					if a.OUT2[2]==1: 
+						start_actions(index)
+						triggers[index][4]=True
+					else: 
+						triggers[index][4]=False
+				if trigger=='OUT3' and channel9:
+					if a.OUT3[2]==1: 
+						start_actions(index)
+						triggers[index][4]=True
+					else: 
+						triggers[index][4]=False
+				if trigger=='OUT4' and channel10:
+					if a.OUT4[2]==1: 
+						start_actions(index)
+						triggers[index][4]=True
+					else: 
+						triggers[index][4]=False
 			#switch off
 			if operator==8:
 				if trigger=='SW1' and channel1:
@@ -374,6 +443,30 @@ while True:
 						triggers[index][4]=False
 				if trigger=='SW6' and channel6:
 					if a.SW6[2]==0: 
+						start_actions(index)
+						triggers[index][4]=True
+					else: 
+						triggers[index][4]=False
+				if trigger=='OUT1' and channel7:
+					if a.OUT1[2]==0: 
+						start_actions(index)
+						triggers[index][4]=True
+					else: 
+						triggers[index][4]=False
+				if trigger=='OUT2' and channel8:
+					if a.OUT2[2]==0: 
+						start_actions(index)
+						triggers[index][4]=True
+					else: 
+						triggers[index][4]=False
+				if trigger=='OUT3' and channel9:
+					if a.OUT3[2]==0: 
+						start_actions(index)
+						triggers[index][4]=True
+					else: 
+						triggers[index][4]=False
+				if trigger=='OUT4' and channel10:
+					if a.OUT4[2]==0: 
 						start_actions(index)
 						triggers[index][4]=True
 					else: 
