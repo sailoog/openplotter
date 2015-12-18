@@ -20,7 +20,7 @@ from classes.datastream import DataStream
 from classes.paths import Paths
 from classes.conf import Conf
 from classes.language import Language
-
+import RPi.GPIO as GPIO
 
 
 class MyFrame(wx.Frame):
@@ -84,10 +84,66 @@ class MyFrame(wx.Frame):
 			self.error=''
 			self.frase_nmea_log=''
 			self.data=[]
-			self.read_conf=0
+			self.read_conf=1
+			GPIO.setmode(GPIO.BCM)
+			GPIO.setwarnings(False)
 
 			if not self.thread1.isAlive(): self.thread1.start()
 			if not self.thread2.isAlive(): self.thread2.start()
+
+		def check_switches(self):
+			self.channel1=''
+			self.channel2=''
+			self.channel3=''
+			self.channel4=''
+			self.channel5=''
+			self.channel6=''
+			self.channel7=''
+			self.channel8=''
+			self.channel9=''
+			self.channel10=''
+			if self.conf.get('SWITCH1', 'enable')=='1':
+				self.channel1=int(self.conf.get('SWITCH1', 'gpio'))
+				pull_up_down=GPIO.PUD_DOWN
+				if self.conf.get('SWITCH1', 'pull_up_down')=='Pull Up': pull_up_down=GPIO.PUD_UP
+				GPIO.setup(self.channel1, GPIO.IN, pull_up_down=pull_up_down)
+			if self.conf.get('SWITCH2', 'enable')=='1':
+				self.channel2=int(self.conf.get('SWITCH2', 'gpio'))
+				pull_up_down=GPIO.PUD_DOWN
+				if self.conf.get('SWITCH2', 'pull_up_down')=='Pull Up': pull_up_down=GPIO.PUD_UP
+				GPIO.setup(self.channel2, GPIO.IN, pull_up_down=pull_up_down)
+			if self.conf.get('SWITCH3', 'enable')=='1':
+				self.channel3=int(self.conf.get('SWITCH3', 'gpio'))
+				pull_up_down=GPIO.PUD_DOWN
+				if self.conf.get('SWITCH3', 'pull_up_down')=='Pull Up': pull_up_down=GPIO.PUD_UP
+				GPIO.setup(self.channel3, GPIO.IN, pull_up_down=pull_up_down)
+			if self.conf.get('SWITCH4', 'enable')=='1':
+				self.channel4=int(self.conf.get('SWITCH4', 'gpio'))
+				pull_up_down=GPIO.PUD_DOWN
+				if self.conf.get('SWITCH4', 'pull_up_down')=='Pull Up': pull_up_down=GPIO.PUD_UP
+				GPIO.setup(self.channel4, GPIO.IN, pull_up_down=pull_up_down)
+			if self.conf.get('SWITCH5', 'enable')=='1':
+				self.channel5=int(self.conf.get('SWITCH5', 'gpio'))
+				pull_up_down=GPIO.PUD_DOWN
+				if self.conf.get('SWITCH5', 'pull_up_down')=='Pull Up': pull_up_down=GPIO.PUD_UP
+				GPIO.setup(self.channel5, GPIO.IN, pull_up_down=pull_up_down)
+			if self.conf.get('SWITCH6', 'enable')=='1':
+				self.channel6=int(self.conf.get('SWITCH6', 'gpio'))
+				pull_up_down=GPIO.PUD_DOWN
+				if self.conf.get('SWITCH6', 'pull_up_down')=='Pull Up': pull_up_down=GPIO.PUD_UP
+				GPIO.setup(self.channel6, GPIO.IN, pull_up_down=pull_up_down)
+			if self.conf.get('OUTPUT1', 'enable')=='1':
+				self.channel7=int(self.conf.get('OUTPUT1', 'gpio'))
+				GPIO.setup(self.channel7, GPIO.OUT)
+			if self.conf.get('OUTPUT2', 'enable')=='1':
+				self.channel8=int(self.conf.get('OUTPUT2', 'gpio'))
+				GPIO.setup(self.channel8, GPIO.OUT)
+			if self.conf.get('OUTPUT3', 'enable')=='1':
+				self.channel9=int(self.conf.get('OUTPUT3', 'gpio'))
+				GPIO.setup(self.channel9, GPIO.OUT)
+			if self.conf.get('OUTPUT4', 'enable')=='1':
+				self.channel10=int(self.conf.get('OUTPUT4', 'gpio'))
+				GPIO.setup(self.channel10, GPIO.OUT)
 
  		# thread 1
 		def connect(self):
@@ -124,15 +180,83 @@ class MyFrame(wx.Frame):
 		def refresh_loop(self):
 			while True:	
 				if self.pause_all==0:
-					if self.conf.get('SWITCH1', 'enable')=='1': self.a.switches_status(1, self.conf.get('SWITCH1', 'gpio'), self.conf.get('SWITCH1', 'pull_up_down'))
-					if self.conf.get('SWITCH2', 'enable')=='1': self.a.switches_status(2, self.conf.get('SWITCH2', 'gpio'), self.conf.get('SWITCH2', 'pull_up_down'))
-					if self.conf.get('SWITCH3', 'enable')=='1': self.a.switches_status(3, self.conf.get('SWITCH3', 'gpio'), self.conf.get('SWITCH3', 'pull_up_down'))
-					if self.conf.get('SWITCH4', 'enable')=='1': self.a.switches_status(4, self.conf.get('SWITCH4', 'gpio'), self.conf.get('SWITCH4', 'pull_up_down'))
-					if self.conf.get('SWITCH5', 'enable')=='1': self.a.switches_status(5, self.conf.get('SWITCH5', 'gpio'), self.conf.get('SWITCH5', 'pull_up_down'))
-					if self.conf.get('SWITCH6', 'enable')=='1': self.a.switches_status(6, self.conf.get('SWITCH6', 'gpio'), self.conf.get('SWITCH6', 'pull_up_down'))
+
 					if self.read_conf==1: 
 						self.conf.read()
+						self.check_switches()
 						self.read_conf=0
+
+					if self.channel1:
+						if GPIO.input(self.channel1):
+							self.a.SW1[2]=1
+							self.a.SW1[4]=time.time()
+						else:
+							self.a.SW1[2]=0
+							self.a.SW1[4]=time.time()
+					if self.channel2:
+						if GPIO.input(self.channel2):
+							self.a.SW2[2]=1
+							self.a.SW2[4]=time.time()
+						else:
+							self.a.SW2[2]=0
+							self.a.SW2[4]=time.time()
+					if self.channel3:
+						if GPIO.input(self.channel3):
+							self.a.SW3[2]=1
+							self.a.SW3[4]=time.time()
+						else:
+							self.a.SW3[2]=0
+							self.a.SW3[4]=time.time()
+					if self.channel4:
+						if GPIO.input(self.channel4):
+							self.a.SW4[2]=1
+							self.a.SW4[4]=time.time()
+						else:
+							self.a.SW4[2]=0
+							self.a.SW4[4]=time.time()
+					if self.channel5:
+						if GPIO.input(self.channel5):
+							self.a.SW5[2]=1
+							self.a.SW5[4]=time.time()
+						else:
+							self.a.SW5[2]=0
+							self.a.SW5[4]=time.time()
+					if self.channel6:
+						if GPIO.input(self.channel6):
+							self.a.SW6[2]=1
+							self.a.SW6[4]=time.time()
+						else:
+							self.a.SW6[2]=0
+							self.a.SW6[4]=time.time()
+					if self.channel7:
+						if GPIO.input(self.channel7):
+							self.a.OUT1[2]=1
+							self.a.OUT1[4]=time.time()
+						else:
+							self.a.OUT1[2]=0
+							self.a.OUT1[4]=time.time()
+					if self.channel8:
+						if GPIO.input(self.channel8):
+							self.a.OUT2[2]=1
+							self.a.OUT2[4]=time.time()
+						else:
+							self.a.OUT2[2]=0
+							self.a.OUT2[4]=time.time()
+					if self.channel9:
+						if GPIO.input(self.channel9):
+							self.a.OUT3[2]=1
+							self.a.OUT3[4]=time.time()
+						else:
+							self.a.OUT3[2]=0
+							self.a.OUT3[4]=time.time()
+					if self.channel10:
+						if GPIO.input(self.channel10):
+							self.a.OUT4[2]=1
+							self.a.OUT4[4]=time.time()
+						else:
+							self.a.OUT4[2]=0
+							self.a.OUT4[4]=time.time()
+
 					index=0
 					for i in self.a.DataList:
 						timestamp=eval('self.a.'+i+'[4]')
@@ -168,6 +292,7 @@ class MyFrame(wx.Frame):
 						index=index+1
 					wx.CallAfter(self.refresh_data)
 					time.sleep(0.001)
+					
 				else: time.sleep(0.001)
 		# end thread 2
 

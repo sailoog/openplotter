@@ -16,15 +16,12 @@
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
 import pynmea2, time
-import RPi.GPIO as GPIO
 
 class DataStream:
 
 	def __init__(self):
 
-		GPIO.setmode(GPIO.BCM)
-
-		self.DataList=['Lat','Lon','Date','Time','Var','HDM','HDT','COG','SOG','STW','DPT','AWA','TWA','AWS','TWS','TWD','AP','AT','ARH','ROT','Heel','ECT','SW1','SW2','SW3','SW4','SW5','SW6']
+		self.DataList=['Lat','Lon','Date','Time','Var','HDM','HDT','COG','SOG','STW','DPT','AWA','TWA','AWS','TWS','TWD','AP','AT','ARH','ROT','Heel','ECT','SW1','SW2','SW3','SW4','SW5','SW6','OUT1','OUT2','OUT3','OUT4']
 		
 		#(0 name, 1 short, 2 value, 3 unit, 4 timestamp, 5 talker, 6 sentence, 7 valid operators, 8 disable field)
 		self.Lat=[_('Latitude'),_('Lat'),None,None,None,None,None,(0,1,2,3,4,5,6),1]
@@ -55,6 +52,10 @@ class DataStream:
 		self.SW4=[_('Switch 4 status'),_('SW4'),None,None,None,None,None,(7,8),0]
 		self.SW5=[_('Switch 5 status'),_('SW5'),None,None,None,None,None,(7,8),0]
 		self.SW6=[_('Switch 6 status'),_('SW6'),None,None,None,None,None,(7,8),0]
+		self.OUT1=[_('Output 1 status'),_('OUT1'),None,None,None,None,None,(7,8),0]
+		self.OUT2=[_('Output 2 status'),_('OUT2'),None,None,None,None,None,(7,8),0]
+		self.OUT3=[_('Output 3 status'),_('OUT3'),None,None,None,None,None,(7,8),0]
+		self.OUT4=[_('Output 4 status'),_('OUT4'),None,None,None,None,None,(7,8),0]
 
 		#ATENTION. If order changes, edit monitoring.py: "#actions"
 		self.operators_list=[_('was not present in the last (sec.)'),_('was present in the last (sec.)'),_('is equal to'), _('is less than'), _('is less than or equal to'), _('is greater than'), _('is greater than or equal to'), _('is on'), _('is off')]
@@ -69,51 +70,6 @@ class DataStream:
 				else:
 					return self.Date[2]
 			else: return None
-
-	def switches_status(self, switch, channel, pull_up_down):
-		pull_up_down1=GPIO.PUD_DOWN
-		channel1=int(channel)
-		if pull_up_down=='Pull Up': pull_up_down1=GPIO.PUD_UP
-		GPIO.setup(channel1, GPIO.IN, pull_up_down=pull_up_down1)
-
-		if GPIO.input(channel1):
-			if switch==1: 
-				self.SW1[2]=_('on')
-				self.SW1[4]=time.time()
-			if switch==2: 
-				self.SW2[2]=_('on')
-				self.SW2[4]=time.time()
-			if switch==3: 
-				self.SW3[2]=_('on')
-				self.SW3[4]=time.time()
-			if switch==4: 
-				self.SW4[2]=_('on')
-				self.SW4[4]=time.time()
-			if switch==5: 
-				self.SW5[2]=_('on')
-				self.SW5[4]=time.time()
-			if switch==6: 
-				self.SW6[2]=_('on')
-				self.SW6[4]=time.time()
-		else:
-			if switch==1: 
-				self.SW1[2]=_('off')
-				self.SW1[4]=time.time()
-			if switch==2: 
-				self.SW2[2]=_('off')
-				self.SW2[4]=time.time()
-			if switch==3: 
-				self.SW3[2]=_('off')
-				self.SW3[4]=time.time()
-			if switch==4: 
-				self.SW4[2]=_('off')
-				self.SW4[4]=time.time()
-			if switch==5: 
-				self.SW5[2]=_('off')
-				self.SW5[4]=time.time()
-			if switch==6: 
-				self.SW6[2]=_('off')
-				self.SW6[4]=time.time()
 
 	def parse_nmea(self, frase_nmea):
 		nmea_list=frase_nmea.split()

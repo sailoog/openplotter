@@ -389,33 +389,57 @@ class MainFrame(wx.Frame):
 		self.gpio_pin2= wx.ComboBox(self.page8, choices=self.pin_list, style=wx.CB_READONLY, size=(60, 32), pos=(495, 27))
 		self.gpio_pull2= wx.ComboBox(self.page8, choices=self.pull_list, style=wx.CB_READONLY, size=(105, 32), pos=(565, 27))
 		
-		wx.StaticBox(self.page8, label=_(' Switch 3 '), size=(330, 60), pos=(10, 80))
-		self.switch3_enable = wx.CheckBox(self.page8, label=_('Enable'), pos=(20, 102))
+		wx.StaticBox(self.page8, label=_(' Switch 3 '), size=(330, 60), pos=(10, 75))
+		self.switch3_enable = wx.CheckBox(self.page8, label=_('Enable'), pos=(20, 97))
 		self.switch3_enable.Bind(wx.EVT_CHECKBOX, self.on_switch3_enable)
-		wx.StaticText(self.page8, label=_('GPIO'), pos=(115, 105))
-		self.gpio_pin3= wx.ComboBox(self.page8, choices=self.pin_list, style=wx.CB_READONLY, size=(60, 32), pos=(155, 97))
-		self.gpio_pull3= wx.ComboBox(self.page8, choices=self.pull_list, style=wx.CB_READONLY, size=(105, 32), pos=(225, 97))
+		wx.StaticText(self.page8, label=_('GPIO'), pos=(115, 100))
+		self.gpio_pin3= wx.ComboBox(self.page8, choices=self.pin_list, style=wx.CB_READONLY, size=(60, 32), pos=(155, 92))
+		self.gpio_pull3= wx.ComboBox(self.page8, choices=self.pull_list, style=wx.CB_READONLY, size=(105, 32), pos=(225, 92))
 		
-		wx.StaticBox(self.page8, label=_(' Switch 4 '), size=(330, 60), pos=(350, 80))
-		self.switch4_enable = wx.CheckBox(self.page8, label=_('Enable'), pos=(360, 102))
+		wx.StaticBox(self.page8, label=_(' Switch 4 '), size=(330, 60), pos=(350, 75))
+		self.switch4_enable = wx.CheckBox(self.page8, label=_('Enable'), pos=(360, 97))
 		self.switch4_enable.Bind(wx.EVT_CHECKBOX, self.on_switch4_enable)
-		wx.StaticText(self.page8, label=_('GPIO'), pos=(455, 105))
-		self.gpio_pin4= wx.ComboBox(self.page8, choices=self.pin_list, style=wx.CB_READONLY, size=(60, 32), pos=(495, 97))
-		self.gpio_pull4= wx.ComboBox(self.page8, choices=self.pull_list, style=wx.CB_READONLY, size=(105, 32), pos=(565, 97))
+		wx.StaticText(self.page8, label=_('GPIO'), pos=(455, 100))
+		self.gpio_pin4= wx.ComboBox(self.page8, choices=self.pin_list, style=wx.CB_READONLY, size=(60, 32), pos=(495, 92))
+		self.gpio_pull4= wx.ComboBox(self.page8, choices=self.pull_list, style=wx.CB_READONLY, size=(105, 32), pos=(565, 92))
 
-		wx.StaticBox(self.page8, label=_(' Switch 5 '), size=(330, 60), pos=(10, 150))
-		self.switch5_enable = wx.CheckBox(self.page8, label=_('Enable'), pos=(20, 172))
+		wx.StaticBox(self.page8, label=_(' Switch 5 '), size=(330, 60), pos=(10, 140))
+		self.switch5_enable = wx.CheckBox(self.page8, label=_('Enable'), pos=(20, 162))
 		self.switch5_enable.Bind(wx.EVT_CHECKBOX, self.on_switch5_enable)
-		wx.StaticText(self.page8, label=_('GPIO'), pos=(115, 175))
-		self.gpio_pin5= wx.ComboBox(self.page8, choices=self.pin_list, style=wx.CB_READONLY, size=(60, 32), pos=(155, 167))
-		self.gpio_pull5= wx.ComboBox(self.page8, choices=self.pull_list, style=wx.CB_READONLY, size=(105, 32), pos=(225, 167))
+		wx.StaticText(self.page8, label=_('GPIO'), pos=(115, 165))
+		self.gpio_pin5= wx.ComboBox(self.page8, choices=self.pin_list, style=wx.CB_READONLY, size=(60, 32), pos=(155, 157))
+		self.gpio_pull5= wx.ComboBox(self.page8, choices=self.pull_list, style=wx.CB_READONLY, size=(105, 32), pos=(225, 157))
 		
-		wx.StaticBox(self.page8, label=_(' Switch 6 '), size=(330, 60), pos=(350, 150))
-		self.switch6_enable = wx.CheckBox(self.page8, label=_('Enable'), pos=(360, 172))
+		wx.StaticBox(self.page8, label=_(' Switch 6 '), size=(330, 60), pos=(350, 140))
+		self.switch6_enable = wx.CheckBox(self.page8, label=_('Enable'), pos=(360, 162))
 		self.switch6_enable.Bind(wx.EVT_CHECKBOX, self.on_switch6_enable)
-		wx.StaticText(self.page8, label=_('GPIO'), pos=(455, 175))
-		self.gpio_pin6= wx.ComboBox(self.page8, choices=self.pin_list, style=wx.CB_READONLY, size=(60, 32), pos=(495, 167))
-		self.gpio_pull6= wx.ComboBox(self.page8, choices=self.pull_list, style=wx.CB_READONLY, size=(105, 32), pos=(565, 167))
+		wx.StaticText(self.page8, label=_('GPIO'), pos=(455, 165))
+		self.gpio_pin6= wx.ComboBox(self.page8, choices=self.pin_list, style=wx.CB_READONLY, size=(60, 32), pos=(495, 157))
+		self.gpio_pull6= wx.ComboBox(self.page8, choices=self.pull_list, style=wx.CB_READONLY, size=(105, 32), pos=(565, 157))
+
+		wx.StaticBox(self.page8, label=_(' Output 1 '), size=(163, 67), pos=(10, 205))
+		self.output1_enable = wx.CheckBox(self.page8, label=_('Enable'), pos=(20, 235))
+		self.output1_enable.Bind(wx.EVT_CHECKBOX, self.on_output1_enable)
+		wx.StaticText(self.page8, label=_('GPIO'), pos=(105, 217))
+		self.gpio_pin7= wx.ComboBox(self.page8, choices=self.pin_list, style=wx.CB_READONLY, size=(60, 32), pos=(105, 235))
+
+		wx.StaticBox(self.page8, label=_(' Output 2 '), size=(163, 67), pos=(179, 205))
+		self.output2_enable = wx.CheckBox(self.page8, label=_('Enable'), pos=(189, 235))
+		self.output2_enable.Bind(wx.EVT_CHECKBOX, self.on_output2_enable)
+		wx.StaticText(self.page8, label=_('GPIO'), pos=(274, 217))
+		self.gpio_pin8= wx.ComboBox(self.page8, choices=self.pin_list, style=wx.CB_READONLY, size=(60, 32), pos=(274, 235))
+		
+		wx.StaticBox(self.page8, label=_(' Output 3 '), size=(163, 67), pos=(348, 205))
+		self.output3_enable = wx.CheckBox(self.page8, label=_('Enable'), pos=(358, 235))
+		self.output3_enable.Bind(wx.EVT_CHECKBOX, self.on_output3_enable)
+		wx.StaticText(self.page8, label=_('GPIO'), pos=(443, 217))
+		self.gpio_pin9= wx.ComboBox(self.page8, choices=self.pin_list, style=wx.CB_READONLY, size=(60, 32), pos=(443, 235))
+		
+		wx.StaticBox(self.page8, label=_(' Output 4 '), size=(163, 67), pos=(517, 205))
+		self.output4_enable = wx.CheckBox(self.page8, label=_('Enable'), pos=(527, 235))
+		self.output4_enable.Bind(wx.EVT_CHECKBOX, self.on_output4_enable)
+		wx.StaticText(self.page8, label=_('GPIO'), pos=(612, 217))
+		self.gpio_pin10= wx.ComboBox(self.page8, choices=self.pin_list, style=wx.CB_READONLY, size=(60, 32), pos=(612, 235))
 
 		self.button_apply_switches =wx.Button(self.page8, label=_('Apply changes'), pos=(570, 285))
 		self.Bind(wx.EVT_BUTTON, self.apply_changes_switches, self.button_apply_switches)
@@ -1539,6 +1563,22 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.switch6_enable.SetValue(True)
 			self.gpio_pin6.Disable()
 			self.gpio_pull6.Disable()
+		if self.conf.get('OUTPUT1', 'enable')=='1':
+			self.gpio_pin7.SetValue(self.conf.get('OUTPUT1', 'gpio'))
+			self.output1_enable.SetValue(True)
+			self.gpio_pin7.Disable()
+		if self.conf.get('OUTPUT2', 'enable')=='1':
+			self.gpio_pin8.SetValue(self.conf.get('OUTPUT2', 'gpio'))
+			self.output2_enable.SetValue(True)
+			self.gpio_pin8.Disable()
+		if self.conf.get('OUTPUT3', 'enable')=='1':
+			self.gpio_pin9.SetValue(self.conf.get('OUTPUT3', 'gpio'))
+			self.output3_enable.SetValue(True)
+			self.gpio_pin9.Disable()
+		if self.conf.get('OUTPUT4', 'enable')=='1':
+			self.gpio_pin10.SetValue(self.conf.get('OUTPUT4', 'gpio'))
+			self.output4_enable.SetValue(True)
+			self.gpio_pin10.Disable()
 
 	def on_switch1_enable(self, e):
 		if self.switch1_enable.GetValue(): 
@@ -1605,6 +1645,49 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		else: 
 			self.gpio_pin6.Enable()
 			self.gpio_pull6.Enable()
+
+	def on_output1_enable(self, e):
+		if self.output1_enable.GetValue(): 
+			if self.gpio_pin7.GetValue(): 
+				self.gpio_pin7.Disable()
+				self.output_message()
+			else:
+				self.output1_enable.SetValue(False)
+		else: 
+			self.gpio_pin7.Enable()
+
+	def on_output2_enable(self, e):
+		if self.output2_enable.GetValue(): 
+			if self.gpio_pin8.GetValue(): 
+				self.gpio_pin8.Disable()
+				self.output_message()
+			else:
+				self.output2_enable.SetValue(False)
+		else: 
+			self.gpio_pin8.Enable()
+
+	def on_output3_enable(self, e):
+		if self.output3_enable.GetValue(): 
+			if self.gpio_pin9.GetValue(): 
+				self.gpio_pin9.Disable()
+				self.output_message()
+			else:
+				self.output3_enable.SetValue(False)
+		else: 
+			self.gpio_pin9.Enable()
+
+	def on_output4_enable(self, e):
+		if self.output4_enable.GetValue(): 
+			if self.gpio_pin10.GetValue(): 
+				self.gpio_pin10.Disable()
+				self.output_message()
+			else:
+				self.output4_enable.SetValue(False)
+		else: 
+			self.gpio_pin10.Enable()
+
+	def output_message(self):
+		self.ShowMessage(_('ATTENTION! if you set this output to "High" and there is not a resistor or a circuit connected to the selected GPIO pin, YOU CAN DAMAGE YOUR BOARD.'))	
 
 	def apply_changes_switches(self, e):
 		enabled=[]
@@ -1687,7 +1770,52 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.conf.set('SWITCH6', 'gpio', self.gpio_pin6.GetValue())
 				self.conf.set('SWITCH6', 'pull_up_down', self.gpio_pull6.GetValue())
 		else: self.conf.set('SWITCH6', 'enable', '0')
+		if self.output1_enable.GetValue() and self.gpio_pin7.GetValue():
+			if self.gpio_pin7.GetValue() in enabled: 
+				if not self.gpio_pin7.GetValue() in repeated: repeated.append(self.gpio_pin7.GetValue())
+				self.output1_enable.SetValue(False)
+				self.gpio_pin7.Enable()
+				self.conf.set('OUTPUT1', 'enable', '0')
+			else: 
+				enabled.append(self.gpio_pin7.GetValue())
+				self.conf.set('OUTPUT1', 'enable', '1')
+				self.conf.set('OUTPUT1', 'gpio', self.gpio_pin7.GetValue())
+		else: self.conf.set('OUTPUT1', 'enable', '0')
+		if self.output2_enable.GetValue() and self.gpio_pin8.GetValue():
+			if self.gpio_pin8.GetValue() in enabled: 
+				if not self.gpio_pin8.GetValue() in repeated: repeated.append(self.gpio_pin8.GetValue())
+				self.output2_enable.SetValue(False)
+				self.gpio_pin8.Enable()
+				self.conf.set('OUTPUT2', 'enable', '0')
+			else: 
+				enabled.append(self.gpio_pin8.GetValue())
+				self.conf.set('OUTPUT2', 'enable', '1')
+				self.conf.set('OUTPUT2', 'gpio', self.gpio_pin8.GetValue())
+		else: self.conf.set('OUTPUT2', 'enable', '0')
+		if self.output3_enable.GetValue() and self.gpio_pin9.GetValue():
+			if self.gpio_pin9.GetValue() in enabled: 
+				if not self.gpio_pin9.GetValue() in repeated: repeated.append(self.gpio_pin9.GetValue())
+				self.output3_enable.SetValue(False)
+				self.gpio_pin9.Enable()
+				self.conf.set('OUTPUT3', 'enable', '0')
+			else: 
+				enabled.append(self.gpio_pin9.GetValue())
+				self.conf.set('OUTPUT3', 'enable', '1')
+				self.conf.set('OUTPUT3', 'gpio', self.gpio_pin9.GetValue())
+		else: self.conf.set('OUTPUT3', 'enable', '0')
+		if self.output4_enable.GetValue() and self.gpio_pin10.GetValue():
+			if self.gpio_pin10.GetValue() in enabled: 
+				if not self.gpio_pin10.GetValue() in repeated: repeated.append(self.gpio_pin10.GetValue())
+				self.output4_enable.SetValue(False)
+				self.gpio_pin10.Enable()
+				self.conf.set('OUTPUT4', 'enable', '0')
+			else: 
+				enabled.append(self.gpio_pin10.GetValue())
+				self.conf.set('OUTPUT4', 'enable', '1')
+				self.conf.set('OUTPUT4', 'gpio', self.gpio_pin10.GetValue())
+		else: self.conf.set('OUTPUT4', 'enable', '0')
 		if repeated: self.ShowMessage(_('GPIO pins must be unique. Repeated pins: ')+', '.join(repeated)+'.')
+		else: self.ShowMessage(_('Switches set successfully'))
 		self.SetStatusText(_('Switches changes applied and restarted'))
 		self.start_monitoring()
 
@@ -1710,6 +1838,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.switch6_enable.SetValue(False)
 		self.gpio_pin6.Enable()
 		self.gpio_pull6.Enable()
+		self.output1_enable.SetValue(False)
+		self.gpio_pin7.Enable()
+		self.output2_enable.SetValue(False)
+		self.gpio_pin8.Enable()
+		self.output3_enable.SetValue(False)
+		self.gpio_pin9.Enable()
+		self.output4_enable.SetValue(False)
+		self.gpio_pin10.Enable()
 		self.read_switches()
 		self.SetStatusText(_('Switches changes cancelled'))
 #######################twitterbot
