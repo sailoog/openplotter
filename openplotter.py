@@ -63,14 +63,16 @@ class MainFrame(wx.Frame):
 		self.page8 = wx.Panel(self.nb)
 		self.page9 = wx.Panel(self.nb)
 		self.page10 = wx.Panel(self.nb)
+		self.page11 = wx.Panel(self.nb)
 
 		self.nb.AddPage(self.page5, _('NMEA 0183'))
 		self.nb.AddPage(self.page7, _('Signal K (beta)'))
 		self.nb.AddPage(self.page3, _('WiFi AP'))
-		self.nb.AddPage(self.page4, _('SDR-AIS'))
-		self.nb.AddPage(self.page2, _('Calculate'))
-		self.nb.AddPage(self.page6, _('Sensors'))
 		self.nb.AddPage(self.page10, _('Actions'))
+		self.nb.AddPage(self.page4, _('SDR-AIS'))
+		self.nb.AddPage(self.page6, _('I2C sensors'))
+		self.nb.AddPage(self.page11, _('1W sensors'))
+		self.nb.AddPage(self.page2, _('Calculate'))
 		self.nb.AddPage(self.page8, _('Switches'))
 		self.nb.AddPage(self.page9, _('Accounts'))
 		self.nb.AddPage(self.page1, _('Startup'))
@@ -343,11 +345,6 @@ class MainFrame(wx.Frame):
 		self.heel.Bind(wx.EVT_CHECKBOX, self.nmea_heel)
 		self.heel_nmea=wx.StaticText(self.page6, label=_('Generated NMEA: $OSXDR'), pos=(20, 180))
 
-		wx.StaticBox(self.page6, label=' DS18B20 ', size=(330, 70), pos=(10, 210))
-		self.eng_temp = wx.CheckBox(self.page6, label=_('Engine temperature'), pos=(20, 230))
-		self.eng_temp.Bind(wx.EVT_CHECKBOX, self.nmea_eng_temp)
-		self.eng_temp_nmea=wx.StaticText(self.page6, label=_('Generated NMEA: $OSXDR'), pos=(20, 255))
-
 		wx.StaticBox(self.page6, label=_(' Weather '), size=(330, 270), pos=(350, 10))
 		self.press_tag=wx.StaticText(self.page6, label=_('Sensor detected: ')+_('none'), pos=(360, 30))
 		self.button_reset_press_hum =wx.Button(self.page6, label=_('Reset'), pos=(580, 30))
@@ -371,6 +368,12 @@ class MainFrame(wx.Frame):
 		self.button_graph =wx.Button(self.page6, label=_('Show'), pos=(475, 240))
 		self.Bind(wx.EVT_BUTTON, self.show_graph, self.button_graph)
 ###########################page6
+########page11###################
+		wx.StaticBox(self.page11, label=' DS18B20 ', size=(330, 70), pos=(10, 10))
+		self.eng_temp = wx.CheckBox(self.page11, label=_('Engine Coolant Temperature'), pos=(20, 30))
+		self.eng_temp.Bind(wx.EVT_CHECKBOX, self.nmea_eng_temp)
+		self.eng_temp_nmea=wx.StaticText(self.page11, label=_('Generated NMEA: $OSXDR'), pos=(20, 55))
+###########################page11
 ########page8###################
 		self.pin_list = ['5', '6', '12', '13','16', '17', '18', '19','20', '21', '22', '23','24', '25', '26', '27']
 		self.pull_list = ['Pull Down', 'Pull Up']
@@ -759,12 +762,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		info.SetName('OpenPlotter')
 		info.SetVersion(self.conf.get('GENERAL', 'version'))
 		info.SetDescription(description)
-		info.SetCopyright('2013 - 2015 Sailoog')
+		info.SetCopyright('2016 Sailoog')
 		info.SetWebSite('http://www.sailoog.com')
 		info.SetLicence(licence)
-		info.AddDeveloper('Sailoog\nhttp://github.com/sailoog/openplotter\n-------------------\nOpenCPN: http://opencpn.org/ocpn/\nzyGrib: http://www.zygrib.org/\nMultiplexer: http://www.stripydog.com/kplex/index.html\nrtl-sdr: http://sdr.osmocom.org/trac/wiki/rtl-sdr\naisdecoder: http://www.aishub.net/aisdecoder-via-sound-card.html\ngeomag: http://github.com/cmweiss/geomag\nIMU sensor: http://github.com/richards-tech/RTIMULib\nNMEA parser: http://github.com/Knio/pynmea2\n\n')
+		info.AddDeveloper('Sailoog\nhttp://github.com/sailoog/openplotter\n-------------------\nOpenCPN: http://opencpn.org/ocpn/\nzyGrib: http://www.zygrib.org/\nMultiplexer: http://www.stripydog.com/kplex/index.html\nrtl-sdr: http://sdr.osmocom.org/trac/wiki/rtl-sdr\naisdecoder: http://www.aishub.net/aisdecoder-via-sound-card.html\ngeomag: http://github.com/cmweiss/geomag\nIMU sensor: http://github.com/richards-tech/RTIMULib2\nNMEA parser: http://github.com/Knio/pynmea2\ntwython: http://github.com/ryanmcgrath/twython\npyrtlsdr: http://github.com/roger-/pyrtlsdr\nkalibrate-rtl: http://github.com/steve-m/kalibrate-rtl\nSignalK: http://signalk.org/\n\n')
 		info.AddDocWriter('Sailoog\n\nDocumentation: http://sailoog.gitbooks.io/openplotter-documentation/\nGuides: http://sailoog.dozuki.com/c/OpenPlotter')
-		info.AddArtist('Sailoog')
 		info.AddTranslator('Catalan, English and Spanish by Sailoog\nFrench by Nicolas Janvier.')
 		wx.AboutBox(info)
 
