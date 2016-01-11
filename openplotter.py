@@ -64,6 +64,7 @@ class MainFrame(wx.Frame):
 		self.page9 = wx.Panel(self.nb)
 		self.page10 = wx.Panel(self.nb)
 		self.page11 = wx.Panel(self.nb)
+		self.page12 = wx.Panel(self.nb)
 
 		self.nb.AddPage(self.page5, _('NMEA 0183'))
 		self.nb.AddPage(self.page7, _('Signal K (beta)'))
@@ -72,6 +73,7 @@ class MainFrame(wx.Frame):
 		self.nb.AddPage(self.page4, _('SDR-AIS'))
 		self.nb.AddPage(self.page6, _('I2C sensors'))
 		self.nb.AddPage(self.page11, _('1W sensors'))
+		self.nb.AddPage(self.page12, _('SPI sensors'))
 		self.nb.AddPage(self.page2, _('Calculate'))
 		self.nb.AddPage(self.page8, _('Switches'))
 		self.nb.AddPage(self.page9, _('Accounts'))
@@ -294,7 +296,7 @@ class MainFrame(wx.Frame):
 		self.button_delete_output =wx.Button(self.page5, label=_('delete'), pos=(585, 235))
 		self.Bind(wx.EVT_BUTTON, self.delete_output, self.button_delete_output)
 
-		self.show_output =wx.Button(self.page5, label=_('Show output'), pos=(10, 285))
+		self.show_output =wx.Button(self.page5, label=_('Inspector'), pos=(10, 285))
 		self.Bind(wx.EVT_BUTTON, self.show_output_window, self.show_output)
 		self.restart =wx.Button(self.page5, label=_('Restart'), pos=(130, 285))
 		self.Bind(wx.EVT_BUTTON, self.restart_multiplex, self.restart)
@@ -374,6 +376,9 @@ class MainFrame(wx.Frame):
 		self.eng_temp.Bind(wx.EVT_CHECKBOX, self.nmea_eng_temp)
 		self.eng_temp_nmea=wx.StaticText(self.page11, label=_('Generated NMEA: $OSXDR'), pos=(20, 55))
 ###########################page11
+########page12###################
+		wx.StaticText(self.page12, label=_('Coming soon'), pos=(20, 30))
+###########################page12
 ########page8###################
 		self.pin_list = ['5', '6', '12', '13','16', '17', '18', '19','20', '21', '22', '23','24', '25', '26', '27']
 		self.pull_list = ['Pull Down', 'Pull Up']

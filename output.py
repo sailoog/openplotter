@@ -25,7 +25,7 @@ import RPi.GPIO as GPIO
 
 class MyFrame(wx.Frame):
 		
-		def __init__(self, parent, title):
+		def __init__(self, parent):
 
 			paths=Paths()
 			self.currentpath=paths.currentpath
@@ -34,7 +34,7 @@ class MyFrame(wx.Frame):
 
 			Language(self.conf.get('GENERAL','lang'))
 
-			wx.Frame.__init__(self, parent, title=title, size=(650,435))
+			wx.Frame.__init__(self, parent, title="Inspector", size=(650,435))
 			
 			self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 			
@@ -43,23 +43,21 @@ class MyFrame(wx.Frame):
 
 			self.logger = wx.TextCtrl(self, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_DONTWRAP, size=(650,150), pos=(0,0))
 
-			wx.StaticText(self, label=_('NMEA inspector'), pos=(525, 160))
-
-			self.button_pause =wx.Button(self, label=_('Pause'), pos=(530, 190))
-			self.Bind(wx.EVT_BUTTON, self.pause, self.button_pause)
-
-			self.button_reset =wx.Button(self, label=_('Reset'), pos=(530, 230))
-			self.Bind(wx.EVT_BUTTON, self.reset, self.button_reset)
-
-			self.button_nmea =wx.Button(self, label=_('NMEA info'), pos=(530, 270))
-			self.Bind(wx.EVT_BUTTON, self.nmea_info, self.button_nmea)
-
 			self.list = wx.ListCtrl(self, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(500, 220), pos=(5, 155))
 			self.list.InsertColumn(0, _('Type'), width=165)
 			self.list.InsertColumn(1, _('Value'), width=130)
 			self.list.InsertColumn(2, _('Source'), width=90)
 			self.list.InsertColumn(3, _('NMEA'), width=50)
 			self.list.InsertColumn(4, _('Age'), width=59)
+
+			self.button_pause =wx.Button(self, label=_('Pause'), pos=(530, 160))
+			self.Bind(wx.EVT_BUTTON, self.pause, self.button_pause)
+
+			self.button_reset =wx.Button(self, label=_('Reset'), pos=(530, 200))
+			self.Bind(wx.EVT_BUTTON, self.reset, self.button_reset)
+
+			self.button_nmea =wx.Button(self, label=_('NMEA info'), pos=(530, 240))
+			self.Bind(wx.EVT_BUTTON, self.nmea_info, self.button_nmea)
 
 			self.a=DataStream()
 
@@ -325,5 +323,5 @@ class MyFrame(wx.Frame):
 			webbrowser.open(url,new=2)
 
 app = wx.App(False)
-frame = MyFrame(None, 'TCP localhost:10110')
+frame = MyFrame(None)
 app.MainLoop()
