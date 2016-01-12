@@ -35,7 +35,7 @@ class Actions():
 		self.options[5]= _('reset NMEA multiplexer'),0,0
 		self.options[6]= _('stop Signal K server'),0,0
 		self.options[7]= _('reset Signal K server'),0,0
-		self.options[8]= _('stop WiFi access point'),0,0
+		self.options[8]= _('stop WiFi access point'),_('Be careful, if you are connected by remote you may not be able to reconnect again.'),0
 		self.options[9]= _('start WiFi access point'),_('Be sure you have filled in all fields in "WiFi AP" tab and enabled WiFi access point.'),0
 		self.options[10]= _('stop SDR-AIS'),0,0
 		self.options[11]= _('reset SDR-AIS'),_('Be sure you have filled in Gain and Correction fields in "SDR-AIS" tab and enabled AIS NMEA generation.'),0

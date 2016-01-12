@@ -67,16 +67,16 @@ class MainFrame(wx.Frame):
 		self.page12 = wx.Panel(self.nb)
 
 		self.nb.AddPage(self.page5, _('NMEA 0183'))
-		self.nb.AddPage(self.page7, _('Signal K (beta)'))
 		self.nb.AddPage(self.page3, _('WiFi AP'))
 		self.nb.AddPage(self.page10, _('Actions'))
-		self.nb.AddPage(self.page4, _('SDR-AIS'))
+		self.nb.AddPage(self.page8, _('Switches'))
 		self.nb.AddPage(self.page6, _('I2C sensors'))
 		self.nb.AddPage(self.page11, _('1W sensors'))
 		self.nb.AddPage(self.page12, _('SPI sensors'))
+		self.nb.AddPage(self.page4, _('SDR-AIS'))
 		self.nb.AddPage(self.page2, _('Calculate'))
-		self.nb.AddPage(self.page8, _('Switches'))
 		self.nb.AddPage(self.page9, _('Accounts'))
+		self.nb.AddPage(self.page7, _('Signal K (beta)'))
 		self.nb.AddPage(self.page1, _('Startup'))
 
 		sizer = wx.BoxSizer()
@@ -841,6 +841,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def onwifi_enable (self, e):
 		isChecked = self.wifi_enable.GetValue()
+		if not isChecked:
+			dlg = wx.MessageDialog(None, _('Are you sure to disable?\nIf you are connected by remote, you may not be able to reconnect again.'), _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+			if dlg.ShowModal() != wx.ID_YES:
+				self.wifi_enable.SetValue(True)
+				dlg.Destroy()
+				return
+			dlg.Destroy()
 		wlan=self.wlan.GetValue()
 		ssid=self.ssid.GetValue()
 		share=self.share.GetValue()
@@ -864,7 +871,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if isChecked:
 			self.enable_disable_wifi(1)
 			wifi_result=subprocess.check_output(['sudo', 'python', currentpath+'/wifi_server.py', '1', wlan, passw, ssid, share])		
-		else: 
+		else:
 			self.enable_disable_wifi(0)
 			wifi_result=subprocess.check_output(['sudo', 'python', currentpath+'/wifi_server.py', '0', wlan, passw, ssid, share])
 			
@@ -987,10 +994,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.conf.set('AIS-SDR', 'ppm', ppm)
 			self.conf.set('AIS-SDR', 'channel', channel)
 			msg=_('SDR-AIS reception enabled')
-		else: 
+		else:
 			self.enable_sdr_controls()
 			self.conf.set('AIS-SDR', 'enable', '0')
 			msg=_('SDR-AIS reception disabled')
+
 		self.SetStatusText('')
 		self.ShowMessage(msg)
 
