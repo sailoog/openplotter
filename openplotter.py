@@ -1050,6 +1050,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.read_kplex_conf()
 
 	def advanced_multiplex(self,event):
+		self.ShowMessage(_('OpenPlotter will close. Add manual settings at the end of the configuration file. Open OpenPlotter again and restart multiplexer to apply changes.'))
 		subprocess.Popen(['leafpad',home+'/.kplex.conf'])
 		self.Close()
 
