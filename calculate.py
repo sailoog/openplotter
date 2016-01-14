@@ -120,7 +120,7 @@ while True:
 				AWA[0]=360-AWA[0]
 				AWA[1]='L'
 	SOG = a.validate('SOG',now,accuracy)
-	COG = a.validate('SOG',now,accuracy)
+	COG = a.validate('COG',now,accuracy)
 	# end refresh values
 	# generate NMEA
 	if now-sent >= rate:
@@ -162,14 +162,6 @@ while True:
 				sock.sendto(rot2, ('localhost', 10110))
 		#generate True Wind STW
 		if conf.get('STARTUP', 'tw_stw')=='1' and STW and AWS and AWA:
-			print 'STW '
-			print  STW
-			print 'AWS '
-			print  AWS 
-			print 'AWA '
-			print  AWA
-			print 'heading_t '
-			print  heading_t
 			#TWA
 			TWS=math.sqrt((STW**2+AWS**2)-(2*STW*AWS*math.cos(math.radians(AWA[0]))))
 			TWA=math.degrees(math.acos((AWS**2-TWS**2-STW**2)/(2*TWS*STW)))
@@ -194,25 +186,8 @@ while True:
 				mwd1=str(mwd)
 				mwd2=mwd1+'\r\n'
 				sock.sendto(mwd2, ('localhost', 10110))
-				print ' '
-				print 'TWA'
-				print TWA0r
-				print 'TWS'
-				print TWSr
-				print 'TWD'
-				print TWDr
 		#generate True Wind SOG
 		if conf.get('STARTUP', 'tw_sog')=='1' and SOG and COG and heading_t and AWS and AWA:
-			print 'SOG '
-			print  SOG
-			print 'COG '
-			print  COG
-			print 'AWS '
-			print  AWS 
-			print 'AWA '
-			print  AWA
-			print 'heading_t '
-			print  heading_t
 			#TWD
 			D=heading_t-COG
 			if AWA[1]=='R': AWD=AWA[0]+D
@@ -240,10 +215,3 @@ while True:
 			mwv1=str(mwv)
 			mwv2=mwv1+'\r\n'
 			sock.sendto(mwv2, ('localhost', 10110))
-			print ' '
-			print 'TWA'
-			print TWA0r
-			print 'TWS'
-			print TWSr
-			print 'TWD'
-			print TWDr

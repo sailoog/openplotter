@@ -15,9 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import sys, subprocess
+import sys, subprocess, wx
 from classes.conf import Conf
 from classes.paths import Paths
+from classes.language import Language
 
 action=sys.argv[1]
 
@@ -28,6 +29,8 @@ paths=Paths()
 currentpath=paths.currentpath
 
 conf=Conf()
+
+Language(conf.get('GENERAL','lang'))
 
 data=conf.get('ACTIONS', 'triggers')
 triggers=data.split('||')
@@ -66,5 +69,12 @@ if action=='1':
 
 subprocess.call(['pkill', '-f', 'monitoring.py'])
 subprocess.Popen(['python',currentpath+'/monitoring.py'])
+
+app = wx.App()
+
+if action=='0':
+	wx.MessageBox(_('All actions have been stopped.'), 'Info', wx.OK | wx.ICON_INFORMATION)
+if action=='1':
+	wx.MessageBox(_('All actions have been started.'), 'Info', wx.OK | wx.ICON_INFORMATION)
 
 sys.exit()
