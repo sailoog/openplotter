@@ -1944,7 +1944,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			if ii[1]==-1:
 				self.list_triggers.Append([_('None (always true)'),'',''])
 			else:
-				self.list_triggers.Append([self.datastream_list[ii[1]].decode('utf8'),self.a.operators_list[ii[2]],ii[3]])
+				self.list_triggers.Append([self.datastream_list[ii[1]].decode('utf8'),self.a.operators_list[ii[2]].decode('utf8'),ii[3]])
 			if ii[0]==1:
 				last=self.list_triggers.GetItemCount()-1
 				self.list_triggers.CheckItem(last)
