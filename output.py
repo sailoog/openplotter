@@ -43,20 +43,20 @@ class MyFrame(wx.Frame):
 
 			self.logger = wx.TextCtrl(self, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_DONTWRAP, size=(650,150), pos=(0,0))
 
-			self.list = wx.ListCtrl(self, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(500, 220), pos=(5, 155))
-			self.list.InsertColumn(0, _('Type'), width=165)
+			self.list = wx.ListCtrl(self, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(540, 220), pos=(5, 155))
+			self.list.InsertColumn(0, _('Type'), width=205)
 			self.list.InsertColumn(1, _('Value'), width=130)
 			self.list.InsertColumn(2, _('Source'), width=90)
 			self.list.InsertColumn(3, _('NMEA'), width=50)
 			self.list.InsertColumn(4, _('Age'), width=59)
 
-			self.button_pause =wx.Button(self, label=_('Pause'), pos=(530, 160))
+			self.button_pause =wx.Button(self, label=_('Pause'), pos=(555, 160))
 			self.Bind(wx.EVT_BUTTON, self.pause, self.button_pause)
 
-			self.button_reset =wx.Button(self, label=_('Reset'), pos=(530, 200))
+			self.button_reset =wx.Button(self, label=_('Reset'), pos=(555, 200))
 			self.Bind(wx.EVT_BUTTON, self.reset, self.button_reset)
 
-			self.button_nmea =wx.Button(self, label=_('NMEA info'), pos=(530, 240))
+			self.button_nmea =wx.Button(self, label=_('NMEA info'), pos=(555, 240))
 			self.Bind(wx.EVT_BUTTON, self.nmea_info, self.button_nmea)
 
 			self.a=DataStream()
