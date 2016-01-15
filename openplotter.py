@@ -2002,7 +2002,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					return
 				trigger=self.datastream_list[dlg.trigger_select.GetCurrentSelection()]
 				operator=self.a.operators_list[operator_selection]
-				self.list_triggers.Append([trigger,operator,value])
+				self.list_triggers.Append([trigger.decode('utf8'),operator.decode('utf8'),value])
 				tmp=[]
 				tmp.append(1)
 				tmp.append(trigger_selection)
