@@ -146,7 +146,7 @@ class MainFrame(wx.Frame):
 		self.startup_nmea_time = wx.CheckBox(self.page1, label=_('Set time from NMEA'), pos=(40, 190))
 		self.startup_nmea_time.Bind(wx.EVT_CHECKBOX, self.startup)
 
-		self.startup_remote_desktop = wx.CheckBox(self.page1, label=_('Remote desktop'), pos=(20, 225))
+		self.startup_remote_desktop = wx.CheckBox(self.page1, label=_('VNC remote desktop'), pos=(20, 225))
 		self.startup_remote_desktop.Bind(wx.EVT_CHECKBOX, self.startup)
 
 		self.startup_signalk = wx.CheckBox(self.page1, label=_('Signal K server (beta)'), pos=(20, 260))
@@ -903,9 +903,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		ips=ip_info.split()
 		for ip in ips:
 			out+=ip+':10110\n'
-		out+=_('\n Remote desktop:\n')
+		out+=_('\n VNC remote desktop:\n')
 		for ip in ips:
 			out+=ip+':5900\n'
+		out+=_('\n RDP remote desktop:\n')
+		for ip in ips:
+			out+=ip+'\n'
 		out+=_('\n Signal K panel:\n')
 		for ip in ips:
 			out+=ip+':3000/instrumentpanel\n'

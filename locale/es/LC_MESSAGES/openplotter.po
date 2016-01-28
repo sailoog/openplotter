@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: OpenPlotter 0.0.0\n"
-"POT-Creation-Date: 2016-01-14 14:39+0100\n"
-"PO-Revision-Date: 2016-01-28 22:51+0100\n"
+"POT-Creation-Date: 2016-01-28 19:13+0100\n"
+"PO-Revision-Date: 2016-01-28 19:13+0100\n"
 "Last-Translator: sailoog <info@sailoog.com>\n"
 "Language-Team: Sailoog <info@sailoog.com>\n"
 "Language: es\n"
@@ -231,8 +231,8 @@ msgid "NMEA 0183 multiplexer"
 msgstr "Multiplexor NMEA 0183"
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:149
-msgid "Remote desktop"
-msgstr "Escritorio remoto"
+msgid "VNC remote desktop"
+msgstr "Escritorio remoto VNC"
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:152
 msgid "Signal K server (beta)"
@@ -302,8 +302,8 @@ msgstr "Configuración"
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:358
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:559
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:869
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1140
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1162
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1143
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1165
 #: /home/sailoog/Escritorio/openplotter/connection.py:78
 #: /home/sailoog/Escritorio/openplotter/connection.py:175
 msgid "none"
@@ -753,9 +753,9 @@ msgid "Startup delay set to "
 msgstr "Retraso en el inicio establecido en "
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:795
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1356
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1489
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1495
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1359
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1492
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1498
 msgid " seconds"
 msgstr " segundos"
 
@@ -814,28 +814,36 @@ msgstr " NMEA 0183:\n"
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:906
 msgid ""
 "\n"
-" Remote desktop:\n"
+" VNC remote desktop:\n"
 msgstr ""
 "\n"
-" Remote desktop:\n"
+" Escritorio remoto VNC:\n"
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:909
 msgid ""
 "\n"
-" Signal K panel:\n"
+" RDP remote desktop:\n"
 msgstr ""
 "\n"
-" Signal K panel:\n"
+" Escritorio remoto RDP:\n"
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:912
 msgid ""
 "\n"
+" Signal K panel:\n"
+msgstr ""
+"\n"
+" Signal K panel:\n"
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:915
+msgid ""
+"\n"
 " Signal K gauge:\n"
 msgstr ""
 "\n"
 " Signal K gauge:\n"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:915
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:918
 msgid ""
 "\n"
 " Signal K WebSocket:\n"
@@ -843,15 +851,15 @@ msgstr ""
 "\n"
 " Signal K WebSocket:\n"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:996
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:999
 msgid "SDR-AIS reception enabled"
 msgstr "Recepción SDR-AIS habilitada"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1000
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1003
 msgid "SDR-AIS reception disabled"
 msgstr "Recepción SDR-AIS deshabilitada"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1019
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1022
 msgid ""
 "SDR-AIS reception disabled.\n"
 "After checking the new window enable SDR-AIS reception again."
@@ -859,7 +867,7 @@ msgstr ""
 "Recepción AIS-SDR deshabilitada.\n"
 "Después de comprobar la nueva ventana habilita la recepción AIS-SDR de nuevo."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1026
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1029
 msgid ""
 "SDR-AIS reception disabled.\n"
 "Check the new window. Copy the maximum supported gain value. Wait for ppm "
@@ -869,7 +877,7 @@ msgstr ""
 "Comprueba la ventana nueva. Copia el valor máximo de ganancia posible. "
 "Espera a que el valor ppm se estabilice y cópialo también."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1061
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1064
 msgid ""
 "OpenPlotter will close. Add manual settings at the end of the configuration "
 "file. Open OpenPlotter again and restart multiplexer to apply changes."
@@ -878,33 +886,33 @@ msgstr ""
 "configuración. Abre OpenPlotter de nuevo y reinicia el multiplexor para "
 "aplicar los cambios."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1066
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1069
 msgid "Closing Kplex"
 msgstr "Cerrando Kplex"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1069
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1072
 msgid "Kplex restarted"
 msgstr "Kplex reiniciado"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1124
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1127
 msgid ""
 "Multiplexer configuration file does not exist. Add inputs and apply changes."
 msgstr ""
 "El archivo de configuración del multiplexor no existe. Añadir entradas y "
 "aplicar cambios."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1141
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1163
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1144
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1166
 msgid "accept"
 msgstr "aceptar"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1142
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1164
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1145
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1167
 msgid "ignore"
 msgstr "ignorar"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1144
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1166
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1147
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1169
 #: /home/sailoog/Escritorio/openplotter/connection.py:93
 #: /home/sailoog/Escritorio/openplotter/connection.py:117
 #: /home/sailoog/Escritorio/openplotter/connection.py:137
@@ -914,26 +922,26 @@ msgstr "ignorar"
 msgid "nothing"
 msgstr "nada"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1263
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1266
 msgid "This name already exists."
 msgstr "Este nombre ya existe."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1278
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1311
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1281
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1314
 msgid "This input is already in use."
 msgstr "Esta entrada ya está en uso."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1294
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1328
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1297
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1331
 msgid "This output is already in use."
 msgstr "Esta salida ya está en uso."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1356
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1489
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1359
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1492
 msgid "Generation rate set to "
 msgstr "Frecuencia generacion establecida en "
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1381
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1384
 msgid ""
 "Heading and heel disabled.\n"
 "Close and open OpenPlotter again to autodetect."
@@ -941,7 +949,7 @@ msgstr ""
 "Rumbo y escora desactivados.\n"
 "Cierra y vuelve abrir OpenPlotter para su detección automática."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1402
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1405
 msgid ""
 "Temperature, humidity and pressure disabled.\n"
 "Close and open OpenPlotter again to autodetect."
@@ -949,7 +957,7 @@ msgstr ""
 "Temperatura, humedad y presión desactivados.\n"
 "Cierra y vuelve abrir OpenPlotter para su detección automática."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1420
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1423
 msgid ""
 "Heading, heel, temperature, humidity and pressure disabled.\n"
 "After calibrating, enable them again."
@@ -957,23 +965,23 @@ msgstr ""
 "Rumbo magnético, escora, temperatura, humedad y presión detenidos.\n"
 "Activar de nuevo tras la calibración."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1477
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1480
 msgid "Weather log restarted"
 msgstr "Registro de datos meteo reiniciado"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1495
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1498
 msgid "Calculation accuracy set to "
 msgstr "Precisión del cálculo establecida en "
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1540
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1543
 msgid "Closing Signal K server"
 msgstr "Cerrando servidor Signal K"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1543
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1546
 msgid "Signal K server restarted"
 msgstr "Servidor Signal K reiniciado."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1706
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1709
 #: /home/sailoog/Escritorio/openplotter/classes/actions.py:50
 #: /home/sailoog/Escritorio/openplotter/classes/actions.py:52
 #: /home/sailoog/Escritorio/openplotter/classes/actions.py:54
@@ -985,84 +993,84 @@ msgstr ""
 "¡ATENCIÓN! si configuras esta salida como \"High\" y no hay una resistencia "
 "o un circuito conectado al pin GPIO seleccionado, PUEDES DAÑAR TU PLACA."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1833
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1836
 msgid "GPIO pins must be unique. Repeated pins: "
 msgstr "Los pins GPIO no pueden repetirse. Pins repetidos: "
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1834
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1837
 msgid "Switches set successfully"
 msgstr "Interruptores configurados correctamente"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1835
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1838
 msgid "Switches changes applied and restarted"
 msgstr "Cambios en interruptores aplicados y reiniciados."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1866
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1869
 msgid "Switches changes cancelled"
 msgstr "Cambios en interruptores cancelados"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1876
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1879
 msgid ""
 "Enter valid Twitter apiKey, apiSecret, accessToken and accessTokenSecret."
 msgstr ""
 "Introduce una Twitter apiKey, apiSecret, accessToken y accessTokenSecret "
 "válidas."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1880
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1883
 msgid "Select some data to publish."
 msgstr "Selecciona algunos datos para publicar."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1914
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1917
 msgid "Enter valid Gmail account, Gmail password and Recipient."
 msgstr "Introduce un correo Gmail válido, la contraseña y el destinatario."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1945
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1982
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1948
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1985
 #: /home/sailoog/Escritorio/openplotter/classes/add_trigger.py:32
 msgid "None (always true)"
 msgstr "Ninguno (siempre verdadero)"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1991
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1994
 msgid "Failed. Select trigger and operator."
 msgstr "Fallo. Selecciona un disparador y un operador."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:2000
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:2003
 msgid "Failed. Value must be a number."
 msgstr "Fallo. \"Valor \" debe ser un número."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:2022
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:2025
 msgid "Select a trigger to add actions."
 msgstr "Selecciona un disparador para añadir acciones."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:2029
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:2032
 msgid "Failed. Select an action."
 msgstr "Fallo. Selecciona una acción."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:2036
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:2039
 msgid "Failed. \"Repeat after\" must be a number."
 msgstr "Fallo. \"Repetir tras\" debe ser un número."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:2059
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:2062
 msgid "Select a trigger to delete."
 msgstr "Selecciona un disparador para borrar."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:2076
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:2079
 msgid "Select an action to delete."
 msgstr "Selecciona una acción para borrar."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:2099
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:2102
 msgid "Actions changes applied and restarted"
 msgstr "Cambios en acciones aplicados y reiniciados."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:2106
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:2109
 msgid "Actions changes cancelled"
 msgstr "Cambios en acciones cancelados"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:2110
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:2113
 msgid "Actions stopped"
 msgstr "Acciones detenidas"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:2119
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:2122
 msgid "Actions started"
 msgstr "Acciones iniciadas"
 
