@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenPlotter 0.0.0\n"
 "POT-Creation-Date: 2016-01-14 14:39+0100\n"
-"PO-Revision-Date: 2016-01-15 17:40+0100\n"
+"PO-Revision-Date: 2016-01-28 22:51+0100\n"
 "Last-Translator: sailoog <info@sailoog.com>\n"
 "Language-Team: Sailoog <info@sailoog.com>\n"
 "Language: es\n"
@@ -963,7 +963,7 @@ msgstr "Registro de datos meteo reiniciado"
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:1495
 msgid "Calculation accuracy set to "
-msgstr "Precesión del cálculo establecida en "
+msgstr "Precisión del cálculo establecida en "
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:1540
 msgid "Closing Signal K server"
@@ -983,7 +983,7 @@ msgid ""
 "a circuit connected to the selected GPIO pin, YOU CAN DAMAGE YOUR BOARD."
 msgstr ""
 "¡ATENCIÓN! si configuras esta salida como \"High\" y no hay una resistencia "
-"o un circuito conectado al GPIO pin seleccionado, PUEDES DAÑAR TU PLACA."
+"o un circuito conectado al pin GPIO seleccionado, PUEDES DAÑAR TU PLACA."
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:1833
 msgid "GPIO pins must be unique. Repeated pins: "
@@ -1406,7 +1406,7 @@ msgstr "reproducir audio"
 
 #: /home/sailoog/Escritorio/openplotter/classes/actions.py:45
 msgid "stop all sounds"
-msgstr "detener todos los sonidos"
+msgstr "detener todos los audios"
 
 #: /home/sailoog/Escritorio/openplotter/classes/actions.py:46
 msgid "show message"
