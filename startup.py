@@ -94,14 +94,6 @@ if opencpn_fullscreen=='1': opencpn_commands.append('-fullscreen')
 if opencpn=='1' and len(opencpn_commands)>1: subprocess.Popen(opencpn_commands)
 if opencpn=='1' and len(opencpn_commands)==1: subprocess.Popen('opencpn')
 
-subprocess.call(['pkill', '-9', 'aisdecoder'])
-subprocess.call(['pkill', '-9', 'rtl_fm'])
-if enable=='1':
-	frecuency='161975000'
-	if channel=='b': frecuency='162025000'
-	rtl_fm=subprocess.Popen(['rtl_fm', '-f', frecuency, '-g', gain, '-p', ppm, '-s', '48k'], stdout = subprocess.PIPE)
-	aisdecoder=subprocess.Popen(['aisdecoder', '-h', '127.0.0.1', '-p', '10110', '-a', 'file', '-c', 'mono', '-d', '-f', '/dev/stdin'], stdin = rtl_fm.stdout)
-	
 if wifi_server=='1':
 	subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '1', wlan, passw2, ssid2, share])
 else:
@@ -113,6 +105,14 @@ subprocess.call(['pkill', '-9', 'kplex'])
 if kplex=='1':
 	subprocess.Popen('kplex')        
 
+subprocess.call(['pkill', '-9', 'aisdecoder'])
+subprocess.call(['pkill', '-9', 'rtl_fm'])
+if enable=='1':
+	frecuency='161975000'
+	if channel=='b': frecuency='162025000'
+	rtl_fm=subprocess.Popen(['rtl_fm', '-f', frecuency, '-g', gain, '-p', ppm, '-s', '48k'], stdout = subprocess.PIPE)
+	aisdecoder=subprocess.Popen(['aisdecoder', '-h', '127.0.0.1', '-p', '10110', '-a', 'file', '-c', 'mono', '-d', '-f', '/dev/stdin'], stdin = rtl_fm.stdout)
+	
 subprocess.call(["pkill", '-9', "node"])
 if signalk=='1':
 	subprocess.Popen(home+'/.config/signalk-server-node/bin/nmea-from-10110', cwd=home+'/.config/signalk-server-node')       
