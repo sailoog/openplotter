@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import subprocess, os, shutil, sys
+import subprocess, os, shutil, sys, time
 from classes.paths import Paths
 
 wifi_server=sys.argv[1]
@@ -124,7 +124,13 @@ else:
 	file = open('/etc/network/interfaces', 'w')
 	file.write(data)
 	file.close()
+	try:
+		os.remove("/etc/dnsmasq.conf")
+	except Exception,e: print str(e)
 
 	subprocess.call(['/etc/init.d/network-manager', 'restart'])
+	output=subprocess.call(['ifdown', 'wlan0'])
+	time.sleep(2)
+	output=subprocess.call(['ifup', 'wlan0'])
 
 	print "\nWiFi access point stopped."
