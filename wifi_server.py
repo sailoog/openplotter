@@ -117,7 +117,10 @@ if wifi_server=='1':
 
 else:
 
-	data='# interfaces(5) file used by ifup(8) and ifdown(8)\nauto lo\niface lo inet loopback'
+	data='# interfaces(5) file used by ifup(8) and ifdown(8)\nauto lo\niface lo inet loopback\n'
+	data+='\nauto eth0\nallow-hotplug eth0\niface eth0 inet manual\n'
+	data+='\nauto wlan0\nallow-hotplug wlan0\niface wlan0 inet manual\nwpa-conf /etc/wpa_supplicant/wpa_supplicant.conf\n'
+	data+='\nauto wlan1\nallow-hotplug wlan1\niface wlan1 inet manual\nwpa-conf /etc/wpa_supplicant/wpa_supplicant.conf\n'
 	file = open('/etc/network/interfaces', 'w')
 	file.write(data)
 	file.close()
