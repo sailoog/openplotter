@@ -52,6 +52,6 @@ while True:
 			xdr = pynmea2.XDR('OS', 'XDR', (list_tmp))
 			xdr1=str(xdr)
 			xdr2=xdr1+"\r\n"
-			sock.sendto(xdr2, ('localhost', 10110))
+			sock.sendto(xdr2, ('127.0.0.1', 10110))
 			eng_temp=''
 

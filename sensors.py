@@ -110,7 +110,7 @@ while True:
 			hdg = pynmea2.HDG('OS', 'HDG', (str(heading_m),'','','',''))
 			hdg1=str(hdg)
 			hdg2=hdg1+"\r\n"
-			sock.sendto(hdg2, ('localhost', 10110))
+			sock.sendto(hdg2, ('127.0.0.1', 10110))
 			heading_m=''
 		# XDR
 		list_tmp=[]			
@@ -148,7 +148,7 @@ while True:
 			xdr = pynmea2.XDR('OS', 'XDR', (list_tmp))
 			xdr1=str(xdr)
 			xdr2=xdr1+"\r\n"
-			sock.sendto(xdr2, ('localhost', 10110))
+			sock.sendto(xdr2, ('127.0.0.1', 10110))
 			heel=''
 
 		temperature=''

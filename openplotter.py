@@ -1137,7 +1137,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			if i[1]: index = self.list_input.InsertStringItem(sys.maxint, i[1])
 			if i[2]: self.list_input.SetStringItem(index, 1, i[2])
 			if i[3]: self.list_input.SetStringItem(index, 2, i[3])
-			else: self.list_input.SetStringItem(index, 2, 'localhost')
+			else: self.list_input.SetStringItem(index, 2, '127.0.0.1')
 			if i[4]: self.list_input.SetStringItem(index, 3, i[4])
 			if i[5]:
 				if i[5]=='none': self.list_input.SetStringItem(index, 4, _('none'))

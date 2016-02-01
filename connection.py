@@ -142,7 +142,7 @@ class MainFrame(wx.Frame):
 		def create_gpsd(self,event):
 			self.name.SetValue('gpsd')
 			self.typeComboBox.SetValue('TCP')
-			self.address.SetValue('localhost')
+			self.address.SetValue('127.0.0.1')
 			self.port.SetValue('2947')
 
 		def ok_conn(self,event):

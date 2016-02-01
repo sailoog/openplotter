@@ -132,13 +132,13 @@ while True:
 			hdg = pynmea2.HDG('OC', 'HDG', (value,'','',str(mag_var[0]),mag_var[1]))
 			hdg1=str(hdg)
 			hdg2=hdg1+'\r\n'
-			sock.sendto(hdg2, ('localhost', 10110))
+			sock.sendto(hdg2, ('127.0.0.1', 10110))
 		#generate headint_t
 		if  conf.get('STARTUP', 'nmea_hdt')=='1' and heading_t:
 			hdt = pynmea2.HDT('OC', 'HDT', (str(round(heading_t,1)),'T'))
 			hdt1=str(hdt)
 			hdt2=hdt1+'\r\n'
-			sock.sendto(hdt2, ('localhost', 10110))
+			sock.sendto(hdt2, ('127.0.0.1', 10110))
 		#generate Rate of Turn (ROT)
 		if conf.get('STARTUP', 'nmea_rot')=='1' and heading_m:
 			if not last_heading: #initialize
@@ -159,7 +159,7 @@ while True:
 				rot = pynmea2.ROT('OC', 'ROT', (str(rot),'A'))
 				rot1=str(rot)
 				rot2=rot1+'\r\n'
-				sock.sendto(rot2, ('localhost', 10110))
+				sock.sendto(rot2, ('127.0.0.1', 10110))
 		#generate True Wind STW
 		if conf.get('STARTUP', 'tw_stw')=='1' and STW and AWS and AWA:
 			#TWA
@@ -172,7 +172,7 @@ while True:
 			mwv = pynmea2.MWV('OC', 'MWV', (str(TWA0r),'T',str(TWSr),'N','A'))
 			mwv1=str(mwv)
 			mwv2=mwv1+'\r\n'
-			sock.sendto(mwv2, ('localhost', 10110))
+			sock.sendto(mwv2, ('127.0.0.1', 10110))
 			#TWD
 			if heading_t:
 				if AWA[1]=='R':
@@ -185,7 +185,7 @@ while True:
 				mwd = pynmea2.MWD('OC', 'MWD', (str(TWDr),'T','','M',str(TWSr),'N','',''))
 				mwd1=str(mwd)
 				mwd2=mwd1+'\r\n'
-				sock.sendto(mwd2, ('localhost', 10110))
+				sock.sendto(mwd2, ('127.0.0.1', 10110))
 		#generate True Wind SOG
 		if conf.get('STARTUP', 'tw_sog')=='1' and SOG and COG and heading_t and AWS and AWA:
 			#TWD
@@ -205,7 +205,7 @@ while True:
 			mwd = pynmea2.MWD('OC', 'MWD', (str(TWDr),'T','','M',str(TWSr),'N','',''))
 			mwd1=str(mwd)
 			mwd2=mwd1+'\r\n'
-			sock.sendto(mwd2, ('localhost', 10110))
+			sock.sendto(mwd2, ('127.0.0.1', 10110))
 			#TWA
 			TWA=TWD-heading_t
 			TWA0=TWA
@@ -214,4 +214,4 @@ while True:
 			mwv = pynmea2.MWV('OC', 'MWV', (str(TWA0r),'T',str(TWSr),'N','A'))
 			mwv1=str(mwv)
 			mwv2=mwv1+'\r\n'
-			sock.sendto(mwv2, ('localhost', 10110))
+			sock.sendto(mwv2, ('127.0.0.1', 10110))
