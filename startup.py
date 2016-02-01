@@ -105,18 +105,10 @@ subprocess.call(['pkill', '-9', 'kplex'])
 if kplex=='1':
 	subprocess.Popen('kplex')        
 
-subprocess.call(['pkill', '-9', 'aisdecoder'])
-subprocess.call(['pkill', '-9', 'rtl_fm'])
-if enable=='1':
-	frecuency='161975000'
-	if channel=='b': frecuency='162025000'
-	rtl_fm=subprocess.Popen(['rtl_fm', '-f', frecuency, '-g', gain, '-p', ppm, '-s', '48k'], stdout = subprocess.PIPE)
-	aisdecoder=subprocess.Popen(['aisdecoder', '-h', '127.0.0.1', '-p', '10110', '-a', 'file', '-c', 'mono', '-d', '-f', '/dev/stdin'], stdin = rtl_fm.stdout)
-	
 subprocess.call(["pkill", '-9', "node"])
 if signalk=='1':
 	subprocess.Popen(home+'/.config/signalk-server-node/bin/nmea-from-10110', cwd=home+'/.config/signalk-server-node')       
-	
+
 if gps_time=='1':
 	subprocess.call(['sudo', 'python', currentpath+'/time_gps.py'])
 
@@ -134,3 +126,11 @@ if nmea_mag_var=='1' or nmea_hdt=='1' or nmea_rot=='1' or TW_STW=='1' or TW_SOG=
 
 subprocess.call(['pkill', '-f', 'monitoring.py'])
 subprocess.Popen(['python',currentpath+'/monitoring.py'])
+
+subprocess.call(['pkill', '-9', 'aisdecoder'])
+subprocess.call(['pkill', '-9', 'rtl_fm'])
+if enable=='1':
+	frecuency='161975000'
+	if channel=='b': frecuency='162025000'
+	rtl_fm=subprocess.Popen(['rtl_fm', '-f', frecuency, '-g', gain, '-p', ppm, '-s', '48k'], stdout = subprocess.PIPE)
+	aisdecoder=subprocess.Popen(['aisdecoder', '-h', '127.0.0.1', '-p', '10110', '-a', 'file', '-c', 'mono', '-d', '-f', '/dev/stdin'], stdin = rtl_fm.stdout)
