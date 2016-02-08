@@ -1983,7 +1983,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				else: repeat=str(i[3])
 				time_units=self.actions.time_units[i[4]]
 				repeat2=repeat+' '+time_units
-				self.list_actions.Append([self.actions.options[i[1]][0],i[2].decode('utf8'),repeat2])
+				self.list_actions.Append([self.actions.options[i[1]][0].decode('utf8'),i[2].decode('utf8'),repeat2.decode('utf8')])
 
 	def add_trigger(self,e):
 		dlg = addTrigger(self.datastream_list, self.a)
@@ -2055,7 +2055,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			time_units=self.actions.time_units[time_units_selection]
 			if repeat==0.0: repeat2=time_units
 			else: repeat2=str(repeat)+' '+time_units
-			self.list_actions.Append([action,data.decode('utf8'),repeat2])
+			self.list_actions.Append([action.decode('utf8'),data.decode('utf8'),repeat2.decode('utf8')])
 			tmp=[]
 			tmp.append(selected_trigger)
 			tmp.append(action_selection)
