@@ -201,74 +201,74 @@ while True:
 	#switches
 	if channel1:
 		if GPIO.input(channel1):
-			a.SW1[2]=1
-			a.SW1[4]=time.time()
+			a.DataList[a.getDataListIndex(_('SW1'))][2]=1
+			a.DataList[a.getDataListIndex(_('SW1'))][4]=time.time()
 		else:
-			a.SW1[2]=0
-			a.SW1[4]=time.time()
+			a.DataList[a.getDataListIndex(_('SW1'))][2]=0
+			a.DataList[a.getDataListIndex(_('SW1'))][4]=time.time()
 	if channel2:
 		if GPIO.input(channel2):
-			a.SW2[2]=1
-			a.SW2[4]=time.time()
+			a.DataList[a.getDataListIndex(_('SW2'))][2]=1
+			a.DataList[a.getDataListIndex(_('SW2'))][4]=time.time()
 		else:
-			a.SW2[2]=0
-			a.SW2[4]=time.time()
+			a.DataList[a.getDataListIndex(_('SW2'))][2]=0
+			a.DataList[a.getDataListIndex(_('SW2'))][4]=time.time()
 	if channel3:
 		if GPIO.input(channel3):
-			a.SW3[2]=1
-			a.SW3[4]=time.time()
+			a.DataList[a.getDataListIndex(_('SW3'))][2]=1
+			a.DataList[a.getDataListIndex(_('SW3'))][4]=time.time()
 		else:
-			a.SW3[2]=0
-			a.SW3[4]=time.time()
+			a.DataList[a.getDataListIndex(_('SW3'))][2]=0
+			a.DataList[a.getDataListIndex(_('SW3'))][4]=time.time()
 	if channel4:
 		if GPIO.input(channel4):
-			a.SW4[2]=1
-			a.SW4[4]=time.time()
+			a.DataList[a.getDataListIndex(_('SW4'))][2]=1
+			a.DataList[a.getDataListIndex(_('SW4'))][4]=time.time()
 		else:
-			a.SW4[2]=0
-			a.SW4[4]=time.time()
+			a.DataList[a.getDataListIndex(_('SW4'))][2]=0
+			a.DataList[a.getDataListIndex(_('SW4'))][4]=time.time()
 	if channel5:
 		if GPIO.input(channel5):
-			a.SW5[2]=1
-			a.SW5[4]=time.time()
+			a.DataList[a.getDataListIndex(_('SW5'))][2]=1
+			a.DataList[a.getDataListIndex(_('SW5'))][4]=time.time()
 		else:
-			a.SW5[2]=0
-			a.SW5[4]=time.time()
+			a.DataList[a.getDataListIndex(_('SW5'))][2]=0
+			a.DataList[a.getDataListIndex(_('SW5'))][4]=time.time()
 	if channel6:
 		if GPIO.input(channel6):
-			a.SW6[2]=1
-			a.SW6[4]=time.time()
+			a.DataList[a.getDataListIndex(_('SW6'))][2]=1
+			a.DataList[a.getDataListIndex(_('SW6'))][4]=time.time()
 		else:
-			a.SW6[2]=0
-			a.SW6[4]=time.time()
+			a.DataList[a.getDataListIndex(_('SW6'))][2]=0
+			a.DataList[a.getDataListIndex(_('SW6'))][4]=time.time()
 	if channel7:
 		if GPIO.input(channel7):
-			a.OUT1[2]=1
-			a.OUT1[4]=time.time()
+			a.DataList[a.getDataListIndex(_('OUT1'))][2]=1
+			a.DataList[a.getDataListIndex(_('OUT1'))][4]=time.time()
 		else:
-			a.OUT1[2]=0
-			a.OUT1[4]=time.time()
+			a.DataList[a.getDataListIndex(_('OUT1'))][2]=0
+			a.DataList[a.getDataListIndex(_('OUT1'))][4]=time.time()
 	if channel8:
 		if GPIO.input(channel8):
-			a.OUT2[2]=1
-			a.OUT2[4]=time.time()
+			a.DataList[a.getDataListIndex(_('OUT2'))][2]=1
+			a.DataList[a.getDataListIndex(_('OUT2'))][4]=time.time()
 		else:
-			a.OUT2[2]=0
-			a.OUT2[4]=time.time()
+			a.DataList[a.getDataListIndex(_('OUT2'))][2]=0
+			a.DataList[a.getDataListIndex(_('OUT2'))][4]=time.time()
 	if channel9:
 		if GPIO.input(channel9):
-			a.OUT3[2]=1
-			a.OUT3[4]=time.time()
+			a.DataList[a.getDataListIndex(_('OUT3'))][2]=1
+			a.DataList[a.getDataListIndex(_('OUT3'))][4]=time.time()
 		else:
-			a.OUT3[2]=0
-			a.OUT3[4]=time.time()
+			a.DataList[a.getDataListIndex(_('OUT3'))][2]=0
+			a.DataList[a.getDataListIndex(_('OUT3'))][4]=time.time()
 	if channel10:
 		if GPIO.input(channel10):
-			a.OUT4[2]=1
-			a.OUT4[4]=time.time()
+			a.DataList[a.getDataListIndex(_('OUT4'))][2]=1
+			a.DataList[a.getDataListIndex(_('OUT4'))][4]=time.time()
 		else:
-			a.OUT4[2]=0
-			a.OUT4[4]=time.time()
+			a.DataList[a.getDataListIndex(_('OUT4'))][2]=0
+			a.DataList[a.getDataListIndex(_('OUT4'))][4]=time.time()
 	#end switches
 
 	#actions
@@ -280,9 +280,9 @@ while True:
 				triggers[index][4]=True
 			else:
 				trigger=a.DataList[item[1]]
-				trigger_value=eval('a.'+trigger+'[2]')
+				trigger_value=trigger[2]
 				now = time.time()
-				trigger_value_timestamp=eval('a.'+trigger+'[4]')
+				trigger_value_timestamp=trigger[4]
 				operator=item[2]
 				data_value=float(item[3])
 			#not present for
@@ -349,124 +349,124 @@ while True:
 								triggers[index][4]=False
 			#switch on
 			if operator==7:
-				if trigger=='SW1' and channel1:
-					if a.SW1[2]==1: 
+				if trigger[1]==_('SW1') and channel1:
+					if a.DataList[a.getDataListIndex(_('SW1'))][2]==1: 
 						start_actions(index)
 						triggers[index][4]=True
 					else: 
 						triggers[index][4]=False
-				if trigger=='SW2' and channel2:
-					if a.SW2[2]==1: 
+				if trigger[1]==_('SW2') and channel2:
+					if a.DataList[a.getDataListIndex(_('SW2'))][2]==1: 
 						start_actions(index)
 						triggers[index][4]=True
 					else: 
 						triggers[index][4]=False
-				if trigger=='SW3' and channel3:
-					if a.SW3[2]==1: 
+				if trigger[1]==_('SW3') and channel3:
+					if a.DataList[a.getDataListIndex(_('SW3'))][2]==1: 
 						start_actions(index)
 						triggers[index][4]=True
 					else: 
 						triggers[index][4]=False
-				if trigger=='SW4' and channel4:
-					if a.SW4[2]==1: 
+				if trigger[1]==_('SW4') and channel4:
+					if a.DataList[a.getDataListIndex(_('SW4'))][2]==1: 
 						start_actions(index)
 						triggers[index][4]=True
 					else: 
 						triggers[index][4]=False
-				if trigger=='SW5' and channel5:
-					if a.SW5[2]==1: 
+				if trigger[1]==_('SW5') and channel5:
+					if a.DataList[a.getDataListIndex(_('SW5'))][2]==1: 
 						start_actions(index)
 						triggers[index][4]=True
 					else: 
 						triggers[index][4]=False
-				if trigger=='SW6' and channel6:
-					if a.SW6[2]==1: 
+				if trigger[1]==_('SW6') and channel6:
+					if a.DataList[a.getDataListIndex(_('SW6'))][2]==1: 
 						start_actions(index)
 						triggers[index][4]=True
 					else: 
 						triggers[index][4]=False
-				if trigger=='OUT1' and channel7:
-					if a.OUT1[2]==1: 
+				if trigger[1]==_('OUT1') and channel7:
+					if a.DataList[a.getDataListIndex(_('OUT1'))][2]==1: 
 						start_actions(index)
 						triggers[index][4]=True
 					else: 
 						triggers[index][4]=False
-				if trigger=='OUT2' and channel8:
-					if a.OUT2[2]==1: 
+				if trigger[1]==_('OUT2') and channel8:
+					if a.DataList[a.getDataListIndex(_('OUT2'))][2]==1: 
 						start_actions(index)
 						triggers[index][4]=True
 					else: 
 						triggers[index][4]=False
-				if trigger=='OUT3' and channel9:
-					if a.OUT3[2]==1: 
+				if trigger[1]==_('OUT3') and channel9:
+					if a.DataList[a.getDataListIndex(_('OUT3'))][2]==1: 
 						start_actions(index)
 						triggers[index][4]=True
 					else: 
 						triggers[index][4]=False
-				if trigger=='OUT4' and channel10:
-					if a.OUT4[2]==1: 
+				if trigger[1]==_('OUT4') and channel10:
+					if a.DataList[a.getDataListIndex(_('OUT4'))][2]==1: 
 						start_actions(index)
 						triggers[index][4]=True
 					else: 
 						triggers[index][4]=False
 			#switch off
 			if operator==8:
-				if trigger=='SW1' and channel1:
-					if a.SW1[2]==0: 
+				if trigger[1]==_('SW1') and channel1:
+					if a.DataList[a.getDataListIndex(_('SW1'))][2]==0: 
 						start_actions(index)
 						triggers[index][4]=True
 					else: 
 						triggers[index][4]=False
-				if trigger=='SW2' and channel2:
-					if a.SW2[2]==0: 
+				if trigger[1]==_('SW2') and channel2:
+					if a.DataList[a.getDataListIndex(_('SW2'))][2]==0: 
 						start_actions(index)
 						triggers[index][4]=True
 					else: 
 						triggers[index][4]=False
-				if trigger=='SW3' and channel3:
-					if a.SW3[2]==0: 
+				if trigger[1]==_('SW3') and channel3:
+					if a.DataList[a.getDataListIndex(_('SW3'))][2]==0: 
 						start_actions(index)
 						triggers[index][4]=True
 					else: 
 						triggers[index][4]=False
-				if trigger=='SW4' and channel4:
-					if a.SW4[2]==0: 
+				if trigger[1]==_('SW4') and channel4:
+					if a.DataList[a.getDataListIndex(_('SW4'))][2]==0: 
 						start_actions(index)
 						triggers[index][4]=True
 					else: 
 						triggers[index][4]=False
-				if trigger=='SW5' and channel5:
-					if a.SW5[2]==0: 
+				if trigger[1]==_('SW5') and channel5:
+					if a.DataList[a.getDataListIndex(_('SW5'))][2]==0: 
 						start_actions(index)
 						triggers[index][4]=True
 					else: 
 						triggers[index][4]=False
-				if trigger=='SW6' and channel6:
-					if a.SW6[2]==0: 
+				if trigger[1]==_('SW6') and channel6:
+					if a.DataList[a.getDataListIndex(_('SW6'))][2]==0: 
 						start_actions(index)
 						triggers[index][4]=True
 					else: 
 						triggers[index][4]=False
-				if trigger=='OUT1' and channel7:
-					if a.OUT1[2]==0: 
+				if trigger[1]==_('OUT1') and channel7:
+					if a.DataList[a.getDataListIndex(_('OUT1'))][2]==0: 
 						start_actions(index)
 						triggers[index][4]=True
 					else: 
 						triggers[index][4]=False
-				if trigger=='OUT2' and channel8:
-					if a.OUT2[2]==0: 
+				if trigger[1]==_('OUT2') and channel8:
+					if a.DataList[a.getDataListIndex(_('OUT2'))][2]==0: 
 						start_actions(index)
 						triggers[index][4]=True
 					else: 
 						triggers[index][4]=False
-				if trigger=='OUT3' and channel9:
-					if a.OUT3[2]==0: 
+				if trigger[1]==_('OUT3') and channel9:
+					if a.DataList[a.getDataListIndex(_('OUT3'))][2]==0: 
 						start_actions(index)
 						triggers[index][4]=True
 					else: 
 						triggers[index][4]=False
-				if trigger=='OUT4' and channel10:
-					if a.OUT4[2]==0: 
+				if trigger[1]==_('OUT4') and channel10:
+					if a.DataList[a.getDataListIndex(_('OUT4'))][2]==0: 
 						start_actions(index)
 						triggers[index][4]=True
 					else: 

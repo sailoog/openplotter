@@ -94,15 +94,15 @@ while True:
 	time.sleep(0.01)
 	now=time.time()
 	# refresh values
-	position =[a.validate('Lat',now,accuracy), a.Lat[3], a.validate('Lon',now,accuracy), a.Lon[3]]
-	date = a.validate('Date',now,accuracy)
+	position =[a.validate(_('Lat'),now,accuracy), a.DataList[a.getDataListIndex(_('Lat'))][3], a.validate(_('Lon'),now,accuracy), a.DataList[a.getDataListIndex(_('Lon'))][3]]
+	date = a.validate(_('Date'),now,accuracy)
 	if not date: date = datetime.date.today()
-	heading_m = a.validate('HDM',now,accuracy)
-	if a.Var[5] == 'OC': mag_var=['','']
-	else: mag_var = [a.validate('Var',now,accuracy), a.Var[3]]
+	heading_m = a.validate(_('HDM'),now,accuracy)
+	if a.DataList[a.getDataListIndex(_('Var'))][5] == 'OC': mag_var=['','']
+	else: mag_var = [a.validate(_('Var'),now,accuracy), a.DataList[a.getDataListIndex(_('Var'))][3]]
 	if not mag_var[0]: mag_var = calculate_mag_var(position,date)
-	if a.HDT[5] == 'OC': heading_t=''
-	else: heading_t = a.validate('HDT',now,accuracy)
+	if a.DataList[a.getDataListIndex(_('HDT'))][5] == 'OC': heading_t=''
+	else: heading_t = a.validate(_('HDT'),now,accuracy)
 	if not heading_t:
 		if heading_m and mag_var[0]:
 			var=mag_var[0]
@@ -110,17 +110,17 @@ while True:
 			heading_t=heading_m+var
 			if heading_t>360: heading_t=heading_t-360
 			if heading_t<0: heading_t=360+heading_t
-	STW = a.validate('STW',now,accuracy)
-	AWS = a.validate('AWS',now,accuracy) 
-	AWA = [a.validate('AWA',now,accuracy), a.AWA[3]]
+	STW = a.validate(_('STW'),now,accuracy)
+	AWS = a.validate(_('AWS'),now,accuracy) 
+	AWA = [a.validate(_('AWA'),now,accuracy), a.DataList[a.getDataListIndex(_('AWA'))][3]]
 	if AWA[0]:
 		if AWA[1]=='D':
 			AWA[1]='R'
 			if AWA[0]>180: 
 				AWA[0]=360-AWA[0]
 				AWA[1]='L'
-	SOG = a.validate('SOG',now,accuracy)
-	COG = a.validate('COG',now,accuracy)
+	SOG = a.validate(_('SOG'),now,accuracy)
+	COG = a.validate(_('COG'),now,accuracy)
 	# end refresh values
 	# generate NMEA
 	if now-sent >= rate:

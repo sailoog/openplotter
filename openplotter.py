@@ -464,7 +464,7 @@ class MainFrame(wx.Frame):
 		self.datastream_list=[]
 		self.a=DataStream()
 		for i in self.a.DataList:
-			self.datastream_list.append(eval('self.a.'+i+'[1]')+': '+eval('self.a.'+i+'[0]'))
+			self.datastream_list.append(i[1]+': '+i[0])
 		self.datastream_select = wx.ListBox(self.page9, choices=self.datastream_list, style=wx.LB_MULTIPLE, size=(310, 80), pos=(20, 65))
 		wx.StaticText(self.page9, label=_('apiKey'), pos=(20, 160))
 		self.apiKey = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(150, 155))
@@ -2004,7 +2004,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					dlg.Destroy()
 					return
 				trigger0=self.a.DataList[trigger_selection]
-				operator_selection=eval('self.a.'+trigger0+'[7]['+str(dlg.operator_select.GetCurrentSelection())+']')
+				operator_selection=trigger0[7][dlg.operator_select.GetCurrentSelection()]
 				if dlg.value.GetValue(): value=dlg.value.GetValue()
 				else: value='0'
 				try: value2=float(value)
