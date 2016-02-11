@@ -676,7 +676,8 @@ class MainFrame(wx.Frame):
 		if self.conf.get('TWITTER', 'send_data'):
 			selections=eval(self.conf.get('TWITTER', 'send_data'))
 			for i in selections:
-				self.datastream_select.SetSelection(i)
+				for index,item in enumerate(self.a.DataList):
+					if i==item[9]: self.datastream_select.SetSelection(index)
 		if self.conf.get('TWITTER', 'apiKey'): self.apiKey.SetValue('********************')
 		if self.conf.get('TWITTER', 'apiSecret'): self.apiSecret.SetValue('********************')
 		if self.conf.get('TWITTER', 'accessToken'): self.accessToken.SetValue('********************')
@@ -700,7 +701,6 @@ class MainFrame(wx.Frame):
 
 		self.read_switches()
 		self.read_triggers()
-		self.read_actions()
 
 ########MENU###################################	
 
@@ -1898,7 +1898,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.accessToken.Disable()
 			self.accessTokenSecret.Disable()
 			self.conf.set('TWITTER', 'enable', '1')
-			self.conf.set('TWITTER', 'send_data', str(self.datastream_select.GetSelections()))
+			temp_list=[]
+			for i in self.datastream_select.GetSelections():
+				temp_list.append(self.a.DataList[i][9])
+			self.conf.set('TWITTER', 'send_data', str(temp_list))
 			if not '*****' in self.apiKey.GetValue(): 
 				self.conf.set('TWITTER', 'apiKey', self.apiKey.GetValue())
 				self.apiKey.SetValue('********************')
@@ -1943,47 +1946,38 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.start_monitoring()
 #######################actions
 	def read_triggers(self):
+		self.triggers=[]
 		self.list_triggers.DeleteAllItems()
 		data=self.conf.get('ACTIONS', 'triggers')
-		self.triggers=data.split('||')
-		self.triggers.pop()
-		for index,item in enumerate(self.triggers):
-			ii=item.split(',')
-			ii[0]=int(ii[0])
-			ii[1]=int(ii[1])
-			ii[2]=int(ii[2])
-			ii[3]=float(ii[3])
+		try:
+			temp_list=eval(data)
+		except:temp_list=[]
+		for ii in temp_list:
 			if ii[1]==-1:
-				self.list_triggers.Append([_('None (always true)'),'',''])
+				self.triggers.append(ii)
+				self.list_triggers.Append([_('None (always true)'),'','',])
+				if ii[0]==1:
+					last=self.list_triggers.GetItemCount()-1
+					self.list_triggers.CheckItem(last)
 			else:
-				self.list_triggers.Append([self.datastream_list[ii[1]].decode('utf8'),self.a.operators_list[ii[2]].decode('utf8'),ii[3]])
-			if ii[0]==1:
-				last=self.list_triggers.GetItemCount()-1
-				self.list_triggers.CheckItem(last)
-			self.triggers[index]=ii
-
-	def read_actions(self):
-		data=self.conf.get('ACTIONS', 'actions')
-		self.trigger_actions=data.split('||')
-		self.trigger_actions.pop()
-		for index,item in enumerate(self.trigger_actions):
-			ii=item.split(',')
-			ii[0]=int(ii[0])
-			ii[1]=int(ii[1])
-			ii[3]=float(ii[3])
-			ii[4]=int(ii[4])
-			self.trigger_actions[index]=ii
+				x=self.a.getDataListIndex(ii[1])
+				if x:
+					self.triggers.append(ii)
+					self.list_triggers.Append([self.a.DataList[x][0].decode('utf8'),self.a.operators_list[ii[2]].decode('utf8'),ii[3]])
+					if ii[0]==1:
+						last=self.list_triggers.GetItemCount()-1
+						self.list_triggers.CheckItem(last)
+				else: self.ShowMessage(_('Problem with Actions detected. Please check and save again.'))
 
 	def print_actions(self, e):
 		selected_trigger=e.GetIndex()
 		self.list_actions.DeleteAllItems()
-		for i in self.trigger_actions:
-			if i[0]==selected_trigger:
-				if i[3]==0.0: repeat=''
-				else: repeat=str(i[3])
-				time_units=self.actions.time_units[i[4]]
-				repeat2=repeat+' '+time_units
-				self.list_actions.Append([self.actions.options[i[1]][0].decode('utf8'),i[2].decode('utf8'),repeat2.decode('utf8')])
+		for i in  self.triggers[selected_trigger][4]:
+			if i[2]==0.0: repeat=''
+			else: repeat=str(i[2])
+			time_units=self.actions.time_units[i[3]]
+			repeat2=repeat+' '+time_units
+			self.list_actions.Append([self.actions.options[i[0]][0].decode('utf8'),i[1].decode('utf8'),repeat2.decode('utf8')])
 
 	def add_trigger(self,e):
 		dlg = addTrigger(self.datastream_list, self.a)
@@ -1997,6 +1991,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				tmp.append(-1)
 				tmp.append(-1)
 				tmp.append(-1)
+				tmp.append([])
 				self.triggers.append(tmp)
 			else:
 				if trigger_selection == -1 or dlg.operator_select.GetCurrentSelection() == -1:
@@ -2012,14 +2007,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					self.ShowMessage(_('Failed. Value must be a number.'))
 					dlg.Destroy()
 					return
-				trigger=self.datastream_list[dlg.trigger_select.GetCurrentSelection()]
 				operator=self.a.operators_list[operator_selection]
-				self.list_triggers.Append([trigger.decode('utf8'),operator.decode('utf8'),value])
+				self.list_triggers.Append([trigger0[0].decode('utf8'),operator.decode('utf8'),value])
 				tmp=[]
 				tmp.append(1)
-				tmp.append(trigger_selection)
+				tmp.append(trigger0[9])
 				tmp.append(operator_selection)
 				tmp.append(value2)
+				tmp.append([])
 				self.triggers.append(tmp)
 			dlg.Destroy()
 			total=self.list_triggers.GetItemCount()
@@ -2029,8 +2024,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.list_triggers.CheckItem(total-1)
 
 	def add_action(self,e):
-		selected_trigger= self.list_triggers.GetFirstSelected()
-		if selected_trigger==-1:
+		selected_trigger_position= self.list_triggers.GetFirstSelected()
+		if selected_trigger_position==-1:
 			self.ShowMessage(_('Select a trigger to add actions.'))
 			return
 		dlg = addAction(self.actions.options,self.actions.time_units)
@@ -2057,12 +2052,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			else: repeat2=str(repeat)+' '+time_units
 			self.list_actions.Append([action.decode('utf8'),data.decode('utf8'),repeat2.decode('utf8')])
 			tmp=[]
-			tmp.append(selected_trigger)
 			tmp.append(action_selection)
 			tmp.append(data)
 			tmp.append(repeat)
 			tmp.append(time_units_selection)
-			self.trigger_actions.append(tmp)
+			self.triggers[selected_trigger_position][4].append(tmp)
 		dlg.Destroy()
 
 	def delete_trigger(self,e):
@@ -2072,13 +2066,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		else:
 			del self.triggers[selected]
 			self.list_triggers.DeleteItem(selected)
-			toRemove=[]
-			for index,item in enumerate(self.trigger_actions):
-				if item[0]==selected: toRemove.append(index)
-			for i in sorted(toRemove, reverse=True):
-				del self.trigger_actions[i]
-			for i in self.trigger_actions:
-				if i[0]>selected: i[0]=(i[0])-1
 			self.list_actions.DeleteAllItems()
 
 	def delete_action(self,e):
@@ -2086,35 +2073,22 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		selected_action=self.list_actions.GetFirstSelected()
 		if selected_action==-1: 
 			self.ShowMessage(_('Select an action to delete.'))
-		else:
+		else: 
+			del self.triggers[selected_trigger][4][selected_action]
 			self.list_actions.DeleteItem(selected_action)
-			cont=0
-			for index,item in enumerate(self.trigger_actions):
-				if item[0]==selected_trigger:
-					if cont==selected_action: 
-						del self.trigger_actions[index]
-						return
-					else: cont=cont+1
 
 	def apply_changes_actions(self,e):
-		tmp=''
-		for index,item in enumerate(self.triggers):
-			if self.list_triggers.IsChecked(index): tmp +='1,'
-			else: tmp +='0,'
-			tmp +=str(self.triggers[index][1])+','+str(self.triggers[index][2])+','+str(self.triggers[index][3])+'||'
-		self.conf.set('ACTIONS', 'triggers', tmp)
-		
-		tmp=''
-		for index,item in enumerate(self.trigger_actions):
-			tmp +=str(self.trigger_actions[index][0])+','+str(self.trigger_actions[index][1])+','+str(self.trigger_actions[index][2])+','+str(self.trigger_actions[index][3])+','+str(self.trigger_actions[index][4])+'||'
-		self.conf.set('ACTIONS', 'actions', tmp)
+		i=0
+		for ii in self.triggers:
+			if self.list_triggers.IsChecked(i): self.triggers[i][0]=1
+			else: self.triggers[i][0]=0
+			i=i+1
+		self.conf.set('ACTIONS', 'triggers', str(self.triggers))
 		self.SetStatusText(_('Actions changes applied and restarted'))
 		self.start_monitoring()
 
 	def cancel_changes_actions(self,e):
 		self.read_triggers()
-		self.read_actions()
-		self.list_actions.DeleteAllItems()
 		self.SetStatusText(_('Actions changes cancelled'))
 
 	def stop_actions(self,e):
@@ -2123,7 +2097,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.conf.read()
 		self.read_triggers()
 		self.list_actions.DeleteAllItems()
-		self.read_actions()
 
 
 	def start_actions(self,e):
@@ -2132,7 +2105,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.conf.read()
 		self.read_triggers()
 		self.list_actions.DeleteAllItems()
-		self.read_actions()
 
 #Main#############################
 if __name__ == "__main__":

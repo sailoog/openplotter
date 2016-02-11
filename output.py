@@ -186,74 +186,74 @@ class MyFrame(wx.Frame):
 
 					if self.channel1:
 						if GPIO.input(self.channel1):
-							self.a.DataList[self.a.getDataListIndex(_('SW1'))][2]=1
-							self.a.DataList[self.a.getDataListIndex(_('SW1'))][4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('SW1')][2]=1
+							self.a.DataList[self.a.getDataListIndex('SW1')][4]=time.time()
 						else:
-							self.a.DataList[self.a.getDataListIndex(_('SW1'))][2]=0
-							self.a.DataList[self.a.getDataListIndex(_('SW1'))][4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('SW1')][2]=0
+							self.a.DataList[self.a.getDataListIndex('SW1')][4]=time.time()
 					if self.channel2:
 						if GPIO.input(self.channel2):
-							self.a.DataList[self.a.getDataListIndex(_('SW2'))][2]=1
-							self.a.DataList[self.a.getDataListIndex(_('SW2'))][4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('SW2')][2]=1
+							self.a.DataList[self.a.getDataListIndex('SW2')][4]=time.time()
 						else:
-							self.a.DataList[self.a.getDataListIndex(_('SW2'))][2]=0
-							self.a.DataList[self.a.getDataListIndex(_('SW2'))][4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('SW2')][2]=0
+							self.a.DataList[self.a.getDataListIndex('SW2')][4]=time.time()
 					if self.channel3:
 						if GPIO.input(self.channel3):
-							self.a.DataList[self.a.getDataListIndex(_('SW3'))][2]=1
-							self.a.DataList[self.a.getDataListIndex(_('SW3'))][4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('SW3')][2]=1
+							self.a.DataList[self.a.getDataListIndex('SW3')][4]=time.time()
 						else:
-							self.a.DataList[self.a.getDataListIndex(_('SW3'))][2]=0
-							self.a.DataList[self.a.getDataListIndex(_('SW3'))][4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('SW3')][2]=0
+							self.a.DataList[self.a.getDataListIndex('SW3')][4]=time.time()
 					if self.channel4:
 						if GPIO.input(self.channel4):
-							self.a.DataList[self.a.getDataListIndex(_('SW4'))][2]=1
-							self.a.DataList[self.a.getDataListIndex(_('SW4'))][4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('SW4')][2]=1
+							self.a.DataList[self.a.getDataListIndex('SW4')][4]=time.time()
 						else:
-							self.a.DataList[self.a.getDataListIndex(_('SW4'))][2]=0
-							self.a.DataList[self.a.getDataListIndex(_('SW4'))][4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('SW4')][2]=0
+							self.a.DataList[self.a.getDataListIndex('SW4')][4]=time.time()
 					if self.channel5:
 						if GPIO.input(self.channel5):
-							self.a.DataList[self.a.getDataListIndex(_('SW5'))][2]=1
-							self.a.DataList[self.a.getDataListIndex(_('SW5'))][4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('SW5')][2]=1
+							self.a.DataList[self.a.getDataListIndex('SW5')][4]=time.time()
 						else:
-							self.a.DataList[self.a.getDataListIndex(_('SW5'))][2]=0
-							self.a.DataList[self.a.getDataListIndex(_('SW5'))][4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('SW5')][2]=0
+							self.a.DataList[self.a.getDataListIndex('SW5')][4]=time.time()
 					if self.channel6:
 						if GPIO.input(self.channel6):
-							self.a.DataList[self.a.getDataListIndex(_('SW6'))][2]=1
-							self.a.DataList[self.a.getDataListIndex(_('SW6'))][4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('SW6')][2]=1
+							self.a.DataList[self.a.getDataListIndex('SW6')][4]=time.time()
 						else:
-							self.a.DataList[self.a.getDataListIndex(_('SW6'))][2]=0
-							self.a.DataList[self.a.getDataListIndex(_('SW6'))][4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('SW6')][2]=0
+							self.a.DataList[self.a.getDataListIndex('SW6')][4]=time.time()
 					if self.channel7:
 						if GPIO.input(self.channel7):
-							self.a.DataList[self.a.getDataListIndex(_('OUT1'))][2]=1
-							self.a.DataList[self.a.getDataListIndex(_('OUT1'))][4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('OUT1')][2]=1
+							self.a.DataList[self.a.getDataListIndex('OUT1')][4]=time.time()
 						else:
-							self.a.DataList[self.a.getDataListIndex(_('OUT1'))][2]=0
-							self.a.DataList[self.a.getDataListIndex(_('OUT1'))][4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('OUT1')][2]=0
+							self.a.DataList[self.a.getDataListIndex('OUT1')][4]=time.time()
 					if self.channel8:
 						if GPIO.input(self.channel8):
-							self.a.DataList[self.a.getDataListIndex(_('OUT2'))][2]=1
-							self.a.DataList[self.a.getDataListIndex(_('OUT2'))][4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('OUT2')][2]=1
+							self.a.DataList[self.a.getDataListIndex('OUT2')][4]=time.time()
 						else:
-							self.a.DataList[self.a.getDataListIndex(_('OUT2'))][2]=0
-							self.a.DataList[self.a.getDataListIndex(_('OUT2'))][4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('OUT2')][2]=0
+							self.a.DataList[self.a.getDataListIndex('OUT2')][4]=time.time()
 					if self.channel9:
 						if GPIO.input(self.channel9):
-							self.a.DataList[self.a.getDataListIndex(_('OUT3'))][2]=1
-							self.a.DataList[self.a.getDataListIndex(_('OUT3'))][4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('OUT3')][2]=1
+							self.a.DataList[self.a.getDataListIndex('OUT3')][4]=time.time()
 						else:
-							self.a.DataList[self.a.getDataListIndex(_('OUT3'))][2]=0
-							self.a.DataList[self.a.getDataListIndex(_('OUT3'))][4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('OUT3')][2]=0
+							self.a.DataList[self.a.getDataListIndex('OUT3')][4]=time.time()
 					if self.channel10:
 						if GPIO.input(self.channel10):
-							self.a.DataList[self.a.getDataListIndex(_('OUT4'))][2]=1
-							self.a.DataList[self.a.getDataListIndex(_('OUT4'))][4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('OUT4')][2]=1
+							self.a.DataList[self.a.getDataListIndex('OUT4')][4]=time.time()
 						else:
-							self.a.DataList[self.a.getDataListIndex(_('OUT4'))][2]=0
-							self.a.DataList[self.a.getDataListIndex(_('OUT4'))][4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('OUT4')][2]=0
+							self.a.DataList[self.a.getDataListIndex('OUT4')][4]=time.time()
 
 					index=0
 					for i in self.a.DataList:

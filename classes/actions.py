@@ -116,19 +116,22 @@ class Actions():
 			tweetStr = now+' '+text
 			send_data=eval(conf.get('TWITTER', 'send_data'))
 			for ii in send_data:
-				timestamp=eval('a.'+a.DataList[ii]+'[4]')
-				if timestamp:
-					now=time.time()
-					age=now-timestamp
-					if age < 20:
-						data=''
-						value=''
-						unit=''
-						data=eval('a.'+a.DataList[ii]+'[1]')
-						value=eval('a.'+a.DataList[ii]+'[2]')
-						unit=eval('a.'+a.DataList[ii]+'[3]')
-						if unit: tweetStr+= ' '+data+':'+str(value)+str(unit)
-						else: tweetStr+= ' '+data+':'+str(value)+' '
+				for index,item in enumerate(a.DataList):
+					if ii==item[9]:
+						timestamp=item[4]
+						if timestamp:
+							now=time.time()
+							age=now-timestamp
+							if age < 20:
+								data=''
+								value=''
+								unit=''
+								data=item[1]
+								value=item[2]
+								unit=item[3]
+								if unit: tweetStr+= ' '+data+':'+str(value)+str(unit)
+								else: tweetStr+= ' '+data+':'+str(value)+' '
+						timestamp=''
 			apiKey = conf.get('TWITTER', 'apiKey')
 			apiSecret = conf.get('TWITTER', 'apiSecret')
 			accessToken = conf.get('TWITTER', 'accessToken')
@@ -142,7 +145,7 @@ class Actions():
 			subject = text
 			body = ''
 			for ii in a.DataList:
-				timestamp=eval('a.'+ii+'[4]')
+				timestamp=ii[4]
 				if timestamp:
 					now=time.time()
 					age=now-timestamp
@@ -150,9 +153,9 @@ class Actions():
 						data=''
 						value=''
 						unit=''
-						data=eval('a.'+ii+'[0]')
-						value=eval('a.'+ii+'[2]')
-						unit=eval('a.'+ii+'[3]')
+						data=ii[0]
+						value=ii[2]
+						unit=ii[3]
 						if unit: body += data+': '+str(value)+' '+str(unit)+'\n'
 						else: body+= data+': '+str(value)+'\n'
 			GMAIL_USERNAME = conf.get('GMAIL', 'gmail')
