@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import sys, ConfigParser, os, socket, time, pynmea2
+import socket, pynmea2
 from w1thermsensor import W1ThermSensor
 from classes.conf import Conf
 
@@ -23,35 +23,33 @@ conf=Conf()
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-eng_temp=''
+sensors_list=eval(conf.get('1W', 'DS18B20'))
 
-tick=time.time()
+sensors=[]
+for i in sensors_list:
+	sensors.append(W1ThermSensor(W1ThermSensor.THERM_SENSOR_DS18B20, i[3]))
 
 while True:
-	tick2=time.time()
-
-	#GENERATE
-	if tick2-tick > float(conf.get('STARTUP', 'nmea_rate_sen')):
-		tick=time.time()
-
-		# read DS18B20
-		if conf.get('STARTUP', 'nmea_eng_temp')=='1':
-			try:
-				sensor = W1ThermSensor()
-				eng_temp = sensor.get_temperature()
-			except Exception,e: print str(e)
-		# XDR
-		list_tmp=[]			
-		if conf.get('STARTUP', 'nmea_eng_temp')=='1' and eng_temp:
-			eng_temp=round(eng_temp,1)
+	temp=''
+	list_tmp=[]	
+	ib=0
+	try:
+		for i in sensors_list:
+ 			if i[2]=='C': unit=W1ThermSensor.DEGREES_C
+			if i[2]=='F': unit=W1ThermSensor.DEGREES_F
+			if i[2]=='K': unit=W1ThermSensor.KELVIN
+			temp=sensors[ib].get_temperature(unit)
+			
+			temp=round(temp,1)
 			list_tmp.append('C')
-			list_tmp.append(str(eng_temp))
-			list_tmp.append('C')
-			list_tmp.append('1W1')
-		if list_tmp:
-			xdr = pynmea2.XDR('OS', 'XDR', (list_tmp))
-			xdr1=str(xdr)
-			xdr2=xdr1+"\r\n"
-			sock.sendto(xdr2, ('127.0.0.1', 10110))
-			eng_temp=''
-
+			list_tmp.append(str(temp))
+			list_tmp.append(i[2])
+			list_tmp.append(i[4])
+			ib=ib+1
+	except: pass
+	
+	if list_tmp:
+		xdr = pynmea2.XDR('OS', 'XDR', (list_tmp))
+		xdr1=str(xdr)
+		xdr2=xdr1+"\r\n"
+		sock.sendto(xdr2, ('127.0.0.1', 10110))
