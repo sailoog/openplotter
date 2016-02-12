@@ -175,17 +175,6 @@ class Actions():
 		if option=='17':
 			subprocess.Popen(['pkill', '-f', 'message.py'])
 		if option=='18':
-			tmp=''
-			data=conf.get('ACTIONS', 'triggers')
-			triggers=data.split('||')
-			triggers.pop()
-			for index,item in enumerate(triggers):
-				ii=item.split(',')
-				triggers[index]=ii
-			for index,item in enumerate(triggers):
-				tmp +='1,'
-				tmp +=triggers[index][1]+','+triggers[index][2]+','+triggers[index][3]+'||'
-			conf.set('ACTIONS', 'triggers', tmp)
 			return 'read'
 		if option=='19':
 			subprocess.Popen(['python', self.currentpath+'/ctrl_actions.py', '0'])

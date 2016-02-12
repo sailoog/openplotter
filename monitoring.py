@@ -77,7 +77,7 @@ def start_actions(trigger):
 				re=actions.run_action(str(i[0]),i[1],conf,a)
 			except Exception,e: print str(e)
 			if re=='read':
-				read_triggers()
+				startall()
 		else:
 			if i[3]==0: pass
 			else:
@@ -88,7 +88,16 @@ def start_actions(trigger):
 						re=actions.run_action(str(i[0]),i[1],conf,a)
 					except Exception,e: print str(e)
 					if re=='read':
-						read_triggers()
+						startall()
+
+def startall():
+	global triggers
+	i=0
+	for ii in triggers:
+		triggers[i][0]=1
+		i=i+1
+	conf.set('ACTIONS', 'triggers', str(triggers))
+
 #thread1
 def parse_nmea():
 	global sock_in
