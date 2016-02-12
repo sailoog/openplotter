@@ -47,7 +47,7 @@ while True:
 			list_tmp.append('C')
 			list_tmp.append(str(eng_temp))
 			list_tmp.append('C')
-			list_tmp.append('ENGT')
+			list_tmp.append('1W1')
 		if list_tmp:
 			xdr = pynmea2.XDR('OS', 'XDR', (list_tmp))
 			xdr1=str(xdr)

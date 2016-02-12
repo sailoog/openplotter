@@ -40,12 +40,12 @@ class DataStream:
 		self.DataList.append([_('Apparent Wind Speed'),_('AWS'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'AWS'])
 		self.DataList.append([_('True Wind Speed'),_('TWS'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'TWS'])
 		self.DataList.append([_('True Wind Direction'),_('TWD'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'TWD'])
-		self.DataList.append([_('Air Pressure'),_('AP'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'AP'])
-		self.DataList.append([_('Air Temperature'),_('AT'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'AT'])
-		self.DataList.append([_('Air Relative Humidity'),_('ARH'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'ARH'])
+		self.DataList.append([_('Air Pressure'),_('AP'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'I2CP'])
+		self.DataList.append([_('Air Temperature'),_('AT'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'I2CT'])
+		self.DataList.append([_('Air Relative Humidity'),_('ARH'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'I2CH'])
 		self.DataList.append([_('Rate of Turn'),_('ROT'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'ROT'])
-		self.DataList.append([_('Heel'),_('Heel'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'Heel'])
-		self.DataList.append([_('Engine Coolant Temperature'),_('ECT'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'ECT'])
+		self.DataList.append([_('Heel'),_('Heel'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'I2CR'])
+		self.DataList.append([_('Engine Coolant Temperature'),_('ECT'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'1W1'])
 		self.DataList.append([_('Switch 1 status'),_('SW1'),None,None,None,None,None,(7,8),0,'SW1'])
 		self.DataList.append([_('Switch 2 status'),_('SW2'),None,None,None,None,None,(7,8),0,'SW2'])
 		self.DataList.append([_('Switch 3 status'),_('SW3'),None,None,None,None,None,(7,8),0,'SW3'])
@@ -264,35 +264,35 @@ class DataStream:
 					n=msg.num_transducers
 					for i in range(0, n):
 						transducer=msg.get_transducer(i)
-						if transducer.id=='AIRP':		
+						if transducer.id=='I2CP':		
 							#pressure
 							value=transducer.value
 							if value:
 								unit='hPa'
-								self.updateDataList('AP',value,unit,talker,nmea_type)
-						if transducer.id=='AIRT':		
+								self.updateDataList('I2CP',value,unit,talker,nmea_type)
+						if transducer.id=='I2CT':		
 							#temperature
 							value=transducer.value
 							if value:
 								unit='C'
-								self.updateDataList('AT',value,unit,talker,nmea_type)
-						if transducer.id=='HUMI':		
+								self.updateDataList('I2CT',value,unit,talker,nmea_type)
+						if transducer.id=='I2CH':		
 							#humidity
 							value=transducer.value
 							if value:
 								unit='%'
-								self.updateDataList('ARH',value,unit,talker,nmea_type)
-						if transducer.id=='ROLL':		
+								self.updateDataList('I2CH',value,unit,talker,nmea_type)
+						if transducer.id=='I2CR':		
 							#heel
 							value=transducer.value
 							if value:
 								unit='D'
-								self.updateDataList('Heel',value,unit,talker,nmea_type)						
-						if transducer.id=='ENGT':		
+								self.updateDataList('I2CR',value,unit,talker,nmea_type)						
+						if transducer.id=='1W1':		
 							#engine temperature
 							value=transducer.value
 							if value:
 								unit='C'
-								self.updateDataList('ECT',value,unit,talker,nmea_type)
+								self.updateDataList('1W1',value,unit,talker,nmea_type)
 			#except Exception,e: print str(e)
 			except: pass

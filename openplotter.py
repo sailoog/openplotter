@@ -1351,14 +1351,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 #####sensors#################################
 	def start_sensors(self):
 		subprocess.call(['pkill', 'RTIMULibCal'])
-		subprocess.call(['pkill', '-f', 'sensors.py'])
+		subprocess.call(['pkill', '-f', 'i2c.py'])
 		if self.heading.GetValue() or self.heel.GetValue() or self.press.GetValue() or self.temp_p.GetValue() or self.hum.GetValue() or self.temp_h.GetValue():
-			subprocess.Popen(['python', currentpath+'/sensors.py'], cwd=currentpath+'/imu')
+			subprocess.Popen(['python', currentpath+'/i2c.py'], cwd=currentpath+'/imu')
 
 	def start_sensors_b(self):
-		subprocess.call(['pkill', '-f', 'sensors_b.py'])
+		subprocess.call(['pkill', '-f', '1w.py'])
 		if self.eng_temp.GetValue():
-			subprocess.Popen(['python', currentpath+'/sensors_b.py'])
+			subprocess.Popen(['python', currentpath+'/1w.py'])
 
 	def ok_rate(self, e):
 		rate=self.rate.GetValue()

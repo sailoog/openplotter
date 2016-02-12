@@ -112,13 +112,13 @@ if signalk=='1':
 if gps_time=='1':
 	subprocess.call(['sudo', 'python', currentpath+'/time_gps.py'])
 
-subprocess.call(['pkill', '-f', 'sensors.py'])
+subprocess.call(['pkill', '-f', 'i2c.py'])
 if nmea_hdg=='1' or nmea_heel=='1' or nmea_press=='1' or nmea_temp_p=='1' or nmea_hum=='1' or nmea_temp_h=='1': 
-	subprocess.Popen(['python', currentpath+'/sensors.py'], cwd=currentpath+'/imu')
+	subprocess.Popen(['python', currentpath+'/i2c.py'], cwd=currentpath+'/imu')
 
-subprocess.call(['pkill', '-f', 'sensors_b.py'])
+subprocess.call(['pkill', '-f', '1w.py'])
 if nmea_eng_temp=='1': 
-	subprocess.Popen(['python', currentpath+'/sensors_b.py'])
+	subprocess.Popen(['python', currentpath+'/1w.py'])
 
 subprocess.call(['pkill', '-f', 'calculate.py'])
 if nmea_mag_var=='1' or nmea_hdt=='1' or nmea_rot=='1' or TW_STW=='1' or TW_SOG=='1': 

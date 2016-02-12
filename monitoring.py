@@ -56,7 +56,6 @@ def read_triggers():
 	try:
 		temp_list=eval(data)
 	except:temp_list=[]
-	print temp_list
 	for ii in temp_list:
 		if ii[1]==-1 or a.getDataListIndex(ii[1]):
 			ii.append(False)# 5 state
@@ -66,7 +65,6 @@ def read_triggers():
 				if iii[3]==4: iii[2]=((iii[2]*24)*60)*60
 				iii.append('')# 4 last run
 			triggers.append(ii)
-	print triggers
 
 def start_actions(trigger):
 	global triggers
