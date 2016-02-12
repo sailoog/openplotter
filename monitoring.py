@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import time, socket, threading
+import time, socket, threading, copy
 import RPi.GPIO as GPIO
 from classes.datastream import DataStream
 from classes.conf import Conf
@@ -92,11 +92,19 @@ def start_actions(trigger):
 
 def startall():
 	global triggers
+	new_list = copy.deepcopy(triggers)
 	i=0
 	for ii in triggers:
 		triggers[i][0]=1
+		new_list[i][0]=1
+		del new_list[i][5]
+		ib=0
+		for iii in ii[4]:
+			del new_list[i][4][ib][4]
+			ib=ib+1
 		i=i+1
-	conf.set('ACTIONS', 'triggers', str(triggers))
+	conf.set('ACTIONS', 'triggers', str(new_list))
+	del new_list
 
 #thread1
 def parse_nmea():
