@@ -198,9 +198,9 @@ class MainFrame(wx.Frame):
 		self.wifi_enable.Bind(wx.EVT_CHECKBOX, self.onwifi_enable)
 
 		wx.StaticBox(self.page3, label=_(' Settings '), size=(400, 215), pos=(10, 60))
-
+		
 		self.available_wireless = []
-		output=subprocess.check_output('iwconfig')
+		output=subprocess.check_output('iwconfig', stderr=subprocess.STDOUT)
 		for i in range (0, 10):
 			ii=str(i)
 			if 'wlan'+ii in output: self.available_wireless.append('wlan'+ii)
