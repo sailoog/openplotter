@@ -34,6 +34,9 @@ class MyFrame(wx.Frame):
 
 			Language(self.conf.get('GENERAL','lang'))
 
+			GPIO.setmode(GPIO.BCM)
+			GPIO.setwarnings(False)
+
 			wx.Frame.__init__(self, parent, title="Inspector", size=(650,435))
 			
 			self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
@@ -59,13 +62,7 @@ class MyFrame(wx.Frame):
 			self.button_nmea =wx.Button(self, label=_('NMEA info'), pos=(555, 240))
 			self.Bind(wx.EVT_BUTTON, self.nmea_info, self.button_nmea)
 
-			self.a=DataStream()
-
-			index=0
-			for i in self.a.DataList:
-				data=i[0]
-				self.list.InsertStringItem(index,data)
-				index=index+1
+			self.reset(0)
 
 			self.pause_all=0
 
@@ -82,12 +79,10 @@ class MyFrame(wx.Frame):
 			self.error=''
 			self.frase_nmea_log=''
 			self.data=[]
-			self.read_conf=1
-			GPIO.setmode(GPIO.BCM)
-			GPIO.setwarnings(False)
 
 			if not self.thread1.isAlive(): self.thread1.start()
 			if not self.thread2.isAlive(): self.thread2.start()
+
 
 		def check_switches(self):
 			self.channel1=''
@@ -166,7 +161,7 @@ class MyFrame(wx.Frame):
 					except socket.error, error_msg:
 						self.error= _('Connected with localhost:10110. Error: ')+ str(error_msg[0])+_(', waiting for data...')
 					else:
-						if frase_nmea:
+						if frase_nmea and self.pause_all==0:
 							self.a.parse_nmea(frase_nmea)
 							self.frase_nmea_log+=frase_nmea
 							self.error = _('Connected with localhost:10110.')
@@ -178,11 +173,6 @@ class MyFrame(wx.Frame):
 		def refresh_loop(self):
 			while True:	
 				if self.pause_all==0:
-
-					if self.read_conf==1: 
-						self.conf.read()
-						self.check_switches()
-						self.read_conf=0
 
 					if self.channel1:
 						if GPIO.input(self.channel1):
@@ -310,13 +300,25 @@ class MyFrame(wx.Frame):
 				self.button_pause.SetLabel(_('Pause'))
 
 		def reset(self, e):
+			self.pause_all=1
 			for i in range(self.list.GetItemCount()):
+				self.list.SetStringItem(i,0,'')
 				self.list.SetStringItem(i,1,'')
 				self.list.SetStringItem(i,2,'')
 				self.list.SetStringItem(i,3,'')
 				self.list.SetStringItem(i,4,'')
 			self.logger.SetValue('')
-			self.read_conf=1
+			time.sleep(1)
+			self.conf.read()
+			self.check_switches()
+			self.a=DataStream(self.conf)
+			index=0
+			for i in self.a.DataList:
+				data=i[0]
+				self.list.InsertStringItem(index,data)
+				index=index+1
+
+			self.pause_all=0
 
 		def nmea_info(self, e):
 			url = self.currentpath+'/docs/NMEA.html'

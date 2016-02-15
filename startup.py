@@ -71,7 +71,12 @@ nmea_press=conf.get('STARTUP', 'nmea_press')
 nmea_temp_p=conf.get('STARTUP', 'nmea_temp_p')
 nmea_hum=conf.get('STARTUP', 'nmea_hum')
 nmea_temp_h=conf.get('STARTUP', 'nmea_temp_h')
-nmea_eng_temp=conf.get('STARTUP', 'nmea_eng_temp')
+
+#1W
+DS18B20='0'
+sensors_list=eval(conf.get('1W', 'DS18B20'))
+for i in sensors_list:
+	if i[5]=='1': DS18B20='1'
 
 nmea_mag_var=conf.get('STARTUP', 'nmea_mag_var')
 nmea_hdt=conf.get('STARTUP', 'nmea_hdt')
@@ -117,7 +122,7 @@ if nmea_hdg=='1' or nmea_heel=='1' or nmea_press=='1' or nmea_temp_p=='1' or nme
 	subprocess.Popen(['python', currentpath+'/i2c.py'], cwd=currentpath+'/imu')
 
 subprocess.call(['pkill', '-f', '1w.py'])
-if nmea_eng_temp=='1': 
+if DS18B20=='1': 
 	subprocess.Popen(['python', currentpath+'/1w.py'])
 
 subprocess.call(['pkill', '-f', 'calculate.py'])

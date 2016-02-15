@@ -31,7 +31,7 @@ global sock_in
 global error
 sock_in=''
 error=0
-a=DataStream()
+a=DataStream(conf)
 actions=Actions()
 nodata=''
 channel1=''

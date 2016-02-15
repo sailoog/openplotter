@@ -16,13 +16,11 @@
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
 import RTIMU, os
-from w1thermsensor import W1ThermSensor
 
 detected_imu=''
 detected_pressure=''
 detected_humidity=''
 calibrated=''
-DS18B20=''
 
 
 SETTINGS_FILE = "RTIMULib"
@@ -43,10 +41,6 @@ s3 = RTIMU.Settings(SETTINGS_FILE3)
 humidity = RTIMU.RTHumidity(s3)
 if humidity.humidityName()!='none': detected_humidity=humidity.humidityName()
 
-try:
-	DS18B20=W1ThermSensor.get_available_sensors()
-except: pass
-
 
 if detected_imu: print detected_imu
 else: print 'none'
@@ -58,7 +52,4 @@ if detected_pressure: print detected_pressure
 else: print 'none'
 
 if detected_humidity: print detected_humidity
-else: print 'none'
-
-if DS18B20: print DS18B20
 else: print 'none'

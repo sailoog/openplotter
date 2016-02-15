@@ -19,7 +19,7 @@ import pynmea2, time
 
 class DataStream:
 
-	def __init__(self):
+	def __init__(self,conf):
 
 		self.DataList=[]
 		
@@ -45,7 +45,16 @@ class DataStream:
 		self.DataList.append([_('Air Relative Humidity'),_('ARH'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'I2CH'])
 		self.DataList.append([_('Rate of Turn'),_('ROT'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'ROT'])
 		self.DataList.append([_('Heel'),_('Heel'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'I2CR'])
-		self.DataList.append([_('Engine Coolant Temperature'),_('ECT'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'1W1'])
+
+		#1W
+		sensors_list=eval(conf.get('1W', 'DS18B20'))
+		for i in sensors_list:
+			try:
+				if i[5]=='1':
+					self.DataList.append([i[0],i[1],None,None,None,None,None,(0,1,2,3,4,5,6),1, i[4]])
+			except Exception,e: print str(e)
+
+		#Switches
 		self.DataList.append([_('Switch 1 status'),_('SW1'),None,None,None,None,None,(7,8),0,'SW1'])
 		self.DataList.append([_('Switch 2 status'),_('SW2'),None,None,None,None,None,(7,8),0,'SW2'])
 		self.DataList.append([_('Switch 3 status'),_('SW3'),None,None,None,None,None,(7,8),0,'SW3'])
@@ -56,7 +65,7 @@ class DataStream:
 		self.DataList.append([_('Output 2 status'),_('OUT2'),None,None,None,None,None,(7,8),0,'OUT2'])
 		self.DataList.append([_('Output 3 status'),_('OUT3'),None,None,None,None,None,(7,8),0,'OUT3'])
 		self.DataList.append([_('Output 4 status'),_('OUT4'),None,None,None,None,None,(7,8),0,'OUT4'])
-		
+
 		#ATENTION. If order changes, edit monitoring.py: "#actions"
 		self.operators_list=[_('was not present in the last (sec.)'),_('was present in the last (sec.)'),_('is equal to'), _('is less than'), _('is less than or equal to'), _('is greater than'), _('is greater than or equal to'), _('is on'), _('is off')]
 
@@ -288,11 +297,11 @@ class DataStream:
 							if value:
 								unit='D'
 								self.updateDataList('I2CR',value,unit,talker,nmea_type)						
-						if transducer.id=='1W1':		
-							#engine temperature
+						if transducer.id[:2]=='1W':		
+							#DS18B20 temperature
 							value=transducer.value
 							if value:
-								unit='C'
-								self.updateDataList('1W1',value,unit,talker,nmea_type)
+								unit=transducer.units
+								self.updateDataList(transducer.id,value,unit,talker,nmea_type)
 			#except Exception,e: print str(e)
 			except: pass

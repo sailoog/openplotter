@@ -26,8 +26,12 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sensors_list=eval(conf.get('1W', 'DS18B20'))
 
 sensors=[]
-for i in sensors_list:
-	sensors.append(W1ThermSensor(W1ThermSensor.THERM_SENSOR_DS18B20, i[3]))
+for index,item in enumerate(sensors_list):
+	try:
+		sensors.append(W1ThermSensor(W1ThermSensor.THERM_SENSOR_DS18B20, item[3]))
+	except Exception,e: 
+		del sensors_list[index]
+		print str(e)
 
 while True:
 	temp=''
@@ -35,18 +39,19 @@ while True:
 	ib=0
 	try:
 		for i in sensors_list:
- 			if i[2]=='C': unit=W1ThermSensor.DEGREES_C
-			if i[2]=='F': unit=W1ThermSensor.DEGREES_F
-			if i[2]=='K': unit=W1ThermSensor.KELVIN
-			temp=sensors[ib].get_temperature(unit)
+			if i[5]=='1':
+ 				if i[2]=='C': unit=W1ThermSensor.DEGREES_C
+				if i[2]=='F': unit=W1ThermSensor.DEGREES_F
+				if i[2]=='K': unit=W1ThermSensor.KELVIN
+				temp=sensors[ib].get_temperature(unit)
 			
-			temp=round(temp,1)
-			list_tmp.append('C')
-			list_tmp.append(str(temp))
-			list_tmp.append(i[2])
-			list_tmp.append(i[4])
-			ib=ib+1
-	except: pass
+				temp=round(temp,1)
+				list_tmp.append('C')
+				list_tmp.append(str(temp))
+				list_tmp.append(i[2])
+				list_tmp.append(i[4])
+				ib=ib+1
+	except Exception,e: print str(e)
 	
 	if list_tmp:
 		xdr = pynmea2.XDR('OS', 'XDR', (list_tmp))

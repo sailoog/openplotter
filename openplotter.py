@@ -374,10 +374,12 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.show_graph, self.button_graph)
 ###########################page6
 ########page11###################
-		wx.StaticBox(self.page11, label=' DS18B20 ', size=(330, 70), pos=(10, 10))
-		self.eng_temp = wx.CheckBox(self.page11, label=_('Engine Coolant Temperature'), pos=(20, 30))
-		self.eng_temp.Bind(wx.EVT_CHECKBOX, self.nmea_eng_temp)
-		self.eng_temp_nmea=wx.StaticText(self.page11, label=_('Generated NMEA: $OSXDR'), pos=(20, 55))
+
+
+
+
+
+
 ###########################page11
 ########page12###################
 		wx.StaticText(self.page12, label=_('Coming soon'), pos=(20, 30))
@@ -462,7 +464,7 @@ class MainFrame(wx.Frame):
 		self.twitter_enable = wx.CheckBox(self.page9, label=_('Enable'), pos=(20, 32))
 		self.twitter_enable.Bind(wx.EVT_CHECKBOX, self.on_twitter_enable)
 		self.datastream_list=[]
-		self.a=DataStream()
+		self.a=DataStream(self.conf)
 		for i in self.a.DataList:
 			self.datastream_list.append(i[1]+': '+i[0])
 		self.datastream_select = wx.ListBox(self.page9, choices=self.datastream_list, style=wx.LB_MULTIPLE, size=(310, 80), pos=(20, 65))
@@ -622,7 +624,6 @@ class MainFrame(wx.Frame):
 		calibrated=l_detected[1]
 		press_sensor=l_detected[2]
 		hum_sensor=l_detected[3]
-		DS18B20=l_detected[4]
 
 		if 'none' in imu_sensor:
 			self.heading.Disable()
@@ -638,14 +639,6 @@ class MainFrame(wx.Frame):
 			if calibrated=='1':self.button_calibrate_imu.Disable()
 			if self.conf.get('STARTUP', 'nmea_hdg')=='1': self.heading.SetValue(True)
 			if self.conf.get('STARTUP', 'nmea_heel')=='1': self.heel.SetValue(True)
-
-		if 'none' in DS18B20:
-			self.eng_temp.Disable()
-			self.eng_temp_nmea.Disable()
-			if self.conf.get('STARTUP', 'nmea_eng_temp')=='1': 
-				self.conf.set('STARTUP', 'nmea_eng_temp', '0')
-		else:
-			if self.conf.get('STARTUP', 'nmea_eng_temp')=='1': self.eng_temp.SetValue(True)
 
 		if 'none' in press_sensor:
 			self.press.Disable()
@@ -1355,11 +1348,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if self.heading.GetValue() or self.heel.GetValue() or self.press.GetValue() or self.temp_p.GetValue() or self.hum.GetValue() or self.temp_h.GetValue():
 			subprocess.Popen(['python', currentpath+'/i2c.py'], cwd=currentpath+'/imu')
 
-	def start_sensors_b(self):
-		subprocess.call(['pkill', '-f', '1w.py'])
-		if self.eng_temp.GetValue():
-			subprocess.Popen(['python', currentpath+'/1w.py'])
-
 	def ok_rate(self, e):
 		rate=self.rate.GetValue()
 		self.conf.set('STARTUP', 'nmea_rate_sen', rate)
@@ -1463,12 +1451,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		else: 
 			self.conf.set('STARTUP', 'nmea_temp_h', '0')
 		self.start_sensors()
-
-	def nmea_eng_temp(self, e):
-		sender = e.GetEventObject()
-		if sender.GetValue(): self.conf.set('STARTUP', 'nmea_eng_temp', '1')
-		else: self.conf.set('STARTUP', 'nmea_eng_temp', '0')
-		self.start_sensors_b()		
 
 	def enable_press_temp_log(self, e):
 		sender = e.GetEventObject()
