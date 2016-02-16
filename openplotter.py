@@ -25,6 +25,7 @@ from classes.conf import Conf
 from classes.language import Language
 from classes.add_trigger import addTrigger
 from classes.add_action import addAction
+from classes.add_DS18B20 import addDS18B20
 
 paths=Paths()
 home=paths.home
@@ -375,10 +376,25 @@ class MainFrame(wx.Frame):
 ###########################page6
 ########page11###################
 
+		wx.StaticBox(self.page11, label=_(' DS18B20 sensors '), size=(670, 265), pos=(10, 10))
+		
+		self.list_DS18B20 = CheckListCtrl(self.page11, 237)
+		self.list_DS18B20.SetPosition((15, 30))
+		self.list_DS18B20.InsertColumn(0, _('Name'), width=275)
+		self.list_DS18B20.InsertColumn(1, _('Short'), width=60)
+		self.list_DS18B20.InsertColumn(2, _('Unit'), width=40)
+		self.list_DS18B20.InsertColumn(3, _('ID'))
+			
+		self.add_DS18B20_button =wx.Button(self.page11, label=_('add'), pos=(585, 30))
+		self.Bind(wx.EVT_BUTTON, self.add_DS18B20, self.add_DS18B20_button)
 
+		self.delete_DS18B20_button =wx.Button(self.page11, label=_('delete'), pos=(585, 65))
+		self.Bind(wx.EVT_BUTTON, self.delete_DS18B20, self.delete_DS18B20_button)
 
-
-
+		self.button_apply_DS18B20 =wx.Button(self.page11, label=_('Apply changes'), pos=(570, 285))
+		self.Bind(wx.EVT_BUTTON, self.apply_changes_DS18B20, self.button_apply_DS18B20)
+		self.button_cancel_DS18B20 =wx.Button(self.page11, label=_('Cancel changes'), pos=(430, 285))
+		self.Bind(wx.EVT_BUTTON, self.cancel_changes_DS18B20, self.button_cancel_DS18B20)
 
 ###########################page11
 ########page12###################
@@ -694,6 +710,7 @@ class MainFrame(wx.Frame):
 
 		self.read_switches()
 		self.read_triggers()
+		self.read_DS18B20()
 
 ########MENU###################################	
 
@@ -1858,6 +1875,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.gpio_pin10.Enable()
 		self.read_switches()
 		self.SetStatusText(_('Switches changes cancelled'))
+
 #######################twitterbot
 
 	def start_monitoring(self):
@@ -1926,7 +1944,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.Gmail_password.Enable()
 			self.Recipient.Enable()
 		self.start_monitoring()
+
 #######################actions
+
 	def read_triggers(self):
 		self.triggers=[]
 		self.list_triggers.DeleteAllItems()
@@ -2080,7 +2100,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.read_triggers()
 		self.list_actions.DeleteAllItems()
 
-
 	def start_actions(self,e):
 		subprocess.call(['python', currentpath+'/ctrl_actions.py', '1'])
 		self.SetStatusText(_('Actions started'))
@@ -2088,6 +2107,80 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.read_triggers()
 		self.list_actions.DeleteAllItems()
 
+#######################DS18B20
+	def read_DS18B20(self):
+		self.DS18B20=[]
+		self.list_DS18B20.DeleteAllItems()
+		data=self.conf.get('1W', 'DS18B20')
+		try:
+			temp_list=eval(data)
+		except:temp_list=[]
+		for ii in temp_list:
+			self.DS18B20.append(ii)
+			self.list_DS18B20.Append([ii[0],ii[1],ii[2],ii[3]])
+			if ii[5]=='1':
+				last=self.list_DS18B20.GetItemCount()-1
+				self.list_DS18B20.CheckItem(last)
+
+	def add_DS18B20(self,e):
+		edit=[]
+		dlg = addDS18B20(edit)
+		res = dlg.ShowModal()
+		if res == wx.ID_OK:
+			name=dlg.name.GetValue()
+			name=name.encode('utf8')
+			short=dlg.short.GetValue()
+			short=short.encode('utf8')
+			unit_selection=dlg.unit_select.GetValue()
+			id_selection=dlg.id_select.GetValue()
+			id_selection=id_selection.encode('utf8')
+			if not name or not short:
+				self.ShowMessage(_('Failed. Write a name and a short name.'))
+				dlg.Destroy()
+				return				
+			if unit_selection == '':
+				self.ShowMessage(_('Failed. Select unit.'))
+				dlg.Destroy()
+				return
+			if id_selection == '':
+				self.ShowMessage(_('Failed. Select sensor ID.'))
+				dlg.Destroy()
+				return
+			for i in self.DS18B20:
+				if i[3]==id_selection:
+					self.ShowMessage(_('Failed. This sensor ID is already in use.'))
+					dlg.Destroy()
+					return
+			if unit_selection=='Celsius': unit_selection='C'
+			if unit_selection=='Fahrenheit': unit_selection='F'
+			if unit_selection=='Kelvin': unit_selection='K'
+			self.list_DS18B20.Append([name.decode('utf8'),short.decode('utf8'),unit_selection,id_selection])
+			last=self.list_DS18B20.GetItemCount()-1
+			self.list_DS18B20.CheckItem(last)
+			self.DS18B20.append([name,short,unit_selection,id_selection,'','1'])
+			self.renameDS18B20()
+		dlg.Destroy()
+
+	def renameDS18B20(self):
+		for i in self.DS18B20:
+			index=self.DS18B20.index(i)
+			self.DS18B20[index][4]='1W'+str(index)
+
+	def delete_DS18B20(self,e):
+		selected_DS18B20=self.list_DS18B20.GetFirstSelected()
+		if selected_DS18B20==-1: 
+			self.ShowMessage(_('Select a sensor to delete.'))
+		else: 
+			del self.DS18B20[selected_DS18B20]
+			self.list_DS18B20.DeleteItem(selected_DS18B20)
+			self.renameDS18B20()
+
+	def apply_changes_DS18B20(self,e):
+		pass
+
+	def cancel_changes_DS18B20(self,e):
+		self.read_DS18B20()
+		self.SetStatusText(_('DS18B20 sensors changes cancelled'))
 #Main#############################
 if __name__ == "__main__":
 	app = wx.App()

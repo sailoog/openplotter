@@ -301,12 +301,7 @@ class MyFrame(wx.Frame):
 
 		def reset(self, e):
 			self.pause_all=1
-			for i in range(self.list.GetItemCount()):
-				self.list.SetStringItem(i,0,'')
-				self.list.SetStringItem(i,1,'')
-				self.list.SetStringItem(i,2,'')
-				self.list.SetStringItem(i,3,'')
-				self.list.SetStringItem(i,4,'')
+			self.list. DeleteAllItems()
 			self.logger.SetValue('')
 			time.sleep(1)
 			self.conf.read()
