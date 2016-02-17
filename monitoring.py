@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import time, socket, threading
+import time, socket, threading, copy
 import RPi.GPIO as GPIO
 from classes.datastream import DataStream
 from classes.conf import Conf
@@ -25,15 +25,13 @@ conf=Conf()
 
 Language(conf.get('GENERAL','lang'))
 
-global trigger_actions
 global triggers
-trigger_actions=''
-triggers=''
+triggers=[]
 global sock_in
 global error
 sock_in=''
 error=0
-a=DataStream()
+a=DataStream(conf)
 actions=Actions()
 nodata=''
 channel1=''
@@ -55,60 +53,59 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 def read_triggers():
 	global triggers
 	data=conf.get('ACTIONS', 'triggers')
-	triggers=data.split('||')
-	triggers.pop()
-	for index,item in enumerate(triggers):
-		ii=item.split(',')
-		ii[0]=int(ii[0])
-		ii[1]=int(ii[1])
-		ii[2]=int(ii[2])
-		ii[3]=float(ii[3])
-		ii.append(False)# 4 state
-		triggers[index]=ii
-
-def read_actions():
-	global trigger_actions
-	data=conf.get('ACTIONS', 'actions')
-	trigger_actions=data.split('||')
-	trigger_actions.pop()
-	for index,item in enumerate(trigger_actions):
-		ii=item.split(',')
-		ii[0]=int(ii[0])
-		ii[1]=int(ii[1])
-		ii[3]=float(ii[3])
-		ii[4]=int(ii[4])
-		if ii[4]==2: ii[3]=ii[3]*60
-		if ii[4]==3: ii[3]=(ii[3]*60)*60
-		if ii[4]==4: ii[3]=((ii[3]*24)*60)*60
-		ii.append('')# 5 last run
-		trigger_actions[index]=ii
+	try:
+		temp_list=eval(data)
+	except:temp_list=[]
+	for ii in temp_list:
+		if ii[1]==-1 or a.getDataListIndex(ii[1]):
+			ii.append(False)# 5 state
+			for iii in ii[4]:
+				if iii[3]==2: iii[2]=iii[2]*60
+				if iii[3]==3: iii[2]=(iii[2]*60)*60
+				if iii[3]==4: iii[2]=((iii[2]*24)*60)*60
+				iii.append('')# 4 last run
+			triggers.append(ii)
 
 def start_actions(trigger):
-	global trigger_actions
-	for index,i in enumerate(trigger_actions):
-		if i[0]==trigger:
-			now=time.time()
-			if triggers[trigger][4]==False:
-				trigger_actions[index][5]=now
-				re=''
-				try:
-					re=actions.run_action(str(i[1]),i[2],conf,a)
-				except Exception,e: print str(e)
-				if re=='read':
-					read_triggers()
-					read_actions()
+	global triggers
+	for index,i in enumerate(triggers[trigger][4]):
+		now=time.time()
+		if triggers[trigger][5]==False:
+			triggers[trigger][4][index][4]=now
+			re=''
+			try:
+				re=actions.run_action(str(i[0]),i[1],conf,a)
+			except Exception,e: print str(e)
+			if re=='read':
+				startall()
+		else:
+			if i[3]==0: pass
 			else:
-				if i[4]==0: pass
-				else:
-					if now-i[5] > i[3]:
-						trigger_actions[index][5]=now
-						re=''
-						try:
-							re=actions.run_action(str(i[1]),i[2],conf,a)
-						except Exception,e: print str(e)
-						if re=='read':
-							read_triggers()
-							read_actions()
+				if now-i[4] > i[2]:
+					triggers[trigger][4][index][4]=now
+					re=''
+					try:
+						re=actions.run_action(str(i[0]),i[1],conf,a)
+					except Exception,e: print str(e)
+					if re=='read':
+						startall()
+
+def startall():
+	global triggers
+	new_list = copy.deepcopy(triggers)
+	i=0
+	for ii in triggers:
+		triggers[i][0]=1
+		new_list[i][0]=1
+		del new_list[i][5]
+		ib=0
+		for iii in ii[4]:
+			del new_list[i][4][ib][4]
+			ib=ib+1
+		i=i+1
+	conf.set('ACTIONS', 'triggers', str(new_list))
+	del new_list
+
 #thread1
 def parse_nmea():
 	global sock_in
@@ -146,7 +143,6 @@ def connect():
 
 # no loop
 read_triggers()
-read_actions()
 
 thread1=threading.Thread(target=parse_nmea)	
 if not thread1.isAlive(): thread1.start()
@@ -201,74 +197,74 @@ while True:
 	#switches
 	if channel1:
 		if GPIO.input(channel1):
-			a.SW1[2]=1
-			a.SW1[4]=time.time()
+			a.DataList[a.getDataListIndex('SW1')][2]=1
+			a.DataList[a.getDataListIndex('SW1')][4]=time.time()
 		else:
-			a.SW1[2]=0
-			a.SW1[4]=time.time()
+			a.DataList[a.getDataListIndex('SW1')][2]=0
+			a.DataList[a.getDataListIndex('SW1')][4]=time.time()
 	if channel2:
 		if GPIO.input(channel2):
-			a.SW2[2]=1
-			a.SW2[4]=time.time()
+			a.DataList[a.getDataListIndex('SW2')][2]=1
+			a.DataList[a.getDataListIndex('SW2')][4]=time.time()
 		else:
-			a.SW2[2]=0
-			a.SW2[4]=time.time()
+			a.DataList[a.getDataListIndex('SW2')][2]=0
+			a.DataList[a.getDataListIndex('SW2')][4]=time.time()
 	if channel3:
 		if GPIO.input(channel3):
-			a.SW3[2]=1
-			a.SW3[4]=time.time()
+			a.DataList[a.getDataListIndex('SW3')][2]=1
+			a.DataList[a.getDataListIndex('SW3')][4]=time.time()
 		else:
-			a.SW3[2]=0
-			a.SW3[4]=time.time()
+			a.DataList[a.getDataListIndex('SW3')][2]=0
+			a.DataList[a.getDataListIndex('SW3')][4]=time.time()
 	if channel4:
 		if GPIO.input(channel4):
-			a.SW4[2]=1
-			a.SW4[4]=time.time()
+			a.DataList[a.getDataListIndex('SW4')][2]=1
+			a.DataList[a.getDataListIndex('SW4')][4]=time.time()
 		else:
-			a.SW4[2]=0
-			a.SW4[4]=time.time()
+			a.DataList[a.getDataListIndex('SW4')][2]=0
+			a.DataList[a.getDataListIndex('SW4')][4]=time.time()
 	if channel5:
 		if GPIO.input(channel5):
-			a.SW5[2]=1
-			a.SW5[4]=time.time()
+			a.DataList[a.getDataListIndex('SW5')][2]=1
+			a.DataList[a.getDataListIndex('SW5')][4]=time.time()
 		else:
-			a.SW5[2]=0
-			a.SW5[4]=time.time()
+			a.DataList[a.getDataListIndex('SW5')][2]=0
+			a.DataList[a.getDataListIndex('SW5')][4]=time.time()
 	if channel6:
 		if GPIO.input(channel6):
-			a.SW6[2]=1
-			a.SW6[4]=time.time()
+			a.DataList[a.getDataListIndex('SW6')][2]=1
+			a.DataList[a.getDataListIndex('SW6')][4]=time.time()
 		else:
-			a.SW6[2]=0
-			a.SW6[4]=time.time()
+			a.DataList[a.getDataListIndex('SW6')][2]=0
+			a.DataList[a.getDataListIndex('SW6')][4]=time.time()
 	if channel7:
 		if GPIO.input(channel7):
-			a.OUT1[2]=1
-			a.OUT1[4]=time.time()
+			a.DataList[a.getDataListIndex('OUT1')][2]=1
+			a.DataList[a.getDataListIndex('OUT1')][4]=time.time()
 		else:
-			a.OUT1[2]=0
-			a.OUT1[4]=time.time()
+			a.DataList[a.getDataListIndex('OUT1')][2]=0
+			a.DataList[a.getDataListIndex('OUT1')][4]=time.time()
 	if channel8:
 		if GPIO.input(channel8):
-			a.OUT2[2]=1
-			a.OUT2[4]=time.time()
+			a.DataList[a.getDataListIndex('OUT2')][2]=1
+			a.DataList[a.getDataListIndex('OUT2')][4]=time.time()
 		else:
-			a.OUT2[2]=0
-			a.OUT2[4]=time.time()
+			a.DataList[a.getDataListIndex('OUT2')][2]=0
+			a.DataList[a.getDataListIndex('OUT2')][4]=time.time()
 	if channel9:
 		if GPIO.input(channel9):
-			a.OUT3[2]=1
-			a.OUT3[4]=time.time()
+			a.DataList[a.getDataListIndex('OUT3')][2]=1
+			a.DataList[a.getDataListIndex('OUT3')][4]=time.time()
 		else:
-			a.OUT3[2]=0
-			a.OUT3[4]=time.time()
+			a.DataList[a.getDataListIndex('OUT3')][2]=0
+			a.DataList[a.getDataListIndex('OUT3')][4]=time.time()
 	if channel10:
 		if GPIO.input(channel10):
-			a.OUT4[2]=1
-			a.OUT4[4]=time.time()
+			a.DataList[a.getDataListIndex('OUT4')][2]=1
+			a.DataList[a.getDataListIndex('OUT4')][4]=time.time()
 		else:
-			a.OUT4[2]=0
-			a.OUT4[4]=time.time()
+			a.DataList[a.getDataListIndex('OUT4')][2]=0
+			a.DataList[a.getDataListIndex('OUT4')][4]=time.time()
 	#end switches
 
 	#actions
@@ -277,12 +273,12 @@ while True:
 			if item[1]==-1:
 				operator=''
 				start_actions(index)
-				triggers[index][4]=True
+				triggers[index][5]=True
 			else:
-				trigger=a.DataList[item[1]]
-				trigger_value=eval('a.'+trigger+'[2]')
+				trigger=a.getDataListIndex(item[1])
+				trigger_value=a.DataList[trigger][2]
 				now = time.time()
-				trigger_value_timestamp=eval('a.'+trigger+'[4]')
+				trigger_value_timestamp=a.DataList[trigger][4]
 				operator=item[2]
 				data_value=float(item[3])
 			#not present for
@@ -290,25 +286,25 @@ while True:
 				if trigger_value_timestamp:
 					if now-trigger_value_timestamp > data_value: 
 						start_actions(index)
-						triggers[index][4]=True
+						triggers[index][5]=True
 					else: 
-						triggers[index][4]=False
+						triggers[index][5]=False
 					nodata=''
 				else: 
 					if not nodata: nodata=now
 					if now-nodata > data_value: 
 						start_actions(index)
-						triggers[index][4]=True
+						triggers[index][5]=True
 					else: 
-						triggers[index][4]=False
+						triggers[index][5]=False
 			#present in the last
 			if operator==1: 
 				if trigger_value_timestamp:
 					if now-trigger_value_timestamp < data_value:
 						start_actions(index)
-						triggers[index][4]=True
+						triggers[index][5]=True
 					else: 
-						triggers[index][4]=False
+						triggers[index][5]=False
 			if operator==2 or operator==3 or operator==4 or operator==5 or operator==6:
 				if trigger_value_timestamp:
 					if now-trigger_value_timestamp < 20:
@@ -316,159 +312,51 @@ while True:
 						if operator==2:
 							if float(trigger_value) == data_value: 
 								start_actions(index)
-								triggers[index][4]=True
+								triggers[index][5]=True
 							else: 
-								triggers[index][4]=False
+								triggers[index][5]=False
 						#less than
 						if operator==3:
 							if float(trigger_value) < data_value: 
 								start_actions(index)
-								triggers[index][4]=True
+								triggers[index][5]=True
 							else: 
-								triggers[index][4]=False
+								triggers[index][5]=False
 						#less than or equal to
 						if operator==4:
 							if float(trigger_value) <= data_value: 
 								start_actions(index)
-								triggers[index][4]=True
+								triggers[index][5]=True
 							else: 
-								triggers[index][4]=False
+								triggers[index][5]=False
 						#greater than
 						if operator==5:
 							if float(trigger_value) > data_value:
 								start_actions(index)
-								triggers[index][4]=True
+								triggers[index][5]=True
 							else: 
-								triggers[index][4]=False
+								triggers[index][5]=False
 						#greater than or equal to
 						if operator==6:
 							if float(trigger_value) >= data_value: 
 								start_actions(index)
-								triggers[index][4]=True
+								triggers[index][5]=True
 							else: 
-								triggers[index][4]=False
+								triggers[index][5]=False
 			#switch on
 			if operator==7:
-				if trigger=='SW1' and channel1:
-					if a.SW1[2]==1: 
-						start_actions(index)
-						triggers[index][4]=True
-					else: 
-						triggers[index][4]=False
-				if trigger=='SW2' and channel2:
-					if a.SW2[2]==1: 
-						start_actions(index)
-						triggers[index][4]=True
-					else: 
-						triggers[index][4]=False
-				if trigger=='SW3' and channel3:
-					if a.SW3[2]==1: 
-						start_actions(index)
-						triggers[index][4]=True
-					else: 
-						triggers[index][4]=False
-				if trigger=='SW4' and channel4:
-					if a.SW4[2]==1: 
-						start_actions(index)
-						triggers[index][4]=True
-					else: 
-						triggers[index][4]=False
-				if trigger=='SW5' and channel5:
-					if a.SW5[2]==1: 
-						start_actions(index)
-						triggers[index][4]=True
-					else: 
-						triggers[index][4]=False
-				if trigger=='SW6' and channel6:
-					if a.SW6[2]==1: 
-						start_actions(index)
-						triggers[index][4]=True
-					else: 
-						triggers[index][4]=False
-				if trigger=='OUT1' and channel7:
-					if a.OUT1[2]==1: 
-						start_actions(index)
-						triggers[index][4]=True
-					else: 
-						triggers[index][4]=False
-				if trigger=='OUT2' and channel8:
-					if a.OUT2[2]==1: 
-						start_actions(index)
-						triggers[index][4]=True
-					else: 
-						triggers[index][4]=False
-				if trigger=='OUT3' and channel9:
-					if a.OUT3[2]==1: 
-						start_actions(index)
-						triggers[index][4]=True
-					else: 
-						triggers[index][4]=False
-				if trigger=='OUT4' and channel10:
-					if a.OUT4[2]==1: 
-						start_actions(index)
-						triggers[index][4]=True
-					else: 
-						triggers[index][4]=False
+				if trigger_value==1: 
+					start_actions(index)
+					triggers[index][5]=True
+				else: 
+					triggers[index][5]=False
+
 			#switch off
 			if operator==8:
-				if trigger=='SW1' and channel1:
-					if a.SW1[2]==0: 
-						start_actions(index)
-						triggers[index][4]=True
-					else: 
-						triggers[index][4]=False
-				if trigger=='SW2' and channel2:
-					if a.SW2[2]==0: 
-						start_actions(index)
-						triggers[index][4]=True
-					else: 
-						triggers[index][4]=False
-				if trigger=='SW3' and channel3:
-					if a.SW3[2]==0: 
-						start_actions(index)
-						triggers[index][4]=True
-					else: 
-						triggers[index][4]=False
-				if trigger=='SW4' and channel4:
-					if a.SW4[2]==0: 
-						start_actions(index)
-						triggers[index][4]=True
-					else: 
-						triggers[index][4]=False
-				if trigger=='SW5' and channel5:
-					if a.SW5[2]==0: 
-						start_actions(index)
-						triggers[index][4]=True
-					else: 
-						triggers[index][4]=False
-				if trigger=='SW6' and channel6:
-					if a.SW6[2]==0: 
-						start_actions(index)
-						triggers[index][4]=True
-					else: 
-						triggers[index][4]=False
-				if trigger=='OUT1' and channel7:
-					if a.OUT1[2]==0: 
-						start_actions(index)
-						triggers[index][4]=True
-					else: 
-						triggers[index][4]=False
-				if trigger=='OUT2' and channel8:
-					if a.OUT2[2]==0: 
-						start_actions(index)
-						triggers[index][4]=True
-					else: 
-						triggers[index][4]=False
-				if trigger=='OUT3' and channel9:
-					if a.OUT3[2]==0: 
-						start_actions(index)
-						triggers[index][4]=True
-					else: 
-						triggers[index][4]=False
-				if trigger=='OUT4' and channel10:
-					if a.OUT4[2]==0: 
-						start_actions(index)
-						triggers[index][4]=True
-					else: 
-						triggers[index][4]=False
+				if trigger_value==0: 
+					start_actions(index)
+					triggers[index][5]=True
+				else: 
+					triggers[index][5]=False
+
 	#end actions

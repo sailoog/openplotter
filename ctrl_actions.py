@@ -23,7 +23,7 @@ from classes.language import Language
 action=sys.argv[1]
 
 #see actions.py
-start_all_actions='18'
+start_all_actions=18
 
 paths=Paths()
 currentpath=paths.currentpath
@@ -32,40 +32,34 @@ conf=Conf()
 
 Language(conf.get('GENERAL','lang'))
 
+triggers=[]
 data=conf.get('ACTIONS', 'triggers')
-triggers=data.split('||')
-triggers.pop()
-for index,item in enumerate(triggers):
-	ii=item.split(',')
-	triggers[index]=ii
+try:
+	triggers=eval(data)
+except:triggers=[]
 
-data=conf.get('ACTIONS', 'actions')
-trigger_actions=data.split('||')
-trigger_actions.pop()
-for index,item in enumerate(trigger_actions):
-	ii=item.split(',')
-	trigger_actions[index]=ii
-
-tmp=''
 #stop all
 if action=='0':
-	for index,item in enumerate(triggers):
+	i=0
+	for ii in triggers:
+		templist=ii[4]
 		start_all=False
-		for i in trigger_actions:
-			if int(i[0])==index and i[1]==start_all_actions: start_all=True
-		if start_all==False: tmp +='0,'
-		if start_all==True: tmp +='1,'
-		tmp +=triggers[index][1]+','+triggers[index][2]+','+triggers[index][3]+'||'
-	conf.set('ACTIONS', 'triggers', tmp)
+		for iii in templist:
+			if iii[0]==start_all_actions: start_all=True
+		if start_all==True: triggers[i][0]=1
+		else: triggers[i][0]=0
+		i=i+1
+	conf.set('ACTIONS', 'triggers', str(triggers))
 	subprocess.Popen(['pkill', '-f', 'message.py'])
 	subprocess.Popen(['pkill', '-9', 'mpg123'])
-	
+
 #start all
 if action=='1':
-	for index,item in enumerate(triggers):
-		tmp +='1,'
-		tmp +=triggers[index][1]+','+triggers[index][2]+','+triggers[index][3]+'||'
-	conf.set('ACTIONS', 'triggers', tmp)
+	i=0
+	for ii in triggers:
+		triggers[i][0]=1
+		i=i+1
+	conf.set('ACTIONS', 'triggers', str(triggers))
 
 subprocess.call(['pkill', '-f', 'monitoring.py'])
 subprocess.Popen(['python',currentpath+'/monitoring.py'])

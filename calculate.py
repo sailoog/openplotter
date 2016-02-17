@@ -27,7 +27,7 @@ global sock_in
 global error
 sock_in=''
 error=0
-a=DataStream()
+a=DataStream(conf)
 last_heading=''
 heading_time=''
 
@@ -94,14 +94,14 @@ while True:
 	time.sleep(0.01)
 	now=time.time()
 	# refresh values
-	position =[a.validate('Lat',now,accuracy), a.Lat[3], a.validate('Lon',now,accuracy), a.Lon[3]]
+	position =[a.validate('Lat',now,accuracy), a.DataList[a.getDataListIndex('Lat')][3], a.validate('Lon',now,accuracy), a.DataList[a.getDataListIndex('Lon')][3]]
 	date = a.validate('Date',now,accuracy)
 	if not date: date = datetime.date.today()
 	heading_m = a.validate('HDM',now,accuracy)
-	if a.Var[5] == 'OC': mag_var=['','']
-	else: mag_var = [a.validate('Var',now,accuracy), a.Var[3]]
+	if a.DataList[a.getDataListIndex('Var')][5] == 'OC': mag_var=['','']
+	else: mag_var = [a.validate('Var',now,accuracy), a.DataList[a.getDataListIndex('Var')][3]]
 	if not mag_var[0]: mag_var = calculate_mag_var(position,date)
-	if a.HDT[5] == 'OC': heading_t=''
+	if a.DataList[a.getDataListIndex('HDT')][5] == 'OC': heading_t=''
 	else: heading_t = a.validate('HDT',now,accuracy)
 	if not heading_t:
 		if heading_m and mag_var[0]:
@@ -112,7 +112,7 @@ while True:
 			if heading_t<0: heading_t=360+heading_t
 	STW = a.validate('STW',now,accuracy)
 	AWS = a.validate('AWS',now,accuracy) 
-	AWA = [a.validate('AWA',now,accuracy), a.AWA[3]]
+	AWA = [a.validate('AWA',now,accuracy), a.DataList[a.getDataListIndex('AWA')][3]]
 	if AWA[0]:
 		if AWA[1]=='D':
 			AWA[1]='R'

@@ -51,7 +51,7 @@ class addTrigger(wx.Dialog):
 			wx.MessageBox(_('The actions of this trigger will always be executed.'), 'Info', wx.OK | wx.ICON_INFORMATION)
 		else:
 			trigger=self.a.DataList[self.trigger_select.GetCurrentSelection()]
-			operators_valid_list=eval('self.a.'+trigger+'[7]')
+			operators_valid_list=trigger[7]
 			new_list=[]
 			for i in operators_valid_list:
 				new_list.append(self.a.operators_list[i])
@@ -59,9 +59,9 @@ class addTrigger(wx.Dialog):
 			self.operator_select.Clear()
 			self.operator_select.AppendItems(new_list)
 			self.operator_select.SetSelection(0)
-			disable_field=eval('self.a.'+trigger+'[8]')
+			disable_field=trigger[8]
 			self.value.SetValue('')
 			if disable_field==1: self.value.Enable()
 			if disable_field==0: self.value.Disable()
-			if trigger=='SW1' or trigger=='SW2' or trigger=='SW3' or trigger=='SW4' or trigger=='SW5' or trigger=='SW6':
+			if trigger[9]=='SW1' or trigger=='SW2' or trigger=='SW3' or trigger=='SW4' or trigger=='SW5' or trigger=='SW6':
 				wx.MessageBox(_('Be sure you have filled in GPIO and Pull Down/Up fields in "Switches" tab and enabled the desired switch.'), 'Info', wx.OK | wx.ICON_INFORMATION)

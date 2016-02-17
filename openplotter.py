@@ -25,6 +25,7 @@ from classes.conf import Conf
 from classes.language import Language
 from classes.add_trigger import addTrigger
 from classes.add_action import addAction
+from classes.add_DS18B20 import addDS18B20
 
 paths=Paths()
 home=paths.home
@@ -110,6 +111,9 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_MENU, self.lang_es, self.lang_item3)
 		self.lang_item4 = self.lang.Append(wx.ID_ANY, _('French'), _('Set French language'), kind=wx.ITEM_CHECK)
 		self.Bind(wx.EVT_MENU, self.lang_fr, self.lang_item4)
+
+		self.lang_item5 = self.lang.Append(wx.ID_ANY, _('Dutch'), _('Set Dutch language'), kind=wx.ITEM_CHECK)
+		self.Bind(wx.EVT_MENU, self.lang_nl, self.lang_item5)
 		self.menubar.Append(self.lang, _('Language'))
 
 		self.helpm = wx.Menu()
@@ -195,9 +199,9 @@ class MainFrame(wx.Frame):
 		self.wifi_enable.Bind(wx.EVT_CHECKBOX, self.onwifi_enable)
 
 		wx.StaticBox(self.page3, label=_(' Settings '), size=(400, 215), pos=(10, 60))
-
+		
 		self.available_wireless = []
-		output=subprocess.check_output('iwconfig')
+		output=subprocess.check_output('iwconfig', stderr=subprocess.STDOUT)
 		for i in range (0, 10):
 			ii=str(i)
 			if 'wlan'+ii in output: self.available_wireless.append('wlan'+ii)
@@ -371,10 +375,28 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.show_graph, self.button_graph)
 ###########################page6
 ########page11###################
-		wx.StaticBox(self.page11, label=' DS18B20 ', size=(330, 70), pos=(10, 10))
-		self.eng_temp = wx.CheckBox(self.page11, label=_('Engine Coolant Temperature'), pos=(20, 30))
-		self.eng_temp.Bind(wx.EVT_CHECKBOX, self.nmea_eng_temp)
-		self.eng_temp_nmea=wx.StaticText(self.page11, label=_('Generated NMEA: $OSXDR'), pos=(20, 55))
+
+		wx.StaticBox(self.page11, label=_(' DS18B20 sensors '), size=(670, 265), pos=(10, 10))
+		
+		self.list_DS18B20 = CheckListCtrl(self.page11, 237)
+		self.list_DS18B20.SetPosition((15, 30))
+		self.list_DS18B20.InsertColumn(0, _('Name'), width=275)
+		self.list_DS18B20.InsertColumn(1, _('Short'), width=60)
+		self.list_DS18B20.InsertColumn(2, _('Unit'), width=40)
+		self.list_DS18B20.InsertColumn(3, _('ID'))
+		self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_DS18B20, self.list_DS18B20)
+			
+		self.add_DS18B20_button =wx.Button(self.page11, label=_('add'), pos=(585, 30))
+		self.Bind(wx.EVT_BUTTON, self.add_DS18B20, self.add_DS18B20_button)
+
+		self.delete_DS18B20_button =wx.Button(self.page11, label=_('delete'), pos=(585, 65))
+		self.Bind(wx.EVT_BUTTON, self.delete_DS18B20, self.delete_DS18B20_button)
+
+		self.button_apply_DS18B20 =wx.Button(self.page11, label=_('Apply changes'), pos=(570, 285))
+		self.Bind(wx.EVT_BUTTON, self.apply_changes_DS18B20, self.button_apply_DS18B20)
+		self.button_cancel_DS18B20 =wx.Button(self.page11, label=_('Cancel changes'), pos=(430, 285))
+		self.Bind(wx.EVT_BUTTON, self.cancel_changes_DS18B20, self.button_cancel_DS18B20)
+
 ###########################page11
 ########page12###################
 		wx.StaticText(self.page12, label=_('Coming soon'), pos=(20, 30))
@@ -458,10 +480,8 @@ class MainFrame(wx.Frame):
 		wx.StaticBox(self.page9, label=_(' Twitter '), size=(330, 290), pos=(10, 10))
 		self.twitter_enable = wx.CheckBox(self.page9, label=_('Enable'), pos=(20, 32))
 		self.twitter_enable.Bind(wx.EVT_CHECKBOX, self.on_twitter_enable)
-		self.datastream_list=[]
-		self.a=DataStream()
-		for i in self.a.DataList:
-			self.datastream_list.append(eval('self.a.'+i+'[1]')+': '+eval('self.a.'+i+'[0]'))
+
+		self.read_datastream()
 		self.datastream_select = wx.ListBox(self.page9, choices=self.datastream_list, style=wx.LB_MULTIPLE, size=(310, 80), pos=(20, 65))
 		wx.StaticText(self.page9, label=_('apiKey'), pos=(20, 160))
 		self.apiKey = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(150, 155))
@@ -529,11 +549,19 @@ class MainFrame(wx.Frame):
 ###########################layout
 
 ####definitions###################
+
+	def read_datastream(self):
+		self.datastream_list=[]
+		self.a=DataStream(self.conf)
+		for i in self.a.DataList:
+			self.datastream_list.append(i[1]+': '+i[0])
+
 	def set_layout_conf(self):
 		if self.language=='en': self.lang.Check(self.lang_item1.GetId(), True)
 		if self.language=='ca': self.lang.Check(self.lang_item2.GetId(), True)
 		if self.language=='es': self.lang.Check(self.lang_item3.GetId(), True)
 		if self.language=='fr': self.lang.Check(self.lang_item4.GetId(), True)
+		if self.language=='nl': self.lang.Check(self.lang_item5.GetId(), True)
 
 		self.delay.SetValue(self.conf.get('STARTUP', 'delay'))
 
@@ -618,7 +646,6 @@ class MainFrame(wx.Frame):
 		calibrated=l_detected[1]
 		press_sensor=l_detected[2]
 		hum_sensor=l_detected[3]
-		DS18B20=l_detected[4]
 
 		if 'none' in imu_sensor:
 			self.heading.Disable()
@@ -634,14 +661,6 @@ class MainFrame(wx.Frame):
 			if calibrated=='1':self.button_calibrate_imu.Disable()
 			if self.conf.get('STARTUP', 'nmea_hdg')=='1': self.heading.SetValue(True)
 			if self.conf.get('STARTUP', 'nmea_heel')=='1': self.heel.SetValue(True)
-
-		if 'none' in DS18B20:
-			self.eng_temp.Disable()
-			self.eng_temp_nmea.Disable()
-			if self.conf.get('STARTUP', 'nmea_eng_temp')=='1': 
-				self.conf.set('STARTUP', 'nmea_eng_temp', '0')
-		else:
-			if self.conf.get('STARTUP', 'nmea_eng_temp')=='1': self.eng_temp.SetValue(True)
 
 		if 'none' in press_sensor:
 			self.press.Disable()
@@ -672,7 +691,8 @@ class MainFrame(wx.Frame):
 		if self.conf.get('TWITTER', 'send_data'):
 			selections=eval(self.conf.get('TWITTER', 'send_data'))
 			for i in selections:
-				self.datastream_select.SetSelection(i)
+				for index,item in enumerate(self.a.DataList):
+					if i==item[9]: self.datastream_select.SetSelection(index)
 		if self.conf.get('TWITTER', 'apiKey'): self.apiKey.SetValue('********************')
 		if self.conf.get('TWITTER', 'apiSecret'): self.apiSecret.SetValue('********************')
 		if self.conf.get('TWITTER', 'accessToken'): self.accessToken.SetValue('********************')
@@ -696,7 +716,7 @@ class MainFrame(wx.Frame):
 
 		self.read_switches()
 		self.read_triggers()
-		self.read_actions()
+		self.read_DS18B20()
 
 ########MENU###################################	
 
@@ -729,6 +749,7 @@ class MainFrame(wx.Frame):
 		self.lang.Check(self.lang_item2.GetId(), False)
 		self.lang.Check(self.lang_item3.GetId(), False)
 		self.lang.Check(self.lang_item4.GetId(), False)
+		self.lang.Check(self.lang_item5.GetId(), False)
 		self.ShowMessage(_('The selected language will be enabled when you restart'))
 	
 	def lang_en(self, e):
@@ -747,6 +768,10 @@ class MainFrame(wx.Frame):
 		self.clear_lang()
 		self.lang.Check(self.lang_item4.GetId(), True)
 		self.conf.set('GENERAL', 'lang', 'fr')
+	def lang_nl(self, e):
+		self.clear_lang()
+		self.lang.Check(self.lang_item5.GetId(), True)
+		self.conf.set('GENERAL', 'lang', 'nl')
 
 	def OnAboutBox(self, e):
 		description = _("OpenPlotter is a DIY, open-source, low-cost, low-consumption, modular and scalable sailing platform to run on ARM boards.")			
@@ -1342,14 +1367,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 #####sensors#################################
 	def start_sensors(self):
 		subprocess.call(['pkill', 'RTIMULibCal'])
-		subprocess.call(['pkill', '-f', 'sensors.py'])
+		subprocess.call(['pkill', '-f', 'i2c.py'])
 		if self.heading.GetValue() or self.heel.GetValue() or self.press.GetValue() or self.temp_p.GetValue() or self.hum.GetValue() or self.temp_h.GetValue():
-			subprocess.Popen(['python', currentpath+'/sensors.py'], cwd=currentpath+'/imu')
-
-	def start_sensors_b(self):
-		subprocess.call(['pkill', '-f', 'sensors_b.py'])
-		if self.eng_temp.GetValue():
-			subprocess.Popen(['python', currentpath+'/sensors_b.py'])
+			subprocess.Popen(['python', currentpath+'/i2c.py'], cwd=currentpath+'/imu')
 
 	def ok_rate(self, e):
 		rate=self.rate.GetValue()
@@ -1454,12 +1474,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		else: 
 			self.conf.set('STARTUP', 'nmea_temp_h', '0')
 		self.start_sensors()
-
-	def nmea_eng_temp(self, e):
-		sender = e.GetEventObject()
-		if sender.GetValue(): self.conf.set('STARTUP', 'nmea_eng_temp', '1')
-		else: self.conf.set('STARTUP', 'nmea_eng_temp', '0')
-		self.start_sensors_b()		
 
 	def enable_press_temp_log(self, e):
 		sender = e.GetEventObject()
@@ -1867,9 +1881,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.gpio_pin10.Enable()
 		self.read_switches()
 		self.SetStatusText(_('Switches changes cancelled'))
+
 #######################twitterbot
 
 	def start_monitoring(self):
+		self.ShowMessage(_('Actions will be restarted.'))
 		subprocess.call(['pkill', '-f', 'monitoring.py'])
 		subprocess.Popen(['python',currentpath+'/monitoring.py'])
 
@@ -1889,7 +1905,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.accessToken.Disable()
 			self.accessTokenSecret.Disable()
 			self.conf.set('TWITTER', 'enable', '1')
-			self.conf.set('TWITTER', 'send_data', str(self.datastream_select.GetSelections()))
+			temp_list=[]
+			for i in self.datastream_select.GetSelections():
+				temp_list.append(self.a.DataList[i][9])
+			self.conf.set('TWITTER', 'send_data', str(temp_list))
 			if not '*****' in self.apiKey.GetValue(): 
 				self.conf.set('TWITTER', 'apiKey', self.apiKey.GetValue())
 				self.apiKey.SetValue('********************')
@@ -1932,49 +1951,42 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.Gmail_password.Enable()
 			self.Recipient.Enable()
 		self.start_monitoring()
+
 #######################actions
+
 	def read_triggers(self):
+		self.triggers=[]
 		self.list_triggers.DeleteAllItems()
 		data=self.conf.get('ACTIONS', 'triggers')
-		self.triggers=data.split('||')
-		self.triggers.pop()
-		for index,item in enumerate(self.triggers):
-			ii=item.split(',')
-			ii[0]=int(ii[0])
-			ii[1]=int(ii[1])
-			ii[2]=int(ii[2])
-			ii[3]=float(ii[3])
+		try:
+			temp_list=eval(data)
+		except:temp_list=[]
+		for ii in temp_list:
 			if ii[1]==-1:
-				self.list_triggers.Append([_('None (always true)'),'',''])
+				self.triggers.append(ii)
+				self.list_triggers.Append([_('None (always true)'),'','',])
+				if ii[0]==1:
+					last=self.list_triggers.GetItemCount()-1
+					self.list_triggers.CheckItem(last)
 			else:
-				self.list_triggers.Append([self.datastream_list[ii[1]].decode('utf8'),self.a.operators_list[ii[2]].decode('utf8'),ii[3]])
-			if ii[0]==1:
-				last=self.list_triggers.GetItemCount()-1
-				self.list_triggers.CheckItem(last)
-			self.triggers[index]=ii
-
-	def read_actions(self):
-		data=self.conf.get('ACTIONS', 'actions')
-		self.trigger_actions=data.split('||')
-		self.trigger_actions.pop()
-		for index,item in enumerate(self.trigger_actions):
-			ii=item.split(',')
-			ii[0]=int(ii[0])
-			ii[1]=int(ii[1])
-			ii[3]=float(ii[3])
-			ii[4]=int(ii[4])
-			self.trigger_actions[index]=ii
+				x=self.a.getDataListIndex(ii[1])
+				if x:
+					self.triggers.append(ii)
+					self.list_triggers.Append([self.a.DataList[x][0].decode('utf8'),self.a.operators_list[ii[2]].decode('utf8'),ii[3]])
+					if ii[0]==1:
+						last=self.list_triggers.GetItemCount()-1
+						self.list_triggers.CheckItem(last)
+				else: self.ShowMessage(_('Problem with Actions detected. Please check and save again.'))
 
 	def print_actions(self, e):
 		selected_trigger=e.GetIndex()
 		self.list_actions.DeleteAllItems()
-		for i in self.trigger_actions:
-			if i[0]==selected_trigger:
-				if i[3]==0.0: repeat=''
-				else: repeat=str(i[3])
-				time_units=self.actions.time_units[i[4]]
-				repeat2=repeat+' '+time_units
-				self.list_actions.Append([self.actions.options[i[1]][0],i[2].decode('utf8'),repeat2])
+		for i in  self.triggers[selected_trigger][4]:
+			if i[2]==0.0: repeat=''
+			else: repeat=str(i[2])
+			time_units=self.actions.time_units[i[3]]
+			repeat2=repeat+' '+time_units
+			self.list_actions.Append([self.actions.options[i[0]][0].decode('utf8'),i[1].decode('utf8'),repeat2.decode('utf8')])
 
 	def add_trigger(self,e):
 		dlg = addTrigger(self.datastream_list, self.a)
@@ -1988,6 +2000,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				tmp.append(-1)
 				tmp.append(-1)
 				tmp.append(-1)
+				tmp.append([])
 				self.triggers.append(tmp)
 			else:
 				if trigger_selection == -1 or dlg.operator_select.GetCurrentSelection() == -1:
@@ -1995,7 +2008,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					dlg.Destroy()
 					return
 				trigger0=self.a.DataList[trigger_selection]
-				operator_selection=eval('self.a.'+trigger0+'[7]['+str(dlg.operator_select.GetCurrentSelection())+']')
+				operator_selection=trigger0[7][dlg.operator_select.GetCurrentSelection()]
 				if dlg.value.GetValue(): value=dlg.value.GetValue()
 				else: value='0'
 				try: value2=float(value)
@@ -2003,14 +2016,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					self.ShowMessage(_('Failed. Value must be a number.'))
 					dlg.Destroy()
 					return
-				trigger=self.datastream_list[dlg.trigger_select.GetCurrentSelection()]
 				operator=self.a.operators_list[operator_selection]
-				self.list_triggers.Append([trigger.decode('utf8'),operator.decode('utf8'),value])
+				self.list_triggers.Append([trigger0[0].decode('utf8'),operator.decode('utf8'),value])
 				tmp=[]
 				tmp.append(1)
-				tmp.append(trigger_selection)
+				tmp.append(trigger0[9])
 				tmp.append(operator_selection)
 				tmp.append(value2)
+				tmp.append([])
 				self.triggers.append(tmp)
 			dlg.Destroy()
 			total=self.list_triggers.GetItemCount()
@@ -2020,8 +2033,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.list_triggers.CheckItem(total-1)
 
 	def add_action(self,e):
-		selected_trigger= self.list_triggers.GetFirstSelected()
-		if selected_trigger==-1:
+		selected_trigger_position= self.list_triggers.GetFirstSelected()
+		if selected_trigger_position==-1:
 			self.ShowMessage(_('Select a trigger to add actions.'))
 			return
 		dlg = addAction(self.actions.options,self.actions.time_units)
@@ -2046,14 +2059,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			time_units=self.actions.time_units[time_units_selection]
 			if repeat==0.0: repeat2=time_units
 			else: repeat2=str(repeat)+' '+time_units
-			self.list_actions.Append([action,data.decode('utf8'),repeat2])
+			self.list_actions.Append([action.decode('utf8'),data.decode('utf8'),repeat2.decode('utf8')])
 			tmp=[]
-			tmp.append(selected_trigger)
 			tmp.append(action_selection)
 			tmp.append(data)
 			tmp.append(repeat)
 			tmp.append(time_units_selection)
-			self.trigger_actions.append(tmp)
+			self.triggers[selected_trigger_position][4].append(tmp)
 		dlg.Destroy()
 
 	def delete_trigger(self,e):
@@ -2063,13 +2075,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		else:
 			del self.triggers[selected]
 			self.list_triggers.DeleteItem(selected)
-			toRemove=[]
-			for index,item in enumerate(self.trigger_actions):
-				if item[0]==selected: toRemove.append(index)
-			for i in sorted(toRemove, reverse=True):
-				del self.trigger_actions[i]
-			for i in self.trigger_actions:
-				if i[0]>selected: i[0]=(i[0])-1
 			self.list_actions.DeleteAllItems()
 
 	def delete_action(self,e):
@@ -2077,35 +2082,22 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		selected_action=self.list_actions.GetFirstSelected()
 		if selected_action==-1: 
 			self.ShowMessage(_('Select an action to delete.'))
-		else:
+		else: 
+			del self.triggers[selected_trigger][4][selected_action]
 			self.list_actions.DeleteItem(selected_action)
-			cont=0
-			for index,item in enumerate(self.trigger_actions):
-				if item[0]==selected_trigger:
-					if cont==selected_action: 
-						del self.trigger_actions[index]
-						return
-					else: cont=cont+1
 
 	def apply_changes_actions(self,e):
-		tmp=''
-		for index,item in enumerate(self.triggers):
-			if self.list_triggers.IsChecked(index): tmp +='1,'
-			else: tmp +='0,'
-			tmp +=str(self.triggers[index][1])+','+str(self.triggers[index][2])+','+str(self.triggers[index][3])+'||'
-		self.conf.set('ACTIONS', 'triggers', tmp)
-		
-		tmp=''
-		for index,item in enumerate(self.trigger_actions):
-			tmp +=str(self.trigger_actions[index][0])+','+str(self.trigger_actions[index][1])+','+str(self.trigger_actions[index][2])+','+str(self.trigger_actions[index][3])+','+str(self.trigger_actions[index][4])+'||'
-		self.conf.set('ACTIONS', 'actions', tmp)
+		i=0
+		for ii in self.triggers:
+			if self.list_triggers.IsChecked(i): self.triggers[i][0]=1
+			else: self.triggers[i][0]=0
+			i=i+1
+		self.conf.set('ACTIONS', 'triggers', str(self.triggers))
 		self.SetStatusText(_('Actions changes applied and restarted'))
 		self.start_monitoring()
 
 	def cancel_changes_actions(self,e):
 		self.read_triggers()
-		self.read_actions()
-		self.list_actions.DeleteAllItems()
 		self.SetStatusText(_('Actions changes cancelled'))
 
 	def stop_actions(self,e):
@@ -2114,8 +2106,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.conf.read()
 		self.read_triggers()
 		self.list_actions.DeleteAllItems()
-		self.read_actions()
-
 
 	def start_actions(self,e):
 		subprocess.call(['python', currentpath+'/ctrl_actions.py', '1'])
@@ -2123,8 +2113,115 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.conf.read()
 		self.read_triggers()
 		self.list_actions.DeleteAllItems()
-		self.read_actions()
 
+#######################DS18B20
+
+	def start_1w(self):
+		subprocess.call(['pkill', '-f', '1w.py'])
+		subprocess.Popen(['python',currentpath+'/1w.py'])
+
+	def read_DS18B20(self):
+		self.DS18B20=[]
+		self.list_DS18B20.DeleteAllItems()
+		data=self.conf.get('1W', 'DS18B20')
+		try:
+			temp_list=eval(data)
+		except:temp_list=[]
+		for ii in temp_list:
+			self.DS18B20.append(ii)
+			self.list_DS18B20.Append([ii[0],ii[1],ii[2],ii[3]])
+			if ii[5]=='1':
+				last=self.list_DS18B20.GetItemCount()-1
+				self.list_DS18B20.CheckItem(last)
+	
+	def edit_DS18B20(self,e):
+		selected_DS18B20=e.GetIndex()
+		edit=[selected_DS18B20,self.DS18B20[selected_DS18B20][0],self.DS18B20[selected_DS18B20][1],self.DS18B20[selected_DS18B20][2],self.DS18B20[selected_DS18B20][3]]
+		self.edit_add_DS18B20(edit)
+
+	def add_DS18B20(self,e):
+		self.edit_add_DS18B20(0)
+
+	def edit_add_DS18B20(self,edit):
+		dlg = addDS18B20(edit)
+		res = dlg.ShowModal()
+		if res == wx.ID_OK:
+			name=dlg.name.GetValue()
+			name=name.encode('utf8')
+			short=dlg.short.GetValue()
+			short=short.encode('utf8')
+			unit_selection=dlg.unit_select.GetValue()
+			id_selection=dlg.id_select.GetValue()
+			id_selection=id_selection.encode('utf8')
+			if not name or not short:
+				self.ShowMessage(_('Failed. Write a name and a short name.'))
+				dlg.Destroy()
+				return				
+			if unit_selection == '':
+				self.ShowMessage(_('Failed. Select unit.'))
+				dlg.Destroy()
+				return
+			if id_selection == '':
+				self.ShowMessage(_('Failed. Select sensor ID.'))
+				dlg.Destroy()
+				return
+			if unit_selection=='Celsius': unit_selection='C'
+			if unit_selection=='Fahrenheit': unit_selection='F'
+			if unit_selection=='Kelvin': unit_selection='K'
+			if edit==0:
+				self.list_DS18B20.Append([name.decode('utf8'),short.decode('utf8'),unit_selection,id_selection])
+				last=self.list_DS18B20.GetItemCount()-1
+				self.list_DS18B20.CheckItem(last)
+				if len(self.DS18B20)==0: ID='1W0'
+				else:
+					last=len(self.DS18B20)-1
+					x=int(self.DS18B20[last][4][2:])
+					ID='1W'+str(x+1)
+				self.DS18B20.append([name,short,unit_selection,id_selection,ID,'1'])
+			else:
+				self.list_DS18B20.SetStringItem(edit[0],0,name.decode('utf8'))
+				self.list_DS18B20.SetStringItem(edit[0],1,short.decode('utf8'))
+				self.list_DS18B20.SetStringItem(edit[0],2,unit_selection)
+				self.list_DS18B20.SetStringItem(edit[0],3,id_selection)
+				self.DS18B20[edit[0]][0]=name
+				self.DS18B20[edit[0]][1]=short
+				self.DS18B20[edit[0]][2]=unit_selection
+				self.DS18B20[edit[0]][3]=id_selection
+		dlg.Destroy()
+
+
+	def delete_DS18B20(self,e):
+		selected_DS18B20=self.list_DS18B20.GetFirstSelected()
+		if selected_DS18B20==-1: 
+			self.ShowMessage(_('Select a sensor to delete.'))
+			return
+		data=self.conf.get('ACTIONS', 'triggers')
+		try:
+			temp_list=eval(data)
+		except:temp_list=[]
+		for i in temp_list:
+			if i[1]==self.DS18B20[selected_DS18B20][4]:
+				self.read_triggers()
+				self.ShowMessage(_('You have an action defined for this sensor. You must delete that action before deleting this sensor.'))
+				return
+		del self.DS18B20[selected_DS18B20]
+		self.list_DS18B20.DeleteItem(selected_DS18B20)
+
+	def apply_changes_DS18B20(self,e):
+		for i in self.DS18B20:
+			index=self.DS18B20.index(i)
+			if self.list_DS18B20.IsChecked(index): self.DS18B20[index][5]='1'
+			else: self.DS18B20[index][5]='0'
+		self.conf.set('1W', 'DS18B20', str(self.DS18B20))
+		self.start_1w()
+		self.start_monitoring()
+		self.read_datastream()
+		self.read_triggers()
+		self.SetStatusText(_('DS18B20 sensors changes applied and restarted'))
+
+	def cancel_changes_DS18B20(self,e):
+		self.read_DS18B20()
+		self.SetStatusText(_('DS18B20 sensors changes cancelled'))
 #Main#############################
 if __name__ == "__main__":
 	app = wx.App()

@@ -34,6 +34,9 @@ class MyFrame(wx.Frame):
 
 			Language(self.conf.get('GENERAL','lang'))
 
+			GPIO.setmode(GPIO.BCM)
+			GPIO.setwarnings(False)
+
 			wx.Frame.__init__(self, parent, title="Inspector", size=(650,435))
 			
 			self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
@@ -59,13 +62,7 @@ class MyFrame(wx.Frame):
 			self.button_nmea =wx.Button(self, label=_('NMEA info'), pos=(555, 240))
 			self.Bind(wx.EVT_BUTTON, self.nmea_info, self.button_nmea)
 
-			self.a=DataStream()
-
-			index=0
-			for i in self.a.DataList:
-				data=eval('self.a.'+i+'[0]')
-				self.list.InsertStringItem(index,data)
-				index=index+1
+			self.reset(0)
 
 			self.pause_all=0
 
@@ -82,12 +79,10 @@ class MyFrame(wx.Frame):
 			self.error=''
 			self.frase_nmea_log=''
 			self.data=[]
-			self.read_conf=1
-			GPIO.setmode(GPIO.BCM)
-			GPIO.setwarnings(False)
 
 			if not self.thread1.isAlive(): self.thread1.start()
 			if not self.thread2.isAlive(): self.thread2.start()
+
 
 		def check_switches(self):
 			self.channel1=''
@@ -166,7 +161,7 @@ class MyFrame(wx.Frame):
 					except socket.error, error_msg:
 						self.error= _('Connected with localhost:10110. Error: ')+ str(error_msg[0])+_(', waiting for data...')
 					else:
-						if frase_nmea:
+						if frase_nmea and self.pause_all==0:
 							self.a.parse_nmea(frase_nmea)
 							self.frase_nmea_log+=frase_nmea
 							self.error = _('Connected with localhost:10110.')
@@ -179,85 +174,80 @@ class MyFrame(wx.Frame):
 			while True:	
 				if self.pause_all==0:
 
-					if self.read_conf==1: 
-						self.conf.read()
-						self.check_switches()
-						self.read_conf=0
-
 					if self.channel1:
 						if GPIO.input(self.channel1):
-							self.a.SW1[2]=1
-							self.a.SW1[4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('SW1')][2]=1
+							self.a.DataList[self.a.getDataListIndex('SW1')][4]=time.time()
 						else:
-							self.a.SW1[2]=0
-							self.a.SW1[4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('SW1')][2]=0
+							self.a.DataList[self.a.getDataListIndex('SW1')][4]=time.time()
 					if self.channel2:
 						if GPIO.input(self.channel2):
-							self.a.SW2[2]=1
-							self.a.SW2[4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('SW2')][2]=1
+							self.a.DataList[self.a.getDataListIndex('SW2')][4]=time.time()
 						else:
-							self.a.SW2[2]=0
-							self.a.SW2[4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('SW2')][2]=0
+							self.a.DataList[self.a.getDataListIndex('SW2')][4]=time.time()
 					if self.channel3:
 						if GPIO.input(self.channel3):
-							self.a.SW3[2]=1
-							self.a.SW3[4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('SW3')][2]=1
+							self.a.DataList[self.a.getDataListIndex('SW3')][4]=time.time()
 						else:
-							self.a.SW3[2]=0
-							self.a.SW3[4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('SW3')][2]=0
+							self.a.DataList[self.a.getDataListIndex('SW3')][4]=time.time()
 					if self.channel4:
 						if GPIO.input(self.channel4):
-							self.a.SW4[2]=1
-							self.a.SW4[4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('SW4')][2]=1
+							self.a.DataList[self.a.getDataListIndex('SW4')][4]=time.time()
 						else:
-							self.a.SW4[2]=0
-							self.a.SW4[4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('SW4')][2]=0
+							self.a.DataList[self.a.getDataListIndex('SW4')][4]=time.time()
 					if self.channel5:
 						if GPIO.input(self.channel5):
-							self.a.SW5[2]=1
-							self.a.SW5[4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('SW5')][2]=1
+							self.a.DataList[self.a.getDataListIndex('SW5')][4]=time.time()
 						else:
-							self.a.SW5[2]=0
-							self.a.SW5[4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('SW5')][2]=0
+							self.a.DataList[self.a.getDataListIndex('SW5')][4]=time.time()
 					if self.channel6:
 						if GPIO.input(self.channel6):
-							self.a.SW6[2]=1
-							self.a.SW6[4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('SW6')][2]=1
+							self.a.DataList[self.a.getDataListIndex('SW6')][4]=time.time()
 						else:
-							self.a.SW6[2]=0
-							self.a.SW6[4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('SW6')][2]=0
+							self.a.DataList[self.a.getDataListIndex('SW6')][4]=time.time()
 					if self.channel7:
 						if GPIO.input(self.channel7):
-							self.a.OUT1[2]=1
-							self.a.OUT1[4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('OUT1')][2]=1
+							self.a.DataList[self.a.getDataListIndex('OUT1')][4]=time.time()
 						else:
-							self.a.OUT1[2]=0
-							self.a.OUT1[4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('OUT1')][2]=0
+							self.a.DataList[self.a.getDataListIndex('OUT1')][4]=time.time()
 					if self.channel8:
 						if GPIO.input(self.channel8):
-							self.a.OUT2[2]=1
-							self.a.OUT2[4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('OUT2')][2]=1
+							self.a.DataList[self.a.getDataListIndex('OUT2')][4]=time.time()
 						else:
-							self.a.OUT2[2]=0
-							self.a.OUT2[4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('OUT2')][2]=0
+							self.a.DataList[self.a.getDataListIndex('OUT2')][4]=time.time()
 					if self.channel9:
 						if GPIO.input(self.channel9):
-							self.a.OUT3[2]=1
-							self.a.OUT3[4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('OUT3')][2]=1
+							self.a.DataList[self.a.getDataListIndex('OUT3')][4]=time.time()
 						else:
-							self.a.OUT3[2]=0
-							self.a.OUT3[4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('OUT3')][2]=0
+							self.a.DataList[self.a.getDataListIndex('OUT3')][4]=time.time()
 					if self.channel10:
 						if GPIO.input(self.channel10):
-							self.a.OUT4[2]=1
-							self.a.OUT4[4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('OUT4')][2]=1
+							self.a.DataList[self.a.getDataListIndex('OUT4')][4]=time.time()
 						else:
-							self.a.OUT4[2]=0
-							self.a.OUT4[4]=time.time()
+							self.a.DataList[self.a.getDataListIndex('OUT4')][2]=0
+							self.a.DataList[self.a.getDataListIndex('OUT4')][4]=time.time()
 
 					index=0
 					for i in self.a.DataList:
-						timestamp=eval('self.a.'+i+'[4]')
+						timestamp=i[4]
 						if timestamp:
 							now=time.time()
 							age=now-timestamp
@@ -265,10 +255,10 @@ class MyFrame(wx.Frame):
 							unit=''
 							talker=''
 							sentence=''
-							value=eval('self.a.'+i+'[2]')
-							unit=eval('self.a.'+i+'[3]')
-							talker=eval('self.a.'+i+'[5]')
-							sentence=eval('self.a.'+i+'[6]')
+							value=i[2]
+							unit=i[3]
+							talker=i[5]
+							sentence=i[6]
 							if talker=='OC': talker=_('Calculated')
 							if talker=='OS': talker=_('Sensor')
 							if unit: data = str(value)+' '+str(unit)
@@ -310,13 +300,20 @@ class MyFrame(wx.Frame):
 				self.button_pause.SetLabel(_('Pause'))
 
 		def reset(self, e):
-			for i in range(self.list.GetItemCount()):
-				self.list.SetStringItem(i,1,'')
-				self.list.SetStringItem(i,2,'')
-				self.list.SetStringItem(i,3,'')
-				self.list.SetStringItem(i,4,'')
+			self.pause_all=1
+			self.list. DeleteAllItems()
 			self.logger.SetValue('')
-			self.read_conf=1
+			time.sleep(1)
+			self.conf.read()
+			self.check_switches()
+			self.a=DataStream(self.conf)
+			index=0
+			for i in self.a.DataList:
+				data=i[0]
+				self.list.InsertStringItem(index,data)
+				index=index+1
+
+			self.pause_all=0
 
 		def nmea_info(self, e):
 			url = self.currentpath+'/docs/NMEA.html'
