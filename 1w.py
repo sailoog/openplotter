@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import socket, pynmea2
+import socket, pynmea2, time
 from w1thermsensor import W1ThermSensor
 from classes.conf import Conf
 
@@ -30,10 +30,11 @@ for index,item in enumerate(sensors_list):
 	try:
 		sensors.append(W1ThermSensor(W1ThermSensor.THERM_SENSOR_DS18B20, item[3]))
 	except Exception,e: 
-		del sensors_list[index]
+		sensors_list[index][5]='0'
 		print str(e)
 
 while True:
+	time.sleep(1)
 	temp=''
 	list_tmp=[]	
 	ib=0

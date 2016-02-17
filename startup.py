@@ -74,7 +74,9 @@ nmea_temp_h=conf.get('STARTUP', 'nmea_temp_h')
 
 #1W
 DS18B20='0'
-sensors_list=eval(conf.get('1W', 'DS18B20'))
+x=conf.get('1W', 'DS18B20')
+if x: sensors_list=eval(x)
+else: sensors_list=[]
 for i in sensors_list:
 	if i[5]=='1': DS18B20='1'
 

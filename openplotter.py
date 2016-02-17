@@ -384,6 +384,7 @@ class MainFrame(wx.Frame):
 		self.list_DS18B20.InsertColumn(1, _('Short'), width=60)
 		self.list_DS18B20.InsertColumn(2, _('Unit'), width=40)
 		self.list_DS18B20.InsertColumn(3, _('ID'))
+		self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_DS18B20, self.list_DS18B20)
 			
 		self.add_DS18B20_button =wx.Button(self.page11, label=_('add'), pos=(585, 30))
 		self.Bind(wx.EVT_BUTTON, self.add_DS18B20, self.add_DS18B20_button)
@@ -479,10 +480,8 @@ class MainFrame(wx.Frame):
 		wx.StaticBox(self.page9, label=_(' Twitter '), size=(330, 290), pos=(10, 10))
 		self.twitter_enable = wx.CheckBox(self.page9, label=_('Enable'), pos=(20, 32))
 		self.twitter_enable.Bind(wx.EVT_CHECKBOX, self.on_twitter_enable)
-		self.datastream_list=[]
-		self.a=DataStream(self.conf)
-		for i in self.a.DataList:
-			self.datastream_list.append(i[1]+': '+i[0])
+
+		self.read_datastream()
 		self.datastream_select = wx.ListBox(self.page9, choices=self.datastream_list, style=wx.LB_MULTIPLE, size=(310, 80), pos=(20, 65))
 		wx.StaticText(self.page9, label=_('apiKey'), pos=(20, 160))
 		self.apiKey = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(150, 155))
@@ -550,6 +549,13 @@ class MainFrame(wx.Frame):
 ###########################layout
 
 ####definitions###################
+
+	def read_datastream(self):
+		self.datastream_list=[]
+		self.a=DataStream(self.conf)
+		for i in self.a.DataList:
+			self.datastream_list.append(i[1]+': '+i[0])
+
 	def set_layout_conf(self):
 		if self.language=='en': self.lang.Check(self.lang_item1.GetId(), True)
 		if self.language=='ca': self.lang.Check(self.lang_item2.GetId(), True)
@@ -1879,6 +1885,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 #######################twitterbot
 
 	def start_monitoring(self):
+		self.ShowMessage(_('Actions will be restarted.'))
 		subprocess.call(['pkill', '-f', 'monitoring.py'])
 		subprocess.Popen(['python',currentpath+'/monitoring.py'])
 
@@ -2108,6 +2115,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.list_actions.DeleteAllItems()
 
 #######################DS18B20
+
+	def start_1w(self):
+		subprocess.call(['pkill', '-f', '1w.py'])
+		subprocess.Popen(['python',currentpath+'/1w.py'])
+
 	def read_DS18B20(self):
 		self.DS18B20=[]
 		self.list_DS18B20.DeleteAllItems()
@@ -2121,9 +2133,16 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			if ii[5]=='1':
 				last=self.list_DS18B20.GetItemCount()-1
 				self.list_DS18B20.CheckItem(last)
+	
+	def edit_DS18B20(self,e):
+		selected_DS18B20=e.GetIndex()
+		edit=[selected_DS18B20,self.DS18B20[selected_DS18B20][0],self.DS18B20[selected_DS18B20][1],self.DS18B20[selected_DS18B20][2],self.DS18B20[selected_DS18B20][3]]
+		self.edit_add_DS18B20(edit)
 
 	def add_DS18B20(self,e):
-		edit=[]
+		self.edit_add_DS18B20(0)
+
+	def edit_add_DS18B20(self,edit):
 		dlg = addDS18B20(edit)
 		res = dlg.ShowModal()
 		if res == wx.ID_OK:
@@ -2146,37 +2165,59 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.ShowMessage(_('Failed. Select sensor ID.'))
 				dlg.Destroy()
 				return
-			for i in self.DS18B20:
-				if i[3]==id_selection:
-					self.ShowMessage(_('Failed. This sensor ID is already in use.'))
-					dlg.Destroy()
-					return
 			if unit_selection=='Celsius': unit_selection='C'
 			if unit_selection=='Fahrenheit': unit_selection='F'
 			if unit_selection=='Kelvin': unit_selection='K'
-			self.list_DS18B20.Append([name.decode('utf8'),short.decode('utf8'),unit_selection,id_selection])
-			last=self.list_DS18B20.GetItemCount()-1
-			self.list_DS18B20.CheckItem(last)
-			self.DS18B20.append([name,short,unit_selection,id_selection,'','1'])
-			self.renameDS18B20()
+			if edit==0:
+				self.list_DS18B20.Append([name.decode('utf8'),short.decode('utf8'),unit_selection,id_selection])
+				last=self.list_DS18B20.GetItemCount()-1
+				self.list_DS18B20.CheckItem(last)
+				if len(self.DS18B20)==0: ID='1W0'
+				else:
+					last=len(self.DS18B20)-1
+					x=int(self.DS18B20[last][4][2:])
+					ID='1W'+str(x+1)
+				self.DS18B20.append([name,short,unit_selection,id_selection,ID,'1'])
+			else:
+				self.list_DS18B20.SetStringItem(edit[0],0,name.decode('utf8'))
+				self.list_DS18B20.SetStringItem(edit[0],1,short.decode('utf8'))
+				self.list_DS18B20.SetStringItem(edit[0],2,unit_selection)
+				self.list_DS18B20.SetStringItem(edit[0],3,id_selection)
+				self.DS18B20[edit[0]][0]=name
+				self.DS18B20[edit[0]][1]=short
+				self.DS18B20[edit[0]][2]=unit_selection
+				self.DS18B20[edit[0]][3]=id_selection
 		dlg.Destroy()
 
-	def renameDS18B20(self):
-		for i in self.DS18B20:
-			index=self.DS18B20.index(i)
-			self.DS18B20[index][4]='1W'+str(index)
 
 	def delete_DS18B20(self,e):
 		selected_DS18B20=self.list_DS18B20.GetFirstSelected()
 		if selected_DS18B20==-1: 
 			self.ShowMessage(_('Select a sensor to delete.'))
-		else: 
-			del self.DS18B20[selected_DS18B20]
-			self.list_DS18B20.DeleteItem(selected_DS18B20)
-			self.renameDS18B20()
+			return
+		data=self.conf.get('ACTIONS', 'triggers')
+		try:
+			temp_list=eval(data)
+		except:temp_list=[]
+		for i in temp_list:
+			if i[1]==self.DS18B20[selected_DS18B20][4]:
+				self.read_triggers()
+				self.ShowMessage(_('You have an action defined for this sensor. You must delete that action before deleting this sensor.'))
+				return
+		del self.DS18B20[selected_DS18B20]
+		self.list_DS18B20.DeleteItem(selected_DS18B20)
 
 	def apply_changes_DS18B20(self,e):
-		pass
+		for i in self.DS18B20:
+			index=self.DS18B20.index(i)
+			if self.list_DS18B20.IsChecked(index): self.DS18B20[index][5]='1'
+			else: self.DS18B20[index][5]='0'
+		self.conf.set('1W', 'DS18B20', str(self.DS18B20))
+		self.start_1w()
+		self.start_monitoring()
+		self.read_datastream()
+		self.read_triggers()
+		self.SetStatusText(_('DS18B20 sensors changes applied and restarted'))
 
 	def cancel_changes_DS18B20(self,e):
 		self.read_DS18B20()

@@ -47,7 +47,9 @@ class DataStream:
 		self.DataList.append([_('Heel'),_('Heel'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'I2CR'])
 
 		#1W
-		sensors_list=eval(conf.get('1W', 'DS18B20'))
+		x=conf.get('1W', 'DS18B20')
+		if x: sensors_list=eval(x)
+		else: sensors_list=[]
 		for i in sensors_list:
 			try:
 				if i[5]=='1':

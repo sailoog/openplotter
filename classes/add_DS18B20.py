@@ -39,5 +39,14 @@ class addDS18B20(wx.Dialog):
 		wx.StaticText(panel, label=_('sensor ID'), pos=(10, 130))
 		self.id_select= wx.ComboBox(panel, choices=list_id, style=wx.CB_READONLY, size=(310, 32), pos=(10, 155))
 
+		if edit != 0:
+			self.name.SetValue(edit[1])
+			self.short.SetValue(edit[2])
+			if edit[3]=='C': unit_selection='Celsius'
+			if edit[3]=='F': unit_selection='Fahrenheit'
+			if edit[3]=='K': unit_selection='Kelvin'
+			self.unit_select.SetValue(unit_selection)
+			self.id_select.SetValue(edit[4])
+
 		cancelBtn = wx.Button(panel, wx.ID_CANCEL, pos=(70, 205))
 		okBtn = wx.Button(panel, wx.ID_OK, pos=(180, 205))
