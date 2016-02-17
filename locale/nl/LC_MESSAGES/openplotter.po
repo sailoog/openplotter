@@ -184,12 +184,12 @@ msgstr "Taal instellen op Frans"
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:114
 msgid "Dutch"
-msgstr ""
+msgstr "Nederlands"
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:114
 #, fuzzy
 msgid "Set Dutch language"
-msgstr "Taal instellen op Frans"
+msgstr "Taal instellen op Nederlands"
 
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:116
 msgid "Language"
