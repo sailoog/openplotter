@@ -20,7 +20,7 @@ from classes.actions import Actions
 
 class addAction(wx.Dialog):
 
-	def __init__(self,actions_options,time_units):
+	def __init__(self,actions_options,time_units,edit):
 
 		wx.Dialog.__init__(self, None, title=_('Add action'), size=(330,290))
 
@@ -43,6 +43,14 @@ class addAction(wx.Dialog):
 		self.repeat_unit= wx.ComboBox(panel, choices=time_units, style=wx.CB_READONLY, size=(150, 32), pos=(170, 155))
 		self.repeat_unit.Bind(wx.EVT_COMBOBOX, self.onSelectUnit)
 		self.repeat_unit.SetValue(_('no repeat'))
+
+		if edit != 0:
+			self.action_select.SetValue(list_actions[edit[1]])
+			self.data.SetValue(edit[2])
+			if edit[3] != 0.0:
+				self.repeat.SetValue(str(edit[3]))
+				self.repeat.Enable()
+			self.repeat_unit.SetValue(time_units[edit[4]])
 
 		cancelBtn = wx.Button(panel, wx.ID_CANCEL, pos=(70, 205))
 		okBtn = wx.Button(panel, wx.ID_OK, pos=(180, 205))

@@ -209,7 +209,7 @@ class MainFrame(wx.Frame):
 		for i in range (0, 9):
 			ii=str(i)
 			if 'wlan'+ii in output: self.available_wireless.append('wlan'+ii)
-			
+
 		self.available_share = [_('none')]
 		for i in range (0, 9):
 			ii=str(i)
@@ -517,7 +517,8 @@ class MainFrame(wx.Frame):
 		self.list_triggers.InsertColumn(0, _('trigger'), width=275)
 		self.list_triggers.InsertColumn(1, _('operator'), width=170)
 		self.list_triggers.InsertColumn(2, _('value'))
-			
+		self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_triggers, self.list_triggers)
+
 		self.add_trigger_button =wx.Button(self.page10, label=_('add'), pos=(585, 30))
 		self.Bind(wx.EVT_BUTTON, self.add_trigger, self.add_trigger_button)
 
@@ -531,6 +532,7 @@ class MainFrame(wx.Frame):
 		self.list_actions.InsertColumn(0, _('action'), width=200)
 		self.list_actions.InsertColumn(1, _('data'), width=220)
 		self.list_actions.InsertColumn(2, _('repeat'), width=130)
+		self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_actions, self.list_actions)
 
 		self.add_action_button =wx.Button(self.page10, label=_('add'), pos=(585, 165))
 		self.Bind(wx.EVT_BUTTON, self.add_action, self.add_action_button)
@@ -2002,6 +2004,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			time_units=self.actions.time_units[i[3]]
 			repeat2=repeat+' '+time_units
 			self.list_actions.Append([self.actions.options[i[0]][0].decode('utf8'),i[1].decode('utf8'),repeat2.decode('utf8')])
+	
+	def edit_triggers(self,e):
+		pass
 
 	def add_trigger(self,e):
 		dlg = addTrigger(self.datastream_list, self.a)
@@ -2046,13 +2051,26 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.list_triggers.Select(x, on=0)
 			self.list_triggers.Select(total-1, on=1)
 			self.list_triggers.CheckItem(total-1)
+	
+	def edit_actions(self,e):
+		a=e.GetIndex()
+		t= self.list_triggers.GetFirstSelected()
+		action=self.triggers[t][4][a][0]
+		data=self.triggers[t][4][a][1]
+		repeat=self.triggers[t][4][a][2]
+		unit=self.triggers[t][4][a][3]
+		edit=[a,action,data,repeat,unit]
+		self.edit_add_action(edit)
 
 	def add_action(self,e):
+		self.edit_add_action(0)
+
+	def edit_add_action(self,edit):
 		selected_trigger_position= self.list_triggers.GetFirstSelected()
 		if selected_trigger_position==-1:
 			self.ShowMessage(_('Select a trigger to add actions.'))
 			return
-		dlg = addAction(self.actions.options,self.actions.time_units)
+		dlg = addAction(self.actions.options,self.actions.time_units,edit)
 		res = dlg.ShowModal()
 		if res == wx.ID_OK:
 			action_selection=dlg.action_select.GetCurrentSelection()
@@ -2074,13 +2092,22 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			time_units=self.actions.time_units[time_units_selection]
 			if repeat==0.0: repeat2=time_units
 			else: repeat2=str(repeat)+' '+time_units
-			self.list_actions.Append([action.decode('utf8'),data.decode('utf8'),repeat2.decode('utf8')])
-			tmp=[]
-			tmp.append(action_selection)
-			tmp.append(data)
-			tmp.append(repeat)
-			tmp.append(time_units_selection)
-			self.triggers[selected_trigger_position][4].append(tmp)
+			if edit==0:
+				self.list_actions.Append([action.decode('utf8'),data.decode('utf8'),repeat2.decode('utf8')])
+				tmp=[]
+				tmp.append(action_selection)
+				tmp.append(data)
+				tmp.append(repeat)
+				tmp.append(time_units_selection)
+				self.triggers[selected_trigger_position][4].append(tmp)
+			else:
+				self.list_actions.SetStringItem(edit[0],0,action.decode('utf8'))
+				self.list_actions.SetStringItem(edit[0],1,data.decode('utf8'))
+				self.list_actions.SetStringItem(edit[0],2,repeat2.decode('utf8'))
+				self.triggers[selected_trigger_position][4][edit[0]][0]=action_selection
+				self.triggers[selected_trigger_position][4][edit[0]][1]=data
+				self.triggers[selected_trigger_position][4][edit[0]][2]=repeat
+				self.triggers[selected_trigger_position][4][edit[0]][3]=time_units_selection			
 		dlg.Destroy()
 
 	def delete_trigger(self,e):
@@ -2203,7 +2230,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.DS18B20[edit[0]][2]=unit_selection
 				self.DS18B20[edit[0]][3]=id_selection
 		dlg.Destroy()
-
 
 	def delete_DS18B20(self,e):
 		selected_DS18B20=self.list_DS18B20.GetFirstSelected()
