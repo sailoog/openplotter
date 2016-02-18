@@ -156,6 +156,10 @@ class MainFrame(wx.Frame):
 		self.startup_signalk = wx.CheckBox(self.page1, label=_('Signal K server (beta)'), pos=(20, 260))
 		self.startup_signalk.Bind(wx.EVT_CHECKBOX, self.startup)
 
+		wx.StaticBox(self.page1, size=(330, 230), pos=(350, 65))
+
+		self.op_maximize = wx.CheckBox(self.page1, label=_('Maximize OpenPlotter'), pos=(360, 80))
+		self.op_maximize.Bind(wx.EVT_CHECKBOX, self.startup)
 ###########################page1
 ########page2###################
 		wx.StaticBox(self.page2, size=(330, 50), pos=(10, 10))
@@ -581,6 +585,9 @@ class MainFrame(wx.Frame):
 		if self.conf.get('STARTUP', 'gps_time')=='1': self.startup_nmea_time.SetValue(True)
 		if self.conf.get('STARTUP', 'x11vnc')=='1': self.startup_remote_desktop.SetValue(True)
 		if self.conf.get('STARTUP', 'signalk')=='1': self.startup_signalk.SetValue(True)
+		if self.conf.get('STARTUP', 'maximize')=='1':
+			self.op_maximize.SetValue(True) 
+			self.Maximize()
 
 		if len(self.available_wireless)>0:
 			self.wlan.SetValue(self.conf.get('WIFI', 'device'))
@@ -863,6 +870,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		else:
 			self.conf.set('STARTUP', 'signalk', '0')
 
+		if self.op_maximize.GetValue():
+			self.conf.set('STARTUP', 'maximize', '1')
+		else:
+			self.conf.set('STARTUP', 'maximize', '0')
 ########WIFI###################################	
 
 
