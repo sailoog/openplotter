@@ -18,7 +18,7 @@ import wx
 
 class addTrigger(wx.Dialog):
 
-	def __init__(self,datastream_list,a):
+	def __init__(self,datastream_list,a,edit):
 
 		wx.Dialog.__init__(self, None, title=_('Add trigger'), size=(330,290))
 
@@ -41,6 +41,19 @@ class addTrigger(wx.Dialog):
 
 		self.value.Disable()
 		
+		if edit != 0:
+			if edit[1]==-1: self.trigger_select.SetValue(_('None (always true)'))
+			else: self.trigger_select.SetValue(datastream_list[self.a.getDataListIndex(edit[1])])
+			
+			if edit[2]==-1: self.operator_select.Disable()
+			else: 
+				self.print_operators_list()
+				self.operator_select.SetValue(self.a.operators_list[edit[2]])
+
+			if edit[3]!=0.0 and edit[3]!=-1:
+				self.value.SetValue(str(edit[3]))
+				self.value.Enable()
+
 		cancelBtn = wx.Button(panel, wx.ID_CANCEL, pos=(70, 205))
 		okBtn = wx.Button(panel, wx.ID_OK, pos=(180, 205))
 
@@ -50,14 +63,8 @@ class addTrigger(wx.Dialog):
 			self.value.Disable()
 			wx.MessageBox(_('The actions of this trigger will always be executed.'), 'Info', wx.OK | wx.ICON_INFORMATION)
 		else:
+			self.print_operators_list()
 			trigger=self.a.DataList[self.trigger_select.GetCurrentSelection()]
-			operators_valid_list=trigger[7]
-			new_list=[]
-			for i in operators_valid_list:
-				new_list.append(self.a.operators_list[i])
-			self.operator_select.Enable()
-			self.operator_select.Clear()
-			self.operator_select.AppendItems(new_list)
 			self.operator_select.SetSelection(0)
 			disable_field=trigger[8]
 			self.value.SetValue('')
@@ -65,3 +72,13 @@ class addTrigger(wx.Dialog):
 			if disable_field==0: self.value.Disable()
 			if trigger[9]=='SW1' or trigger=='SW2' or trigger=='SW3' or trigger=='SW4' or trigger=='SW5' or trigger=='SW6':
 				wx.MessageBox(_('Be sure you have filled in GPIO and Pull Down/Up fields in "Switches" tab and enabled the desired switch.'), 'Info', wx.OK | wx.ICON_INFORMATION)
+
+	def print_operators_list(self):
+		trigger=self.a.DataList[self.trigger_select.GetCurrentSelection()]
+		operators_valid_list=trigger[7]
+		new_list=[]
+		for i in operators_valid_list:
+			new_list.append(self.a.operators_list[i])
+		self.operator_select.Enable()
+		self.operator_select.Clear()
+		self.operator_select.AppendItems(new_list)

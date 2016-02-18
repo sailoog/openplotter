@@ -2006,22 +2006,43 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.list_actions.Append([self.actions.options[i[0]][0].decode('utf8'),i[1].decode('utf8'),repeat2.decode('utf8')])
 	
 	def edit_triggers(self,e):
-		pass
+		t=e.GetIndex()
+		trigger=self.triggers[t][1]
+		operator=self.triggers[t][2]
+		value=self.triggers[t][3]
+		edit=[t,trigger,operator,value]
+		self.edit_add_trigger(edit)
 
 	def add_trigger(self,e):
-		dlg = addTrigger(self.datastream_list, self.a)
+		self.edit_add_trigger(0)
+
+	def edit_add_trigger(self,edit):
+		dlg = addTrigger(self.datastream_list, self.a,edit)
 		res = dlg.ShowModal()
 		if res == wx.ID_OK:
 			trigger_selection=dlg.trigger_select.GetCurrentSelection()
 			if trigger_selection==len(self.datastream_list):
-				self.list_triggers.Append([_('None (always true)'),'',''])
-				tmp=[]
-				tmp.append(1)
-				tmp.append(-1)
-				tmp.append(-1)
-				tmp.append(-1)
-				tmp.append([])
-				self.triggers.append(tmp)
+				if edit==0:
+					self.list_triggers.Append([_('None (always true)'),'',''])
+					tmp=[]
+					tmp.append(1)
+					tmp.append(-1)
+					tmp.append(-1)
+					tmp.append(-1)
+					tmp.append([])
+					self.triggers.append(tmp)
+					total=self.list_triggers.GetItemCount()
+					for x in xrange(0, total, 1):
+						self.list_triggers.Select(x, on=0)
+					self.list_triggers.Select(total-1, on=1)
+					self.list_triggers.CheckItem(total-1)
+				else:
+					self.list_triggers.SetStringItem(edit[0],0,_('None (always true)'))
+					self.list_triggers.SetStringItem(edit[0],1,'')
+					self.list_triggers.SetStringItem(edit[0],2,'')
+					self.triggers[edit[0]][1]=-1
+					self.triggers[edit[0]][2]=-1
+					self.triggers[edit[0]][3]=-1
 			else:
 				if trigger_selection == -1 or dlg.operator_select.GetCurrentSelection() == -1:
 					self.ShowMessage(_('Failed. Select trigger and operator.'))
@@ -2037,20 +2058,28 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					dlg.Destroy()
 					return
 				operator=self.a.operators_list[operator_selection]
-				self.list_triggers.Append([trigger0[0].decode('utf8'),operator.decode('utf8'),value])
-				tmp=[]
-				tmp.append(1)
-				tmp.append(trigger0[9])
-				tmp.append(operator_selection)
-				tmp.append(value2)
-				tmp.append([])
-				self.triggers.append(tmp)
+				if edit==0:
+					self.list_triggers.Append([trigger0[0].decode('utf8'),operator.decode('utf8'),value])				
+					tmp=[]
+					tmp.append(1)
+					tmp.append(trigger0[9])
+					tmp.append(operator_selection)
+					tmp.append(value2)
+					tmp.append([])
+					self.triggers.append(tmp)
+					total=self.list_triggers.GetItemCount()
+					for x in xrange(0, total, 1):
+						self.list_triggers.Select(x, on=0)
+					self.list_triggers.Select(total-1, on=1)
+					self.list_triggers.CheckItem(total-1)
+				else:
+					self.list_triggers.SetStringItem(edit[0],0,trigger0[0].decode('utf8'))
+					self.list_triggers.SetStringItem(edit[0],1,operator.decode('utf8'))
+					self.list_triggers.SetStringItem(edit[0],2,value)
+					self.triggers[edit[0]][1]=trigger0[9]
+					self.triggers[edit[0]][2]=operator_selection
+					self.triggers[edit[0]][3]=value2					
 			dlg.Destroy()
-			total=self.list_triggers.GetItemCount()
-			for x in xrange(0, total, 1):
-				self.list_triggers.Select(x, on=0)
-			self.list_triggers.Select(total-1, on=1)
-			self.list_triggers.CheckItem(total-1)
 	
 	def edit_actions(self,e):
 		a=e.GetIndex()
