@@ -480,8 +480,8 @@ class MainFrame(wx.Frame):
 		wx.StaticBox(self.page9, label=_(' Twitter '), size=(330, 290), pos=(10, 10))
 		self.twitter_enable = wx.CheckBox(self.page9, label=_('Enable'), pos=(20, 32))
 		self.twitter_enable.Bind(wx.EVT_CHECKBOX, self.on_twitter_enable)
-
-		self.read_datastream()
+		
+		self.datastream_list=[]
 		self.datastream_select = wx.ListBox(self.page9, choices=self.datastream_list, style=wx.LB_MULTIPLE, size=(310, 80), pos=(20, 65))
 		wx.StaticText(self.page9, label=_('apiKey'), pos=(20, 160))
 		self.apiKey = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(150, 155))
@@ -542,6 +542,7 @@ class MainFrame(wx.Frame):
 		self.button_cancel_actions =wx.Button(self.page10, label=_('Cancel changes'), pos=(430, 285))
 		self.Bind(wx.EVT_BUTTON, self.cancel_changes_actions, self.button_cancel_actions)
 ###########################page10
+		self.read_datastream()
 		self.actions=Actions()
 		self.manual_settings=''
 		self.read_kplex_conf()
@@ -555,6 +556,7 @@ class MainFrame(wx.Frame):
 		self.a=DataStream(self.conf)
 		for i in self.a.DataList:
 			self.datastream_list.append(i[1]+': '+i[0])
+		self.datastream_select.Set(self.datastream_list)
 
 	def set_layout_conf(self):
 		if self.language=='en': self.lang.Check(self.lang_item1.GetId(), True)
