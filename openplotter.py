@@ -205,13 +205,15 @@ class MainFrame(wx.Frame):
 		wx.StaticBox(self.page3, label=_(' Settings '), size=(400, 215), pos=(10, 60))
 		
 		self.available_wireless = []
-		output=subprocess.check_output('iwconfig', stderr=subprocess.STDOUT)
-		for i in range (0, 10):
+		output=subprocess.check_output('ifconfig', stderr=subprocess.STDOUT)
+		for i in range (0, 9):
 			ii=str(i)
 			if 'wlan'+ii in output: self.available_wireless.append('wlan'+ii)
-		self.available_share = []
-		self.available_share.append(_('none'))
-		self.available_share.append('eth0')
+			
+		self.available_share = [_('none')]
+		for i in range (0, 9):
+			ii=str(i)
+			if 'eth'+ii in output: self.available_share.append('eth'+ii)
 		for i in self.available_wireless:
 			self.available_share.append(i)
 		self.wlan = wx.ComboBox(self.page3, choices=self.available_wireless, style=wx.CB_READONLY, size=(100, 32), pos=(20, 85))
