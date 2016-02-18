@@ -51,6 +51,7 @@ class MainFrame(wx.Frame):
 				self.SerialCheck('/dev/ttyUSB')
 				self.SerialCheck('/dev/ttyS')
 				self.SerialCheck('/dev/ttyACM')
+				self.SerialCheck('/dev/ttyAMA')
 				wx.StaticText(self, label=_('Port'), pos=(155, 35))
 				self.deviceComboBox = wx.ComboBox(self, choices=self.SerDevLs, style=wx.CB_DROPDOWN, size=(155, 32), pos=(150, 55))
 				if self.SerDevLs : self.deviceComboBox.SetValue(self.SerDevLs[0])
