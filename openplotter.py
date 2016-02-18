@@ -2129,7 +2129,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		except:temp_list=[]
 		for ii in temp_list:
 			self.DS18B20.append(ii)
-			self.list_DS18B20.Append([ii[0],ii[1],ii[2],ii[3]])
+			self.list_DS18B20.Append([ii[0].decode('utf8'),ii[1].decode('utf8'),ii[2],ii[3]])
 			if ii[5]=='1':
 				last=self.list_DS18B20.GetItemCount()-1
 				self.list_DS18B20.CheckItem(last)
