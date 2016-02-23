@@ -27,7 +27,7 @@ conf=Conf()
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 
-if conf.get('STARTUP', 'nmea_hdg')=='1' or conf.get('STARTUP', 'nmea_heel')=='1':
+if conf.get('STARTUP', 'nmea_hdg')=='1' or conf.get('STARTUP', 'nmea_heel')=='1' or conf.get('STARTUP', 'nmea_pitch')=='1':
 	SETTINGS_FILE = "RTIMULib"
 	s = RTIMU.Settings(SETTINGS_FILE)
 	imu = RTIMU.RTIMU(s)
@@ -62,6 +62,7 @@ if conf.get('STARTUP', 'press_temp_log')=='1':
 
 heading_m=''
 heel=''
+pitch=''
 pressure=''
 temperature_p=''
 humidity=''
@@ -72,12 +73,13 @@ tick=time.time()
 while True:
 	tick2=time.time()
 	# read IMU
-	if conf.get('STARTUP', 'nmea_hdg')=='1' or conf.get('STARTUP', 'nmea_heel')=='1':
+	if conf.get('STARTUP', 'nmea_hdg')=='1' or conf.get('STARTUP', 'nmea_heel')=='1' or conf.get('STARTUP', 'nmea_pitch')=='1':
 		if imu.IMURead():
 			data = imu.getIMUData()
 			fusionPose = data["fusionPose"]
 			heading_m0=math.degrees(fusionPose[2])
 			heel=math.degrees(fusionPose[0])
+			pitch=math.degrees(fusionPose[1])
 			if heading_m0<0:
 				heading_m0=360+heading_m0
 			heading_m=round(heading_m0,1)
@@ -113,73 +115,89 @@ while True:
 			sock.sendto(hdg2, ('127.0.0.1', 10110))
 			heading_m=''
 		# XDR
-		list_tmp=[]			
+		list_tmp1=[]
+		list_tmp2=[]		
 		if conf.get('STARTUP', 'nmea_press')=='1' and pressure:
 			press=round(pressure/1000,4)
-			list_tmp.append('P')
-			list_tmp.append(str(press))
-			list_tmp.append('B')
-			list_tmp.append('I2CP')
+			list_tmp1.append('P')
+			list_tmp1.append(str(press))
+			list_tmp1.append('B')
+			list_tmp1.append('I2CP')
 		if conf.get('STARTUP', 'nmea_temp_p')=='1' and temperature_p:			
 			temp= round(temperature_p,1)
-			list_tmp.append('C')
-			list_tmp.append(str(temp))
-			list_tmp.append('C')
-			list_tmp.append('I2CT')
+			list_tmp1.append('C')
+			list_tmp1.append(str(temp))
+			list_tmp1.append('C')
+			list_tmp1.append('I2CT')
 		if conf.get('STARTUP', 'nmea_temp_h')=='1' and temperature_h:			
 			temp= round(temperature_h,1)
-			list_tmp.append('C')
-			list_tmp.append(str(temp))
-			list_tmp.append('C')
-			list_tmp.append('I2CT')
+			list_tmp1.append('C')
+			list_tmp1.append(str(temp))
+			list_tmp1.append('C')
+			list_tmp1.append('I2CT')
 		if conf.get('STARTUP', 'nmea_hum')=='1' and humidity:
 			hum=round(humidity,1)
-			list_tmp.append('H')
-			list_tmp.append(str(hum))
-			list_tmp.append('R')
-			list_tmp.append('I2CH')
+			list_tmp1.append('H')
+			list_tmp1.append(str(hum))
+			list_tmp1.append('R')
+			list_tmp1.append('I2CH')
 		if conf.get('STARTUP', 'nmea_heel')=='1' and heel:
 			heel= round(heel,1)
-			list_tmp.append('A')
-			list_tmp.append(str(heel))
-			list_tmp.append('D')
-			list_tmp.append('I2CX')
-		if list_tmp:
-			xdr = pynmea2.XDR('OS', 'XDR', (list_tmp))
+			list_tmp2.append('A')
+			list_tmp2.append(str(heel))
+			list_tmp2.append('D')
+			list_tmp2.append('I2CX')
+		if conf.get('STARTUP', 'nmea_pitch')=='1' and pitch:
+			pitch= round(pitch,1)
+			list_tmp2.append('A')
+			list_tmp2.append(str(pitch))
+			list_tmp2.append('D')
+			list_tmp2.append('I2CY')
+
+		if list_tmp1:
+			xdr = pynmea2.XDR('OS', 'XDR', (list_tmp1))
 			xdr1=str(xdr)
 			xdr2=xdr1+"\r\n"
 			sock.sendto(xdr2, ('127.0.0.1', 10110))
+		if list_tmp2:
+			xdr = pynmea2.XDR('OS', 'XDR', (list_tmp2))
+			xdr1=str(xdr)
+			xdr2=xdr1+"\r\n"
+			sock.sendto(xdr2, ('127.0.0.1', 10110))			
 			heel=''
+			pitch=''
 
 		temperature=''
 		if conf.get('STARTUP', 'nmea_temp_p')=='1': temperature=temperature_p
 		if conf.get('STARTUP', 'nmea_temp_h')=='1': temperature=temperature_h
 
 		# log temperature pressure humidity
-		if conf.get('STARTUP', 'press_temp_log')=='1':
-			if tick-last_log > 300:
-				last_log=tick
-				press2=0
-				temp2=0
-				hum2=0
-				if pressure: press2=pressure
-				if temperature: temp2=temperature
-				if humidity: hum2=humidity
-				new_row=[tick,press2,temp2,hum2]
-				if len(log_list) < 288:
-					log_list.append(new_row)
-					ofile = open(currentpath+'/weather_log.csv', "a")
-					writer = csv.writer(ofile)
-					writer.writerow(new_row)
-				if len(log_list) >= 288:
-					del log_list[0]
-					log_list.append(new_row)
-					ofile = open(currentpath+'/weather_log.csv', "w")
-					writer = csv.writer(ofile)
-					for row in log_list:
-						writer.writerow(row)
-				ofile.close()
-
+		try:
+			if conf.get('STARTUP', 'press_temp_log')=='1':
+				if tick-last_log > 300:
+					last_log=tick
+					press2=0
+					temp2=0
+					hum2=0
+					if pressure: press2=pressure
+					if temperature: temp2=temperature
+					if humidity: hum2=humidity
+					new_row=[tick,press2,temp2,hum2]
+					if len(log_list) < 288:
+						log_list.append(new_row)
+						ofile = open(currentpath+'/weather_log.csv', "a")
+						writer = csv.writer(ofile)
+						writer.writerow(new_row)
+					if len(log_list) >= 288:
+						del log_list[0]
+						log_list.append(new_row)
+						ofile = open(currentpath+'/weather_log.csv', "w")
+						writer = csv.writer(ofile)
+						for row in log_list:
+							writer.writerow(row)
+					ofile.close()
+		except Exception,e: print str(e)
+		
 		temperature_p=''
 		temperature_h=''
 		pressure=''

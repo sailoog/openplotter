@@ -67,6 +67,7 @@ if not share: share='0'
 
 nmea_hdg=conf.get('STARTUP', 'nmea_hdg')
 nmea_heel=conf.get('STARTUP', 'nmea_heel')
+nmea_pitch=conf.get('STARTUP', 'nmea_pitch')
 nmea_press=conf.get('STARTUP', 'nmea_press')
 nmea_temp_p=conf.get('STARTUP', 'nmea_temp_p')
 nmea_hum=conf.get('STARTUP', 'nmea_hum')
@@ -120,7 +121,7 @@ if gps_time=='1':
 	subprocess.call(['sudo', 'python', currentpath+'/time_gps.py'])
 
 subprocess.call(['pkill', '-f', 'i2c.py'])
-if nmea_hdg=='1' or nmea_heel=='1' or nmea_press=='1' or nmea_temp_p=='1' or nmea_hum=='1' or nmea_temp_h=='1': 
+if nmea_hdg=='1' or nmea_heel=='1' or nmea_pitch=='1' or nmea_press=='1' or nmea_temp_p=='1' or nmea_hum=='1' or nmea_temp_h=='1': 
 	subprocess.Popen(['python', currentpath+'/i2c.py'], cwd=currentpath+'/imu')
 
 subprocess.call(['pkill', '-f', '1w.py'])

@@ -344,7 +344,7 @@ class MainFrame(wx.Frame):
 		self.button_ok_rate =wx.Button(self.page6, label=_('Ok'),size=(70, 32), pos=(250, 23))
 		self.Bind(wx.EVT_BUTTON, self.ok_rate, self.button_ok_rate)
 
-		wx.StaticBox(self.page6, label=_(' IMU '), size=(330, 140), pos=(10, 65))
+		wx.StaticBox(self.page6, label=_(' IMU '), size=(330, 170), pos=(10, 65))
 		self.imu_tag=wx.StaticText(self.page6, label=_('Sensor detected: ')+_('none'), pos=(20, 85))
 		self.button_reset_imu =wx.Button(self.page6, label=_('Reset'), pos=(240, 85))
 		self.Bind(wx.EVT_BUTTON, self.reset_imu, self.button_reset_imu)
@@ -355,7 +355,9 @@ class MainFrame(wx.Frame):
 		self.heading_nmea=wx.StaticText(self.page6, label=_('Generated NMEA: $OSHDG'), pos=(20, 130))
 		self.heel = wx.CheckBox(self.page6, label=_('Heel'), pos=(20, 155))
 		self.heel.Bind(wx.EVT_CHECKBOX, self.nmea_heel)
-		self.heel_nmea=wx.StaticText(self.page6, label=_('Generated NMEA: $OSXDR'), pos=(20, 180))
+		self.pitch = wx.CheckBox(self.page6, label=_('Pitch'), pos=(20, 180))
+		self.pitch.Bind(wx.EVT_CHECKBOX, self.nmea_pitch)
+		self.heel_nmea=wx.StaticText(self.page6, label=_('Generated NMEA: $OSXDR'), pos=(20, 205))
 
 		wx.StaticBox(self.page6, label=_(' Weather '), size=(330, 270), pos=(350, 10))
 		self.press_tag=wx.StaticText(self.page6, label=_('Sensor detected: ')+_('none'), pos=(360, 30))
@@ -665,15 +667,18 @@ class MainFrame(wx.Frame):
 			self.button_calibrate_imu.Disable()
 			self.heading_nmea.Disable()
 			self.heel.Disable()
+			self.pitch.Disable()
 			self.heel_nmea.Disable()
-			if self.conf.get('STARTUP', 'nmea_hdg')=='1' or self.conf.get('STARTUP', 'nmea_heel')=='1': 
+			if self.conf.get('STARTUP', 'nmea_hdg')=='1' or self.conf.get('STARTUP', 'nmea_heel')=='1' or self.conf.get('STARTUP', 'nmea_pitch')=='1': 
 				self.conf.set('STARTUP', 'nmea_hdg', '0')
 				self.conf.set('STARTUP', 'nmea_heel', '0')
+				self.conf.set('STARTUP', 'nmea_pitch', '0')
 		else:
 			self.imu_tag.SetLabel(_('Sensor detected: ')+imu_sensor)
 			if calibrated=='1':self.button_calibrate_imu.Disable()
 			if self.conf.get('STARTUP', 'nmea_hdg')=='1': self.heading.SetValue(True)
 			if self.conf.get('STARTUP', 'nmea_heel')=='1': self.heel.SetValue(True)
+			if self.conf.get('STARTUP', 'nmea_pitch')=='1': self.pitch.SetValue(True)
 
 		if 'none' in press_sensor:
 			self.press.Disable()
@@ -1385,7 +1390,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def start_sensors(self):
 		subprocess.call(['pkill', 'RTIMULibCal'])
 		subprocess.call(['pkill', '-f', 'i2c.py'])
-		if self.heading.GetValue() or self.heel.GetValue() or self.press.GetValue() or self.temp_p.GetValue() or self.hum.GetValue() or self.temp_h.GetValue():
+		if self.heading.GetValue() or self.heel.GetValue() or self.pitch.GetValue() or self.press.GetValue() or self.temp_p.GetValue() or self.hum.GetValue() or self.temp_h.GetValue():
 			subprocess.Popen(['python', currentpath+'/i2c.py'], cwd=currentpath+'/imu')
 
 	def ok_rate(self, e):
@@ -1407,6 +1412,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		else: self.conf.set('STARTUP', 'nmea_heel', '0')
 		self.start_sensors()
 
+	def nmea_pitch(self, e):
+		sender = e.GetEventObject()
+		if sender.GetValue(): self.conf.set('STARTUP', 'nmea_pitch', '1')
+		else: self.conf.set('STARTUP', 'nmea_pitch', '0')
+		self.start_sensors()
+
 	def reset_imu(self, e):
 		try:
 			os.remove(currentpath+'/imu/RTIMULib.ini')
@@ -1415,10 +1426,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.imu_tag.Disable()
 		self.heading.SetValue(False)
 		self.heel.SetValue(False)
+		self.pitch.SetValue(False)
 		self.conf.set('STARTUP', 'nmea_hdg', '0')
 		self.conf.set('STARTUP', 'nmea_heel', '0')
+		self.conf.set('STARTUP', 'nmea_pitch', '0')
 		self.start_sensors()
-		msg=_('Heading and heel disabled.\nClose and open OpenPlotter again to autodetect.')
+		msg=_('Heading, heel and pitch disabled.\nClose and open OpenPlotter again to autodetect.')
 		self.ShowMessage(msg)
 
 	def reset_press_hum(self, e):
@@ -1445,19 +1458,21 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def calibrate_imu(self, e):
 		self.heading.SetValue(False)
 		self.heel.SetValue(False)
+		self.pitch.SetValue(False)
 		self.press.SetValue(False)
 		self.temp_p.SetValue(False)
 		self.hum.SetValue(False)
 		self.temp_h.SetValue(False)
 		self.conf.set('STARTUP', 'nmea_hdg', '0')
 		self.conf.set('STARTUP', 'nmea_heel', '0')
+		self.conf.set('STARTUP', 'nmea_pitch', '0')
 		self.conf.set('STARTUP', 'nmea_press', '0')
 		self.conf.set('STARTUP', 'nmea_temp_p', '0')
 		self.conf.set('STARTUP', 'nmea_hum', '0')
 		self.conf.set('STARTUP', 'nmea_temp_h', '0')
 		self.start_sensors()
 		subprocess.Popen(['lxterminal', '-e', 'RTIMULibCal'], cwd=currentpath+'/imu')
-		msg=_('Heading, heel, temperature, humidity and pressure disabled.\nAfter calibrating, enable them again.')
+		msg=_('Heading, heel, pitch, temperature, humidity and pressure disabled.\nAfter calibrating, enable them again.')
 		self.ShowMessage(msg)
 	
 	def nmea_press(self, e):
