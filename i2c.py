@@ -143,7 +143,7 @@ while True:
 			list_tmp.append('A')
 			list_tmp.append(str(heel))
 			list_tmp.append('D')
-			list_tmp.append('I2CR')
+			list_tmp.append('I2CX')
 		if list_tmp:
 			xdr = pynmea2.XDR('OS', 'XDR', (list_tmp))
 			xdr1=str(xdr)

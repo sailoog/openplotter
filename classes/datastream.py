@@ -44,7 +44,7 @@ class DataStream:
 		self.DataList.append([_('Air Temperature'),_('AT'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'I2CT'])
 		self.DataList.append([_('Air Relative Humidity'),_('ARH'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'I2CH'])
 		self.DataList.append([_('Rate of Turn'),_('ROT'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'ROT'])
-		self.DataList.append([_('Heel'),_('Heel'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'I2CR'])
+		self.DataList.append([_('Heel'),_('Heel'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'I2CX'])
 
 		#1W
 		x=conf.get('1W', 'DS18B20')
@@ -293,12 +293,12 @@ class DataStream:
 							if value:
 								unit='%'
 								self.updateDataList('I2CH',value,unit,talker,nmea_type)
-						if transducer.id=='I2CR':		
+						if transducer.id=='I2CX':		
 							#heel
 							value=transducer.value
 							if value:
 								unit='D'
-								self.updateDataList('I2CR',value,unit,talker,nmea_type)						
+								self.updateDataList('I2CX',value,unit,talker,nmea_type)						
 						if transducer.id[:2]=='1W':		
 							#DS18B20 temperature
 							value=transducer.value
