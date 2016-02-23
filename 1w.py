@@ -34,10 +34,11 @@ for index,item in enumerate(sensors_list):
 		print str(e)
 
 while True:
-	time.sleep(1)
+	time.sleep(0.01)
 	temp=''
 	list_tmp=[]	
 	ib=0
+	c=0
 	try:
 		for i in sensors_list:
 			if i[5]=='1':
@@ -52,10 +53,18 @@ while True:
 				list_tmp.append(i[2])
 				list_tmp.append(i[4])
 				ib=ib+1
+				c=c+1
+				if c==3:
+					xdr = pynmea2.XDR('OS', 'XDR', (list_tmp))
+					xdr1=str(xdr)
+					xdr2=xdr1+"\r\n"
+					sock.sendto(xdr2, ('127.0.0.1', 10110))
+					list_tmp=[]
+					c=0
+		if c>0:
+			xdr = pynmea2.XDR('OS', 'XDR', (list_tmp))
+			xdr1=str(xdr)
+			xdr2=xdr1+"\r\n"
+			sock.sendto(xdr2, ('127.0.0.1', 10110))
+
 	except Exception,e: print str(e)
-	
-	if list_tmp:
-		xdr = pynmea2.XDR('OS', 'XDR', (list_tmp))
-		xdr1=str(xdr)
-		xdr2=xdr1+"\r\n"
-		sock.sendto(xdr2, ('127.0.0.1', 10110))
