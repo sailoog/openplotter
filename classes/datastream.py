@@ -16,10 +16,14 @@
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
 import pynmea2, time
+import RPi.GPIO as GPIO
 
 class DataStream:
 
 	def __init__(self,conf):
+
+		GPIO.setmode(GPIO.BCM)
+		GPIO.setwarnings(False)
 
 		self.DataList=[]
 		
@@ -58,19 +62,57 @@ class DataStream:
 			except Exception,e: print str(e)
 
 		#Switches
-		self.DataList.append([_('Switch 1 status'),_('SW1'),None,None,None,None,None,(7,8),0,'SW1'])
-		self.DataList.append([_('Switch 2 status'),_('SW2'),None,None,None,None,None,(7,8),0,'SW2'])
-		self.DataList.append([_('Switch 3 status'),_('SW3'),None,None,None,None,None,(7,8),0,'SW3'])
-		self.DataList.append([_('Switch 4 status'),_('SW4'),None,None,None,None,None,(7,8),0,'SW4'])
-		self.DataList.append([_('Switch 5 status'),_('SW5'),None,None,None,None,None,(7,8),0,'SW5'])
-		self.DataList.append([_('Switch 6 status'),_('SW6'),None,None,None,None,None,(7,8),0,'SW6'])
-		self.DataList.append([_('Output 1 status'),_('OUT1'),None,None,None,None,None,(7,8),0,'OUT1'])
-		self.DataList.append([_('Output 2 status'),_('OUT2'),None,None,None,None,None,(7,8),0,'OUT2'])
-		self.DataList.append([_('Output 3 status'),_('OUT3'),None,None,None,None,None,(7,8),0,'OUT3'])
-		self.DataList.append([_('Output 4 status'),_('OUT4'),None,None,None,None,None,(7,8),0,'OUT4'])
+		x=conf.get('INPUTS', 'switches')
+		if x: self.sw_list=eval(x)
+		else: self.sw_list=[]
+		for i in self.sw_list:
+			try:
+				if i[0]=='1':
+					self.DataList.append([i[1],i[2],None,None,None,None,None,(7,8),0, i[5]])
+					channel=i[3]
+					pull_up_down=GPIO.PUD_DOWN
+					if i[4]=='up': pull_up_down=GPIO.PUD_UP
+					GPIO.setup(channel, GPIO.IN, pull_up_down=pull_up_down)
+			except Exception,e: print str(e)
+
+		#Outputs
+		x=conf.get('OUTPUTS', 'outputs')
+		if x: self.out_list=eval(x)
+		else: self.out_list=[]
+		for i in self.out_list:
+			try:
+				if i[0]=='1':
+					self.DataList.append([i[1],i[2],None,None,None,None,None,(7,8),0, i[4]])
+					channel=i[3]
+					GPIO.setup(channel, GPIO.OUT)
+			except Exception,e: print str(e)
 
 		#ATENTION. If order changes, edit monitoring.py: "#actions"
 		self.operators_list=[_('was not present in the last (sec.)'),_('was present in the last (sec.)'),_('is equal to'), _('is less than'), _('is less than or equal to'), _('is greater than'), _('is greater than or equal to'), _('is on'), _('is off')]
+
+	def checkinputs(self):
+		for i in self.sw_list:
+			try:
+				if i[0]=='1':
+					if GPIO.input(i[3]):
+						self.DataList[self.getDataListIndex(i[5])][2]=1
+						self.DataList[self.getDataListIndex(i[5])][4]=time.time()
+					else:
+						self.DataList[self.getDataListIndex(i[5])][2]=0
+						self.DataList[self.getDataListIndex(i[5])][4]=time.time()
+			except Exception,e: print str(e)
+
+	def checkoutputs(self):
+		for i in self.out_list:
+			try:
+				if i[0]=='1':
+					if GPIO.input(i[3]):
+						self.DataList[self.getDataListIndex(i[4])][2]=1
+						self.DataList[self.getDataListIndex(i[4])][4]=time.time()
+					else:
+						self.DataList[self.getDataListIndex(i[4])][2]=0
+						self.DataList[self.getDataListIndex(i[4])][4]=time.time()
+			except Exception,e: print str(e)
 
 	def getDataListIndex(self, data):
 		for index, item in enumerate(self.DataList):
