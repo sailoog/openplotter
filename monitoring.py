@@ -31,7 +31,7 @@ global error
 sock_in=''
 error=0
 a=DataStream(conf)
-actions=Actions()
+actions=Actions(conf)
 nodata=''
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -60,7 +60,7 @@ def start_actions(trigger):
 			triggers[trigger][4][index][4]=now
 			re=''
 			try:
-				re=actions.run_action(str(i[0]),i[1],conf,a)
+				re=actions.run_action(i[0],i[1],conf,a)
 			except Exception,e: print str(e)
 			if re=='read':
 				startall()
@@ -71,7 +71,7 @@ def start_actions(trigger):
 					triggers[trigger][4][index][4]=now
 					re=''
 					try:
-						re=actions.run_action(str(i[0]),i[1],conf,a)
+						re=actions.run_action(i[0],i[1],conf,a)
 					except Exception,e: print str(e)
 					if re=='read':
 						startall()

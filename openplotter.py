@@ -494,7 +494,7 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.cancel_changes_actions, self.button_cancel_actions)
 ###########################page10
 		self.read_datastream()
-		self.actions=Actions()
+		self.read_actions()
 		self.manual_settings=''
 		self.read_kplex_conf()
 		self.set_layout_conf()
@@ -508,6 +508,9 @@ class MainFrame(wx.Frame):
 		for i in self.a.DataList:
 			self.datastream_list.append(i[1]+': '+i[0])
 		self.datastream_select.Set(self.datastream_list)
+
+	def read_actions(self):
+		self.actions=Actions(self.conf)
 
 	def set_layout_conf(self):
 		if self.language=='en': self.lang.Check(self.lang_item1.GetId(), True)
@@ -1651,7 +1654,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			else: repeat=str(i[2])
 			time_units=self.actions.time_units[i[3]]
 			repeat2=repeat+' '+time_units
-			self.list_actions.Append([self.actions.options[i[0]][0].decode('utf8'),i[1].decode('utf8'),repeat2.decode('utf8')])
+			self.list_actions.Append([self.actions.options[self.actions.getOptionsListIndex(i[0])][0].decode('utf8'),i[1].decode('utf8'),repeat2.decode('utf8')])
 	
 	def edit_triggers(self,e):
 		t=e.GetIndex()
@@ -1747,7 +1750,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if selected_trigger_position==-1:
 			self.ShowMessage(_('Select a trigger to add actions.'))
 			return
-		dlg = addAction(self.actions.options,self.actions.time_units,edit)
+		dlg = addAction(self.conf,self.actions.options,self.actions.time_units,edit)
 		res = dlg.ShowModal()
 		if res == wx.ID_OK:
 			action_selection=dlg.action_select.GetCurrentSelection()
@@ -1772,7 +1775,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			if edit==0:
 				self.list_actions.Append([action.decode('utf8'),data.decode('utf8'),repeat2.decode('utf8')])
 				tmp=[]
-				tmp.append(action_selection)
+				tmp.append(self.actions.options[action_selection][3])
 				tmp.append(data)
 				tmp.append(repeat)
 				tmp.append(time_units_selection)
@@ -1781,7 +1784,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.list_actions.SetStringItem(edit[0],0,action.decode('utf8'))
 				self.list_actions.SetStringItem(edit[0],1,data.decode('utf8'))
 				self.list_actions.SetStringItem(edit[0],2,repeat2.decode('utf8'))
-				self.triggers[selected_trigger_position][4][edit[0]][0]=action_selection
+				self.triggers[selected_trigger_position][4][edit[0]][0]=self.actions.options[action_selection][3]
 				self.triggers[selected_trigger_position][4][edit[0]][1]=data
 				self.triggers[selected_trigger_position][4][edit[0]][2]=repeat
 				self.triggers[selected_trigger_position][4][edit[0]][3]=time_units_selection			
