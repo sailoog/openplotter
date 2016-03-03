@@ -26,6 +26,7 @@ from classes.language import Language
 from classes.add_trigger import addTrigger
 from classes.add_action import addAction
 from classes.add_DS18B20 import addDS18B20
+from classes.add_switch import addSwitch
 
 paths=Paths()
 home=paths.home
@@ -412,6 +413,21 @@ class MainFrame(wx.Frame):
 		wx.StaticText(self.page12, label=_('Coming soon'), pos=(20, 30))
 ###########################page12
 ########page8###################
+		wx.StaticBox(self.page8, label=_(' Switches '), size=(670, 265), pos=(10, 10))
+		
+		self.list_switches = CheckListCtrl(self.page8, 237)
+		self.list_switches.SetPosition((15, 30))
+		self.list_switches.InsertColumn(0, _('Name'), width=300)
+		self.list_switches.InsertColumn(1, _('Short'), width=80)
+		self.list_switches.InsertColumn(2, 'GPIO')
+		self.list_switches.InsertColumn(3, 'Pull')
+		self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_switches, self.list_switches)
+			
+		self.add_switches_button =wx.Button(self.page8, label=_('add'), pos=(585, 30))
+		self.Bind(wx.EVT_BUTTON, self.add_switches, self.add_switches_button)
+
+		self.delete_switches_button =wx.Button(self.page8, label=_('delete'), pos=(585, 65))
+		self.Bind(wx.EVT_BUTTON, self.delete_switches, self.delete_switches_button)
 
 		self.button_apply_switches =wx.Button(self.page8, label=_('Apply changes'), pos=(570, 285))
 		self.Bind(wx.EVT_BUTTON, self.apply_changes_switches, self.button_apply_switches)
@@ -452,9 +468,9 @@ class MainFrame(wx.Frame):
 		self.Recipient = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(490, 135))
 ###########################page9
 ########page10###################
-		wx.StaticBox(self.page10, label=_(' Triggers '), size=(670, 130), pos=(10, 10))
+		wx.StaticBox(self.page10, label=_(' Triggers '), size=(670, 265), pos=(10, 10))
 		
-		self.list_triggers = CheckListCtrl(self.page10, 102)
+		self.list_triggers = CheckListCtrl(self.page10, 125)
 		self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.print_actions, self.list_triggers)
 		self.list_triggers.SetPosition((15, 30))
 		self.list_triggers.InsertColumn(0, _('trigger'), width=275)
@@ -467,8 +483,6 @@ class MainFrame(wx.Frame):
 
 		self.delete_trigger_button =wx.Button(self.page10, label=_('delete'), pos=(585, 65))
 		self.Bind(wx.EVT_BUTTON, self.delete_trigger, self.delete_trigger_button)
-
-		wx.StaticBox(self.page10, label=_(' Actions '), size=(670, 130), pos=(10, 145))
 		
 		self.list_actions = wx.ListCtrl(self.page10, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(565, 102))
 		self.list_actions.SetPosition((15, 165))
@@ -678,6 +692,7 @@ class MainFrame(wx.Frame):
 
 		self.read_triggers()
 		self.read_DS18B20()
+		self.read_switches()
 
 ########MENU###################################	
 
@@ -1534,7 +1549,106 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		subprocess.Popen(home+'/.config/signalk-server-node/bin/nmea-from-10110', cwd=home+'/.config/signalk-server-node')
 		self.SetStatusText(_('Signal K server restarted'))
 ######################################Switches
+	'''
+	def start_1w(self):
+		subprocess.call(['pkill', '-f', '1w.py'])
+		subprocess.Popen(['python',currentpath+'/1w.py'])
+	'''
+	def read_switches(self):
+		self.switches=[]
+		self.list_switches.DeleteAllItems()
+		data=self.conf.get('INPUTS', 'switches')
+		try:
+			temp_list=eval(data)
+		except:temp_list=[]
+		for ii in temp_list:
+			self.switches.append(ii)
+			self.list_switches.Append([ii[1].decode('utf8'),ii[2].decode('utf8'),str(ii[3]),ii[4]])
+			if ii[0]=='1':
+				last=self.list_switches.GetItemCount()-1
+				self.list_switches.CheckItem(last)
 
+	def edit_switches(self,e):
+		pass
+	'''
+		selected_DS18B20=e.GetIndex()
+		edit=[selected_DS18B20,self.DS18B20[selected_DS18B20][0],self.DS18B20[selected_DS18B20][1],self.DS18B20[selected_DS18B20][2],self.DS18B20[selected_DS18B20][3]]
+		self.edit_add_DS18B20(edit)
+	'''
+	def add_switches(self,e):
+		self.edit_add_switches(0)
+
+	def edit_add_switches(self,edit):
+		list_gpio=['5', '6', '12', '13','16', '17', '18', '19','20', '21', '22', '23','24', '25', '26', '27']
+		avalaible_gpio=[]
+
+		dlg = addSwitch(edit)
+		res = dlg.ShowModal()
+		if res == wx.ID_OK:
+			'''
+			name=dlg.name.GetValue()
+			name=name.encode('utf8')
+			short=dlg.short.GetValue()
+			short=short.encode('utf8')
+			unit_selection=dlg.unit_select.GetValue()
+			id_selection=dlg.id_select.GetValue()
+			id_selection=id_selection.encode('utf8')
+			if not name or not short:
+				self.ShowMessage(_('Failed. Write a name and a short name.'))
+				dlg.Destroy()
+				return				
+			if unit_selection == '':
+				self.ShowMessage(_('Failed. Select unit.'))
+				dlg.Destroy()
+				return
+			if id_selection == '':
+				self.ShowMessage(_('Failed. Select sensor ID.'))
+				dlg.Destroy()
+				return
+			if unit_selection=='Celsius': unit_selection='C'
+			if unit_selection=='Fahrenheit': unit_selection='F'
+			if unit_selection=='Kelvin': unit_selection='K'
+			if edit==0:
+				self.list_DS18B20.Append([name.decode('utf8'),short.decode('utf8'),unit_selection,id_selection])
+				last=self.list_DS18B20.GetItemCount()-1
+				self.list_DS18B20.CheckItem(last)
+				if len(self.DS18B20)==0: ID='1W0'
+				else:
+					last=len(self.DS18B20)-1
+					x=int(self.DS18B20[last][4][2:])
+					ID='1W'+str(x+1)
+				self.DS18B20.append([name,short,unit_selection,id_selection,ID,'1'])
+			else:
+				self.list_DS18B20.SetStringItem(edit[0],0,name.decode('utf8'))
+				self.list_DS18B20.SetStringItem(edit[0],1,short.decode('utf8'))
+				self.list_DS18B20.SetStringItem(edit[0],2,unit_selection)
+				self.list_DS18B20.SetStringItem(edit[0],3,id_selection)
+				self.DS18B20[edit[0]][0]=name
+				self.DS18B20[edit[0]][1]=short
+				self.DS18B20[edit[0]][2]=unit_selection
+				self.DS18B20[edit[0]][3]=id_selection
+			'''
+		dlg.Destroy()
+
+	def delete_switches(self,e):
+		pass
+	'''
+		selected_DS18B20=self.list_DS18B20.GetFirstSelected()
+		if selected_DS18B20==-1: 
+			self.ShowMessage(_('Select a sensor to delete.'))
+			return
+		data=self.conf.get('ACTIONS', 'triggers')
+		try:
+			temp_list=eval(data)
+		except:temp_list=[]
+		for i in temp_list:
+			if i[1]==self.DS18B20[selected_DS18B20][4]:
+				self.read_triggers()
+				self.ShowMessage(_('You have an action defined for this sensor. You must delete that action before deleting this sensor.'))
+				return
+		del self.DS18B20[selected_DS18B20]
+		self.list_DS18B20.DeleteItem(selected_DS18B20)
+	'''
 	def apply_changes_switches(self, e):
 		pass
 
@@ -1735,7 +1849,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def edit_actions(self,e):
 		a=e.GetIndex()
 		t= self.list_triggers.GetFirstSelected()
-		action=self.triggers[t][4][a][0]
+		action=self.actions.getOptionsListIndex(self.triggers[t][4][a][0])
 		data=self.triggers[t][4][a][1]
 		repeat=self.triggers[t][4][a][2]
 		unit=self.triggers[t][4][a][3]
