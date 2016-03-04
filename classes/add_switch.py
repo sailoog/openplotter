@@ -18,7 +18,7 @@ import wx
 
 class addSwitch(wx.Dialog):
 
-	def __init__(self,edit):
+	def __init__(self,avalaible_gpio,edit):
 
 		wx.Dialog.__init__(self, None, title=_('Add Switch'), size=(330,235))
 
@@ -30,22 +30,18 @@ class addSwitch(wx.Dialog):
 		wx.StaticText(panel, label=_('short name'), pos=(10, 70))
 		self.short = wx.TextCtrl(panel, size=(100, 30), pos=(10, 95))
 
-		list_gpio=['5', '6', '12', '13','16', '17', '18', '19','20', '21', '22', '23','24', '25', '26', '27']
 		wx.StaticText(panel, label=_('GPIO'), pos=(115, 70))
-		self.gpio_select= wx.ComboBox(panel, choices=list_gpio, style=wx.CB_READONLY, size=(100, 32), pos=(115, 95))
+		self.gpio_select= wx.ComboBox(panel, choices=avalaible_gpio, style=wx.CB_READONLY, size=(100, 32), pos=(115, 95))
 		
 		list_pull=['down', 'up']
 		wx.StaticText(panel, label=_('pull'), pos=(220, 70))
-		self.id_select= wx.ComboBox(panel, choices=list_pull, style=wx.CB_READONLY, size=(100, 32), pos=(220, 95))
-		'''
+		self.pull_select= wx.ComboBox(panel, choices=list_pull, style=wx.CB_READONLY, size=(100, 32), pos=(220, 95))
+
 		if edit != 0:
 			self.name.SetValue(edit[1])
 			self.short.SetValue(edit[2])
-			if edit[3]=='C': unit_selection='Celsius'
-			if edit[3]=='F': unit_selection='Fahrenheit'
-			if edit[3]=='K': unit_selection='Kelvin'
-			self.gpio_select.SetValue(unit_selection)
-			self.id_select.SetValue(edit[4])
-		'''
+			self.gpio_select.SetValue(str(edit[3]))
+			self.pull_select.SetValue(edit[4])
+
 		cancelBtn = wx.Button(panel, wx.ID_CANCEL, pos=(70, 150))
 		okBtn = wx.Button(panel, wx.ID_OK, pos=(180, 150))

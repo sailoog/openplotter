@@ -1549,11 +1549,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		subprocess.Popen(home+'/.config/signalk-server-node/bin/nmea-from-10110', cwd=home+'/.config/signalk-server-node')
 		self.SetStatusText(_('Signal K server restarted'))
 ######################################Switches
-	'''
-	def start_1w(self):
-		subprocess.call(['pkill', '-f', '1w.py'])
-		subprocess.Popen(['python',currentpath+'/1w.py'])
-	'''
+
 	def read_switches(self):
 		self.switches=[]
 		self.list_switches.DeleteAllItems()
@@ -1569,91 +1565,114 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.list_switches.CheckItem(last)
 
 	def edit_switches(self,e):
-		pass
-	'''
-		selected_DS18B20=e.GetIndex()
-		edit=[selected_DS18B20,self.DS18B20[selected_DS18B20][0],self.DS18B20[selected_DS18B20][1],self.DS18B20[selected_DS18B20][2],self.DS18B20[selected_DS18B20][3]]
-		self.edit_add_DS18B20(edit)
-	'''
+		selected_switch=e.GetIndex()
+		edit=[selected_switch,self.switches[selected_switch][1],self.switches[selected_switch][2],self.switches[selected_switch][3],self.switches[selected_switch][4]]
+		self.edit_add_switches(edit)
+
 	def add_switches(self,e):
 		self.edit_add_switches(0)
 
 	def edit_add_switches(self,edit):
-		list_gpio=['5', '6', '12', '13','16', '17', '18', '19','20', '21', '22', '23','24', '25', '26', '27']
 		avalaible_gpio=[]
+		edited=''
+		if edit!=0: edited=edit[3]
+		list_gpio=[5,6,12,13,16,17,18,19,20,21,22,23,24,25,26,27]
 
-		dlg = addSwitch(edit)
+		gpio_sw=[]
+		for i in self.switches:
+			gpio_sw.append(i[3])
+
+		#TO DO check outputs	
+		gpio_out=[]
+
+		for i in list_gpio:
+			if i==edited:
+				avalaible_gpio.append(str(i))
+			else:
+				if i in gpio_sw or i in gpio_out: pass
+				else: avalaible_gpio.append(str(i))
+		
+
+		dlg = addSwitch(avalaible_gpio,edit)
 		res = dlg.ShowModal()
 		if res == wx.ID_OK:
-			'''
 			name=dlg.name.GetValue()
 			name=name.encode('utf8')
 			short=dlg.short.GetValue()
 			short=short.encode('utf8')
-			unit_selection=dlg.unit_select.GetValue()
-			id_selection=dlg.id_select.GetValue()
-			id_selection=id_selection.encode('utf8')
+			gpio_selection=dlg.gpio_select.GetValue()
+			pull_selection=dlg.pull_select.GetValue()
+			pull_selection=pull_selection.encode('utf8')
 			if not name or not short:
 				self.ShowMessage(_('Failed. Write a name and a short name.'))
 				dlg.Destroy()
 				return				
-			if unit_selection == '':
-				self.ShowMessage(_('Failed. Select unit.'))
+			if gpio_selection == '':
+				self.ShowMessage(_('Failed. Select GPIO.'))
 				dlg.Destroy()
 				return
-			if id_selection == '':
-				self.ShowMessage(_('Failed. Select sensor ID.'))
+			if pull_selection == '':
+				self.ShowMessage(_('Failed. Select pull down or pull up.'))
 				dlg.Destroy()
 				return
-			if unit_selection=='Celsius': unit_selection='C'
-			if unit_selection=='Fahrenheit': unit_selection='F'
-			if unit_selection=='Kelvin': unit_selection='K'
 			if edit==0:
-				self.list_DS18B20.Append([name.decode('utf8'),short.decode('utf8'),unit_selection,id_selection])
-				last=self.list_DS18B20.GetItemCount()-1
-				self.list_DS18B20.CheckItem(last)
-				if len(self.DS18B20)==0: ID='1W0'
+				self.list_switches.Append([name.decode('utf8'),short.decode('utf8'),gpio_selection,pull_selection])
+				last=self.list_switches.GetItemCount()-1
+				self.list_switches.CheckItem(last)
+				if len(self.switches)==0: ID='SW0'
 				else:
-					last=len(self.DS18B20)-1
-					x=int(self.DS18B20[last][4][2:])
-					ID='1W'+str(x+1)
-				self.DS18B20.append([name,short,unit_selection,id_selection,ID,'1'])
+					last=len(self.switches)-1
+					x=int(self.switches[last][5][2:])
+					ID='SW'+str(x+1)
+				self.switches.append(['1',name,short,int(gpio_selection),pull_selection,ID])
 			else:
-				self.list_DS18B20.SetStringItem(edit[0],0,name.decode('utf8'))
-				self.list_DS18B20.SetStringItem(edit[0],1,short.decode('utf8'))
-				self.list_DS18B20.SetStringItem(edit[0],2,unit_selection)
-				self.list_DS18B20.SetStringItem(edit[0],3,id_selection)
-				self.DS18B20[edit[0]][0]=name
-				self.DS18B20[edit[0]][1]=short
-				self.DS18B20[edit[0]][2]=unit_selection
-				self.DS18B20[edit[0]][3]=id_selection
-			'''
+				self.list_switches.SetStringItem(edit[0],0,name.decode('utf8'))
+				self.list_switches.SetStringItem(edit[0],1,short.decode('utf8'))
+				self.list_switches.SetStringItem(edit[0],2,gpio_selection)
+				self.list_switches.SetStringItem(edit[0],3,pull_selection)
+				self.switches[edit[0]][1]=name
+				self.switches[edit[0]][2]=short
+				self.switches[edit[0]][3]=int(gpio_selection)
+				self.switches[edit[0]][4]=pull_selection
 		dlg.Destroy()
 
 	def delete_switches(self,e):
-		pass
-	'''
-		selected_DS18B20=self.list_DS18B20.GetFirstSelected()
-		if selected_DS18B20==-1: 
-			self.ShowMessage(_('Select a sensor to delete.'))
+		selected_switch=self.list_switches.GetFirstSelected()
+		if selected_switch==-1: 
+			self.ShowMessage(_('Select a switch to delete.'))
 			return
 		data=self.conf.get('ACTIONS', 'triggers')
 		try:
 			temp_list=eval(data)
 		except:temp_list=[]
 		for i in temp_list:
-			if i[1]==self.DS18B20[selected_DS18B20][4]:
+			if i[1]==self.switches[selected_switch][5]:
 				self.read_triggers()
-				self.ShowMessage(_('You have an action defined for this sensor. You must delete that action before deleting this sensor.'))
+				self.ShowMessage(_('You have an action defined for this switch. You must delete that action before deleting this switch.'))
 				return
-		del self.DS18B20[selected_DS18B20]
-		self.list_DS18B20.DeleteItem(selected_DS18B20)
-	'''
+		del self.switches[selected_switch]
+		self.list_switches.DeleteItem(selected_switch)
+
 	def apply_changes_switches(self, e):
-		pass
+		#TO DO check outputs	
+		gpio_out=[]
+		for i in self.switches:
+			if i[3] in gpio_out:
+				self.ShowMessage('GPIO '+str(i[3])+_(' is being used in outputs.'))
+				return
+		for i in self.switches:
+			index=self.switches.index(i)
+			if self.list_switches.IsChecked(index): self.switches[index][0]='1'
+			else: self.switches[index][0]='0'
+		self.conf.set('INPUTS', 'switches', str(self.switches))
+		self.start_monitoring()
+		self.read_datastream()
+		self.read_switches()
+		self.SetStatusText(_('Switches changes applied and restarted'))
 
 	def cancel_changes_switches(self, e):
-		pass
+		self.read_switches()
+		self.SetStatusText(_('Switches changes cancelled'))
 ######################################outputs
 
 	def output_message(self):
