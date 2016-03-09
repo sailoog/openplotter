@@ -22,39 +22,42 @@ import RPi.GPIO as GPIO
 
 class Actions():
 
-	def __init__(self):
+	def __init__(self,conf):
 
-		self.options=[None]*28
+		self.options=[]
 		#ATENTION. If order changes, edit "run_action()" and ctrl_actions.py
-		# 0 name, 1 message, 2 field data
-		self.options[0]= _('wait'),_('Enter seconds to wait in the field below.'),1
-		self.options[1]= _('command'),_('Enter a Linux command and arguments in the field below.'),1
-		self.options[2]= _('reset'),0,0
-		self.options[3]= _('shutdown'),0,0
-		self.options[4]= _('stop NMEA multiplexer'),0,0
-		self.options[5]= _('reset NMEA multiplexer'),0,0
-		self.options[6]= _('stop Signal K server'),0,0
-		self.options[7]= _('reset Signal K server'),0,0
-		self.options[8]= _('stop WiFi access point'),_('Be careful, if you are connected by remote you may not be able to reconnect again.'),0
-		self.options[9]= _('start WiFi access point'),_('Be sure you have filled in all fields in "WiFi AP" tab and enabled WiFi access point.'),0
-		self.options[10]= _('stop SDR-AIS'),0,0
-		self.options[11]= _('reset SDR-AIS'),_('Be sure you have filled in Gain and Correction fields in "SDR-AIS" tab and enabled AIS NMEA generation.'),0
-		self.options[12]= _('publish Twitter'),_('Be sure you have filled in all fields in "Accounts" tab, selected data to publish and enabled Twitter checkbox.\n\nEnter text to publish in the field below (optional).'),1
-		self.options[13]= _('send e-mail'),_('Be sure you have filled in all fields in "Accounts" tab, and enabled Gmail checkbox.\n\nEnter the subject in the field below.'),1
-		self.options[14]= _('play sound'),'OpenFileDialog',1
-		self.options[15]= _('stop all sounds'),0,0
-		self.options[16]= _('show message'),_('Enter the message in the field below.'),1
-		self.options[17]= _('close all messages'),0,0
-		self.options[18]= _('start all actions'),0,0
-		self.options[19]= _('stop all actions'),_('This action will stop all the triggers except the trigger which has an action "start all actions" defined.'),0
-		self.options[20]= _('Set Output 1 to High'),_('ATTENTION! if you set this output to "High" and there is not a resistor or a circuit connected to the selected GPIO pin, YOU CAN DAMAGE YOUR BOARD.'),0
-		self.options[21]= _('Set Output 1 to Low'),0,0
-		self.options[22]= _('Set Output 2 to High'),_('ATTENTION! if you set this output to "High" and there is not a resistor or a circuit connected to the selected GPIO pin, YOU CAN DAMAGE YOUR BOARD.'),0
-		self.options[23]= _('Set Output 2 to Low'),0,0
-		self.options[24]= _('Set Output 3 to High'),_('ATTENTION! if you set this output to "High" and there is not a resistor or a circuit connected to the selected GPIO pin, YOU CAN DAMAGE YOUR BOARD.'),0
-		self.options[25]= _('Set Output 3 to Low'),0,0
-		self.options[26]= _('Set Output 4 to High'),_('ATTENTION! if you set this output to "High" and there is not a resistor or a circuit connected to the selected GPIO pin, YOU CAN DAMAGE YOUR BOARD.'),0
-		self.options[27]= _('Set Output 4 to Low'),0,0
+		# 0 name, 1 message, 2 field data, 3 unique ID
+		self.options.append([_('wait'),_('Enter seconds to wait in the field below.'),1,'ACT1'])
+		self.options.append([_('command'),_('Enter a Linux command and arguments in the field below.'),1,'ACT2'])
+		self.options.append([_('reset'),0,0,'ACT3'])
+		self.options.append([_('shutdown'),0,0,'ACT4'])
+		self.options.append([_('stop NMEA multiplexer'),0,0,'ACT5'])
+		self.options.append([_('reset NMEA multiplexer'),0,0,'ACT6'])
+		self.options.append([_('stop Signal K server'),0,0,'ACT7'])
+		self.options.append([_('reset Signal K server'),0,0,'ACT8'])
+		self.options.append([_('stop WiFi access point'),_('Be careful, if you are connected by remote you may not be able to reconnect again.'),0,'ACT9'])
+		self.options.append([_('start WiFi access point'),_('Be sure you have filled in all fields in "WiFi AP" tab and enabled WiFi access point.'),0,'ACT10'])
+		self.options.append([_('stop SDR-AIS'),0,0,'ACT11'])
+		self.options.append([_('reset SDR-AIS'),_('Be sure you have filled in Gain and Correction fields in "SDR-AIS" tab and enabled AIS NMEA generation.'),0,'ACT12'])
+		self.options.append([_('publish Twitter'),_('Be sure you have filled in all fields in "Accounts" tab, selected data to publish and enabled Twitter checkbox.\n\nEnter text to publish in the field below (optional).'),1,'ACT13'])
+		self.options.append([_('send e-mail'),_('Be sure you have filled in all fields in "Accounts" tab, and enabled Gmail checkbox.\n\nEnter the subject in the field below.'),1,'ACT14'])
+		self.options.append([_('play sound'),'OpenFileDialog',1,'ACT15'])
+		self.options.append([_('stop all sounds'),0,0,'ACT16'])
+		self.options.append([_('show message'),_('Enter the message in the field below.'),1,'ACT17'])
+		self.options.append([_('close all messages'),0,0,'ACT18'])
+		self.options.append([_('start all actions'),0,0,'ACT19'])
+		self.options.append([_('stop all actions'),_('This action will stop all the triggers except the trigger which has an action "start all actions" defined.'),0,'ACT20'])
+
+		#Outputs
+		x=conf.get('OUTPUTS', 'outputs')
+		if x: self.out_list=eval(x)
+		else: self.out_list=[]
+		for i in self.out_list:
+			try:
+				if i[0]=='1':
+					self.options.append([i[1]+_(': High'),_('ATTENTION! if you set this output to "High" and there is not a resistor or a circuit connected to the selected GPIO pin, YOU CAN DAMAGE YOUR BOARD.'),0,'H'+i[4]])
+					self.options.append([i[1]+_(': Low'),0,0,'L'+i[4]])
+			except Exception,e: print str(e)
 
 		self.time_units=[_('no repeat'),_('seconds'), _('minutes'), _('hours'), _('days')]
 
@@ -62,45 +65,54 @@ class Actions():
 		self.home=paths.home
 		self.currentpath=paths.currentpath
 
-	
+	def getOptionsListIndex(self, data):
+		for index, item in enumerate(self.options):
+			if item[3]==data: return index
+
+	def getoutlistIndex(self, data):
+		for index, item in enumerate(self.out_list):
+			if item[4]==data: return index
+
 	def run_action(self,option,text,conf,a):
 		conf.read()
-		if option=='0': time.sleep(float(text))
-		if option=='1':
+		if option=='ACT1': time.sleep(float(text))
+		if option=='ACT2':
 			if text:
-				text=text.split(' ')
-				subprocess.Popen(text)		
-		if option=='2': 
+				try:
+					text=text.split(' ')
+					subprocess.Popen(text)
+				except Exception,e: print str(e)	
+		if option=='ACT3': 
 			subprocess.Popen(['sudo', 'reboot'])
-		if option=='3': 
+		if option=='ACT4': 
 			subprocess.Popen(['sudo', 'shutdown', '-h', 'now'])
-		if option=='4': 
+		if option=='ACT5': 
 			subprocess.Popen(['pkill', '-9', 'kplex'])
-		if option=='5':
+		if option=='ACT6':
 			subprocess.call(['pkill', '-9', 'kplex'])
 			subprocess.Popen('kplex')
-		if option=='6': 
+		if option=='ACT7': 
 			subprocess.Popen(["pkill", '-9', "node"])
-		if option=='7':
+		if option=='ACT8':
 			subprocess.call(["pkill", '-9', "node"]) 
 			subprocess.Popen(self.home+'/.config/signalk-server-node/bin/nmea-from-10110', cwd=self.home+'/.config/signalk-server-node') 
-		if option=='8':
+		if option=='ACT9':
 			wlan=conf.get('WIFI', 'device')
 			passw2=conf.get('WIFI', 'password')
 			ssid2=conf.get('WIFI', 'ssid')
 			subprocess.Popen(['sudo', 'python', self.currentpath+'/wifi_server.py', '0', wlan, passw2, ssid2])
 			conf.set('WIFI', 'enable', '0')
-		if option=='9':
+		if option=='ACT10':
 			wlan=conf.get('WIFI', 'device')
 			passw2=conf.get('WIFI', 'password')
 			ssid2=conf.get('WIFI', 'ssid')
 			subprocess.Popen(['sudo', 'python', self.currentpath+'/wifi_server.py', '1', wlan, passw2, ssid2])
 			conf.set('WIFI', 'enable', '1')
-		if option=='10':
+		if option=='ACT11':
 			subprocess.Popen(['pkill', '-9', 'aisdecoder'])
 			subprocess.Popen(['pkill', '-9', 'rtl_fm'])
 			conf.set('AIS-SDR', 'enable', '0')
-		if option=='11':
+		if option=='ACT12':
 			gain=conf.get('AIS-SDR', 'gain')
 			ppm=conf.get('AIS-SDR', 'ppm')
 			channel=conf.get('AIS-SDR', 'channel')
@@ -111,7 +123,7 @@ class Actions():
 			rtl_fm=subprocess.Popen(['rtl_fm', '-f', frecuency, '-g', gain, '-p', ppm, '-s', '48k'], stdout = subprocess.PIPE)
 			aisdecoder=subprocess.Popen(['aisdecoder', '-h', '127.0.0.1', '-p', '10110', '-a', 'file', '-c', 'mono', '-d', '-f', '/dev/stdin'], stdin = rtl_fm.stdout)
 			conf.set('AIS-SDR', 'enable', '1')
-		if option=='12':
+		if option=='ACT13':
 			now = time.strftime("%H:%M:%S")
 			tweetStr = now+' '+text
 			send_data=eval(conf.get('TWITTER', 'send_data'))
@@ -141,7 +153,7 @@ class Actions():
 				msg=TwitterBot(apiKey,apiSecret,accessToken,accessTokenSecret)
 				msg.send(tweetStr)
 			except Exception,e: print str(e)
-		if option=='13':
+		if option=='ACT14':
 			subject = text
 			body = ''
 			for ii in a.DataList:
@@ -166,47 +178,22 @@ class Actions():
 				msg=GmailBot(GMAIL_USERNAME,GMAIL_PASSWORD,recipient)
 				msg.send(subject,body)
 			except Exception,e: print str(e)
-		if option=='14':
+		if option=='ACT15':
 			subprocess.Popen(['mpg123',text])
-		if option=='15':
+		if option=='ACT16':
 			subprocess.Popen(['pkill', '-9', 'mpg123'])
-		if option=='16':
+		if option=='ACT17':
 			subprocess.Popen(['python', self.currentpath+'/message.py', text, conf.get('GENERAL','lang')])
-		if option=='17':
+		if option=='ACT18':
 			subprocess.Popen(['pkill', '-f', 'message.py'])
-		if option=='18':
+		if option=='ACT19':
 			return 'read'
-		if option=='19':
+		if option=='ACT20':
 			subprocess.Popen(['python', self.currentpath+'/ctrl_actions.py', '0'])
-		if option=='20':
-			if conf.get('OUTPUT1', 'enable')=='1':
-				channel=int(conf.get('OUTPUT1', 'gpio'))
+		if option[:4]=='HOUT':
+				channel=self.out_list[self.getoutlistIndex(option[1:])][3]
 				GPIO.output(channel, 1)
-		if option=='21':
-			if conf.get('OUTPUT1', 'enable')=='1':
-				channel=int(conf.get('OUTPUT1', 'gpio'))
+		if option[:4]=='LOUT':
+				channel=self.out_list[self.getoutlistIndex(option[1:])][3]
 				GPIO.output(channel, 0)
-		if option=='22':
-			if conf.get('OUTPUT2', 'enable')=='1':
-				channel=int(conf.get('OUTPUT2', 'gpio'))
-				GPIO.output(channel, 1)
-		if option=='23':
-			if conf.get('OUTPUT2', 'enable')=='1':
-				channel=int(conf.get('OUTPUT2', 'gpio'))
-				GPIO.output(channel, 0)
-		if option=='24':
-			if conf.get('OUTPUT3', 'enable')=='1':
-				channel=int(conf.get('OUTPUT3', 'gpio'))
-				GPIO.output(channel, 1)
-		if option=='25':
-			if conf.get('OUTPUT3', 'enable')=='1':
-				channel=int(conf.get('OUTPUT3', 'gpio'))
-				GPIO.output(channel, 0)
-		if option=='26':
-			if conf.get('OUTPUT4', 'enable')=='1':
-				channel=int(conf.get('OUTPUT4', 'gpio'))
-				GPIO.output(channel, 1)
-		if option=='27':
-			if conf.get('OUTPUT4', 'enable')=='1':
-				channel=int(conf.get('OUTPUT4', 'gpio'))
-				GPIO.output(channel, 0)
+

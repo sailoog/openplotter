@@ -16,16 +16,15 @@
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 import wx
 from paths import Paths
-from classes.actions import Actions
 
 class addAction(wx.Dialog):
 
-	def __init__(self,actions_options,time_units,edit):
+	def __init__(self,conf,actions_options,time_units,edit):
 
 		wx.Dialog.__init__(self, None, title=_('Add action'), size=(330,290))
 
 		panel = wx.Panel(self)
-
+		self.conf=conf
 		self.actions_options=actions_options
 
 		list_actions=[]
@@ -60,7 +59,6 @@ class addAction(wx.Dialog):
 		self.currentpath=paths.currentpath
 
 	def onSelect(self,e):
-		actions=Actions()
 		msg=self.actions_options[self.action_select.GetCurrentSelection()][1]
 		field=self.actions_options[self.action_select.GetCurrentSelection()][2]
 		self.data.SetValue('')

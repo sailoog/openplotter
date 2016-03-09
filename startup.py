@@ -115,7 +115,7 @@ if kplex=='1':
 
 subprocess.call(["pkill", '-9', "node"])
 if signalk=='1':
-	subprocess.Popen(home+'/.config/signalk-server-node/bin/nmea-from-10110', cwd=home+'/.config/signalk-server-node')       
+	subprocess.Popen(home+'/.config/signalk-server-node/bin/openplotter', cwd=home+'/.config/signalk-server-node')       
 
 if gps_time=='1':
 	subprocess.call(['sudo', 'python', currentpath+'/time_gps.py'])

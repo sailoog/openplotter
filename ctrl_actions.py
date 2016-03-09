@@ -23,7 +23,7 @@ from classes.language import Language
 action=sys.argv[1]
 
 #see actions.py
-start_all_actions=18
+start_all_actions='ACT19'
 
 paths=Paths()
 currentpath=paths.currentpath
