@@ -1605,7 +1605,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			else:
 				if i in gpio_sw or i in gpio_out: pass
 				else: avalaible_gpio.append(str(i))
-		
 		dlg = addSwitch(avalaible_gpio,edit)
 		res = dlg.ShowModal()
 		if res == wx.ID_OK:
@@ -1666,12 +1665,18 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		del self.switches[selected_switch]
 		self.list_switches.DeleteItem(selected_switch)
 
-	def apply_changes_switches(self, e):
-		#TO DO check outputs	
+	def apply_changes_switches(self, e):	
 		gpio_out=[]
+		data=self.conf.get('OUTPUTS', 'outputs')
+		try:
+			temp_list=eval(data)
+		except:temp_list=[]
+		for i in temp_list:
+			gpio_out.append(i[3])
 		for i in self.switches:
 			if i[3] in gpio_out:
-				self.ShowMessage('GPIO '+str(i[3])+_(' is being used in outputs.'))
+				self.read_outputs()
+				self.ShowMessage('GPIO '+str(i[3])+_(' is being used in outputs. Switches changes cancelled.'))
 				return
 		for i in self.switches:
 			index=self.switches.index(i)
@@ -1687,10 +1692,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.read_switches()
 		self.SetStatusText(_('Switches changes cancelled'))
 ######################################outputs
-
-	def output_message(self):
-		self.ShowMessage(_('ATTENTION! if you set this output to "High" and there is not a resistor or a circuit connected to the selected GPIO pin, YOU CAN DAMAGE YOUR BOARD.'))	
-
 	def read_outputs(self):
 		self.outputs=[]
 		self.list_outputs.DeleteAllItems()
@@ -1729,19 +1730,15 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				avalaible_gpio.append(str(i))
 			else:
 				if i in gpio_sw or i in gpio_out: pass
-				else: avalaible_gpio.append(str(i))
-		
+				else: avalaible_gpio.append(str(i))	
 		dlg = addOutput(avalaible_gpio,edit)
 		res = dlg.ShowModal()
-		'''
 		if res == wx.ID_OK:
 			name=dlg.name.GetValue()
 			name=name.encode('utf8')
 			short=dlg.short.GetValue()
 			short=short.encode('utf8')
 			gpio_selection=dlg.gpio_select.GetValue()
-			pull_selection=dlg.pull_select.GetValue()
-			pull_selection=pull_selection.encode('utf8')
 			if not name or not short:
 				self.ShowMessage(_('Failed. Write a name and a short name.'))
 				dlg.Destroy()
@@ -1750,71 +1747,69 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.ShowMessage(_('Failed. Select GPIO.'))
 				dlg.Destroy()
 				return
-			if pull_selection == '':
-				self.ShowMessage(_('Failed. Select pull down or pull up.'))
-				dlg.Destroy()
-				return
 			if edit==0:
-				self.list_switches.Append([name.decode('utf8'),short.decode('utf8'),gpio_selection,pull_selection])
-				last=self.list_switches.GetItemCount()-1
-				self.list_switches.CheckItem(last)
-				if len(self.switches)==0: ID='SW0'
+				self.list_outputs.Append([name.decode('utf8'),short.decode('utf8'),gpio_selection])
+				last=self.list_outputs.GetItemCount()-1
+				self.list_outputs.CheckItem(last)
+				if len(self.outputs)==0: ID='OUT0'
 				else:
-					last=len(self.switches)-1
-					x=int(self.switches[last][5][2:])
-					ID='SW'+str(x+1)
-				self.switches.append(['1',name,short,int(gpio_selection),pull_selection,ID])
+					last=len(self.outputs)-1
+					x=int(self.outputs[last][4][3:])
+					ID='OUT'+str(x+1)
+				self.outputs.append(['1',name,short,int(gpio_selection),ID])
 			else:
-				self.list_switches.SetStringItem(edit[0],0,name.decode('utf8'))
-				self.list_switches.SetStringItem(edit[0],1,short.decode('utf8'))
-				self.list_switches.SetStringItem(edit[0],2,gpio_selection)
-				self.list_switches.SetStringItem(edit[0],3,pull_selection)
-				self.switches[edit[0]][1]=name
-				self.switches[edit[0]][2]=short
-				self.switches[edit[0]][3]=int(gpio_selection)
-				self.switches[edit[0]][4]=pull_selection
-		'''
+				self.list_outputs.SetStringItem(edit[0],0,name.decode('utf8'))
+				self.list_outputs.SetStringItem(edit[0],1,short.decode('utf8'))
+				self.list_outputs.SetStringItem(edit[0],2,gpio_selection)
+				self.outputs[edit[0]][1]=name
+				self.outputs[edit[0]][2]=short
+				self.outputs[edit[0]][3]=int(gpio_selection)
 		dlg.Destroy()
 
 	def delete_outputs(self,e):
-		pass
-		'''
-		selected_switch=self.list_switches.GetFirstSelected()
-		if selected_switch==-1: 
-			self.ShowMessage(_('Select a switch to delete.'))
+		selected_output=self.list_outputs.GetFirstSelected()
+		if selected_output==-1: 
+			self.ShowMessage(_('Select an output to delete.'))
 			return
 		data=self.conf.get('ACTIONS', 'triggers')
 		try:
 			temp_list=eval(data)
 		except:temp_list=[]
+		dontdelete=0
 		for i in temp_list:
-			if i[1]==self.switches[selected_switch][5]:
-				self.read_triggers()
-				self.ShowMessage(_('You have an action defined for this switch. You must delete that action before deleting this switch.'))
-				return
-		del self.switches[selected_switch]
-		self.list_switches.DeleteItem(selected_switch)
-		'''
+			if i[1]==self.outputs[selected_output][4]: dontdelete=1
+			for ii in i[4]:
+				if ii[0][1:]==self.outputs[selected_output][4]: dontdelete=1
+		if dontdelete==1:
+			self.read_triggers()
+			self.ShowMessage(_('You have an action defined for this output. You must delete that action before deleting this output.'))
+			return
+		del self.outputs[selected_output]
+		self.list_outputs.DeleteItem(selected_output)
 
 	def apply_changes_outputs(self, e):
-		pass
-		'''
-		#TO DO check outputs	
-		gpio_out=[]
-		for i in self.switches:
-			if i[3] in gpio_out:
-				self.ShowMessage('GPIO '+str(i[3])+_(' is being used in outputs.'))
+		gpio_sw=[]
+		data=self.conf.get('INPUTS', 'switches')
+		try:
+			temp_list=eval(data)
+		except:temp_list=[]
+		for i in temp_list:
+			gpio_sw.append(i[3])
+		for i in self.outputs:
+			if i[3] in gpio_sw:
+				self.read_switches()
+				self.ShowMessage('GPIO '+str(i[3])+_(' is being used in switches. Output changes cancelled.'))
 				return
-		for i in self.switches:
-			index=self.switches.index(i)
-			if self.list_switches.IsChecked(index): self.switches[index][0]='1'
-			else: self.switches[index][0]='0'
-		self.conf.set('INPUTS', 'switches', str(self.switches))
+		for i in self.outputs:
+			index=self.outputs.index(i)
+			if self.list_outputs.IsChecked(index): self.outputs[index][0]='1'
+			else: self.outputs[index][0]='0'
+		self.conf.set('OUTPUTS', 'outputs', str(self.outputs))
 		self.start_monitoring()
 		self.read_datastream()
-		self.read_switches()
-		self.SetStatusText(_('Switches changes applied and restarted'))
-		'''
+		self.read_outputs()
+		self.SetStatusText(_('Output changes applied and restarted'))
+
 
 	def cancel_changes_outputs(self, e):
 		self.read_outputs()
