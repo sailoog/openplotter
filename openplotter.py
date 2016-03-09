@@ -71,6 +71,7 @@ class MainFrame(wx.Frame):
 		self.page13 = wx.Panel(self.nb)
 
 		self.nb.AddPage(self.page5, _('NMEA 0183'))
+		self.nb.AddPage(self.page7, _('Signal K'))
 		self.nb.AddPage(self.page3, _('WiFi AP'))
 		self.nb.AddPage(self.page10, _('Actions'))
 		self.nb.AddPage(self.page8, _('Switches'))
@@ -81,7 +82,6 @@ class MainFrame(wx.Frame):
 		self.nb.AddPage(self.page4, _('SDR-AIS'))
 		self.nb.AddPage(self.page2, _('Calculate'))
 		self.nb.AddPage(self.page9, _('Accounts'))
-		self.nb.AddPage(self.page7, _('Signal K (beta)'))
 		self.nb.AddPage(self.page1, _('Startup'))
 
 		sizer = wx.BoxSizer()
@@ -323,22 +323,14 @@ class MainFrame(wx.Frame):
 ###########################page5
 ########page7###################
 		wx.StaticBox(self.page7, label=_(' Inputs '), size=(670, 130), pos=(10, 10))
-		self.inSK = wx.TextCtrl(self.page7, -1, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_DONTWRAP, size=(565, 102), pos=(15, 30))
-		self.inSK.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_INACTIVECAPTION))
-		self.inSK.SetValue(' NMEA 0183 - system_output  TCP  localhost  10110')
+		wx.StaticText(self.page7, label='Multiplexed NMEA 0183 - system_output - TCP localhost 10110', pos=(20, 30))
 
 		wx.StaticBox(self.page7, label=_(' Outputs '), size=(670, 130), pos=(10, 145))
-		self.outSK = wx.TextCtrl(self.page7, -1, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_DONTWRAP, size=(565, 102), pos=(15, 165))
-		self.outSK.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_INACTIVECAPTION))
-		self.outSK.SetValue(' http://localhost:3000/instrumentpanel\n http://localhost:3000/sailgauge\n http://localhost:3000/signalk/stream/v1?stream=delta')
-		self.showpanels =wx.Button(self.page7, label=_('Panel'), pos=(585, 165))
-		self.Bind(wx.EVT_BUTTON, self.signalKpanels, self.showpanels)
-		self.showgauge =wx.Button(self.page7, label=_('Gauge'), pos=(585, 200))
-		self.Bind(wx.EVT_BUTTON, self.signalKsailgauge, self.showgauge)
+		wx.StaticText(self.page7, label='Signal K REST\nSignal K Web Socket\nSignal K NMEA 0183 - TCP localhost 10111', pos=(20, 165))
 
-		self.show_outputSK =wx.Button(self.page7, label=_('Show output'), pos=(10, 285))
+		self.show_outputSK =wx.Button(self.page7, label=_('Show Web Socket'), pos=(10, 285))
 		self.Bind(wx.EVT_BUTTON, self.signalKout, self.show_outputSK)
-		self.button_restartSK =wx.Button(self.page7, label=_('Restart'), pos=(130, 285))
+		self.button_restartSK =wx.Button(self.page7, label=_('Restart'), pos=(150, 285))
 		self.Bind(wx.EVT_BUTTON, self.restartSK, self.button_restartSK)
 ###########################page7
 ########page6###################
@@ -920,7 +912,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def show_ip_info(self, e):
 		ip_info=subprocess.check_output(['hostname', '-I'])
-		out=_(' NMEA 0183:\n')
+		out=_(' Multiplexed NMEA 0183:\n')
 		ips=ip_info.split()
 		for ip in ips:
 			out+=ip+':10110\n'
@@ -936,9 +928,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		out+=_('\n Signal K gauge:\n')
 		for ip in ips:
 			out+=ip+':3000/sailgauge\n'
-		out+=_('\n Signal K WebSocket:\n')
+		out+=_('\n Signal K NMEA 0183:\n')
 		for ip in ips:
-			out+=ip+':3000/signalk/stream/v1?stream=delta\n'
+			out+=ip+':10111\n'
 		self.ip_info.SetValue(out)
 
 	def enable_disable_wifi(self, s):
@@ -1547,14 +1539,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if self.TW_SOG.GetValue(): self.conf.set('STARTUP', 'tw_sog', '1')
 		self.start_calculate()
 ######################################Signal K
-	def signalKpanels(self, e):
-		url = 'http://localhost:3000/instrumentpanel'
-		webbrowser.open(url,new=2)
-
-	def signalKsailgauge(self, e):
-		url = 'http://localhost:3000/sailgauge'
-		webbrowser.open(url,new=2)
-
 	def signalKout(self, e):
 		url = 'http://localhost:3000/examples/consumer-example.html'
 		webbrowser.open(url,new=2)
@@ -1562,7 +1546,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def restartSK(self, e):
 		self.SetStatusText(_('Closing Signal K server'))
 		subprocess.call(["pkill", '-9', "node"])
-		subprocess.Popen(home+'/.config/signalk-server-node/bin/nmea-from-10110', cwd=home+'/.config/signalk-server-node')
+		subprocess.Popen(home+'/.config/signalk-server-node/bin/openplotter', cwd=home+'/.config/signalk-server-node')
 		self.SetStatusText(_('Signal K server restarted'))
 ######################################Switches
 
