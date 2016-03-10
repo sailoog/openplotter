@@ -41,26 +41,27 @@ if wifi_server=='1':
 	driver='nl80211'
 	chipset= 'default'
 
-	output=subprocess.check_output('lsusb')
-
-	if 'RTL8188CUS' in output:
-		driver='rtl871xdrv'
-		chipset= 'RTL8188CUS'
-		shutil.copyfile(currentpath+'/wifi_drivers/RTL8188CUS/hostapd', '/usr/sbin/hostapd')
-		subprocess.call(['chmod', '755', '/usr/sbin/hostapd'])
-	if 'RTL8192CU' in output:
-		driver='rtl871xdrv'
-		chipset= 'RTL8192CU'
-		shutil.copyfile(currentpath+'/wifi_drivers/RTL8192CU/hostapd', '/usr/sbin/hostapd')
-		subprocess.call(['chmod', '755', '/usr/sbin/hostapd'])
-	if '0bda:818b' in output:
-		driver='rtl871xdrv'
-		chipset= 'RTL8192EU'
-		shutil.copyfile(currentpath+'/wifi_drivers/RTL8192EU/hostapd', '/usr/sbin/hostapd')
-		subprocess.call(['chmod', '755', '/usr/sbin/hostapd'])
-	if chipset == 'default':
+	version=subprocess.check_output("cat /proc/cpuinfo | grep 'Revision' | awk '{print $3}' | sed 's/^1000//'", shell=True)
+	if 'a02082' in version and wlan=='wlan0':
 		shutil.copyfile('/usr/sbin/hostapd.org', '/usr/sbin/hostapd')
-		subprocess.call(['chmod', '755', '/usr/sbin/hostapd'])
+	else:
+		output=subprocess.check_output('lsusb')
+		if 'RTL8188CUS' in output:
+			driver='rtl871xdrv'
+			chipset= 'RTL8188CUS'
+			shutil.copyfile(currentpath+'/wifi_drivers/RTL8188CUS/hostapd', '/usr/sbin/hostapd')
+		if 'RTL8192CU' in output:
+			driver='rtl871xdrv'
+			chipset= 'RTL8192CU'
+			shutil.copyfile(currentpath+'/wifi_drivers/RTL8192CU/hostapd', '/usr/sbin/hostapd')
+		if '0bda:818b' in output:
+			driver='rtl871xdrv'
+			chipset= 'RTL8192EU'
+			shutil.copyfile(currentpath+'/wifi_drivers/RTL8192EU/hostapd', '/usr/sbin/hostapd')
+		if chipset == 'default':
+			shutil.copyfile('/usr/sbin/hostapd.org', '/usr/sbin/hostapd')
+		
+	subprocess.call(['chmod', '755', '/usr/sbin/hostapd'])
 
 	subprocess.call(['rfkill', 'unblock', 'wifi'])
 
