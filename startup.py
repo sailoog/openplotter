@@ -51,7 +51,7 @@ opencpn_no=conf.get('STARTUP', 'opencpn_no_opengl')
 opencpn_fullscreen=conf.get('STARTUP', 'opencpn_fullscreen')
 x11vnc=conf.get('STARTUP', 'x11vnc')
 gps_time=conf.get('STARTUP', 'gps_time')
-signalk=conf.get('STARTUP', 'signalk')
+signalk=conf.get('SIGNALK', 'enable')
 
 enable=conf.get('AIS-SDR', 'enable')
 gain=conf.get('AIS-SDR', 'gain')

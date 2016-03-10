@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, sys, os, subprocess, webbrowser, re
+import wx, sys, os, subprocess, webbrowser, re, json
 import wx.lib.scrolledpanel as scrolled
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 from classes.datastream import DataStream
@@ -156,9 +156,6 @@ class MainFrame(wx.Frame):
 
 		self.startup_remote_desktop = wx.CheckBox(self.page1, label=_('VNC remote desktop'), pos=(20, 225))
 		self.startup_remote_desktop.Bind(wx.EVT_CHECKBOX, self.startup)
-
-		self.startup_signalk = wx.CheckBox(self.page1, label=_('Signal K server (beta)'), pos=(20, 260))
-		self.startup_signalk.Bind(wx.EVT_CHECKBOX, self.startup)
 
 		wx.StaticBox(self.page1, size=(330, 230), pos=(350, 65))
 
@@ -322,15 +319,25 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.cancel_changes, self.button_cancel)
 ###########################page5
 ########page7###################
-		wx.StaticBox(self.page7, label=_(' Inputs '), size=(670, 130), pos=(10, 10))
-		wx.StaticText(self.page7, label='Multiplexed NMEA 0183 - system_output - TCP localhost 10110', pos=(20, 30))
+		wx.StaticBox(self.page7, label=_(' Settings '), size=(230, 265), pos=(10, 10))
+		self.signalk_enable = wx.CheckBox(self.page7, label=_('Enable Signal K server'), pos=(20, 30))
+		self.signalk_enable.Bind(wx.EVT_CHECKBOX, self.onsignalk_enable)
 
-		wx.StaticBox(self.page7, label=_(' Outputs '), size=(670, 130), pos=(10, 145))
-		wx.StaticText(self.page7, label='Signal K REST\nSignal K Web Socket\nSignal K NMEA 0183 - TCP localhost 10111', pos=(20, 165))
+		self.vessel = wx.TextCtrl(self.page7, -1, size=(110, 32), pos=(20, 60))
+		self.vessel_label=wx.StaticText(self.page7, label=_('Vessel name'), pos=(140, 65))
+
+		self.mmsi = wx.TextCtrl(self.page7, -1, size=(110, 32), pos=(20, 95))
+		self.mmsi_label=wx.StaticText(self.page7, label='MMSI', pos=(140, 100))
+
+		wx.StaticBox(self.page7, label=_(' Inputs '), size=(430, 130), pos=(250, 10))
+		wx.StaticText(self.page7, label='Multiplexed NMEA 0183 - system_output - TCP localhost 10110', pos=(260, 30))
+
+		wx.StaticBox(self.page7, label=_(' Outputs '), size=(430, 130), pos=(250, 145))
+		wx.StaticText(self.page7, label='Signal K REST\nSignal K Web Socket\nSignal K NMEA 0183 - TCP localhost 10111', pos=(260, 165))
 
 		self.show_outputSK =wx.Button(self.page7, label=_('Show Web Socket'), pos=(10, 285))
 		self.Bind(wx.EVT_BUTTON, self.signalKout, self.show_outputSK)
-		self.button_restartSK =wx.Button(self.page7, label=_('Restart'), pos=(150, 285))
+		self.button_restartSK =wx.Button(self.page7, label=_('Restart'), pos=(155, 285))
 		self.Bind(wx.EVT_BUTTON, self.restartSK, self.button_restartSK)
 ###########################page7
 ########page6###################
@@ -555,7 +562,6 @@ class MainFrame(wx.Frame):
 			self.startup_nmea_time.Disable()
 		if self.conf.get('STARTUP', 'gps_time')=='1': self.startup_nmea_time.SetValue(True)
 		if self.conf.get('STARTUP', 'x11vnc')=='1': self.startup_remote_desktop.SetValue(True)
-		if self.conf.get('STARTUP', 'signalk')=='1': self.startup_signalk.SetValue(True)
 		if self.conf.get('STARTUP', 'maximize')=='1':
 			self.op_maximize.SetValue(True) 
 			self.Maximize()
@@ -696,6 +702,17 @@ class MainFrame(wx.Frame):
 			self.Gmail_account.Disable()
 			self.Gmail_password.Disable()
 			self.Recipient.Disable()
+
+		with open(home+'/.config/signalk-server-node/settings/openplotter-settings.json') as data_file:
+			data = json.load(data_file)
+		self.vessel.SetValue(data['vessel']['name'])
+		self.mmsi.SetValue(data['vessel']['uuid'])
+		if self.conf.get('SIGNALK', 'enable')=='1': 
+			self.signalk_enable.SetValue(True)
+			self.vessel.Disable()
+			self.vessel_label.Disable()
+			self.mmsi.Disable()
+			self.mmsi_label.Disable()
 
 		self.read_triggers()
 		self.read_DS18B20()
@@ -839,11 +856,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.conf.set('STARTUP', 'x11vnc', '1')
 		else:
 			self.conf.set('STARTUP', 'x11vnc', '0')
-
-		if self.startup_signalk.GetValue():
-			self.conf.set('STARTUP', 'signalk', '1')
-		else:
-			self.conf.set('STARTUP', 'signalk', '0')
 
 		if self.op_maximize.GetValue():
 			self.conf.set('STARTUP', 'maximize', '1')
@@ -1083,13 +1095,16 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		subprocess.call(["pkill", '-9', "kplex"])
 		subprocess.Popen('kplex')
 		self.SetStatusText(_('Kplex restarted'))
+		if self.conf.get('SIGNALK', 'enable')=='1':
+			subprocess.call(["pkill", '-9', "node"])
+			subprocess.Popen(home+'/.config/signalk-server-node/bin/openplotter', cwd=home+'/.config/signalk-server-node')
 
 	def cancel_changes(self,event):
 		self.read_kplex_conf()
 
 	def read_kplex_conf(self):
 		self.inputs = []
-		self.outputs = []
+		self.koutputs = []
 		try:
 			file=open(home+'/.kplex.conf', 'r')
 			data=file.readlines()
@@ -1103,7 +1118,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				else:
 					if re.search('\[*\]', item):
 						if l_tmp[0]=='in': self.inputs.append(l_tmp)
-						if l_tmp[0]=='out': self.outputs.append(l_tmp)
+						if l_tmp[0]=='out': self.koutputs.append(l_tmp)
 						l_tmp=[None]*8
 						l_tmp[5]='none'
 						l_tmp[6]='nothing'
@@ -1132,7 +1147,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 						self.manual_settings='###Manual settings\n\n'
 
 			if l_tmp[0]=='in': self.inputs.append(l_tmp)
-			if l_tmp[0]=='out': self.outputs.append(l_tmp)
+			if l_tmp[0]=='out': self.koutputs.append(l_tmp)
 			self.write_inputs()
 			self.write_outputs()
 
@@ -1168,7 +1183,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	
 	def write_outputs(self):
 		self.list_output.DeleteAllItems()
-		for i in self.outputs:
+		for i in self.koutputs:
 			if i[1]: index = self.list_output.InsertStringItem(sys.maxint, i[1])
 			if i[2]: self.list_output.SetStringItem(index, 1, i[2])
 			if i[3]: self.list_output.SetStringItem(index, 2, i[3])
@@ -1217,7 +1232,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					data=data+state+'address='+item[3]+'\n'+state+'port='+item[4]+'\n\n'
 		
 
-		for index,item in enumerate(self.outputs):
+		for index,item in enumerate(self.koutputs):
 			if 'system_output' not in item[1]:
 				if self.list_output.IsChecked(index): state=''
 				else: state='#'
@@ -1255,10 +1270,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.write_inputs()
 
 	def delete_output(self,event):
-		num = len(self.outputs)
+		num = len(self.koutputs)
 		for i in range(num):
 			if self.list_output.IsSelected(i):
-				del self.outputs[i]
+				del self.koutputs[i]
 		self.write_outputs()
 
 	def process_name(self,r):
@@ -1272,7 +1287,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		for sublist in self.inputs:
 			if sublist[1] == name:
 				found=True
-		for sublist in self.outputs:
+		for sublist in self.koutputs:
 			if sublist[1] == name:
 				found=True
 		if found==True:
@@ -1305,11 +1320,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			list_tmp=self.process_name(r)
 			if list_tmp:
 				new_port=list_tmp[3]
-				for sublist in self.outputs:
+				for sublist in self.koutputs:
 					if sublist[3] == new_port: 
 						self.ShowMessage(_('This output is already in use.'))
 						return
-				self.outputs.append(list_tmp)
+				self.koutputs.append(list_tmp)
 				self.write_outputs()
 
 	
@@ -1320,6 +1335,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if r:
 			list_tmp=self.process_name(r)
 			if list_tmp:
+				if list_tmp[4]=='10111':
+					self.ShowMessage(_('Cancelled. Port 10111 is being used by Signal K.'))
+					return
 				new_address_port=str(list_tmp[2])+str(list_tmp[3])+str(list_tmp[4])
 				for sublist in self.inputs:					
 					old_address_port=str(sublist[2])+str(sublist[3])+str(sublist[4])
@@ -1337,13 +1355,16 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if r:
 			list_tmp=self.process_name(r)
 			if list_tmp:
+				if list_tmp[4]=='10111':
+					self.ShowMessage(_('Cancelled. Port 10111 is being used by Signal K.'))
+					return
 				new_address_port=str(list_tmp[2])+str(list_tmp[3])+str(list_tmp[4])
-				for sublist in self.outputs:					
+				for sublist in self.koutputs:					
 					old_address_port=str(sublist[2])+str(sublist[3])+str(sublist[4])
 					if old_address_port == new_address_port: 
 						self.ShowMessage(_('This output is already in use.'))
 						return
-				self.outputs.append(list_tmp)
+				self.koutputs.append(list_tmp)
 				self.write_outputs()
 
 
@@ -2192,6 +2213,38 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def cancel_changes_DS18B20(self,e):
 		self.read_DS18B20()
 		self.SetStatusText(_('DS18B20 sensors changes cancelled'))
+
+#######################Signal K
+
+	def onsignalk_enable (self,e):
+		isChecked = self.signalk_enable.GetValue()
+		if isChecked:
+			name=self.vessel.GetValue()
+			uuid=self.mmsi.GetValue()
+			if name=='' or uuid=='':
+				self.ShowMessage(_('You have to provide name and MMSI.'))
+				self.signalk_enable.SetValue(False)
+				return				
+			self.vessel.Disable()
+			self.vessel_label.Disable()
+			self.mmsi.Disable()
+			self.mmsi_label.Disable()
+			subprocess.call(["pkill", '-9', "node"])
+			with open(home+'/.config/signalk-server-node/settings/openplotter-settings.json') as data_file:
+				data = json.load(data_file)
+			data['vessel']['name']=name
+			data['vessel']['uuid']=uuid
+			with open(home+'/.config/signalk-server-node/settings/openplotter-settings.json', 'w') as outfile:
+				json.dump(data, outfile)
+			self.conf.set('SIGNALK', 'enable', '1')
+			subprocess.Popen(home+'/.config/signalk-server-node/bin/openplotter', cwd=home+'/.config/signalk-server-node')
+		else:
+			subprocess.call(["pkill", '-9', "node"])
+			self.conf.set('SIGNALK', 'enable', '0')
+			self.vessel.Enable()
+			self.vessel_label.Enable()
+			self.mmsi.Enable()
+			self.mmsi_label.Enable()
 #Main#############################
 if __name__ == "__main__":
 	app = wx.App()

@@ -95,7 +95,7 @@ class Actions():
 			subprocess.Popen(["pkill", '-9', "node"])
 		if option=='ACT8':
 			subprocess.call(["pkill", '-9', "node"]) 
-			subprocess.Popen(self.home+'/.config/signalk-server-node/bin/nmea-from-10110', cwd=self.home+'/.config/signalk-server-node') 
+			subprocess.Popen(self.home+'/.config/signalk-server-node/bin/openplotter', cwd=self.home+'/.config/signalk-server-node') 
 		if option=='ACT9':
 			wlan=conf.get('WIFI', 'device')
 			passw2=conf.get('WIFI', 'password')
