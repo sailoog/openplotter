@@ -328,9 +328,17 @@ class MainFrame(wx.Frame):
 
 		self.mmsi = wx.TextCtrl(self.page7, -1, size=(110, 32), pos=(20, 95))
 		self.mmsi_label=wx.StaticText(self.page7, label='MMSI', pos=(140, 100))
+		
+		self.NMEA2000_label=wx.StaticText(self.page7, label='NMEA 2000', pos=(20, 140))
+
+		self.SerDevLs = [_('none')]
+		self.SerialCheck('/dev/ttyUSB')
+		self.can_usb= wx.ComboBox(self.page7, choices=self.SerDevLs, style=wx.CB_READONLY, size=(120, 32), pos=(20, 165))
+		self.can_usb.SetValue(self.SerDevLs[0])
+		self.CANUSB_label=wx.StaticText(self.page7, label='CAN-USB', pos=(155, 172))
 
 		wx.StaticBox(self.page7, label=_(' Inputs '), size=(430, 130), pos=(250, 10))
-		wx.StaticText(self.page7, label='Multiplexed NMEA 0183 - system_output - TCP localhost 10110', pos=(260, 30))
+		self.SKinputs_label=wx.StaticText(self.page7, label='NMEA 0183 - system_output - TCP localhost 10110', pos=(260, 30))
 
 		wx.StaticBox(self.page7, label=_(' Outputs '), size=(430, 130), pos=(250, 145))
 		wx.StaticText(self.page7, label='Signal K REST\nSignal K Web Socket\nSignal K NMEA 0183 - TCP localhost 10111', pos=(260, 165))
@@ -707,12 +715,21 @@ class MainFrame(wx.Frame):
 			data = json.load(data_file)
 		self.vessel.SetValue(data['vessel']['name'])
 		self.mmsi.SetValue(data['vessel']['uuid'])
+		if self.conf.get('SIGNALK', 'can_usb')=='0': self.can_usb.SetValue(self.SerDevLs[0])
+		else: 
+			self.can_usb.SetValue(self.conf.get('SIGNALK', 'can_usb'))
+			text='NMEA 0183 - system_output - TCP localhost 10110'
+			text=text+'\nNMEA 2000 - CAN-USB - '+self.conf.get('SIGNALK', 'can_usb')
+			self.SKinputs_label.SetLabel(text)
 		if self.conf.get('SIGNALK', 'enable')=='1': 
 			self.signalk_enable.SetValue(True)
 			self.vessel.Disable()
 			self.vessel_label.Disable()
 			self.mmsi.Disable()
 			self.mmsi_label.Disable()
+			self.NMEA2000_label.Disable()
+			self.can_usb.Disable()
+			self.CANUSB_label.Disable()
 
 		self.read_triggers()
 		self.read_DS18B20()
@@ -2215,6 +2232,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.SetStatusText(_('DS18B20 sensors changes cancelled'))
 
 #######################Signal K
+	def SerialCheck(self,dev):
+		num = 0
+		for _ in range(99):
+			s = dev + str(num)
+			d = os.path.exists(s)
+			if d == True:
+				self.SerDevLs.append(s)      
+			num = num + 1
 
 	def onsignalk_enable (self,e):
 		isChecked = self.signalk_enable.GetValue()
@@ -2229,11 +2254,44 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.vessel_label.Disable()
 			self.mmsi.Disable()
 			self.mmsi_label.Disable()
+			self.NMEA2000_label.Disable()
+			self.can_usb.Disable()
+			self.CANUSB_label.Disable()
 			subprocess.call(["pkill", '-9', "node"])
 			with open(home+'/.config/signalk-server-node/settings/openplotter-settings.json') as data_file:
 				data = json.load(data_file)
 			data['vessel']['name']=name
 			data['vessel']['uuid']=uuid
+			if self.can_usb.GetValue()==_('none'): 
+				self.conf.set('SIGNALK', 'can_usb', '0')
+				ii=0
+				for i in data['pipedProviders']:
+					if i['id']=='CAN-USB':
+						#delete nmea 2000
+						del data['pipedProviders'][ii]
+					ii=ii+1
+				text='NMEA 0183 - system_output - TCP localhost 10110'
+				self.SKinputs_label.SetLabel(text)
+			else:
+				self.conf.set('SIGNALK', 'can_usb', self.can_usb.GetValue())
+				exist=0
+				ii=0
+				for i in data['pipedProviders']:
+					if i['id']=='CAN-USB':
+						#edit nmea 2000
+						data['pipedProviders'][ii]['pipeElements'][0]['options']['command']='actisense-serial '+self.can_usb.GetValue()
+						exist=1
+					ii=ii+1
+				text='NMEA 0183 - system_output - TCP localhost 10110'
+				text=text+'\nNMEA 2000 - CAN-USB - '+self.conf.get('SIGNALK', 'can_usb')
+				self.SKinputs_label.SetLabel(text)
+				if exist==0:
+					new={"id":"CAN-USB","pipeElements":[{"type":"providers/execute","options":{"command":"actisense-serial xxx"}},{"type":"providers/liner"},{"type":"providers/n2kAnalyzer"},{"type":"providers/n2k-signalk"}]}
+					new['pipeElements'][0]['options']['command']='actisense-serial '+self.can_usb.GetValue()
+					data['pipedProviders'].append(new)
+					text='NMEA 0183 - system_output - TCP localhost 10110'
+					text=text+'\nNMEA 2000 - CAN-USB - '+self.conf.get('SIGNALK', 'can_usb')
+					self.SKinputs_label.SetLabel(text)
 			with open(home+'/.config/signalk-server-node/settings/openplotter-settings.json', 'w') as outfile:
 				json.dump(data, outfile)
 			self.conf.set('SIGNALK', 'enable', '1')
@@ -2245,6 +2303,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.vessel_label.Enable()
 			self.mmsi.Enable()
 			self.mmsi_label.Enable()
+			self.NMEA2000_label.Enable()
+			self.can_usb.Enable()
+			self.CANUSB_label.Enable()
 #Main#############################
 if __name__ == "__main__":
 	app = wx.App()
