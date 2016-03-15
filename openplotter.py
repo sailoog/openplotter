@@ -1045,7 +1045,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			msg=_('SDR-AIS reception disabled')
 
 		self.SetStatusText('')
-		self.ShowMessage(msg)
+		self.SetStatusText(msg)
 
 	def test_ppm(self,event):
 		self.kill_sdr()

@@ -36,7 +36,7 @@ class MainFrame(wx.Frame):
 
 			Language(self.conf.get('GENERAL','lang'))
 
-			wx.Frame.__init__(self, None, title=_('Fine calibration'), size=(400,300))
+			wx.Frame.__init__(self, None, title=_('Fine calibration'), size=(500,300))
 
 			self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 			
@@ -47,12 +47,12 @@ class MainFrame(wx.Frame):
 
 			self.text=wx.StaticText(self, label=_('Error'), pos=(10, 10))
 
-			self.output = wx.TextCtrl(self, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_DONTWRAP, size=(380,110), pos=(10,90))
+			self.output = wx.TextCtrl(self, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_DONTWRAP, size=(480,110), pos=(10,90))
 			
-			self.button_close =wx.Button(self, label=_('Close'), pos=(200, 210))
+			self.button_close =wx.Button(self, label=_('Close'), pos=(300, 210))
 			self.Bind(wx.EVT_BUTTON, self.close, self.button_close)
 
-			self.button_calculate =wx.Button(self, label=_('Calculate'), pos=(300, 210))
+			self.button_calculate =wx.Button(self, label=_('Calculate'), pos=(400, 210))
 			self.Bind(wx.EVT_BUTTON, self.calculate, self.button_calculate)
 			
 			if self.option=='c': 
