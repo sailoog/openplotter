@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: OpenPlotter 0.0.0\n"
-"POT-Creation-Date: 2016-01-28 19:26+0100\n"
-"PO-Revision-Date: 2016-01-28 19:26+0100\n"
+"POT-Creation-Date: 2016-03-15 18:20+0100\n"
+"PO-Revision-Date: 2016-03-15 18:20+0100\n"
 "Last-Translator: sailoog <info@sailoog.com>\n"
 "Language-Team: Sailoog <info@sailoog.com>\n"
 "Language: ca\n"
@@ -19,7 +19,7 @@ msgid "Message"
 msgstr "Missatge"
 
 #: /home/sailoog/Escritorio/openplotter/fine_cal.py:39
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:259
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:270
 msgid "Fine calibration"
 msgstr "Calibratge precís"
 
@@ -32,7 +32,7 @@ msgid "Close"
 msgstr "Tancar"
 
 #: /home/sailoog/Escritorio/openplotter/fine_cal.py:55
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:77
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:83
 msgid "Calculate"
 msgstr "Calcular"
 
@@ -71,248 +71,267 @@ msgstr "error"
 msgid "Finished"
 msgstr "Enllestit"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:69
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:73
 msgid "NMEA 0183"
 msgstr "NMEA 0183"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:70
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:74
+#, fuzzy
+msgid "Signal K"
+msgstr "Signal K (beta)"
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:75
 msgid "WiFi AP"
 msgstr "PA WiFi"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:71
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:76
 msgid "Actions"
 msgstr "Accions"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:72
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:77
 msgid "Switches"
 msgstr "Interruptors"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:73
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:78
+#, fuzzy
+msgid "Outputs"
+msgstr "Sortida"
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:79
 msgid "I2C sensors"
 msgstr "Sensors I2C"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:74
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:80
 msgid "1W sensors"
 msgstr "Sensors 1W"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:75
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:81
 msgid "SPI sensors"
 msgstr "Sensor SPI"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:76
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:82
 msgid "SDR-AIS"
 msgstr "AIS-SDR"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:78
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:84
 msgid "Accounts"
 msgstr "Comptes"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:79
-msgid "Signal K (beta)"
-msgstr "Signal K (beta)"
-
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:80
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:85
 msgid "Startup"
 msgstr "Executar en l'inici"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:95
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:100
 msgid "Set time zone"
 msgstr "Establir la zona horària"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:95
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:705
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:100
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:743
 msgid "Set time zone in the new window"
 msgstr "Establir la zona horària en la nova finestra"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:97
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:146
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:102
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:154
 msgid "Set time from NMEA"
 msgstr "establir l'hora des de NMEA"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:97
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:102
 msgid "Set system time from NMEA data"
 msgstr "Establir l'hora del sistema des de les dades NMEA"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:100
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:105
 msgid "Set GPSD"
 msgstr "Configurar GPSD"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:100
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:725
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:105
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:763
 msgid "Set GPSD in the new window"
 msgstr "Configurar GPSD en la nova finestra"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:102
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:107
 msgid "Settings"
 msgstr "Configuració"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:105
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:110
 msgid "English"
 msgstr "Anglès"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:105
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:110
 msgid "Set English language"
 msgstr "Establir l'anglès com a idioma"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:107
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:112
 msgid "Catalan"
 msgstr "Català"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:107
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:112
 msgid "Set Catalan language"
 msgstr "Establir el català com a idioma"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:109
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:114
 msgid "Spanish"
 msgstr "Espanyol"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:109
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:114
 msgid "Set Spanish language"
 msgstr "Establir l'espanyol com a idioma"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:111
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:116
 msgid "French"
 msgstr "Francès"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:111
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:116
 msgid "Set French language"
 msgstr "Establir el francès com a idioma"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:113
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:119
+msgid "Dutch"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:119
+#, fuzzy
+msgid "Set Dutch language"
+msgstr "Establir el francès com a idioma"
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:121
 msgid "Language"
 msgstr "Idioma"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:116
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:124
 msgid "&About"
 msgstr "&Sobre"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:116
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:124
 msgid "About OpenPlotter"
 msgstr "Sobre OpenPlotter"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:118
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:126
 msgid "OpenPlotter online documentation"
 msgstr "Documentació online OpenPlotter"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:120
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:128
 msgid "OpenPlotter online guides"
 msgstr "Guies online OpenPlotter"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:122
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:130
 msgid "&Help"
 msgstr "&Ajut"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:128
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:136
 msgid "Delay (seconds)"
 msgstr "Retard (segons)"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:130
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:161
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:167
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:334
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:138
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:170
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:176
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:355
 msgid "Ok"
 msgstr "Ok"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:134
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:142
 msgid "OpenCPN"
 msgstr "OpenCPN"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:137
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:145
 msgid "no OpenGL"
 msgstr "sense OpenGL"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:140
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:148
 msgid "fullscreen"
 msgstr "pantalla completa"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:143
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:151
 msgid "NMEA 0183 multiplexer"
 msgstr "Multiplexor NMEA 0183"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:149
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:157
 msgid "VNC remote desktop"
 msgstr "Escriptori remot VNC"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:152
-msgid "Signal K server (beta)"
-msgstr "Servidor Signal K (beta)"
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:162
+#, fuzzy
+msgid "Maximize OpenPlotter"
+msgstr "OpenPlotter"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:158
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:332
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:167
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:353
 msgid "Rate (sec)"
 msgstr "Freqüència (sec)"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:165
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:174
 msgid "Accuracy (sec)"
 msgstr "Precisió (seg)"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:171
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:180
 msgid "Magnetic variation"
 msgstr "Declinació magnètica"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:173
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:182
 msgid "Generated NMEA: $OCHDG"
 msgstr "NMEA generat: $OCHDG"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:176
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:185
 msgid "True heading"
 msgstr "Rumb verdader"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:178
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:187
 msgid "Generated NMEA: $OCHDT"
 msgstr "NMEA generat: $OCHDT"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:181
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:190
 msgid "Rate of turn"
 msgstr "Ràtio de gir"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:183
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:192
 msgid "Generated NMEA: $OCROT"
 msgstr "NMEA generat: $OCROT"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:185
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:194
 msgid " True wind "
 msgstr " Vent real "
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:186
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:195
 msgid "Use speed log"
 msgstr "Fer servir corredera"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:188
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:197
 msgid "Use GPS"
 msgstr "Fer servir GPS"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:190
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:199
 msgid "Generated NMEA: $OCMWV, $OCMWD"
 msgstr "NMEA generat: $OCMWV, $OCMWD"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:194
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:203
 msgid "Enable WiFi access point"
 msgstr "Activar punt d'accés WiFi"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:197
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:233
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:206
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:244
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:322
 msgid " Settings "
 msgstr "Configuració"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:205
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:338
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:351
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:358
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:559
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:869
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1143
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1165
-#: /home/sailoog/Escritorio/openplotter/connection.py:78
-#: /home/sailoog/Escritorio/openplotter/connection.py:175
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:214
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:334
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:359
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:374
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:381
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:581
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:911
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1188
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1210
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:2265
+#: /home/sailoog/Escritorio/openplotter/connection.py:79
+#: /home/sailoog/Escritorio/openplotter/connection.py:176
 msgid "none"
 msgstr "cap"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:210
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:221
 msgid "AP WiFi device"
 msgstr "Dispositiu WiFi PA"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:213
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:224
 msgid ""
 "SSID \n"
 "maximum 32 characters"
@@ -320,7 +339,7 @@ msgstr ""
 "SSID \n"
 "un màxim de 32 caràcters"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:216
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:227
 msgid ""
 "Password \n"
 "minimum 8 characters required"
@@ -328,412 +347,384 @@ msgstr ""
 "Contrasenya \n"
 "ha de tenir almenys 8 caràcters"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:219
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:230
 msgid "Internet connection to share"
 msgstr "Connexió a Internet per compartir"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:221
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:232
 msgid " Addresses "
 msgstr "  Adreces "
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:225
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:236
 msgid "Refresh"
 msgstr "Actualitzar"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:230
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:241
 msgid "Enable AIS NMEA generation"
 msgstr "Activar generació NMEA AIS"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:236
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:247
 msgid "Gain"
 msgstr "Guany"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:238
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:249
 msgid "Correction (ppm)"
 msgstr "Correcció (ppm)"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:240
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:251
 msgid "Channel A 161.975Mhz"
 msgstr "Canal A 161.975Mhz"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:242
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:253
 msgid "Channel B 162.025Mhz"
 msgstr "Canal B 162.025Mhz"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:245
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:256
 msgid "Calibration"
 msgstr "Calibratge"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:247
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:258
 msgid "Take a look"
 msgstr "Fer una ullada"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:250
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:261
 msgid " Fine calibration using GSM base stations "
 msgstr "Calibratge precís fent servir estacions base GSM"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:251
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:262
 msgid "Band"
 msgstr "Banda"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:255
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:266
 msgid "Check band"
 msgstr "Veure banda"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:257
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:268
 msgid "Channel"
 msgstr "Canal"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:263
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:311
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:274
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:340
 msgid " Inputs "
 msgstr "Entrades"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:266
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:284
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:277
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:295
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:402
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:428
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:450
 #: /home/sailoog/Escritorio/openplotter/connection.py:43
 msgid "Name"
 msgstr "Nom"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:267
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:285
-#: /home/sailoog/Escritorio/openplotter/output.py:47
-#: /home/sailoog/Escritorio/openplotter/connection.py:69
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:278
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:296
+#: /home/sailoog/Escritorio/openplotter/output.py:46
+#: /home/sailoog/Escritorio/openplotter/connection.py:70
 msgid "Type"
 msgstr "Tipus"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:268
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:286
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:279
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:297
 msgid "Port/Address"
 msgstr "Port/Adreça"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:269
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:287
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:280
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:298
 msgid "Bauds/Port"
 msgstr "Bauds/Port"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:270
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:288
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:281
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:299
 msgid "Filter"
 msgstr "Filtrar"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:271
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:289
-#: /home/sailoog/Escritorio/openplotter/connection.py:81
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:282
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:300
+#: /home/sailoog/Escritorio/openplotter/connection.py:82
 msgid "Filtering"
 msgstr "Filtrant"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:272
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:290
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:283
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:301
 msgid "+ serial"
 msgstr "+ sèrie"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:275
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:293
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:286
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:304
 msgid "+ network"
 msgstr "+ xarxa"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:278
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:296
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:498
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:512
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:289
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:307
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:411
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:437
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:458
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:506
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:519
 msgid "delete"
 msgstr "esborrar"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:281
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:316
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:292
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:343
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:446
 msgid " Outputs "
 msgstr "Sortides"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:299
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:310
 msgid "Inspector"
 msgstr "Inspector"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:301
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:327
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:312
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:348
 msgid "Restart"
 msgstr "Reiniciar"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:303
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:314
 msgid "Advanced"
 msgstr "Avançat"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:305
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:452
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:520
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:316
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:414
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:440
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:461
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:527
 msgid "Apply changes"
 msgstr "Aplicar canvis"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:307
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:454
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:522
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:318
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:416
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:442
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:463
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:529
 msgid "Cancel changes"
 msgstr "Cancel·lar canvis"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:320
-msgid "Panel"
-msgstr "Panell"
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:323
+#, fuzzy
+msgid "Enable Signal K server"
+msgstr "reiniciar servidor Signal K"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:322
-msgid "Gauge"
-msgstr "Gauge"
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:327
+msgid "Vessel name"
+msgstr ""
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:325
-msgid "Show output"
-msgstr "Mostrar sortida"
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:346
+msgid "Show Web Socket"
+msgstr ""
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:337
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:358
 msgid " IMU "
 msgstr " IMU "
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:338
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:351
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:358
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:633
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:653
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:664
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:359
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:374
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:381
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:656
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:669
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:680
 msgid "Sensor detected: "
 msgstr "Sensor detectat: "
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:339
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:352
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:368
-#: /home/sailoog/Escritorio/openplotter/output.py:56
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:360
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:375
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:391
+#: /home/sailoog/Escritorio/openplotter/output.py:55
 msgid "Reset"
 msgstr "Reinici"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:341
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:362
 msgid "Calibrate"
 msgstr "Calibrar"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:343
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:364
 msgid "Heading"
 msgstr "Rumb"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:345
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:366
 msgid "Generated NMEA: $OSHDG"
 msgstr "NMEA generat: $OSHDG"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:346
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:47
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:367
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:51
 msgid "Heel"
 msgstr "Escora"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:348
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:364
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:377
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:369
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:52
+#, fuzzy
+msgid "Pitch"
+msgstr "Interruptors"
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:371
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:387
 msgid "Generated NMEA: $OSXDR"
 msgstr "NMEA generat: $OSXDR"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:350
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:373
 msgid " Weather "
 msgstr " Clima "
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:354
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:377
 msgid "Pressure"
 msgstr "Pressió"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:356
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:361
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:379
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:384
 msgid "Temperature"
 msgstr "Temperatura"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:359
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:382
 msgid "Humidity"
 msgstr "Humitat"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:366
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:389
 msgid "Weather data logging"
 msgstr "Registrar dades meteo"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:370
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:393
 msgid "Show"
 msgstr "Mostrar"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:375
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:48
-msgid "Engine Coolant Temperature"
-msgstr "Temperatura Refrigerant Motor"
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:398
+#, fuzzy
+msgid " DS18B20 sensors "
+msgstr "Sensors 1W"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:380
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:403
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:429
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:451
+msgid "Short"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:404
+msgid "Unit"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:405
+msgid "ID"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:408
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:434
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:455
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:503
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:516
+msgid "add"
+msgstr "afegir"
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:421
 msgid "Coming soon"
 msgstr "Pròximament"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:386
-msgid " Switch 1 "
-msgstr " Interruptor 1 "
-
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:387
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:394
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:401
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:408
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:415
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:422
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:429
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:435
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:441
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:447
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:459
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:476
-msgid "Enable"
-msgstr "Activar"
-
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:389
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:396
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:403
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:410
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:417
 #: /home/sailoog/Escritorio/openplotter/openplotter.py:424
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:431
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:437
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:443
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:449
-msgid "GPIO"
-msgstr "GPIO"
+#, fuzzy
+msgid " Switches "
+msgstr "Interruptors"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:393
-msgid " Switch 2 "
-msgstr " Interruptor 2 "
-
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:400
-msgid " Switch 3 "
-msgstr " Interruptor 3 "
-
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:407
-msgid " Switch 4 "
-msgstr " Interruptor 4 "
-
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:414
-msgid " Switch 5 "
-msgstr " Interruptor 5 "
-
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:421
-msgid " Switch 6 "
-msgstr " Interruptor 6 "
-
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:428
-msgid " Output 1 "
-msgstr " Sortida 1 "
-
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:434
-msgid " Output 2 "
-msgstr " Sortida 2 "
-
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:440
-msgid " Output 3 "
-msgstr " Sortida 3 "
-
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:446
-msgid " Output 4 "
-msgstr " Sortida 4 "
-
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:458
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:467
 msgid " Twitter "
 msgstr " Twitter "
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:466
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:468
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:483
+msgid "Enable"
+msgstr "Activar"
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:473
 msgid "apiKey"
 msgstr "apiKey"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:468
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:475
 msgid "apiSecret"
 msgstr "apiSecret"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:470
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:477
 msgid "accessToken"
 msgstr "accessToken"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:472
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:479
 msgid "accessTokenSecret"
 msgstr "accessTokenSecret"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:475
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:482
 msgid " Gmail "
 msgstr " Gmail "
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:478
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:485
 msgid "Gmail account"
 msgstr "Compte de Gmail"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:480
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:487
 msgid "Gmail password"
 msgstr "Clau d'accés de Gmail"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:482
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:489
 msgid "Recipient"
 msgstr "Destinatari"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:486
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:493
 msgid " Triggers "
 msgstr " Disparadors "
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:491
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:498
 #: /home/sailoog/Escritorio/openplotter/classes/add_trigger.py:34
 msgid "trigger"
 msgstr "disparador"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:492
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:499
 #: /home/sailoog/Escritorio/openplotter/classes/add_trigger.py:37
 msgid "operator"
 msgstr "operador"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:493
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:500
 #: /home/sailoog/Escritorio/openplotter/classes/add_trigger.py:39
 msgid "value"
 msgstr "valor"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:495
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:509
-msgid "add"
-msgstr "afegir"
-
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:501
-msgid " Actions "
-msgstr " Accions "
-
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:505
-#: /home/sailoog/Escritorio/openplotter/classes/add_action.py:35
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:511
+#: /home/sailoog/Escritorio/openplotter/classes/add_action.py:34
 msgid "action"
 msgstr "acció"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:506
-#: /home/sailoog/Escritorio/openplotter/classes/add_action.py:38
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:512
+#: /home/sailoog/Escritorio/openplotter/classes/add_action.py:37
 msgid "data"
 msgstr "dades"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:507
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:513
 msgid "repeat"
 msgstr "repetir"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:515
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:522
 msgid "Stop all"
 msgstr "Aturar totes"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:517
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:524
 msgid "Start all"
 msgstr "Iniciar totes"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:708
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:746
 msgid "Waiting for NMEA time data in localhost:10110 ..."
 msgstr "A l'espera de dades NMEA de temps a localhost: 10110 ..."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:713
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:751
 msgid "Failed to connect with localhost:10110.\n"
 msgstr "Ha fallat la connexió amb localhost: 10110.\n"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:715
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:753
 msgid "Unable to retrieve date or time from NMEA data.\n"
 msgstr "Incapaç d'extreure data o hora de dades NMEA.\n"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:718
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:756
 msgid "Date and time retrieved from NMEA data successfully."
 msgstr "Data i hora recuperades des de dades NMEA amb èxit."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:732
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:771
 msgid "The selected language will be enabled when you restart"
 msgstr "L'idioma seleccionat s'activarà quan torni a obrir el programa"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:752
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:795
 msgid ""
 "OpenPlotter is a DIY, open-source, low-cost, low-consumption, modular and "
 "scalable sailing platform to run on ARM boards."
@@ -741,22 +732,22 @@ msgstr ""
 "OpenPlotter és una plataforma de navegació d'auto-construcció, codi obert, "
 "baix consum, baix cost, modular i escalable que funciona en plaques ARM."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:790
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:833
 msgid "You can enter only numbers."
 msgstr "Només pots introduir nombres."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:795
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:838
 msgid "Startup delay set to "
 msgstr "Retard en l'inici establert en "
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:795
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1359
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1492
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1498
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:838
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1405
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1542
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1548
 msgid " seconds"
 msgstr " segons"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:845
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:887
 msgid ""
 "Are you sure to disable?\n"
 "If you are connected by remote, you may not be able to reconnect again."
@@ -765,22 +756,22 @@ msgstr ""
 "Si estàs connectat remotament pot ser que no puguis tornar a connectar-te de "
 "nou."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:845
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:887
 msgid "Question"
 msgstr "Pregunta"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:858
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:900
 msgid "You must fill in all of the fields."
 msgstr "Has d'omplir tots els camps."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:862
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:904
 msgid ""
 "\"AP Wifi Device\" and \"internet connection to share\" must be different"
 msgstr ""
 "\"Dispositiu Wifi PA\" i \"Connexió a Internet per compartir\" han de ser "
 "diferents"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:866
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:908
 msgid ""
 "Your SSID must have a maximum of 32 characters and your password a minimum "
 "of 8."
@@ -788,27 +779,28 @@ msgstr ""
 "El teu SSID ha de tenir un màxim de 32 caràcters i la contrasenya un mínim "
 "de 8."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:870
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:912
 msgid "Configuring WiFi AP, wait please..."
 msgstr "Configurant el punt d'accés WiFi, esperi si us plau ..."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:893
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:935
 msgid "WiFi access point failed."
 msgstr "El punt d'accés WiFi ha fallat."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:894
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:936
 msgid "WiFi access point started."
 msgstr "Punt d'accés WiFi iniciat."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:895
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:937
 msgid "WiFi access point stopped."
 msgstr "Punt d'accés WiFi aturat."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:902
-msgid " NMEA 0183:\n"
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:944
+#, fuzzy
+msgid " Multiplexed NMEA 0183:\n"
 msgstr " NMEA 0183:\n"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:906
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:948
 msgid ""
 "\n"
 " VNC remote desktop:\n"
@@ -816,7 +808,7 @@ msgstr ""
 "\n"
 "Escriptori remot VNC:\n"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:909
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:951
 msgid ""
 "\n"
 " RDP remote desktop:\n"
@@ -824,7 +816,7 @@ msgstr ""
 "\n"
 "Escriptori remot RDP:\n"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:912
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:954
 msgid ""
 "\n"
 " Signal K panel:\n"
@@ -832,7 +824,7 @@ msgstr ""
 "\n"
 " Signal K panell:\n"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:915
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:957
 msgid ""
 "\n"
 " Signal K gauge:\n"
@@ -840,23 +832,22 @@ msgstr ""
 "\n"
 " Signal K gauge:\n"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:918
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:960
+#, fuzzy
 msgid ""
 "\n"
-" Signal K WebSocket:\n"
-msgstr ""
-"\n"
-" Signal K WebSocket:\n"
+" Signal K NMEA 0183:\n"
+msgstr " NMEA 0183:\n"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:999
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1041
 msgid "SDR-AIS reception enabled"
 msgstr "Recepció SDR-AIS habilitada"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1003
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1045
 msgid "SDR-AIS reception disabled"
 msgstr "Recepció SDR-AIS deshabilitada"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1022
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1064
 msgid ""
 "SDR-AIS reception disabled.\n"
 "After checking the new window enable SDR-AIS reception again."
@@ -865,7 +856,7 @@ msgstr ""
 "Després de comprovar la nova finestra habilita la recepció AIS-SDR un altre "
 "cop."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1029
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1071
 msgid ""
 "SDR-AIS reception disabled.\n"
 "Check the new window. Copy the maximum supported gain value. Wait for ppm "
@@ -875,7 +866,7 @@ msgstr ""
 "Comprova la finestra nova. Copia el valor màxim de guany possible. Espera a "
 "que el valor ppm s'estabilitzi i copia'l també."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1064
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1106
 msgid ""
 "OpenPlotter will close. Add manual settings at the end of the configuration "
 "file. Open OpenPlotter again and restart multiplexer to apply changes."
@@ -884,70 +875,76 @@ msgstr ""
 "configuració. Obre OpenPlotter un altre cop i reinicia el multiplexor per "
 "aplicar els canvis."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1069
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1111
 msgid "Closing Kplex"
 msgstr "Tancant Kplex"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1072
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1114
 msgid "Kplex restarted"
 msgstr "Kplex reiniciat"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1127
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1172
 msgid ""
 "Multiplexer configuration file does not exist. Add inputs and apply changes."
 msgstr ""
 "L'arxiu de configuració del multiplexor no existeix. Afegeix entrades i "
 "aplica els canvis."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1144
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1166
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1189
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1211
 msgid "accept"
 msgstr "acceptar"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1145
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1167
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1190
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1212
 msgid "ignore"
 msgstr "ignorar"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1147
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1169
-#: /home/sailoog/Escritorio/openplotter/connection.py:93
-#: /home/sailoog/Escritorio/openplotter/connection.py:117
-#: /home/sailoog/Escritorio/openplotter/connection.py:137
-#: /home/sailoog/Escritorio/openplotter/connection.py:175
-#: /home/sailoog/Escritorio/openplotter/connection.py:182
-#: /home/sailoog/Escritorio/openplotter/connection.py:193
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1192
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1214
+#: /home/sailoog/Escritorio/openplotter/connection.py:94
+#: /home/sailoog/Escritorio/openplotter/connection.py:118
+#: /home/sailoog/Escritorio/openplotter/connection.py:138
+#: /home/sailoog/Escritorio/openplotter/connection.py:176
+#: /home/sailoog/Escritorio/openplotter/connection.py:183
+#: /home/sailoog/Escritorio/openplotter/connection.py:194
 msgid "nothing"
 msgstr "res"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1266
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1311
 msgid "This name already exists."
 msgstr "Aquest nom ja existeix."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1281
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1314
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1326
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1362
 msgid "This input is already in use."
 msgstr "Aquesta entrada ja està en ús."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1297
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1331
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1342
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1382
 msgid "This output is already in use."
 msgstr "Aquesta sortida ja està en ús."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1359
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1492
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1356
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1376
+msgid "Cancelled. Port 10111 is being used by Signal K."
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1405
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1542
 msgid "Generation rate set to "
 msgstr "Frequencia de generacio establerta en "
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1384
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1438
+#, fuzzy
 msgid ""
-"Heading and heel disabled.\n"
+"Heading, heel and pitch disabled.\n"
 "Close and open OpenPlotter again to autodetect."
 msgstr ""
 "Rumb i escora desactivats.\n"
 "Tanca i torna obrir OpenPlotter per a la seva detecció automàtica."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1405
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1459
 msgid ""
 "Temperature, humidity and pressure disabled.\n"
 "Close and open OpenPlotter again to autodetect."
@@ -955,190 +952,275 @@ msgstr ""
 "Temperatura, humitat i pressió desactivats.\n"
 "Tanca i torna obrir OpenPlotter per a la seva detecció automàtica."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1423
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1479
+#, fuzzy
 msgid ""
-"Heading, heel, temperature, humidity and pressure disabled.\n"
+"Heading, heel, pitch, temperature, humidity and pressure disabled.\n"
 "After calibrating, enable them again."
 msgstr ""
 "Rumb magnètic, escora, temperatura, humitat i pressió detinguts.\n"
 "Activar de nou després del calibratge."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1480
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1530
 msgid "Weather log restarted"
 msgstr "Registre de dades meteo reiniciat"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1498
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1548
 msgid "Calculation accuracy set to "
 msgstr "Precisió del càlcul establerta en "
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1543
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1585
 msgid "Closing Signal K server"
 msgstr "Tancant servidor Signal K"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1546
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1588
 msgid "Signal K server restarted"
 msgstr "Servidor Signal K  reiniciat"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1709
-#: /home/sailoog/Escritorio/openplotter/classes/actions.py:50
-#: /home/sailoog/Escritorio/openplotter/classes/actions.py:52
-#: /home/sailoog/Escritorio/openplotter/classes/actions.py:54
-#: /home/sailoog/Escritorio/openplotter/classes/actions.py:56
-msgid ""
-"ATTENTION! if you set this output to \"High\" and there is not a resistor or "
-"a circuit connected to the selected GPIO pin, YOU CAN DAMAGE YOUR BOARD."
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1641
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1765
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:2166
+msgid "Failed. Write a name and a short name."
 msgstr ""
-"ATENCIÓ! si configures aquesta sortida com \"High \" i no hi ha una "
-"resistència o un circuit connectat al pin GPIO seleccionat, POTS MALMETRE LA "
-"TEVA PLACA."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1836
-msgid "GPIO pins must be unique. Repeated pins: "
-msgstr "Els pins GPIO no poden repetir-se. Pins repetits: "
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1645
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1769
+#, fuzzy
+msgid "Failed. Select GPIO."
+msgstr "Fallada. Selecciona una acció."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1837
-msgid "Switches set successfully"
-msgstr "Interruptors configurats correctament"
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1649
+#, fuzzy
+msgid "Failed. Select pull down or pull up."
+msgstr "Fallada. Selecciona una acció."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1838
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1676
+#, fuzzy
+msgid "Select a switch to delete."
+msgstr "Selecciona un disparador per esborrar."
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1685
+msgid ""
+"You have an action defined for this switch. You must delete that action "
+"before deleting this switch."
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1701
+#, fuzzy
+msgid " is being used in outputs. Switches changes cancelled."
+msgstr "Canvis en interruptors cancel·lats"
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1711
 msgid "Switches changes applied and restarted"
 msgstr "Canvis en interruptors aplicats i reiniciats"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1869
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1715
 msgid "Switches changes cancelled"
 msgstr "Canvis en interruptors cancel·lats"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1879
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1794
+#, fuzzy
+msgid "Select an output to delete."
+msgstr "Selecciona una acció per esborrar."
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1807
+msgid ""
+"You have an action defined for this output. You must delete that action "
+"before deleting this output."
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1823
+#, fuzzy
+msgid " is being used in switches. Output changes cancelled."
+msgstr "Canvis en interruptors cancel·lats"
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1833
+#, fuzzy
+msgid "Output changes applied and restarted"
+msgstr "Canvis en accions aplicats i reiniciats"
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1838
+#, fuzzy
+msgid "Output changes cancelled"
+msgstr "Canvis en accions cancel·lats"
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1843
+#, fuzzy
+msgid "Actions will be restarted."
+msgstr "Accions iniciades"
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1850
 msgid ""
 "Enter valid Twitter apiKey, apiSecret, accessToken and accessTokenSecret."
 msgstr ""
 "Introdueix una Twitter apiKey, apiSecret, accessToken i accessTokenSecret "
 "vàlides."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1883
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1854
 msgid "Select some data to publish."
 msgstr "Selecciona algunes dades per a publicar."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1917
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1891
 msgid "Enter valid Gmail account, Gmail password and Recipient."
 msgstr "Introdueix un correu Gmail vàlid, la contrasenya i el destinatari."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1948
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1985
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1922
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1964
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1978
 #: /home/sailoog/Escritorio/openplotter/classes/add_trigger.py:32
+#: /home/sailoog/Escritorio/openplotter/classes/add_trigger.py:45
 msgid "None (always true)"
 msgstr "Cap (sempre verdader)"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:1994
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1934
+msgid "Problem with Actions detected. Please check and save again."
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1986
 msgid "Failed. Select trigger and operator."
 msgstr "Fallada. Selecciona un disparador i un operador."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:2003
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:1995
 msgid "Failed. Value must be a number."
 msgstr "Fallada. \"Valor\" ha de ser un nombre."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:2025
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:2038
 msgid "Select a trigger to add actions."
 msgstr "Selecciona un disparador per afegir accions."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:2032
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:2045
 msgid "Failed. Select an action."
 msgstr "Fallada. Selecciona una acció."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:2039
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:2052
 msgid "Failed. \"Repeat after\" must be a number."
 msgstr "Fallada. \"Repetir després de\" ha de ser un nombre."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:2062
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:2083
 msgid "Select a trigger to delete."
 msgstr "Selecciona un disparador per esborrar."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:2079
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:2093
 msgid "Select an action to delete."
 msgstr "Selecciona una acció per esborrar."
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:2102
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:2105
 msgid "Actions changes applied and restarted"
 msgstr "Canvis en accions aplicats i reiniciats"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:2109
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:2110
 msgid "Actions changes cancelled"
 msgstr "Canvis en accions cancel·lats"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:2113
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:2114
 msgid "Actions stopped"
 msgstr "Accions aturades"
 
-#: /home/sailoog/Escritorio/openplotter/openplotter.py:2122
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:2121
 msgid "Actions started"
 msgstr "Accions iniciades"
 
-#: /home/sailoog/Escritorio/openplotter/output.py:48
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:2170
+#, fuzzy
+msgid "Failed. Select unit."
+msgstr "Fallada. Selecciona una acció."
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:2174
+#, fuzzy
+msgid "Failed. Select sensor ID."
+msgstr "Fallada. Selecciona una acció."
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:2204
+#, fuzzy
+msgid "Select a sensor to delete."
+msgstr "Selecciona un disparador per esborrar."
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:2213
+msgid ""
+"You have an action defined for this sensor. You must delete that action "
+"before deleting this sensor."
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:2228
+#, fuzzy
+msgid "DS18B20 sensors changes applied and restarted"
+msgstr "Canvis en interruptors aplicats i reiniciats"
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:2232
+#, fuzzy
+msgid "DS18B20 sensors changes cancelled"
+msgstr "Canvis en interruptors cancel·lats"
+
+#: /home/sailoog/Escritorio/openplotter/openplotter.py:2250
+msgid "You have to provide name and MMSI."
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/output.py:47
 msgid "Value"
 msgstr "Valor"
 
-#: /home/sailoog/Escritorio/openplotter/output.py:49
+#: /home/sailoog/Escritorio/openplotter/output.py:48
 msgid "Source"
 msgstr "Font"
 
-#: /home/sailoog/Escritorio/openplotter/output.py:50
+#: /home/sailoog/Escritorio/openplotter/output.py:49
 msgid "NMEA"
 msgstr "NMEA"
 
-#: /home/sailoog/Escritorio/openplotter/output.py:51
+#: /home/sailoog/Escritorio/openplotter/output.py:50
 msgid "Age"
 msgstr "Edat"
 
-#: /home/sailoog/Escritorio/openplotter/output.py:53
-#: /home/sailoog/Escritorio/openplotter/output.py:310
+#: /home/sailoog/Escritorio/openplotter/output.py:52
+#: /home/sailoog/Escritorio/openplotter/output.py:171
 msgid "Pause"
 msgstr "Pausa"
 
-#: /home/sailoog/Escritorio/openplotter/output.py:59
+#: /home/sailoog/Escritorio/openplotter/output.py:58
 msgid "NMEA info"
 msgstr "NMEA info"
 
-#: /home/sailoog/Escritorio/openplotter/output.py:153
+#: /home/sailoog/Escritorio/openplotter/output.py:89
+#: /home/sailoog/Escritorio/openplotter/monitoring.py:106
 #: /home/sailoog/Escritorio/openplotter/monitoring.py:123
-#: /home/sailoog/Escritorio/openplotter/monitoring.py:140
 #: /home/sailoog/Escritorio/openplotter/calculate.py:50
 #: /home/sailoog/Escritorio/openplotter/calculate.py:67
 msgid "Failed to connect with localhost:10110. Error: "
 msgstr "Ha fallat la connexió amb localhost: 10110. Error: "
 
-#: /home/sailoog/Escritorio/openplotter/output.py:153
+#: /home/sailoog/Escritorio/openplotter/output.py:89
 msgid ", trying to reconnect..."
 msgstr ", Intentant reconnectar..."
 
-#: /home/sailoog/Escritorio/openplotter/output.py:167
+#: /home/sailoog/Escritorio/openplotter/output.py:103
 msgid "Connected with localhost:10110. Error: "
 msgstr "Connectat amb localhost: 10110. Error: "
 
-#: /home/sailoog/Escritorio/openplotter/output.py:167
+#: /home/sailoog/Escritorio/openplotter/output.py:103
 msgid ", waiting for data..."
 msgstr ", esperant dades ..."
 
-#: /home/sailoog/Escritorio/openplotter/output.py:172
+#: /home/sailoog/Escritorio/openplotter/output.py:108
 msgid "Connected with localhost:10110."
 msgstr "Connectat amb localhost: 10110."
 
-#: /home/sailoog/Escritorio/openplotter/output.py:272
+#: /home/sailoog/Escritorio/openplotter/output.py:133
 msgid "Calculated"
 msgstr "Calculat"
 
-#: /home/sailoog/Escritorio/openplotter/output.py:273
+#: /home/sailoog/Escritorio/openplotter/output.py:134
 msgid "Sensor"
 msgstr "Sensor"
 
-#: /home/sailoog/Escritorio/openplotter/output.py:307
+#: /home/sailoog/Escritorio/openplotter/output.py:168
 msgid "Resume"
 msgstr "Reprendre"
 
-#: /home/sailoog/Escritorio/openplotter/ctrl_actions.py:76
+#: /home/sailoog/Escritorio/openplotter/ctrl_actions.py:70
 msgid "All actions have been stopped."
 msgstr "Totes les accions han estat aturades."
 
-#: /home/sailoog/Escritorio/openplotter/ctrl_actions.py:78
+#: /home/sailoog/Escritorio/openplotter/ctrl_actions.py:72
 msgid "All actions have been started."
 msgstr "Totes les accions han estat iniciades."
 
@@ -1154,77 +1236,77 @@ msgstr " Entrada sèrie "
 msgid " Serial output "
 msgstr " Sortida sèrie "
 
-#: /home/sailoog/Escritorio/openplotter/connection.py:54
-#: /home/sailoog/Escritorio/openplotter/connection.py:74
+#: /home/sailoog/Escritorio/openplotter/connection.py:55
+#: /home/sailoog/Escritorio/openplotter/connection.py:75
 msgid "Port"
 msgstr "Port"
 
-#: /home/sailoog/Escritorio/openplotter/connection.py:58
+#: /home/sailoog/Escritorio/openplotter/connection.py:59
 msgid "Bauds"
 msgstr "Bauds"
 
-#: /home/sailoog/Escritorio/openplotter/connection.py:64
+#: /home/sailoog/Escritorio/openplotter/connection.py:65
 msgid " Network input "
 msgstr " Entrada de xarxa "
 
-#: /home/sailoog/Escritorio/openplotter/connection.py:65
+#: /home/sailoog/Escritorio/openplotter/connection.py:66
 msgid "GPSD"
 msgstr "GPSD"
 
-#: /home/sailoog/Escritorio/openplotter/connection.py:67
+#: /home/sailoog/Escritorio/openplotter/connection.py:68
 msgid " Network output "
 msgstr " Sortida xarxa "
 
-#: /home/sailoog/Escritorio/openplotter/connection.py:72
+#: /home/sailoog/Escritorio/openplotter/connection.py:73
 msgid "Address"
 msgstr "Adreça"
 
-#: /home/sailoog/Escritorio/openplotter/connection.py:77
+#: /home/sailoog/Escritorio/openplotter/connection.py:78
 msgid " Filter "
 msgstr "Filtrar"
 
-#: /home/sailoog/Escritorio/openplotter/connection.py:78
-#: /home/sailoog/Escritorio/openplotter/connection.py:182
+#: /home/sailoog/Escritorio/openplotter/connection.py:79
+#: /home/sailoog/Escritorio/openplotter/connection.py:183
 msgid "Accept only sentences:"
 msgstr "Acceptar només sentències:"
 
-#: /home/sailoog/Escritorio/openplotter/connection.py:78
-#: /home/sailoog/Escritorio/openplotter/connection.py:193
+#: /home/sailoog/Escritorio/openplotter/connection.py:79
+#: /home/sailoog/Escritorio/openplotter/connection.py:194
 msgid "Ignore sentences:"
 msgstr "Ignorar sentències:"
 
-#: /home/sailoog/Escritorio/openplotter/connection.py:84
+#: /home/sailoog/Escritorio/openplotter/connection.py:85
 msgid "Delete"
 msgstr "Esborrar"
 
-#: /home/sailoog/Escritorio/openplotter/connection.py:86
+#: /home/sailoog/Escritorio/openplotter/connection.py:87
 msgid "Talker - Sentence"
 msgstr "Talker - Sentència"
 
-#: /home/sailoog/Escritorio/openplotter/connection.py:88
+#: /home/sailoog/Escritorio/openplotter/connection.py:89
 msgid "-"
 msgstr "-"
 
-#: /home/sailoog/Escritorio/openplotter/connection.py:90
+#: /home/sailoog/Escritorio/openplotter/connection.py:91
 msgid "Add sentence"
 msgstr "Afegir sentència"
 
-#: /home/sailoog/Escritorio/openplotter/connection.py:97
+#: /home/sailoog/Escritorio/openplotter/connection.py:98
 msgid "OK"
 msgstr "OK"
 
-#: /home/sailoog/Escritorio/openplotter/connection.py:99
+#: /home/sailoog/Escritorio/openplotter/connection.py:100
 msgid "Cancel"
 msgstr "Cancel·lar"
 
-#: /home/sailoog/Escritorio/openplotter/connection.py:124
+#: /home/sailoog/Escritorio/openplotter/connection.py:125
 msgid ""
 "Talker must have 2 uppercase characters. The symbol * matches any character."
 msgstr ""
 "El Talker ha de tenir 2 lletres majúscules. El símbol * substitueix "
 "qualsevol lletra."
 
-#: /home/sailoog/Escritorio/openplotter/connection.py:127
+#: /home/sailoog/Escritorio/openplotter/connection.py:128
 msgid ""
 "Sentence must have 3 uppercase characters. The symbol * matches any "
 "character."
@@ -1232,7 +1314,7 @@ msgstr ""
 "La sentència ha de tenir 3 lletres majúscules. El símbol * substitueix "
 "qualsevol lletra."
 
-#: /home/sailoog/Escritorio/openplotter/connection.py:132
+#: /home/sailoog/Escritorio/openplotter/connection.py:133
 msgid ""
 "You must enter 2 uppercase characters for talker or 3 uppercase characters "
 "for sentence. The symbol * matches any character."
@@ -1240,11 +1322,11 @@ msgstr ""
 "S'ha d'introduir 2 lletres majúscules per al Talker o 3 lletres majúscules "
 "per la Sentència. El símbol * substitueix qualsevol lletra."
 
-#: /home/sailoog/Escritorio/openplotter/connection.py:135
+#: /home/sailoog/Escritorio/openplotter/connection.py:136
 msgid "This sentence already exists."
 msgstr "Aquesta sentència ja existeix."
 
-#: /home/sailoog/Escritorio/openplotter/connection.py:152
+#: /home/sailoog/Escritorio/openplotter/connection.py:153
 msgid ""
 "\"Name\" must be a string between 1 and 13 lowercase letters and/or numbers "
 "which is not used as name for another input/output."
@@ -1253,44 +1335,44 @@ msgstr ""
 "o números, que no estigui sent usada com a nom per a una altra entrada / "
 "sortida."
 
-#: /home/sailoog/Escritorio/openplotter/connection.py:159
+#: /home/sailoog/Escritorio/openplotter/connection.py:160
 msgid "You must select a Port."
 msgstr "S'ha d'introduir un Port."
 
-#: /home/sailoog/Escritorio/openplotter/connection.py:168
+#: /home/sailoog/Escritorio/openplotter/connection.py:169
 msgid "You must enter an Address."
 msgstr "S'ha d'introduir una adreça."
 
-#: /home/sailoog/Escritorio/openplotter/connection.py:172
+#: /home/sailoog/Escritorio/openplotter/connection.py:173
 msgid "You must enter a Port."
 msgstr "S'ha d'introduir un Port."
 
-#: /home/sailoog/Escritorio/openplotter/connection.py:176
+#: /home/sailoog/Escritorio/openplotter/connection.py:177
 msgid "You must select a Filter type."
 msgstr "Heu de seleccionar un tipus de filtre."
 
-#: /home/sailoog/Escritorio/openplotter/classes/add_action.py:25
+#: /home/sailoog/Escritorio/openplotter/classes/add_action.py:24
 msgid "Add action"
 msgstr "Afegir acció"
 
-#: /home/sailoog/Escritorio/openplotter/classes/add_action.py:40
+#: /home/sailoog/Escritorio/openplotter/classes/add_action.py:39
 msgid "repeat after"
 msgstr "repetir després de"
 
-#: /home/sailoog/Escritorio/openplotter/classes/add_action.py:45
-#: /home/sailoog/Escritorio/openplotter/classes/actions.py:59
+#: /home/sailoog/Escritorio/openplotter/classes/add_action.py:44
+#: /home/sailoog/Escritorio/openplotter/classes/actions.py:62
 msgid "no repeat"
 msgstr "no repetir"
 
-#: /home/sailoog/Escritorio/openplotter/classes/add_action.py:67
+#: /home/sailoog/Escritorio/openplotter/classes/add_action.py:73
 msgid "Choose a file"
 msgstr "Selecciona un arxiu"
 
-#: /home/sailoog/Escritorio/openplotter/classes/add_action.py:67
+#: /home/sailoog/Escritorio/openplotter/classes/add_action.py:73
 msgid "Audio files"
 msgstr "Fitxers de so"
 
-#: /home/sailoog/Escritorio/openplotter/classes/add_action.py:67
+#: /home/sailoog/Escritorio/openplotter/classes/add_action.py:73
 msgid "All files"
 msgstr "Tots els arxius"
 
@@ -1442,341 +1524,431 @@ msgstr ""
 "Aquesta acció desactivarà tot els disparadors excepte aquells que continguin "
 "una acció \"iniciar totes les accions\"."
 
-#: /home/sailoog/Escritorio/openplotter/classes/actions.py:50
-msgid "Set Output 1 to High"
-msgstr "Configurar Sortida 1 com High"
+#: /home/sailoog/Escritorio/openplotter/classes/actions.py:58
+msgid ": High"
+msgstr ""
 
-#: /home/sailoog/Escritorio/openplotter/classes/actions.py:51
-msgid "Set Output 1 to Low"
-msgstr "Configurar Sortida 1 com Low"
-
-#: /home/sailoog/Escritorio/openplotter/classes/actions.py:52
-msgid "Set Output 2 to High"
-msgstr "Configurar Sortida 2 com High"
-
-#: /home/sailoog/Escritorio/openplotter/classes/actions.py:53
-msgid "Set Output 2 to Low"
-msgstr "Configurar Sortida 2 com Low"
-
-#: /home/sailoog/Escritorio/openplotter/classes/actions.py:54
-msgid "Set Output 3 to High"
-msgstr "Configurar Sortida 3 com High"
-
-#: /home/sailoog/Escritorio/openplotter/classes/actions.py:55
-msgid "Set Output 3 to Low"
-msgstr "Configurar Sortida 3 com Low"
-
-#: /home/sailoog/Escritorio/openplotter/classes/actions.py:56
-msgid "Set Output 4 to High"
-msgstr "Configurar Sortida 4 com High"
-
-#: /home/sailoog/Escritorio/openplotter/classes/actions.py:57
-msgid "Set Output 4 to Low"
-msgstr "Configurar Sortida 4 com Low"
+#: /home/sailoog/Escritorio/openplotter/classes/actions.py:58
+msgid ""
+"ATTENTION! if you set this output to \"High\" and there is not a resistor or "
+"a circuit connected to the selected GPIO pin, YOU CAN DAMAGE YOUR BOARD."
+msgstr ""
+"ATENCIÓ! si configures aquesta sortida com \"High \" i no hi ha una "
+"resistència o un circuit connectat al pin GPIO seleccionat, POTS MALMETRE LA "
+"TEVA PLACA."
 
 #: /home/sailoog/Escritorio/openplotter/classes/actions.py:59
+msgid ": Low"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/classes/actions.py:62
 msgid "seconds"
 msgstr "segons"
 
-#: /home/sailoog/Escritorio/openplotter/classes/actions.py:59
+#: /home/sailoog/Escritorio/openplotter/classes/actions.py:62
 msgid "minutes"
 msgstr "minuts"
 
-#: /home/sailoog/Escritorio/openplotter/classes/actions.py:59
+#: /home/sailoog/Escritorio/openplotter/classes/actions.py:62
 msgid "hours"
 msgstr "hores"
 
-#: /home/sailoog/Escritorio/openplotter/classes/actions.py:59
+#: /home/sailoog/Escritorio/openplotter/classes/actions.py:62
 msgid "days"
 msgstr "dies"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:27
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:31
 msgid "Latitude"
 msgstr "Latitud"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:27
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:31
 msgid "Lat"
 msgstr "Lat"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:28
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:32
 msgid "Longitude"
 msgstr "Longitud"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:28
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:32
 msgid "Lon"
 msgstr "Lon"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:29
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:33
 msgid "Date"
 msgstr "Data"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:30
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:34
 msgid "Time"
 msgstr "Hora"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:31
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:35
 msgid "Magnetic Variation"
 msgstr "Declinació Magnètica"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:31
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:35
 msgid "Var"
 msgstr "DM"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:32
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:36
 msgid "Magnetic Heading"
 msgstr "Rumb Magnètic"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:32
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:36
 msgid "HDM"
 msgstr "RM"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:33
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:37
 msgid "True Heading"
 msgstr "Rumb Verdader"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:33
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:37
 msgid "HDT"
 msgstr "RV"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:34
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:38
 msgid "Course Over Ground"
 msgstr "Rumb Sobre el Fons"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:34
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:38
 msgid "COG"
 msgstr "RSF"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:35
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:39
 msgid "Speed Over Ground"
 msgstr "Velocitat Sobre el Fons"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:35
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:39
 msgid "SOG"
 msgstr "VSF"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:36
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:40
 msgid "Speed Trought Water"
 msgstr "Velocitat Sobre l'Aigua"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:36
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:40
 msgid "STW"
 msgstr "VSA"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:37
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:41
 msgid "Water Depth (from transducer)"
 msgstr "Profunditat (des del transductor)"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:37
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:41
 msgid "DPT"
 msgstr "PRF"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:38
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:42
 msgid "Apparent Wind Angle"
 msgstr "Angle Vent Aparent"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:38
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:42
 msgid "AWA"
 msgstr "AVA"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:39
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:43
 msgid "True Wind Angle"
 msgstr "Angle Vent Real"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:39
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:43
 msgid "TWA"
 msgstr "AVR"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:40
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:44
 msgid "Apparent Wind Speed"
 msgstr "Velocitat Vent Aparent"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:40
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:44
 msgid "AWS"
 msgstr "VVA"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:41
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:45
 msgid "True Wind Speed"
 msgstr "Velocitat Vent Real"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:41
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:45
 msgid "TWS"
 msgstr "VVR"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:42
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:46
 msgid "True Wind Direction"
 msgstr "Direcció Vent Real"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:42
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:46
 msgid "TWD"
 msgstr "DVR"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:43
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:47
 msgid "Air Pressure"
 msgstr "Pressió Aire"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:43
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:47
 msgid "AP"
 msgstr "PA"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:44
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:48
 msgid "Air Temperature"
 msgstr "Temperatura Aire"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:44
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:48
 msgid "AT"
 msgstr "TA"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:45
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:49
 msgid "Air Relative Humidity"
 msgstr "Humitat Relativa Aire"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:45
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:49
 msgid "ARH"
 msgstr "HRA"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:46
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:50
 msgid "Rate of Turn"
 msgstr "Ràtio Gir"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:46
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:50
 msgid "ROT"
 msgstr "RG"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:48
-msgid "ECT"
-msgstr "TRM"
-
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:49
-msgid "Switch 1 status"
-msgstr "Estat Interruptor 1"
-
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:49
-msgid "SW1"
-msgstr "INT1"
-
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:50
-msgid "Switch 2 status"
-msgstr "Estat Interruptor 2"
-
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:50
-msgid "SW2"
-msgstr "INT2"
-
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:51
-msgid "Switch 3 status"
-msgstr "Estat Interruptor 3"
-
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:51
-msgid "SW3"
-msgstr "INT3"
-
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:52
-msgid "Switch 4 status"
-msgstr "Estat Interruptor 4"
-
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:52
-msgid "SW4"
-msgstr "INT4"
-
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:53
-msgid "Switch 5 status"
-msgstr "Estat Interruptor 5"
-
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:53
-msgid "SW5"
-msgstr "INT5"
-
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:54
-msgid "Switch 6 status"
-msgstr "Estat Interruptor 6"
-
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:54
-msgid "SW6"
-msgstr "INT6"
-
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:55
-msgid "Output 1 status"
-msgstr "Estat Sortida 1"
-
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:55
-msgid "OUT1"
-msgstr "SOR1"
-
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:56
-msgid "Output 2 status"
-msgstr "Estat Sortida 2"
-
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:56
-msgid "OUT2"
-msgstr "SOR2"
-
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:57
-msgid "Output 3 status"
-msgstr "Estat Sortida 3"
-
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:57
-msgid "OUT3"
-msgstr "SOR4"
-
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:58
-msgid "Output 4 status"
-msgstr "Estat Sortida 4"
-
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:58
-msgid "OUT4"
-msgstr "SOR4"
-
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:61
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:91
 msgid "was not present in the last (sec.)"
 msgstr "no present en els últims (seg.)"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:61
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:91
 msgid "was present in the last (sec.)"
 msgstr "present en els últims (seg.)"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:61
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:91
 msgid "is equal to"
 msgstr "és igual a"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:61
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:91
 msgid "is less than"
 msgstr "és menor que"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:61
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:91
 msgid "is less than or equal to"
 msgstr "és menor o igual que"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:61
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:91
 msgid "is greater than"
 msgstr "és més gran que"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:61
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:91
 msgid "is greater than or equal to"
 msgstr "és més gran o igual que"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:61
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:91
 msgid "is on"
 msgstr "està on"
 
-#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:61
+#: /home/sailoog/Escritorio/openplotter/classes/datastream.py:91
 msgid "is off"
 msgstr "està off"
+
+#: /home/sailoog/Escritorio/openplotter/classes/add_output.py:23
+#, fuzzy
+msgid "Add Output"
+msgstr "Sortida"
+
+#: /home/sailoog/Escritorio/openplotter/classes/add_output.py:27
+#: /home/sailoog/Escritorio/openplotter/classes/add_DS18B20.py:28
+#: /home/sailoog/Escritorio/openplotter/classes/add_switch.py:27
+msgid "name"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/classes/add_output.py:30
+#: /home/sailoog/Escritorio/openplotter/classes/add_DS18B20.py:31
+#: /home/sailoog/Escritorio/openplotter/classes/add_switch.py:30
+msgid "short name"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/classes/add_output.py:33
+#: /home/sailoog/Escritorio/openplotter/classes/add_switch.py:33
+msgid "GPIO"
+msgstr "GPIO"
 
 #: /home/sailoog/Escritorio/openplotter/classes/add_trigger.py:23
 msgid "Add trigger"
 msgstr "Afegir disparador"
 
-#: /home/sailoog/Escritorio/openplotter/classes/add_trigger.py:51
+#: /home/sailoog/Escritorio/openplotter/classes/add_trigger.py:64
 msgid "The actions of this trigger will always be executed."
 msgstr "Les accions d'aquest disparador sempre seran executades."
 
-#: /home/sailoog/Escritorio/openplotter/classes/add_trigger.py:67
+#: /home/sailoog/Escritorio/openplotter/classes/add_trigger.py:74
 msgid ""
 "Be sure you have filled in GPIO and Pull Down/Up fields in \"Switches\" tab "
 "and enabled the desired switch."
 msgstr ""
 "Assegura't d'haver emplenat els camps GPIO i Pull Down/Up a la pestanya "
 "\"Interruptors\" i activat l'interruptor desitjat."
+
+#: /home/sailoog/Escritorio/openplotter/classes/add_DS18B20.py:24
+msgid "Add DS18B20 sensor"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/classes/add_DS18B20.py:34
+msgid "unit"
+msgstr ""
+
+#: /home/sailoog/Escritorio/openplotter/classes/add_DS18B20.py:39
+#, fuzzy
+msgid "sensor ID"
+msgstr "Sensor"
+
+#: /home/sailoog/Escritorio/openplotter/classes/add_switch.py:23
+#, fuzzy
+msgid "Add Switch"
+msgstr " Interruptor 1 "
+
+#: /home/sailoog/Escritorio/openplotter/classes/add_switch.py:37
+msgid "pull"
+msgstr ""
+
+#~ msgid "Signal K server (beta)"
+#~ msgstr "Servidor Signal K (beta)"
+
+#~ msgid "Panel"
+#~ msgstr "Panell"
+
+#~ msgid "Gauge"
+#~ msgstr "Gauge"
+
+#~ msgid "Show output"
+#~ msgstr "Mostrar sortida"
+
+#~ msgid "Engine Coolant Temperature"
+#~ msgstr "Temperatura Refrigerant Motor"
+
+#~ msgid " Switch 2 "
+#~ msgstr " Interruptor 2 "
+
+#~ msgid " Switch 3 "
+#~ msgstr " Interruptor 3 "
+
+#~ msgid " Switch 4 "
+#~ msgstr " Interruptor 4 "
+
+#~ msgid " Switch 5 "
+#~ msgstr " Interruptor 5 "
+
+#~ msgid " Switch 6 "
+#~ msgstr " Interruptor 6 "
+
+#~ msgid " Output 1 "
+#~ msgstr " Sortida 1 "
+
+#~ msgid " Output 2 "
+#~ msgstr " Sortida 2 "
+
+#~ msgid " Output 3 "
+#~ msgstr " Sortida 3 "
+
+#~ msgid " Output 4 "
+#~ msgstr " Sortida 4 "
+
+#~ msgid " Actions "
+#~ msgstr " Accions "
+
+#~ msgid ""
+#~ "\n"
+#~ " Signal K WebSocket:\n"
+#~ msgstr ""
+#~ "\n"
+#~ " Signal K WebSocket:\n"
+
+#~ msgid "GPIO pins must be unique. Repeated pins: "
+#~ msgstr "Els pins GPIO no poden repetir-se. Pins repetits: "
+
+#~ msgid "Switches set successfully"
+#~ msgstr "Interruptors configurats correctament"
+
+#~ msgid "Set Output 1 to High"
+#~ msgstr "Configurar Sortida 1 com High"
+
+#~ msgid "Set Output 1 to Low"
+#~ msgstr "Configurar Sortida 1 com Low"
+
+#~ msgid "Set Output 2 to High"
+#~ msgstr "Configurar Sortida 2 com High"
+
+#~ msgid "Set Output 2 to Low"
+#~ msgstr "Configurar Sortida 2 com Low"
+
+#~ msgid "Set Output 3 to High"
+#~ msgstr "Configurar Sortida 3 com High"
+
+#~ msgid "Set Output 3 to Low"
+#~ msgstr "Configurar Sortida 3 com Low"
+
+#~ msgid "Set Output 4 to High"
+#~ msgstr "Configurar Sortida 4 com High"
+
+#~ msgid "Set Output 4 to Low"
+#~ msgstr "Configurar Sortida 4 com Low"
+
+#~ msgid "ECT"
+#~ msgstr "TRM"
+
+#~ msgid "Switch 1 status"
+#~ msgstr "Estat Interruptor 1"
+
+#~ msgid "SW1"
+#~ msgstr "INT1"
+
+#~ msgid "Switch 2 status"
+#~ msgstr "Estat Interruptor 2"
+
+#~ msgid "SW2"
+#~ msgstr "INT2"
+
+#~ msgid "Switch 3 status"
+#~ msgstr "Estat Interruptor 3"
+
+#~ msgid "SW3"
+#~ msgstr "INT3"
+
+#~ msgid "Switch 4 status"
+#~ msgstr "Estat Interruptor 4"
+
+#~ msgid "SW4"
+#~ msgstr "INT4"
+
+#~ msgid "Switch 5 status"
+#~ msgstr "Estat Interruptor 5"
+
+#~ msgid "SW5"
+#~ msgstr "INT5"
+
+#~ msgid "Switch 6 status"
+#~ msgstr "Estat Interruptor 6"
+
+#~ msgid "SW6"
+#~ msgstr "INT6"
+
+#~ msgid "Output 1 status"
+#~ msgstr "Estat Sortida 1"
+
+#~ msgid "OUT1"
+#~ msgstr "SOR1"
+
+#~ msgid "Output 2 status"
+#~ msgstr "Estat Sortida 2"
+
+#~ msgid "OUT2"
+#~ msgstr "SOR2"
+
+#~ msgid "Output 3 status"
+#~ msgstr "Estat Sortida 3"
+
+#~ msgid "OUT3"
+#~ msgstr "SOR4"
+
+#~ msgid "Output 4 status"
+#~ msgstr "Estat Sortida 4"
+
+#~ msgid "OUT4"
+#~ msgstr "SOR4"
 
 #, fuzzy
 #~ msgid "Engine temperature"
@@ -1805,9 +1977,6 @@ msgstr ""
 
 #~ msgid "Error code: "
 #~ msgstr "Codi d'error: "
-
-#~ msgid "OpenPlotter"
-#~ msgstr "OpenPlotter"
 
 #~ msgid "NMEA WiFi Server failed."
 #~ msgstr "El servidor WiFi NMEA ha fallat."
@@ -1968,9 +2137,6 @@ msgstr ""
 
 #~ msgid "Input"
 #~ msgstr "Entrada"
-
-#~ msgid "Output"
-#~ msgstr "Sortida"
 
 #~ msgid " NMEA inputs / outputs "
 #~ msgstr "Entrades/Sortides NMEA"
