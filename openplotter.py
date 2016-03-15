@@ -1392,7 +1392,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 #####sensors#################################
 	def start_sensors(self):
-		subprocess.call(['pkill', 'RTIMULibCal'])
+		subprocess.call(['pkill', 'RTIMULibDemoGL'])
 		subprocess.call(['pkill', '-f', 'i2c.py'])
 		if self.heading.GetValue() or self.heel.GetValue() or self.pitch.GetValue() or self.press.GetValue() or self.temp_p.GetValue() or self.hum.GetValue() or self.temp_h.GetValue():
 			subprocess.Popen(['python', currentpath+'/i2c.py'], cwd=currentpath+'/imu')
@@ -1475,7 +1475,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.conf.set('STARTUP', 'nmea_hum', '0')
 		self.conf.set('STARTUP', 'nmea_temp_h', '0')
 		self.start_sensors()
-		subprocess.Popen(['lxterminal', '-e', 'RTIMULibCal'], cwd=currentpath+'/imu')
+		subprocess.Popen('RTIMULibDemoGL', cwd=currentpath+'/imu')
 		msg=_('Heading, heel, pitch, temperature, humidity and pressure disabled.\nAfter calibrating, enable them again.')
 		self.ShowMessage(msg)
 	
