@@ -1829,6 +1829,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.conf.set('OUTPUTS', 'outputs', str(self.outputs))
 		self.start_monitoring()
 		self.read_datastream()
+		self.read_actions()
 		self.read_outputs()
 		self.SetStatusText(_('Output changes applied and restarted'))
 
