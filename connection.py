@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, os, sys, re
+import wx, os, sys, re, pyudev
 from classes.paths import Paths
 from classes.conf import Conf
 from classes.language import Language
@@ -47,11 +47,11 @@ class MainFrame(wx.Frame):
 				if self.in_out=='in': wx.StaticBox(self, label=_(' Serial input '), size=(530, 90), pos=(10, 10))
 				if self.in_out=='out': wx.StaticBox(self, label=_(' Serial output '), size=(530, 90), pos=(10, 10))
 				self.SerDevLs = []
+				self.SerialCheck('/dev/ttyOP')
 				self.SerialCheck('/dev/rfcomm')
 				self.SerialCheck('/dev/ttyUSB')
 				self.SerialCheck('/dev/ttyS')
-				self.SerialCheck('/dev/ttyACM')
-				self.SerialCheck('/dev/ttyAMA')
+				self.SerialCheck('/dev/ttyA')
 				wx.StaticText(self, label=_('Port'), pos=(155, 35))
 				self.deviceComboBox = wx.ComboBox(self, choices=self.SerDevLs, style=wx.CB_DROPDOWN, size=(155, 32), pos=(150, 55))
 				if self.SerDevLs : self.deviceComboBox.SetValue(self.SerDevLs[0])
@@ -106,13 +106,27 @@ class MainFrame(wx.Frame):
 			wx.MessageBox(w_msg, 'Info', wx.OK | wx.ICON_INFORMATION)
 
 		def SerialCheck(self,dev):
-			num = 0
-			for _ in range(99):
-				s = dev + str(num)
-				d = os.path.exists(s)
-				if d == True:
-					self.SerDevLs.append(s)      
-				num = num + 1
+			#num = 0
+			context = pyudev.Context()
+			
+			for device in context.list_devices(subsystem='tty'):
+				for key, value in device.iteritems():
+					if key == 'DEVNAME':
+						if value.find(dev) >=0:
+							self.SerDevLs.append(value)
+					if key == 'DEVLINKS':
+						value= value[value.rfind('/dev/t'):]			
+						if value.find(dev) >=0:
+							self.SerDevLs.append(value)
+
+
+				
+			#for _ in range(99):
+			#	s = dev + str(num)
+			#	d = os.path.exists(s)
+			#	if d == True:
+			#		self.SerDevLs.append(s)      
+			#	num = num + 1
 
 		def delete_sentences(self,event):
 			self.sentences.SetValue(_('nothing'))

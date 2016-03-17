@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, sys, os, subprocess, webbrowser, re, json
+import wx, sys, os, subprocess, webbrowser, re, json, pyudev
 import wx.lib.scrolledpanel as scrolled
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 from classes.datastream import DataStream
@@ -335,6 +335,7 @@ class MainFrame(wx.Frame):
 		self.NMEA2000_label=wx.StaticText(self.page7, label='NMEA 2000', pos=(20, 140))
 
 		self.SerDevLs = [_('none')]
+		self.SerialCheck('/dev/ttyOP_NMEA20')
 		self.SerialCheck('/dev/ttyUSB')
 		self.can_usb= wx.ComboBox(self.page7, choices=self.SerDevLs, style=wx.CB_READONLY, size=(120, 32), pos=(20, 165))
 		self.can_usb.SetValue(self.SerDevLs[0])
@@ -2387,13 +2388,17 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 #######################Signal K
 	def SerialCheck(self,dev):
-		num = 0
-		for _ in range(99):
-			s = dev + str(num)
-			d = os.path.exists(s)
-			if d == True:
-				self.SerDevLs.append(s)      
-			num = num + 1
+		context = pyudev.Context()
+		
+		for device in context.list_devices(subsystem='tty'):
+			for key, value in device.iteritems():
+				if key == 'DEVNAME':
+					if value.find(dev) >=0:
+						self.SerDevLs.append(value)
+				if key == 'DEVLINKS':
+					value= value[value.rfind('/dev/t'):]			
+					if value.find(dev) >=0:
+						self.SerDevLs.append(value)
 
 	def onsignalk_enable (self,e):
 		isChecked = self.signalk_enable.GetValue()
