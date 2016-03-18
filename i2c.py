@@ -26,8 +26,25 @@ conf=Conf()
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
+nmea_hdg_b = conf.get('STARTUP', 'nmea_hdg')=='1'
+nmea_heel_b = conf.get('STARTUP', 'nmea_heel')=='1'
+nmea_pitch_b = conf.get('STARTUP', 'nmea_pitch')=='1'
+poll_interval = 1
 
-if conf.get('STARTUP', 'nmea_hdg')=='1' or conf.get('STARTUP', 'nmea_heel')=='1' or conf.get('STARTUP', 'nmea_pitch')=='1':
+imu_b = False
+pressure_val_b = False
+humidity_val_b = False
+log_list_b = False
+
+nmea_press_b = conf.get('STARTUP', 'nmea_press')=='1'
+nmea_temp_p_b = conf.get('STARTUP', 'nmea_temp_p')=='1'
+nmea_hum_b = conf.get('STARTUP', 'nmea_hum')=='1'
+nmea_temp_h_b = conf.get('STARTUP', 'nmea_temp_h')=='1'
+press_temp_log_b = conf.get('STARTUP', 'press_temp_log')=='1'
+
+nmea_rate_sen = float(conf.get('STARTUP', 'nmea_rate_sen'))
+
+if nmea_hdg_b or nmea_heel_b or nmea_pitch_b:
 	SETTINGS_FILE = "RTIMULib"
 	s = RTIMU.Settings(SETTINGS_FILE)
 	imu = RTIMU.RTIMU(s)
@@ -37,20 +54,25 @@ if conf.get('STARTUP', 'nmea_hdg')=='1' or conf.get('STARTUP', 'nmea_heel')=='1'
 	imu.setAccelEnable(True)
 	imu.setCompassEnable(True)
 	poll_interval = imu.IMUGetPollInterval()
+	imu_b = True
+	
 
-if conf.get('STARTUP', 'nmea_press')=='1' or conf.get('STARTUP', 'nmea_temp_p')=='1':
+
+if nmea_press_b or nmea_temp_p_b:
 	SETTINGS_FILE2 = "RTIMULib2"
 	s2 = RTIMU.Settings(SETTINGS_FILE2)
 	pressure_val = RTIMU.RTPressure(s2)
 	pressure_val.pressureInit()
+	pressure_val_b = True
 
-if conf.get('STARTUP', 'nmea_hum')=='1' or conf.get('STARTUP', 'nmea_temp_h')=='1':
+if nmea_hum_b or nmea_temp_h_b:
 	SETTINGS_FILE3 = "RTIMULib3"
 	s3 = RTIMU.Settings(SETTINGS_FILE3)
 	humidity_val = RTIMU.RTHumidity(s3)
 	humidity_val.humidityInit()
+	humidity_val_b = True
 
-if conf.get('STARTUP', 'press_temp_log')=='1':
+if press_temp_log_b:
 	ifile  = open(currentpath+'/weather_log.csv', "r")
 	reader = csv.reader(ifile)
 	log_list = []
@@ -59,6 +81,7 @@ if conf.get('STARTUP', 'press_temp_log')=='1':
 	ifile.close()
 	if log_list: last_log=float(log_list[len(log_list)-1][0])
 	else: last_log=0
+	log_list_b = True
 
 heading_m=''
 heel=''
@@ -72,8 +95,9 @@ tick=time.time()
 
 while True:
 	tick2=time.time()
+	time.sleep(poll_interval*1.0/1000.0)
 	# read IMU
-	if conf.get('STARTUP', 'nmea_hdg')=='1' or conf.get('STARTUP', 'nmea_heel')=='1' or conf.get('STARTUP', 'nmea_pitch')=='1':
+	if imu_b:
 		if imu.IMURead():
 			data = imu.getIMUData()
 			fusionPose = data["fusionPose"]
@@ -84,10 +108,9 @@ while True:
 				heading_m0=360+heading_m0
 			heading_m=round(heading_m0,1)
 
-		time.sleep(poll_interval*1.0/1000.0)
 
 	# read Pressure
-	if conf.get('STARTUP', 'nmea_press')=='1' or conf.get('STARTUP', 'nmea_temp_p')=='1':
+	if pressure_val_b:
 		read=pressure_val.pressureRead()
 		if read:
 			if (read[0]):
@@ -96,7 +119,8 @@ while True:
 				temperature_p=read[3]
 
 	# read humidity
-	if conf.get('STARTUP', 'nmea_hum')=='1' or conf.get('STARTUP', 'nmea_temp_h')=='1':
+	if humidity_val_b:
+
 		read=humidity_val.humidityRead()
 		if read:
 			if (read[0]):
@@ -105,10 +129,10 @@ while True:
 				temperature_h=read[3]
 
 	#GENERATE
-	if tick2-tick > float(conf.get('STARTUP', 'nmea_rate_sen')):
+	if tick2-tick > nmea_rate_sen:
 		tick=time.time()
 		# HDG
-		if conf.get('STARTUP', 'nmea_hdg')=='1' and heading_m:
+		if nmea_hdg_b and heading_m:
 			hdg = pynmea2.HDG('OS', 'HDG', (str(heading_m),'','','',''))
 			hdg1=str(hdg)
 			hdg2=hdg1+"\r\n"
@@ -117,37 +141,37 @@ while True:
 		# XDR
 		list_tmp1=[]
 		list_tmp2=[]		
-		if conf.get('STARTUP', 'nmea_press')=='1' and pressure:
+		if nmea_press_b and pressure:
 			press=round(pressure/1000,4)
 			list_tmp1.append('P')
 			list_tmp1.append(str(press))
 			list_tmp1.append('B')
 			list_tmp1.append('I2CP')
-		if conf.get('STARTUP', 'nmea_temp_p')=='1' and temperature_p:			
+		if nmea_temp_p_b and temperature_p:
 			temp= round(temperature_p,1)
 			list_tmp1.append('C')
 			list_tmp1.append(str(temp))
 			list_tmp1.append('C')
 			list_tmp1.append('I2CT')
-		if conf.get('STARTUP', 'nmea_temp_h')=='1' and temperature_h:			
+		if nmea_temp_h_b and temperature_h:
 			temp= round(temperature_h,1)
 			list_tmp1.append('C')
 			list_tmp1.append(str(temp))
 			list_tmp1.append('C')
 			list_tmp1.append('I2CT')
-		if conf.get('STARTUP', 'nmea_hum')=='1' and humidity:
+		if nmea_hum_b and humidity:
 			hum=round(humidity,1)
 			list_tmp1.append('H')
 			list_tmp1.append(str(hum))
 			list_tmp1.append('R')
 			list_tmp1.append('I2CH')
-		if conf.get('STARTUP', 'nmea_heel')=='1' and heel:
+		if nmea_heel_b and heel:
 			heel= round(heel,1)
 			list_tmp2.append('A')
 			list_tmp2.append(str(heel))
 			list_tmp2.append('D')
 			list_tmp2.append('I2CX')
-		if conf.get('STARTUP', 'nmea_pitch')=='1' and pitch:
+		if nmea_pitch_b and pitch:
 			pitch= round(pitch,1)
 			list_tmp2.append('A')
 			list_tmp2.append(str(pitch))
@@ -168,12 +192,12 @@ while True:
 			pitch=''
 
 		temperature=''
-		if conf.get('STARTUP', 'nmea_temp_p')=='1': temperature=temperature_p
-		if conf.get('STARTUP', 'nmea_temp_h')=='1': temperature=temperature_h
+		if nmea_temp_p_b: temperature=temperature_p
+		if nmea_temp_h_b: temperature=temperature_h
 
 		# log temperature pressure humidity
 		try:
-			if conf.get('STARTUP', 'press_temp_log')=='1':
+			if press_temp_log_b:
 				if tick-last_log > 300:
 					last_log=tick
 					press2=0

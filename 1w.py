@@ -28,7 +28,12 @@ sensors_list=eval(conf.get('1W', 'DS18B20'))
 sensors=[]
 for index,item in enumerate(sensors_list):
 	try:
-		sensors.append(W1ThermSensor(W1ThermSensor.THERM_SENSOR_DS18B20, item[3]))
+		type=W1ThermSensor.THERM_SENSOR_DS18B20
+		for sensor in W1ThermSensor.get_available_sensors():
+			if item[3] == sensor.id:
+				type = sensor.type
+		
+		sensors.append(W1ThermSensor(type, item[3]))
 	except Exception,e: 
 		sensors_list[index][5]='0'
 		print str(e)
