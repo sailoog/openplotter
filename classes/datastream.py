@@ -61,6 +61,16 @@ class DataStream:
 					self.DataList.append([i[0],i[1],None,None,None,None,None,(0,1,2,3,4,5,6),1, i[4]])
 			except Exception,e: print str(e)
 
+		#USBinst
+		x=conf.get('UDEV', 'USBinst')
+		if x: udev_list=eval(x)
+		else: udev_list=[]
+		for i in udev_list:
+			try:
+				if i[6]=='1':
+					self.DataList.append([i[0],i[1],None,None,None,None,None,(0,1,2,3,4,5,6),1, i[4]])
+			except Exception,e: print str(e)
+
 		#Switches
 		x=conf.get('INPUTS', 'switches')
 		if x: self.sw_list=eval(x)
