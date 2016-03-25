@@ -128,8 +128,6 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_MENU, self.OnAboutBox, self.helpm_item1)
 		self.helpm_item2=self.helpm.Append(wx.ID_ANY, _('OpenPlotter online documentation'), _('OpenPlotter online documentation'))
 		self.Bind(wx.EVT_MENU, self.op_doc, self.helpm_item2)
-		self.helpm_item3=self.helpm.Append(wx.ID_ANY, _('OpenPlotter online guides'), _('OpenPlotter online guides'))
-		self.Bind(wx.EVT_MENU, self.op_guides, self.helpm_item3)
 		self.menubar.Append(self.helpm, _('&Help'))
 
 		self.SetMenuBar(self.menubar)
@@ -836,16 +834,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		info.SetWebSite('http://www.sailoog.com')
 		info.SetLicence(licence)
 		info.AddDeveloper('Sailoog\nhttp://github.com/sailoog/openplotter\n-------------------\nOpenCPN: http://opencpn.org/ocpn/\nzyGrib: http://www.zygrib.org/\nMultiplexer: http://www.stripydog.com/kplex/index.html\nrtl-sdr: http://sdr.osmocom.org/trac/wiki/rtl-sdr\naisdecoder: http://www.aishub.net/aisdecoder-via-sound-card.html\ngeomag: http://github.com/cmweiss/geomag\nIMU sensor: http://github.com/richards-tech/RTIMULib2\nNMEA parser: http://github.com/Knio/pynmea2\ntwython: http://github.com/ryanmcgrath/twython\npyrtlsdr: http://github.com/roger-/pyrtlsdr\nkalibrate-rtl: http://github.com/steve-m/kalibrate-rtl\nSignalK: http://signalk.org/\n\n')
-		info.AddDocWriter('Sailoog\n\nDocumentation: http://sailoog.gitbooks.io/openplotter-documentation/\nGuides: http://sailoog.dozuki.com/c/OpenPlotter')
+		info.AddDocWriter('Sailoog\n\nDocumentation: http://sailoog.gitbooks.io/openplotter-documentation/')
 		info.AddTranslator('Catalan, English and Spanish by Sailoog\nFrench by Nicolas Janvier.')
 		wx.AboutBox(info)
 
 	def op_doc(self, e):
 		url = "http://sailoog.gitbooks.io/openplotter-documentation/"
-		webbrowser.open(url,new=2)
-
-	def op_guides(self, e):
-		url = "http://sailoog.dozuki.com/c/OpenPlotter"
 		webbrowser.open(url,new=2)
 
 ########startup###################################	
