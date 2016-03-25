@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, sys, os, subprocess, webbrowser, re, json, pyudev
+import wx, sys, os, subprocess, webbrowser, re, json, pyudev, time
 import wx.lib.scrolledpanel as scrolled
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 from classes.datastream import DataStream
@@ -72,6 +72,7 @@ class MainFrame(wx.Frame):
 		self.page13 = wx.Panel(self.nb)
 		self.page14 = wx.Panel(self.nb)
 
+		self.nb.AddPage(self.page14, _('Rename USB'))
 		self.nb.AddPage(self.page5, _('NMEA 0183'))
 		self.nb.AddPage(self.page7, _('Signal K'))
 		self.nb.AddPage(self.page3, _('WiFi AP'))
@@ -85,7 +86,6 @@ class MainFrame(wx.Frame):
 		self.nb.AddPage(self.page2, _('Calculate'))
 		self.nb.AddPage(self.page9, _('Accounts'))
 		self.nb.AddPage(self.page1, _('Startup'))
-		self.nb.AddPage(self.page14, _('USB install'))
 
 		sizer = wx.BoxSizer()
 		sizer.Add(self.nb, 1, wx.EXPAND)
@@ -333,12 +333,9 @@ class MainFrame(wx.Frame):
 		self.mmsi_label=wx.StaticText(self.page7, label='MMSI', pos=(140, 100))
 		
 		self.NMEA2000_label=wx.StaticText(self.page7, label='NMEA 2000', pos=(20, 140))
-
-		self.SerDevLs = [_('none')]
-		self.SerialCheck('/dev/ttyOP_NMEA20')
-		self.SerialCheck('/dev/ttyUSB')
+		self.SerDevLs = []
 		self.can_usb= wx.ComboBox(self.page7, choices=self.SerDevLs, style=wx.CB_READONLY, size=(120, 32), pos=(20, 165))
-		self.can_usb.SetValue(self.SerDevLs[0])
+		self.SerialCheck()
 		self.CANUSB_label=wx.StaticText(self.page7, label='CAN-USB', pos=(155, 172))
 
 		wx.StaticBox(self.page7, label=_(' Inputs '), size=(430, 130), pos=(250, 10))
@@ -430,13 +427,12 @@ class MainFrame(wx.Frame):
 		
 		self.list_USBinst = CheckListCtrl(self.page14, 237)
 		self.list_USBinst.SetPosition((15, 30))
-		self.list_USBinst.InsertColumn(0, _('op name'), width=150)
-		self.list_USBinst.InsertColumn(1, _('vendor'), width=60)
-		self.list_USBinst.InsertColumn(2, _('product'), width=60)
-		self.list_USBinst.InsertColumn(3, _('serial'), width=110)
-		self.list_USBinst.InsertColumn(4, _('connect port'), width=140)
-		self.list_USBinst.InsertColumn(5, _('act'), width=15)
-		self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_USBinst, self.list_USBinst)
+		self.list_USBinst.InsertColumn(0, _('name'), width=131)
+		self.list_USBinst.InsertColumn(1, _('vendor'), width=55)
+		self.list_USBinst.InsertColumn(2, _('product'), width=62)
+		self.list_USBinst.InsertColumn(3, _('port'), width=92)
+		self.list_USBinst.InsertColumn(4, _('serial'), width=175)
+		self.list_USBinst.InsertColumn(5, _('rem.'), width=15)
 			
 		self.add_USBinst_button =wx.Button(self.page14, label=_('add'), pos=(585, 30))
 		self.Bind(wx.EVT_BUTTON, self.add_USBinst, self.add_USBinst_button)
@@ -2278,75 +2274,43 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		except:temp_list=[]
 		for ii in temp_list:
 			self.USBinst.append(ii)
-			self.list_USBinst.Append([ii[0].decode('utf8'),ii[1].decode('utf8'),ii[2].decode('utf8'),ii[3].decode('utf8'),ii[4].decode('utf8'),ii[5]])
+			self.list_USBinst.Append([ii[0].decode('utf8'),ii[1].decode('utf8'),ii[2].decode('utf8'),ii[4].decode('utf8'),ii[3].decode('utf8'),ii[5]])
 			if ii[6]=='1':
 				last=self.list_USBinst.GetItemCount()-1
 				self.list_USBinst.CheckItem(last)
-	
-	def edit_USBinst(self,e):
-		selected_USBinst=e.GetIndex()
-		edit=[selected_USBinst,self.USBinst[selected_USBinst][0],self.USBinst[selected_USBinst][1],self.USBinst[selected_USBinst][2],self.USBinst[selected_USBinst][3]]
-		self.edit_add_USBinst(edit)
+
 
 	def add_USBinst(self,e):
-		self.edit_add_USBinst(0)
-
-	def edit_add_USBinst(self,edit):
-		dlg = addUSBinst(edit)
+		dlg = addUSBinst()
 		res = dlg.ShowModal()
 		if res == wx.ID_OK:
 			OPname_selection=dlg.OPname_select.GetValue()
-			OPname_selection=OPname_selection.encode('utf8')
-			vendor=dlg.vendor.GetValue()
-			vendor=vendor.encode('utf8')	
-			product=dlg.product.GetValue()
-			product=product.encode('utf8')
-			serial=dlg.serial.GetValue()
-			serial=serial.encode('utf8')
-			con_port=dlg.con_port.GetValue()
-			con_port=con_port.encode('utf8')
-			con_port_enable=dlg.con_port_enable.GetValue()
-
-			if OPname_selection == '':
-				self.ShowMessage(_('Failed. Select port name.'))
+			if not re.match('^[0-9a-zA-Z]{1,8}$', OPname_selection):
+				self.ShowMessage(_('Failed. The new name must be a string between 1 and 8 letters and/or numbers.'))
 				dlg.Destroy()
 				return
-			if edit==0:
-				self.list_USBinst.Append([OPname_selection.decode('utf8'),vendor.decode('utf8'),product.decode('utf8'),serial.decode('utf8'),con_port.decode('utf8'),con_port_enable])
-				last=self.list_USBinst.GetItemCount()-1
-				self.list_USBinst.CheckItem(last)
-				self.USBinst.append([OPname_selection,vendor,product,serial,con_port,con_port_enable,'1'])
-			
-			else:
-				self.list_USBinst.SetStringItem(edit[0],0,OPname_selection.decode('utf8'))
-				self.list_USBinst.SetStringItem(edit[0],1,vendor.decode('utf8'))
-				self.list_USBinst.SetStringItem(edit[0],2,product.decode('utf8'))
-				self.list_USBinst.SetStringItem(edit[0],3,serial.decode('utf8'))
-				self.list_USBinst.SetStringItem(edit[0],4,con_port.decode('utf8'))
-				self.list_USBinst.SetStringItem(edit[0],5,con_port_enable)
-				self.USBinst[edit[0]][0]=OPname_selection
-				self.USBinst[edit[0]][1]=vendor
-				self.USBinst[edit[0]][2]=product
-				self.USBinst[edit[0]][3]=serial
-				self.USBinst[edit[0]][4]=con_port
-				self.USBinst[edit[0]][5]=con_port_enable
-
+			OPname_selection='ttyOP_'+OPname_selection
+			OPname_selection=OPname_selection.encode('utf8')
+			vendor=dlg.vendor
+			vendor=vendor.encode('utf8')	
+			product=dlg.product
+			product=product.encode('utf8')
+			serial=dlg.serial
+			serial=serial.encode('utf8')
+			con_port=dlg.con_port
+			con_port=con_port.encode('utf8')
+			rem=dlg.rem
+			self.list_USBinst.Append([OPname_selection.decode('utf8'),vendor.decode('utf8'),product.decode('utf8'),con_port.decode('utf8'),serial.decode('utf8'),rem])
+			last=self.list_USBinst.GetItemCount()-1
+			self.list_USBinst.CheckItem(last)
+			self.USBinst.append([OPname_selection,vendor,product,serial,con_port,rem,'1'])
 		dlg.Destroy()
 
 	def delete_USBinst(self,e):
 		selected_USBinst=self.list_USBinst.GetFirstSelected()
 		if selected_USBinst==-1: 
-			self.ShowMessage(_('Select a sensor to delete.'))
+			self.ShowMessage(_('Select a device to delete.'))
 			return
-		data=self.conf.get('ACTIONS', 'triggers')
-		try:
-			temp_list=eval(data)
-		except:temp_list=[]
-		for i in temp_list:
-			if i[1]==self.USBinst[selected_USBinst][4]:
-				self.read_triggers()
-				self.ShowMessage(_('You have an action defined for this sensor. You must delete that action before deleting this sensor.'))
-				return
 		del self.USBinst[selected_USBinst]
 		self.list_USBinst.DeleteItem(selected_USBinst)
 
@@ -2356,50 +2320,48 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			if self.list_USBinst.IsChecked(index): self.USBinst[index][6]='1'
 			else: self.USBinst[index][6]='0'
 		self.conf.set('UDEV', 'USBinst', str(self.USBinst))
-		
-		#SUBSYSTEM=="tty", ATTRS{idVendor}=="0403",ATTRS{serial}=="285D6",ATTRS{idProduct}=="d9aa" , SYMLINK+="ttyUSBCAN"
-		#KERNEL=="ttyUSB*", KERNELS=="1-8.1.5", NAME="ttyUSB0"
 
 		file = open('10-openplotter.rules', 'w')
 		for i in self.USBinst:
 			index=self.USBinst.index(i)
 			if self.USBinst[index][6]=='1':
-				if self.USBinst[index][5]:
+				if self.USBinst[index][5]=='port':
 					write_str='KERNEL=="ttyUSB*", KERNELS=="'+self.USBinst[index][4]
 					write_str=write_str+'" ,SYMLINK+="'+self.USBinst[index][0]+'"\n'
 				else:
 					write_str='SUBSYSTEM=="tty", ATTRS{idVendor}=="'+self.USBinst[index][1]
-					if self.USBinst[index][3]!='':
-						write_str=write_str+'",ATTRS{serial}=="'+self.USBinst[index][3]
 					write_str=write_str+'",ATTRS{idProduct}=="'+self.USBinst[index][2]
 					write_str=write_str+'" ,SYMLINK+="'+self.USBinst[index][0]+'"\n'
 				file.write(write_str)
 		file.close()
 		os.system('sudo mv 10-openplotter.rules /etc/udev/rules.d')
-		
+		self.SetStatusText(_('Restarting'))
 		self.start_udev()
-		self.start_monitoring()
-		self.read_datastream()
-		self.read_triggers()
-		self.SetStatusText(_('USB install done processes restarted'))
+		time.sleep(2)
+		self.SetStatusText(_('USB names changes applied and restarted'))
+		self.SerialCheck()
 
 	def cancel_changes_USBinst(self,e):
 		self.read_USBinst()
-		self.SetStatusText(_('USB install cancelled'))
+		self.SetStatusText(_('USB names changes cancelled'))
 
 #######################Signal K
-	def SerialCheck(self,dev):
+
+	def SerialCheck(self):
+		self.SerDevLs = [_('none')]
 		context = pyudev.Context()
-		
 		for device in context.list_devices(subsystem='tty'):
-			for key, value in device.iteritems():
-				if key == 'DEVNAME':
-					if value.find(dev) >=0:
-						self.SerDevLs.append(value)
-				if key == 'DEVLINKS':
-					value= value[value.rfind('/dev/t'):]			
-					if value.find(dev) >=0:
-						self.SerDevLs.append(value)
+			i=device['DEVNAME']
+			if '/dev/ttyUSB' in i:
+				self.SerDevLs.append(i)
+			try:
+				ii=device['DEVLINKS']
+				value= ii[ii.rfind('/dev/ttyOP_'):]			
+				if value.find('/dev/ttyOP_') >=0:
+					self.SerDevLs.append(value)
+			except: pass
+		self.can_usb.Clear()
+		self.can_usb.AppendItems(self.SerDevLs)
 
 	def onsignalk_enable (self,e):
 		isChecked = self.signalk_enable.GetValue()
