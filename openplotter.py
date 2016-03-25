@@ -72,7 +72,7 @@ class MainFrame(wx.Frame):
 		self.page13 = wx.Panel(self.nb)
 		self.page14 = wx.Panel(self.nb)
 
-		self.nb.AddPage(self.page14, _('Rename USB'))
+		self.nb.AddPage(self.page14, _('USB manager'))
 		self.nb.AddPage(self.page5, _('NMEA 0183'))
 		self.nb.AddPage(self.page7, _('Signal K'))
 		self.nb.AddPage(self.page3, _('WiFi AP'))
@@ -425,25 +425,20 @@ class MainFrame(wx.Frame):
 
 		wx.StaticBox(self.page14, label=_(' USB Serial ports '), size=(670, 265), pos=(10, 10))
 		
-		self.list_USBinst = CheckListCtrl(self.page14, 237)
+		self.list_USBinst = wx.ListCtrl(self.page14, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(565, 237))
 		self.list_USBinst.SetPosition((15, 30))
-		self.list_USBinst.InsertColumn(0, _('name'), width=131)
+		self.list_USBinst.InsertColumn(0, _('name'), width=130)
 		self.list_USBinst.InsertColumn(1, _('vendor'), width=55)
-		self.list_USBinst.InsertColumn(2, _('product'), width=62)
-		self.list_USBinst.InsertColumn(3, _('port'), width=92)
-		self.list_USBinst.InsertColumn(4, _('serial'), width=175)
-		self.list_USBinst.InsertColumn(5, _('rem.'), width=15)
+		self.list_USBinst.InsertColumn(2, _('product'), width=60)
+		self.list_USBinst.InsertColumn(3, _('port'), width=90)
+		self.list_USBinst.InsertColumn(4, _('serial'), width=190)
+		self.list_USBinst.InsertColumn(5, _('rem.'), width=40)
 			
 		self.add_USBinst_button =wx.Button(self.page14, label=_('add'), pos=(585, 30))
 		self.Bind(wx.EVT_BUTTON, self.add_USBinst, self.add_USBinst_button)
 
 		self.delete_USBinst_button =wx.Button(self.page14, label=_('delete'), pos=(585, 65))
 		self.Bind(wx.EVT_BUTTON, self.delete_USBinst, self.delete_USBinst_button)
-
-		self.button_apply_USBinst =wx.Button(self.page14, label=_('Apply changes'), pos=(570, 285))
-		self.Bind(wx.EVT_BUTTON, self.apply_changes_USBinst, self.button_apply_USBinst)
-		self.button_cancel_USBinst =wx.Button(self.page14, label=_('Cancel changes'), pos=(430, 285))
-		self.Bind(wx.EVT_BUTTON, self.cancel_changes_USBinst, self.button_cancel_USBinst)
 
 ###########################page14
 ########page8###################
@@ -2275,9 +2270,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		for ii in temp_list:
 			self.USBinst.append(ii)
 			self.list_USBinst.Append([ii[0].decode('utf8'),ii[1].decode('utf8'),ii[2].decode('utf8'),ii[4].decode('utf8'),ii[3].decode('utf8'),ii[5]])
-			if ii[6]=='1':
-				last=self.list_USBinst.GetItemCount()-1
-				self.list_USBinst.CheckItem(last)
 
 
 	def add_USBinst(self,e):
@@ -2301,10 +2293,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			con_port=con_port.encode('utf8')
 			rem=dlg.rem
 			self.list_USBinst.Append([OPname_selection.decode('utf8'),vendor.decode('utf8'),product.decode('utf8'),con_port.decode('utf8'),serial.decode('utf8'),rem])
-			last=self.list_USBinst.GetItemCount()-1
-			self.list_USBinst.CheckItem(last)
-			self.USBinst.append([OPname_selection,vendor,product,serial,con_port,rem,'1'])
+			self.USBinst.append([OPname_selection,vendor,product,serial,con_port,rem])
 		dlg.Destroy()
+		self.apply_changes_USBinst()
 
 	def delete_USBinst(self,e):
 		selected_USBinst=self.list_USBinst.GetFirstSelected()
@@ -2313,37 +2304,28 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			return
 		del self.USBinst[selected_USBinst]
 		self.list_USBinst.DeleteItem(selected_USBinst)
+		self.apply_changes_USBinst()
 
-	def apply_changes_USBinst(self,e):
-		for i in self.USBinst:
-			index=self.USBinst.index(i)
-			if self.list_USBinst.IsChecked(index): self.USBinst[index][6]='1'
-			else: self.USBinst[index][6]='0'
+	def apply_changes_USBinst(self):
 		self.conf.set('UDEV', 'USBinst', str(self.USBinst))
-
 		file = open('10-openplotter.rules', 'w')
 		for i in self.USBinst:
 			index=self.USBinst.index(i)
-			if self.USBinst[index][6]=='1':
-				if self.USBinst[index][5]=='port':
-					write_str='KERNEL=="ttyUSB*", KERNELS=="'+self.USBinst[index][4]
-					write_str=write_str+'" ,SYMLINK+="'+self.USBinst[index][0]+'"\n'
-				else:
-					write_str='SUBSYSTEM=="tty", ATTRS{idVendor}=="'+self.USBinst[index][1]
-					write_str=write_str+'",ATTRS{idProduct}=="'+self.USBinst[index][2]
-					write_str=write_str+'" ,SYMLINK+="'+self.USBinst[index][0]+'"\n'
-				file.write(write_str)
+			if self.USBinst[index][5]=='port':
+				write_str='KERNEL=="ttyUSB*", KERNELS=="'+self.USBinst[index][4]
+				write_str=write_str+'" ,SYMLINK+="'+self.USBinst[index][0]+'"\n'
+			else:
+				write_str='SUBSYSTEM=="tty", ATTRS{idVendor}=="'+self.USBinst[index][1]
+				write_str=write_str+'",ATTRS{idProduct}=="'+self.USBinst[index][2]
+				write_str=write_str+'" ,SYMLINK+="'+self.USBinst[index][0]+'"\n'
+			file.write(write_str)
 		file.close()
 		os.system('sudo mv 10-openplotter.rules /etc/udev/rules.d')
 		self.SetStatusText(_('Restarting'))
 		self.start_udev()
-		time.sleep(2)
+		time.sleep(1.5)
 		self.SetStatusText(_('USB names changes applied and restarted'))
 		self.SerialCheck()
-
-	def cancel_changes_USBinst(self,e):
-		self.read_USBinst()
-		self.SetStatusText(_('USB names changes cancelled'))
 
 #######################Signal K
 
@@ -2354,12 +2336,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			i=device['DEVNAME']
 			if '/dev/ttyUSB' in i:
 				self.SerDevLs.append(i)
-			try:
-				ii=device['DEVLINKS']
-				value= ii[ii.rfind('/dev/ttyOP_'):]			
-				if value.find('/dev/ttyOP_') >=0:
-					self.SerDevLs.append(value)
-			except: pass
+				try:
+					ii=device['DEVLINKS']
+					value= ii[ii.rfind('/dev/ttyOP_'):]			
+					if value.find('/dev/ttyOP_') >=0:
+						self.SerDevLs.append(value)
+				except: pass
 		self.can_usb.Clear()
 		self.can_usb.AppendItems(self.SerDevLs)
 
