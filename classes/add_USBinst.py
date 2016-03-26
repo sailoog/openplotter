@@ -32,7 +32,7 @@ class addUSBinst(wx.Dialog):
 		self.list_devices.InsertColumn(1, _('vendor'), width=60)
 		self.list_devices.InsertColumn(2, _('product'), width=65)
 		self.list_devices.InsertColumn(3, _('port'), width=100)
-		self.list_devices.InsertColumn(4, _('serial'), width=230)
+		self.list_devices.InsertColumn(4, _('serial'), width=215)
 		self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.select_device, self.list_devices)
 
 		wx.StaticText(panel, label=_('new name'), pos=(15, 140))

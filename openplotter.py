@@ -2288,8 +2288,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			rem=dlg.rem
 			self.list_USBinst.Append([OPname_selection.decode('utf8'),vendor.decode('utf8'),product.decode('utf8'),con_port.decode('utf8'),serial.decode('utf8'),rem])
 			self.USBinst.append([OPname_selection,vendor,product,serial,con_port,rem])
+			self.apply_changes_USBinst()
 		dlg.Destroy()
-		self.apply_changes_USBinst()
 
 	def delete_USBinst(self,e):
 		selected_USBinst=self.list_USBinst.GetFirstSelected()
