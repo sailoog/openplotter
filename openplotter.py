@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, sys, os, subprocess, webbrowser, re, json, pyudev, time
+import wx, sys, os, subprocess, webbrowser, re, json, pyudev, time, ConfigParser
 import wx.lib.scrolledpanel as scrolled
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 from classes.datastream import DataStream
@@ -71,6 +71,7 @@ class MainFrame(wx.Frame):
 		self.page12 = wx.Panel(self.nb)
 		self.page13 = wx.Panel(self.nb)
 		self.page14 = wx.Panel(self.nb)
+		self.page15 = wx.Panel(self.nb)
 
 		self.nb.AddPage(self.page14, _('USB manager'))
 		self.nb.AddPage(self.page5, _('NMEA 0183'))
@@ -85,6 +86,7 @@ class MainFrame(wx.Frame):
 		self.nb.AddPage(self.page4, _('SDR-AIS'))
 		self.nb.AddPage(self.page2, _('Calculate'))
 		self.nb.AddPage(self.page9, _('Accounts'))
+		self.nb.AddPage(self.page15, _('SMS'))
 		self.nb.AddPage(self.page1, _('Startup'))
 
 		sizer = wx.BoxSizer()
@@ -333,7 +335,6 @@ class MainFrame(wx.Frame):
 		self.NMEA2000_label=wx.StaticText(self.page7, label='NMEA 2000', pos=(20, 140))
 		self.SerDevLs = []
 		self.can_usb= wx.ComboBox(self.page7, choices=self.SerDevLs, style=wx.CB_READONLY, size=(120, 32), pos=(20, 165))
-		self.SerialCheck()
 		self.CANUSB_label=wx.StaticText(self.page7, label='CAN-USB', pos=(155, 172))
 
 		wx.StaticBox(self.page7, label=_(' Inputs '), size=(430, 130), pos=(250, 10))
@@ -347,6 +348,38 @@ class MainFrame(wx.Frame):
 		self.button_restartSK =wx.Button(self.page7, label=_('Restart'), pos=(155, 285))
 		self.Bind(wx.EVT_BUTTON, self.restartSK, self.button_restartSK)
 ###########################page7
+########page15###################
+		wx.StaticBox(self.page15, label=_(' Settings '), size=(330, 180), pos=(10, 10))
+		self.sms_enable = wx.CheckBox(self.page15, label=_('Enable settings'), pos=(20, 30))
+		self.sms_enable.Bind(wx.EVT_CHECKBOX, self.onsms_enable)
+
+		self.sms_dev_label=wx.StaticText(self.page15, label='Serial port', pos=(20, 60))
+		self.sms_dev= wx.ComboBox(self.page15, choices=self.SerDevLs, style=wx.CB_READONLY, size=(150, 32), pos=(20, 80))
+		sms_con_list=['at','at19200','at115200','blueat','bluephonet','bluefbus','blueobex','bluerfgnapbus','bluerfat','blues60','dlr3','dku2','dku2at','dku2phonet','dku5','dku5fbus','fbus','fbusdlr3','fbusdku5','fbusblue','fbuspl2303','irdaphonet','irdaat','irdaobex','irdagnapbus','phonetblue','proxyphonet','proxyfbus','proxyat','proxyobex','proxygnapbus','proxys60','mbus']
+		
+		self.sms_bt_label=wx.StaticText(self.page15, label=_('Bluetooth address'), pos=(180, 60))
+		self.sms_bt = wx.TextCtrl(self.page15, -1, size=(150, 32), pos=(180, 80))
+
+		self.sms_con_label=wx.StaticText(self.page15, label='Connection', pos=(20, 120))
+		self.sms_con= wx.ComboBox(self.page15, choices=sms_con_list, style=wx.CB_READONLY, size=(150, 32), pos=(20, 140))
+		
+		self.button_sms_identify =wx.Button(self.page15, label=_('Identify'), pos=(180, 140))
+		self.Bind(wx.EVT_BUTTON, self.sms_identify, self.button_sms_identify)
+
+		wx.StaticBox(self.page15, label=_(' Sending '), size=(330, 180), pos=(350, 10))
+
+		self.sms_enable_send = wx.CheckBox(self.page15, label=_('Enable sending SMS'), pos=(360, 30))
+		self.sms_enable_send.Bind(wx.EVT_CHECKBOX, self.onsms_enable_send)
+
+		self.phone_number_label=wx.StaticText(self.page15, label=_('Send to phone'), pos=(360, 60))
+		self.phone_number = wx.TextCtrl(self.page15, -1, size=(150, 32), pos=(360, 80))
+
+		self.sms_text_label=wx.StaticText(self.page15, label=_('Text'), pos=(360, 120))
+		self.sms_text = wx.TextCtrl(self.page15, -1, size=(150, 32), pos=(360, 140))
+
+		self.button_sms_test =wx.Button(self.page15, label=_('Test'), pos=(520, 140))
+		self.Bind(wx.EVT_BUTTON, self.sms_test, self.button_sms_test)
+###########################page15
 ########page6###################
 		wx.StaticBox(self.page6, size=(330, 50), pos=(10, 10))
 		wx.StaticText(self.page6, label=_('Rate (sec)'), pos=(20, 30))
@@ -552,6 +585,7 @@ class MainFrame(wx.Frame):
 		self.read_actions()
 		self.manual_settings=''
 		self.read_kplex_conf()
+		self.SerialCheck()
 		self.set_layout_conf()
 ###########################layout
 
@@ -749,6 +783,31 @@ class MainFrame(wx.Frame):
 			self.NMEA2000_label.Disable()
 			self.can_usb.Disable()
 			self.CANUSB_label.Disable()
+
+		if self.conf.get('SMS', 'serial')=='0': self.sms_dev.SetValue(self.SerDevLs[0])
+		else: self.sms_dev.SetValue(self.conf.get('SMS', 'serial'))
+		self.sms_bt.SetValue(self.conf.get('SMS', 'bluetooth'))
+		self.sms_con.SetValue(self.conf.get('SMS', 'connection'))
+		if self.conf.get('SMS', 'enable')=='1': 
+			self.sms_enable.SetValue(True)
+			self.sms_dev_label.Disable()
+			self.sms_dev.Disable()
+			self.sms_bt_label.Disable()
+			self.sms_bt.Disable()
+			self.sms_con_label.Disable()
+			self.sms_con.Disable()
+		else: 
+			self.button_sms_identify.Disable()
+
+		self.phone_number.SetValue(self.conf.get('SMS', 'phone'))
+		if self.conf.get('SMS', 'enable_sending')=='1': 
+			self.sms_enable_send.SetValue(True)
+			self.phone_number_label.Disable()
+			self.phone_number.Disable()
+		else: 
+			self.button_sms_test.Disable()
+			self.sms_text.Disable()
+			self.sms_text_label.Disable()
 
 		self.read_triggers()
 		self.read_DS18B20()
@@ -2328,7 +2387,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		context = pyudev.Context()
 		for device in context.list_devices(subsystem='tty'):
 			i=device['DEVNAME']
-			if '/dev/ttyUSB' in i:
+			if '/dev/ttyU' in i or '/dev/ttyA' in i or '/dev/ttyS' in i or '/dev/ttyO' in i or '/dev/r' in i or '/dev/i' in i:
 				self.SerDevLs.append(i)
 				try:
 					ii=device['DEVLINKS']
@@ -2337,7 +2396,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 						self.SerDevLs.append(value)
 				except: pass
 		self.can_usb.Clear()
+		self.sms_dev.Clear()
 		self.can_usb.AppendItems(self.SerDevLs)
+		self.sms_dev.AppendItems(self.SerDevLs)
 
 	def onsignalk_enable (self,e):
 		isChecked = self.signalk_enable.GetValue()
@@ -2404,6 +2465,104 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.NMEA2000_label.Enable()
 			self.can_usb.Enable()
 			self.CANUSB_label.Enable()
+
+####################### SMS
+
+	def save_gammu_settings(self,port,con):
+		gammu_conf = ConfigParser.SafeConfigParser()
+		gammu_conf.read(home+'/.gammurc')
+		gammu_conf.set('gammu', 'port', port)
+		gammu_conf.set('gammu', 'connection', con)
+		with open(home+'/.gammurc', 'wb') as configfile:
+			gammu_conf.write(configfile)
+
+	def onsms_enable(self,e):
+		isChecked = self.sms_enable.GetValue()
+		if isChecked:
+			if self.sms_dev.GetValue()==_('none'):
+				if self.sms_bt.GetValue()=='':
+					self.ShowMessage(_('You have to provide a serial port or a bluetooth address.'))
+					self.sms_enable.SetValue(False)
+					return
+				else:
+					bluetooth=self.sms_bt.GetValue()
+			else:
+				bluetooth = ''
+				self.sms_bt.SetValue(bluetooth)
+				serial = self.sms_dev.GetValue()
+			if self.sms_con.GetValue()=='':
+				self.ShowMessage(_('You have to provide a connection type.'))
+				self.sms_enable.SetValue(False)
+				return
+			else: connection = self.sms_con.GetValue()
+			self.conf.set('SMS', 'enable', '1')
+			if self.sms_dev.GetValue()==_('none'):
+				self.conf.set('SMS', 'serial', '0')
+				port=bluetooth
+			else:
+				self.conf.set('SMS', 'serial', serial)
+				port=serial
+			self.conf.set('SMS', 'bluetooth', bluetooth)
+			self.conf.set('SMS', 'connection', connection)
+			self.sms_dev_label.Disable()
+			self.sms_dev.Disable()
+			self.sms_bt_label.Disable()
+			self.sms_bt.Disable()
+			self.sms_con_label.Disable()
+			self.sms_con.Disable()
+			self.button_sms_identify.Enable()
+			self.save_gammu_settings(port,connection)
+		else:
+			self.conf.set('SMS', 'enable', '0')
+			self.sms_dev_label.Enable()
+			self.sms_dev.Enable()
+			self.sms_bt_label.Enable()
+			self.sms_bt.Enable()
+			self.sms_con_label.Enable()
+			self.sms_con.Enable()
+			self.button_sms_identify.Disable()
+			self.save_gammu_settings('','')
+			self.sms_enable_send.SetValue(False)
+			self.onsms_enable_send(0)
+
+	def onsms_enable_send(self,e):
+		isChecked = self.sms_enable_send.GetValue()
+		if isChecked:
+			if not self.sms_enable.GetValue():
+				self.ShowMessage(_('You have to enable settings.'))
+				self.sms_enable_send.SetValue(False)
+				return
+			if self.phone_number.GetValue()=='':
+				self.ShowMessage(_('You have to provide a phone number.'))
+				self.sms_enable_send.SetValue(False)
+				return
+			self.conf.set('SMS', 'enable_sending', '1')
+			self.conf.set('SMS', 'phone', self.phone_number.GetValue())
+			self.phone_number_label.Disable()
+			self.phone_number.Disable()
+			self.sms_text_label.Enable()
+			self.sms_text.Enable()
+			self.button_sms_test.Enable()
+		else:
+			self.conf.set('SMS', 'enable_sending', '0')
+			self.phone_number_label.Enable()
+			self.phone_number.Enable()
+			self.sms_text_label.Disable()
+			self.sms_text.Disable()
+			self.button_sms_test.Disable()
+
+	def sms_identify(self,e):
+		subprocess.call(['pkill', '-f', 'test_sms.py'])
+		subprocess.Popen(['python',currentpath+'/test_sms.py', 'i', '0', '0'])
+
+	def sms_test(self,e):
+		text=self.sms_text.GetValue()
+		if text=='':
+			self.ShowMessage(_('You have to provide some text to send.'))
+			return
+		subprocess.call(['pkill', '-f', 'test_sms.py'])
+		subprocess.Popen(['python',currentpath+'/test_sms.py', 't', text, self.phone_number.GetValue()])
+
 #Main#############################
 if __name__ == "__main__":
 	app = wx.App()

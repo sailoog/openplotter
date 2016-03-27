@@ -51,7 +51,7 @@ class addUSBinst(wx.Dialog):
 		self.rem_port.Bind(wx.EVT_CHECKBOX, self.on_enable_port)
 		self.rem_port.Disable()
 
-		context = pyudev.Context()
+		context = pyudev.Context()	
 		for device in context.list_devices(subsystem='tty'):
 			i=device['DEVNAME']
 			if '/dev/ttyACM' in i or '/dev/ttyUSB' in i:
