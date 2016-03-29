@@ -115,9 +115,10 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_MENU, self.lang_es, self.lang_item3)
 		self.lang_item4 = self.lang.Append(wx.ID_ANY, _('French'), _('Set French language'), kind=wx.ITEM_CHECK)
 		self.Bind(wx.EVT_MENU, self.lang_fr, self.lang_item4)
-
 		self.lang_item5 = self.lang.Append(wx.ID_ANY, _('Dutch'), _('Set Dutch language'), kind=wx.ITEM_CHECK)
 		self.Bind(wx.EVT_MENU, self.lang_nl, self.lang_item5)
+		self.lang_item6 = self.lang.Append(wx.ID_ANY, _('German'), _('Set German language'), kind=wx.ITEM_CHECK)
+		self.Bind(wx.EVT_MENU, self.lang_de, self.lang_item6)		
 		self.menubar.Append(self.lang, _('Language'))
 
 		self.helpm = wx.Menu()
@@ -552,6 +553,7 @@ class MainFrame(wx.Frame):
 		if self.language=='es': self.lang.Check(self.lang_item3.GetId(), True)
 		if self.language=='fr': self.lang.Check(self.lang_item4.GetId(), True)
 		if self.language=='nl': self.lang.Check(self.lang_item5.GetId(), True)
+		if self.language=='de': self.lang.Check(self.lang_item6.GetId(), True)
 
 		self.delay.SetValue(self.conf.get('STARTUP', 'delay'))
 
@@ -766,6 +768,7 @@ class MainFrame(wx.Frame):
 		self.lang.Check(self.lang_item3.GetId(), False)
 		self.lang.Check(self.lang_item4.GetId(), False)
 		self.lang.Check(self.lang_item5.GetId(), False)
+		self.lang.Check(self.lang_item6.GetId(), False)
 		self.ShowMessage(_('The selected language will be enabled when you restart'))
 	
 	def lang_en(self, e):
@@ -788,6 +791,10 @@ class MainFrame(wx.Frame):
 		self.clear_lang()
 		self.lang.Check(self.lang_item5.GetId(), True)
 		self.conf.set('GENERAL', 'lang', 'nl')
+	def lang_de(self, e):
+		self.clear_lang()
+		self.lang.Check(self.lang_item6.GetId(), True)
+		self.conf.set('GENERAL', 'lang', 'de')
 
 	def OnAboutBox(self, e):
 		description = _("OpenPlotter is a DIY, open-source, low-cost, low-consumption, modular and scalable sailing platform to run on ARM boards.")			
