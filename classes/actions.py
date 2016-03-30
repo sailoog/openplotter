@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
-import subprocess, time
+import subprocess, time, gammu
 from paths import Paths
 from classes.twitterbot import TwitterBot
 from classes.gmailbot import GmailBot
@@ -41,6 +41,7 @@ class Actions():
 		self.options.append([_('reset SDR-AIS'),_('Be sure you have filled in Gain and Correction fields in "SDR-AIS" tab and enabled AIS NMEA generation.'),0,'ACT12'])
 		self.options.append([_('publish Twitter'),_('Be sure you have filled in all fields in "Accounts" tab, selected data to publish and enabled Twitter checkbox.\n\nEnter text to publish in the field below (optional).'),1,'ACT13'])
 		self.options.append([_('send e-mail'),_('Be sure you have filled in all fields in "Accounts" tab, and enabled Gmail checkbox.\n\nEnter the subject in the field below.'),1,'ACT14'])
+		self.options.append([_('send SMS'),_('Be sure you have enabled sending SMS in "SMS" tab.\n\nEnter the text in the field below.'),1,'ACT21'])
 		self.options.append([_('play sound'),'OpenFileDialog',1,'ACT15'])
 		self.options.append([_('stop all sounds'),0,0,'ACT16'])
 		self.options.append([_('show message'),_('Enter the message in the field below.'),1,'ACT17'])
@@ -196,4 +197,15 @@ class Actions():
 		if option[:4]=='LOUT':
 				channel=self.out_list[self.getoutlistIndex(option[1:])][3]
 				GPIO.output(channel, 0)
-
+		if option=='ACT21':
+			try:
+				sm = gammu.StateMachine()
+				sm.ReadConfig()
+				sm.Init()
+				message = {
+					'Text': text, 
+					'SMSC': {'Location': 1},
+					'Number': conf.get('SMS','phone'),
+				}
+				sm.SendSMS(message)
+			except Exception,e: print str(e)
