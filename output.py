@@ -43,11 +43,12 @@ class MyFrame(wx.Frame):
 			self.logger = wx.TextCtrl(self, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_DONTWRAP, size=(650,150), pos=(0,0))
 
 			self.list = wx.ListCtrl(self, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(540, 220), pos=(5, 155))
-			self.list.InsertColumn(0, _('Type'), width=205)
-			self.list.InsertColumn(1, _('Value'), width=130)
-			self.list.InsertColumn(2, _('Source'), width=90)
-			self.list.InsertColumn(3, _('NMEA'), width=50)
-			self.list.InsertColumn(4, _('Age'), width=59)
+			self.list.InsertColumn(0, _('Short'), width=45)
+			self.list.InsertColumn(1, _('Magnitude'), width=180)
+			self.list.InsertColumn(2, _('Value'), width=120)
+			self.list.InsertColumn(3, _('Source'), width=80)
+			self.list.InsertColumn(4, _('NMEA'), width=50)
+			self.list.InsertColumn(5, _('Age'), width=59)
 
 			self.button_pause =wx.Button(self, label=_('Pause'), pos=(555, 160))
 			self.Bind(wx.EVT_BUTTON, self.pause, self.button_pause)
@@ -134,18 +135,18 @@ class MyFrame(wx.Frame):
 							if talker=='OS': talker=_('Sensor')
 							if unit: data = str(value)+' '+str(unit)
 							else: data = str(value)
-							self.data=[index,1,data]
+							self.data=[index,2,data]
 							wx.CallAfter(self.refresh_data)
 							time.sleep(0.001)
 							if talker:
-								self.data=[index,2,talker]
+								self.data=[index,3,talker]
 								wx.CallAfter(self.refresh_data)
 								time.sleep(0.001)
 							if sentence: 
-								self.data=[index,3,sentence]
+								self.data=[index,4,sentence]
 								wx.CallAfter(self.refresh_data)
 								time.sleep(0.001)
-							self.data=[index,4,str(round(age,1))]
+							self.data=[index,5,str(round(age,1))]
 							wx.CallAfter(self.refresh_data)
 							time.sleep(0.001)
 						index=index+1
@@ -172,15 +173,17 @@ class MyFrame(wx.Frame):
 
 		def reset(self, e):
 			self.pause_all=1
-			self.list. DeleteAllItems()
+			self.list.DeleteAllItems()
 			self.logger.SetValue('')
 			time.sleep(1)
 			self.conf.read()
 			self.a=DataStream(self.conf)
 			index=0
 			for i in self.a.DataList:
-				data=i[0]
-				self.list.InsertStringItem(index,data)
+				short=i[1]
+				name=i[0]
+				self.list.InsertStringItem(index,short)
+				self.list.SetStringItem(index,1,name)
 				index=index+1
 
 			self.pause_all=0

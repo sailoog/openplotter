@@ -517,20 +517,18 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.cancel_changes_outputs, self.button_cancel_outputs)
 ###########################page13
 ########page9###################
-		wx.StaticBox(self.page9, label=_(' Twitter '), size=(330, 290), pos=(10, 10))
+		wx.StaticBox(self.page9, label=_(' Twitter '), size=(330, 200), pos=(10, 10))
 		self.twitter_enable = wx.CheckBox(self.page9, label=_('Enable'), pos=(20, 32))
 		self.twitter_enable.Bind(wx.EVT_CHECKBOX, self.on_twitter_enable)
 		
-		self.datastream_list=[]
-		self.datastream_select = wx.ListBox(self.page9, choices=self.datastream_list, style=wx.LB_MULTIPLE, size=(310, 80), pos=(20, 65))
-		wx.StaticText(self.page9, label=_('apiKey'), pos=(20, 160))
-		self.apiKey = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(150, 155))
-		wx.StaticText(self.page9, label=_('apiSecret'), pos=(20, 195))
-		self.apiSecret = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(150, 190))
-		wx.StaticText(self.page9, label=_('accessToken'), pos=(20, 230))
-		self.accessToken = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(150, 225))
-		wx.StaticText(self.page9, label=_('accessTokenSecret'), pos=(20, 265))
-		self.accessTokenSecret = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(150, 260))
+		wx.StaticText(self.page9, label=_('apiKey'), pos=(20, 70))
+		self.apiKey = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(150, 65))
+		wx.StaticText(self.page9, label=_('apiSecret'), pos=(20, 105))
+		self.apiSecret = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(150, 100))
+		wx.StaticText(self.page9, label=_('accessToken'), pos=(20, 140))
+		self.accessToken = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(150, 135))
+		wx.StaticText(self.page9, label=_('accessTokenSecret'), pos=(20, 175))
+		self.accessTokenSecret = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(150, 170))
 
 		wx.StaticBox(self.page9, label=_(' Gmail '), size=(330, 200), pos=(350, 10))
 		self.gmail_enable = wx.CheckBox(self.page9, label=_('Enable'), pos=(360, 32))
@@ -582,7 +580,6 @@ class MainFrame(wx.Frame):
 		self.button_cancel_actions =wx.Button(self.page10, label=_('Cancel changes'), pos=(430, 285))
 		self.Bind(wx.EVT_BUTTON, self.cancel_changes_actions, self.button_cancel_actions)
 ###########################page10
-		self.read_datastream()
 		self.read_actions()
 		self.manual_settings=''
 		self.read_kplex_conf()
@@ -591,13 +588,6 @@ class MainFrame(wx.Frame):
 ###########################layout
 
 ####definitions###################
-
-	def read_datastream(self):
-		self.datastream_list=[]
-		self.a=DataStream(self.conf)
-		for i in self.a.DataList:
-			self.datastream_list.append(i[1]+': '+i[0])
-		self.datastream_select.Set(self.datastream_list)
 
 	def read_actions(self):
 		self.actions=Actions(self.conf)
@@ -740,18 +730,12 @@ class MainFrame(wx.Frame):
 
 		if self.conf.get('STARTUP', 'press_temp_log')=='1': self.press_temp_log.SetValue(True)
 
-		if self.conf.get('TWITTER', 'send_data'):
-			selections=eval(self.conf.get('TWITTER', 'send_data'))
-			for i in selections:
-				for index,item in enumerate(self.a.DataList):
-					if i==item[9]: self.datastream_select.SetSelection(index)
 		if self.conf.get('TWITTER', 'apiKey'): self.apiKey.SetValue('********************')
 		if self.conf.get('TWITTER', 'apiSecret'): self.apiSecret.SetValue('********************')
 		if self.conf.get('TWITTER', 'accessToken'): self.accessToken.SetValue('********************')
 		if self.conf.get('TWITTER', 'accessTokenSecret'): self.accessTokenSecret.SetValue('********************')
 		if self.conf.get('TWITTER', 'enable')=='1':
 			self.twitter_enable.SetValue(True)
-			self.datastream_select.Disable()
 			self.apiKey.Disable()
 			self.apiSecret.Disable()
 			self.accessToken.Disable()
@@ -1788,7 +1772,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			else: self.switches[index][0]='0'
 		self.conf.set('INPUTS', 'switches', str(self.switches))
 		self.start_monitoring()
-		self.read_datastream()
 		self.read_switches()
 		self.SetStatusText(_('Switches changes applied and restarted'))
 
@@ -1910,7 +1893,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			else: self.outputs[index][0]='0'
 		self.conf.set('OUTPUTS', 'outputs', str(self.outputs))
 		self.start_monitoring()
-		self.read_datastream()
 		self.read_actions()
 		self.read_outputs()
 		self.SetStatusText(_('Output changes applied and restarted'))
@@ -1932,21 +1914,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.twitter_enable.SetValue(False)
 			self.ShowMessage(_('Enter valid Twitter apiKey, apiSecret, accessToken and accessTokenSecret.'))
 			return
-		if not self.datastream_select.GetSelections():
-			self.twitter_enable.SetValue(False)
-			self.ShowMessage(_('Select some data to publish.'))
-			return
 		if self.twitter_enable.GetValue():
-			self.datastream_select.Disable()
 			self.apiKey.Disable()
 			self.apiSecret.Disable()
 			self.accessToken.Disable()
 			self.accessTokenSecret.Disable()
 			self.conf.set('TWITTER', 'enable', '1')
-			temp_list=[]
-			for i in self.datastream_select.GetSelections():
-				temp_list.append(self.a.DataList[i][9])
-			self.conf.set('TWITTER', 'send_data', str(temp_list))
 			if not '*****' in self.apiKey.GetValue(): 
 				self.conf.set('TWITTER', 'apiKey', self.apiKey.GetValue())
 				self.apiKey.SetValue('********************')
@@ -1961,7 +1934,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.accessTokenSecret.SetValue('********************')
 		else:
 			self.conf.set('TWITTER', 'enable', '0')
-			self.datastream_select.Enable()
 			self.apiKey.Enable()
 			self.apiSecret.Enable()
 			self.accessToken.Enable()
@@ -1993,6 +1965,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 #######################actions
 
 	def read_triggers(self):
+		self.a=DataStream(self.conf)
 		self.triggers=[]
 		self.list_triggers.DeleteAllItems()
 		data=self.conf.get('ACTIONS', 'triggers')
@@ -2038,6 +2011,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.edit_add_trigger(0)
 
 	def edit_add_trigger(self,edit):
+		self.datastream_list=[]
+		self.a=DataStream(self.conf)
+		for i in self.a.DataList:
+			self.datastream_list.append(i[1]+': '+i[0])
 		dlg = addTrigger(self.datastream_list, self.a,edit)
 		res = dlg.ShowModal()
 		if res == wx.ID_OK:
@@ -2306,7 +2283,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.conf.set('1W', 'DS18B20', str(self.DS18B20))
 		self.start_1w()
 		self.start_monitoring()
-		self.read_datastream()
 		self.read_triggers()
 		self.SetStatusText(_('DS18B20 sensors changes applied and restarted'))
 
