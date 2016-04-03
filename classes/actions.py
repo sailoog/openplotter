@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
-import subprocess, time
+import subprocess, time, gammu, re
 from paths import Paths
 from classes.twitterbot import TwitterBot
 from classes.gmailbot import GmailBot
@@ -39,8 +39,9 @@ class Actions():
 		self.options.append([_('start WiFi access point'),_('Be sure you have filled in all fields in "WiFi AP" tab and enabled WiFi access point.'),0,'ACT10'])
 		self.options.append([_('stop SDR-AIS'),0,0,'ACT11'])
 		self.options.append([_('reset SDR-AIS'),_('Be sure you have filled in Gain and Correction fields in "SDR-AIS" tab and enabled AIS NMEA generation.'),0,'ACT12'])
-		self.options.append([_('publish Twitter'),_('Be sure you have filled in all fields in "Accounts" tab, selected data to publish and enabled Twitter checkbox.\n\nEnter text to publish in the field below (optional).'),1,'ACT13'])
+		self.options.append([_('publish Twitter'),_('Be sure you have filled in all fields in "Accounts" tab, and enabled Twitter checkbox.\n\nEnter text to publish in the field below.'),1,'ACT13'])
 		self.options.append([_('send e-mail'),_('Be sure you have filled in all fields in "Accounts" tab, and enabled Gmail checkbox.\n\nEnter the subject in the field below.'),1,'ACT14'])
+		self.options.append([_('send SMS'),_('Be sure you have enabled sending SMS in "SMS" tab.\n\nEnter the text in the field below.'),1,'ACT21'])
 		self.options.append([_('play sound'),'OpenFileDialog',1,'ACT15'])
 		self.options.append([_('stop all sounds'),0,0,'ACT16'])
 		self.options.append([_('show message'),_('Enter the message in the field below.'),1,'ACT17'])
@@ -74,6 +75,11 @@ class Actions():
 			if item[4]==data: return index
 
 	def run_action(self,option,text,conf,a):
+		if text:
+			var_list=re.findall(r'\[(.*?)\]',text)
+			for i in var_list:
+				for ii in a.DataList:
+					if i==ii[1]: text=text.replace('['+i+']', str(ii[2]))
 		conf.read()
 		if option=='ACT1': time.sleep(float(text))
 		if option=='ACT2':
@@ -126,24 +132,6 @@ class Actions():
 		if option=='ACT13':
 			now = time.strftime("%H:%M:%S")
 			tweetStr = now+' '+text
-			send_data=eval(conf.get('TWITTER', 'send_data'))
-			for ii in send_data:
-				for index,item in enumerate(a.DataList):
-					if ii==item[9]:
-						timestamp=item[4]
-						if timestamp:
-							now=time.time()
-							age=now-timestamp
-							if age < 20:
-								data=''
-								value=''
-								unit=''
-								data=item[1]
-								value=item[2]
-								unit=item[3]
-								if unit: tweetStr+= ' '+data+':'+str(value)+str(unit)
-								else: tweetStr+= ' '+data+':'+str(value)+' '
-						timestamp=''
 			apiKey = conf.get('TWITTER', 'apiKey')
 			apiSecret = conf.get('TWITTER', 'apiSecret')
 			accessToken = conf.get('TWITTER', 'accessToken')
@@ -196,4 +184,15 @@ class Actions():
 		if option[:4]=='LOUT':
 				channel=self.out_list[self.getoutlistIndex(option[1:])][3]
 				GPIO.output(channel, 0)
-
+		if option=='ACT21':
+			try:
+				sm = gammu.StateMachine()
+				sm.ReadConfig()
+				sm.Init()
+				message = {
+					'Text': text, 
+					'SMSC': {'Location': 1},
+					'Number': conf.get('SMS','phone'),
+				}
+				sm.SendSMS(message)
+			except Exception,e: print str(e)
