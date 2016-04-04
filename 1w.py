@@ -39,7 +39,7 @@ for index,item in enumerate(sensors_list):
 		print str(e)
 
 while True:
-	time.sleep(0.01)
+	time.sleep(0.4)
 	temp=''
 	list_tmp=[]	
 	ib=0
