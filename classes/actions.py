@@ -19,6 +19,7 @@ from paths import Paths
 from classes.twitterbot import TwitterBot
 from classes.gmailbot import GmailBot
 import RPi.GPIO as GPIO
+import paho.mqtt.publish as publish
 
 class Actions():
 
@@ -42,6 +43,7 @@ class Actions():
 		self.options.append([_('publish Twitter'),_('Be sure you have filled in all fields in "Accounts" tab, and enabled Twitter checkbox.\n\nEnter text to publish in the field below.'),1,'ACT13'])
 		self.options.append([_('send e-mail'),_('Be sure you have filled in all fields in "Accounts" tab, and enabled Gmail checkbox.\n\nEnter the subject in the field below.'),1,'ACT14'])
 		self.options.append([_('send SMS'),_('Be sure you have enabled sending SMS in "SMS" tab.\n\nEnter the text in the field below.'),1,'ACT21'])
+		self.options.append([_('send MQTT message'),_('Be sure you have filled in all fields in "Accounts" tab, and enabled MQTT checkbox.\n\nEnter the topic and the message separated by a space in the field below, e.g. sensors/temp 20C'),1,'ACT22'])		
 		self.options.append([_('play sound'),'OpenFileDialog',1,'ACT15'])
 		self.options.append([_('stop all sounds'),0,0,'ACT16'])
 		self.options.append([_('show message'),_('Enter the message in the field below.'),1,'ACT17'])
@@ -196,3 +198,9 @@ class Actions():
 				}
 				sm.SendSMS(message)
 			except Exception,e: print str(e)
+		if option=='ACT22':
+			topic0=text.split()
+			topic=topic0[0]
+			payload= text.replace(topic, "")
+			auth = {'username':conf.get('MQTT','username'), 'password':conf.get('MQTT','password')}
+			publish.single(topic, payload=payload, hostname=conf.get('MQTT','broker'), port=conf.get('MQTT','port'), auth=auth)

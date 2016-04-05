@@ -530,7 +530,7 @@ class MainFrame(wx.Frame):
 		wx.StaticText(self.page9, label=_('accessTokenSecret'), pos=(20, 175))
 		self.accessTokenSecret = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(150, 170))
 
-		wx.StaticBox(self.page9, label=_(' Gmail '), size=(330, 200), pos=(350, 10))
+		wx.StaticBox(self.page9, label=_(' Gmail '), size=(330, 165), pos=(350, 10))
 		self.gmail_enable = wx.CheckBox(self.page9, label=_('Enable'), pos=(360, 32))
 		self.gmail_enable.Bind(wx.EVT_CHECKBOX, self.on_gmail_enable)
 		wx.StaticText(self.page9, label=_('Gmail account'), pos=(360, 70))
@@ -539,6 +539,18 @@ class MainFrame(wx.Frame):
 		self.Gmail_password = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(490, 100))
 		wx.StaticText(self.page9, label=_('Recipient'), pos=(360, 140))
 		self.Recipient = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(490, 135))
+
+		wx.StaticBox(self.page9, label=_(' MQTT '), size=(330, 145), pos=(350, 180))
+		self.mqtt_enable = wx.CheckBox(self.page9, label=_('Enable'), pos=(360, 202))
+		self.mqtt_enable.Bind(wx.EVT_CHECKBOX, self.on_mqtt_enable)
+		wx.StaticText(self.page9, label='Broker', pos=(360, 235))
+		self.mqtt_broker = wx.TextCtrl(self.page9, -1, size=(170, 32), pos=(410, 230))
+		wx.StaticText(self.page9, label=_('Port'), pos=(590, 235))
+		self.mqtt_port = wx.TextCtrl(self.page9, -1, size=(50, 32), pos=(620, 230))
+		wx.StaticText(self.page9, label=_('Username'), pos=(360, 267))
+		self.mqtt_user = wx.TextCtrl(self.page9, -1, size=(120, 32), pos=(360, 285))
+		wx.StaticText(self.page9, label=_('Password'), pos=(500, 267))
+		self.mqtt_pass = wx.TextCtrl(self.page9, -1, size=(120, 32), pos=(500, 285))
 ###########################page9
 ########page10###################
 		wx.StaticBox(self.page10, label=_(' Triggers '), size=(670, 265), pos=(10, 10))
@@ -749,6 +761,18 @@ class MainFrame(wx.Frame):
 			self.Gmail_account.Disable()
 			self.Gmail_password.Disable()
 			self.Recipient.Disable()
+
+		if self.conf.get('MQTT', 'broker'): self.mqtt_broker.SetValue(self.conf.get('MQTT', 'broker'))
+		if self.conf.get('MQTT', 'port'): self.mqtt_port.SetValue(self.conf.get('MQTT', 'port'))
+		if self.conf.get('MQTT', 'username'): self.mqtt_user.SetValue(self.conf.get('MQTT', 'username'))
+		if self.conf.get('MQTT', 'password'): self.mqtt_pass.SetValue('***************')
+		if self.conf.get('MQTT', 'enable')=='1':
+			self.mqtt_enable.SetValue(True)
+			self.mqtt_broker.Disable()
+			self.mqtt_port.Disable()
+			self.mqtt_user.Disable()
+			self.mqtt_pass.Disable()
+
 
 		with open(home+'/.config/signalk-server-node/settings/openplotter-settings.json') as data_file:
 			data = json.load(data_file)
@@ -1902,7 +1926,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.read_outputs()
 		self.SetStatusText(_('Output changes cancelled'))
 
-#######################twitterbot
+#######################accounts
 
 	def start_monitoring(self):
 		self.ShowMessage(_('Actions will be restarted.'))
@@ -1961,6 +1985,30 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.Gmail_password.Enable()
 			self.Recipient.Enable()
 		self.start_monitoring()
+
+	def on_mqtt_enable(self,e):
+		if not self.mqtt_broker.GetValue() or not self.mqtt_port.GetValue() or not self.mqtt_user.GetValue() or not self.mqtt_pass.GetValue():
+			self.mqtt_enable.SetValue(False)
+			self.ShowMessage(_('Enter valid MQTT broker, port, username and password.'))
+			return
+		if self.mqtt_enable.GetValue():
+			self.mqtt_broker.Disable()
+			self.mqtt_port.Disable()
+			self.mqtt_user.Disable()
+			self.mqtt_pass.Disable()
+			self.conf.set('MQTT', 'enable', '1')
+			self.conf.set('MQTT', 'broker', self.mqtt_broker.GetValue())
+			self.conf.set('MQTT', 'port', self.mqtt_port.GetValue())
+			self.conf.set('MQTT', 'username', self.mqtt_user.GetValue())
+			if not '*****' in self.mqtt_pass.GetValue(): 
+				self.conf.set('MQTT', 'password', self.mqtt_pass.GetValue())
+				self.mqtt_pass.SetValue('***************')
+		else:
+			self.conf.set('MQTT', 'enable', '1')
+			self.mqtt_broker.Enable()
+			self.mqtt_port.Enable()
+			self.mqtt_user.Enable()
+			self.mqtt_pass.Enable()
 
 #######################actions
 
