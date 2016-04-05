@@ -20,7 +20,7 @@ class addUSBinst(wx.Dialog):
 
 	def __init__(self):
 
-		wx.Dialog.__init__(self, None, title=_('Add individual name to serial port'), size=(580,300))
+		wx.Dialog.__init__(self, None, title=_('Rename USB serial port'), size=(580,300))
 
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 
@@ -28,12 +28,11 @@ class addUSBinst(wx.Dialog):
 
 		self.list_devices = wx.ListCtrl(panel, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(565, 120))
 		self.list_devices.SetPosition((5, 5))
-		self.list_devices.InsertColumn(0, _('random name'), width=113)
+		self.list_devices.InsertColumn(0, _('name'), width=113)
 		self.list_devices.InsertColumn(1, _('vendor'), width=60)
 		self.list_devices.InsertColumn(2, _('product'), width=65)
-		self.list_devices.InsertColumn(3, _('port'), width=90)
-		self.list_devices.InsertColumn(4, _('serial'), width=100)
-		self.list_devices.InsertColumn(5, _('info'), width=600)
+		self.list_devices.InsertColumn(3, _('port'), width=100)
+		self.list_devices.InsertColumn(4, _('serial'), width=215)
 		self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.select_device, self.list_devices)
 
 		wx.StaticText(panel, label=_('new name'), pos=(15, 140))
@@ -42,13 +41,13 @@ class addUSBinst(wx.Dialog):
 		self.OPname_select.Disable()
 		self.OPname_label.Disable()
 
-		self.rem_dev = wx.CheckBox(panel, label=_('Remember device (by vendor, product,(serial))'), pos=(245, 140))
+		self.rem_dev = wx.CheckBox(panel, label=_('Remember device'), pos=(245, 140))
 		self.rem_dev.Bind(wx.EVT_CHECKBOX, self.on_enable_dev)
 		self.rem_dev.Disable()
 		self.rem_dev.SetValue(True)
 		self.rem='dev'
 
-		self.rem_port = wx.CheckBox(panel, label=_('Remember port (positon on the USB-hub)'), pos=(245, 165))	
+		self.rem_port = wx.CheckBox(panel, label=_('Remember port'), pos=(245, 165))	
 		self.rem_port.Bind(wx.EVT_CHECKBOX, self.on_enable_port)
 		self.rem_port.Disable()
 
@@ -62,10 +61,7 @@ class addUSBinst(wx.Dialog):
 					value=device['DEVPATH']
 					value_DEVPATH = value[value.rfind('/usb1/')+6:-(len(value)-value.find('/tty'))]
 					value_DEVPATH = value_DEVPATH[value_DEVPATH.rfind('/')+1:]
-					if device.get('ID_SERIAL_SHORT'):
-						self.list_devices.Append([i,device['ID_VENDOR_ID'],device['ID_MODEL_ID'],value_DEVPATH,device['ID_SERIAL_SHORT'],device['ID_VENDOR_FROM_DATABASE'] +' '+ device['ID_MODEL_FROM_DATABASE']])
-					else:
-						self.list_devices.Append([i,device['ID_VENDOR_ID'],device['ID_MODEL_ID'],value_DEVPATH,'',device['ID_VENDOR_FROM_DATABASE'] +' '+ device['ID_MODEL_FROM_DATABASE']])
+					self.list_devices.Append([i,device['ID_VENDOR_ID'],device['ID_MODEL_ID'],value_DEVPATH,device['ID_SERIAL']])
 
 		cancelBtn = wx.Button(panel, wx.ID_CANCEL, pos=(195, 220))
 		okBtn = wx.Button(panel, wx.ID_OK, pos=(305, 220))

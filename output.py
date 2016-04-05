@@ -24,7 +24,7 @@ from classes.language import Language
 
 class MyFrame(wx.Frame):
 		
-		def __init__(self):
+		def __init__(self, parent):
 
 			paths=Paths()
 			self.currentpath=paths.currentpath
@@ -33,8 +33,7 @@ class MyFrame(wx.Frame):
 
 			Language(self.conf.get('GENERAL','lang'))
 
-			wx.Frame.__init__(self, None, title="Inspector", size=(650,435))
-			self.Bind(wx.EVT_CLOSE, self.OnClose)
+			wx.Frame.__init__(self, parent, title="Inspector", size=(650,435))
 			
 			self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 			
@@ -70,10 +69,8 @@ class MyFrame(wx.Frame):
 
 			self.Show(True)
 
-			self.t1_stop= threading.Event()
-			self.thread1=threading.Thread(target=self.parse_data, args=(1,self.t1_stop))
-			self.t2_stop= threading.Event()
-			self.thread2=threading.Thread(target=self.refresh_loop, args=(1,self.t2_stop))
+			self.thread1=threading.Thread(target=self.parse_data)
+			self.thread2=threading.Thread(target=self.refresh_loop)
 			
 			self.s2=''
 			self.error=''
@@ -96,8 +93,8 @@ class MyFrame(wx.Frame):
 			else: self.error=''
 			
 
-		def parse_data(self,arg1,stop_event):
-			while (not stop_event.is_set()):
+		def parse_data(self):
+			while True:
 				if not self.s2: self.connect()
 				else:
 					frase_nmea=''
@@ -115,8 +112,8 @@ class MyFrame(wx.Frame):
 		# end thread 1
 
 		# thread 2
-		def refresh_loop(self,arg1,stop_event):
-			while (not stop_event.is_set()):
+		def refresh_loop(self):
+			while True:	
 				if self.pause_all==0:
 					self.a.checkinputs()
 					self.a.checkoutputs()
@@ -194,14 +191,7 @@ class MyFrame(wx.Frame):
 		def nmea_info(self, e):
 			url = self.currentpath+'/docs/NMEA.html'
 			webbrowser.open(url,new=2)
-					
-		def OnClose(self, event):
-			self.t1_stop.set()
-			self.t2_stop.set()
-			while (self.thread1.isAlive() or self.thread2.isAlive()):
-				time.sleep(0.1)
-			self.Destroy()
 
-app = wx.App()
-MyFrame().Show()
+app = wx.App(False)
+frame = MyFrame(None)
 app.MainLoop()
