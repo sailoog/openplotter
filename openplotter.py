@@ -463,8 +463,8 @@ class MainFrame(wx.Frame):
 		self.list_USBinst.InsertColumn(1, _('vendor'), width=55)
 		self.list_USBinst.InsertColumn(2, _('product'), width=60)
 		self.list_USBinst.InsertColumn(3, _('port'), width=90)
-		self.list_USBinst.InsertColumn(4, _('serial'), width=190)
-		self.list_USBinst.InsertColumn(5, _('rem.'), width=40)
+		self.list_USBinst.InsertColumn(4, _('serial'), width=130)
+		self.list_USBinst.InsertColumn(5, _('remember'), width=100)
 			
 		self.add_USBinst_button =wx.Button(self.page14, label=_('add'), pos=(585, 30))
 		self.Bind(wx.EVT_BUTTON, self.add_USBinst, self.add_USBinst_button)
