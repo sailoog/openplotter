@@ -15,12 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import socket, time, pynmea2, RTIMU, math, csv
+import socket, time, pynmea2, RTIMU, math, csv, datetime, json
 from classes.paths import Paths
 from classes.conf import Conf
 
 paths=Paths()
 currentpath=paths.currentpath
+home=paths.home
 
 conf=Conf()
 
@@ -44,6 +45,10 @@ press_temp_log_b = conf.get('STARTUP', 'press_temp_log')=='1'
 
 nmea_rate_sen = float(conf.get('STARTUP', 'nmea_rate_sen'))
 
+with open(home+'/.config/signalk-server-node/settings/openplotter-settings.json') as data_file:
+	data = json.load(data_file)
+
+mmsi=data['vessel']['uuid']
 if nmea_hdg_b or nmea_heel_b or nmea_pitch_b:
 	SETTINGS_FILE = "RTIMULib"
 	s = RTIMU.Settings(SETTINGS_FILE)
@@ -137,6 +142,12 @@ while True:
 			hdg1=str(hdg)
 			hdg2=hdg1+"\r\n"
 			sock.sendto(hdg2, ('127.0.0.1', 10110))
+
+			SK_path = "navigation.headingMagnetic"
+			SignalK = '{"updates": [{"source": {"type": "HDG","src" : "imu"},"timestamp": "'+str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z","values":[ {"path": "'+SK_path+'","value":'+str(0.017453293*heading_m)+'}]}],"context": "vessels.'+mmsi+'"}\n'
+
+			sock.sendto(SignalK, ('127.0.0.1', 7777))			
+			
 			heading_m=''
 		# XDR
 		list_tmp1=[]
