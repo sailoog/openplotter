@@ -32,7 +32,7 @@ class addUSBinst(wx.Dialog):
 		self.list_devices.InsertColumn(1, _('vendor'), width=60)
 		self.list_devices.InsertColumn(2, _('product'), width=65)
 		self.list_devices.InsertColumn(3, _('port'), width=90)
-		self.list_devices.InsertColumn(4, _('serial'), width=100)
+		self.list_devices.InsertColumn(4, _('serial'), width=65)
 		self.list_devices.InsertColumn(5, _('info'), width=600)
 		self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.select_device, self.list_devices)
 
@@ -62,10 +62,16 @@ class addUSBinst(wx.Dialog):
 					value=device['DEVPATH']
 					value_DEVPATH = value[value.rfind('/usb1/')+6:-(len(value)-value.find('/tty'))]
 					value_DEVPATH = value_DEVPATH[value_DEVPATH.rfind('/')+1:]
-					if device.get('ID_SERIAL_SHORT'):
-						self.list_devices.Append([i,device['ID_VENDOR_ID'],device['ID_MODEL_ID'],value_DEVPATH,device['ID_SERIAL_SHORT'],device['ID_VENDOR_FROM_DATABASE'] +' '+ device['ID_MODEL_FROM_DATABASE']])
-					else:
-						self.list_devices.Append([i,device['ID_VENDOR_ID'],device['ID_MODEL_ID'],value_DEVPATH,'',device['ID_VENDOR_FROM_DATABASE'] +' '+ device['ID_MODEL_FROM_DATABASE']])
+					try:
+						serial=device['ID_SERIAL_SHORT']
+					except: serial=''
+					try:
+						vendor_db=device['ID_VENDOR_FROM_DATABASE']
+					except: vendor_db=''
+					try:
+						model_db=device['ID_MODEL_FROM_DATABASE']
+					except: model_db=''
+					self.list_devices.Append([i,device['ID_VENDOR_ID'],device['ID_MODEL_ID'],value_DEVPATH,serial,vendor_db +' '+ model_db])
 
 		cancelBtn = wx.Button(panel, wx.ID_CANCEL, pos=(195, 220))
 		okBtn = wx.Button(panel, wx.ID_OK, pos=(305, 220))

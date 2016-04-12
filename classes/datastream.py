@@ -37,7 +37,7 @@ class DataStream:
 		self.DataList.append([_('True Heading'),_('HDT'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'HDT'])
 		self.DataList.append([_('Course Over Ground'),_('COG'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'COG'])
 		self.DataList.append([_('Speed Over Ground'),_('SOG'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'SOG'])
-		self.DataList.append([_('Speed Trought Water'),_('STW'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'STW'])
+		self.DataList.append([_('Speed Through Water'),_('STW'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'STW'])
 		self.DataList.append([_('Water Depth (from transducer)'),_('DPT'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'DPT'])
 		self.DataList.append([_('Apparent Wind Angle'),_('AWA'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'AWA'])
 		self.DataList.append([_('True Wind Angle'),_('TWA'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'TWA'])
