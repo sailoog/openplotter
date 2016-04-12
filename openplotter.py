@@ -2399,16 +2399,23 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				write_str='KERNEL=="ttyUSB*", KERNELS=="'+self.USBinst[index][4]
 				write_str=write_str+'" ,SYMLINK+="'+self.USBinst[index][0]+'"\n'
 			else:
-				write_str='SUBSYSTEM=="tty", ATTRS{idVendor}=="'+self.USBinst[index][1]
-				write_str=write_str+'",ATTRS{idProduct}=="'+self.USBinst[index][2]
-				write_str=write_str+'" ,SYMLINK+="'+self.USBinst[index][0]+'"\n'
+				if self.USBinst[index][3] == '':
+					write_str='SUBSYSTEM=="tty", ATTRS{idVendor}=="'+self.USBinst[index][1]
+					write_str=write_str+'",ATTRS{idProduct}=="'+self.USBinst[index][2]
+					write_str=write_str+'" ,SYMLINK+="'+self.USBinst[index][0]+'"\n'
+				else:	
+					write_str='SUBSYSTEM=="tty", ATTRS{idVendor}=="'+self.USBinst[index][1]
+					write_str=write_str+'",ATTRS{idProduct}=="'+self.USBinst[index][2]
+					write_str=write_str+'",ATTRS{serial}=="'+self.USBinst[index][3]
+					write_str=write_str+'" ,SYMLINK+="'+self.USBinst[index][0]+'"\n'
+					
 			file.write(write_str)
 		file.close()
 		os.system('sudo mv 10-openplotter.rules /etc/udev/rules.d')
 		self.SetStatusText(_('Restarting'))
 		self.start_udev()
 		time.sleep(1.5)
-		self.SetStatusText(_('USB names changes applied and restarted'))
+		self.SetStatusText(_('USB names added and restarted'))
 		self.SerialCheck()
 
 #######################Signal K
@@ -2597,5 +2604,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 #Main#############################
 if __name__ == "__main__":
 	app = wx.App()
+
+	bitmap = wx.Bitmap(home+'/.config/openplotter/openplotter.ico', wx.BITMAP_TYPE_ICO)
+	splash = wx.SplashScreen(bitmap, wx.SPLASH_CENTRE_ON_SCREEN|wx.SPLASH_TIMEOUT, 500, None, style=wx.SIMPLE_BORDER|wx.STAY_ON_TOP)
+	wx.Yield()
+
 	MainFrame().Show()
 	app.MainLoop()
