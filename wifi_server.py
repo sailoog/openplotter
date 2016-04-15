@@ -58,6 +58,10 @@ if wifi_server=='1':
 			driver='rtl871xdrv'
 			chipset= 'RTL8192EU'
 			shutil.copyfile(currentpath+'/wifi_drivers/RTL8192EU/hostapd', '/usr/sbin/hostapd')
+		if '0bda:8179' in output:
+			driver='rtl871xdrv'
+			chipset= 'RTL8188EU'
+			shutil.copyfile(currentpath+'/wifi_drivers/RTL8188EU/hostapd', '/usr/sbin/hostapd')
 		if chipset == 'default':
 			shutil.copyfile('/usr/sbin/hostapd.org', '/usr/sbin/hostapd')
 		
