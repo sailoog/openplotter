@@ -24,15 +24,30 @@ class Mqtt:
 		if x: self.topics_list=eval(x)
 		else: self.topics_list=[]
 
+		local_broker='127.0.0.1'
+		local_port='1883'
+		user=conf.get('MQTT', 'username')
+		passw=conf.get('MQTT', 'password')
+
+		if self.topics_list:
+			self.client_local = paho.Client()
+			self.client_local.on_message = self.on_message
+			self.client_local.on_connect = self.on_connect
+			self.client_local.username_pw_set(user, passw)
+			self.client_local.connect(local_broker, local_port)
+			self.client_local.loop_start()
+
 		broker=conf.get('MQTT', 'broker')
 		port=conf.get('MQTT', 'port')
+
 		if self.topics_list and broker and port :
 			self.client = paho.Client()
 			self.client.on_message = self.on_message
 			self.client.on_connect = self.on_connect
-			self.client.username_pw_set(conf.get('MQTT', 'username'), conf.get('MQTT', 'password'))
+			self.client.username_pw_set(user, passw)
 			self.client.connect(broker, port)
 			self.client.loop_start()
+
 
 	def on_message(self, client, userdata, msg):
 		for index, item in enumerate(self.a.DataList):
@@ -46,8 +61,9 @@ class Mqtt:
 	def on_connect(self, client, userdata, flags, rc):
 		for i in self.topics_list:
 			try:
-				self.client.subscribe(i[1], qos=0)
+				client.subscribe(i[1], qos=0)
 			except Exception,e: print str(e)
 
 	def stop(self):
 		self.client.loop_stop()
+		self.client_local.loop_stop()

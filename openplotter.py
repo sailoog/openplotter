@@ -550,10 +550,12 @@ class MainFrame(wx.Frame):
 		wx.StaticText(self.page16, label=_('Port'), pos=(220, 30))
 		self.mqtt_port = wx.TextCtrl(self.page16, -1, size=(50, 32), pos=(220, 50))
 
-		wx.StaticText(self.page16, label=_('Username'), pos=(320, 30))
-		self.mqtt_user = wx.TextCtrl(self.page16, -1, size=(120, 32), pos=(320, 50))
-		wx.StaticText(self.page16, label=_('Password'), pos=(450, 30))
-		self.mqtt_pass = wx.TextCtrl(self.page16, -1, size=(120, 32), pos=(450, 50))
+		wx.StaticText(self.page16, label=_('Username'), pos=(280, 30))
+		self.mqtt_user = wx.TextCtrl(self.page16, -1, size=(120, 32), pos=(280, 50))
+		wx.StaticText(self.page16, label=_('Remote password'), pos=(410, 30))
+		self.mqtt_pass = wx.TextCtrl(self.page16, -1, size=(120, 32), pos=(410, 50))
+		self.set_rem_pass_but =wx.Button(self.page16, label=_('Local password'), pos=(540, 50))
+		self.Bind(wx.EVT_BUTTON, self.set_rem_pass, self.set_rem_pass_but)
 
 		wx.StaticText(self.page16, label=_('Topics'), pos=(20, 90))
 
@@ -2664,12 +2666,20 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.conf.set('MQTT', 'password', self.mqtt_pass.GetValue())
 			self.mqtt_pass.SetValue('***************')
 		self.conf.set('MQTT', 'topics', str(self.topics))
+		subprocess.call(['sudo','service','mosquitto','restart'])
 		self.start_monitoring()
 		self.SetStatusText(_('MQTT topics changes applied and restarted'))
 
 	def cancel_changes_mqtt(self,e):
 		self.read_mqtt()
 		self.SetStatusText(_('MQTT topics changes cancelled'))
+
+	def set_rem_pass(self,e):
+		if not self.mqtt_user.GetValue():
+			self.ShowMessage(_('Enter an username.'))
+			return
+		self.ShowMessage(_('Your remote username and your local username will be the same. Set the local password in the next window.'))
+		subprocess.Popen(['lxterminal','-e','sudo','mosquitto_passwd','-c','/etc/mosquitto/passwd.pw',self.mqtt_user.GetValue()])
 
 #Main#############################
 if __name__ == "__main__":
