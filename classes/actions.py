@@ -42,8 +42,7 @@ class Actions():
 		self.options.append([_('reset SDR-AIS'),_('Be sure you have filled in Gain and Correction fields in "SDR-AIS" tab and enabled AIS NMEA generation.'),0,'ACT12'])
 		self.options.append([_('publish Twitter'),_('Be sure you have filled in all fields in "Accounts" tab, and enabled Twitter checkbox.\n\nEnter text to publish in the field below.'),1,'ACT13'])
 		self.options.append([_('send e-mail'),_('Be sure you have filled in all fields in "Accounts" tab, and enabled Gmail checkbox.\n\nEnter the subject in the field below.'),1,'ACT14'])
-		self.options.append([_('send SMS'),_('Be sure you have enabled sending SMS in "SMS" tab.\n\nEnter the text in the field below.'),1,'ACT21'])
-		self.options.append([_('send MQTT message'),_('Be sure you have filled in all fields in "Accounts" tab, and enabled MQTT checkbox.\n\nEnter the topic and the message separated by a space in the field below, e.g. sensors/temp 20C'),1,'ACT22'])		
+		self.options.append([_('send SMS'),_('Be sure you have enabled sending SMS in "SMS" tab.\n\nEnter the text in the field below.'),1,'ACT21'])		
 		self.options.append([_('play sound'),'OpenFileDialog',1,'ACT15'])
 		self.options.append([_('stop all sounds'),0,0,'ACT16'])
 		self.options.append([_('show message'),_('Enter the message in the field below.'),1,'ACT17'])
@@ -62,6 +61,15 @@ class Actions():
 					self.options.append([i[1]+_(': Low'),0,0,'L'+i[4]])
 			except Exception,e: print str(e)
 
+		#mqtt
+		x=conf.get('MQTT', 'topics')
+		if x: self.mqtt_list=eval(x)
+		else: self.mqtt_list=[]
+		for i in self.mqtt_list:
+			try:
+				self.options.append([_('Publish on topic ')+i[1],0,1,i[2]])
+			except Exception,e: print str(e)
+
 		self.time_units=[_('no repeat'),_('seconds'), _('minutes'), _('hours'), _('days')]
 
 		paths=Paths()
@@ -75,6 +83,10 @@ class Actions():
 	def getoutlistIndex(self, data):
 		for index, item in enumerate(self.out_list):
 			if item[4]==data: return index
+
+	def getmqttlistIndex(self, data):
+		for index, item in enumerate(self.mqtt_list):
+			if item[2]==data: return index
 
 	def run_action(self,option,text,conf,a):
 		if text:
@@ -198,9 +210,8 @@ class Actions():
 				}
 				sm.SendSMS(message)
 			except Exception,e: print str(e)
-		if option=='ACT22':
-			topic0=text.split()
-			topic=topic0[0]
-			payload= text.replace(topic, "")
+		if option[:4]=='MQTT':
+			topic=self.mqtt_list[self.getmqttlistIndex(option)][1]
+			payload= text
 			auth = {'username':conf.get('MQTT','username'), 'password':conf.get('MQTT','password')}
 			publish.single(topic, payload=payload, hostname=conf.get('MQTT','broker'), port=conf.get('MQTT','port'), auth=auth)

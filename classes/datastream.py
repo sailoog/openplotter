@@ -86,10 +86,21 @@ class DataStream:
 					channel=i[3]
 					GPIO.setup(channel, GPIO.OUT)
 			except Exception,e: print str(e)
+		
+		#MQTT
+		x=conf.get('MQTT', 'topics')
+		if x: topics_list=eval(x)
+		else: topics_list=[]
+		for i in topics_list:
+			try:
+				self.DataList.append([i[1],i[0],None,None,None,None,None,(0,1,2,3,4,5,6),1, i[2]])
+			except Exception,e: print str(e)
+
+
 
 		#ATENTION. If order changes, edit monitoring.py: "#actions"
 		self.operators_list=[_('was not present in the last (sec.)'),_('was present in the last (sec.)'),_('is equal to'), _('is less than'), _('is less than or equal to'), _('is greater than'), _('is greater than or equal to'), _('is on'), _('is off')]
-
+		
 	def checkinputs(self):
 		for i in self.sw_list:
 			try:

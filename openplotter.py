@@ -29,6 +29,7 @@ from classes.add_DS18B20 import addDS18B20
 from classes.add_switch import addSwitch
 from classes.add_output import addOutput
 from classes.add_USBinst import addUSBinst
+from classes.add_topic import addTopic
 
 paths=Paths()
 home=paths.home
@@ -72,6 +73,7 @@ class MainFrame(wx.Frame):
 		self.page13 = wx.Panel(self.nb)
 		self.page14 = wx.Panel(self.nb)
 		self.page15 = wx.Panel(self.nb)
+		self.page16 = wx.Panel(self.nb)
 
 		self.nb.AddPage(self.page14, _('USB manager'))
 		self.nb.AddPage(self.page5, _('NMEA 0183'))
@@ -86,6 +88,7 @@ class MainFrame(wx.Frame):
 		self.nb.AddPage(self.page4, _('SDR-AIS'))
 		self.nb.AddPage(self.page2, _('Calculate'))
 		self.nb.AddPage(self.page9, _('Accounts'))
+		self.nb.AddPage(self.page16, _('MQTT'))
 		self.nb.AddPage(self.page15, _('SMS'))
 		self.nb.AddPage(self.page1, _('Startup'))
 
@@ -539,19 +542,38 @@ class MainFrame(wx.Frame):
 		self.Gmail_password = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(490, 100))
 		wx.StaticText(self.page9, label=_('Recipient'), pos=(360, 140))
 		self.Recipient = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(490, 135))
-
-		wx.StaticBox(self.page9, label=_(' MQTT '), size=(330, 145), pos=(350, 180))
-		self.mqtt_enable = wx.CheckBox(self.page9, label=_('Enable'), pos=(360, 202))
-		self.mqtt_enable.Bind(wx.EVT_CHECKBOX, self.on_mqtt_enable)
-		wx.StaticText(self.page9, label='Broker', pos=(360, 235))
-		self.mqtt_broker = wx.TextCtrl(self.page9, -1, size=(170, 32), pos=(410, 230))
-		wx.StaticText(self.page9, label=_('Port'), pos=(590, 235))
-		self.mqtt_port = wx.TextCtrl(self.page9, -1, size=(50, 32), pos=(620, 230))
-		wx.StaticText(self.page9, label=_('Username'), pos=(360, 267))
-		self.mqtt_user = wx.TextCtrl(self.page9, -1, size=(120, 32), pos=(360, 285))
-		wx.StaticText(self.page9, label=_('Password'), pos=(500, 267))
-		self.mqtt_pass = wx.TextCtrl(self.page9, -1, size=(120, 32), pos=(500, 285))
 ###########################page9
+########page16###################
+		wx.StaticBox(self.page16, label=_(' MQTT '), size=(670, 265), pos=(10, 10))
+		wx.StaticText(self.page16, label=_('Remote broker'), pos=(20, 30))
+		self.mqtt_broker = wx.TextCtrl(self.page16, -1, size=(190, 32), pos=(20, 50))
+		wx.StaticText(self.page16, label=_('Port'), pos=(220, 30))
+		self.mqtt_port = wx.TextCtrl(self.page16, -1, size=(50, 32), pos=(220, 50))
+
+		wx.StaticText(self.page16, label=_('Username'), pos=(320, 30))
+		self.mqtt_user = wx.TextCtrl(self.page16, -1, size=(120, 32), pos=(320, 50))
+		wx.StaticText(self.page16, label=_('Password'), pos=(450, 30))
+		self.mqtt_pass = wx.TextCtrl(self.page16, -1, size=(120, 32), pos=(450, 50))
+
+		wx.StaticText(self.page16, label=_('Topics'), pos=(20, 90))
+
+		self.list_topics = wx.ListCtrl(self.page16, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(565, 155))
+		self.list_topics.SetPosition((15, 110))
+		self.list_topics.InsertColumn(0, _('Short'), width=80)
+		self.list_topics.InsertColumn(1, _('Topic'), width=485)
+		self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_topic, self.list_topics)
+
+		self.add_topic_button =wx.Button(self.page16, label=_('add'), pos=(585, 110))
+		self.Bind(wx.EVT_BUTTON, self.add_topic, self.add_topic_button)
+
+		self.delete_topic_button =wx.Button(self.page16, label=_('delete'), pos=(585, 145))
+		self.Bind(wx.EVT_BUTTON, self.delete_topic, self.delete_topic_button)
+
+		self.button_apply_mqtt =wx.Button(self.page16, label=_('Apply changes'), pos=(570, 285))
+		self.Bind(wx.EVT_BUTTON, self.apply_changes_mqtt, self.button_apply_mqtt)
+		self.button_cancel_mqtt =wx.Button(self.page16, label=_('Cancel changes'), pos=(430, 285))
+		self.Bind(wx.EVT_BUTTON, self.cancel_changes_mqtt, self.button_cancel_mqtt)
+###########################page16
 ########page10###################
 		wx.StaticBox(self.page10, label=_(' Triggers '), size=(670, 265), pos=(10, 10))
 		
@@ -592,7 +614,6 @@ class MainFrame(wx.Frame):
 		self.button_cancel_actions =wx.Button(self.page10, label=_('Cancel changes'), pos=(430, 285))
 		self.Bind(wx.EVT_BUTTON, self.cancel_changes_actions, self.button_cancel_actions)
 ###########################page10
-		self.read_actions()
 		self.manual_settings=''
 		self.read_kplex_conf()
 		self.SerialCheck()
@@ -600,9 +621,6 @@ class MainFrame(wx.Frame):
 ###########################layout
 
 ####definitions###################
-
-	def read_actions(self):
-		self.actions=Actions(self.conf)
 
 	def set_layout_conf(self):
 		if self.language=='en': self.lang.Check(self.lang_item1.GetId(), True)
@@ -762,18 +780,6 @@ class MainFrame(wx.Frame):
 			self.Gmail_password.Disable()
 			self.Recipient.Disable()
 
-		if self.conf.get('MQTT', 'broker'): self.mqtt_broker.SetValue(self.conf.get('MQTT', 'broker'))
-		if self.conf.get('MQTT', 'port'): self.mqtt_port.SetValue(self.conf.get('MQTT', 'port'))
-		if self.conf.get('MQTT', 'username'): self.mqtt_user.SetValue(self.conf.get('MQTT', 'username'))
-		if self.conf.get('MQTT', 'password'): self.mqtt_pass.SetValue('***************')
-		if self.conf.get('MQTT', 'enable')=='1':
-			self.mqtt_enable.SetValue(True)
-			self.mqtt_broker.Disable()
-			self.mqtt_port.Disable()
-			self.mqtt_user.Disable()
-			self.mqtt_pass.Disable()
-
-
 		with open(home+'/.config/signalk-server-node/settings/openplotter-settings.json') as data_file:
 			data = json.load(data_file)
 		self.vessel.SetValue(data['vessel']['name'])
@@ -824,6 +830,7 @@ class MainFrame(wx.Frame):
 		self.read_USBinst()
 		self.read_switches()
 		self.read_outputs()
+		self.read_mqtt()
 
 ########MENU###################################	
 
@@ -1041,6 +1048,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		out+=_('\n RDP remote desktop:\n')
 		for ip in ips:
 			out+=ip+'\n'
+		out+=_('\n MQTT local broker:\n')
+		for ip in ips:
+			out+=ip+':1883\n'
 		out+=_('\n Signal K panel:\n')
 		for ip in ips:
 			out+=ip+':3000/instrumentpanel\n'
@@ -1772,7 +1782,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		for i in temp_list:
 			if i[1]==self.switches[selected_switch][5]:
 				self.read_triggers()
-				self.ShowMessage(_('You have an action defined for this switch. You must delete that action before deleting this switch.'))
+				self.ShowMessage(_('You have a trigger defined for this switch. You must delete that action before deleting this switch.'))
 				return
 		del self.switches[selected_switch]
 		self.list_switches.DeleteItem(selected_switch)
@@ -1796,7 +1806,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			else: self.switches[index][0]='0'
 		self.conf.set('INPUTS', 'switches', str(self.switches))
 		self.start_monitoring()
-		self.read_switches()
 		self.SetStatusText(_('Switches changes applied and restarted'))
 
 	def cancel_changes_switches(self, e):
@@ -1893,7 +1902,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				if ii[0][1:]==self.outputs[selected_output][4]: dontdelete=1
 		if dontdelete==1:
 			self.read_triggers()
-			self.ShowMessage(_('You have an action defined for this output. You must delete that action before deleting this output.'))
+			self.ShowMessage(_('You have a trigger defined for this output. You must delete that action before deleting this output.'))
 			return
 		del self.outputs[selected_output]
 		self.list_outputs.DeleteItem(selected_output)
@@ -1917,8 +1926,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			else: self.outputs[index][0]='0'
 		self.conf.set('OUTPUTS', 'outputs', str(self.outputs))
 		self.start_monitoring()
-		self.read_actions()
-		self.read_outputs()
 		self.SetStatusText(_('Output changes applied and restarted'))
 
 
@@ -1986,30 +1993,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.Recipient.Enable()
 		self.start_monitoring()
 
-	def on_mqtt_enable(self,e):
-		if not self.mqtt_broker.GetValue() or not self.mqtt_port.GetValue() or not self.mqtt_user.GetValue() or not self.mqtt_pass.GetValue():
-			self.mqtt_enable.SetValue(False)
-			self.ShowMessage(_('Enter valid MQTT broker, port, username and password.'))
-			return
-		if self.mqtt_enable.GetValue():
-			self.mqtt_broker.Disable()
-			self.mqtt_port.Disable()
-			self.mqtt_user.Disable()
-			self.mqtt_pass.Disable()
-			self.conf.set('MQTT', 'enable', '1')
-			self.conf.set('MQTT', 'broker', self.mqtt_broker.GetValue())
-			self.conf.set('MQTT', 'port', self.mqtt_port.GetValue())
-			self.conf.set('MQTT', 'username', self.mqtt_user.GetValue())
-			if not '*****' in self.mqtt_pass.GetValue(): 
-				self.conf.set('MQTT', 'password', self.mqtt_pass.GetValue())
-				self.mqtt_pass.SetValue('***************')
-		else:
-			self.conf.set('MQTT', 'enable', '1')
-			self.mqtt_broker.Enable()
-			self.mqtt_port.Enable()
-			self.mqtt_user.Enable()
-			self.mqtt_pass.Enable()
-
 #######################actions
 
 	def read_triggers(self):
@@ -2038,6 +2021,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				else: self.ShowMessage(_('Problem with Actions detected. Please check and save again.'))
 
 	def print_actions(self, e):
+		self.actions=Actions(self.conf)
 		selected_trigger=e.GetIndex()
 		self.list_actions.DeleteAllItems()
 		for i in  self.triggers[selected_trigger][4]:
@@ -2097,15 +2081,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				trigger0=self.a.DataList[trigger_selection]
 				operator_selection=trigger0[7][dlg.operator_select.GetCurrentSelection()]
 				if dlg.value.GetValue(): value=dlg.value.GetValue()
-				else: value='0'
-				try: value2=float(value)
-				except:
-					self.ShowMessage(_('Failed. Value must be a number.'))
-					dlg.Destroy()
-					return
+				else: value=0
+				value2=str(value)
 				operator=self.a.operators_list[operator_selection]
 				if edit==0:
-					self.list_triggers.Append([trigger0[0].decode('utf8'),operator.decode('utf8'),value])				
+					self.list_triggers.Append([trigger0[0].decode('utf8'),operator.decode('utf8'),value2.decode('utf8')])				
 					tmp=[]
 					tmp.append(1)
 					tmp.append(trigger0[9])
@@ -2121,13 +2101,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				else:
 					self.list_triggers.SetStringItem(edit[0],0,trigger0[0].decode('utf8'))
 					self.list_triggers.SetStringItem(edit[0],1,operator.decode('utf8'))
-					self.list_triggers.SetStringItem(edit[0],2,value)
+					self.list_triggers.SetStringItem(edit[0],2,value2.decode('utf8'))
 					self.triggers[edit[0]][1]=trigger0[9]
 					self.triggers[edit[0]][2]=operator_selection
 					self.triggers[edit[0]][3]=value2					
 			dlg.Destroy()
 	
 	def edit_actions(self,e):
+		self.actions=Actions(self.conf)
 		a=e.GetIndex()
 		t= self.list_triggers.GetFirstSelected()
 		action=self.actions.getOptionsListIndex(self.triggers[t][4][a][0])
@@ -2141,6 +2122,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.edit_add_action(0)
 
 	def edit_add_action(self,edit):
+		self.actions=Actions(self.conf)
 		selected_trigger_position= self.list_triggers.GetFirstSelected()
 		if selected_trigger_position==-1:
 			self.ShowMessage(_('Select a trigger to add actions.'))
@@ -2210,8 +2192,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			else: self.triggers[i][0]=0
 			i=i+1
 		self.conf.set('ACTIONS', 'triggers', str(self.triggers))
-		self.SetStatusText(_('Actions changes applied and restarted'))
 		self.start_monitoring()
+		self.SetStatusText(_('Actions changes applied and restarted'))
 
 	def cancel_changes_actions(self,e):
 		self.read_triggers()
@@ -2318,7 +2300,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		for i in temp_list:
 			if i[1]==self.DS18B20[selected_DS18B20][4]:
 				self.read_triggers()
-				self.ShowMessage(_('You have an action defined for this sensor. You must delete that action before deleting this sensor.'))
+				self.ShowMessage(_('You have a trigger defined for this sensor. You must delete that action before deleting this sensor.'))
 				return
 		del self.DS18B20[selected_DS18B20]
 		self.list_DS18B20.DeleteItem(selected_DS18B20)
@@ -2331,7 +2313,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.conf.set('1W', 'DS18B20', str(self.DS18B20))
 		self.start_1w()
 		self.start_monitoring()
-		self.read_triggers()
 		self.SetStatusText(_('DS18B20 sensors changes applied and restarted'))
 
 	def cancel_changes_DS18B20(self,e):
@@ -2600,6 +2581,95 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			return
 		subprocess.call(['pkill', '-f', 'test_sms.py'])
 		subprocess.Popen(['python',currentpath+'/test_sms.py', 't', text, self.phone_number.GetValue()])
+
+####################### MQTT
+
+	def read_mqtt(self):
+		if self.conf.get('MQTT', 'broker'): self.mqtt_broker.SetValue(self.conf.get('MQTT', 'broker'))
+		if self.conf.get('MQTT', 'port'): self.mqtt_port.SetValue(self.conf.get('MQTT', 'port'))
+		if self.conf.get('MQTT', 'username'): self.mqtt_user.SetValue(self.conf.get('MQTT', 'username'))
+		if self.conf.get('MQTT', 'password'): self.mqtt_pass.SetValue('***************')
+
+		self.topics=[]
+		self.list_topics.DeleteAllItems()
+		data=self.conf.get('MQTT', 'topics')
+		try:
+			temp_list=eval(data)
+		except:temp_list=[]
+		for ii in temp_list:
+			self.topics.append(ii)
+			self.list_topics.Append([ii[0].decode('utf8'),ii[1].decode('utf8')])
+
+	def edit_topic(self,e):
+		selected_topic=e.GetIndex()
+		edit=[selected_topic,self.topics[selected_topic][0],self.topics[selected_topic][1]]
+		self.edit_add_topic(edit)
+
+	def add_topic(self,e):
+		self.edit_add_topic(0)
+
+	def edit_add_topic(self,edit):
+		dlg = addTopic(edit)
+		res = dlg.ShowModal()
+		if res == wx.ID_OK:
+			short=dlg.short.GetValue()
+			short=short.encode('utf8')
+			topic=dlg.topic.GetValue()
+			topic=topic.encode('utf8')
+			if not topic or not short:
+				self.ShowMessage(_('Failed. Write a topic and a short name.'))
+				dlg.Destroy()
+				return				
+			if edit==0:
+				self.list_topics.Append([short.decode('utf8'),topic.decode('utf8')])
+				if len(self.topics)==0: ID='MQTT0'
+				else:
+					last=len(self.topics)-1
+					x=int(self.topics[last][2][4:])
+					ID='MQTT'+str(x+1)
+				self.topics.append([short,topic,ID])
+			else:
+				self.list_topics.SetStringItem(edit[0],0,short.decode('utf8'))
+				self.list_topics.SetStringItem(edit[0],1,topic.decode('utf8'))
+				self.topics[edit[0]][0]=short
+				self.topics[edit[0]][1]=topic
+		dlg.Destroy()
+
+
+	def delete_topic(self,e):
+		selected_topic=self.list_topics.GetFirstSelected()
+		if selected_topic==-1: 
+			self.ShowMessage(_('Select a topic to delete.'))
+			return
+		data=self.conf.get('ACTIONS', 'triggers')
+		try:
+			temp_list=eval(data)
+		except:temp_list=[]
+		for i in temp_list:
+			if i[1]==self.topics[selected_topic][2]:
+				self.read_triggers()
+				self.ShowMessage(_('You have a trigger defined for this topic. You must delete that action before deleting this topic.'))
+				return
+		del self.topics[selected_topic]
+		self.list_topics.DeleteItem(selected_topic)
+
+	def apply_changes_mqtt(self,e):
+		if not self.mqtt_user.GetValue() or not self.mqtt_pass.GetValue():
+			self.ShowMessage(_('Enter at least username and password.'))
+			return
+		self.conf.set('MQTT', 'broker', self.mqtt_broker.GetValue())
+		self.conf.set('MQTT', 'port', self.mqtt_port.GetValue())
+		self.conf.set('MQTT', 'username', self.mqtt_user.GetValue())
+		if not '*****' in self.mqtt_pass.GetValue(): 
+			self.conf.set('MQTT', 'password', self.mqtt_pass.GetValue())
+			self.mqtt_pass.SetValue('***************')
+		self.conf.set('MQTT', 'topics', str(self.topics))
+		self.start_monitoring()
+		self.SetStatusText(_('MQTT topics changes applied and restarted'))
+
+	def cancel_changes_mqtt(self,e):
+		self.read_mqtt()
+		self.SetStatusText(_('MQTT topics changes cancelled'))
 
 #Main#############################
 if __name__ == "__main__":

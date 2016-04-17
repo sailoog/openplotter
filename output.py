@@ -20,7 +20,7 @@ from classes.datastream import DataStream
 from classes.paths import Paths
 from classes.conf import Conf
 from classes.language import Language
-
+from classes.mqtt import Mqtt
 
 class MyFrame(wx.Frame):
 		
@@ -44,8 +44,8 @@ class MyFrame(wx.Frame):
 			self.logger = wx.TextCtrl(self, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_DONTWRAP, size=(650,150), pos=(0,0))
 
 			self.list = wx.ListCtrl(self, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(540, 220), pos=(5, 155))
-			self.list.InsertColumn(0, _('Short'), width=45)
-			self.list.InsertColumn(1, _('Magnitude'), width=180)
+			self.list.InsertColumn(0, _('Short'), width=50)
+			self.list.InsertColumn(1, _('Magnitude'), width=175)
 			self.list.InsertColumn(2, _('Value'), width=120)
 			self.list.InsertColumn(3, _('Source'), width=80)
 			self.list.InsertColumn(4, _('NMEA'), width=50)
@@ -59,6 +59,8 @@ class MyFrame(wx.Frame):
 
 			self.button_nmea =wx.Button(self, label=_('NMEA info'), pos=(555, 240))
 			self.Bind(wx.EVT_BUTTON, self.nmea_info, self.button_nmea)
+
+			self.mqtt=''
 
 			self.reset(0)
 
@@ -181,6 +183,8 @@ class MyFrame(wx.Frame):
 			time.sleep(1)
 			self.conf.read()
 			self.a=DataStream(self.conf)
+			if self.mqtt: self.mqtt.stop()
+			self.mqtt=Mqtt(self.conf,self.a)
 			index=0
 			for i in self.a.DataList:
 				short=i[1]
@@ -198,6 +202,7 @@ class MyFrame(wx.Frame):
 		def OnClose(self, event):
 			self.t1_stop.set()
 			self.t2_stop.set()
+			self.mqtt.stop()
 			while (self.thread1.isAlive() or self.thread2.isAlive()):
 				time.sleep(0.1)
 			self.Destroy()
