@@ -40,6 +40,9 @@ if wifi_server=='1':
 
 	driver='nl80211'
 	chipset= 'default'
+	wpa='1'
+	hw_mode='b'
+	channel='6'
 
 	version=subprocess.check_output("cat /proc/cpuinfo | grep 'Revision' | awk '{print $3}' | sed 's/^1000//'", shell=True)
 	if 'a02082' in version and wlan=='wlan0':
@@ -59,7 +62,10 @@ if wifi_server=='1':
 			chipset= 'RTL8192EU'
 			shutil.copyfile(currentpath+'/wifi_drivers/RTL8192EU/hostapd', '/usr/sbin/hostapd')
 		if '0bda:8179' in output:
-			driver='rtl871xdrv'
+			driver=''
+			wpa='3'
+			hw_mode='g'
+			channel='11'
 			chipset= 'RTL8188EU'
 			shutil.copyfile(currentpath+'/wifi_drivers/RTL8188EU/hostapd', '/usr/sbin/hostapd')
 		if chipset == 'default':
@@ -73,8 +79,10 @@ if wifi_server=='1':
 	file = open('/etc/default/hostapd', 'w')
 	file.write(data)
 	file.close()
-
-	data='interface='+wlan+'\ndriver='+driver+'\nssid='+ssid+'\nchannel=6\nwmm_enabled=1\nwpa=1\nwpa_passphrase='+passw+'\nwpa_key_mgmt=WPA-PSK\nwpa_pairwise=TKIP\nrsn_pairwise=CCMP\nauth_algs=1\nmacaddr_acl=0'
+	
+	if driver!='':
+		driver = 'driver='+driver
+	data='interface='+wlan+'\n'+driver+'\nssid='+ssid+'\nhw_mode='+hw_mode+'\nchannel='+channel+'\nwmm_enabled=1\nwpa='+wpa+'\nwpa_passphrase='+passw+'\nwpa_key_mgmt=WPA-PSK\nwpa_pairwise=TKIP\nrsn_pairwise=CCMP\nauth_algs=1\nmacaddr_acl=0'
 	file = open('/etc/hostapd/hostapd.conf', 'w')
 	file.write(data)
 	file.close()
