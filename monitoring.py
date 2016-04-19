@@ -156,10 +156,11 @@ while True:
 				now = time.time()
 				trigger_value_timestamp=a.DataList[trigger][4]
 				operator=item[2]
+				data=a.getVariablesValue(item[3])
 				try:
-					data_value=float(item[3])
+					data_value=float(data)
 				except: data_value=''
-				data_string=str(item[3])
+				data_string=str(data)
 			try:	
 				#not present for
 				if operator==0:

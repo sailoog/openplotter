@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import pynmea2, time
+import pynmea2, time, re
 import RPi.GPIO as GPIO
 
 class DataStream:
@@ -124,6 +124,13 @@ class DataStream:
 						self.DataList[self.getDataListIndex(i[4])][2]=0
 						self.DataList[self.getDataListIndex(i[4])][4]=time.time()
 			except Exception,e: print str(e)
+	
+	def getVariablesValue(self, data):
+		var_list=re.findall(r'\[(.*?)\]',data)
+		for i in var_list:
+			for ii in self.DataList:
+				if i==ii[1]: data=data.replace('['+i+']', str(ii[2]))
+		return data
 
 	def getDataListIndex(self, data):
 		for index, item in enumerate(self.DataList):

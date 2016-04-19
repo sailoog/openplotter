@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
-import subprocess, time, gammu, re
+import subprocess, time, gammu
 from paths import Paths
 from classes.twitterbot import TwitterBot
 from classes.gmailbot import GmailBot
@@ -90,10 +90,7 @@ class Actions():
 
 	def run_action(self,option,text,conf,a):
 		if text:
-			var_list=re.findall(r'\[(.*?)\]',text)
-			for i in var_list:
-				for ii in a.DataList:
-					if i==ii[1]: text=text.replace('['+i+']', str(ii[2]))
+			text=a.getVariablesValue(text)
 		conf.read()
 		if option=='ACT1': time.sleep(float(text))
 		if option=='ACT2':
