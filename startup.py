@@ -42,6 +42,8 @@ if device and ssid and passw:
 	conf.set('WIFI', 'device', device)
 	conf.set('WIFI', 'ssid', ssid)
 	conf.set('WIFI', 'password', passw)
+else :
+	conf.set('WIFI', 'enable', '0')
 
 delay=int(conf.get('STARTUP', 'delay'))
 
