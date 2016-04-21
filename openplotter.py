@@ -206,11 +206,9 @@ class MainFrame(wx.Frame):
 		wx.StaticText(self.page2, label=_('Generated NMEA: $OCMWV, $OCMWD'), pos=(360, 130))
 ###########################page2
 ########page3###################
-		wx.StaticBox(self.page3, size=(400, 45), pos=(10, 10))
-		self.wifi_enable = wx.CheckBox(self.page3, label=_('Enable WiFi access point'), pos=(20, 25))
+		wx.StaticBox(self.page3, size=(370, 315), pos=(10, 10))
+		self.wifi_enable = wx.CheckBox(self.page3, label=_('Enable access point'), pos=(20, 25))
 		self.wifi_enable.Bind(wx.EVT_CHECKBOX, self.onwifi_enable)
-
-		wx.StaticBox(self.page3, label=_(' Settings '), size=(400, 215), pos=(10, 60))
 		
 		self.available_wireless = []
 		output=subprocess.check_output('ifconfig', stderr=subprocess.STDOUT)
@@ -224,23 +222,40 @@ class MainFrame(wx.Frame):
 			if 'eth'+ii in output: self.available_share.append('eth'+ii)
 		for i in self.available_wireless:
 			self.available_share.append(i)
-		self.wlan = wx.ComboBox(self.page3, choices=self.available_wireless, style=wx.CB_READONLY, size=(100, 32), pos=(20, 85))
-		self.wlan_label=wx.StaticText(self.page3, label=_('AP WiFi device'), pos=(140, 90))
+		self.wlan_label=wx.StaticText(self.page3, label=_('Access point device'), pos=(20, 55))
+		self.wlan = wx.ComboBox(self.page3, choices=self.available_wireless, style=wx.CB_READONLY, size=(100, 32), pos=(20, 75))
+		
+		self.share_label=wx.StaticText(self.page3, label=_('Sharing Internet device'), pos=(180, 55))
+		self.share = wx.ComboBox(self.page3, choices=self.available_share, style=wx.CB_READONLY, size=(100, 32), pos=(180, 75))
 
-		self.ssid = wx.TextCtrl(self.page3, -1, size=(100, 32), pos=(20, 125))
-		self.ssid_label=wx.StaticText(self.page3, label=_('SSID \nmaximum 32 characters'), pos=(140, 125))
+		self.wifi_settings_label=wx.StaticText(self.page3, label=_('Access point settings'), pos=(20, 120))
 
-		self.passw = wx.TextCtrl(self.page3, -1, size=(100, 32), pos=(20, 165))
-		self.passw_label=wx.StaticText(self.page3, label=_('Password \nminimum 8 characters required'), pos=(140, 165))
+		self.ssid = wx.TextCtrl(self.page3, -1, size=(120, 32), pos=(20, 140))
+		self.ssid_label=wx.StaticText(self.page3, label=_('SSID \nmaximum 32 characters'), pos=(160, 140))
 
-		self.share = wx.ComboBox(self.page3, choices=self.available_share, style=wx.CB_READONLY, size=(100, 32), pos=(20, 205))
-		self.share_label=wx.StaticText(self.page3, label=_('Internet connection to share'), pos=(140, 210))
+		self.passw = wx.TextCtrl(self.page3, -1, size=(120, 32), pos=(20, 173))
+		self.passw_label=wx.StaticText(self.page3, label=_('Password \nminimum 8 characters required'), pos=(160, 175))
+		
+		self.wifi_channel_list=['1','2','3','4','5','6','7','8','9','10','11']
+		self.wifi_channel = wx.ComboBox(self.page3, choices=self.wifi_channel_list, style=wx.CB_READONLY, size=(120, 32), pos=(20, 208))
+		self.wifi_channel_label=wx.StaticText(self.page3, label=_('Channel'), pos=(160, 215))
 
-		wx.StaticBox(self.page3, label=_(' Addresses '), size=(270, 265), pos=(415, 10))
-		self.ip_info = wx.TextCtrl(self.page3, -1, style=wx.TE_MULTILINE|wx.TE_READONLY, size=(260, 245), pos=(420, 25))
+		self.wifi_mode_list=['IEEE 802.11b', 'IEEE 802.11g']
+		self.wifi_mode = wx.ComboBox(self.page3, choices=self.wifi_mode_list, style=wx.CB_READONLY, size=(120, 32), pos=(20, 246))
+		self.wifi_mode_label=wx.StaticText(self.page3, label=_('Mode'), pos=(160, 255))
+
+		self.wifi_wpa_list=['WPA','WPA2', _('Both')]
+		self.wifi_wpa = wx.ComboBox(self.page3, choices=self.wifi_wpa_list, style=wx.CB_READONLY, size=(120, 32), pos=(20, 285))
+		self.wifi_wpa_label=wx.StaticText(self.page3, label=_('WPA'), pos=(160, 290))
+
+		self.wifi_button_default =wx.Button(self.page3, label=_('Defaults'), pos=(275, 280))
+		self.Bind(wx.EVT_BUTTON, self.wifi_default, self.wifi_button_default)
+
+		wx.StaticBox(self.page3, label=_(' Addresses '), size=(290, 315), pos=(385, 10))
+		self.ip_info = wx.TextCtrl(self.page3, -1, style=wx.TE_MULTILINE|wx.TE_READONLY, size=(270, 245), pos=(395, 30))
 		self.ip_info.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_INACTIVECAPTION))
 
-		self.button_refresh_ip =wx.Button(self.page3, label=_('Refresh'), pos=(570, 285))
+		self.button_refresh_ip =wx.Button(self.page3, label=_('Refresh'), pos=(565, 280))
 		self.Bind(wx.EVT_BUTTON, self.show_ip_info, self.button_refresh_ip)
 ###########################page3
 ########page4###################
@@ -648,34 +663,6 @@ class MainFrame(wx.Frame):
 		if self.conf.get('STARTUP', 'maximize')=='1':
 			self.op_maximize.SetValue(True) 
 			self.Maximize()
-
-		if len(self.available_wireless)>0:
-			self.wlan.SetValue(self.conf.get('WIFI', 'device'))
-			self.ssid.SetValue(self.conf.get('WIFI', 'ssid'))
-			if self.conf.get('WIFI', 'password'): self.passw.SetValue('**********')
-			if self.conf.get('WIFI', 'share')=='0': self.share.SetValue( _('none'))
-			else: self.share.SetValue(self.conf.get('WIFI', 'share'))
-			if self.conf.get('WIFI', 'enable')=='1':
-				self.wifi_enable.SetValue(True)
-				self.wlan.Disable()
-				self.passw.Disable()
-				self.wlan_label.Disable()
-				self.passw_label.Disable()
-				self.ssid.Disable()
-				self.ssid_label.Disable()
-				self.share.Disable()
-				self.share_label.Disable()
-		else:
-			self.wifi_enable.Disable()
-			self.wlan.Disable()
-			self.passw.Disable()
-			self.wlan_label.Disable()
-			self.passw_label.Disable()
-			self.ssid.Disable()
-			self.ssid_label.Disable()
-			self.share.Disable()
-			self.share_label.Disable()
-		self.show_ip_info('')
 		
 		output=subprocess.check_output('lsusb')
 		if 'DVB-T' in output:
@@ -825,13 +812,14 @@ class MainFrame(wx.Frame):
 			self.sms_text.Disable()
 			self.sms_text_label.Disable()
 
+		self.read_wifi_conf()
 		self.read_triggers()
 		self.read_DS18B20()
 		self.read_USBinst()
 		self.read_switches()
 		self.read_outputs()
 		self.read_mqtt()
-
+		
 ########MENU###################################	
 
 	def time_zone(self,event):
@@ -976,7 +964,25 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		else:
 			self.conf.set('STARTUP', 'maximize', '0')
 ########WIFI###################################	
-
+	
+	def read_wifi_conf(self):
+		if len(self.available_wireless)>0:
+			self.wlan.SetValue(self.conf.get('WIFI', 'device'))
+			self.ssid.SetValue(self.conf.get('WIFI', 'ssid'))
+			self.wifi_channel.SetValue(self.conf.get('WIFI', 'channel'))
+			if self.conf.get('WIFI', 'password'): self.passw.SetValue('**********')
+			if self.conf.get('WIFI', 'share')=='0': self.share.SetValue( _('none'))
+			else: self.share.SetValue(self.conf.get('WIFI', 'share'))
+			if self.conf.get('WIFI', 'hw_mode')=='b': self.wifi_mode.SetValue('IEEE 802.11b')
+			if self.conf.get('WIFI', 'hw_mode')=='g': self.wifi_mode.SetValue('IEEE 802.11g')
+			if self.conf.get('WIFI', 'wpa')=='1': self.wifi_wpa.SetValue('WPA')
+			if self.conf.get('WIFI', 'wpa')=='2': self.wifi_wpa.SetValue('WPA2')
+			if self.conf.get('WIFI', 'wpa')=='3': self.wifi_wpa.SetValue(_('Both'))
+			if self.conf.get('WIFI', 'enable')=='1':
+				self.enable_disable_wifi(1)
+		else:
+			self.enable_disable_wifi(0)
+		self.show_ip_info('')
 
 	def onwifi_enable (self, e):
 		isChecked = self.wifi_enable.GetValue()
@@ -998,37 +1004,40 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.enable_disable_wifi(0)
 			return
 		if wlan==share:
-			self.ShowMessage(_('"AP Wifi Device" and "internet connection to share" must be different'))
+			self.ShowMessage(_('"Access point device" and "Sharing Internet device" must be different'))
 			self.enable_disable_wifi(0)
 			return
 		if len(ssid)>32 or len(passw)<8:
 			self.ShowMessage(_('Your SSID must have a maximum of 32 characters and your password a minimum of 8.'))
 			self.enable_disable_wifi(0)
 			return
-		if share==_('none'):share='0'
 		self.SetStatusText(_('Configuring WiFi AP, wait please...'))
+		channel=self.wifi_channel.GetValue()
+		mode=self.wifi_mode.GetValue()
+		wpa=self.wifi_wpa.GetValue()
+		if share==_('none'):share='0'
+		if mode=='IEEE 802.11b':mode='b'
+		if mode=='IEEE 802.11g':mode='g'
+		if wpa=='WPA':wpa='1'
+		if wpa=='WPA2':wpa='2'
+		if wpa==_('Both'):wpa='3'
+		self.conf.set('WIFI', 'device', wlan)
+		self.conf.set('WIFI', 'password', passw)
+		self.conf.set('WIFI', 'ssid', ssid)
+		self.conf.set('WIFI', 'share', share)
+		self.conf.set('WIFI', 'channel', channel)
+		self.conf.set('WIFI', 'hw_mode', mode)
+		self.conf.set('WIFI', 'wpa', wpa)
+		self.passw.SetValue('**********')
 		if isChecked:
 			self.enable_disable_wifi(1)
-			wifi_result=subprocess.check_output(['sudo', 'python', currentpath+'/wifi_server.py', '1', wlan, passw, ssid, share])		
+			wifi_result=subprocess.check_output(['sudo', 'python', currentpath+'/wifi_server.py', '1'])		
 		else:
 			self.enable_disable_wifi(0)
-			wifi_result=subprocess.check_output(['sudo', 'python', currentpath+'/wifi_server.py', '0', wlan, passw, ssid, share])
-			
+			wifi_result=subprocess.check_output(['sudo', 'python', currentpath+'/wifi_server.py', '0'])
 		msg=wifi_result
-
 		if 'WiFi access point failed.' in msg:
 			self.enable_disable_wifi(0)
-			self.conf.set('WIFI', 'device', '')
-			self.conf.set('WIFI', 'password', '')
-			self.conf.set('WIFI', 'ssid', '')
-			self.conf.set('WIFI', 'share', '')
-		if'WiFi access point started.' in msg:
-			self.conf.set('WIFI', 'device', wlan)
-			self.conf.set('WIFI', 'password', passw)
-			self.conf.set('WIFI', 'ssid', ssid)
-			self.conf.set('WIFI', 'share', share)
-			self.passw.SetValue('**********')
-
 		msg=msg.replace('WiFi access point failed.', _('WiFi access point failed.'))
 		msg=msg.replace('WiFi access point started.', _('WiFi access point started.'))
 		msg=msg.replace('WiFi access point stopped.', _('WiFi access point stopped.'))
@@ -1062,6 +1071,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			out+=ip+':10111\n'
 		self.ip_info.SetValue(out)
 
+	def wifi_default(self, e):
+		self.ssid.SetValue('OpenPlotter')
+		self.passw.SetValue('12345678')
+		self.wifi_channel.SetValue('6')
+		self.wifi_mode.SetValue('IEEE 802.11g')
+		self.wifi_wpa.SetValue('WPA2')
+
 	def enable_disable_wifi(self, s):
 		if s==1:
 			self.wlan.Disable()
@@ -1072,6 +1088,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.passw_label.Disable()
 			self.ssid_label.Disable()
 			self.share_label.Disable()
+			self.wifi_settings_label.Disable()
+			self.wifi_channel.Disable()
+			self.wifi_channel_label.Disable()
+			self.wifi_mode.Disable()
+			self.wifi_mode_label.Disable()
+			self.wifi_wpa.Disable()
+			self.wifi_wpa_label.Disable()
+			self.wifi_button_default.Disable()
 			self.wifi_enable.SetValue(True)
 			self.conf.set('WIFI', 'enable', '1')
 		else:
@@ -1083,6 +1107,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.passw_label.Enable()
 			self.ssid_label.Enable()
 			self.share_label.Enable()
+			self.wifi_settings_label.Enable()
+			self.wifi_channel.Enable()
+			self.wifi_channel_label.Enable()
+			self.wifi_mode.Enable()
+			self.wifi_mode_label.Enable()
+			self.wifi_wpa.Enable()
+			self.wifi_wpa_label.Enable()
+			self.wifi_button_default.Enable()
 			self.wifi_enable.SetValue(False)
 			self.conf.set('WIFI', 'enable', '0')
 
