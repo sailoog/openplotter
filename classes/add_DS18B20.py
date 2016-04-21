@@ -16,6 +16,10 @@
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 import wx
 from w1thermsensor import W1ThermSensor
+from classes.paths import Paths
+
+paths=Paths()
+home=paths.home
 
 class addDS18B20(wx.Dialog):
 
@@ -25,8 +29,14 @@ class addDS18B20(wx.Dialog):
 
 		panel = wx.Panel(self)
 
-		wx.StaticText(panel, label=_('name'), pos=(10, 10))
-		self.name = wx.TextCtrl(panel, size=(310, 30), pos=(10, 35))
+		with open(home+'/.config/openplotter/classes/SK_temp.txt') as f:
+			list_sk_path = [x.strip('\n\r') for x in f.readlines()]
+			#list_sk_path = f.readlines()
+
+
+		wx.StaticText(panel, label=_('Signal K name'), pos=(10, 10))
+		#self.name = wx.TextCtrl(panel, size=(310, 30), pos=(10, 35))
+		self.name= wx.ComboBox(panel, choices=list_sk_path, style=wx.CB_READONLY, size=(310, 30), pos=(10, 35))
 
 		wx.StaticText(panel, label=_('short name'), pos=(10, 70))
 		self.short = wx.TextCtrl(panel, size=(100, 30), pos=(10, 95))

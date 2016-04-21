@@ -15,12 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import socket, time, pynmea2, RTIMU, math, csv
+import socket, time, pynmea2, RTIMU, math, csv, datetime, json
 from classes.paths import Paths
 from classes.conf import Conf
 
 paths=Paths()
 currentpath=paths.currentpath
+home=paths.home
 
 conf=Conf()
 
@@ -44,6 +45,10 @@ press_temp_log_b = conf.get('STARTUP', 'press_temp_log')=='1'
 
 nmea_rate_sen = float(conf.get('STARTUP', 'nmea_rate_sen'))
 
+with open(home+'/.config/signalk-server-node/settings/openplotter-settings.json') as data_file:
+	data = json.load(data_file)
+
+mmsi=data['vessel']['uuid']
 if nmea_hdg_b or nmea_heel_b or nmea_pitch_b:
 	SETTINGS_FILE = "RTIMULib"
 	s = RTIMU.Settings(SETTINGS_FILE)
@@ -137,52 +142,85 @@ while True:
 			hdg1=str(hdg)
 			hdg2=hdg1+"\r\n"
 			sock.sendto(hdg2, ('127.0.0.1', 10110))
+
+			SK_path = "navigation.headingMagnetic"
+			SignalK = '{"updates": [{"source": {"type": "HDG","src" : "imu"},"timestamp": "'+str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z","values":[ {"path": "'+SK_path+'","value":'+str(0.017453293*heading_m)+'}]}],"context": "vessels.'+mmsi+'"}\n'
+			sock.sendto(SignalK, ('127.0.0.1', 7777))			
+			
 			heading_m=''
 		# XDR
 		list_tmp1=[]
 		list_tmp2=[]		
+		list_signalk_path1=[]
+		list_signalk1=[]
+		list_signalk_path2=[]
+		list_signalk2=[]
+
 		if nmea_press_b and pressure:
 			press=round(pressure,2)
 			list_tmp1.append('P')
 			list_tmp1.append(str(press))
 			list_tmp1.append('B')
 			list_tmp1.append('I2CP')
+			list_signalk_path1.append('environment.air.outside.pressure')
+			list_signalk1.append(str(pressure*100))
 		if nmea_temp_p_b and temperature_p:
 			temp= round(temperature_p,1)
 			list_tmp1.append('C')
 			list_tmp1.append(str(temp))
 			list_tmp1.append('C')
 			list_tmp1.append('I2CT')
+			list_signalk_path1.append('environment.air.inside.temperature')
+			list_signalk1.append(str(temp+273.15))
 		if nmea_temp_h_b and temperature_h:
 			temp= round(temperature_h,1)
 			list_tmp1.append('C')
 			list_tmp1.append(str(temp))
 			list_tmp1.append('C')
 			list_tmp1.append('I2CT')
+			list_signalk_path1.append('environment.air.inside.temperature')
+			list_signalk1.append(str(temp+273.15))
 		if nmea_hum_b and humidity:
 			hum=round(humidity,1)
 			list_tmp1.append('H')
 			list_tmp1.append(str(hum))
 			list_tmp1.append('R')
 			list_tmp1.append('I2CH')
+			list_signalk_path1.append('environment.air.outside.humidity')
+			list_signalk1.append(str(hum))
+			
 		if nmea_heel_b and heel:
 			heel= round(heel,1)
 			list_tmp2.append('A')
 			list_tmp2.append(str(heel))
 			list_tmp2.append('D')
 			list_tmp2.append('I2CX')
+			list_signalk_path2.append('navigation.attitude.roll')
+			list_signalk2.append(str(0.017453293*heel))
+			
 		if nmea_pitch_b and pitch:
 			pitch= round(pitch,1)
 			list_tmp2.append('A')
 			list_tmp2.append(str(pitch))
 			list_tmp2.append('D')
 			list_tmp2.append('I2CY')
+			list_signalk_path2.append('navigation.attitude.pitch')
+			list_signalk2.append(str(0.017453293*pitch))
 
 		if list_tmp1:
 			xdr = pynmea2.XDR('OS', 'XDR', (list_tmp1))
 			xdr1=str(xdr)
 			xdr2=xdr1+"\r\n"
 			sock.sendto(xdr2, ('127.0.0.1', 10110))
+
+			SignalK = '{"updates": [{"source": {"type": "Sensors","src" : "bmp180"},"timestamp": "'+str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z","values":[ '
+			Erg=''
+			
+			for i in range(0,len(list_signalk1)):
+				Erg += '{"path": "'+list_signalk_path1[i]+'","value":'+list_signalk1[i]+'},'
+			SignalK+=Erg[0:-1]+']}],"context": "vessels.'+mmsi+'"}\n'
+			sock.sendto(SignalK, ('127.0.0.1', 7777))			
+			
 		if list_tmp2:
 			xdr = pynmea2.XDR('OS', 'XDR', (list_tmp2))
 			xdr1=str(xdr)
@@ -191,6 +229,15 @@ while True:
 			heel=''
 			pitch=''
 
+			SignalK = '{"updates": [{"source": {"type": "Sensors","src" : "imu"},"timestamp": "'+str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z","values":[ '
+			Erg=''
+			
+			for i in range(0,len(list_signalk2)):
+				Erg += '{"path": "'+list_signalk_path2[i]+'","value":'+list_signalk2[i]+'},'
+			SignalK+=Erg[0:-1]+']}],"context": "vessels.'+mmsi+'"}\n'			
+			sock.sendto(SignalK, ('127.0.0.1', 7777))			
+
+			
 		temperature=''
 		if nmea_temp_p_b: temperature=temperature_p
 		if nmea_temp_h_b: temperature=temperature_h
