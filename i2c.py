@@ -142,7 +142,7 @@ while True:
 		list_tmp1=[]
 		list_tmp2=[]		
 		if nmea_press_b and pressure:
-			press=round(pressure/1000,4)
+			press=round(pressure,2)
 			list_tmp1.append('P')
 			list_tmp1.append(str(press))
 			list_tmp1.append('B')

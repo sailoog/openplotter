@@ -19,22 +19,7 @@ from classes.datastream import DataStream
 from classes.conf import Conf
 from classes.language import Language
 from classes.actions import Actions
-
-conf=Conf()
-
-Language(conf.get('GENERAL','lang'))
-
-global triggers
-triggers=[]
-global sock_in
-global error
-sock_in=''
-error=0
-a=DataStream(conf)
-actions=Actions(conf)
-nodata=''
-
-sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+from classes.mqtt import Mqtt
 
 def read_triggers():
 	global triggers
@@ -128,10 +113,29 @@ def connect():
 #end thread1
 
 # no loop
+conf=Conf()
+
+Language(conf.get('GENERAL','lang'))
+
+global triggers
+triggers=[]
+global sock_in
+global error
+sock_in=''
+error=0
+a=DataStream(conf)
+actions=Actions(conf)
+nodata=''
+
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
 read_triggers()
 
 thread1=threading.Thread(target=parse_nmea)	
 if not thread1.isAlive(): thread1.start()
+
+mqtt=Mqtt(conf,a)
+
 #end no loop
 
 # loop
@@ -152,37 +156,48 @@ while True:
 				now = time.time()
 				trigger_value_timestamp=a.DataList[trigger][4]
 				operator=item[2]
-				data_value=float(item[3])
-			#not present for
-			if operator==0:
-				if trigger_value_timestamp:
-					if now-trigger_value_timestamp > data_value: 
-						start_actions(index)
-						triggers[index][5]=True
+				data=a.getVariablesValue(item[3])
+				try:
+					data_value=float(data)
+				except: data_value=''
+				data_string=str(data)
+			try:	
+				#not present for
+				if operator==0:
+					if trigger_value_timestamp:
+						if now-trigger_value_timestamp > data_value: 
+							start_actions(index)
+							triggers[index][5]=True
+						else: 
+							triggers[index][5]=False
+						nodata=''
 					else: 
-						triggers[index][5]=False
-					nodata=''
-				else: 
-					if not nodata: nodata=now
-					if now-nodata > data_value: 
-						start_actions(index)
-						triggers[index][5]=True
-					else: 
-						triggers[index][5]=False
-			#present in the last
-			if operator==1: 
-				if trigger_value_timestamp:
-					if now-trigger_value_timestamp < data_value:
-						start_actions(index)
-						triggers[index][5]=True
-					else: 
-						triggers[index][5]=False
-			if operator==2 or operator==3 or operator==4 or operator==5 or operator==6:
-				if trigger_value_timestamp:
-					if now-trigger_value_timestamp < 20:
-						#equal
-						if operator==2:
+						if not nodata: nodata=now
+						if now-nodata > data_value: 
+							start_actions(index)
+							triggers[index][5]=True
+						else: 
+							triggers[index][5]=False
+				#present in the last
+				if operator==1: 
+					if trigger_value_timestamp:
+						if now-trigger_value_timestamp < data_value:
+							start_actions(index)
+							triggers[index][5]=True
+						else: 
+							triggers[index][5]=False
+				if operator==2 or operator==3 or operator==4 or operator==5 or operator==6:
+					if trigger_value_timestamp:
+						#equal (number)
+						if operator==2 and data_value:
 							if float(trigger_value) == data_value: 
+								start_actions(index)
+								triggers[index][5]=True
+							else: 
+								triggers[index][5]=False
+						#equal (string)
+						if operator==2 and not data_value:
+							if trigger_value == data_string:
 								start_actions(index)
 								triggers[index][5]=True
 							else: 
@@ -215,20 +230,21 @@ while True:
 								triggers[index][5]=True
 							else: 
 								triggers[index][5]=False
-			#switch on
-			if operator==7:
-				if trigger_value==1: 
-					start_actions(index)
-					triggers[index][5]=True
-				else: 
-					triggers[index][5]=False
+				#switch on
+				if operator==7:
+					if trigger_value==1: 
+						start_actions(index)
+						triggers[index][5]=True
+					else: 
+						triggers[index][5]=False
 
-			#switch off
-			if operator==8:
-				if trigger_value==0: 
-					start_actions(index)
-					triggers[index][5]=True
-				else: 
-					triggers[index][5]=False
+				#switch off
+				if operator==8:
+					if trigger_value==0: 
+						start_actions(index)
+						triggers[index][5]=True
+					else: 
+						triggers[index][5]=False
 
-	#end actions
+			#except Exception,e: print str(e)
+			except: pass

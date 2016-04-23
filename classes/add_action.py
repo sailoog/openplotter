@@ -77,7 +77,9 @@ class addAction(wx.Dialog):
 				self.data.SetValue(file_path)
 			else:
 				if msg==0: pass
-				else: wx.MessageBox(msg, 'Info', wx.OK | wx.ICON_INFORMATION)
+				else: 
+					if field==1:msg=msg+_('\n\nYou can add the current value of any magnitude typing its short name between brackets, e.g. [Lat] for Latitude. See available short names in Inspector window.')
+					wx.MessageBox(msg, 'Info', wx.OK | wx.ICON_INFORMATION)
 
 	def onSelectUnit(self,e):
 		if self.repeat_unit.GetCurrentSelection()==0: 

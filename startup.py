@@ -23,25 +23,37 @@ paths=Paths()
 home=paths.home
 currentpath=paths.currentpath
 
-device=''
-ssid=''
-passw=''
+boot_ap=0
 
 try:
 	boot_conf = ConfigParser.SafeConfigParser()
 	boot_conf.read('/boot/config.txt')
 	device=boot_conf.get('OPENPLOTTER', 'device')
+	share=boot_conf.get('OPENPLOTTER', 'share')
 	ssid=boot_conf.get('OPENPLOTTER', 'ssid')
 	passw=boot_conf.get('OPENPLOTTER', 'pass')
-except Exception,e: print str(e)
+	hw_mode = boot_conf.get('OPENPLOTTER', 'hw_mode')
+	channel = boot_conf.get('OPENPLOTTER', 'channel')
+	wpa = boot_conf.get('OPENPLOTTER', 'wpa')
+	boot_ap=1
+except Exception,e: 
+	print str(e)
+	boot_ap=0
 
 conf=Conf()
 
-if device and ssid and passw:
+if boot_ap==1:
 	conf.set('WIFI', 'enable', '1')
 	conf.set('WIFI', 'device', device)
+	conf.set('WIFI', 'share', share)
 	conf.set('WIFI', 'ssid', ssid)
 	conf.set('WIFI', 'password', passw)
+	conf.set('WIFI', 'hw_mode', hw_mode)
+	conf.set('WIFI', 'channel', channel)
+	conf.set('WIFI', 'wpa', wpa)
+
+
+wifi_server=conf.get('WIFI', 'enable')
 
 delay=int(conf.get('STARTUP', 'delay'))
 
@@ -57,13 +69,6 @@ enable=conf.get('AIS-SDR', 'enable')
 gain=conf.get('AIS-SDR', 'gain')
 ppm=conf.get('AIS-SDR', 'ppm')
 channel=conf.get('AIS-SDR', 'channel')
-
-wifi_server=conf.get('WIFI', 'enable')
-wlan=conf.get('WIFI', 'device')
-passw2=conf.get('WIFI', 'password')
-ssid2=conf.get('WIFI', 'ssid')
-share=conf.get('WIFI', 'share')
-if not share: share='0'
 
 nmea_hdg=conf.get('STARTUP', 'nmea_hdg')
 nmea_heel=conf.get('STARTUP', 'nmea_heel')
@@ -103,9 +108,9 @@ if opencpn=='1' and len(opencpn_commands)>1: subprocess.Popen(opencpn_commands)
 if opencpn=='1' and len(opencpn_commands)==1: subprocess.Popen('opencpn')
 
 if wifi_server=='1':
-	subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '1', wlan, passw2, ssid2, share])
+	subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '1'])
 else:
-	subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '0', wlan, passw2, ssid2, share])
+	subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '0'])
 	
 time.sleep(16)
 

@@ -15,14 +15,20 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import subprocess, os, shutil, sys
+import subprocess, os, shutil, sys, pyudev
 from classes.paths import Paths
+from classes.conf import Conf
+
+conf=Conf()
 
 wifi_server=sys.argv[1]
-wlan = sys.argv[2]
-passw = sys.argv[3]
-ssid = sys.argv[4]
-share = sys.argv[5]
+wlan = conf.get('WIFI', 'device')
+passw = conf.get('WIFI', 'password')
+ssid = conf.get('WIFI', 'ssid')
+hw_mode = conf.get('WIFI', 'hw_mode')
+channel = conf.get('WIFI', 'channel')
+wpa = conf.get('WIFI', 'wpa')
+share = conf.get('WIFI', 'share')
 
 paths=Paths()
 currentpath=paths.currentpath
@@ -30,7 +36,7 @@ currentpath=paths.currentpath
 subprocess.call(['service', 'hostapd', 'stop'])
 subprocess.call(['service', 'dnsmasq', 'stop'])
 subprocess.call(['ifdown', wlan])
-	
+
 if wifi_server=='1':
 
 	error=0
@@ -40,36 +46,31 @@ if wifi_server=='1':
 
 	driver='nl80211'
 	chipset= 'default'
-	wpa='1'
-	hw_mode='b'
-	channel='6'
 
-	version=subprocess.check_output("cat /proc/cpuinfo | grep 'Revision' | awk '{print $3}' | sed 's/^1000//'", shell=True)
-	if 'a02082' in version and wlan=='wlan0':
-		shutil.copyfile('/usr/sbin/hostapd.org', '/usr/sbin/hostapd')
-	else:
-		output=subprocess.check_output('lsusb')
-		if 'RTL8188CUS' in output:
-			driver='rtl871xdrv'
-			chipset= 'RTL8188CUS'
-			shutil.copyfile(currentpath+'/wifi_drivers/RTL8188CUS/hostapd', '/usr/sbin/hostapd')
-		if 'RTL8192CU' in output:
-			driver='rtl871xdrv'
-			chipset= 'RTL8192CU'
-			shutil.copyfile(currentpath+'/wifi_drivers/RTL8192CU/hostapd', '/usr/sbin/hostapd')
-		if '0bda:818b' in output:
-			driver='rtl871xdrv'
-			chipset= 'RTL8192EU'
-			shutil.copyfile(currentpath+'/wifi_drivers/RTL8192EU/hostapd', '/usr/sbin/hostapd')
-		if '0bda:8179' in output:
-			driver=''
-			wpa='3'
-			hw_mode='g'
-			channel='11'
-			chipset= 'RTL8188EU'
-			shutil.copyfile(currentpath+'/wifi_drivers/RTL8188EU/hostapd', '/usr/sbin/hostapd')
-		if chipset == 'default':
-			shutil.copyfile('/usr/sbin/hostapd.org', '/usr/sbin/hostapd')
+	context = pyudev.Context()
+	for device in context.list_devices(subsystem='net'):
+		if device['INTERFACE']==wlan:
+			if device['ID_NET_DRIVER']=='brcmfmac':
+				shutil.copyfile('/usr/sbin/hostapd.org', '/usr/sbin/hostapd')
+				chipset= 'Built-in WiFi'
+			if device['ID_NET_DRIVER']=='rtl8192cu':
+				driver='rtl871xdrv'
+				chipset= 'RTL8192CU'
+				shutil.copyfile(currentpath+'/wifi_drivers/RTL8192CU/hostapd', '/usr/sbin/hostapd')
+			if device['ID_NET_DRIVER']=='rtl8192eu':
+				driver='rtl871xdrv'
+				chipset= 'RTL8192EU'
+				shutil.copyfile(currentpath+'/wifi_drivers/RTL8192EU/hostapd', '/usr/sbin/hostapd')
+			if device['ID_NET_DRIVER']=='rtl8188cus':
+				driver='rtl871xdrv'
+				chipset= 'RTL8188CUS'
+				shutil.copyfile(currentpath+'/wifi_drivers/RTL8188CUS/hostapd', '/usr/sbin/hostapd')
+			if device['ID_NET_DRIVER']=='rtl8188eu':
+				driver=''
+				chipset= 'RTL8188EU'
+				shutil.copyfile(currentpath+'/wifi_drivers/RTL8188EU/hostapd', '/usr/sbin/hostapd')
+			if chipset == 'default':
+				shutil.copyfile('/usr/sbin/hostapd.org', '/usr/sbin/hostapd')
 		
 	subprocess.call(['chmod', '755', '/usr/sbin/hostapd'])
 
@@ -79,10 +80,20 @@ if wifi_server=='1':
 	file = open('/etc/default/hostapd', 'w')
 	file.write(data)
 	file.close()
-	
-	if driver!='':
-		driver = 'driver='+driver
-	data='interface='+wlan+'\n'+driver+'\nssid='+ssid+'\nhw_mode='+hw_mode+'\nchannel='+channel+'\nwmm_enabled=1\nwpa='+wpa+'\nwpa_passphrase='+passw+'\nwpa_key_mgmt=WPA-PSK\nwpa_pairwise=TKIP\nrsn_pairwise=CCMP\nauth_algs=1\nmacaddr_acl=0'
+
+	data='interface='+wlan+'\n'
+	if driver!='': data+= 'driver='+driver+'\n'
+	data+= 'hw_mode='+hw_mode+'\n'
+	data+= 'channel='+channel+'\n'
+	data+= 'ieee80211n=1\n'
+	data+= 'wmm_enabled=1\n'
+	data+= 'ssid='+ssid+'\n'
+	data+= 'auth_algs=1\n'
+	data+= 'wpa='+wpa+'\n'
+	data+= 'wpa_key_mgmt=WPA-PSK\n'
+	data+= 'rsn_pairwise=CCMP\n'
+	data+= 'wpa_passphrase='+passw+'\n'
+
 	file = open('/etc/hostapd/hostapd.conf', 'w')
 	file.write(data)
 	file.close()
@@ -124,7 +135,6 @@ if wifi_server=='1':
 	else: 
 		print "WiFi access point started.\n"
 		print "SSID: "+ssid
-		print "Password: "+passw
 		print "Adress: 10.10.10.1"
 
 

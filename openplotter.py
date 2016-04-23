@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, sys, os, subprocess, webbrowser, re, json
+import wx, sys, os, subprocess, webbrowser, re, json, pyudev, time, ConfigParser
 import wx.lib.scrolledpanel as scrolled
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 from classes.datastream import DataStream
@@ -28,6 +28,8 @@ from classes.add_action import addAction
 from classes.add_DS18B20 import addDS18B20
 from classes.add_switch import addSwitch
 from classes.add_output import addOutput
+from classes.add_USBinst import addUSBinst
+from classes.add_topic import addTopic
 
 paths=Paths()
 home=paths.home
@@ -69,7 +71,11 @@ class MainFrame(wx.Frame):
 		self.page11 = wx.Panel(self.nb)
 		self.page12 = wx.Panel(self.nb)
 		self.page13 = wx.Panel(self.nb)
+		self.page14 = wx.Panel(self.nb)
+		self.page15 = wx.Panel(self.nb)
+		self.page16 = wx.Panel(self.nb)
 
+		self.nb.AddPage(self.page14, _('USB manager'))
 		self.nb.AddPage(self.page5, _('NMEA 0183'))
 		self.nb.AddPage(self.page7, _('Signal K'))
 		self.nb.AddPage(self.page3, _('WiFi AP'))
@@ -82,6 +88,8 @@ class MainFrame(wx.Frame):
 		self.nb.AddPage(self.page4, _('SDR-AIS'))
 		self.nb.AddPage(self.page2, _('Calculate'))
 		self.nb.AddPage(self.page9, _('Accounts'))
+		self.nb.AddPage(self.page16, _('MQTT'))
+		self.nb.AddPage(self.page15, _('SMS'))
 		self.nb.AddPage(self.page1, _('Startup'))
 
 		sizer = wx.BoxSizer()
@@ -198,11 +206,9 @@ class MainFrame(wx.Frame):
 		wx.StaticText(self.page2, label=_('Generated NMEA: $OCMWV, $OCMWD'), pos=(360, 130))
 ###########################page2
 ########page3###################
-		wx.StaticBox(self.page3, size=(400, 45), pos=(10, 10))
-		self.wifi_enable = wx.CheckBox(self.page3, label=_('Enable WiFi access point'), pos=(20, 25))
+		wx.StaticBox(self.page3, size=(370, 315), pos=(10, 10))
+		self.wifi_enable = wx.CheckBox(self.page3, label=_('Enable access point'), pos=(20, 25))
 		self.wifi_enable.Bind(wx.EVT_CHECKBOX, self.onwifi_enable)
-
-		wx.StaticBox(self.page3, label=_(' Settings '), size=(400, 215), pos=(10, 60))
 		
 		self.available_wireless = []
 		output=subprocess.check_output('ifconfig', stderr=subprocess.STDOUT)
@@ -216,23 +222,40 @@ class MainFrame(wx.Frame):
 			if 'eth'+ii in output: self.available_share.append('eth'+ii)
 		for i in self.available_wireless:
 			self.available_share.append(i)
-		self.wlan = wx.ComboBox(self.page3, choices=self.available_wireless, style=wx.CB_READONLY, size=(100, 32), pos=(20, 85))
-		self.wlan_label=wx.StaticText(self.page3, label=_('AP WiFi device'), pos=(140, 90))
+		self.wlan_label=wx.StaticText(self.page3, label=_('Access point device'), pos=(20, 55))
+		self.wlan = wx.ComboBox(self.page3, choices=self.available_wireless, style=wx.CB_READONLY, size=(100, 32), pos=(20, 75))
+		
+		self.share_label=wx.StaticText(self.page3, label=_('Sharing Internet device'), pos=(180, 55))
+		self.share = wx.ComboBox(self.page3, choices=self.available_share, style=wx.CB_READONLY, size=(100, 32), pos=(180, 75))
 
-		self.ssid = wx.TextCtrl(self.page3, -1, size=(100, 32), pos=(20, 125))
-		self.ssid_label=wx.StaticText(self.page3, label=_('SSID \nmaximum 32 characters'), pos=(140, 125))
+		self.wifi_settings_label=wx.StaticText(self.page3, label=_('Access point settings'), pos=(20, 120))
 
-		self.passw = wx.TextCtrl(self.page3, -1, size=(100, 32), pos=(20, 165))
-		self.passw_label=wx.StaticText(self.page3, label=_('Password \nminimum 8 characters required'), pos=(140, 165))
+		self.ssid = wx.TextCtrl(self.page3, -1, size=(120, 32), pos=(20, 140))
+		self.ssid_label=wx.StaticText(self.page3, label=_('SSID \nmaximum 32 characters'), pos=(160, 140))
 
-		self.share = wx.ComboBox(self.page3, choices=self.available_share, style=wx.CB_READONLY, size=(100, 32), pos=(20, 205))
-		self.share_label=wx.StaticText(self.page3, label=_('Internet connection to share'), pos=(140, 210))
+		self.passw = wx.TextCtrl(self.page3, -1, size=(120, 32), pos=(20, 173))
+		self.passw_label=wx.StaticText(self.page3, label=_('Password \nminimum 8 characters required'), pos=(160, 175))
+		
+		self.wifi_channel_list=['1','2','3','4','5','6','7','8','9','10','11']
+		self.wifi_channel = wx.ComboBox(self.page3, choices=self.wifi_channel_list, style=wx.CB_READONLY, size=(120, 32), pos=(20, 208))
+		self.wifi_channel_label=wx.StaticText(self.page3, label=_('Channel'), pos=(160, 215))
 
-		wx.StaticBox(self.page3, label=_(' Addresses '), size=(270, 265), pos=(415, 10))
-		self.ip_info = wx.TextCtrl(self.page3, -1, style=wx.TE_MULTILINE|wx.TE_READONLY, size=(260, 245), pos=(420, 25))
+		self.wifi_mode_list=['IEEE 802.11b', 'IEEE 802.11g']
+		self.wifi_mode = wx.ComboBox(self.page3, choices=self.wifi_mode_list, style=wx.CB_READONLY, size=(120, 32), pos=(20, 246))
+		self.wifi_mode_label=wx.StaticText(self.page3, label=_('Mode'), pos=(160, 255))
+
+		self.wifi_wpa_list=['WPA','WPA2', _('Both')]
+		self.wifi_wpa = wx.ComboBox(self.page3, choices=self.wifi_wpa_list, style=wx.CB_READONLY, size=(120, 32), pos=(20, 285))
+		self.wifi_wpa_label=wx.StaticText(self.page3, label=_('WPA'), pos=(160, 290))
+
+		self.wifi_button_default =wx.Button(self.page3, label=_('Defaults'), pos=(275, 280))
+		self.Bind(wx.EVT_BUTTON, self.wifi_default, self.wifi_button_default)
+
+		wx.StaticBox(self.page3, label=_(' Addresses '), size=(290, 315), pos=(385, 10))
+		self.ip_info = wx.TextCtrl(self.page3, -1, style=wx.TE_MULTILINE|wx.TE_READONLY, size=(270, 245), pos=(395, 30))
 		self.ip_info.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_INACTIVECAPTION))
 
-		self.button_refresh_ip =wx.Button(self.page3, label=_('Refresh'), pos=(570, 285))
+		self.button_refresh_ip =wx.Button(self.page3, label=_('Refresh'), pos=(565, 280))
 		self.Bind(wx.EVT_BUTTON, self.show_ip_info, self.button_refresh_ip)
 ###########################page3
 ########page4###################
@@ -329,11 +352,8 @@ class MainFrame(wx.Frame):
 		self.mmsi_label=wx.StaticText(self.page7, label='MMSI', pos=(140, 100))
 		
 		self.NMEA2000_label=wx.StaticText(self.page7, label='NMEA 2000', pos=(20, 140))
-
-		self.SerDevLs = [_('none')]
-		self.SerialCheck('/dev/ttyUSB')
+		self.SerDevLs = []
 		self.can_usb= wx.ComboBox(self.page7, choices=self.SerDevLs, style=wx.CB_READONLY, size=(120, 32), pos=(20, 165))
-		self.can_usb.SetValue(self.SerDevLs[0])
 		self.CANUSB_label=wx.StaticText(self.page7, label='CAN-USB', pos=(155, 172))
 
 		wx.StaticBox(self.page7, label=_(' Inputs '), size=(430, 130), pos=(250, 10))
@@ -347,6 +367,38 @@ class MainFrame(wx.Frame):
 		self.button_restartSK =wx.Button(self.page7, label=_('Restart'), pos=(155, 285))
 		self.Bind(wx.EVT_BUTTON, self.restartSK, self.button_restartSK)
 ###########################page7
+########page15###################
+		wx.StaticBox(self.page15, label=_(' Settings '), size=(330, 180), pos=(10, 10))
+		self.sms_enable = wx.CheckBox(self.page15, label=_('Enable settings'), pos=(20, 30))
+		self.sms_enable.Bind(wx.EVT_CHECKBOX, self.onsms_enable)
+
+		self.sms_dev_label=wx.StaticText(self.page15, label='Serial port', pos=(20, 60))
+		self.sms_dev= wx.ComboBox(self.page15, choices=self.SerDevLs, style=wx.CB_READONLY, size=(150, 32), pos=(20, 80))
+		sms_con_list=['at','at19200','at115200','blueat','bluephonet','bluefbus','blueobex','bluerfgnapbus','bluerfat','blues60','dlr3','dku2','dku2at','dku2phonet','dku5','dku5fbus','fbus','fbusdlr3','fbusdku5','fbusblue','fbuspl2303','irdaphonet','irdaat','irdaobex','irdagnapbus','phonetblue','proxyphonet','proxyfbus','proxyat','proxyobex','proxygnapbus','proxys60','mbus']
+		
+		self.sms_bt_label=wx.StaticText(self.page15, label=_('Bluetooth address'), pos=(180, 60))
+		self.sms_bt = wx.TextCtrl(self.page15, -1, size=(150, 32), pos=(180, 80))
+
+		self.sms_con_label=wx.StaticText(self.page15, label='Connection', pos=(20, 120))
+		self.sms_con= wx.ComboBox(self.page15, choices=sms_con_list, style=wx.CB_READONLY, size=(150, 32), pos=(20, 140))
+		
+		self.button_sms_identify =wx.Button(self.page15, label=_('Identify'), pos=(180, 140))
+		self.Bind(wx.EVT_BUTTON, self.sms_identify, self.button_sms_identify)
+
+		wx.StaticBox(self.page15, label=_(' Sending '), size=(330, 180), pos=(350, 10))
+
+		self.sms_enable_send = wx.CheckBox(self.page15, label=_('Enable sending SMS'), pos=(360, 30))
+		self.sms_enable_send.Bind(wx.EVT_CHECKBOX, self.onsms_enable_send)
+
+		self.phone_number_label=wx.StaticText(self.page15, label=_('Send to phone'), pos=(360, 60))
+		self.phone_number = wx.TextCtrl(self.page15, -1, size=(150, 32), pos=(360, 80))
+
+		self.sms_text_label=wx.StaticText(self.page15, label=_('Text'), pos=(360, 120))
+		self.sms_text = wx.TextCtrl(self.page15, -1, size=(150, 32), pos=(360, 140))
+
+		self.button_sms_test =wx.Button(self.page15, label=_('Test'), pos=(520, 140))
+		self.Bind(wx.EVT_BUTTON, self.sms_test, self.button_sms_test)
+###########################page15
 ########page6###################
 		wx.StaticBox(self.page6, size=(330, 50), pos=(10, 10))
 		wx.StaticText(self.page6, label=_('Rate (sec)'), pos=(20, 30))
@@ -419,6 +471,26 @@ class MainFrame(wx.Frame):
 ########page12###################
 		wx.StaticText(self.page12, label=_('Coming soon'), pos=(20, 30))
 ###########################page12
+########page14###################
+
+		wx.StaticBox(self.page14, label=_(' USB Serial ports '), size=(670, 265), pos=(10, 10))
+		
+		self.list_USBinst = wx.ListCtrl(self.page14, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(565, 237))
+		self.list_USBinst.SetPosition((15, 30))
+		self.list_USBinst.InsertColumn(0, _('name'), width=130)
+		self.list_USBinst.InsertColumn(1, _('vendor'), width=55)
+		self.list_USBinst.InsertColumn(2, _('product'), width=60)
+		self.list_USBinst.InsertColumn(3, _('port'), width=90)
+		self.list_USBinst.InsertColumn(4, _('serial'), width=130)
+		self.list_USBinst.InsertColumn(5, _('remember'), width=100)
+			
+		self.add_USBinst_button =wx.Button(self.page14, label=_('add'), pos=(585, 30))
+		self.Bind(wx.EVT_BUTTON, self.add_USBinst, self.add_USBinst_button)
+
+		self.delete_USBinst_button =wx.Button(self.page14, label=_('delete'), pos=(585, 65))
+		self.Bind(wx.EVT_BUTTON, self.delete_USBinst, self.delete_USBinst_button)
+
+###########################page14
 ########page8###################
 		wx.StaticBox(self.page8, label=_(' Switches '), size=(670, 265), pos=(10, 10))
 		
@@ -463,22 +535,20 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.cancel_changes_outputs, self.button_cancel_outputs)
 ###########################page13
 ########page9###################
-		wx.StaticBox(self.page9, label=_(' Twitter '), size=(330, 290), pos=(10, 10))
+		wx.StaticBox(self.page9, label=_(' Twitter '), size=(330, 200), pos=(10, 10))
 		self.twitter_enable = wx.CheckBox(self.page9, label=_('Enable'), pos=(20, 32))
 		self.twitter_enable.Bind(wx.EVT_CHECKBOX, self.on_twitter_enable)
 		
-		self.datastream_list=[]
-		self.datastream_select = wx.ListBox(self.page9, choices=self.datastream_list, style=wx.LB_MULTIPLE, size=(310, 80), pos=(20, 65))
-		wx.StaticText(self.page9, label=_('apiKey'), pos=(20, 160))
-		self.apiKey = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(150, 155))
-		wx.StaticText(self.page9, label=_('apiSecret'), pos=(20, 195))
-		self.apiSecret = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(150, 190))
-		wx.StaticText(self.page9, label=_('accessToken'), pos=(20, 230))
-		self.accessToken = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(150, 225))
-		wx.StaticText(self.page9, label=_('accessTokenSecret'), pos=(20, 265))
-		self.accessTokenSecret = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(150, 260))
+		wx.StaticText(self.page9, label=_('apiKey'), pos=(20, 70))
+		self.apiKey = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(150, 65))
+		wx.StaticText(self.page9, label=_('apiSecret'), pos=(20, 105))
+		self.apiSecret = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(150, 100))
+		wx.StaticText(self.page9, label=_('accessToken'), pos=(20, 140))
+		self.accessToken = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(150, 135))
+		wx.StaticText(self.page9, label=_('accessTokenSecret'), pos=(20, 175))
+		self.accessTokenSecret = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(150, 170))
 
-		wx.StaticBox(self.page9, label=_(' Gmail '), size=(330, 200), pos=(350, 10))
+		wx.StaticBox(self.page9, label=_(' Gmail '), size=(330, 165), pos=(350, 10))
 		self.gmail_enable = wx.CheckBox(self.page9, label=_('Enable'), pos=(360, 32))
 		self.gmail_enable.Bind(wx.EVT_CHECKBOX, self.on_gmail_enable)
 		wx.StaticText(self.page9, label=_('Gmail account'), pos=(360, 70))
@@ -488,6 +558,37 @@ class MainFrame(wx.Frame):
 		wx.StaticText(self.page9, label=_('Recipient'), pos=(360, 140))
 		self.Recipient = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(490, 135))
 ###########################page9
+########page16###################
+		wx.StaticBox(self.page16, label=_(' MQTT '), size=(670, 265), pos=(10, 10))
+		wx.StaticText(self.page16, label=_('Remote broker'), pos=(20, 30))
+		self.mqtt_broker = wx.TextCtrl(self.page16, -1, size=(190, 32), pos=(20, 50))
+		wx.StaticText(self.page16, label=_('Port'), pos=(220, 30))
+		self.mqtt_port = wx.TextCtrl(self.page16, -1, size=(50, 32), pos=(220, 50))
+
+		wx.StaticText(self.page16, label=_('Username'), pos=(280, 30))
+		self.mqtt_user = wx.TextCtrl(self.page16, -1, size=(120, 32), pos=(280, 50))
+		wx.StaticText(self.page16, label=_('Password'), pos=(410, 30))
+		self.mqtt_pass = wx.TextCtrl(self.page16, -1, size=(120, 32), pos=(410, 50))
+
+		wx.StaticText(self.page16, label=_('Topics'), pos=(20, 90))
+
+		self.list_topics = wx.ListCtrl(self.page16, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(565, 155))
+		self.list_topics.SetPosition((15, 110))
+		self.list_topics.InsertColumn(0, _('Short'), width=80)
+		self.list_topics.InsertColumn(1, _('Topic'), width=485)
+		self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_topic, self.list_topics)
+
+		self.add_topic_button =wx.Button(self.page16, label=_('add'), pos=(585, 110))
+		self.Bind(wx.EVT_BUTTON, self.add_topic, self.add_topic_button)
+
+		self.delete_topic_button =wx.Button(self.page16, label=_('delete'), pos=(585, 145))
+		self.Bind(wx.EVT_BUTTON, self.delete_topic, self.delete_topic_button)
+
+		self.button_apply_mqtt =wx.Button(self.page16, label=_('Apply changes'), pos=(570, 285))
+		self.Bind(wx.EVT_BUTTON, self.apply_changes_mqtt, self.button_apply_mqtt)
+		self.button_cancel_mqtt =wx.Button(self.page16, label=_('Cancel changes'), pos=(430, 285))
+		self.Bind(wx.EVT_BUTTON, self.cancel_changes_mqtt, self.button_cancel_mqtt)
+###########################page16
 ########page10###################
 		wx.StaticBox(self.page10, label=_(' Triggers '), size=(670, 265), pos=(10, 10))
 		
@@ -528,24 +629,13 @@ class MainFrame(wx.Frame):
 		self.button_cancel_actions =wx.Button(self.page10, label=_('Cancel changes'), pos=(430, 285))
 		self.Bind(wx.EVT_BUTTON, self.cancel_changes_actions, self.button_cancel_actions)
 ###########################page10
-		self.read_datastream()
-		self.read_actions()
 		self.manual_settings=''
 		self.read_kplex_conf()
+		self.SerialCheck()
 		self.set_layout_conf()
 ###########################layout
 
 ####definitions###################
-
-	def read_datastream(self):
-		self.datastream_list=[]
-		self.a=DataStream(self.conf)
-		for i in self.a.DataList:
-			self.datastream_list.append(i[1]+': '+i[0])
-		self.datastream_select.Set(self.datastream_list)
-
-	def read_actions(self):
-		self.actions=Actions(self.conf)
 
 	def set_layout_conf(self):
 		if self.language=='en': self.lang.Check(self.lang_item1.GetId(), True)
@@ -573,34 +663,6 @@ class MainFrame(wx.Frame):
 		if self.conf.get('STARTUP', 'maximize')=='1':
 			self.op_maximize.SetValue(True) 
 			self.Maximize()
-
-		if len(self.available_wireless)>0:
-			self.wlan.SetValue(self.conf.get('WIFI', 'device'))
-			self.ssid.SetValue(self.conf.get('WIFI', 'ssid'))
-			if self.conf.get('WIFI', 'password'): self.passw.SetValue('**********')
-			if self.conf.get('WIFI', 'share')=='0': self.share.SetValue( _('none'))
-			else: self.share.SetValue(self.conf.get('WIFI', 'share'))
-			if self.conf.get('WIFI', 'enable')=='1':
-				self.wifi_enable.SetValue(True)
-				self.wlan.Disable()
-				self.passw.Disable()
-				self.wlan_label.Disable()
-				self.passw_label.Disable()
-				self.ssid.Disable()
-				self.ssid_label.Disable()
-				self.share.Disable()
-				self.share_label.Disable()
-		else:
-			self.wifi_enable.Disable()
-			self.wlan.Disable()
-			self.passw.Disable()
-			self.wlan_label.Disable()
-			self.passw_label.Disable()
-			self.ssid.Disable()
-			self.ssid_label.Disable()
-			self.share.Disable()
-			self.share_label.Disable()
-		self.show_ip_info('')
 		
 		output=subprocess.check_output('lsusb')
 		if 'DVB-T' in output:
@@ -685,18 +747,12 @@ class MainFrame(wx.Frame):
 
 		if self.conf.get('STARTUP', 'press_temp_log')=='1': self.press_temp_log.SetValue(True)
 
-		if self.conf.get('TWITTER', 'send_data'):
-			selections=eval(self.conf.get('TWITTER', 'send_data'))
-			for i in selections:
-				for index,item in enumerate(self.a.DataList):
-					if i==item[9]: self.datastream_select.SetSelection(index)
 		if self.conf.get('TWITTER', 'apiKey'): self.apiKey.SetValue('********************')
 		if self.conf.get('TWITTER', 'apiSecret'): self.apiSecret.SetValue('********************')
 		if self.conf.get('TWITTER', 'accessToken'): self.accessToken.SetValue('********************')
 		if self.conf.get('TWITTER', 'accessTokenSecret'): self.accessTokenSecret.SetValue('********************')
 		if self.conf.get('TWITTER', 'enable')=='1':
 			self.twitter_enable.SetValue(True)
-			self.datastream_select.Disable()
 			self.apiKey.Disable()
 			self.apiSecret.Disable()
 			self.accessToken.Disable()
@@ -731,11 +787,39 @@ class MainFrame(wx.Frame):
 			self.can_usb.Disable()
 			self.CANUSB_label.Disable()
 
+		if self.conf.get('SMS', 'serial')=='0': self.sms_dev.SetValue(self.SerDevLs[0])
+		else: self.sms_dev.SetValue(self.conf.get('SMS', 'serial'))
+		self.sms_bt.SetValue(self.conf.get('SMS', 'bluetooth'))
+		self.sms_con.SetValue(self.conf.get('SMS', 'connection'))
+		if self.conf.get('SMS', 'enable')=='1': 
+			self.sms_enable.SetValue(True)
+			self.sms_dev_label.Disable()
+			self.sms_dev.Disable()
+			self.sms_bt_label.Disable()
+			self.sms_bt.Disable()
+			self.sms_con_label.Disable()
+			self.sms_con.Disable()
+		else: 
+			self.button_sms_identify.Disable()
+
+		self.phone_number.SetValue(self.conf.get('SMS', 'phone'))
+		if self.conf.get('SMS', 'enable_sending')=='1': 
+			self.sms_enable_send.SetValue(True)
+			self.phone_number_label.Disable()
+			self.phone_number.Disable()
+		else: 
+			self.button_sms_test.Disable()
+			self.sms_text.Disable()
+			self.sms_text_label.Disable()
+
+		self.read_wifi_conf()
 		self.read_triggers()
 		self.read_DS18B20()
+		self.read_USBinst()
 		self.read_switches()
 		self.read_outputs()
-
+		self.read_mqtt()
+		
 ########MENU###################################	
 
 	def time_zone(self,event):
@@ -880,7 +964,25 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		else:
 			self.conf.set('STARTUP', 'maximize', '0')
 ########WIFI###################################	
-
+	
+	def read_wifi_conf(self):
+		if len(self.available_wireless)>0:
+			self.wlan.SetValue(self.conf.get('WIFI', 'device'))
+			self.ssid.SetValue(self.conf.get('WIFI', 'ssid'))
+			self.wifi_channel.SetValue(self.conf.get('WIFI', 'channel'))
+			if self.conf.get('WIFI', 'password'): self.passw.SetValue('**********')
+			if self.conf.get('WIFI', 'share')=='0': self.share.SetValue( _('none'))
+			else: self.share.SetValue(self.conf.get('WIFI', 'share'))
+			if self.conf.get('WIFI', 'hw_mode')=='b': self.wifi_mode.SetValue('IEEE 802.11b')
+			if self.conf.get('WIFI', 'hw_mode')=='g': self.wifi_mode.SetValue('IEEE 802.11g')
+			if self.conf.get('WIFI', 'wpa')=='1': self.wifi_wpa.SetValue('WPA')
+			if self.conf.get('WIFI', 'wpa')=='2': self.wifi_wpa.SetValue('WPA2')
+			if self.conf.get('WIFI', 'wpa')=='3': self.wifi_wpa.SetValue(_('Both'))
+			if self.conf.get('WIFI', 'enable')=='1':
+				self.enable_disable_wifi(1)
+		else:
+			self.enable_disable_wifi(0)
+		self.show_ip_info('')
 
 	def onwifi_enable (self, e):
 		isChecked = self.wifi_enable.GetValue()
@@ -902,37 +1004,40 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.enable_disable_wifi(0)
 			return
 		if wlan==share:
-			self.ShowMessage(_('"AP Wifi Device" and "internet connection to share" must be different'))
+			self.ShowMessage(_('"Access point device" and "Sharing Internet device" must be different'))
 			self.enable_disable_wifi(0)
 			return
 		if len(ssid)>32 or len(passw)<8:
 			self.ShowMessage(_('Your SSID must have a maximum of 32 characters and your password a minimum of 8.'))
 			self.enable_disable_wifi(0)
 			return
-		if share==_('none'):share='0'
 		self.SetStatusText(_('Configuring WiFi AP, wait please...'))
+		channel=self.wifi_channel.GetValue()
+		mode=self.wifi_mode.GetValue()
+		wpa=self.wifi_wpa.GetValue()
+		if share==_('none'):share='0'
+		if mode=='IEEE 802.11b':mode='b'
+		if mode=='IEEE 802.11g':mode='g'
+		if wpa=='WPA':wpa='1'
+		if wpa=='WPA2':wpa='2'
+		if wpa==_('Both'):wpa='3'
+		self.conf.set('WIFI', 'device', wlan)
+		self.conf.set('WIFI', 'password', passw)
+		self.conf.set('WIFI', 'ssid', ssid)
+		self.conf.set('WIFI', 'share', share)
+		self.conf.set('WIFI', 'channel', channel)
+		self.conf.set('WIFI', 'hw_mode', mode)
+		self.conf.set('WIFI', 'wpa', wpa)
+		self.passw.SetValue('**********')
 		if isChecked:
 			self.enable_disable_wifi(1)
-			wifi_result=subprocess.check_output(['sudo', 'python', currentpath+'/wifi_server.py', '1', wlan, passw, ssid, share])		
+			wifi_result=subprocess.check_output(['sudo', 'python', currentpath+'/wifi_server.py', '1'])		
 		else:
 			self.enable_disable_wifi(0)
-			wifi_result=subprocess.check_output(['sudo', 'python', currentpath+'/wifi_server.py', '0', wlan, passw, ssid, share])
-			
+			wifi_result=subprocess.check_output(['sudo', 'python', currentpath+'/wifi_server.py', '0'])
 		msg=wifi_result
-
 		if 'WiFi access point failed.' in msg:
 			self.enable_disable_wifi(0)
-			self.conf.set('WIFI', 'device', '')
-			self.conf.set('WIFI', 'password', '')
-			self.conf.set('WIFI', 'ssid', '')
-			self.conf.set('WIFI', 'share', '')
-		if'WiFi access point started.' in msg:
-			self.conf.set('WIFI', 'device', wlan)
-			self.conf.set('WIFI', 'password', passw)
-			self.conf.set('WIFI', 'ssid', ssid)
-			self.conf.set('WIFI', 'share', share)
-			self.passw.SetValue('**********')
-
 		msg=msg.replace('WiFi access point failed.', _('WiFi access point failed.'))
 		msg=msg.replace('WiFi access point started.', _('WiFi access point started.'))
 		msg=msg.replace('WiFi access point stopped.', _('WiFi access point stopped.'))
@@ -952,6 +1057,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		out+=_('\n RDP remote desktop:\n')
 		for ip in ips:
 			out+=ip+'\n'
+		out+=_('\n MQTT local broker:\n')
+		for ip in ips:
+			out+=ip+':1883\n'
 		out+=_('\n Signal K panel:\n')
 		for ip in ips:
 			out+=ip+':3000/instrumentpanel\n'
@@ -963,6 +1071,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			out+=ip+':10111\n'
 		self.ip_info.SetValue(out)
 
+	def wifi_default(self, e):
+		self.ssid.SetValue('OpenPlotter')
+		self.passw.SetValue('12345678')
+		self.wifi_channel.SetValue('6')
+		self.wifi_mode.SetValue('IEEE 802.11g')
+		self.wifi_wpa.SetValue('WPA2')
+
 	def enable_disable_wifi(self, s):
 		if s==1:
 			self.wlan.Disable()
@@ -973,6 +1088,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.passw_label.Disable()
 			self.ssid_label.Disable()
 			self.share_label.Disable()
+			self.wifi_settings_label.Disable()
+			self.wifi_channel.Disable()
+			self.wifi_channel_label.Disable()
+			self.wifi_mode.Disable()
+			self.wifi_mode_label.Disable()
+			self.wifi_wpa.Disable()
+			self.wifi_wpa_label.Disable()
+			self.wifi_button_default.Disable()
 			self.wifi_enable.SetValue(True)
 			self.conf.set('WIFI', 'enable', '1')
 		else:
@@ -984,6 +1107,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.passw_label.Enable()
 			self.ssid_label.Enable()
 			self.share_label.Enable()
+			self.wifi_settings_label.Enable()
+			self.wifi_channel.Enable()
+			self.wifi_channel_label.Enable()
+			self.wifi_mode.Enable()
+			self.wifi_mode_label.Enable()
+			self.wifi_wpa.Enable()
+			self.wifi_wpa_label.Enable()
+			self.wifi_button_default.Enable()
 			self.wifi_enable.SetValue(False)
 			self.conf.set('WIFI', 'enable', '0')
 
@@ -1683,7 +1814,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		for i in temp_list:
 			if i[1]==self.switches[selected_switch][5]:
 				self.read_triggers()
-				self.ShowMessage(_('You have an action defined for this switch. You must delete that action before deleting this switch.'))
+				self.ShowMessage(_('You have a trigger defined for this switch. You must delete that action before deleting this switch.'))
 				return
 		del self.switches[selected_switch]
 		self.list_switches.DeleteItem(selected_switch)
@@ -1707,8 +1838,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			else: self.switches[index][0]='0'
 		self.conf.set('INPUTS', 'switches', str(self.switches))
 		self.start_monitoring()
-		self.read_datastream()
-		self.read_switches()
 		self.SetStatusText(_('Switches changes applied and restarted'))
 
 	def cancel_changes_switches(self, e):
@@ -1805,7 +1934,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				if ii[0][1:]==self.outputs[selected_output][4]: dontdelete=1
 		if dontdelete==1:
 			self.read_triggers()
-			self.ShowMessage(_('You have an action defined for this output. You must delete that action before deleting this output.'))
+			self.ShowMessage(_('You have a trigger defined for this output. You must delete that action before deleting this output.'))
 			return
 		del self.outputs[selected_output]
 		self.list_outputs.DeleteItem(selected_output)
@@ -1829,9 +1958,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			else: self.outputs[index][0]='0'
 		self.conf.set('OUTPUTS', 'outputs', str(self.outputs))
 		self.start_monitoring()
-		self.read_datastream()
-		self.read_actions()
-		self.read_outputs()
 		self.SetStatusText(_('Output changes applied and restarted'))
 
 
@@ -1839,7 +1965,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.read_outputs()
 		self.SetStatusText(_('Output changes cancelled'))
 
-#######################twitterbot
+#######################accounts
 
 	def start_monitoring(self):
 		self.ShowMessage(_('Actions will be restarted.'))
@@ -1851,21 +1977,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.twitter_enable.SetValue(False)
 			self.ShowMessage(_('Enter valid Twitter apiKey, apiSecret, accessToken and accessTokenSecret.'))
 			return
-		if not self.datastream_select.GetSelections():
-			self.twitter_enable.SetValue(False)
-			self.ShowMessage(_('Select some data to publish.'))
-			return
 		if self.twitter_enable.GetValue():
-			self.datastream_select.Disable()
 			self.apiKey.Disable()
 			self.apiSecret.Disable()
 			self.accessToken.Disable()
 			self.accessTokenSecret.Disable()
 			self.conf.set('TWITTER', 'enable', '1')
-			temp_list=[]
-			for i in self.datastream_select.GetSelections():
-				temp_list.append(self.a.DataList[i][9])
-			self.conf.set('TWITTER', 'send_data', str(temp_list))
 			if not '*****' in self.apiKey.GetValue(): 
 				self.conf.set('TWITTER', 'apiKey', self.apiKey.GetValue())
 				self.apiKey.SetValue('********************')
@@ -1880,7 +1997,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.accessTokenSecret.SetValue('********************')
 		else:
 			self.conf.set('TWITTER', 'enable', '0')
-			self.datastream_select.Enable()
 			self.apiKey.Enable()
 			self.apiSecret.Enable()
 			self.accessToken.Enable()
@@ -1912,6 +2028,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 #######################actions
 
 	def read_triggers(self):
+		self.a=DataStream(self.conf)
 		self.triggers=[]
 		self.list_triggers.DeleteAllItems()
 		data=self.conf.get('ACTIONS', 'triggers')
@@ -1936,6 +2053,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				else: self.ShowMessage(_('Problem with Actions detected. Please check and save again.'))
 
 	def print_actions(self, e):
+		self.actions=Actions(self.conf)
 		selected_trigger=e.GetIndex()
 		self.list_actions.DeleteAllItems()
 		for i in  self.triggers[selected_trigger][4]:
@@ -1957,6 +2075,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.edit_add_trigger(0)
 
 	def edit_add_trigger(self,edit):
+		self.datastream_list=[]
+		self.a=DataStream(self.conf)
+		for i in self.a.DataList:
+			self.datastream_list.append(i[1]+': '+i[0])
 		dlg = addTrigger(self.datastream_list, self.a,edit)
 		res = dlg.ShowModal()
 		if res == wx.ID_OK:
@@ -1991,15 +2113,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				trigger0=self.a.DataList[trigger_selection]
 				operator_selection=trigger0[7][dlg.operator_select.GetCurrentSelection()]
 				if dlg.value.GetValue(): value=dlg.value.GetValue()
-				else: value='0'
-				try: value2=float(value)
-				except:
-					self.ShowMessage(_('Failed. Value must be a number.'))
-					dlg.Destroy()
-					return
+				else: value=0
+				value2=str(value)
 				operator=self.a.operators_list[operator_selection]
 				if edit==0:
-					self.list_triggers.Append([trigger0[0].decode('utf8'),operator.decode('utf8'),value])				
+					self.list_triggers.Append([trigger0[0].decode('utf8'),operator.decode('utf8'),value2.decode('utf8')])				
 					tmp=[]
 					tmp.append(1)
 					tmp.append(trigger0[9])
@@ -2015,13 +2133,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				else:
 					self.list_triggers.SetStringItem(edit[0],0,trigger0[0].decode('utf8'))
 					self.list_triggers.SetStringItem(edit[0],1,operator.decode('utf8'))
-					self.list_triggers.SetStringItem(edit[0],2,value)
+					self.list_triggers.SetStringItem(edit[0],2,value2.decode('utf8'))
 					self.triggers[edit[0]][1]=trigger0[9]
 					self.triggers[edit[0]][2]=operator_selection
 					self.triggers[edit[0]][3]=value2					
 			dlg.Destroy()
 	
 	def edit_actions(self,e):
+		self.actions=Actions(self.conf)
 		a=e.GetIndex()
 		t= self.list_triggers.GetFirstSelected()
 		action=self.actions.getOptionsListIndex(self.triggers[t][4][a][0])
@@ -2035,6 +2154,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.edit_add_action(0)
 
 	def edit_add_action(self,edit):
+		self.actions=Actions(self.conf)
 		selected_trigger_position= self.list_triggers.GetFirstSelected()
 		if selected_trigger_position==-1:
 			self.ShowMessage(_('Select a trigger to add actions.'))
@@ -2104,8 +2224,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			else: self.triggers[i][0]=0
 			i=i+1
 		self.conf.set('ACTIONS', 'triggers', str(self.triggers))
-		self.SetStatusText(_('Actions changes applied and restarted'))
 		self.start_monitoring()
+		self.SetStatusText(_('Actions changes applied and restarted'))
 
 	def cancel_changes_actions(self,e):
 		self.read_triggers()
@@ -2212,7 +2332,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		for i in temp_list:
 			if i[1]==self.DS18B20[selected_DS18B20][4]:
 				self.read_triggers()
-				self.ShowMessage(_('You have an action defined for this sensor. You must delete that action before deleting this sensor.'))
+				self.ShowMessage(_('You have a trigger defined for this sensor. You must delete that action before deleting this sensor.'))
 				return
 		del self.DS18B20[selected_DS18B20]
 		self.list_DS18B20.DeleteItem(selected_DS18B20)
@@ -2225,23 +2345,111 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.conf.set('1W', 'DS18B20', str(self.DS18B20))
 		self.start_1w()
 		self.start_monitoring()
-		self.read_datastream()
-		self.read_triggers()
 		self.SetStatusText(_('DS18B20 sensors changes applied and restarted'))
 
 	def cancel_changes_DS18B20(self,e):
 		self.read_DS18B20()
 		self.SetStatusText(_('DS18B20 sensors changes cancelled'))
 
+#######################USBinst
+
+	def start_udev(self):
+		subprocess.call(['sudo','udevadm','control','--reload-rules'])
+		subprocess.call(['sudo','udevadm','trigger'])
+
+	def read_USBinst(self):
+		self.USBinst=[]
+		self.list_USBinst.DeleteAllItems()
+		data=self.conf.get('UDEV', 'USBinst')
+		try:
+			temp_list=eval(data)
+		except:temp_list=[]
+		for ii in temp_list:
+			self.USBinst.append(ii)
+			self.list_USBinst.Append([ii[0].decode('utf8'),ii[1].decode('utf8'),ii[2].decode('utf8'),ii[4].decode('utf8'),ii[3].decode('utf8'),ii[5]])
+
+
+	def add_USBinst(self,e):
+		dlg = addUSBinst()
+		res = dlg.ShowModal()
+		if res == wx.ID_OK:
+			OPname_selection=dlg.OPname_select.GetValue()
+			if not re.match('^[0-9a-zA-Z]{1,8}$', OPname_selection):
+				self.ShowMessage(_('Failed. The new name must be a string between 1 and 8 letters and/or numbers.'))
+				dlg.Destroy()
+				return
+			OPname_selection='ttyOP_'+OPname_selection
+			OPname_selection=OPname_selection.encode('utf8')
+			vendor=dlg.vendor
+			vendor=vendor.encode('utf8')	
+			product=dlg.product
+			product=product.encode('utf8')
+			serial=dlg.serial
+			serial=serial.encode('utf8')
+			con_port=dlg.con_port
+			con_port=con_port.encode('utf8')
+			rem=dlg.rem
+			self.list_USBinst.Append([OPname_selection.decode('utf8'),vendor.decode('utf8'),product.decode('utf8'),con_port.decode('utf8'),serial.decode('utf8'),rem])
+			self.USBinst.append([OPname_selection,vendor,product,serial,con_port,rem])
+			self.apply_changes_USBinst()
+		dlg.Destroy()
+
+	def delete_USBinst(self,e):
+		selected_USBinst=self.list_USBinst.GetFirstSelected()
+		if selected_USBinst==-1: 
+			self.ShowMessage(_('Select a device to delete.'))
+			return
+		del self.USBinst[selected_USBinst]
+		self.list_USBinst.DeleteItem(selected_USBinst)
+		self.apply_changes_USBinst()
+
+	def apply_changes_USBinst(self):
+		self.conf.set('UDEV', 'USBinst', str(self.USBinst))
+		file = open('10-openplotter.rules', 'w')
+		for i in self.USBinst:
+			index=self.USBinst.index(i)
+			if self.USBinst[index][5]=='port':
+				write_str='KERNEL=="ttyUSB*", KERNELS=="'+self.USBinst[index][4]
+				write_str=write_str+'" ,SYMLINK+="'+self.USBinst[index][0]+'"\n'
+			else:
+				if self.USBinst[index][3] == '':
+					write_str='SUBSYSTEM=="tty", ATTRS{idVendor}=="'+self.USBinst[index][1]
+					write_str=write_str+'",ATTRS{idProduct}=="'+self.USBinst[index][2]
+					write_str=write_str+'" ,SYMLINK+="'+self.USBinst[index][0]+'"\n'
+				else:	
+					write_str='SUBSYSTEM=="tty", ATTRS{idVendor}=="'+self.USBinst[index][1]
+					write_str=write_str+'",ATTRS{idProduct}=="'+self.USBinst[index][2]
+					write_str=write_str+'",ATTRS{serial}=="'+self.USBinst[index][3]
+					write_str=write_str+'" ,SYMLINK+="'+self.USBinst[index][0]+'"\n'
+					
+			file.write(write_str)
+		file.close()
+		os.system('sudo mv 10-openplotter.rules /etc/udev/rules.d')
+		self.SetStatusText(_('Restarting'))
+		self.start_udev()
+		time.sleep(1.5)
+		self.SetStatusText(_('USB names added and restarted'))
+		self.SerialCheck()
+
 #######################Signal K
-	def SerialCheck(self,dev):
-		num = 0
-		for _ in range(99):
-			s = dev + str(num)
-			d = os.path.exists(s)
-			if d == True:
-				self.SerDevLs.append(s)      
-			num = num + 1
+
+	def SerialCheck(self):
+		self.SerDevLs = [_('none')]
+		context = pyudev.Context()
+		for device in context.list_devices(subsystem='tty'):
+			i=device['DEVNAME']
+			if '/dev/ttyU' in i or '/dev/ttyA' in i or '/dev/ttyS' in i or '/dev/ttyO' in i or '/dev/r' in i or '/dev/i' in i:
+				self.SerDevLs.append(i)
+				try:
+					ii=device['DEVLINKS']
+					value= ii[ii.rfind('/dev/ttyOP_'):]			
+					if value.find('/dev/ttyOP_') >=0:
+						self.SerDevLs.append(value)
+				except: pass
+		self.can_usb.Clear()
+		self.sms_dev.Clear()
+		self.can_usb.AppendItems(self.SerDevLs)
+		self.sms_dev.AppendItems(self.SerDevLs)
 
 	def onsignalk_enable (self,e):
 		isChecked = self.signalk_enable.GetValue()
@@ -2308,8 +2516,207 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.NMEA2000_label.Enable()
 			self.can_usb.Enable()
 			self.CANUSB_label.Enable()
+
+####################### SMS
+
+	def save_gammu_settings(self,port,con):
+		gammu_conf = ConfigParser.SafeConfigParser()
+		gammu_conf.read(home+'/.gammurc')
+		gammu_conf.set('gammu', 'port', port)
+		gammu_conf.set('gammu', 'connection', con)
+		with open(home+'/.gammurc', 'wb') as configfile:
+			gammu_conf.write(configfile)
+
+	def onsms_enable(self,e):
+		isChecked = self.sms_enable.GetValue()
+		if isChecked:
+			if self.sms_dev.GetValue()==_('none'):
+				if self.sms_bt.GetValue()=='':
+					self.ShowMessage(_('You have to provide a serial port or a bluetooth address.'))
+					self.sms_enable.SetValue(False)
+					return
+				else:
+					bluetooth=self.sms_bt.GetValue()
+			else:
+				bluetooth = ''
+				self.sms_bt.SetValue(bluetooth)
+				serial = self.sms_dev.GetValue()
+			if self.sms_con.GetValue()=='':
+				self.ShowMessage(_('You have to provide a connection type.'))
+				self.sms_enable.SetValue(False)
+				return
+			else: connection = self.sms_con.GetValue()
+			self.conf.set('SMS', 'enable', '1')
+			if self.sms_dev.GetValue()==_('none'):
+				self.conf.set('SMS', 'serial', '0')
+				port=bluetooth
+			else:
+				self.conf.set('SMS', 'serial', serial)
+				port=serial
+			self.conf.set('SMS', 'bluetooth', bluetooth)
+			self.conf.set('SMS', 'connection', connection)
+			self.sms_dev_label.Disable()
+			self.sms_dev.Disable()
+			self.sms_bt_label.Disable()
+			self.sms_bt.Disable()
+			self.sms_con_label.Disable()
+			self.sms_con.Disable()
+			self.button_sms_identify.Enable()
+			self.save_gammu_settings(port,connection)
+		else:
+			self.conf.set('SMS', 'enable', '0')
+			self.sms_dev_label.Enable()
+			self.sms_dev.Enable()
+			self.sms_bt_label.Enable()
+			self.sms_bt.Enable()
+			self.sms_con_label.Enable()
+			self.sms_con.Enable()
+			self.button_sms_identify.Disable()
+			self.save_gammu_settings('','')
+			self.sms_enable_send.SetValue(False)
+			self.onsms_enable_send(0)
+
+	def onsms_enable_send(self,e):
+		isChecked = self.sms_enable_send.GetValue()
+		if isChecked:
+			if not self.sms_enable.GetValue():
+				self.ShowMessage(_('You have to enable settings.'))
+				self.sms_enable_send.SetValue(False)
+				return
+			if self.phone_number.GetValue()=='':
+				self.ShowMessage(_('You have to provide a phone number.'))
+				self.sms_enable_send.SetValue(False)
+				return
+			self.conf.set('SMS', 'enable_sending', '1')
+			self.conf.set('SMS', 'phone', self.phone_number.GetValue())
+			self.phone_number_label.Disable()
+			self.phone_number.Disable()
+			self.sms_text_label.Enable()
+			self.sms_text.Enable()
+			self.button_sms_test.Enable()
+		else:
+			self.conf.set('SMS', 'enable_sending', '0')
+			self.phone_number_label.Enable()
+			self.phone_number.Enable()
+			self.sms_text_label.Disable()
+			self.sms_text.Disable()
+			self.button_sms_test.Disable()
+
+	def sms_identify(self,e):
+		subprocess.call(['pkill', '-f', 'test_sms.py'])
+		subprocess.Popen(['python',currentpath+'/test_sms.py', 'i', '0', '0'])
+
+	def sms_test(self,e):
+		text=self.sms_text.GetValue()
+		if text=='':
+			self.ShowMessage(_('You have to provide some text to send.'))
+			return
+		subprocess.call(['pkill', '-f', 'test_sms.py'])
+		subprocess.Popen(['python',currentpath+'/test_sms.py', 't', text, self.phone_number.GetValue()])
+
+####################### MQTT
+
+	def read_mqtt(self):
+		if self.conf.get('MQTT', 'broker'): self.mqtt_broker.SetValue(self.conf.get('MQTT', 'broker'))
+		if self.conf.get('MQTT', 'port'): self.mqtt_port.SetValue(self.conf.get('MQTT', 'port'))
+		if self.conf.get('MQTT', 'username'): self.mqtt_user.SetValue(self.conf.get('MQTT', 'username'))
+		if self.conf.get('MQTT', 'password'): self.mqtt_pass.SetValue('***************')
+
+		self.topics=[]
+		self.list_topics.DeleteAllItems()
+		data=self.conf.get('MQTT', 'topics')
+		try:
+			temp_list=eval(data)
+		except:temp_list=[]
+		for ii in temp_list:
+			self.topics.append(ii)
+			self.list_topics.Append([ii[0].decode('utf8'),ii[1].decode('utf8')])
+
+	def edit_topic(self,e):
+		selected_topic=e.GetIndex()
+		edit=[selected_topic,self.topics[selected_topic][0],self.topics[selected_topic][1]]
+		self.edit_add_topic(edit)
+
+	def add_topic(self,e):
+		self.edit_add_topic(0)
+
+	def edit_add_topic(self,edit):
+		dlg = addTopic(edit)
+		res = dlg.ShowModal()
+		if res == wx.ID_OK:
+			short=dlg.short.GetValue()
+			short=short.encode('utf8')
+			topic=dlg.topic.GetValue()
+			topic=topic.encode('utf8')
+			if not topic or not short:
+				self.ShowMessage(_('Failed. Write a topic and a short name.'))
+				dlg.Destroy()
+				return				
+			if edit==0:
+				self.list_topics.Append([short.decode('utf8'),topic.decode('utf8')])
+				if len(self.topics)==0: ID='MQTT0'
+				else:
+					last=len(self.topics)-1
+					x=int(self.topics[last][2][4:])
+					ID='MQTT'+str(x+1)
+				self.topics.append([short,topic,ID])
+			else:
+				self.list_topics.SetStringItem(edit[0],0,short.decode('utf8'))
+				self.list_topics.SetStringItem(edit[0],1,topic.decode('utf8'))
+				self.topics[edit[0]][0]=short
+				self.topics[edit[0]][1]=topic
+		dlg.Destroy()
+
+
+	def delete_topic(self,e):
+		selected_topic=self.list_topics.GetFirstSelected()
+		if selected_topic==-1: 
+			self.ShowMessage(_('Select a topic to delete.'))
+			return
+		data=self.conf.get('ACTIONS', 'triggers')
+		try:
+			temp_list=eval(data)
+		except:temp_list=[]
+		for i in temp_list:
+			if i[1]==self.topics[selected_topic][2]:
+				self.read_triggers()
+				self.ShowMessage(_('You have a trigger defined for this topic. You must delete that action before deleting this topic.'))
+				return
+		del self.topics[selected_topic]
+		self.list_topics.DeleteItem(selected_topic)
+
+	def apply_changes_mqtt(self,e):
+		username=self.mqtt_user.GetValue()
+		passw=self.mqtt_pass.GetValue()
+		if not username or not passw:
+			self.ShowMessage(_('Enter at least username and password.'))
+			return
+		self.conf.set('MQTT', 'broker', self.mqtt_broker.GetValue())
+		self.conf.set('MQTT', 'port', self.mqtt_port.GetValue())
+		self.conf.set('MQTT', 'username', username)
+		self.conf.set('MQTT', 'topics', str(self.topics))
+		if not '*******' in passw:
+			self.mqtt_pass.SetValue('***************')
+			self.conf.set('MQTT', 'password', passw)
+			file = open("/etc/mosquitto/passwd.pw", "w")
+			file.write(username+':'+passw)
+			file.close()
+			subprocess.call(['sudo','mosquitto_passwd','-U','/etc/mosquitto/passwd.pw'])
+		subprocess.call(['sudo','service','mosquitto','restart'])
+		self.start_monitoring()
+		self.SetStatusText(_('MQTT topics changes applied and restarted'))
+
+	def cancel_changes_mqtt(self,e):
+		self.read_mqtt()
+		self.SetStatusText(_('MQTT topics changes cancelled'))
+
 #Main#############################
 if __name__ == "__main__":
 	app = wx.App()
+
+	bitmap = wx.Bitmap(home+'/.config/openplotter/openplotter.ico', wx.BITMAP_TYPE_ICO)
+	splash = wx.SplashScreen(bitmap, wx.SPLASH_CENTRE_ON_SCREEN|wx.SPLASH_TIMEOUT, 500, None, style=wx.SIMPLE_BORDER|wx.STAY_ON_TOP)
+	wx.Yield()
+
 	MainFrame().Show()
 	app.MainLoop()

@@ -20,11 +20,11 @@ from classes.datastream import DataStream
 from classes.paths import Paths
 from classes.conf import Conf
 from classes.language import Language
-
+from classes.mqtt import Mqtt
 
 class MyFrame(wx.Frame):
 		
-		def __init__(self, parent):
+		def __init__(self):
 
 			paths=Paths()
 			self.currentpath=paths.currentpath
@@ -33,7 +33,8 @@ class MyFrame(wx.Frame):
 
 			Language(self.conf.get('GENERAL','lang'))
 
-			wx.Frame.__init__(self, parent, title="Inspector", size=(650,435))
+			wx.Frame.__init__(self, None, title="Inspector", size=(650,435))
+			self.Bind(wx.EVT_CLOSE, self.OnClose)
 			
 			self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 			
@@ -43,11 +44,12 @@ class MyFrame(wx.Frame):
 			self.logger = wx.TextCtrl(self, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_DONTWRAP, size=(650,150), pos=(0,0))
 
 			self.list = wx.ListCtrl(self, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(540, 220), pos=(5, 155))
-			self.list.InsertColumn(0, _('Type'), width=205)
-			self.list.InsertColumn(1, _('Value'), width=130)
-			self.list.InsertColumn(2, _('Source'), width=90)
-			self.list.InsertColumn(3, _('NMEA'), width=50)
-			self.list.InsertColumn(4, _('Age'), width=59)
+			self.list.InsertColumn(0, _('Short'), width=50)
+			self.list.InsertColumn(1, _('Magnitude'), width=175)
+			self.list.InsertColumn(2, _('Value'), width=120)
+			self.list.InsertColumn(3, _('Source'), width=80)
+			self.list.InsertColumn(4, _('NMEA'), width=50)
+			self.list.InsertColumn(5, _('Age'), width=59)
 
 			self.button_pause =wx.Button(self, label=_('Pause'), pos=(555, 160))
 			self.Bind(wx.EVT_BUTTON, self.pause, self.button_pause)
@@ -57,6 +59,8 @@ class MyFrame(wx.Frame):
 
 			self.button_nmea =wx.Button(self, label=_('NMEA info'), pos=(555, 240))
 			self.Bind(wx.EVT_BUTTON, self.nmea_info, self.button_nmea)
+
+			self.mqtt=''
 
 			self.reset(0)
 
@@ -68,8 +72,10 @@ class MyFrame(wx.Frame):
 
 			self.Show(True)
 
-			self.thread1=threading.Thread(target=self.parse_data)
-			self.thread2=threading.Thread(target=self.refresh_loop)
+			self.t1_stop= threading.Event()
+			self.thread1=threading.Thread(target=self.parse_data, args=(1,self.t1_stop))
+			self.t2_stop= threading.Event()
+			self.thread2=threading.Thread(target=self.refresh_loop, args=(1,self.t2_stop))
 			
 			self.s2=''
 			self.error=''
@@ -92,8 +98,8 @@ class MyFrame(wx.Frame):
 			else: self.error=''
 			
 
-		def parse_data(self):
-			while True:
+		def parse_data(self,arg1,stop_event):
+			while (not stop_event.is_set()):
 				if not self.s2: self.connect()
 				else:
 					frase_nmea=''
@@ -111,8 +117,8 @@ class MyFrame(wx.Frame):
 		# end thread 1
 
 		# thread 2
-		def refresh_loop(self):
-			while True:	
+		def refresh_loop(self,arg1,stop_event):
+			while (not stop_event.is_set()):
 				if self.pause_all==0:
 					self.a.checkinputs()
 					self.a.checkoutputs()
@@ -134,18 +140,18 @@ class MyFrame(wx.Frame):
 							if talker=='OS': talker=_('Sensor')
 							if unit: data = str(value)+' '+str(unit)
 							else: data = str(value)
-							self.data=[index,1,data]
+							self.data=[index,2,data]
 							wx.CallAfter(self.refresh_data)
 							time.sleep(0.001)
 							if talker:
-								self.data=[index,2,talker]
+								self.data=[index,3,talker]
 								wx.CallAfter(self.refresh_data)
 								time.sleep(0.001)
 							if sentence: 
-								self.data=[index,3,sentence]
+								self.data=[index,4,sentence]
 								wx.CallAfter(self.refresh_data)
 								time.sleep(0.001)
-							self.data=[index,4,str(round(age,1))]
+							self.data=[index,5,str(round(age,1))]
 							wx.CallAfter(self.refresh_data)
 							time.sleep(0.001)
 						index=index+1
@@ -172,15 +178,19 @@ class MyFrame(wx.Frame):
 
 		def reset(self, e):
 			self.pause_all=1
-			self.list. DeleteAllItems()
+			self.list.DeleteAllItems()
 			self.logger.SetValue('')
 			time.sleep(1)
 			self.conf.read()
 			self.a=DataStream(self.conf)
+			if self.mqtt: self.mqtt.stop()
+			self.mqtt=Mqtt(self.conf,self.a)
 			index=0
 			for i in self.a.DataList:
-				data=i[0]
-				self.list.InsertStringItem(index,data)
+				short=i[1]
+				name=i[0]
+				self.list.InsertStringItem(index,short)
+				self.list.SetStringItem(index,1,name)
 				index=index+1
 
 			self.pause_all=0
@@ -188,7 +198,15 @@ class MyFrame(wx.Frame):
 		def nmea_info(self, e):
 			url = self.currentpath+'/docs/NMEA.html'
 			webbrowser.open(url,new=2)
+					
+		def OnClose(self, event):
+			self.t1_stop.set()
+			self.t2_stop.set()
+			self.mqtt.stop()
+			while (self.thread1.isAlive() or self.thread2.isAlive()):
+				time.sleep(0.1)
+			self.Destroy()
 
-app = wx.App(False)
-frame = MyFrame(None)
+app = wx.App()
+MyFrame().Show()
 app.MainLoop()

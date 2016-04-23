@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import pynmea2, time
+import pynmea2, time, re
 import RPi.GPIO as GPIO
 
 class DataStream:
@@ -37,7 +37,7 @@ class DataStream:
 		self.DataList.append([_('True Heading'),_('HDT'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'HDT'])
 		self.DataList.append([_('Course Over Ground'),_('COG'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'COG'])
 		self.DataList.append([_('Speed Over Ground'),_('SOG'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'SOG'])
-		self.DataList.append([_('Speed Trought Water'),_('STW'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'STW'])
+		self.DataList.append([_('Speed Through Water'),_('STW'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'STW'])
 		self.DataList.append([_('Water Depth (from transducer)'),_('DPT'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'DPT'])
 		self.DataList.append([_('Apparent Wind Angle'),_('AWA'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'AWA'])
 		self.DataList.append([_('True Wind Angle'),_('TWA'),None,None,None,None,None,(0,1,2,3,4,5,6),1,'TWA'])
@@ -86,10 +86,21 @@ class DataStream:
 					channel=i[3]
 					GPIO.setup(channel, GPIO.OUT)
 			except Exception,e: print str(e)
+		
+		#MQTT
+		x=conf.get('MQTT', 'topics')
+		if x: topics_list=eval(x)
+		else: topics_list=[]
+		for i in topics_list:
+			try:
+				self.DataList.append([i[1],i[0],None,None,None,None,None,(0,1,2,3,4,5,6),1, i[2]])
+			except Exception,e: print str(e)
+
+
 
 		#ATENTION. If order changes, edit monitoring.py: "#actions"
 		self.operators_list=[_('was not present in the last (sec.)'),_('was present in the last (sec.)'),_('is equal to'), _('is less than'), _('is less than or equal to'), _('is greater than'), _('is greater than or equal to'), _('is on'), _('is off')]
-
+		
 	def checkinputs(self):
 		for i in self.sw_list:
 			try:
@@ -113,6 +124,13 @@ class DataStream:
 						self.DataList[self.getDataListIndex(i[4])][2]=0
 						self.DataList[self.getDataListIndex(i[4])][4]=time.time()
 			except Exception,e: print str(e)
+	
+	def getVariablesValue(self, data):
+		var_list=re.findall(r'\[(.*?)\]',data)
+		for i in var_list:
+			for ii in self.DataList:
+				if i==ii[1]: data=data.replace('['+i+']', str(ii[2]))
+		return data
 
 	def getDataListIndex(self, data):
 		for index, item in enumerate(self.DataList):
