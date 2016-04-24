@@ -28,6 +28,8 @@ class Mqtt:
 		local_port='1883'
 		user=conf.get('MQTT', 'username')
 		passw=conf.get('MQTT', 'password')
+		self.client=''
+		self.client_local=''
 
 		if self.topics_list:
 			self.client_local = paho.Client()
@@ -45,8 +47,10 @@ class Mqtt:
 			self.client.on_message = self.on_message
 			self.client.on_connect = self.on_connect
 			self.client.username_pw_set(user, passw)
-			self.client.connect(broker, port)
-			self.client.loop_start()
+			try:
+				self.client.connect(broker, port)
+				self.client.loop_start()
+			except Exception,e: print str(e)
 
 
 	def on_message(self, client, userdata, msg):
@@ -65,5 +69,5 @@ class Mqtt:
 			except Exception,e: print str(e)
 
 	def stop(self):
-		self.client.loop_stop()
-		self.client_local.loop_stop()
+		if self.client: self.client.loop_stop()
+		if self.client_local: self.client_local.loop_stop()

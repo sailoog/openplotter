@@ -202,7 +202,7 @@ class MyFrame(wx.Frame):
 		def OnClose(self, event):
 			self.t1_stop.set()
 			self.t2_stop.set()
-			self.mqtt.stop()
+			if self.mqtt: self.mqtt.stop()
 			while (self.thread1.isAlive() or self.thread2.isAlive()):
 				time.sleep(0.1)
 			self.Destroy()
