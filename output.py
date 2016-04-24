@@ -198,8 +198,10 @@ class MyFrame(wx.Frame):
 		def OnClose(self, event):
 			self.t1_stop.set()
 			self.t2_stop.set()
-			while (self.thread1.isAlive() or self.thread2.isAlive()):
+			i=0
+			while ((self.thread1.isAlive() or self.thread2.isAlive()) and i<20):
 				time.sleep(0.1)
+				i+=1
 			self.Destroy()
 
 app = wx.App()
