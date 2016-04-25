@@ -632,6 +632,7 @@ class MainFrame(wx.Frame):
 		self.manual_settings=''
 		self.read_kplex_conf()
 		self.SerialCheck()
+		self.SerialWrongPort()
 		self.set_layout_conf()
 ###########################layout
 
@@ -2445,11 +2446,36 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					value= ii[ii.rfind('/dev/ttyOP_'):]			
 					if value.find('/dev/ttyOP_') >=0:
 						self.SerDevLs.append(value)
-				except: pass
+				except Exception,e: print str(e)
 		self.can_usb.Clear()
 		self.sms_dev.Clear()
 		self.can_usb.AppendItems(self.SerDevLs)
 		self.sms_dev.AppendItems(self.SerDevLs)
+
+	def SerialWrongPort(self):
+		context = pyudev.Context()
+		for device in context.list_devices(subsystem='tty'):
+			i=device['DEVNAME']
+			if '/dev/ttyU' in i or '/dev/ttyA' in i or '/dev/ttyS' in i or '/dev/ttyO' in i or '/dev/r' in i or '/dev/i' in i:
+				try:
+					ii=device['DEVLINKS']
+					value= ii[ii.find('/dev/ttyOP_'):]
+					if value.find(' ')>0:
+						s = value.split()
+						if s[0].find('dev/ttyOP_')>0 and s[1].find('dev/ttyOP_')>0:
+							s[0]=s[0][5:]
+							s[1]=s[1][5:]
+							data=self.conf.get('UDEV', 'USBinst')
+							try:
+								temp_list=eval(data)
+							except:temp_list=[]
+							for ic in temp_list:
+								if ic[0] == s[0]:
+									if ic[5] == 'port':
+										self.ShowMessage(_('Warning: You have connected the '+s[1]+' to the usb port which you have reserved for '+s[0]+'.'))
+									else:
+										self.ShowMessage(_('Warning: You have connected the '+s[0]+' to the usb port which you have reserved for '+s[1]+'.'))
+				except Exception,e: print str(e)
 
 	def onsignalk_enable (self,e):
 		isChecked = self.signalk_enable.GetValue()
