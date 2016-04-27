@@ -166,8 +166,14 @@ class MainFrame(wx.Frame):
 
 		wx.StaticBox(self.page1, size=(330, 230), pos=(350, 65))
 
-		self.op_maximize = wx.CheckBox(self.page1, label=_('Maximize OpenPlotter'), pos=(360, 80))
+		self.op_maximize = wx.CheckBox(self.page1, label=_('Maximize OpenPlotter'), pos=(20, 260))
 		self.op_maximize.Bind(wx.EVT_CHECKBOX, self.startup)
+
+		self.startup_play_sound = wx.CheckBox(self.page1, label=_('Play sound'), pos=(360, 80))
+		self.startup_play_sound.Bind(wx.EVT_CHECKBOX, self.startup)
+		self.startup_path_sound = wx.TextCtrl(self.page1, -1, size=(200, 32), pos=(360, 110))
+		self.button_select_sound =wx.Button(self.page1, label=_('Select'), pos=(570, 110))
+		self.Bind(wx.EVT_BUTTON, self.select_sound, self.button_select_sound)
 ###########################page1
 ########page2###################
 		wx.StaticBox(self.page2, size=(330, 50), pos=(10, 10))
@@ -681,7 +687,10 @@ class MainFrame(wx.Frame):
 		if self.conf.get('STARTUP', 'maximize')=='1':
 			self.op_maximize.SetValue(True) 
 			self.Maximize()
-		
+		self.startup_path_sound.SetValue(self.conf.get('STARTUP', 'sound'))
+		if self.conf.get('STARTUP', 'play')=='1':
+			self.startup_play_sound.SetValue(True) 
+
 		output=subprocess.check_output('lsusb')
 		if 'DVB-T' in output:
 			self.gain.SetValue(self.conf.get('AIS-SDR', 'gain'))
@@ -930,6 +939,15 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		webbrowser.open(url,new=2)
 
 ########startup###################################	
+	def select_sound(self, e):
+		dlg = wx.FileDialog(self, message=_('Choose a file'), defaultDir=currentpath+'/sounds', defaultFile='', wildcard=_('Audio files')+' (*.mp3)|*.mp3|'+_('All files')+' (*.*)|*.*', style=wx.OPEN | wx.CHANGE_DIR)
+		if dlg.ShowModal() == wx.ID_OK:
+			file_path = dlg.GetPath()
+			self.startup_path_sound.SetValue(file_path)
+			self.conf.set('STARTUP', 'sound', file_path)
+		dlg.Destroy()
+
+
 	def ok_delay(self, e):
 		delay=self.delay.GetValue()
 		if not re.match('^[0-9]*$', delay):
@@ -981,6 +999,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.conf.set('STARTUP', 'maximize', '1')
 		else:
 			self.conf.set('STARTUP', 'maximize', '0')
+
+		if self.startup_play_sound.GetValue():
+			self.conf.set('STARTUP', 'play', '1')
+		else:
+			self.conf.set('STARTUP', 'play', '0')
 ########WIFI###################################	
 	
 	def read_wifi_conf(self):
