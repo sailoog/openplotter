@@ -204,6 +204,9 @@ class MainFrame(wx.Frame):
 		self.TW_SOG = wx.CheckBox(self.page2, label=_('Use GPS'), pos=(360, 105))
 		self.TW_SOG.Bind(wx.EVT_CHECKBOX, self.TW)
 		wx.StaticText(self.page2, label=_('Generated NMEA: $OCMWV, $OCMWD'), pos=(360, 130))
+
+		self.show_output7 =wx.Button(self.page2, label=_('Inspector'), pos=(10, 285))
+		self.Bind(wx.EVT_BUTTON, self.show_output_window, self.show_output7)
 ###########################page2
 ########page3###################
 		wx.StaticBox(self.page3, size=(370, 315), pos=(10, 10))
@@ -259,38 +262,40 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.show_ip_info, self.button_refresh_ip)
 ###########################page3
 ########page4###################
-		wx.StaticBox(self.page4, size=(400, 45), pos=(10, 10))
+		wx.StaticBox(self.page4, label='', size=(400, 180), pos=(10, 10))
+
 		self.ais_sdr_enable = wx.CheckBox(self.page4, label=_('Enable AIS NMEA generation'), pos=(20, 25))
 		self.ais_sdr_enable.Bind(wx.EVT_CHECKBOX, self.OnOffAIS)
 
-		wx.StaticBox(self.page4, label=_(' Settings '), size=(400, 150), pos=(10, 60))
+		self.gain = wx.TextCtrl(self.page4, -1, size=(55, 32), pos=(150, 60))
+		self.gain_label=wx.StaticText(self.page4, label=_('Gain'), pos=(20, 65))
+		self.ppm = wx.TextCtrl(self.page4, -1, size=(55, 32), pos=(150, 95))
+		self.correction_label=wx.StaticText(self.page4, label=_('Correction (ppm)'), pos=(20, 100))
 
-		self.gain = wx.TextCtrl(self.page4, -1, size=(55, 32), pos=(150, 80))
-		self.gain_label=wx.StaticText(self.page4, label=_('Gain'), pos=(20, 85))
-		self.ppm = wx.TextCtrl(self.page4, -1, size=(55, 32), pos=(150, 115))
-		self.correction_label=wx.StaticText(self.page4, label=_('Correction (ppm)'), pos=(20, 120))
-
-		self.ais_frequencies1 = wx.CheckBox(self.page4, label=_('Channel A 161.975Mhz'), pos=(220, 80))
+		self.ais_frequencies1 = wx.CheckBox(self.page4, label=_('Channel A 161.975Mhz'), pos=(220, 60))
 		self.ais_frequencies1.Bind(wx.EVT_CHECKBOX, self.ais_frequencies)
-		self.ais_frequencies2 = wx.CheckBox(self.page4, label=_('Channel B 162.025Mhz'), pos=(220, 115))
+		self.ais_frequencies2 = wx.CheckBox(self.page4, label=_('Channel B 162.025Mhz'), pos=(220, 95))
 		self.ais_frequencies2.Bind(wx.EVT_CHECKBOX, self.ais_frequencies)
 
-		self.button_test_gain =wx.Button(self.page4, label=_('Calibration'), pos=(275, 165))
+		self.button_test_gain =wx.Button(self.page4, label=_('Calibration'), pos=(275, 145))
 		self.Bind(wx.EVT_BUTTON, self.test_gain, self.button_test_gain)
-		self.button_test_ppm =wx.Button(self.page4, label=_('Take a look'), pos=(150, 165))
+		self.button_test_ppm =wx.Button(self.page4, label=_('Take a look'), pos=(150, 145))
 		self.Bind(wx.EVT_BUTTON, self.test_ppm, self.button_test_ppm)
 
-		wx.StaticBox(self.page4, label=_(' Fine calibration using GSM base stations '), size=(400, 100), pos=(10, 215))
-		self.bands_label=wx.StaticText(self.page4, label=_('Band'), pos=(20, 245))
+		wx.StaticBox(self.page4, label=_(' Fine calibration using GSM '), size=(260, 180), pos=(420, 10))
+		self.bands_label=wx.StaticText(self.page4, label=_('Band'), pos=(430, 40))
 		self.bands_list = ['GSM850', 'GSM-R', 'GSM900', 'EGSM', 'DCS', 'PCS']
-		self.band= wx.ComboBox(self.page4, choices=self.bands_list, style=wx.CB_READONLY, size=(100, 32), pos=(150, 240))
+		self.band= wx.ComboBox(self.page4, choices=self.bands_list, style=wx.CB_READONLY, size=(100, 32), pos=(430, 60))
 		self.band.SetValue('GSM900')
-		self.check_bands =wx.Button(self.page4, label=_('Check band'), pos=(275, 240))
+		self.check_bands =wx.Button(self.page4, label=_('Check band'), pos=(540, 60))
 		self.Bind(wx.EVT_BUTTON, self.check_band, self.check_bands)
-		self.channel_label=wx.StaticText(self.page4, label=_('Channel'), pos=(20, 280))
-		self.channel = wx.TextCtrl(self.page4, -1, size=(55, 32), pos=(150, 275))
-		self.check_channels =wx.Button(self.page4, label=_('Fine calibration'), pos=(275, 275))
+		self.channel_label=wx.StaticText(self.page4, label=_('Channel'), pos=(430, 105))
+		self.channel = wx.TextCtrl(self.page4, -1, size=(55, 32), pos=(430, 125))
+		self.check_channels =wx.Button(self.page4, label=_('Fine calibration'), pos=(495, 125))
 		self.Bind(wx.EVT_BUTTON, self.check_channel, self.check_channels)
+
+		self.show_output6 =wx.Button(self.page4, label=_('Inspector'), pos=(10, 285))
+		self.Bind(wx.EVT_BUTTON, self.show_output_window, self.show_output6)
 ###########################page4
 ########page5###################
 		wx.StaticBox(self.page5, label=_(' Inputs '), size=(670, 130), pos=(10, 10))
@@ -443,6 +448,9 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.reset_graph, self.button_reset)
 		self.button_graph =wx.Button(self.page6, label=_('Show'), pos=(475, 240))
 		self.Bind(wx.EVT_BUTTON, self.show_graph, self.button_graph)
+
+		self.show_output4 =wx.Button(self.page6, label=_('Inspector'), pos=(10, 285))
+		self.Bind(wx.EVT_BUTTON, self.show_output_window, self.show_output4)
 ###########################page6
 ########page11###################
 
@@ -461,6 +469,9 @@ class MainFrame(wx.Frame):
 
 		self.delete_DS18B20_button =wx.Button(self.page11, label=_('delete'), pos=(585, 65))
 		self.Bind(wx.EVT_BUTTON, self.delete_DS18B20, self.delete_DS18B20_button)
+
+		self.show_output5 =wx.Button(self.page11, label=_('Inspector'), pos=(10, 285))
+		self.Bind(wx.EVT_BUTTON, self.show_output_window, self.show_output5)
 
 		self.button_apply_DS18B20 =wx.Button(self.page11, label=_('Apply changes'), pos=(570, 285))
 		self.Bind(wx.EVT_BUTTON, self.apply_changes_DS18B20, self.button_apply_DS18B20)
@@ -508,6 +519,8 @@ class MainFrame(wx.Frame):
 		self.delete_switches_button =wx.Button(self.page8, label=_('delete'), pos=(585, 65))
 		self.Bind(wx.EVT_BUTTON, self.delete_switches, self.delete_switches_button)
 
+		self.show_output2 =wx.Button(self.page8, label=_('Inspector'), pos=(10, 285))
+		self.Bind(wx.EVT_BUTTON, self.show_output_window, self.show_output2)
 		self.button_apply_switches =wx.Button(self.page8, label=_('Apply changes'), pos=(570, 285))
 		self.Bind(wx.EVT_BUTTON, self.apply_changes_switches, self.button_apply_switches)
 		self.button_cancel_switches =wx.Button(self.page8, label=_('Cancel changes'), pos=(430, 285))
@@ -529,13 +542,15 @@ class MainFrame(wx.Frame):
 		self.delete_outputs_button =wx.Button(self.page13, label=_('delete'), pos=(585, 65))
 		self.Bind(wx.EVT_BUTTON, self.delete_outputs, self.delete_outputs_button)
 
+		self.show_output3 =wx.Button(self.page13, label=_('Inspector'), pos=(10, 285))
+		self.Bind(wx.EVT_BUTTON, self.show_output_window, self.show_output3)
 		self.button_apply_outputs =wx.Button(self.page13, label=_('Apply changes'), pos=(570, 285))
 		self.Bind(wx.EVT_BUTTON, self.apply_changes_outputs, self.button_apply_outputs)
 		self.button_cancel_outputs =wx.Button(self.page13, label=_('Cancel changes'), pos=(430, 285))
 		self.Bind(wx.EVT_BUTTON, self.cancel_changes_outputs, self.button_cancel_outputs)
 ###########################page13
 ########page9###################
-		wx.StaticBox(self.page9, label=_(' Twitter '), size=(330, 200), pos=(10, 10))
+		wx.StaticBox(self.page9, label=_(' Twitter '), size=(330, 205), pos=(10, 10))
 		self.twitter_enable = wx.CheckBox(self.page9, label=_('Enable'), pos=(20, 32))
 		self.twitter_enable.Bind(wx.EVT_CHECKBOX, self.on_twitter_enable)
 		
@@ -548,7 +563,7 @@ class MainFrame(wx.Frame):
 		wx.StaticText(self.page9, label=_('accessTokenSecret'), pos=(20, 175))
 		self.accessTokenSecret = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(150, 170))
 
-		wx.StaticBox(self.page9, label=_(' Gmail '), size=(330, 165), pos=(350, 10))
+		wx.StaticBox(self.page9, label=_(' Gmail '), size=(330, 205), pos=(350, 10))
 		self.gmail_enable = wx.CheckBox(self.page9, label=_('Enable'), pos=(360, 32))
 		self.gmail_enable.Bind(wx.EVT_CHECKBOX, self.on_gmail_enable)
 		wx.StaticText(self.page9, label=_('Gmail account'), pos=(360, 70))
@@ -584,6 +599,8 @@ class MainFrame(wx.Frame):
 		self.delete_topic_button =wx.Button(self.page16, label=_('delete'), pos=(585, 145))
 		self.Bind(wx.EVT_BUTTON, self.delete_topic, self.delete_topic_button)
 
+		self.show_output8 =wx.Button(self.page16, label=_('Inspector'), pos=(10, 285))
+		self.Bind(wx.EVT_BUTTON, self.show_output_window, self.show_output8)
 		self.button_apply_mqtt =wx.Button(self.page16, label=_('Apply changes'), pos=(570, 285))
 		self.Bind(wx.EVT_BUTTON, self.apply_changes_mqtt, self.button_apply_mqtt)
 		self.button_cancel_mqtt =wx.Button(self.page16, label=_('Cancel changes'), pos=(430, 285))
