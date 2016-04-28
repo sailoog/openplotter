@@ -736,8 +736,8 @@ asciidoc.install(2);
 <h1>NMEA Revealed</h1>
 <span id="author">Eric S. Raymond</span><br>
 <span id="email" class="monospaced">&lt;<a href="mailto:esr@thyrsus.com">esr@thyrsus.com</a>&gt;</span><br>
-<span id="revnumber">version 2.19,</span>
-<span id="revdate">Apr 2015</span>
+<span id="revnumber">version 2.21,</span>
+<span id="revdate">Jan 2016</span>
 <div id="toc">
   <div id="toctitle">Table of Contents</div>
   <noscript><p><b>JavaScript must be enabled in your browser to display the table of contents.</b></p></noscript>
@@ -970,10 +970,13 @@ actually ship this sentence.</p></div>
 <div class="sect1">
 <h2 id="_nmea_encoding_conventions">NMEA Encoding Conventions</h2>
 <div class="sectionbody">
+<div class="paragraph"><p>Data is transmitted in serial async, 1 start-bit, 8 data-bits,
+1 stop-bit, no parity.  Data-bits are in least-significant-bit
+order.  The standard specifies 4800 as the speed, but this is no
+longer common. The most-signifacant-bit is always zero.</p></div>
 <div class="paragraph"><p>An NMEA sentence consists of a start delimiter, followed by a
-comma-separated sequence of fields, followed by the character <em>\*</em>
-(ASCII 42), followed by a CRC32 checksum expressed as two hexadecimal
-digits, followed by an end-of-line marker.</p></div>
+comma-separated sequence of fields, followed by the character <em>*</em>
+(ASCII 42), the checksum and an end-of-line marker.</p></div>
 <div class="paragraph"><p>The start delimiter is normally <em>$</em> (ASCII 36). Packets of AIVDM/AIVDO
 data, which are otherwise formatted like NMEA, use <em>!</em>.  Up to 4.00
 these are the only permitted start characters <a href="#ANON">[ANON]</a>.</p></div>
@@ -988,9 +991,16 @@ the whole minutes are whole degrees.</p></div>
 exactly 21 seconds.</p></div>
 <div class="paragraph"><p>Eg. 16708.033 is 167 degrees and 8.033 minutes. ".033" of a minute is
 about 2 seconds.</p></div>
-<div class="paragraph"><p>In NMEA 4.00 (and possibly some earlier versions), the character "^"
-is reserved as an introducer for two-character hex escapes using 0-9
-and A-F, expressing an ISO 8859-1 (Latin-1) character <a href="#ANON">[ANON]</a>.</p></div>
+<div class="paragraph"><p>In NMEA 3.01 (and possibly some earlier versions), the character "^"
+(HEX 5E) is reserved as an introducer for two-character hex escapes
+using 0-9 and A-F, expressing an ISO 8859-1 (Latin-1) character <a href="#ANON">[ANON]</a>.</p></div>
+<div class="paragraph"><p>The Checksum is mandatory, and the last field in a sentance.  It is
+the 8-bit XOR of all characters in the sentance, exclusing the "$", "I",
+or "*" characters; but including all "," and "^".  It is encoded as
+two hexadecimal characters (0-9, A-F), the most-significant-nibble
+being sent first.</p></div>
+<div class="paragraph"><p>Sentences are terminated by a &lt;CR&gt;&lt;LF&gt; sequence.</p></div>
+<div class="paragraph"><p>Maximum sentence length, including the $ and &lt;CR&gt;&lt;LF&gt; is 82 bytes.</p></div>
 <div class="paragraph"><p>According to <a href="#UNMEA">[UNMEA]</a>, the NMEA standard requires that a field (such as
 altitude, latitude, or longitude) must be left empty when the GPS has
 no valid data for it.  However, many receivers violate this.  It’s
@@ -1092,9 +1102,9 @@ fixed elevation of the horizon (usually 15%, but some GPSes make this
 adjustable) making position unreliable due to poor geometry and more
 variable signal lag induced by lengthened atmosphere transit.</p></div>
 <div class="paragraph"><p>Mode is associated with the GSA sentence associated with the last fix.
-It reports whether the fix was no good, sufficirnt for 2D, or
+It reports whether the fix was no good, sufficient for 2D, or
 sufficient for 3D (values 1, 2, and 3).</p></div>
-<div class="paragraph"><p>Status will be 0 ehen the sample from from which the reporting
+<div class="paragraph"><p>Status will be 0 when the sample from from which the reporting
 sentence was generated does not have a valid fix, 1 when it has
 a valid (normal-precision) fix, and 2 when the fig is DGPS corrected
 (reducing the base error).</p></div>
@@ -1108,7 +1118,7 @@ software must cope.</p></div>
 <div class="sectionbody">
 <div class="paragraph"><p>NMEA sentences do not identify the individual device that issued
 them; the format was originally designed for shipboard multidrop
-networks on which it’s possible only to broadcast to all devices,. not
+networks on which it’s possible only to broadcast to all devices, not
 address a specific one.</p></div>
 <div class="paragraph"><p>NMEA sentences do, however, include a "talker ID" a two-character
 prefix that identifies the type of the transmitting unit.  By far the
@@ -1607,21 +1617,25 @@ width:100%;
 </tbody>
 </table>
 <div class="paragraph"><p>GLONASS satellite numbers come in two flavors.  If a sentence
-has a GN talker ID, expect the skyviews to be GLONASS-only and
+has a GL talker ID, expect the skyviews to be GLONASS-only and
 in the range 1-32; you must add 64 to get a globally-unique
-NMEA ID.  If the sentence has a GL talker ID, the device emits
+NMEA ID.  If the sentence has a GN talker ID, the device emits
 a multi-constellation skyview with GLONASS IDs aleady in
-the 65-96 range</p></div>
+the 65-96 range.</p></div>
 <div class="paragraph"><p>QZSS is a  geosynchronous (<strong>not geostationary</strong>) system of three
 (possibly four) satellites in highly eliptical, inclined,
 orbits.  It is designed to provide coverage in Japan’s
 urban canyons.</p></div>
 <div class="paragraph"><p>BeiDou-1 consists of 4 geostationary satellites operated by China,
 operational since 2004.  Coverage area is the Chinese mainland.
-BeiDou-2 (also known as COMPASS) is a system of 35 satellites,
-including 5 geostationary for compatability with BeiDou-1.  It is
-expected to be fully operational by 2019.  Coverage area is
-expected to be worldwide.</p></div>
+gpsd does not support this, as this requires special hardware,
+and prior arrangements with the operator, who calculates and
+returns the position fix.</p></div>
+<div class="paragraph"><p>BeiDou-2 (earlier known as COMPASS) is a system of 35 satellites,
+including 5 geostationary for compatability with BeiDou-1.
+As of late 2015, coverage is complete over most of Asia and the
+West Pacific.  It is expected to be fully operational by 2020, by
+when coverage area is expected to be worldwide.</p></div>
 </div>
 </div>
 <div class="sect1">
@@ -3138,7 +3152,7 @@ E or W (East or West)
 </li>
 <li>
 <p>
-Mode indicator
+Mode indicator (non-null)
 </p>
 </li>
 <li>
@@ -3173,10 +3187,60 @@ Differential reference station ID
 </li>
 <li>
 <p>
-CRC
+Checksum
 </p>
 </li>
 </ol></div>
+<div class="paragraph"><p>The Mode indicator is two or more characters, with the first and second
+defined for GPS and GLONASS.  Further characters may be defined.  For
+each system, the character can have a value (table may be incomplete):</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+N = Constellation not in use, or no valid fix
+</p>
+</li>
+<li>
+<p>
+A = Autonomous (non-differential)
+</p>
+</li>
+<li>
+<p>
+D = Differential mode
+</p>
+</li>
+<li>
+<p>
+P = Precise (no degradation, like Selective Availability)
+</p>
+</li>
+<li>
+<p>
+R = Real Time Kinematic
+</p>
+</li>
+<li>
+<p>
+F = Float RTK
+</p>
+</li>
+<li>
+<p>
+E = Estimated (dead reckoning) Mode
+</p>
+</li>
+<li>
+<p>
+M = Manual Input Mode
+</p>
+</li>
+<li>
+<p>
+S = Simulator Mode
+</p>
+</li>
+</ul></div>
 </div>
 <div class="sect2">
 <h3 id="_grs_gps_range_residuals">GRS - GPS Range Residuals</h3>
@@ -3264,8 +3328,10 @@ Checksum
 </p>
 </li>
 </ol></div>
-<div class="paragraph"><p>The order of satellites the same as those in the last GSA.</p></div>
+<div class="paragraph"><p>The order of satellites MUST match those in the last GSA.</p></div>
 <div class="paragraph"><p>Example: $GPGRS,024603.00,1,-1.8,-2.7,0.3,,,,,,,,,*6C</p></div>
+<div class="paragraph"><p>Note that the talker ID may be GP, GL, or GN, depending on if the residuals
+are for GPS-only, GLONASS-only, or combined solution, respectively.</p></div>
 </div>
 <div class="sect2">
 <h3 id="_gst_gps_pseudorange_noise_statistics">GST - GPS Pseudorange Noise Statistics</h3>
@@ -6339,9 +6405,9 @@ NMEA checksum.
 
 <div id="footer">
 <div id="footer-text">
-Version 2.19<br>
+Version 2.21<br>
 Last updated
- 2015-04-13 23:52:28 EDT
+ 2016-01-05 04:10:58 EST
 </div>
 </div>
 
