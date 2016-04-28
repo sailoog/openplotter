@@ -2402,12 +2402,22 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.USBinst=[]
 		self.list_USBinst.DeleteAllItems()
 		data=self.conf.get('UDEV', 'USBinst')
+		sentence=0
 		try:
 			temp_list=eval(data)
 		except:temp_list=[]
 		for ii in temp_list:
 			self.USBinst.append(ii)
 			self.list_USBinst.Append([ii[0].decode('utf8'),ii[1].decode('utf8'),ii[2].decode('utf8'),ii[4].decode('utf8'),ii[3].decode('utf8'),ii[5]])
+			sentence=1
+		try:		
+			filesize=os.stat('/etc/udev/rules.d/10-openplotter.rules').st_size
+		except: filesize=0		
+			
+		if sentence==0 and filesize>10:
+			self.apply_changes_USBinst()
+		if sentence==1 and filesize<10:
+			self.apply_changes_USBinst()
 
 
 	def add_USBinst(self,e):
