@@ -847,7 +847,10 @@ class MainFrame(wx.Frame):
 		self.read_outputs()
 		self.read_mqtt()
 		
-########MENU###################################	
+###########################################	general functions
+
+	def ShowMessage(self, w_msg):
+			wx.MessageBox(w_msg, 'Info', wx.OK | wx.ICON_INFORMATION)
 
 	def time_zone(self,event):
 		subprocess.Popen(['lxterminal', '-e', 'sudo dpkg-reconfigure tzdata'])
@@ -938,7 +941,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		url = "http://sailoog.gitbooks.io/openplotter-documentation/"
 		webbrowser.open(url,new=2)
 
-########startup###################################	
+###########################################	startup
 	def select_sound(self, e):
 		dlg = wx.FileDialog(self, message=_('Choose a file'), defaultDir=currentpath+'/sounds', defaultFile='', wildcard=_('Audio files')+' (*.mp3)|*.mp3|'+_('All files')+' (*.*)|*.*', style=wx.OPEN | wx.CHANGE_DIR)
 		if dlg.ShowModal() == wx.ID_OK:
@@ -1004,7 +1007,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.conf.set('STARTUP', 'play', '1')
 		else:
 			self.conf.set('STARTUP', 'play', '0')
-########WIFI###################################	
+
+###########################################	WiFi AP
 	
 	def read_wifi_conf(self):
 		if len(self.available_wireless)>0:
@@ -1159,7 +1163,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.wifi_enable.SetValue(False)
 			self.conf.set('WIFI', 'enable', '0')
 
-########SDR-AIS###################################	
+###########################################	SDR-AIS
 
 
 	def kill_sdr(self):
@@ -1265,7 +1269,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.conf.set('AIS-SDR', 'ppm', ppm)
 		self.conf.set('AIS-SDR', 'gsm_channel', channel)
 		if channel: subprocess.Popen(['python',currentpath+'/fine_cal.py', 'c'])
-########multimpexer###################################	
+
+###########################################	NMEA 0183
 
 	def show_output_window(self,event):
 		close=subprocess.call(['pkill', '-f', 'output.py'])
@@ -1557,13 +1562,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.koutputs.append(list_tmp)
 				self.write_outputs()
 
+###################################### I2C sensors
 
-######################################multiplexer
-
-	def ShowMessage(self, w_msg):
-			wx.MessageBox(w_msg, 'Info', wx.OK | wx.ICON_INFORMATION)
-
-#####sensors#################################
 	def start_sensors(self):
 		subprocess.call(['pkill', 'RTIMULibDemoGL'])
 		subprocess.call(['pkill', '-f', 'i2c.py'])
@@ -1701,7 +1701,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		file.close()
 		self.start_sensors()
 		self.ShowMessage(_('Weather log restarted'))
-######################################calculate
+
+###################################### Calculate
 
 	def start_calculate(self):
 		subprocess.call(['pkill', '-f', 'calculate.py'])
@@ -1749,17 +1750,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if self.TW_STW.GetValue(): self.conf.set('STARTUP', 'tw_stw', '1')
 		if self.TW_SOG.GetValue(): self.conf.set('STARTUP', 'tw_sog', '1')
 		self.start_calculate()
-######################################Signal K
-	def signalKout(self, e):
-		url = 'http://localhost:3000/examples/consumer-example.html'
-		webbrowser.open(url,new=2)
 
-	def restartSK(self, e):
-		self.SetStatusText(_('Closing Signal K server'))
-		subprocess.call(["pkill", '-9', "node"])
-		subprocess.Popen(home+'/.config/signalk-server-node/bin/openplotter', cwd=home+'/.config/signalk-server-node')
-		self.SetStatusText(_('Signal K server restarted'))
-######################################Switches
+###################################### Switches
 
 	def read_switches(self):
 		self.switches=[]
@@ -1884,7 +1876,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def cancel_changes_switches(self, e):
 		self.read_switches()
 		self.SetStatusText(_('Switches changes cancelled'))
-######################################outputs
+
+###################################### Outputs
+
 	def read_outputs(self):
 		self.outputs=[]
 		self.list_outputs.DeleteAllItems()
@@ -2006,7 +2000,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.read_outputs()
 		self.SetStatusText(_('Output changes cancelled'))
 
-#######################accounts
+####################### Accounts
 
 	def start_monitoring(self):
 		self.ShowMessage(_('Actions will be restarted.'))
@@ -2066,7 +2060,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.Recipient.Enable()
 		self.start_monitoring()
 
-#######################actions
+####################### Actions
 
 	def read_triggers(self):
 		self.a=DataStream(self.conf)
@@ -2286,7 +2280,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.read_triggers()
 		self.list_actions.DeleteAllItems()
 
-#######################DS18B20
+####################### 1W sensors
 
 	def start_1w(self):
 		subprocess.call(['pkill', '-f', '1w.py'])
@@ -2392,7 +2386,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.read_DS18B20()
 		self.SetStatusText(_('DS18B20 sensors changes cancelled'))
 
-#######################USBinst
+####################### USB manager
 
 	def start_udev(self):
 		subprocess.call(['sudo','udevadm','control','--reload-rules'])
@@ -2482,7 +2476,17 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.SetStatusText(_('USB names added and restarted'))
 		self.SerialCheck()
 
-#######################Signal K
+###################################### Signal K
+
+	def signalKout(self, e):
+		url = 'http://localhost:3000/examples/consumer-example.html'
+		webbrowser.open(url,new=2)
+
+	def restartSK(self, e):
+		self.SetStatusText(_('Closing Signal K server'))
+		subprocess.call(["pkill", '-9', "node"])
+		subprocess.Popen(home+'/.config/signalk-server-node/bin/openplotter', cwd=home+'/.config/signalk-server-node')
+		self.SetStatusText(_('Signal K server restarted'))
 
 	def SerialCheck(self):
 		self.SerDevLs = [_('none')]
@@ -2786,7 +2790,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.read_mqtt()
 		self.SetStatusText(_('MQTT topics changes cancelled'))
 
-#Main#############################
+############################## Main
+
 if __name__ == "__main__":
 	app = wx.App()
 
