@@ -42,22 +42,17 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		ListCtrlAutoWidthMixin.__init__(self)
 
 class MainFrame(wx.Frame):
-####layout###################
+
 	def __init__(self):
 		wx.Frame.__init__(self, None, title="OpenPlotter", size=(700,450))
-
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
-
-########reading configuration###################
 		self.conf=Conf()
 		self.language=self.conf.get('GENERAL','lang')
 		Language(self.language)
-##########################language
 		self.p = scrolled.ScrolledPanel(self, -1, style = wx.TAB_TRAVERSAL|wx.SUNKEN_BORDER)
 		self.p.SetAutoLayout(1)
 		self.p.SetupScrolling()
 		self.nb = wx.Notebook(self.p)
-
 		self.page1 = wx.Panel(self.nb)
 		self.page2 = wx.Panel(self.nb)
 		self.page3 = wx.Panel(self.nb)
@@ -74,7 +69,6 @@ class MainFrame(wx.Frame):
 		self.page14 = wx.Panel(self.nb)
 		self.page15 = wx.Panel(self.nb)
 		self.page16 = wx.Panel(self.nb)
-
 		self.nb.AddPage(self.page14, _('USB manager'))
 		self.nb.AddPage(self.page5, _('NMEA 0183'))
 		self.nb.AddPage(self.page7, _('Signal K'))
@@ -91,19 +85,17 @@ class MainFrame(wx.Frame):
 		self.nb.AddPage(self.page16, _('MQTT'))
 		self.nb.AddPage(self.page15, _('SMS'))
 		self.nb.AddPage(self.page1, _('Startup'))
-
 		sizer = wx.BoxSizer()
 		sizer.Add(self.nb, 1, wx.EXPAND)
 		self.p.SetSizer(sizer)
-
 		self.icon = wx.Icon(currentpath+'/openplotter.ico', wx.BITMAP_TYPE_ICO)
 		self.SetIcon(self.icon)
-
 		self.CreateStatusBar()
 		self.Centre()
-########menu###################
-		self.menubar = wx.MenuBar()
 
+########################### menu
+
+		self.menubar = wx.MenuBar()
 		self.settings = wx.Menu()
 		self.time_item1 = self.settings.Append(wx.ID_ANY, _('Set time zone'), _('Set time zone in the new window'))
 		self.Bind(wx.EVT_MENU, self.time_zone, self.time_item1)
@@ -459,7 +451,6 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.show_output_window, self.show_output4)
 ###########################page6
 ########page11###################
-
 		wx.StaticBox(self.page11, label=_(' DS18B20 sensors '), size=(670, 265), pos=(10, 10))
 		
 		self.list_DS18B20 = CheckListCtrl(self.page11, 237)
@@ -483,13 +474,11 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.apply_changes_DS18B20, self.button_apply_DS18B20)
 		self.button_cancel_DS18B20 =wx.Button(self.page11, label=_('Cancel changes'), pos=(430, 285))
 		self.Bind(wx.EVT_BUTTON, self.cancel_changes_DS18B20, self.button_cancel_DS18B20)
-
 ###########################page11
 ########page12###################
 		wx.StaticText(self.page12, label=_('Coming soon'), pos=(20, 30))
 ###########################page12
 ########page14###################
-
 		wx.StaticBox(self.page14, label=_(' USB Serial ports '), size=(670, 265), pos=(10, 10))
 		
 		self.list_USBinst = wx.ListCtrl(self.page14, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(565, 237))
@@ -506,7 +495,6 @@ class MainFrame(wx.Frame):
 
 		self.delete_USBinst_button =wx.Button(self.page14, label=_('delete'), pos=(585, 65))
 		self.Bind(wx.EVT_BUTTON, self.delete_USBinst, self.delete_USBinst_button)
-
 ###########################page14
 ########page8###################
 		wx.StaticBox(self.page8, label=_(' Switches '), size=(670, 265), pos=(10, 10))
@@ -652,14 +640,14 @@ class MainFrame(wx.Frame):
 		self.button_cancel_actions =wx.Button(self.page10, label=_('Cancel changes'), pos=(430, 285))
 		self.Bind(wx.EVT_BUTTON, self.cancel_changes_actions, self.button_cancel_actions)
 ###########################page10
+
 		self.manual_settings=''
 		self.read_kplex_conf()
 		self.SerialCheck()
 		self.SerialWrongPort()
 		self.set_layout_conf()
-###########################layout
 
-####definitions###################
+###########################################	general functions
 
 	def set_layout_conf(self):
 		if self.language=='en': self.lang.Check(self.lang_item1.GetId(), True)
@@ -846,8 +834,6 @@ class MainFrame(wx.Frame):
 		self.read_switches()
 		self.read_outputs()
 		self.read_mqtt()
-		
-###########################################	general functions
 
 	def ShowMessage(self, w_msg):
 			wx.MessageBox(w_msg, 'Info', wx.OK | wx.ICON_INFORMATION)
@@ -941,7 +927,48 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		url = "http://sailoog.gitbooks.io/openplotter-documentation/"
 		webbrowser.open(url,new=2)
 
+	def check_short_names(self,short,edit,group):
+		exist=False
+		short_switches=[]
+		for i in self.switches:
+			short_switches.append(i[2])	
+		short_outputs=[]
+		for i in self.outputs:
+			short_outputs.append(i[2])
+		short_1W=[]
+		for i in self.DS18B20:
+			short_1W.append(i[1])
+		short_topics=[]
+		for i in self.topics:
+			short_topics.append(i[0])
+		if short in short_switches:
+			if group=='switches':
+				if edit==0: exist=True
+				else:
+					if edit[0]!=short_switches.index(short): exist=True
+			else: exist=True
+		if short in short_outputs:
+			if group=='outputs':
+				if edit==0: exist=True
+				else:
+					if edit[0]!=short_outputs.index(short): exist=True
+			else: exist=True
+		if short in short_1W:
+			if group=='1w':
+				if edit==0: exist=True
+				else:
+					if edit[0]!=short_1W.index(short): exist=True
+			else: exist=True
+		if short in short_topics:
+			if group=='topics':
+				if edit==0: exist=True
+				else:
+					if edit[0]!=short_topics.index(short): exist=True
+			else: exist=True
+		return exist
+
 ###########################################	startup
+
 	def select_sound(self, e):
 		dlg = wx.FileDialog(self, message=_('Choose a file'), defaultDir=currentpath+'/sounds', defaultFile='', wildcard=_('Audio files')+' (*.mp3)|*.mp3|'+_('All files')+' (*.*)|*.*', style=wx.OPEN | wx.CHANGE_DIR)
 		if dlg.ShowModal() == wx.ID_OK:
@@ -949,7 +976,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.startup_path_sound.SetValue(file_path)
 			self.conf.set('STARTUP', 'sound', file_path)
 		dlg.Destroy()
-
 
 	def ok_delay(self, e):
 		delay=self.delay.GetValue()
@@ -1164,7 +1190,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.conf.set('WIFI', 'enable', '0')
 
 ###########################################	SDR-AIS
-
 
 	def kill_sdr(self):
 		subprocess.call(['pkill', '-9', 'aisdecoder'])
@@ -1426,7 +1451,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					if item[5]=='accept':data=data+state+'ifilter='+item[6]+'\n'
 					data=data+state+'address='+item[3]+'\n'+state+'port='+item[4]+'\n\n'
 		
-
 		for index,item in enumerate(self.koutputs):
 			if 'system_output' not in item[1]:
 				if self.list_output.IsChecked(index): state=''
@@ -1506,7 +1530,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.inputs.append(list_tmp)
 				self.write_inputs()
 
-
 	def add_serial_output(self,event):
 		subprocess.call(['pkill', '-f', 'connection.py'])
 		p=subprocess.Popen(['python', currentpath+'/connection.py', 'out', 'serial'], stdout=subprocess.PIPE)
@@ -1522,7 +1545,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.koutputs.append(list_tmp)
 				self.write_outputs()
 
-	
 	def add_network_input(self,event):
 		subprocess.call(['pkill', '-f', 'connection.py'])
 		p=subprocess.Popen(['python', currentpath+'/connection.py', 'in', 'network'], stdout=subprocess.PIPE)
@@ -1541,7 +1563,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 						return
 				self.inputs.append(list_tmp)
 				self.write_inputs()
-
 
 	def add_network_output(self,event):
 		subprocess.call(['pkill', '-f', 'connection.py'])
@@ -1814,6 +1835,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.ShowMessage(_('Failed. Select pull down or pull up.'))
 				dlg.Destroy()
 				return
+			short_exist=self.check_short_names(short,edit,'switches')
+			if short_exist:
+				self.ShowMessage(_('Failed. This short name is already used.'))
+				dlg.Destroy()
+				return				
 			if edit==0:
 				self.list_switches.Append([name.decode('utf8'),short.decode('utf8'),gpio_selection,pull_selection])
 				last=self.list_switches.GetItemCount()-1
@@ -1934,6 +1960,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.ShowMessage(_('Failed. Select GPIO.'))
 				dlg.Destroy()
 				return
+			short_exist=self.check_short_names(short,edit,'outputs')
+			if short_exist:
+				self.ShowMessage(_('Failed. This short name is already used.'))
+				dlg.Destroy()
+				return
 			if edit==0:
 				self.list_outputs.Append([name.decode('utf8'),short.decode('utf8'),gpio_selection])
 				last=self.list_outputs.GetItemCount()-1
@@ -1994,7 +2025,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.conf.set('OUTPUTS', 'outputs', str(self.outputs))
 		self.start_monitoring()
 		self.SetStatusText(_('Output changes applied and restarted'))
-
 
 	def cancel_changes_outputs(self, e):
 		self.read_outputs()
@@ -2331,6 +2361,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.ShowMessage(_('Failed. Select sensor ID.'))
 				dlg.Destroy()
 				return
+			short_exist=self.check_short_names(short,edit,'1w')
+			if short_exist:
+				self.ShowMessage(_('Failed. This short name is already used.'))
+				dlg.Destroy()
+				return	
 			if unit_selection=='Celsius': unit_selection='C'
 			if unit_selection=='Fahrenheit': unit_selection='F'
 			if unit_selection=='Kelvin': unit_selection='K'
@@ -2412,7 +2447,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.apply_changes_USBinst()
 		if sentence==1 and filesize<10:
 			self.apply_changes_USBinst()
-
 
 	def add_USBinst(self,e):
 		dlg = addUSBinst()
@@ -2731,6 +2765,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			if not topic or not short:
 				self.ShowMessage(_('Failed. Write a topic and a short name.'))
 				dlg.Destroy()
+				return
+			short_exist=self.check_short_names(short,edit,'topics')
+			if short_exist:
+				self.ShowMessage(_('Failed. This short name is already used.'))
+				dlg.Destroy()
 				return				
 			if edit==0:
 				self.list_topics.Append([short.decode('utf8'),topic.decode('utf8')])
@@ -2746,7 +2785,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.topics[edit[0]][0]=short
 				self.topics[edit[0]][1]=topic
 		dlg.Destroy()
-
 
 	def delete_topic(self,e):
 		selected_topic=self.list_topics.GetFirstSelected()
