@@ -132,19 +132,36 @@ if wifi_server=='1':
 	print 'Chipset: '+chipset+', driver: '+driver+'.\n'
 
 	if error==1: print "WiFi access point failed."
-	else: 
+	else:
 		print "WiFi access point started.\n"
 		print "SSID: "+ssid
 		print "Adress: 10.10.10.1"
 
-
 else:
-
 	data='# interfaces(5) file used by ifup(8) and ifdown(8)\nauto lo\niface lo inet loopback'
 	file = open('/etc/network/interfaces', 'w')
 	file.write(data)
 	file.close()
-
 	subprocess.call(['/etc/init.d/network-manager', 'restart'])
-
 	print "\nWiFi access point stopped."
+
+data=''
+file = open('/boot/config.txt', 'r')
+file.seek(0)
+for line in file:
+	data0=''
+	if '#' in line: data0=line
+	else:
+		if 'device' in line: data0='device='+wlan+'\n'
+		if 'ssid' in line: data0='ssid='+ssid+'\n'
+		if 'pass' in line: data0='pass='+passw+'\n'
+		if 'hw_mode' in line: data0='hw_mode='+hw_mode+'\n'
+		if 'channel' in line: data0='channel='+channel+'\n'
+		if 'wpa' in line: data0='wpa='+wpa+'\n'
+		if 'share' in line: data0='share='+share+'\n'
+	if not data0: data0=line
+	data+=data0
+file.close()
+file = open('/boot/config.txt', 'w')
+file.write(data)
+file.close()

@@ -24,34 +24,42 @@ home=paths.home
 currentpath=paths.currentpath
 
 boot_ap=0
-
+boot_sh=0
+boot_conf = ConfigParser.SafeConfigParser()
+boot_conf.read('/boot/config.txt')
 try:
-	boot_conf = ConfigParser.SafeConfigParser()
-	boot_conf.read('/boot/config.txt')
 	device=boot_conf.get('OPENPLOTTER', 'device')
-	share=boot_conf.get('OPENPLOTTER', 'share')
 	ssid=boot_conf.get('OPENPLOTTER', 'ssid')
 	passw=boot_conf.get('OPENPLOTTER', 'pass')
 	hw_mode = boot_conf.get('OPENPLOTTER', 'hw_mode')
 	channel = boot_conf.get('OPENPLOTTER', 'channel')
 	wpa = boot_conf.get('OPENPLOTTER', 'wpa')
 	boot_ap=1
-except Exception,e: 
-	print str(e)
-	boot_ap=0
+except: boot_ap=0
+try:
+	share=boot_conf.get('OPENPLOTTER', 'share')
+	boot_sh=1
+except: boot_sh=0
 
 conf=Conf()
 
 if boot_ap==1:
 	conf.set('WIFI', 'enable', '1')
-	conf.set('WIFI', 'device', device)
-	conf.set('WIFI', 'share', share)
-	conf.set('WIFI', 'ssid', ssid)
-	conf.set('WIFI', 'password', passw)
-	conf.set('WIFI', 'hw_mode', hw_mode)
-	conf.set('WIFI', 'channel', channel)
-	conf.set('WIFI', 'wpa', wpa)
-
+	if device: conf.set('WIFI', 'device', device)
+	else: conf.set('WIFI', 'device', 'wlan0')
+	if ssid: conf.set('WIFI', 'ssid', ssid)
+	else: conf.set('WIFI', 'ssid', 'OpenPlotter')
+	if passw: conf.set('WIFI', 'password', passw)
+	else: conf.set('WIFI', 'password', '12345678')
+	if hw_mode: conf.set('WIFI', 'hw_mode', hw_mode)
+	else: conf.set('WIFI', 'hw_mode', 'g')
+	if channel: conf.set('WIFI', 'channel', channel)
+	else: conf.set('WIFI', 'channel', '6')
+	if wpa: conf.set('WIFI', 'wpa', wpa)
+	else: conf.set('WIFI', 'wpa', '2')
+if boot_sh==1:
+	if share: conf.set('WIFI', 'share', share)
+	else: conf.set('WIFI', 'share', '0')
 
 wifi_server=conf.get('WIFI', 'enable')
 

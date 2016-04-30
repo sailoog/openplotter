@@ -1034,7 +1034,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		else:
 			self.conf.set('STARTUP', 'play', '0')
 
-###########################################	WiFi AP
+########################################### WiFi AP
 	
 	def read_wifi_conf(self):
 		if len(self.available_wireless)>0:
