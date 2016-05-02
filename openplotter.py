@@ -221,8 +221,11 @@ class MainFrame(wx.Frame):
 		for i in range (0, 9):
 			ii=str(i)
 			if 'eth'+ii in output: self.available_share.append('eth'+ii)
+			if 'ppp'+ii in output: self.available_share.append('ppp'+ii)
 		for i in self.available_wireless:
 			self.available_share.append(i)
+		share_old= self.conf.get('WIFI', 'share')
+		if share_old!='0' and share_old not in self.available_share: self.available_share.append(share_old)
 		self.wlan_label=wx.StaticText(self.page3, label=_('Access point device'), pos=(20, 55))
 		self.wlan = wx.ComboBox(self.page3, choices=self.available_wireless, style=wx.CB_READONLY, size=(100, 32), pos=(20, 75))
 		
