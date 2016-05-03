@@ -2463,8 +2463,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def SerialCheck(self):
 		self.SerDevLs = [_('none')]
-		context = pyudev.Context()
-		for device in context.list_devices(subsystem='tty'):
+		self.context = pyudev.Context()
+		for device in self.context.list_devices(subsystem='tty'):
 			i=device['DEVNAME']
 			if '/dev/ttyU' in i or '/dev/ttyA' in i or '/dev/ttyS' in i or '/dev/ttyO' in i or '/dev/r' in i or '/dev/i' in i:
 				self.SerDevLs.append(i)
@@ -2480,29 +2480,35 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.sms_dev.AppendItems(self.SerDevLs)
 
 	def SerialWrongPort(self):
-		context = pyudev.Context()
-		for device in context.list_devices(subsystem='tty'):
-			i=device['DEVNAME']
-			if '/dev/ttyU' in i or '/dev/ttyA' in i or '/dev/ttyS' in i or '/dev/ttyO' in i or '/dev/r' in i or '/dev/i' in i:
-				try:
-					ii=device['DEVLINKS']
-					value= ii[ii.find('/dev/ttyOP_'):]
-					if value.find(' ')>0:
-						s = value.split()
-						if s[0].find('dev/ttyOP_')>0 and s[1].find('dev/ttyOP_')>0:
-							s[0]=s[0][5:]
-							s[1]=s[1][5:]
-							data=self.conf.get('UDEV', 'USBinst')
-							try:
-								temp_list=eval(data)
-							except:temp_list=[]
-							for ic in temp_list:
-								if ic[0] == s[0]:
-									if ic[5] == 'port':
-										self.ShowMessage(_('Warning: You have connected the '+s[1]+' to the usb port which you have reserved for '+s[0]+'.'))
-									else:
-										self.ShowMessage(_('Warning: You have connected the '+s[0]+' to the usb port which you have reserved for '+s[1]+'.'))
-				except Exception,e: print str(e)
+		try:
+			self.context		
+		except NameError:
+			self.context = pyudev.Context()
+
+		data=self.conf.get('UDEV', 'USBinst')
+		try:
+			temp_list=eval(data)
+		except:temp_list=[]
+		for ic in temp_list:
+			if ic[5] == 'port':	
+				for device in self.context.list_devices(subsystem='usb'):
+					dp = ""
+					imi= ""
+					ivi= ""
+					imfd=""
+					ivfd=""
+					if 'DEVPATH' in device: dp=device['DEVPATH']
+					if dp.find(ic[4])>0:					
+						if 'PRODUCT' in device:
+							pr=device['PRODUCT']
+							s = pr.split('/')
+							imi = s[1].zfill(4)
+							ivi = s[0].zfill(4)								
+						if imi==ic[2] and ivi==ic[1]: pass
+						else:
+							if 'ID_MODEL_FROM_DATABASE' in device:	imfd=device['ID_MODEL_FROM_DATABASE']
+							if 'ID_VENDOR_FROM_DATABASE' in device:	ivfd=device['ID_VENDOR_FROM_DATABASE']
+							self.ShowMessage(_('Warning: You have connected the "')+ivfd+', '+imfd+_('" to the usb port which is reserved for another device'))		
 
 	def onsignalk_enable (self,e):
 		isChecked = self.signalk_enable.GetValue()
