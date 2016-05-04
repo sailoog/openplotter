@@ -263,7 +263,7 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.show_ip_info, self.button_refresh_ip)
 ###########################page3
 ########page4###################
-		wx.StaticBox(self.page4, label='', size=(400, 180), pos=(10, 10))
+		wx.StaticBox(self.page4, label='', size=(400, 170), pos=(10, 10))
 
 		self.ais_sdr_enable = wx.CheckBox(self.page4, label=_('Enable AIS NMEA generation'), pos=(20, 25))
 		self.ais_sdr_enable.Bind(wx.EVT_CHECKBOX, self.OnOffAIS)
@@ -278,25 +278,34 @@ class MainFrame(wx.Frame):
 		self.ais_frequencies2 = wx.CheckBox(self.page4, label=_('Channel B 162.025Mhz'), pos=(220, 95))
 		self.ais_frequencies2.Bind(wx.EVT_CHECKBOX, self.ais_frequencies)
 
-		self.button_test_gain =wx.Button(self.page4, label=_('Calibration'), pos=(275, 145))
-		self.Bind(wx.EVT_BUTTON, self.test_gain, self.button_test_gain)
-		self.button_test_ppm =wx.Button(self.page4, label=_('Take a look'), pos=(150, 145))
+		self.show_output6 =wx.Button(self.page4, label=_('Inspector'), pos=(20, 140))
+		self.Bind(wx.EVT_BUTTON, self.show_output_window, self.show_output6)
+		self.button_test_ppm =wx.Button(self.page4, label=_('Take a look'), pos=(150, 140))
 		self.Bind(wx.EVT_BUTTON, self.test_ppm, self.button_test_ppm)
+		self.button_test_gain =wx.Button(self.page4, label=_('Calibration'), pos=(275, 140))
+		self.Bind(wx.EVT_BUTTON, self.test_gain, self.button_test_gain)
 
-		wx.StaticBox(self.page4, label=_(' Fine calibration using GSM '), size=(260, 180), pos=(420, 10))
-		self.bands_label=wx.StaticText(self.page4, label=_('Band'), pos=(430, 40))
+		wx.StaticBox(self.page4, label=_(' Fine calibration using GSM '), size=(260, 170), pos=(420, 10))
+		self.bands_label=wx.StaticText(self.page4, label=_('Band'), pos=(430, 50))
 		self.bands_list = ['GSM850', 'GSM-R', 'GSM900', 'EGSM', 'DCS', 'PCS']
-		self.band= wx.ComboBox(self.page4, choices=self.bands_list, style=wx.CB_READONLY, size=(100, 32), pos=(430, 60))
+		self.band= wx.ComboBox(self.page4, choices=self.bands_list, style=wx.CB_READONLY, size=(100, 32), pos=(430, 70))
 		self.band.SetValue('GSM900')
-		self.check_bands =wx.Button(self.page4, label=_('Check band'), pos=(540, 60))
+		self.check_bands =wx.Button(self.page4, label=_('Check band'), pos=(540, 70))
 		self.Bind(wx.EVT_BUTTON, self.check_band, self.check_bands)
-		self.channel_label=wx.StaticText(self.page4, label=_('Channel'), pos=(430, 105))
-		self.channel = wx.TextCtrl(self.page4, -1, size=(55, 32), pos=(430, 125))
-		self.check_channels =wx.Button(self.page4, label=_('Fine calibration'), pos=(495, 125))
+		self.channel_label=wx.StaticText(self.page4, label=_('Channel'), pos=(430, 125))
+		self.channel = wx.TextCtrl(self.page4, -1, size=(55, 32), pos=(430, 143))
+		self.check_channels =wx.Button(self.page4, label=_('Fine calibration'), pos=(495, 140))
 		self.Bind(wx.EVT_BUTTON, self.check_channel, self.check_channels)
 
-		self.show_output6 =wx.Button(self.page4, label=_('Inspector'), pos=(10, 285))
-		self.Bind(wx.EVT_BUTTON, self.show_output_window, self.show_output6)
+		wx.StaticBox(self.page4, label=_(' VHF '), size=(260, 130), pos=(420, 185))
+
+		self.button_vhf_Rx =wx.Button(self.page4, label=_('Receive'), pos=(430, 210))
+		self.Bind(wx.EVT_BUTTON, self.vhf_Rx, self.button_vhf_Rx)
+
+		self.button_vhf_Tx =wx.Button(self.page4, label=_('Transmit'), pos=(430, 255))
+		self.Bind(wx.EVT_BUTTON, self.vhf_Tx, self.button_vhf_Tx)
+		self.Tx_exp_label=wx.StaticText(self.page4, label=_('Experimental'), pos=(540, 263))
+
 ###########################page4
 ########page5###################
 		wx.StaticBox(self.page5, label=_(' Inputs '), size=(670, 130), pos=(10, 10))
@@ -704,6 +713,9 @@ class MainFrame(wx.Frame):
 			self.channel.Disable()
 			self.check_channels.Disable()
 			self.check_bands.Disable()
+			self.button_vhf_Tx.Disable()
+			self.Tx_exp_label.Disable()
+			self.button_vhf_Rx.Disable()
 
 		self.rate.SetValue(self.conf.get('STARTUP', 'nmea_rate_sen'))
 		self.rate2.SetValue(self.conf.get('STARTUP', 'nmea_rate_cal'))
@@ -1200,6 +1212,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		subprocess.call(['pkill', '-f', 'waterfall.py'])
 		subprocess.call(['pkill', '-9', 'rtl_test'])
 		subprocess.call(['pkill', '-9', 'kal'])
+		subprocess.call(['pkill', '-9', 'qtcsdr'])
 
 	def enable_sdr_controls(self):
 		self.gain.Enable()
@@ -1248,8 +1261,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.enable_sdr_controls()
 			self.conf.set('AIS-SDR', 'enable', '0')
 			msg=_('SDR-AIS reception disabled')
-
-		self.SetStatusText('')
 		self.SetStatusText(msg)
 
 	def test_ppm(self,event):
@@ -1266,8 +1277,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		channel='a'
 		if self.ais_frequencies2.GetValue(): channel='b'
 		w_open=subprocess.Popen(['python', currentpath+'/waterfall.py', gain, ppm, channel])
-		msg=_('SDR-AIS reception disabled.\nAfter checking the new window enable SDR-AIS reception again.')
-		self.ShowMessage(msg)
+		msg=_('SDR-AIS reception disabled. After closing the new window enable SDR-AIS reception again.')
+		self.SetStatusText(msg)
 
 	def test_gain(self,event):
 		self.kill_sdr()
@@ -1298,6 +1309,19 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.conf.set('AIS-SDR', 'gsm_channel', channel)
 		if channel: subprocess.Popen(['python',currentpath+'/fine_cal.py', 'c'])
 
+	def vhf_Rx(self, event):
+		self.kill_sdr()
+		self.enable_sdr_controls()
+		subprocess.Popen('qtcsdr')
+		msg=_('SDR-AIS reception disabled. After closing the new window enable SDR-AIS reception again.')
+		self.SetStatusText(msg)
+
+	def vhf_Tx(self, event):
+		self.kill_sdr()
+		self.enable_sdr_controls()
+		subprocess.Popen(['lxterminal', '-e', currentpath+'/classes/rpi-test.sh'])
+		msg=_('SDR-AIS reception disabled. After closing the new window enable SDR-AIS reception again.')
+		self.SetStatusText(msg)
 ###########################################	NMEA 0183
 
 	def show_output_window(self,event):
