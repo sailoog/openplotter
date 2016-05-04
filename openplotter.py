@@ -140,32 +140,31 @@ class MainFrame(wx.Frame):
 		wx.StaticBox(self.page1, size=(330, 230), pos=(10, 65))
 		self.startup_opencpn = wx.CheckBox(self.page1, label=_('OpenCPN'), pos=(20, 80))
 		self.startup_opencpn.Bind(wx.EVT_CHECKBOX, self.startup)
-
 		self.startup_opencpn_nopengl = wx.CheckBox(self.page1, label=_('no OpenGL'), pos=(40, 105))
 		self.startup_opencpn_nopengl.Bind(wx.EVT_CHECKBOX, self.startup)
-
 		self.startup_opencpn_fullscreen = wx.CheckBox(self.page1, label=_('fullscreen'), pos=(40, 130))
 		self.startup_opencpn_fullscreen.Bind(wx.EVT_CHECKBOX, self.startup)
 
 		self.startup_multiplexer = wx.CheckBox(self.page1, label=_('NMEA 0183 multiplexer'), pos=(20, 165))
 		self.startup_multiplexer.Bind(wx.EVT_CHECKBOX, self.startup)
-
 		self.startup_nmea_time = wx.CheckBox(self.page1, label=_('Set time from NMEA'), pos=(40, 190))
 		self.startup_nmea_time.Bind(wx.EVT_CHECKBOX, self.startup)
 
 		self.startup_remote_desktop = wx.CheckBox(self.page1, label=_('VNC remote desktop'), pos=(20, 225))
 		self.startup_remote_desktop.Bind(wx.EVT_CHECKBOX, self.startup)
+		self.startup_vnc_pass = wx.CheckBox(self.page1, label=_('use password'), pos=(40, 250))
+		self.startup_vnc_pass.Bind(wx.EVT_CHECKBOX, self.startup)
 
 		wx.StaticBox(self.page1, size=(330, 230), pos=(350, 65))
-
-		self.op_maximize = wx.CheckBox(self.page1, label=_('Maximize OpenPlotter'), pos=(20, 260))
-		self.op_maximize.Bind(wx.EVT_CHECKBOX, self.startup)
 
 		self.startup_play_sound = wx.CheckBox(self.page1, label=_('Play sound'), pos=(360, 80))
 		self.startup_play_sound.Bind(wx.EVT_CHECKBOX, self.startup)
 		self.startup_path_sound = wx.TextCtrl(self.page1, -1, size=(200, 32), pos=(360, 110))
 		self.button_select_sound =wx.Button(self.page1, label=_('Select'), pos=(570, 110))
 		self.Bind(wx.EVT_BUTTON, self.select_sound, self.button_select_sound)
+
+		self.op_maximize = wx.CheckBox(self.page1, label=_('Maximize OpenPlotter'), pos=(360, 150))
+		self.op_maximize.Bind(wx.EVT_CHECKBOX, self.startup)
 ###########################page1
 ########page2###################
 		wx.StaticBox(self.page2, size=(330, 50), pos=(10, 10))
@@ -684,7 +683,11 @@ class MainFrame(wx.Frame):
 		else:
 			self.startup_nmea_time.Disable()
 		if self.conf.get('STARTUP', 'gps_time')=='1': self.startup_nmea_time.SetValue(True)
-		if self.conf.get('STARTUP', 'x11vnc')=='1': self.startup_remote_desktop.SetValue(True)
+		if self.conf.get('STARTUP', 'x11vnc')=='1': 
+			self.startup_remote_desktop.SetValue(True)
+		else:
+			self.startup_vnc_pass.Disable()
+		if self.conf.get('STARTUP', 'vnc_pass')=='1': self.startup_vnc_pass.SetValue(True)
 		if self.conf.get('STARTUP', 'maximize')=='1':
 			self.op_maximize.SetValue(True) 
 			self.Maximize()
@@ -1004,51 +1007,70 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.ShowMessage(_('Startup delay set to ')+delay+_(' seconds'))
 
 	def startup(self, e):
-		if self.startup_opencpn.GetValue():
-			self.startup_opencpn_nopengl.Enable()
-			self.startup_opencpn_fullscreen.Enable()
-			self.conf.set('STARTUP', 'opencpn', '1')
-		else:
-			self.startup_opencpn_nopengl.Disable()
-			self.startup_opencpn_fullscreen.Disable()
-			self.conf.set('STARTUP', 'opencpn', '0')
+		sender = e.GetEventObject()
 
-		if self.startup_opencpn_nopengl.GetValue():
-			self.conf.set('STARTUP', 'opencpn_no_opengl', '1')
-		else:
-			self.conf.set('STARTUP', 'opencpn_no_opengl', '0')
+		if sender==self.startup_opencpn:
+			if self.startup_opencpn.GetValue():
+				self.startup_opencpn_nopengl.Enable()
+				self.startup_opencpn_fullscreen.Enable()
+				self.conf.set('STARTUP', 'opencpn', '1')
+			else:
+				self.startup_opencpn_nopengl.Disable()
+				self.startup_opencpn_fullscreen.Disable()
+				self.conf.set('STARTUP', 'opencpn', '0')
 
-		if self.startup_opencpn_fullscreen.GetValue():
-			self.conf.set('STARTUP', 'opencpn_fullscreen', '1')
-		else:
-			self.conf.set('STARTUP', 'opencpn_fullscreen', '0')
+		if sender==self.startup_opencpn_nopengl:
+			if self.startup_opencpn_nopengl.GetValue():
+				self.conf.set('STARTUP', 'opencpn_no_opengl', '1')
+			else:
+				self.conf.set('STARTUP', 'opencpn_no_opengl', '0')
 
-		if self.startup_multiplexer.GetValue():
-			self.startup_nmea_time.Enable()
-			self.conf.set('STARTUP', 'kplex', '1')
-		else:
-			self.startup_nmea_time.Disable()
-			self.conf.set('STARTUP', 'kplex', '0')
+		if sender==self.startup_opencpn_fullscreen:
+			if self.startup_opencpn_fullscreen.GetValue():
+				self.conf.set('STARTUP', 'opencpn_fullscreen', '1')
+			else:
+				self.conf.set('STARTUP', 'opencpn_fullscreen', '0')
 
-		if self.startup_nmea_time.GetValue():
-			self.conf.set('STARTUP', 'gps_time', '1')
-		else:
-			self.conf.set('STARTUP', 'gps_time', '0')
+		if sender==self.startup_multiplexer:
+			if self.startup_multiplexer.GetValue():
+				self.startup_nmea_time.Enable()
+				self.conf.set('STARTUP', 'kplex', '1')
+			else:
+				self.startup_nmea_time.Disable()
+				self.conf.set('STARTUP', 'kplex', '0')
 
-		if self.startup_remote_desktop.GetValue():
-			self.conf.set('STARTUP', 'x11vnc', '1')
-		else:
-			self.conf.set('STARTUP', 'x11vnc', '0')
+		if sender==self.startup_nmea_time:
+			if self.startup_nmea_time.GetValue():
+				self.conf.set('STARTUP', 'gps_time', '1')
+			else:
+				self.conf.set('STARTUP', 'gps_time', '0')
 
-		if self.op_maximize.GetValue():
-			self.conf.set('STARTUP', 'maximize', '1')
-		else:
-			self.conf.set('STARTUP', 'maximize', '0')
+		if sender==self.startup_remote_desktop:
+			if self.startup_remote_desktop.GetValue():
+				self.conf.set('STARTUP', 'x11vnc', '1')
+				self.startup_vnc_pass.Enable()
+			else:
+				self.conf.set('STARTUP', 'x11vnc', '0')
+				self.startup_vnc_pass.Disable()
 
-		if self.startup_play_sound.GetValue():
-			self.conf.set('STARTUP', 'play', '1')
-		else:
-			self.conf.set('STARTUP', 'play', '0')
+		if sender==self.startup_vnc_pass:
+			if self.startup_vnc_pass.GetValue():
+				self.conf.set('STARTUP', 'vnc_pass', '1')
+				subprocess.Popen(['lxterminal', '-e', 'x11vnc', '-storepasswd'])
+			else:
+				self.conf.set('STARTUP', 'vnc_pass', '0')
+
+		if sender==self.op_maximize:
+			if self.op_maximize.GetValue():
+				self.conf.set('STARTUP', 'maximize', '1')
+			else:
+				self.conf.set('STARTUP', 'maximize', '0')
+
+		if sender==self.startup_play_sound:
+			if self.startup_play_sound.GetValue():
+				self.conf.set('STARTUP', 'play', '1')
+			else:
+				self.conf.set('STARTUP', 'play', '0')
 
 ########################################### WiFi AP
 	

@@ -70,6 +70,7 @@ opencpn=conf.get('STARTUP', 'opencpn')
 opencpn_no=conf.get('STARTUP', 'opencpn_no_opengl')
 opencpn_fullscreen=conf.get('STARTUP', 'opencpn_fullscreen')
 x11vnc=conf.get('STARTUP', 'x11vnc')
+vnc_pass=conf.get('STARTUP', 'vnc_pass')
 gps_time=conf.get('STARTUP', 'gps_time')
 signalk=conf.get('SIGNALK', 'enable')
 
@@ -106,7 +107,8 @@ time.sleep(delay)
 
 subprocess.call(['pkill', '-9', 'x11vnc'])
 if x11vnc=='1':
-	subprocess.Popen(['x11vnc', '-forever'])         
+	if vnc_pass=='1': subprocess.Popen(['x11vnc', '-forever', '-shared', '-usepw'])
+	else: subprocess.Popen(['x11vnc', '-forever', '-shared' ])         
 
 opencpn_commands=[]
 opencpn_commands.append('opencpn')
