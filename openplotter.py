@@ -222,6 +222,7 @@ class MainFrame(wx.Frame):
 			ii=str(i)
 			if 'eth'+ii in output: self.available_share.append('eth'+ii)
 			if 'ppp'+ii in output: self.available_share.append('ppp'+ii)
+			if 'usb'+ii in output: self.available_share.append('usb'+ii)
 		for i in self.available_wireless:
 			self.available_share.append(i)
 		share_old= self.conf.get('WIFI', 'share')
