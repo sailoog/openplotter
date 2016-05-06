@@ -2622,7 +2622,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 						else:
 							if 'ID_MODEL_FROM_DATABASE' in device:	imfd=device['ID_MODEL_FROM_DATABASE']
 							if 'ID_VENDOR_FROM_DATABASE' in device:	ivfd=device['ID_VENDOR_FROM_DATABASE']
-							self.ShowMessage(_('Warning: You have connected the "')+ivfd+', '+imfd+_('" to the usb port which is reserved for another device'))		
+							self.ShowMessage(_('Warning: You have connected the "')+ivfd+', '+imfd+_('" to the USB port which is reserved for another device'))		
 
 	def onsignalk_enable (self,e):
 		isChecked = self.signalk_enable.GetValue()
