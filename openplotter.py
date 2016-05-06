@@ -1056,7 +1056,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if sender==self.startup_vnc_pass:
 			if self.startup_vnc_pass.GetValue():
 				self.conf.set('STARTUP', 'vnc_pass', '1')
-				subprocess.Popen(['lxterminal', '-e', 'x11vnc', '-storepasswd'])
+				dlg = wx.MessageDialog(None, _('Do you want to change your VNC-Password?'), _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+				if dlg.ShowModal() == wx.ID_YES:
+					subprocess.Popen(['lxterminal', '-e', 'x11vnc', '-storepasswd'])
+				dlg.Destroy()
 			else:
 				self.conf.set('STARTUP', 'vnc_pass', '0')
 
