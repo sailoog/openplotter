@@ -696,7 +696,11 @@ class MainFrame(wx.Frame):
 			self.startup_play_sound.SetValue(True) 
 
 		output=subprocess.check_output('lsusb')
-		if 'DVB-T' in output:
+		supported_dev=['0bda:2832','0bda:2838','0ccd:00a9','0ccd:00b3','0ccd:00d3','0ccd:00e0','185b:0620','185b:0650','1f4d:b803','1f4d:c803','1b80:d3a4','1d19:1101','1d19:1102','1d19:1103','0458:707f','1b80:d393','1b80:d394','1b80:d395','1b80:d39d']
+		found=False
+		for i in supported_dev:
+			if i in output:found=True
+		if found:
 			self.gain.SetValue(self.conf.get('AIS-SDR', 'gain'))
 			self.ppm.SetValue(self.conf.get('AIS-SDR', 'ppm'))
 			self.band.SetValue(self.conf.get('AIS-SDR', 'band'))
