@@ -209,6 +209,8 @@ class MainFrame(wx.Frame):
 		wx.StaticBox(self.page3, size=(370, 315), pos=(10, 10))
 		self.wifi_enable = wx.CheckBox(self.page3, label=_('Enable access point'), pos=(20, 25))
 		self.wifi_enable.Bind(wx.EVT_CHECKBOX, self.onwifi_enable)
+
+		self.bridge_enable = wx.CheckBox(self.page3, label=_('Enable bridge to eth0'), pos=(180,25))
 		
 		self.available_wireless = []
 		output=subprocess.check_output('ifconfig', stderr=subprocess.STDOUT)
@@ -925,12 +927,10 @@ class MainFrame(wx.Frame):
 and/or modify it under the terms of the GNU General Public License 
 as published by the Free Software Foundation, either version 2 of 
 the License, or any later version.
-
 This program is distributed in the hope that it will be useful, but 
 WITHOUT ANY WARRANTY; without even the implied warranty of 
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
 See the GNU General Public License for more details.
-
 You should have received a copy of the GNU General Public License 
 along with this program.  If not, see http://www.gnu.org/licenses/"""
 
@@ -1094,6 +1094,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			if self.conf.get('WIFI', 'wpa')=='1': self.wifi_wpa.SetValue('WPA')
 			if self.conf.get('WIFI', 'wpa')=='2': self.wifi_wpa.SetValue('WPA2')
 			if self.conf.get('WIFI', 'wpa')=='3': self.wifi_wpa.SetValue(_('Both'))
+			if self.conf.get('WIFI', 'bridge')=='1': self.bridge_enable.SetValue(True)
+			else: self.bridge_enable.SetValue(False)
 			if self.conf.get('WIFI', 'enable')=='1':
 				self.enable_disable_wifi(1)
 		else:
@@ -1131,6 +1133,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		channel=self.wifi_channel.GetValue()
 		mode=self.wifi_mode.GetValue()
 		wpa=self.wifi_wpa.GetValue()
+		bridge='0' 
+		if self.bridge_enable.GetValue(): bridge='1'
 		if share==_('none'):share='0'
 		if mode=='IEEE 802.11b':mode='b'
 		if mode=='IEEE 802.11g':mode='g'
@@ -1144,6 +1148,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.conf.set('WIFI', 'channel', channel)
 		self.conf.set('WIFI', 'hw_mode', mode)
 		self.conf.set('WIFI', 'wpa', wpa)
+		self.conf.set('WIFI', 'bridge', bridge)
 		self.passw.SetValue('**********')
 		if isChecked:
 			self.enable_disable_wifi(1)
@@ -1213,6 +1218,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.wifi_wpa_label.Disable()
 			self.wifi_button_default.Disable()
 			self.wifi_enable.SetValue(True)
+			self.bridge_enable.Disable()
 			self.conf.set('WIFI', 'enable', '1')
 		else:
 			self.wlan.Enable()
@@ -1232,6 +1238,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.wifi_wpa_label.Enable()
 			self.wifi_button_default.Enable()
 			self.wifi_enable.SetValue(False)
+			self.bridge_enable.Enable()
 			self.conf.set('WIFI', 'enable', '0')
 
 ###########################################	SDR-AIS

@@ -29,13 +29,14 @@ hw_mode = conf.get('WIFI', 'hw_mode')
 channel = conf.get('WIFI', 'channel')
 wpa = conf.get('WIFI', 'wpa')
 share = conf.get('WIFI', 'share')
+bridge = conf.get('WIFI', 'bridge')
 
 paths=Paths()
 currentpath=paths.currentpath
 
 subprocess.call(['service', 'hostapd', 'stop'])
 subprocess.call(['service', 'dnsmasq', 'stop'])
-subprocess.call(['ifdown', wlan])
+subprocess.call(['ifconfig', wlan, 'down'])
 
 if wifi_server=='1':
 
@@ -50,28 +51,29 @@ if wifi_server=='1':
 	context = pyudev.Context()
 	for device in context.list_devices(subsystem='net'):
 		if device['INTERFACE']==wlan:
-			if device['ID_NET_DRIVER']=='brcmfmac':
-				shutil.copyfile('/usr/sbin/hostapd.org', '/usr/sbin/hostapd')
-				chipset= 'Built-in WiFi'
-			if device['ID_NET_DRIVER']=='rtl8192cu':
-				driver='rtl871xdrv'
-				chipset= 'RTL8192CU'
-				shutil.copyfile(currentpath+'/wifi_drivers/RTL8192CU/hostapd', '/usr/sbin/hostapd')
-			if device['ID_NET_DRIVER']=='rtl8192eu':
-				driver='rtl871xdrv'
-				chipset= 'RTL8192EU'
-				shutil.copyfile(currentpath+'/wifi_drivers/RTL8192EU/hostapd', '/usr/sbin/hostapd')
-			if device['ID_NET_DRIVER']=='rtl8188cus':
-				driver='rtl871xdrv'
-				chipset= 'RTL8188CUS'
-				shutil.copyfile(currentpath+'/wifi_drivers/RTL8188CUS/hostapd', '/usr/sbin/hostapd')
-			if device['ID_NET_DRIVER']=='rtl8188eu':
-				driver=''
-				chipset= 'RTL8188EU'
-				shutil.copyfile(currentpath+'/wifi_drivers/RTL8188EU/hostapd', '/usr/sbin/hostapd')
-			if chipset == 'default':
-				shutil.copyfile('/usr/sbin/hostapd.org', '/usr/sbin/hostapd')
-		
+			try:
+				if device['ID_NET_DRIVER']=='brcmfmac':
+					shutil.copyfile('/usr/sbin/hostapd.org', '/usr/sbin/hostapd')
+					chipset= 'Built-in WiFi'
+				if device['ID_NET_DRIVER']=='rtl8192cu':
+					driver='rtl871xdrv'
+					chipset= 'RTL8192CU'
+					shutil.copyfile(currentpath+'/wifi_drivers/RTL8192CU/hostapd', '/usr/sbin/hostapd')
+				if device['ID_NET_DRIVER']=='rtl8192eu':
+					driver='rtl871xdrv'
+					chipset= 'RTL8192EU'
+					shutil.copyfile(currentpath+'/wifi_drivers/RTL8192EU/hostapd', '/usr/sbin/hostapd')
+				if device['ID_NET_DRIVER']=='rtl8188cus':
+					driver='rtl871xdrv'
+					chipset= 'RTL8188CUS'
+					shutil.copyfile(currentpath+'/wifi_drivers/RTL8188CUS/hostapd', '/usr/sbin/hostapd')
+				if device['ID_NET_DRIVER']=='rtl8188eu':
+					driver=''
+					chipset= 'RTL8188EU'
+					shutil.copyfile(currentpath+'/wifi_drivers/RTL8188EU/hostapd', '/usr/sbin/hostapd')
+				if chipset == 'default':
+					shutil.copyfile('/usr/sbin/hostapd.org', '/usr/sbin/hostapd')
+			except Exception,e: print str(e)
 	subprocess.call(['chmod', '755', '/usr/sbin/hostapd'])
 
 	subprocess.call(['rfkill', 'unblock', 'wifi'])
@@ -82,6 +84,7 @@ if wifi_server=='1':
 	file.close()
 
 	data='interface='+wlan+'\n'
+	if bridge=='1':	data+= 'bridge=br0\n'	
 	if driver!='': data+= 'driver='+driver+'\n'
 	data+= 'hw_mode='+hw_mode+'\n'
 	data+= 'channel='+channel+'\n'
@@ -97,55 +100,170 @@ if wifi_server=='1':
 	file = open('/etc/hostapd/hostapd.conf', 'w')
 	file.write(data)
 	file.close()
-
-	data='# interfaces(5) file used by ifup(8) and ifdown(8)\nauto lo\niface lo inet loopback\n\nauto '+wlan+'\niface '+wlan+' inet static\naddress 10.10.10.1\nnetmask 255.255.255.0'
-	file = open('/etc/network/interfaces', 'w')
-	file.write(data)
+	
+	if bridge=='0':
+		data='# interfaces(5) file used by ifup(8) and ifdown(8)\nauto lo\niface lo inet loopback\n\nauto '+wlan+'\niface '+wlan+' inet static\naddress 10.10.10.1\nnetmask 255.255.255.0'
+		#data+='\nservice hostapd start\n'
+		#data+='service dnsmasq start\n'
+		#if share!='0':
+		#	data+='pre-up iptables -t nat -A POSTROUTING -o '+share+' -j MASQUERADE\n'
+		#	data+='pre-up iptables -A FORWARD -i '+share+' -o '+wlan+' -m state --state RELATED,ESTABLISHED -j ACCEPT\n'
+		#	data+='pre-up iptables -A FORWARD -i '+wlan+' -o '+share+' -j ACCEPT\n'
+	else:
+		data='auto lo\n'
+		data+='iface lo inet loopback\n'
+		data+='auto '+wlan+'\n'
+		data+='iface '+wlan+' inet manual\n'
+		data+='auto br0\n'
+		data+='iface br0 inet static\n'
+		data+='bridge_ports eth0\n'
+		data+='address 10.10.10.1\n'
+		data+='broadcast 10.10.10.255\n'
+		data+='netmask 255.255.255.0\n'
+		data+='bridge_maxwait 1\n'
+		#data+='up /etc/init.d/network-manager restart\n'
+		#data+='service hostapd start\n'
+		#data+='service dnsmasq start\n'
+		#data+='up /etc/init.d/isc-dhcp-server restart\n'
+		#data+='pre-up iptables -t nat -A POSTROUTING -o '+share+' -j MASQUERADE\n'
+		#data+='pre-up iptables -A FORWARD -i '+share+' -o br0 -m state --state RELATED,ESTABLISHED -j ACCEPT\n'
+		#data+='pre-up iptables -A FORWARD -i br0 -o '+share+' -j ACCEPT\n'
+	
+	file = open('/etc/network/interfaces', 'r',2000)
+	bak=file.read()
 	file.close()
+	if bak!=data:
+		file = open('/etc/network/interfaces', 'w')
+		file.write(data)
+		file.close()
 
-	data='interface=lo,'+wlan+'\nno-dhcp-interface=lo\ndhcp-range=10.10.10.20,10.10.10.254,255.255.255.0,12h'
-	file = open('/etc/dnsmasq.conf', 'w')
-	file.write(data)
+	if bridge=='0':
+		data='interface=lo,'+wlan+'\nno-dhcp-interface=lo\ndhcp-range=10.10.10.20,10.10.10.254,255.255.255.0,12h'
+	else:
+		data='no-dhcp-interface=lo,eth0,wlan0,wlan1,ppp0\n'
+		data+='interface=br0\n'
+		data+='dhcp-range=10.10.10.100,10.10.10.200,255.255.255.0,12h\n'
+	
+	file = open('/etc/dnsmasq.conf', 'r',2000)
+	bak=file.read()
 	file.close()
+	if bak!=data:
+		file = open('/etc/dnsmasq.conf', 'w')
+		file.write(data)
+		file.close()
+
+	
+	data='ddns-update-style none;\ndefault-lease-time 600;\nmax-lease-time 7200;\nauthoritative;\nlog-facility local7;\nsubnet 10.10.10.0 netmask 255.255.255.0 {\nrange 10.10.10.100 10.10.10.200;\noption broadcast-address 10.10.10.255;\noption routers 10.10.10.1;\noption domain-name "local";\noption domain-name-servers 8.8.8.8, 8.8.4.4;\n'
+	
+	if bridge=='0':
+		data+='interface '+wlan+';\n}\n'
+	else:
+		data+='interface br0;\n}\n'
+	
+	file = open('/etc/dhcp/dhcpd.conf', 'r',2000)
+	bak=file.read()
+	file.close()
+	if bak!=data:
+		file = open('/etc/dhcp/dhcpd.conf', 'w')
+		file.write(data)
+		file.close()
+
+	lan=wlan
+	if bridge=='1': lan='br0'
 	
 	if share!='0':
 		output=subprocess.call(['iptables', '-t', 'nat', '-A', 'POSTROUTING', '-o', share, '-j', 'MASQUERADE'])
 		if output != 0: error=1
-		output=subprocess.call(['iptables', '-A', 'FORWARD', '-i', share, '-o', wlan, '-m', 'state', '--state', 'RELATED,ESTABLISHED', '-j', 'ACCEPT'])
+		output=subprocess.call(['iptables', '-A', 'FORWARD', '-i', share, '-o', lan, '-m', 'state', '--state', 'RELATED,ESTABLISHED', '-j', 'ACCEPT'])
 		if output != 0: error=1
-		output=subprocess.call(['iptables', '-A', 'FORWARD', '-i', wlan, '-o', share, '-j', 'ACCEPT'])
+		output=subprocess.call(['iptables', '-A', 'FORWARD', '-i', lan, '-o', share, '-j', 'ACCEPT'])
 		if output != 0: error=1
+		
+	output=subprocess.call(['service', 'networking', 'reload'])
+	if output != 0: error=1
+	output=subprocess.call(['systemctl', 'restart', 'NetworkManager'])
+	if output != 0: error=1
+	output=subprocess.call(['/etc/init.d/networking', 'restart'])
+	if output != 0: error=1
+	#output=subprocess.call(['systemctl', 'daemon-reload'])
+	#if output != 0: error=1
+
+	if bridge=='1':
+		output=subprocess.call(['/etc/init.d/isc-dhcp-server','restart'])
+		if output != 0: error=1
+	output=subprocess.call(['ifconfig', wlan,'up'])
+	if output != 0: error=1
+
 	
-	output=subprocess.call(['/etc/init.d/network-manager', 'restart'])
-	if output != 0: error=1
-
-	output=subprocess.call(['ifup', wlan])
-	if output != 0: error=1
-
-	output=subprocess.call(['service', 'dnsmasq', 'start'])
-	if output != 0: error=1
+	if bridge=='0':
+		output=subprocess.call(['service', 'dnsmasq', 'start'])
+		if output != 0: error=1
 	
 	output=subprocess.check_output(['service', 'hostapd', 'start'])
 	print output
 	if 'fail' in output : error=1
-
+	#if bridge=='1':
+		#output=subprocess.call(['ifconfig','wlan0', '10.10.10.2'])
+		#if output != 0: error=1
+		#output=subprocess.call(['ifconfig','eth0', '10.10.10.3'])
+		#if output != 0: error=1
+	
 	print 'Chipset: '+chipset+', driver: '+driver+'.\n'
 
 	if error==1: print "WiFi access point failed."
-	else:
+	else: 
 		print "WiFi access point started.\n"
 		print "SSID: "+ssid
 		print "Adress: 10.10.10.1"
 
-else:
-	data='# interfaces(5) file used by ifup(8) and ifdown(8)\nauto lo\niface lo inet loopback'
-	file = open('/etc/network/interfaces', 'w')
-	file.write(data)
-	file.close()
-	subprocess.call(['/etc/init.d/network-manager', 'restart'])
-	print "\nWiFi access point stopped."
 
+else:
+	file = open('/etc/network/interfaces', 'r',2000)
+	bak=file.read()
+	file.close()
+
+
+	data='# interfaces(5) file used by ifup(8) and ifdown(8)\nauto lo\niface lo inet loopback'
+	if bak!=data:
+		file = open('/etc/network/interfaces', 'w')
+		file.write(data)
+		file.close()
+
+		if bridge=='1':
+			try:
+				subprocess.call(['/etc/init.d/isc-dhcp-server','stop'])
+				subprocess.call(['brctl', 'delif','br0','eth0'])
+				#subprocess.call(['brctl', 'delif','br0','wlan0'])
+				subprocess.call(['ifconfig', 'br0','down'])
+				subprocess.call(['brctl', 'delbr','br0'])
+				#subprocess.call(['dhclient', 'eth0'])
+				
+			except: pass
+
+		
+		subprocess.call(['ifconfig',wlan,'down'])
+		subprocess.call(['ifconfig',wlan,'up'])
+
+		output=subprocess.call(['iptables', '-F'])
+		if output != 0: error=1
+		output=subprocess.call(['service', 'networking', 'restart'])
+		if output != 0: error=1
+		output=subprocess.call(['/etc/init.d/networking', 'restart'])
+		if output != 0: error=1
+		output=subprocess.call(['systemctl', 'daemon-reload'])
+		if output != 0: error=1
+		output=subprocess.call(['systemctl', 'restart', 'NetworkManager'])
+		if output != 0: error=1
+
+		
+		print "\nWiFi access point stopped."
+		
+	subprocess.call(['ifconfig',wlan,'up'])
+
+	
 data=''
+
+
 file = open('/boot/config.txt', 'r')
 file.seek(0)
 for line in file:
@@ -162,6 +280,13 @@ for line in file:
 	if not data0: data0=line
 	data+=data0
 file.close()
-file = open('/boot/config.txt', 'w')
-file.write(data)
+
+file = open('/boot/config.txt', 'r',2000)
+bak=file.read()
 file.close()
+
+if bak!=data:
+	file = open('/boot/config.txt', 'w')
+	file.write(data)
+	file.close()	
+
