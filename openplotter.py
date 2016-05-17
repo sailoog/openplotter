@@ -2879,10 +2879,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if not '*******' in passw:
 			self.mqtt_pass.SetValue('***************')
 			self.conf.set('MQTT', 'password', passw)
-			file = open("/etc/mosquitto/passwd.pw", "w")
-			file.write(username+':'+passw)
-			file.close()
-			subprocess.call(['sudo','mosquitto_passwd','-U','/etc/mosquitto/passwd.pw'])
+		else: passw=self.conf.get('MQTT', 'password')
+		subprocess.call(['sudo', 'sh', '-c', 'echo "'+username+':'+passw+'" > /etc/mosquitto/passwd.pw'])
+		subprocess.call(['sudo','mosquitto_passwd','-U','/etc/mosquitto/passwd.pw'])
 		subprocess.call(['sudo','service','mosquitto','restart'])
 		self.start_monitoring()
 		self.SetStatusText(_('MQTT topics changes applied and restarted'))
