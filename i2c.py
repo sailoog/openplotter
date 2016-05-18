@@ -38,7 +38,7 @@ poll_interval = 1
 #e_hum = False
 #log_list_b = False
 
-def Send_Attitude(self, Yaw, Pitch, Roll):
+def Send_Attitude(Yaw, Pitch, Roll):
 	data_ = (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
 	data = bytearray(data_)
 	length = 8
@@ -141,7 +141,7 @@ def SendCommandtoSerial(data):
 		ser.write(chr(data[i]))
 		#print format(data[i], '02x')
 		if data[i] == 0x10:
-			self.ser.write(chr(data[i]))
+			ser.write(chr(data[i]))
 		i += 1
 	ser.write(chr(ende[0]))
 	ser.write(chr(ende[1]))
@@ -325,7 +325,7 @@ while True:
 				list_signalk2.append(str(0.017453293*pitch))
 			
 			if pitch_2k or heel_2k:
-				self.Send_Attitude(0, pitch, roll)
+				Send_Attitude(0, pitch, heel)
 		
 		if e_pres:	
 			if pressure_183:
