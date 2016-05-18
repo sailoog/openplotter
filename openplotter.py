@@ -2576,9 +2576,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def restartSK(self, e):
 		self.SetStatusText(_('Closing Signal K server'))
 		subprocess.call(["pkill", '-9', "node"])
-		subprocess.Popen(home+'/.config/signalk-server-node/bin/openplotter', cwd=home+'/.config/signalk-server-node')
-		self.SetStatusText(_('Signal K server restarted'))
-
+		isChecked = self.signalk_enable.GetValue()
+		if isChecked:
+			subprocess.Popen(home+'/.config/signalk-server-node/bin/openplotter', cwd=home+'/.config/signalk-server-node')
+			self.SetStatusText(_('Signal K server restarted'))
+	
 	def SerialCheck(self):
 		self.SerDevLs = [_('none')]
 		self.context = pyudev.Context()
