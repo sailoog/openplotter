@@ -123,6 +123,8 @@ class MyFrame(wx.Frame):
 							time.sleep(0.2)
 					counter+=1		
 			print 'del PGNs=',st
+			self.Send_Command(1, 0x01, 0)
+
 
 		def sendTX_PGN(self,lPGN,add):
 			if add:

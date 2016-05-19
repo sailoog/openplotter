@@ -419,62 +419,121 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.sms_test, self.button_sms_test)
 ###########################page15
 ########page6###################
-		wx.StaticBox(self.page6, size=(330, 50), pos=(10, 10))
-		wx.StaticText(self.page6, label=_('Rate (sec)'), pos=(20, 30))
-		self.rate= wx.ComboBox(self.page6, choices=self.rate_list, style=wx.CB_READONLY, size=(80, 32), pos=(150, 23))
-		self.button_ok_rate =wx.Button(self.page6, label=_('Ok'),size=(70, 32), pos=(250, 23))
-		self.Bind(wx.EVT_BUTTON, self.ok_rate, self.button_ok_rate)
+		z1=55
+		z2=80
+		z3=105
+		z4=135
+		z5=165
+		z6=195
+		z7=220
+		s1=20
+		s2=180
+		s3=240
+		s4=280
+		s5=320
+		s6=380
+		s7=550
+		
+		with open(home+'/.config/openplotter/classes/SK_temp.txt') as f:
+			self.list_sk_path = [x.strip('\n\r') for x in f.readlines()]
+		
+		wx.StaticBox(self.page6,label=_(' Settings '), size=(675, 320), pos=(5, 5))
+		wx.StaticText(self.page6, label=_('NMEA'), pos=(260, 20))
+		wx.StaticText(self.page6, label=_('available'), pos=(s2, 35))
+		wx.StaticText(self.page6, label=_('0183'), pos=(s3, 35))
+		wx.StaticText(self.page6, label=_('2000'), pos=(s4, 35))
+		wx.StaticText(self.page6, label=_('SignalK'), pos=(s5, 35))
+		wx.StaticText(self.page6, label=_('SignalK type'), pos=(s6, 35))
+		wx.StaticText(self.page6, label=_('offset'), pos=(s7, 35))
+		z=z1
+		wx.StaticText(self.page6, label=_('IMU  Heading'), pos=(s1, z))
+		self.heading_avai = wx.CheckBox(self.page6, pos=(s2, z))
+		self.heading_183 = wx.CheckBox(self.page6, pos=(s3, z))
+		self.heading_2k = wx.CheckBox(self.page6, pos=(s4, z))
+		self.heading_sk = wx.CheckBox(self.page6, pos=(s5, z))
+		self.heading_offset = wx.TextCtrl(self.page6, size=(100, 20), pos=(s7, z))
+		z=z2
+		wx.StaticText(self.page6, label=_('IMU  Heel'), pos=(s1, z))
+		self.heel_avai = wx.CheckBox(self.page6, pos=(s2, z))
+		self.heel_183 = wx.CheckBox(self.page6, pos=(s3, z))
+		self.heel_2k = wx.CheckBox(self.page6, pos=(s4, z))
+		self.heel_sk = wx.CheckBox(self.page6, pos=(s5, z))
+		self.heel_offset = wx.TextCtrl(self.page6, size=(100, 20), pos=(s7, z))
+		z=z3
+		wx.StaticText(self.page6, label=_('IMU  Pitch'), pos=(s1, z))
+		self.pitch_avai = wx.CheckBox(self.page6, pos=(s2, z))
+		self.pitch_183 = wx.CheckBox(self.page6, pos=(s3, z))
+		self.pitch_2k = wx.CheckBox(self.page6, pos=(s4, z))
+		self.pitch_sk = wx.CheckBox(self.page6, pos=(s5, z))
+		self.pitch_offset = wx.TextCtrl(self.page6, size=(100, 20), pos=(s7, z))
+		z=z4
+		wx.StaticText(self.page6, label=_('Pressure'), pos=(s1, z))
+		self.pressure_avai = wx.CheckBox(self.page6, pos=(s2, z))
+		self.pressure_183 = wx.CheckBox(self.page6, pos=(s3, z))
+		self.pressure_2k = wx.CheckBox(self.page6, pos=(s4, z))
+		self.pressure_sk = wx.CheckBox(self.page6, pos=(s5, z))
+		self.pressure_offset = wx.TextCtrl(self.page6, size=(100, 20), pos=(s7, z))
+		z=z5
+		wx.StaticText(self.page6, label=_('Temperature'), pos=(s1, z))
+		self.p_temp_avai = wx.CheckBox(self.page6, pos=(s2, z))
+		self.p_temp_183 = wx.CheckBox(self.page6, pos=(s3, z))
+		self.p_temp_2k = wx.CheckBox(self.page6, pos=(s4, z))
+		self.p_temp_sk = wx.CheckBox(self.page6, pos=(s5, z))
+		self.p_temp_skt = wx.ComboBox(self.page6, choices=self.list_sk_path, style=wx.CB_READONLY, size=(150, 25), pos=(s6, z-3))
+		self.p_temp_offset = wx.TextCtrl(self.page6, size=(100, 20), pos=(s7, z))
+		z=z6
+		wx.StaticText(self.page6, label=_('Humidity'), pos=(s1, z))
+		self.humidity_avai = wx.CheckBox(self.page6, pos=(s2, z))
+		self.humidity_183 = wx.CheckBox(self.page6, pos=(s3, z))
+		self.humidity_2k = wx.CheckBox(self.page6, pos=(s4, z))
+		self.humidity_sk = wx.CheckBox(self.page6, pos=(s5, z))
+		self.humidity_offset = wx.TextCtrl(self.page6, size=(100, 20), pos=(s7, z))
+		z=z7
+		wx.StaticText(self.page6, label=_('Temperature'), pos=(s1, z))
+		self.h_temp_avai = wx.CheckBox(self.page6, pos=(s2, z))
+		self.h_temp_183 = wx.CheckBox(self.page6, pos=(s3, z))
+		self.h_temp_2k = wx.CheckBox(self.page6, pos=(s4, z))
+		self.h_temp_sk = wx.CheckBox(self.page6, pos=(s5, z))
+		self.h_temp_skt = wx.ComboBox(self.page6, choices=self.list_sk_path, style=wx.CB_READONLY, size=(150, 25), pos=(s6, z-3))
+		self.h_temp_offset = wx.TextCtrl(self.page6, size=(100, 20), pos=(s7, z))
+		
+		wx.StaticText(self.page6, label=_('Rate (sec)'), pos=(s1, 290))
+		self.rate= wx.ComboBox(self.page6, choices=self.rate_list, style=wx.CB_READONLY, size=(80, 32), pos=(100, 283))
 
-		wx.StaticBox(self.page6, label=_(' IMU '), size=(330, 170), pos=(10, 65))
-		self.imu_tag=wx.StaticText(self.page6, label=_('Sensor detected: ')+_('none'), pos=(20, 85))
-		self.button_reset_imu =wx.Button(self.page6, label=_('Reset'), pos=(240, 85))
-		self.Bind(wx.EVT_BUTTON, self.reset_imu, self.button_reset_imu)
-		self.button_calibrate_imu =wx.Button(self.page6, label=_('Calibrate'), pos=(240, 125))
-		self.Bind(wx.EVT_BUTTON, self.calibrate_imu, self.button_calibrate_imu)
-		self.heading = wx.CheckBox(self.page6, label=_('Heading'), pos=(20, 105))
-		self.heading.Bind(wx.EVT_CHECKBOX, self.nmea_hdg)
-		self.heading_nmea=wx.StaticText(self.page6, label=_('Generated NMEA: $OSHDG'), pos=(20, 130))
-		self.heel = wx.CheckBox(self.page6, label=_('Heel'), pos=(20, 155))
-		self.heel.Bind(wx.EVT_CHECKBOX, self.nmea_heel)
-		self.pitch = wx.CheckBox(self.page6, label=_('Pitch'), pos=(20, 180))
-		self.pitch.Bind(wx.EVT_CHECKBOX, self.nmea_pitch)
-		self.heel_nmea=wx.StaticText(self.page6, label=_('Generated NMEA: $OSXDR'), pos=(20, 205))
 
-		wx.StaticBox(self.page6, label=_(' Weather '), size=(330, 270), pos=(350, 10))
-		self.press_tag=wx.StaticText(self.page6, label=_('Sensor detected: ')+_('none'), pos=(360, 30))
-		self.button_reset_press_hum =wx.Button(self.page6, label=_('Reset'), pos=(580, 30))
-		self.Bind(wx.EVT_BUTTON, self.reset_press_hum, self.button_reset_press_hum)
-		self.press = wx.CheckBox(self.page6, label=_('Pressure'), pos=(360, 50))
-		self.press.Bind(wx.EVT_CHECKBOX, self.nmea_press)
-		self.temp_p = wx.CheckBox(self.page6, label=_('Temperature'), pos=(360, 75))
-		self.temp_p.Bind(wx.EVT_CHECKBOX, self.nmea_temp_p)
-		self.hum_tag=wx.StaticText(self.page6, label=_('Sensor detected: ')+_('none'), pos=(360, 105))
-		self.hum = wx.CheckBox(self.page6, label=_('Humidity'), pos=(360, 125))
-		self.hum.Bind(wx.EVT_CHECKBOX, self.nmea_hum)
-		self.temp_h = wx.CheckBox(self.page6, label=_('Temperature'), pos=(360, 150))
-		self.temp_h.Bind(wx.EVT_CHECKBOX, self.nmea_temp_h)
 
-		self.press_nmea=wx.StaticText(self.page6, label=_('Generated NMEA: $OSXDR'), pos=(360, 180))
 
-		self.press_temp_log = wx.CheckBox(self.page6, label=_('Weather data logging'), pos=(360, 210))
-		self.press_temp_log.Bind(wx.EVT_CHECKBOX, self.enable_press_temp_log)
-		self.button_reset =wx.Button(self.page6, label=_('Reset'), pos=(360, 240))
-		self.Bind(wx.EVT_BUTTON, self.reset_graph, self.button_reset)
-		self.button_graph =wx.Button(self.page6, label=_('Show'), pos=(475, 240))
-		self.Bind(wx.EVT_BUTTON, self.show_graph, self.button_graph)
 
-		self.show_output4 =wx.Button(self.page6, label=_('Inspector'), pos=(10, 285))
-		self.Bind(wx.EVT_BUTTON, self.show_output_window, self.show_output4)
+
+
+		self.button_calibrate_imu =wx.Button(self.page6, label=_('Calibrate IMU'), pos=(250, 283))
+		self.Bind(wx.EVT_BUTTON, self.i2c_calibrate_imu, self.button_calibrate_imu)
+		self.button_i2c_cancel =wx.Button(self.page6, label=_('cancel'), pos=(480, 283))
+		self.Bind(wx.EVT_BUTTON, self.i2c_cancel, self.button_i2c_cancel)
+		self.button_i2c_apply =wx.Button(self.page6, label=_('apply'), pos=(580, 283))
+		self.Bind(wx.EVT_BUTTON, self.i2c_apply, self.button_i2c_apply)
+
+		self.heading_avai.Disable()
+		self.heel_avai.Disable()
+		self.pitch_avai.Disable()
+		self.pressure_avai.Disable()
+		self.p_temp_avai.Disable()
+		self.humidity_avai.Disable()
+		self.h_temp_avai.Disable()
 ###########################page6
 ########page11###################
+
 		wx.StaticBox(self.page11, label=_(' DS18B20 sensors '), size=(670, 265), pos=(10, 10))
-		
-		self.list_DS18B20 = CheckListCtrl(self.page11, 237)
+		self.list_DS18B20 =	wx.ListCtrl(self.page11, size=(565, 237), style=wx.LC_REPORT)
+		#self.list_DS18B20 = CheckListCtrl(self.page11, 237)
 		self.list_DS18B20.SetPosition((15, 30))
-		self.list_DS18B20.InsertColumn(0, _('Name'), width=275)
-		self.list_DS18B20.InsertColumn(1, _('Short'), width=60)
-		self.list_DS18B20.InsertColumn(2, _('Unit'), width=40)
-		self.list_DS18B20.InsertColumn(3, _('ID'))
+		self.list_DS18B20.InsertColumn(0, _('SignalK name'), width=275)
+		self.list_DS18B20.InsertColumn(1, _('SK'), width=30)
+		self.list_DS18B20.InsertColumn(2, _('N2K'), width=35)
+		self.list_DS18B20.InsertColumn(3, _('Short'), width=60)
+		self.list_DS18B20.InsertColumn(4, _('Unit'), width=35)
+		self.list_DS18B20.InsertColumn(5, _('ID'),width=105)
+		self.list_DS18B20.InsertColumn(6, _('Offset'),width=70)
 		self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_DS18B20, self.list_DS18B20)
 			
 		self.add_DS18B20_button =wx.Button(self.page11, label=_('add'), pos=(585, 30))
@@ -740,54 +799,10 @@ class MainFrame(wx.Frame):
 
 		detected=subprocess.check_output(['python', currentpath+'/imu/check_sensors.py'], cwd=currentpath+'/imu')
 		l_detected=detected.split('\n')
-		imu_sensor=l_detected[0]
-		calibrated=l_detected[1]
-		press_sensor=l_detected[2]
-		hum_sensor=l_detected[3]
-
-		if 'none' in imu_sensor:
-			self.heading.Disable()
-			self.button_calibrate_imu.Disable()
-			self.heading_nmea.Disable()
-			self.heel.Disable()
-			self.pitch.Disable()
-			self.heel_nmea.Disable()
-			if self.conf.get('STARTUP', 'nmea_hdg')=='1' or self.conf.get('STARTUP', 'nmea_heel')=='1' or self.conf.get('STARTUP', 'nmea_pitch')=='1': 
-				self.conf.set('STARTUP', 'nmea_hdg', '0')
-				self.conf.set('STARTUP', 'nmea_heel', '0')
-				self.conf.set('STARTUP', 'nmea_pitch', '0')
-		else:
-			self.imu_tag.SetLabel(_('Sensor detected: ')+imu_sensor)
-			if calibrated=='1':self.button_calibrate_imu.Disable()
-			if self.conf.get('STARTUP', 'nmea_hdg')=='1': self.heading.SetValue(True)
-			if self.conf.get('STARTUP', 'nmea_heel')=='1': self.heel.SetValue(True)
-			if self.conf.get('STARTUP', 'nmea_pitch')=='1': self.pitch.SetValue(True)
-
-		if 'none' in press_sensor:
-			self.press.Disable()
-			self.temp_p.Disable()
-			if self.conf.get('STARTUP', 'nmea_press')=='1' or self.conf.get('STARTUP', 'nmea_temp_p')=='1': 
-				self.conf.set('STARTUP', 'nmea_press', '0')
-				self.conf.set('STARTUP', 'nmea_temp_p', '0')
-		else:
-			self.press_tag.SetLabel(_('Sensor detected: ')+press_sensor)
-			if self.conf.get('STARTUP', 'nmea_press')=='1': self.press.SetValue(True)
-			if self.conf.get('STARTUP', 'nmea_temp_p')=='1': self.temp_p.SetValue(True)
-
-		if 'none' in hum_sensor:
-			self.hum.Disable()
-			self.temp_h.Disable()
-			if self.conf.get('STARTUP', 'nmea_hum')=='1' or self.conf.get('STARTUP', 'nmea_temp_h')=='1': 
-				self.conf.set('STARTUP', 'nmea_hum', '0')
-				self.conf.set('STARTUP', 'nmea_temp_h', '0')
-		else:
-			self.hum_tag.SetLabel(_('Sensor detected: ')+hum_sensor)
-			if self.conf.get('STARTUP', 'nmea_hum')=='1': self.hum.SetValue(True)
-			if self.conf.get('STARTUP', 'nmea_temp_h')=='1': self.temp_h.SetValue(True)
-		
-		if 'none' in hum_sensor and 'none' in press_sensor: self.press_nmea.Disable()
-
-		if self.conf.get('STARTUP', 'press_temp_log')=='1': self.press_temp_log.SetValue(True)
+		self.imu_sensor=l_detected[0]
+		self.calibrated=l_detected[1]
+		self.press_sensor=l_detected[2]
+		self.hum_sensor=l_detected[3]
 
 		if self.conf.get('TWITTER', 'apiKey'): self.apiKey.SetValue('********************')
 		if self.conf.get('TWITTER', 'apiSecret'): self.apiSecret.SetValue('********************')
@@ -813,12 +828,13 @@ class MainFrame(wx.Frame):
 			data = json.load(data_file)
 		self.vessel.SetValue(data['vessel']['name'])
 		self.mmsi.SetValue(data['vessel']['uuid'])
+
+		text='NMEA 0183 - system_output - TCP localhost 10110\openplotter sensors UDP 7777'
 		if self.conf.get('SIGNALK', 'can_usb')=='0': self.can_usb.SetValue(self.SerDevLs[0])
 		else: 
 			self.can_usb.SetValue(self.conf.get('SIGNALK', 'can_usb'))
-			text='NMEA 0183 - system_output - TCP localhost 10110'
-			text=text+'\nNMEA 2000 - CAN-USB - '+self.conf.get('SIGNALK', 'can_usb')
-			self.SKinputs_label.SetLabel(text)
+			text+='\nNMEA 2000 - CAN-USB - '+self.conf.get('SIGNALK', 'can_usb')
+		self.SKinputs_label.SetLabel(text)
 		if self.conf.get('SIGNALK', 'enable')=='1': 
 			self.signalk_enable.SetValue(True)
 			self.vessel.Disable()
@@ -861,6 +877,7 @@ class MainFrame(wx.Frame):
 		self.read_switches()
 		self.read_outputs()
 		self.read_mqtt()
+		self.i2c_start()
 
 	def ShowMessage(self, w_msg):
 			wx.MessageBox(w_msg, 'Info', wx.OK | wx.ICON_INFORMATION)
@@ -1655,126 +1672,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def start_sensors(self):
 		self.stop_sensors()
-		if self.heading.GetValue() or self.heel.GetValue() or self.pitch.GetValue() or self.press.GetValue() or self.temp_p.GetValue() or self.hum.GetValue() or self.temp_h.GetValue():
+		if self.humidity_avai.GetValue() or self.pressure_avai.GetValue() or self.heading_avai.GetValue():
 			subprocess.Popen(['python', currentpath+'/i2c.py'], cwd=currentpath+'/imu')
 			
 	def stop_sensors(self):
 		subprocess.call(['pkill', 'RTIMULibDemoGL'])
 		subprocess.call(['pkill', '-f', 'i2c.py'])
-
-	def ok_rate(self, e):
-		rate=self.rate.GetValue()
-		self.conf.set('STARTUP', 'nmea_rate_sen', rate)
-		self.start_sensors()
-		self.start_sensors_b()
-		self.ShowMessage(_('Generation rate set to ')+rate+_(' seconds'))
-		
-	def nmea_hdg(self, e):
-		sender = e.GetEventObject()
-		if sender.GetValue(): self.conf.set('STARTUP', 'nmea_hdg', '1')
-		else: self.conf.set('STARTUP', 'nmea_hdg', '0')
-		self.start_sensors()
-
-	def nmea_heel(self, e):
-		sender = e.GetEventObject()
-		if sender.GetValue(): self.conf.set('STARTUP', 'nmea_heel', '1')
-		else: self.conf.set('STARTUP', 'nmea_heel', '0')
-		self.start_sensors()
-
-	def nmea_pitch(self, e):
-		sender = e.GetEventObject()
-		if sender.GetValue(): self.conf.set('STARTUP', 'nmea_pitch', '1')
-		else: self.conf.set('STARTUP', 'nmea_pitch', '0')
-		self.start_sensors()
-
-	def reset_imu(self, e):
-		try:
-			os.remove(currentpath+'/imu/RTIMULib.ini')
-		except Exception,e: print str(e)
-		self.button_calibrate_imu.Enable()
-		self.imu_tag.Disable()
-		self.heading.SetValue(False)
-		self.heel.SetValue(False)
-		self.pitch.SetValue(False)
-		self.conf.set('STARTUP', 'nmea_hdg', '0')
-		self.conf.set('STARTUP', 'nmea_heel', '0')
-		self.conf.set('STARTUP', 'nmea_pitch', '0')
-		self.start_sensors()
-		msg=_('Heading, heel and pitch disabled.\nClose and open OpenPlotter again to autodetect.')
-		self.ShowMessage(msg)
-
-	def reset_press_hum(self, e):
-		try:
-			os.remove(currentpath+'/imu/RTIMULib2.ini')
-		except Exception,e: print str(e)
-		try:
-			os.remove(currentpath+'/imu/RTIMULib3.ini')
-		except Exception,e: print str(e)
-		self.press_tag.Disable()
-		self.hum_tag.Disable()
-		self.press.SetValue(False)
-		self.temp_p.SetValue(False)
-		self.hum.SetValue(False)
-		self.temp_h.SetValue(False)
-		self.conf.set('STARTUP', 'nmea_press', '0')
-		self.conf.set('STARTUP', 'nmea_temp_p', '0')
-		self.conf.set('STARTUP', 'nmea_hum', '0')
-		self.conf.set('STARTUP', 'nmea_temp_h', '0')
-		self.start_sensors()
-		msg=_('Temperature, humidity and pressure disabled.\nClose and open OpenPlotter again to autodetect.')
-		self.ShowMessage(msg)
-
-	def calibrate_imu(self, e):
-		self.heading.SetValue(False)
-		self.heel.SetValue(False)
-		self.pitch.SetValue(False)
-		self.press.SetValue(False)
-		self.temp_p.SetValue(False)
-		self.hum.SetValue(False)
-		self.temp_h.SetValue(False)
-		self.conf.set('STARTUP', 'nmea_hdg', '0')
-		self.conf.set('STARTUP', 'nmea_heel', '0')
-		self.conf.set('STARTUP', 'nmea_pitch', '0')
-		self.conf.set('STARTUP', 'nmea_press', '0')
-		self.conf.set('STARTUP', 'nmea_temp_p', '0')
-		self.conf.set('STARTUP', 'nmea_hum', '0')
-		self.conf.set('STARTUP', 'nmea_temp_h', '0')
-		self.start_sensors()
-		subprocess.Popen('RTIMULibDemoGL', cwd=currentpath+'/imu')
-		msg=_('Heading, heel, pitch, temperature, humidity and pressure disabled.\nAfter calibrating, enable them again.')
-		self.ShowMessage(msg)
-	
-	def nmea_press(self, e):
-		sender = e.GetEventObject()
-		if sender.GetValue(): self.conf.set('STARTUP', 'nmea_press', '1')
-		else: self.conf.set('STARTUP', 'nmea_press', '0')
-		self.start_sensors()
-
-	def nmea_temp_p(self, e):
-		sender = e.GetEventObject()
-		if sender.GetValue(): 
-			self.temp_h.SetValue(False)
-			self.conf.set('STARTUP', 'nmea_temp_h', '0')
-			self.conf.set('STARTUP', 'nmea_temp_p', '1')
-		else: 
-			self.conf.set('STARTUP', 'nmea_temp_p', '0')
-		self.start_sensors()
-
-	def nmea_hum(self, e):
-		sender = e.GetEventObject()
-		if sender.GetValue(): self.conf.set('STARTUP', 'nmea_hum', '1')
-		else: self.conf.set('STARTUP', 'nmea_hum', '0')
-		self.start_sensors()
-
-	def nmea_temp_h(self, e):
-		sender = e.GetEventObject()
-		if sender.GetValue(): 
-			self.temp_p.SetValue(False)
-			self.conf.set('STARTUP', 'nmea_temp_p', '0')
-			self.conf.set('STARTUP', 'nmea_temp_h', '1')
-		else: 
-			self.conf.set('STARTUP', 'nmea_temp_h', '0')
-		self.start_sensors()
 
 	def enable_press_temp_log(self, e):
 		sender = e.GetEventObject()
@@ -1794,8 +1697,111 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.start_sensors()
 		self.ShowMessage(_('Weather log restarted'))
 
-###################################### Calculate
+	def i2c_start(self):
+		self.heading_183.SetValue(self.conf.get('I2C', 'nmea_hdg')=='1')
+		self.heading_2k.SetValue(self.conf.get('I2C', 'n2k_hdg')=='1')
+		self.heading_sk.SetValue(self.conf.get('I2C', 'sk_hdg')=='1')
+		self.heel_183.SetValue(self.conf.get('I2C', 'nmea_heel')=='1')
+		self.heel_2k.SetValue(self.conf.get('I2C', 'n2k_heel')=='1')
+		self.heel_sk.SetValue(self.conf.get('I2C', 'sk_heel')=='1')
+		self.pitch_183.SetValue(self.conf.get('I2C', 'nmea_pitch')=='1')
+		self.pitch_2k.SetValue(self.conf.get('I2C', 'n2k_pitch')=='1')
+		self.pitch_sk.SetValue(self.conf.get('I2C', 'sk_pitch')=='1')
+		self.pressure_183.SetValue(self.conf.get('I2C', 'nmea_press')=='1')
+		self.pressure_2k.SetValue(self.conf.get('I2C', 'n2k_press')=='1')
+		self.pressure_sk.SetValue(self.conf.get('I2C', 'sk_press')=='1')
+		self.p_temp_183.SetValue(self.conf.get('I2C', 'nmea_temp_p')=='1')
+		self.p_temp_2k.SetValue(self.conf.get('I2C', 'n2k_temp_p')=='1')
+		self.p_temp_sk.SetValue(self.conf.get('I2C', 'sk_temp_p')=='1')
+		self.humidity_183.SetValue(self.conf.get('I2C', 'nmea_hum')=='1')
+		self.humidity_2k.SetValue(self.conf.get('I2C', 'n2k_hum')=='1')
+		self.humidity_sk.SetValue(self.conf.get('I2C', 'sk_hum')=='1')
+		self.h_temp_183.SetValue(self.conf.get('I2C', 'nmea_temp_h')=='1')
+		self.h_temp_2k.SetValue(self.conf.get('I2C', 'n2k_temp_h')=='1')
+		self.h_temp_sk.SetValue(self.conf.get('I2C', 'sk_temp_h')=='1')
 
+		self.heading_offset.SetValue(self.conf.get('OFFSET', 'heading'))
+		self.heel_offset.SetValue(self.conf.get('OFFSET', 'heel'))
+		self.pitch_offset.SetValue(self.conf.get('OFFSET', 'pitch'))
+		self.pressure_offset.SetValue(self.conf.get('OFFSET', 'pressure'))
+		self.p_temp_offset.SetValue(self.conf.get('OFFSET', 'temperature_p'))
+		self.humidity_offset.SetValue(self.conf.get('OFFSET', 'humidity'))
+		self.h_temp_offset.SetValue(self.conf.get('OFFSET', 'temperature_h'))
+
+		self.p_temp_skt.SetValue(self.conf.get('I2C', 'p_temp_skt'))
+		self.h_temp_skt.SetValue(self.conf.get('I2C', 'h_temp_skt'))
+		
+		self.rate.SetValue(self.conf.get('STARTUP', 'nmea_rate_sen'))
+		
+		if 'none' in self.imu_sensor: pass
+		else:
+			self.heading_avai.SetValue(True)
+			self.heel_avai.SetValue(True)
+			self.pitch_avai.SetValue(True)
+
+		if 'none' in self.press_sensor: pass
+		else:
+			self.pressure_avai.SetValue(True)
+			self.p_temp_avai.SetValue(True)
+
+		if 'none' in self.hum_sensor: pass
+		else:
+			self.humidity_avai.SetValue(True)
+			self.h_temp_avai.SetValue(True)		
+		
+	def i2c_apply(self, e):
+		self.conf.set('I2C', 'nmea_hdg', str(int(self.heading_183.GetValue())))
+		self.conf.set('I2C', 'n2k_hdg', str(int(self.heading_2k.GetValue())))
+		self.conf.set('I2C', 'sk_hdg', str(int(self.heading_sk.GetValue())))
+		self.conf.set('I2C', 'nmea_heel', str(int(self.heel_183.GetValue())))
+		self.conf.set('I2C', 'n2k_heel', str(int(self.heel_2k.GetValue())))
+		self.conf.set('I2C', 'sk_heel', str(int(self.heel_sk.GetValue())))
+		self.conf.set('I2C', 'nmea_pitch', str(int(self.pitch_183.GetValue())))
+		self.conf.set('I2C', 'n2k_pitch', str(int(self.pitch_2k.GetValue())))
+		self.conf.set('I2C', 'sk_pitch', str(int(self.pitch_sk.GetValue())))
+		self.conf.set('I2C', 'nmea_press', str(int(self.pressure_183.GetValue())))
+		self.conf.set('I2C', 'n2k_press', str(int(self.pressure_2k.GetValue())))
+		self.conf.set('I2C', 'sk_press', str(int(self.pressure_sk.GetValue())))
+		self.conf.set('I2C', 'nmea_temp_p', str(int(self.p_temp_183.GetValue())))
+		self.conf.set('I2C', 'n2k_temp_p', str(int(self.p_temp_2k.GetValue())))
+		self.conf.set('I2C', 'sk_temp_p', str(int(self.p_temp_sk.GetValue())))
+		self.conf.set('I2C', 'nmea_hum', str(int(self.humidity_183.GetValue())))
+		self.conf.set('I2C', 'n2k_hum', str(int(self.humidity_2k.GetValue())))
+		self.conf.set('I2C', 'sk_hum', str(int(self.humidity_sk.GetValue())))
+		self.conf.set('I2C', 'nmea_temp_h', str(int(self.h_temp_183.GetValue())))
+		self.conf.set('I2C', 'n2k_temp_h', str(int(self.h_temp_2k.GetValue())))
+		self.conf.set('I2C', 'sk_temp_h', str(int(self.h_temp_sk.GetValue())))
+
+		self.conf.set('I2C', 'p_temp_skt', str(self.p_temp_skt.GetValue()))
+		self.conf.set('I2C', 'h_temp_skt', str(self.h_temp_skt.GetValue()))
+
+		self.conf.set('STARTUP', 'nmea_rate_sen', str(self.rate.GetValue()))
+		
+		try:
+			self.conf.set('OFFSET', 'heading',str(float(self.heading_offset.GetValue())))
+			self.conf.set('OFFSET', 'heel',str(float(self.heel_offset.GetValue())))
+			self.conf.set('OFFSET', 'pitch',str(float(self.pitch_offset.GetValue())))
+			self.conf.set('OFFSET', 'pressure',str(float(self.pressure_offset.GetValue())))
+			self.conf.set('OFFSET', 'temperature_p',str(float(self.p_temp_offset.GetValue())))
+			self.conf.set('OFFSET', 'humidity',str(float(self.humidity_offset.GetValue())))
+			self.conf.set('OFFSET', 'temperature_h',str(float(self.h_temp_offset.GetValue())))
+		except:
+			self.ShowMessage(_("An offset has't the correct decimal number format"))
+			self.i2c_start()
+		
+		self.start_sensors()
+
+	def i2c_cancel(self, e):
+		self.i2c_start()
+		
+	def i2c_calibrate_imu(self, e):
+		subprocess.call(['pkill', '-f', 'i2c.py'])
+		subprocess.Popen('RTIMULibDemoGL', cwd=currentpath+'/imu')
+		msg=_('After calibrating, click apply.')
+		self.ShowMessage(msg)
+
+###################################### Calculate
+		
 	def start_calculate(self):
 		subprocess.call(['pkill', '-f', 'calculate.py'])
 		if self.mag_var.GetValue() or self.heading_t.GetValue() or self.rot.GetValue() or self.TW_STW.GetValue() or self.TW_SOG.GetValue():
@@ -2389,6 +2395,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def stop_1w(self):
 		subprocess.call(['pkill', '-f', '1w.py'])
+		
 	def read_DS18B20(self):
 		self.DS18B20=[]
 		self.list_DS18B20.DeleteAllItems()
@@ -2398,14 +2405,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		except:temp_list=[]
 		for ii in temp_list:
 			self.DS18B20.append(ii)
-			self.list_DS18B20.Append([ii[0].decode('utf8'),ii[1].decode('utf8'),ii[2],ii[3]])
-			if ii[5]=='1':
-				last=self.list_DS18B20.GetItemCount()-1
-				self.list_DS18B20.CheckItem(last)
+			self.list_DS18B20.Append([ii[0].decode('utf8'),ii[4].decode('utf8'),ii[5].decode('utf8'),ii[1].decode('utf8'),ii[2],ii[3],ii[6]])
 	
 	def edit_DS18B20(self,e):
 		selected_DS18B20=e.GetIndex()
-		edit=[selected_DS18B20,self.DS18B20[selected_DS18B20][0],self.DS18B20[selected_DS18B20][1],self.DS18B20[selected_DS18B20][2],self.DS18B20[selected_DS18B20][3]]
+		edit=[selected_DS18B20,self.DS18B20[selected_DS18B20][0],self.DS18B20[selected_DS18B20][1],self.DS18B20[selected_DS18B20][2],self.DS18B20[selected_DS18B20][3],self.DS18B20[selected_DS18B20][4],self.DS18B20[selected_DS18B20][5],self.DS18B20[selected_DS18B20][6]]
 		self.edit_add_DS18B20(edit)
 
 	def add_DS18B20(self,e):
@@ -2421,7 +2425,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			short=short.encode('utf8')
 			unit_selection=dlg.unit_select.GetValue()
 			id_selection=dlg.id_select.GetValue()
+			offset=dlg.offset.GetValue()
 			id_selection=id_selection.encode('utf8')
+			sk_enable=0
+			n2k_enable=0
+			if dlg.sk_enable.GetValue():sk_enable=1
+			if dlg.n2k_enable.GetValue():n2k_enable=1
 			if not name or not short:
 				self.ShowMessage(_('Failed. Write a name and a short name.'))
 				dlg.Destroy()
@@ -2434,33 +2443,27 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.ShowMessage(_('Failed. Select sensor ID.'))
 				dlg.Destroy()
 				return
-			short_exist=self.check_short_names(short,edit,'1w')
-			if short_exist:
-				self.ShowMessage(_('Failed. This short name is already used.'))
-				dlg.Destroy()
-				return	
 			if unit_selection=='Celsius': unit_selection='C'
-			if unit_selection=='Fahrenheit': unit_selection='F'
-			if unit_selection=='Kelvin': unit_selection='K'
+			elif unit_selection=='Fahrenheit': unit_selection='F'
+			elif unit_selection=='Kelvin': unit_selection='K'
 			if edit==0:
-				self.list_DS18B20.Append([name.decode('utf8'),short.decode('utf8'),unit_selection,id_selection])
-				last=self.list_DS18B20.GetItemCount()-1
-				self.list_DS18B20.CheckItem(last)
-				if len(self.DS18B20)==0: ID='1W0'
-				else:
-					last=len(self.DS18B20)-1
-					x=int(self.DS18B20[last][4][2:])
-					ID='1W'+str(x+1)
-				self.DS18B20.append([name,short,unit_selection,id_selection,ID,'1'])
+				self.list_DS18B20.Append([name.decode('utf8'),str(sk_enable),str(n2k_enable),short.decode('utf8'),unit_selection,id_selection,str(offset)])
+				self.DS18B20.append([name,short,unit_selection,id_selection,str(sk_enable),str(n2k_enable),str(offset)])
 			else:
 				self.list_DS18B20.SetStringItem(edit[0],0,name.decode('utf8'))
-				self.list_DS18B20.SetStringItem(edit[0],1,short.decode('utf8'))
-				self.list_DS18B20.SetStringItem(edit[0],2,unit_selection)
-				self.list_DS18B20.SetStringItem(edit[0],3,id_selection)
+				self.list_DS18B20.SetStringItem(edit[0],1,str(sk_enable))
+				self.list_DS18B20.SetStringItem(edit[0],2,str(n2k_enable))
+				self.list_DS18B20.SetStringItem(edit[0],3,short.decode('utf8'))
+				self.list_DS18B20.SetStringItem(edit[0],4,unit_selection)
+				self.list_DS18B20.SetStringItem(edit[0],5,id_selection)
+				self.list_DS18B20.SetStringItem(edit[0],6,offset)
 				self.DS18B20[edit[0]][0]=name
 				self.DS18B20[edit[0]][1]=short
 				self.DS18B20[edit[0]][2]=unit_selection
 				self.DS18B20[edit[0]][3]=id_selection
+				self.DS18B20[edit[0]][4]=str(sk_enable)
+				self.DS18B20[edit[0]][5]=str(n2k_enable)
+				self.DS18B20[edit[0]][6]=str(offset)
 		dlg.Destroy()
 
 	def delete_DS18B20(self,e):
@@ -2483,8 +2486,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def apply_changes_DS18B20(self,e):
 		for i in self.DS18B20:
 			index=self.DS18B20.index(i)
-			if self.list_DS18B20.IsChecked(index): self.DS18B20[index][5]='1'
-			else: self.DS18B20[index][5]='0'
 		self.conf.set('1W', 'DS18B20', str(self.DS18B20))
 		self.start_1w()
 		self.start_monitoring()
@@ -2607,6 +2608,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.stop_1w()
 			subprocess.Popen(['python',currentpath+'/CAN-USB-stick.py'])
 			self.SetStatusText(_('you have to restart SignalK server'))		
+		
 	def SerialCheck(self):
 		self.SerDevLs = [_('none')]
 		self.context = pyudev.Context()
@@ -2654,7 +2656,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 						else:
 							if 'ID_MODEL_FROM_DATABASE' in device:	imfd=device['ID_MODEL_FROM_DATABASE']
 							if 'ID_VENDOR_FROM_DATABASE' in device:	ivfd=device['ID_VENDOR_FROM_DATABASE']
-							self.ShowMessage(_('Warning: You have connected the "')+ivfd+', '+imfd+_('" to the USB port which is reserved for another device'))		
+							self.ShowMessage(_('Warning: You have connected the "')+ivfd+', '+imfd+_('" to the usb port which is reserved for another device'))		
 
 	def onsignalk_enable (self,e):
 		isChecked = self.signalk_enable.GetValue()
@@ -2677,6 +2679,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				data = json.load(data_file)
 			data['vessel']['name']=name
 			data['vessel']['uuid']=uuid
+			text='NMEA 0183 - system_output - TCP localhost 10110\openplotter sensors UDP 7777'
 			if self.can_usb.GetValue()==_('none'): 
 				self.conf.set('SIGNALK', 'can_usb', '0')
 				ii=0
@@ -2685,8 +2688,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 						#delete nmea 2000
 						del data['pipedProviders'][ii]
 					ii=ii+1
-				text='NMEA 0183 - system_output - TCP localhost 10110'
-				self.SKinputs_label.SetLabel(text)
 			else:
 				self.conf.set('SIGNALK', 'can_usb', self.can_usb.GetValue())
 				exist=0
@@ -2697,16 +2698,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 						data['pipedProviders'][ii]['pipeElements'][0]['options']['command']='actisense-serial '+self.can_usb.GetValue()
 						exist=1
 					ii=ii+1
-				text='NMEA 0183 - system_output - TCP localhost 10110'
-				text=text+'\nNMEA 2000 - CAN-USB - '+self.conf.get('SIGNALK', 'can_usb')
-				self.SKinputs_label.SetLabel(text)
 				if exist==0:
 					new={"id":"CAN-USB","pipeElements":[{"type":"providers/execute","options":{"command":"actisense-serial xxx"}},{"type":"providers/liner"},{"type":"providers/n2kAnalyzer"},{"type":"providers/n2k-signalk"}]}
 					new['pipeElements'][0]['options']['command']='actisense-serial '+self.can_usb.GetValue()
 					data['pipedProviders'].append(new)
-					text='NMEA 0183 - system_output - TCP localhost 10110'
-					text=text+'\nNMEA 2000 - CAN-USB - '+self.conf.get('SIGNALK', 'can_usb')
-					self.SKinputs_label.SetLabel(text)
+				text+='\nNMEA 2000 - CAN-USB - '+self.conf.get('SIGNALK', 'can_usb')
+			self.SKinputs_label.SetLabel(text)
 			with open(home+'/.config/signalk-server-node/settings/openplotter-settings.json', 'w') as outfile:
 				json.dump(data, outfile)
 			self.conf.set('SIGNALK', 'enable', '1')

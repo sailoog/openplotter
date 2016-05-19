@@ -94,7 +94,8 @@ if x: sensors_list=eval(x)
 else: sensors_list=[]
 for i in sensors_list:
 	if i[5]=='1': DS18B20='1'
-
+	if i[4]=='1': DS18B20='1'
+	
 nmea_mag_var=conf.get('STARTUP', 'nmea_mag_var')
 nmea_hdt=conf.get('STARTUP', 'nmea_hdt')
 nmea_rot=conf.get('STARTUP', 'nmea_rot')
@@ -136,8 +137,17 @@ if signalk=='1':
 if gps_time=='1':
 	subprocess.call(['sudo', 'python', currentpath+'/time_gps.py'])
 
+detected=subprocess.check_output(['python', currentpath+'/imu/check_sensors.py'], cwd=currentpath+'/imu')
+l_detected=detected.split('\n')
+e_imu=True
+e_pres=True
+e_hum=True
+if 'none' in l_detected[0]:	e_imu=False
+if 'none' in l_detected[2]:	e_pres=False
+if 'none' in l_detected[3]:	e_hum=False
+	
 subprocess.call(['pkill', '-f', 'i2c.py'])
-if nmea_hdg=='1' or nmea_heel=='1' or nmea_pitch=='1' or nmea_press=='1' or nmea_temp_p=='1' or nmea_hum=='1' or nmea_temp_h=='1': 
+if e_imu or e_pres or e_hum:
 	subprocess.Popen(['python', currentpath+'/i2c.py'], cwd=currentpath+'/imu')
 
 subprocess.call(['pkill', '-f', '1w.py'])
