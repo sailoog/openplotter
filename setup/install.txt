@@ -1,0 +1,24 @@
+!!!File: openplotter-settings.json must be copied into signalk-server-node
+
+
+
+info for installation of signalk
+
+sudo apt-get update
+sudo apt-get install -y curl git build-essential
+curl -sL https://deb.nodesource.com/setup_0.12 | sudo -E bash -
+sudo apt-get install -y nodejs
+
+git clone https://github.com/SignalK/signalk-server-node.git
+cd signalk-server-node
+npm install
+bin/nmea-from-file
+
+sudo npm install -g bower
+bower install https://github.com/SignalK/instrumentpanel.git
+bower install https://github.com/SignalK/sailgauge.git
+bower install https://github.com/SignalK/maptracker.git
+bower install https://github.com/SignalK/simplegauges.git
+
+!!!change 10110 to 10111
+in file: signalk-server-node/lib/interfaces/nmea-tcp.js

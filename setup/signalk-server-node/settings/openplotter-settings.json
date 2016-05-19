@@ -1,0 +1,58 @@
+{
+	"vessel" : {
+		"name" : "Ginny",
+		"uuid" : "2111234567"
+	},
+	"pipedProviders" : [{
+			"pipeElements" : [{
+					"type" : "providers/tcp",
+					"options" : {
+						"host" : "127.0.0.1",
+						"port" : "10110"
+					}
+				}, {
+					"type" : "providers/nmea0183-signalk",
+					"optionMappings" : [{
+							"toOption" : "selfId",
+							"fromAppProperty" : "selfId"
+						}, {
+							"toOption" : "selfType",
+							"fromAppProperty" : "selfType"
+						}
+					]
+				}
+			],
+			"id" : "tcp_localhost_10110"
+		}, {
+			"pipeElements" : [{
+					"type" : "providers/udp",
+					"options" : {
+						"port" : "7777"
+					}
+				}, {
+					"type" : "providers/liner"
+				}, {
+					"type" : "providers/from_json"
+				}
+			],
+			"id" : "i2c"
+		}, {
+			"pipeElements" : [{
+					"type" : "providers/execute",
+					"options" : {
+						"command" : "actisense-serial /dev/ttyOP_N2K"
+					}
+				}, {
+					"type" : "providers/liner"
+				}, {
+					"type" : "providers/n2kAnalyzer"
+				}, {
+					"type" : "providers/n2k-signalk"
+				}
+			],
+			"id" : "CAN-USB"
+		}
+	],
+	"interfaces" : {}
+
+}
