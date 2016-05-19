@@ -209,6 +209,8 @@ class MainFrame(wx.Frame):
 		wx.StaticBox(self.page3, size=(370, 315), pos=(10, 10))
 		self.wifi_enable = wx.CheckBox(self.page3, label=_('Enable access point'), pos=(20, 25))
 		self.wifi_enable.Bind(wx.EVT_CHECKBOX, self.onwifi_enable)
+
+		self.bridge_enable = wx.CheckBox(self.page3, label=_('Enable bridge to eth0'), pos=(180,25))
 		
 		self.available_wireless = []
 		output=subprocess.check_output('ifconfig', stderr=subprocess.STDOUT)
@@ -1096,6 +1098,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			if self.conf.get('WIFI', 'wpa')=='1': self.wifi_wpa.SetValue('WPA')
 			if self.conf.get('WIFI', 'wpa')=='2': self.wifi_wpa.SetValue('WPA2')
 			if self.conf.get('WIFI', 'wpa')=='3': self.wifi_wpa.SetValue(_('Both'))
+			if self.conf.get('WIFI', 'bridge')=='1': self.bridge_enable.SetValue(True)
+			else: self.bridge_enable.SetValue(False)
 			if self.conf.get('WIFI', 'enable')=='1':
 				self.enable_disable_wifi(1)
 		else:
@@ -1133,6 +1137,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		channel=self.wifi_channel.GetValue()
 		mode=self.wifi_mode.GetValue()
 		wpa=self.wifi_wpa.GetValue()
+		bridge='0' 
+		if self.bridge_enable.GetValue(): bridge='1'
 		if share==_('none'):share='0'
 		if mode=='IEEE 802.11b':mode='b'
 		if mode=='IEEE 802.11g':mode='g'
@@ -1146,6 +1152,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.conf.set('WIFI', 'channel', channel)
 		self.conf.set('WIFI', 'hw_mode', mode)
 		self.conf.set('WIFI', 'wpa', wpa)
+		self.conf.set('WIFI', 'bridge', bridge)
 		self.passw.SetValue('**********')
 		if isChecked:
 			self.enable_disable_wifi(1)
@@ -1215,6 +1222,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.wifi_wpa_label.Disable()
 			self.wifi_button_default.Disable()
 			self.wifi_enable.SetValue(True)
+			self.bridge_enable.Disable()
 			self.conf.set('WIFI', 'enable', '1')
 		else:
 			self.wlan.Enable()
@@ -1234,6 +1242,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.wifi_wpa_label.Enable()
 			self.wifi_button_default.Enable()
 			self.wifi_enable.SetValue(False)
+			self.bridge_enable.Enable()
 			self.conf.set('WIFI', 'enable', '0')
 
 ###########################################	SDR-AIS
@@ -1645,10 +1654,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 ###################################### I2C sensors
 
 	def start_sensors(self):
-		subprocess.call(['pkill', 'RTIMULibDemoGL'])
-		subprocess.call(['pkill', '-f', 'i2c.py'])
+		self.stop_sensors()
 		if self.heading.GetValue() or self.heel.GetValue() or self.pitch.GetValue() or self.press.GetValue() or self.temp_p.GetValue() or self.hum.GetValue() or self.temp_h.GetValue():
 			subprocess.Popen(['python', currentpath+'/i2c.py'], cwd=currentpath+'/imu')
+			
+	def stop_sensors(self):
+		subprocess.call(['pkill', 'RTIMULibDemoGL'])
+		subprocess.call(['pkill', '-f', 'i2c.py'])
 
 	def ok_rate(self, e):
 		rate=self.rate.GetValue()
@@ -2372,9 +2384,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 ####################### 1W sensors
 
 	def start_1w(self):
-		subprocess.call(['pkill', '-f', '1w.py'])
+		self.stop_1w()
 		subprocess.Popen(['python',currentpath+'/1w.py'])
 
+	def stop_1w(self):
+		subprocess.call(['pkill', '-f', '1w.py'])
 	def read_DS18B20(self):
 		self.DS18B20=[]
 		self.list_DS18B20.DeleteAllItems()
@@ -2578,17 +2592,21 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def restartSK(self, e):
 		self.SetStatusText(_('Closing Signal K server'))
 		subprocess.call(["pkill", '-9', "node"])
+		self.start_sensors()
+		self.start_1w()
 		isChecked = self.signalk_enable.GetValue()
 		if isChecked:
 			subprocess.Popen(home+'/.config/signalk-server-node/bin/openplotter', cwd=home+'/.config/signalk-server-node')
 			self.SetStatusText(_('Signal K server restarted'))
+
 	def N2K_setting(self, e):
 		if len(self.conf.get('SIGNALK', 'can_usb'))>5:
 			self.SetStatusText(_('Closing Signal K server'))
 			subprocess.call(["pkill", '-9', "node"])
+			self.stop_sensors()
+			self.stop_1w()
 			subprocess.Popen(['python',currentpath+'/CAN-USB-stick.py'])
 			self.SetStatusText(_('you have to restart SignalK server'))		
-	
 	def SerialCheck(self):
 		self.SerDevLs = [_('none')]
 		self.context = pyudev.Context()
