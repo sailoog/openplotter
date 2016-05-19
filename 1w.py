@@ -23,7 +23,10 @@ conf=Conf()
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-sensors_list=eval(conf.get('1W', 'DS18B20'))
+try:
+	sensors_list=eval(conf.get('1W', 'DS18B20'))
+except:sensors_list=[]
+
 
 sensors=[]
 for index,item in enumerate(sensors_list):
