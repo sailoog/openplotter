@@ -381,6 +381,8 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.signalKout, self.show_outputSK)
 		self.button_restartSK =wx.Button(self.page7, label=_('Restart'), pos=(155, 285))
 		self.Bind(wx.EVT_BUTTON, self.restartSK, self.button_restartSK)
+		self.button_N2K_setting =wx.Button(self.page7, label=_('N2K Settings'), pos=(250, 285))
+		self.Bind(wx.EVT_BUTTON, self.N2K_setting, self.button_N2K_setting)		
 ###########################page7
 ########page15###################
 		wx.StaticBox(self.page15, label=_(' Settings '), size=(330, 180), pos=(10, 10))
@@ -2580,6 +2582,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if isChecked:
 			subprocess.Popen(home+'/.config/signalk-server-node/bin/openplotter', cwd=home+'/.config/signalk-server-node')
 			self.SetStatusText(_('Signal K server restarted'))
+	def N2K_setting(self, e):
+		if len(self.conf.get('SIGNALK', 'can_usb'))>5:
+			self.SetStatusText(_('Closing Signal K server'))
+			subprocess.call(["pkill", '-9', "node"])
+			subprocess.Popen(['python',currentpath+'/CAN-USB-stick.py'])
+			self.SetStatusText(_('you have to restart SignalK server'))		
 	
 	def SerialCheck(self):
 		self.SerDevLs = [_('none')]
