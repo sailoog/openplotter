@@ -176,14 +176,17 @@ humidity_sk=conf.get('I2C', 'sk_hum')=='1'
 h_temp_183=conf.get('I2C', 'nmea_temp_h')=='1'
 h_temp_2k=conf.get('I2C', 'n2k_temp_h')=='1'
 h_temp_sk=conf.get('I2C', 'sk_temp_h')=='1'
-
-heading_offset=float(conf.get('OFFSET', 'heading'))
-heel_offset=float(conf.get('OFFSET', 'heel'))
-pitch_offset=float(conf.get('OFFSET', 'pitch'))
-pressure_offset=float(conf.get('OFFSET', 'pressure'))
-p_temp_offset=float(conf.get('OFFSET', 'temperature_p'))
-humidity_offset=float(conf.get('OFFSET', 'humidity'))
-h_temp_offset=float(conf.get('OFFSET', 'temperature_h'))
+try:
+	heading_offset=float(conf.get('OFFSET', 'heading'))
+	heel_offset=float(conf.get('OFFSET', 'heel'))
+	pitch_offset=float(conf.get('OFFSET', 'pitch'))
+	pressure_offset=float(conf.get('OFFSET', 'pressure'))
+	p_temp_offset=float(conf.get('OFFSET', 'temperature_p'))
+	humidity_offset=float(conf.get('OFFSET', 'humidity'))
+	h_temp_offset=float(conf.get('OFFSET', 'temperature_h'))
+except:
+	heading_offset=heel_offset=pitch_offset=pressure_offset=p_temp_offset=humidity_offset=h_temp_offset=0.0
+	print 'Bad format in offset value' 
 
 p_temp_skt=conf.get('I2C', 'p_temp_skt')
 h_temp_skt=conf.get('I2C', 'h_temp_skt')
