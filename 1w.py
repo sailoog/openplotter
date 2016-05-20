@@ -168,6 +168,12 @@ for index,item in enumerate(sensors_list):
 			if i[0]=='propulsion.starboard.coolantTemperature':
 				datab[3]=index
 				engine1=1
+		try:
+			float(i[6])
+		except:
+			print 'Offset: '+i[6]+' is not a correct decimal number'
+			i[6]='0.0'
+			
 		index+=1
 		
 while True:
