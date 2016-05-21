@@ -72,7 +72,6 @@ opencpn_fullscreen=conf.get('STARTUP', 'opencpn_fullscreen')
 x11vnc=conf.get('STARTUP', 'x11vnc')
 vnc_pass=conf.get('STARTUP', 'vnc_pass')
 gps_time=conf.get('STARTUP', 'gps_time')
-signalk=conf.get('SIGNALK', 'enable')
 
 enable=conf.get('AIS-SDR', 'enable')
 gain=conf.get('AIS-SDR', 'gain')
@@ -128,11 +127,7 @@ time.sleep(16)
 
 subprocess.call(['pkill', '-9', 'kplex'])
 if kplex=='1':
-	subprocess.Popen('kplex')        
-
-subprocess.call(["pkill", '-9', "node"])
-if signalk=='1':
-	subprocess.Popen(home+'/.config/signalk-server-node/bin/openplotter', cwd=home+'/.config/signalk-server-node')       
+	subprocess.Popen('kplex')             
 
 if gps_time=='1':
 	subprocess.call(['sudo', 'python', currentpath+'/time_gps.py'])
@@ -157,6 +152,9 @@ if DS18B20=='1':
 subprocess.call(['pkill', '-f', 'calculate.py'])
 if nmea_mag_var=='1' or nmea_hdt=='1' or nmea_rot=='1' or TW_STW=='1' or TW_SOG=='1': 
 	subprocess.Popen(['python', currentpath+'/calculate.py'])
+
+subprocess.call(["pkill", '-9', "node"])
+subprocess.Popen(home+'/.config/signalk-server-node/bin/openplotter', cwd=home+'/.config/signalk-server-node')  
 
 subprocess.call(['pkill', '-f', 'monitoring.py'])
 subprocess.Popen(['python',currentpath+'/monitoring.py'])

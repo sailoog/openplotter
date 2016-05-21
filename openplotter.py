@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, sys, os, subprocess, webbrowser, re, json, pyudev, time, ConfigParser
+import wx, sys, os, subprocess, webbrowser, re, json, pyudev, time, ConfigParser, requests
 import wx.lib.scrolledpanel as scrolled
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 from classes.datastream import DataStream
@@ -69,8 +69,10 @@ class MainFrame(wx.Frame):
 		self.page14 = wx.Panel(self.nb)
 		self.page15 = wx.Panel(self.nb)
 		self.page16 = wx.Panel(self.nb)
+		self.page17 = wx.Panel(self.nb)
 		self.nb.AddPage(self.page14, _('USB manager'))
 		self.nb.AddPage(self.page5, _('NMEA 0183'))
+		self.nb.AddPage(self.page17, _('NMEA 2000'))
 		self.nb.AddPage(self.page7, _('Signal K'))
 		self.nb.AddPage(self.page3, _('WiFi AP'))
 		self.nb.AddPage(self.page10, _('Actions'))
@@ -359,33 +361,63 @@ class MainFrame(wx.Frame):
 ###########################page5
 ########page7###################
 		wx.StaticBox(self.page7, label=_(' Settings '), size=(230, 265), pos=(10, 10))
-		self.signalk_enable = wx.CheckBox(self.page7, label=_('Enable Signal K server'), pos=(20, 30))
-		self.signalk_enable.Bind(wx.EVT_CHECKBOX, self.onsignalk_enable)
 
-		self.vessel = wx.TextCtrl(self.page7, -1, size=(110, 32), pos=(20, 60))
-		self.vessel_label=wx.StaticText(self.page7, label=_('Vessel name'), pos=(140, 65))
+		self.vessel = wx.TextCtrl(self.page7, -1, size=(110, 32), pos=(20, 30))
+		self.vessel_label=wx.StaticText(self.page7, label=_('Vessel name'), pos=(140, 35))
 
-		self.mmsi = wx.TextCtrl(self.page7, -1, size=(110, 32), pos=(20, 95))
-		self.mmsi_label=wx.StaticText(self.page7, label='MMSI', pos=(140, 100))
+		self.mmsi = wx.TextCtrl(self.page7, -1, size=(110, 32), pos=(20, 65))
+		self.mmsi_label=wx.StaticText(self.page7, label='MMSI', pos=(140, 70))
+
+		self.button_restartSK =wx.Button(self.page7, label=_('Restart'), pos=(20, 115))
+		self.Bind(wx.EVT_BUTTON, self.restartSK, self.button_restartSK)	
+
+		self.button_apply_SK =wx.Button(self.page7, label=_('Apply changes'), pos=(125, 115))
+		self.Bind(wx.EVT_BUTTON, self.apply_changes_SK, self.button_apply_SK)
 		
-		self.NMEA2000_label=wx.StaticText(self.page7, label='NMEA 2000', pos=(20, 140))
-		self.SerDevLs = []
-		self.can_usb= wx.ComboBox(self.page7, choices=self.SerDevLs, style=wx.CB_READONLY, size=(120, 32), pos=(20, 165))
-		self.CANUSB_label=wx.StaticText(self.page7, label='CAN-USB', pos=(155, 172))
-
 		wx.StaticBox(self.page7, label=_(' Inputs '), size=(430, 130), pos=(250, 10))
-		self.SKinputs_label=wx.StaticText(self.page7, label='NMEA 0183 - system_output - TCP localhost 10110', pos=(260, 30))
-
+		self.SKinputs_label=wx.StaticText(self.page7, label='NMEA 0183: system_output - TCP localhost 10110', pos=(260, 30))
+		
+		response = requests.get('http://localhost:3000/signalk')
+		data = response.json()
+		text=_('Version: ')
+		text+=data['endpoints']['v1']['version']
+		text+='\n\nhttp: '
+		text+=data['endpoints']['v1']['signalk-http']
+		text+='\nws: '
+		text+=data['endpoints']['v1']['signalk-ws']
+		text+='\nNMEA 0183: TCP localhost 10111'
 		wx.StaticBox(self.page7, label=_(' Outputs '), size=(430, 130), pos=(250, 145))
-		wx.StaticText(self.page7, label='Signal K REST\nSignal K Web Socket\nSignal K NMEA 0183 - TCP localhost 10111', pos=(260, 165))
+		wx.StaticText(self.page7, label=text, pos=(260, 165))
 
-		self.show_outputSK =wx.Button(self.page7, label=_('Show Web Socket'), pos=(10, 285))
+		self.show_outputSK =wx.Button(self.page7, label=_('Show Web Socket'), pos=(250, 285))
 		self.Bind(wx.EVT_BUTTON, self.signalKout, self.show_outputSK)
-		self.button_restartSK =wx.Button(self.page7, label=_('Restart'), pos=(155, 285))
-		self.Bind(wx.EVT_BUTTON, self.restartSK, self.button_restartSK)
-		self.button_N2K_setting =wx.Button(self.page7, label=_('N2K Settings'), pos=(250, 285))
-		self.Bind(wx.EVT_BUTTON, self.N2K_setting, self.button_N2K_setting)		
+
+		self.show_tools_SK =wx.Button(self.page7, label=_('Show Signal K tools'), pos=(420, 285))
+		self.Bind(wx.EVT_BUTTON, self.signalKtools, self.show_tools_SK)
+
 ###########################page7
+########page17###################
+
+		wx.StaticBox(self.page17, label=_(' Settings '), size=(230, 265), pos=(10, 10))
+
+		self.n2k_enable = wx.CheckBox(self.page17, label=_('Enable N2K input/output'), pos=(20, 30))
+		self.n2k_enable.Bind(wx.EVT_CHECKBOX, self.onn2k_enable)
+
+		self.CANUSB_label=wx.StaticText(self.page17, label=_('CAN-USB-CAN device'), pos=(20, 60))
+		self.SerDevLs = []
+		self.can_usb= wx.ComboBox(self.page17, choices=self.SerDevLs, style=wx.CB_READONLY, size=(140, 32), pos=(20, 85))
+
+		self.button_N2K_setting =wx.Button(self.page17, label=_('Output settings'), pos=(20, 130))
+		self.Bind(wx.EVT_BUTTON, self.N2K_setting, self.button_N2K_setting)	
+
+		wx.StaticBox(self.page17, label=_(' Inputs '), size=(430, 50), pos=(250, 10))
+		self.n2kinputs_label=wx.StaticText(self.page17, label=_('PGNs: All'), pos=(260, 30))
+
+		wx.StaticBox(self.page17, label=_(' Outputs '), size=(430, 210), pos=(250, 65))
+		wx.StaticText(self.page17, label='PGNs:', pos=(260, 85))
+		self.n2koutputs_label=wx.StaticText(self.page17, pos=(260, 105))
+
+###########################page17
 ########page15###################
 		wx.StaticBox(self.page15, label=_(' Settings '), size=(330, 180), pos=(10, 10))
 		self.sms_enable = wx.CheckBox(self.page15, label=_('Enable settings'), pos=(20, 30))
@@ -499,11 +531,6 @@ class MainFrame(wx.Frame):
 		
 		wx.StaticText(self.page6, label=_('Rate (sec)'), pos=(s1, 290))
 		self.rate= wx.ComboBox(self.page6, choices=self.rate_list, style=wx.CB_READONLY, size=(80, 32), pos=(100, 283))
-
-
-
-
-
 
 
 		self.button_calibrate_imu =wx.Button(self.page6, label=_('Calibrate IMU'), pos=(250, 283))
@@ -828,22 +855,15 @@ class MainFrame(wx.Frame):
 			data = json.load(data_file)
 		self.vessel.SetValue(data['vessel']['name'])
 		self.mmsi.SetValue(data['vessel']['uuid'])
-
-		text='NMEA 0183 - system_output - TCP localhost 10110\openplotter sensors UDP 7777'
-		if self.conf.get('SIGNALK', 'can_usb')=='0': self.can_usb.SetValue(self.SerDevLs[0])
-		else: 
-			self.can_usb.SetValue(self.conf.get('SIGNALK', 'can_usb'))
-			text+='\nNMEA 2000 - CAN-USB - '+self.conf.get('SIGNALK', 'can_usb')
-		self.SKinputs_label.SetLabel(text)
-		if self.conf.get('SIGNALK', 'enable')=='1': 
-			self.signalk_enable.SetValue(True)
-			self.vessel.Disable()
-			self.vessel_label.Disable()
-			self.mmsi.Disable()
-			self.mmsi_label.Disable()
-			self.NMEA2000_label.Disable()
+		text='NMEA 0183: system_output - TCP localhost 10110\nSignal K: OpenPlotter sensors - UDP localhost 7777'
+		if self.conf.get('N2K', 'enable')=='1': 
+			self.n2k_enable.SetValue(True)
+			self.can_usb.SetValue(self.conf.get('N2K', 'can_usb'))
 			self.can_usb.Disable()
-			self.CANUSB_label.Disable()
+			self.button_N2K_setting.Disable()
+			text+='\nNMEA 2000: CAN-USB-CAN - '+self.conf.get('N2K', 'can_usb')
+		self.n2koutputs_label.SetLabel(self.conf.get('N2K', 'pgn_output'))
+		self.SKinputs_label.SetLabel(text)
 
 		if self.conf.get('SMS', 'serial')=='0': self.sms_dev.SetValue(self.SerDevLs[0])
 		else: self.sms_dev.SetValue(self.conf.get('SMS', 'serial'))
@@ -1010,6 +1030,55 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					if edit[0]!=short_topics.index(short): exist=True
 			else: exist=True
 		return exist
+
+	def SerialWrongPort(self):
+		try:
+			self.context		
+		except NameError:
+			self.context = pyudev.Context()
+
+		data=self.conf.get('UDEV', 'USBinst')
+		try:
+			temp_list=eval(data)
+		except:temp_list=[]
+		for ic in temp_list:
+			if ic[5] == 'port':	
+				for device in self.context.list_devices(subsystem='usb'):
+					dp = ""
+					imi= ""
+					ivi= ""
+					imfd=""
+					ivfd=""
+					if 'DEVPATH' in device: dp=device['DEVPATH']
+					if dp.find(ic[4])>0:					
+						if 'PRODUCT' in device:
+							pr=device['PRODUCT']
+							s = pr.split('/')
+							imi = s[1].zfill(4)
+							ivi = s[0].zfill(4)								
+						if imi==ic[2] and ivi==ic[1]: pass
+						else:
+							if 'ID_MODEL_FROM_DATABASE' in device:	imfd=device['ID_MODEL_FROM_DATABASE']
+							if 'ID_VENDOR_FROM_DATABASE' in device:	ivfd=device['ID_VENDOR_FROM_DATABASE']
+							self.ShowMessage(_('Warning: You have connected the "')+ivfd+', '+imfd+_('" to the usb port which is reserved for another device'))		
+
+	def SerialCheck(self):
+		self.SerDevLs = []
+		self.context = pyudev.Context()
+		for device in self.context.list_devices(subsystem='tty'):
+			i=device['DEVNAME']
+			if '/dev/ttyU' in i or '/dev/ttyA' in i or '/dev/ttyS' in i or '/dev/ttyO' in i or '/dev/r' in i or '/dev/i' in i:
+				self.SerDevLs.append(i)
+				try:
+					ii=device['DEVLINKS']
+					value= ii[ii.rfind('/dev/ttyOP_'):]			
+					if value.find('/dev/ttyOP_') >=0:
+						self.SerDevLs.append(value)
+				except Exception,e: print str(e)
+		self.can_usb.Clear()
+		self.sms_dev.Clear()
+		self.can_usb.AppendItems(self.SerDevLs)
+		self.sms_dev.AppendItems(self.SerDevLs)
 
 ###########################################	startup
 
@@ -1399,10 +1468,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.SetStatusText(_('Closing Kplex'))
 		subprocess.call(["pkill", '-9', "kplex"])
 		subprocess.Popen('kplex')
-		self.SetStatusText(_('Kplex restarted'))
-		if self.conf.get('SIGNALK', 'enable')=='1':
-			subprocess.call(["pkill", '-9', "node"])
-			subprocess.Popen(home+'/.config/signalk-server-node/bin/openplotter', cwd=home+'/.config/signalk-server-node')
+		self.SetStatusText(_('Closing Signal K'))
+		subprocess.call(["pkill", '-9', "node"])
+		subprocess.Popen(home+'/.config/signalk-server-node/bin/openplotter', cwd=home+'/.config/signalk-server-node')
+		self.SetStatusText(_('Kplex and Signal k restarted'))
 
 	def cancel_changes(self,event):
 		self.read_kplex_conf()
@@ -2584,10 +2653,71 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.SetStatusText(_('USB names added and restarted'))
 		self.SerialCheck()
 
+###################################### N2K
+
+	def onn2k_enable(self, e):
+		with open(home+'/.config/signalk-server-node/settings/openplotter-settings.json') as data_file:
+			data = json.load(data_file)
+		text='NMEA 0183: system_output - TCP localhost 10110\nSignal K: OpenPlotter sensors - UDP localhost 7777'
+		isChecked = self.n2k_enable.GetValue()
+		if isChecked:
+			if not self.can_usb.GetValue():
+				self.n2k_enable.SetValue(False)
+				self.SetStatusText(_('You have to select a CAN-USB-CAN device'))
+				return
+			subprocess.call(['pkill', '-f', 'CAN-USB-stick.py'])
+			self.conf.set('N2K', 'enable', '1')
+			self.conf.set('N2K', 'can_usb', self.can_usb.GetValue())
+			self.can_usb.Disable()
+			self.button_N2K_setting.Disable()
+			exist=0
+			ii=0
+			for i in data['pipedProviders']:
+				if i['id']=='CAN-USB':
+					#edit nmea 2000
+					data['pipedProviders'][ii]['pipeElements'][0]['options']['command']='actisense-serial '+self.can_usb.GetValue()
+					exist=1
+				ii=ii+1
+			if exist==0:
+				new={"id":"CAN-USB","pipeElements":[{"type":"providers/execute","options":{"command":"actisense-serial xxx"}},{"type":"providers/liner"},{"type":"providers/n2kAnalyzer"},{"type":"providers/n2k-signalk"}]}
+				new['pipeElements'][0]['options']['command']='actisense-serial '+self.can_usb.GetValue()
+				data['pipedProviders'].append(new)
+			text+='\nNMEA 2000: CAN-USB-CAN - '+self.conf.get('N2K', 'can_usb')
+		else:
+			self.conf.set('N2K', 'enable', '0')
+			self.can_usb.Enable()
+			self.button_N2K_setting.Enable()
+			ii=0
+			for i in data['pipedProviders']:
+				if i['id']=='CAN-USB':
+					#delete nmea 2000
+					del data['pipedProviders'][ii]
+				ii=ii+1
+		self.n2koutputs_label.SetLabel(self.conf.get('N2K', 'pgn_output'))
+		self.SKinputs_label.SetLabel(text)
+		with open(home+'/.config/signalk-server-node/settings/openplotter-settings.json', 'w') as outfile:
+			json.dump(data, outfile)
+		self.restartSK(0)
+
+
+	def N2K_setting(self, e):
+		if not self.can_usb.GetValue():
+			self.SetStatusText(_('You have to select a CAN-USB-CAN device'))
+			return
+		subprocess.call(['pkill', '-f', 'CAN-USB-stick.py'])
+		self.stop_sensors()
+		self.stop_1w()
+		subprocess.Popen(['python',currentpath+'/CAN-USB-stick.py'])
+		self.SetStatusText(_('Select PGNs to transmit and enable N2K input/output again.'))	
+
 ###################################### Signal K
 
 	def signalKout(self, e):
 		url = 'http://localhost:3000/examples/consumer-example.html'
+		webbrowser.open(url,new=2)
+
+	def signalKtools(self, e):
+		url = 'http://localhost:3000'
 		webbrowser.open(url,new=2)
 
 	def restartSK(self, e):
@@ -2595,129 +2725,23 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		subprocess.call(["pkill", '-9', "node"])
 		self.start_sensors()
 		self.start_1w()
-		isChecked = self.signalk_enable.GetValue()
-		if isChecked:
-			subprocess.Popen(home+'/.config/signalk-server-node/bin/openplotter', cwd=home+'/.config/signalk-server-node')
-			self.SetStatusText(_('Signal K server restarted'))
+		subprocess.Popen(home+'/.config/signalk-server-node/bin/openplotter', cwd=home+'/.config/signalk-server-node')
+		self.SetStatusText(_('Signal K server restarted'))	
 
-	def N2K_setting(self, e):
-		if len(self.conf.get('SIGNALK', 'can_usb'))>5:
-			self.SetStatusText(_('Closing Signal K server'))
-			subprocess.call(["pkill", '-9', "node"])
-			self.stop_sensors()
-			self.stop_1w()
-			subprocess.Popen(['python',currentpath+'/CAN-USB-stick.py'])
-			self.SetStatusText(_('you have to restart SignalK server'))		
-		
-	def SerialCheck(self):
-		self.SerDevLs = [_('none')]
-		self.context = pyudev.Context()
-		for device in self.context.list_devices(subsystem='tty'):
-			i=device['DEVNAME']
-			if '/dev/ttyU' in i or '/dev/ttyA' in i or '/dev/ttyS' in i or '/dev/ttyO' in i or '/dev/r' in i or '/dev/i' in i:
-				self.SerDevLs.append(i)
-				try:
-					ii=device['DEVLINKS']
-					value= ii[ii.rfind('/dev/ttyOP_'):]			
-					if value.find('/dev/ttyOP_') >=0:
-						self.SerDevLs.append(value)
-				except Exception,e: print str(e)
-		self.can_usb.Clear()
-		self.sms_dev.Clear()
-		self.can_usb.AppendItems(self.SerDevLs)
-		self.sms_dev.AppendItems(self.SerDevLs)
+	def apply_changes_SK(self,e):
+		name=self.vessel.GetValue()
+		uuid=self.mmsi.GetValue()
+		if name=='' or uuid=='':
+			self.ShowMessage(_('You have to provide name and MMSI.'))
+			return
+		with open(home+'/.config/signalk-server-node/settings/openplotter-settings.json') as data_file:
+			data = json.load(data_file)
+		data['vessel']['name']=name
+		data['vessel']['uuid']=uuid
+		with open(home+'/.config/signalk-server-node/settings/openplotter-settings.json', 'w') as outfile:
+			json.dump(data, outfile)
+		self.restartSK(0)
 
-	def SerialWrongPort(self):
-		try:
-			self.context		
-		except NameError:
-			self.context = pyudev.Context()
-
-		data=self.conf.get('UDEV', 'USBinst')
-		try:
-			temp_list=eval(data)
-		except:temp_list=[]
-		for ic in temp_list:
-			if ic[5] == 'port':	
-				for device in self.context.list_devices(subsystem='usb'):
-					dp = ""
-					imi= ""
-					ivi= ""
-					imfd=""
-					ivfd=""
-					if 'DEVPATH' in device: dp=device['DEVPATH']
-					if dp.find(ic[4])>0:					
-						if 'PRODUCT' in device:
-							pr=device['PRODUCT']
-							s = pr.split('/')
-							imi = s[1].zfill(4)
-							ivi = s[0].zfill(4)								
-						if imi==ic[2] and ivi==ic[1]: pass
-						else:
-							if 'ID_MODEL_FROM_DATABASE' in device:	imfd=device['ID_MODEL_FROM_DATABASE']
-							if 'ID_VENDOR_FROM_DATABASE' in device:	ivfd=device['ID_VENDOR_FROM_DATABASE']
-							self.ShowMessage(_('Warning: You have connected the "')+ivfd+', '+imfd+_('" to the usb port which is reserved for another device'))		
-
-	def onsignalk_enable (self,e):
-		isChecked = self.signalk_enable.GetValue()
-		if isChecked:
-			name=self.vessel.GetValue()
-			uuid=self.mmsi.GetValue()
-			if name=='' or uuid=='':
-				self.ShowMessage(_('You have to provide name and MMSI.'))
-				self.signalk_enable.SetValue(False)
-				return				
-			self.vessel.Disable()
-			self.vessel_label.Disable()
-			self.mmsi.Disable()
-			self.mmsi_label.Disable()
-			self.NMEA2000_label.Disable()
-			self.can_usb.Disable()
-			self.CANUSB_label.Disable()
-			subprocess.call(["pkill", '-9', "node"])
-			with open(home+'/.config/signalk-server-node/settings/openplotter-settings.json') as data_file:
-				data = json.load(data_file)
-			data['vessel']['name']=name
-			data['vessel']['uuid']=uuid
-			text='NMEA 0183 - system_output - TCP localhost 10110\openplotter sensors UDP 7777'
-			if self.can_usb.GetValue()==_('none'): 
-				self.conf.set('SIGNALK', 'can_usb', '0')
-				ii=0
-				for i in data['pipedProviders']:
-					if i['id']=='CAN-USB':
-						#delete nmea 2000
-						del data['pipedProviders'][ii]
-					ii=ii+1
-			else:
-				self.conf.set('SIGNALK', 'can_usb', self.can_usb.GetValue())
-				exist=0
-				ii=0
-				for i in data['pipedProviders']:
-					if i['id']=='CAN-USB':
-						#edit nmea 2000
-						data['pipedProviders'][ii]['pipeElements'][0]['options']['command']='actisense-serial '+self.can_usb.GetValue()
-						exist=1
-					ii=ii+1
-				if exist==0:
-					new={"id":"CAN-USB","pipeElements":[{"type":"providers/execute","options":{"command":"actisense-serial xxx"}},{"type":"providers/liner"},{"type":"providers/n2kAnalyzer"},{"type":"providers/n2k-signalk"}]}
-					new['pipeElements'][0]['options']['command']='actisense-serial '+self.can_usb.GetValue()
-					data['pipedProviders'].append(new)
-				text+='\nNMEA 2000 - CAN-USB - '+self.conf.get('SIGNALK', 'can_usb')
-			self.SKinputs_label.SetLabel(text)
-			with open(home+'/.config/signalk-server-node/settings/openplotter-settings.json', 'w') as outfile:
-				json.dump(data, outfile)
-			self.conf.set('SIGNALK', 'enable', '1')
-			subprocess.Popen(home+'/.config/signalk-server-node/bin/openplotter', cwd=home+'/.config/signalk-server-node')
-		else:
-			subprocess.call(["pkill", '-9', "node"])
-			self.conf.set('SIGNALK', 'enable', '0')
-			self.vessel.Enable()
-			self.vessel_label.Enable()
-			self.mmsi.Enable()
-			self.mmsi_label.Enable()
-			self.NMEA2000_label.Enable()
-			self.can_usb.Enable()
-			self.CANUSB_label.Enable()
 
 ####################### SMS
 

@@ -26,9 +26,9 @@ home=paths.home
 conf=Conf()
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-N2Kdev= conf.get('SIGNALK', 'can_usb')
+N2Kdev= conf.get('N2K', 'can_usb')
 n2k_exist=False
-if (len(N2Kdev)>3):
+if conf.get('N2K', 'enable')=='1':
 	try:
 		ser = serial.Serial(N2Kdev, 115200, timeout=0.5)
 		n2k_exist=True
