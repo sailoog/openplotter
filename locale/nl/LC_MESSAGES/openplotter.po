@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: OpenPlotter 0.0.0\n"
-"POT-Creation-Date: 2016-05-16 19:32+0200\n"
-"PO-Revision-Date: 2016-05-16 19:32+0200\n"
+"POT-Creation-Date: 2016-05-19 12:54+0200\n"
+"PO-Revision-Date: 2016-05-19 12:54+0200\n"
 "Last-Translator: Sailoog <info@sailoog.com>\n"
 "Language-Team: Sailoog <info@sailoog.com>\n"
 "Language: nl_NL\n"
@@ -635,8 +635,8 @@ msgstr " Filter "
 #: connection.py:74 connection.py:104 connection.py:176 openplotter.py:219
 #: openplotter.py:425 openplotter.py:440 openplotter.py:447 openplotter.py:1090
 #: openplotter.py:1134 openplotter.py:1448 openplotter.py:1470
-#: openplotter.py:2583 openplotter.py:2652 openplotter.py:2710
-#: openplotter.py:2727
+#: openplotter.py:2585 openplotter.py:2654 openplotter.py:2712
+#: openplotter.py:2729
 msgid "none"
 msgstr "geen"
 
@@ -1699,7 +1699,7 @@ msgid "Failed. Select pull down or pull up."
 msgstr "Mislukt. Selecteer pull down of pull up."
 
 #: openplotter.py:1897 openplotter.py:2022 openplotter.py:2423
-#: openplotter.py:2834
+#: openplotter.py:2836
 msgid "Failed. This short name is already used."
 msgstr "Mislukt. Deze korte naam is al in gebruik."
 
@@ -1858,52 +1858,52 @@ msgstr "USB namen toegevoegd en herstart"
 msgid "Closing Signal K server"
 msgstr "Bezig met sluiten Signal K server"
 
-#: openplotter.py:2580
+#: openplotter.py:2582
 msgid "Signal K server restarted"
 msgstr "Signal K server herstart"
 
-#: openplotter.py:2629
+#: openplotter.py:2631
 msgid "Warning: You have connected the \""
 msgstr "Waarschuwing: “"
 
-#: openplotter.py:2629
+#: openplotter.py:2631
 msgid "\" to the USB port which is reserved for another device"
 msgstr ""
 "“ is verbonden met een USB-poort die voor een ander apparaat is gereserveerd"
 
-#: openplotter.py:2637
+#: openplotter.py:2639
 msgid "You have to provide name and MMSI."
 msgstr "Geef een naam en MMSI."
 
-#: openplotter.py:2712
+#: openplotter.py:2714
 msgid "You have to provide a serial port or a bluetooth address."
 msgstr "Geef een seriële poort of bluetoothadres."
 
-#: openplotter.py:2722
+#: openplotter.py:2724
 msgid "You have to provide a connection type."
 msgstr "Geef een verbindingstype."
 
-#: openplotter.py:2760
+#: openplotter.py:2762
 msgid "You have to enable settings."
 msgstr "Activeer de instellingen."
 
-#: openplotter.py:2764
+#: openplotter.py:2766
 msgid "You have to provide a phone number."
 msgstr "Geef een telefoonnummer."
 
-#: openplotter.py:2789
+#: openplotter.py:2791
 msgid "You have to provide some text to send."
 msgstr "Geef de te versturen tekst."
 
-#: openplotter.py:2829
+#: openplotter.py:2831
 msgid "Failed. Write a topic and a short name."
 msgstr "Mislukt. Geef een onderwerp en een korte naam."
 
-#: openplotter.py:2855
+#: openplotter.py:2857
 msgid "Select a topic to delete."
 msgstr "Selecteer een onderwerp om te verwijderen."
 
-#: openplotter.py:2864
+#: openplotter.py:2866
 msgid ""
 "You have a trigger defined for this topic. You must delete that action "
 "before deleting this topic."
@@ -1911,15 +1911,15 @@ msgstr ""
 "Je hebt een trigger gedefinieerd voor dit onderwerp. Verwijder de trigger "
 "voordat je het onderwerp verwijdert."
 
-#: openplotter.py:2873
+#: openplotter.py:2875
 msgid "Enter at least username and password."
 msgstr "Geef minimaal een gebruikersnaam en wachtwoord."
 
-#: openplotter.py:2888
+#: openplotter.py:2889
 msgid "MQTT topics changes applied and restarted"
 msgstr "Wijzigingen in MQTT-onderwerpen toegepast en herstart"
 
-#: openplotter.py:2892
+#: openplotter.py:2893
 msgid "MQTT topics changes cancelled"
 msgstr "Wijzigingen in MQTT-onderwerpen geannuleerd"
 

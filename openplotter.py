@@ -2613,9 +2613,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			serial=serial.encode('utf8')
 			con_port=dlg.con_port
 			con_port=con_port.encode('utf8')
+			device=dlg.device
+			device=device.encode('utf8')
 			rem=dlg.rem
 			self.list_USBinst.Append([OPname_selection.decode('utf8'),vendor.decode('utf8'),product.decode('utf8'),con_port.decode('utf8'),serial.decode('utf8'),rem])
-			self.USBinst.append([OPname_selection,vendor,product,serial,con_port,rem])
+			self.USBinst.append([OPname_selection,vendor,product,serial,con_port,rem,device])
 			self.apply_changes_USBinst()
 		dlg.Destroy()
 
@@ -2634,7 +2636,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		for i in self.USBinst:
 			index=self.USBinst.index(i)
 			if self.USBinst[index][5]=='port':
-				write_str='KERNEL=="ttyUSB*", KERNELS=="'+self.USBinst[index][4]
+				write_str='KERNEL=="'+self.USBinst[index][6]+'*", KERNELS=="'+self.USBinst[index][4]
 				write_str=write_str+'" ,SYMLINK+="'+self.USBinst[index][0]+'"\n'
 			else:
 				if self.USBinst[index][3] == '':
