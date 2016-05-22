@@ -2495,6 +2495,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			unit_selection=dlg.unit_select.GetValue()
 			id_selection=dlg.id_select.GetValue()
 			offset=dlg.offset.GetValue()
+			try:
+				float(offset)
+			except: offset='0.0'
 			id_selection=id_selection.encode('utf8')
 			sk_enable=0
 			n2k_enable=0

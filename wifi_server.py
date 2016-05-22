@@ -38,6 +38,8 @@ subprocess.call(['service', 'hostapd', 'stop'])
 subprocess.call(['service', 'dnsmasq', 'stop'])
 subprocess.call(['ifconfig', wlan, 'down'])
 
+driver='nl80211'
+
 if wifi_server=='1':
 
 	error=0
@@ -45,7 +47,6 @@ if wifi_server=='1':
 	original=os.path.isfile('/usr/sbin/hostapd.org')
 	if not original: shutil.copyfile('/usr/sbin/hostapd', '/usr/sbin/hostapd.org')
 
-	driver='nl80211'
 	chipset= 'default'
 
 	context = pyudev.Context()
@@ -78,29 +79,38 @@ if wifi_server=='1':
 
 	subprocess.call(['rfkill', 'unblock', 'wifi'])
 
-	data= 'DAEMON_CONF="/etc/hostapd/hostapd.conf"'
-	file = open('/etc/default/hostapd', 'w')
-	file.write(data)
+	file = open('/etc/default/hostapd', 'r',2000)
+	bak=file.read()
 	file.close()
+	data= 'DAEMON_CONF="/etc/hostapd/hostapd.conf"'
+	if bak!=data:
+		file = open('/etc/default/hostapd', 'w')
+		file.write(data)
+		file.close()
 
-	data='interface='+wlan+'\n'
-	if bridge=='1':	data+= 'bridge=br0\n'	
-	if driver!='': data+= 'driver='+driver+'\n'
-	data+= 'hw_mode='+hw_mode+'\n'
-	data+= 'channel='+channel+'\n'
-	data+= 'ieee80211n=1\n'
-	data+= 'wmm_enabled=1\n'
-	data+= 'ssid='+ssid+'\n'
-	data+= 'auth_algs=1\n'
-	data+= 'wpa='+wpa+'\n'
-	data+= 'wpa_key_mgmt=WPA-PSK\n'
-	data+= 'rsn_pairwise=CCMP\n'
-	data+= 'wpa_passphrase='+passw+'\n'
+data='interface='+wlan+'\n'
+if bridge=='1' and wifi_server=='1':	data+= 'bridge=br0\n'	
+if driver!='': data+= 'driver='+driver+'\n'
+data+= 'hw_mode='+hw_mode+'\n'
+data+= 'channel='+channel+'\n'
+data+= 'ieee80211n=1\n'
+data+= 'wmm_enabled=1\n'
+data+= 'ssid='+ssid+'\n'
+data+= 'auth_algs=1\n'
+data+= 'wpa='+wpa+'\n'
+data+= 'wpa_key_mgmt=WPA-PSK\n'
+data+= 'rsn_pairwise=CCMP\n'
+data+= 'wpa_passphrase='+passw+'\n'
 
+file = open('/etc/hostapd/hostapd.conf', 'r',2000)
+bak=file.read()
+file.close()
+if bak!=data:
 	file = open('/etc/hostapd/hostapd.conf', 'w')
 	file.write(data)
 	file.close()
-	
+
+if wifi_server=='1':	
 	if bridge=='0':
 		data='# interfaces(5) file used by ifup(8) and ifdown(8)\nauto lo\niface lo inet loopback\n\nauto '+wlan+'\niface '+wlan+' inet static\naddress 10.10.10.1\nnetmask 255.255.255.0'
 		#data+='\nservice hostapd start\n'
