@@ -94,6 +94,8 @@ class addUSBinst(wx.Dialog):
 
 	def select_device(self,e):
 		selected_device=e.GetIndex()
+		item = self.list_devices.GetItem(selected_device, 0)
+		self.device=item.GetText()[5:-1]
 		item = self.list_devices.GetItem(selected_device, 1)
 		self.vendor=item.GetText()
 		item = self.list_devices.GetItem(selected_device, 2)
