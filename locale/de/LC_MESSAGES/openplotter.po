@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: OpenPlotter 0.0.0\n"
-"POT-Creation-Date: 2016-05-19 12:51+0200\n"
-"PO-Revision-Date: 2016-05-19 12:51+0200\n"
+"POT-Creation-Date: 2016-05-22 11:04+0200\n"
+"PO-Revision-Date: 2016-05-22 11:05+0200\n"
 "Last-Translator: Sailoog <info@sailoog.com>\n"
 "Language-Team: Sailoog <info@sailoog.com>\n"
 "Language: de\n"
@@ -81,6 +81,7 @@ msgid ""
 "Be sure you have filled in all fields in \"WiFi AP\" tab and enabled WiFi "
 "access point."
 msgstr ""
+"Vergewissern Sie sich alle Felder im Reiter \"WiFi AP\" ausgefüllt zu haben."
 
 #: classes/actions.py:41
 msgid "stop SDR-AIS"
@@ -95,6 +96,8 @@ msgid ""
 "Be sure you have filled in Gain and Correction fields in \"SDR-AIS\" tab and "
 "enabled AIS NMEA generation."
 msgstr ""
+"Vergewissern Sie sich die Felder Verstärkung und Korrektur im Reiter \"SDR-"
+"AIS\" ausgefüllt zu haben und dass AIS NMEA aktiviert ist."
 
 #: classes/actions.py:43
 msgid "publish Twitter"
@@ -107,6 +110,10 @@ msgid ""
 "\n"
 "Enter text to publish in the field below."
 msgstr ""
+"Vergewissern Sie sich alle Felder im Reiter \"Konto\" ausgefüllt zu haben "
+"und dass Twitter aktiviert ist.\n"
+"\n"
+"Eingabe erfolgt im Feld unterhalb."
 
 #: classes/actions.py:44
 msgid "send e-mail"
@@ -119,11 +126,13 @@ msgid ""
 "\n"
 "Enter the subject in the field below."
 msgstr ""
+"Vergewissern Sie sich alle Felder im Reiter \"Konto\" ausgefüllt zu haben.\n"
+"\n"
+"Eingabe erfolgt im Feld unterhalb."
 
 #: classes/actions.py:45
-#, fuzzy
 msgid "send SMS"
-msgstr "aktiviere SMS senden"
+msgstr "sende SMS"
 
 #: classes/actions.py:45
 msgid ""
@@ -131,6 +140,9 @@ msgid ""
 "\n"
 "Enter the text in the field below."
 msgstr ""
+"Vergewissern Sie sich sende SMS aktiviert zu haben.\n"
+"\n"
+"Texteingabe erfolgt im Feld unterhalb."
 
 #: classes/actions.py:46
 msgid "play sound"
@@ -165,6 +177,8 @@ msgid ""
 "This action will stop all the triggers except the trigger which has an "
 "action \"start all actions\" defined."
 msgstr ""
+"Diese Aktion wird alle Schalter stoppen, bis auf Schalter mit der "
+"Einstellung  \"Start alle Aktionen\"."
 
 #: classes/actions.py:60
 msgid ": High"
@@ -175,6 +189,8 @@ msgid ""
 "ATTENTION! if you set this output to \"High\" and there is not a resistor or "
 "a circuit connected to the selected GPIO pin, YOU CAN DAMAGE YOUR BOARD."
 msgstr ""
+"Vorsicht! Wenn sie diesen GPIO Ausgang einschalten ohne das ein Verbraucher "
+"angeschlossen ist, kann ihr Board beschädigt werden."
 
 #: classes/actions.py:61
 msgid ": Low"
@@ -261,11 +277,11 @@ msgstr "neuer Name"
 
 #: classes/add_USBinst.py:45
 msgid "Remember device (by vendor, product,(serial))"
-msgstr ""
+msgstr "Identität des Gerätes (über Hersteller, Prod., SNr)"
 
 #: classes/add_USBinst.py:51
 msgid "Remember port (positon on the USB-hub)"
-msgstr ""
+msgstr "Identität über USB Steckplatz"
 
 #: classes/add_action.py:24
 msgid "Add action"
@@ -303,6 +319,11 @@ msgid ""
 "brackets, e.g. [Lat] for Latitude. See available short names in Inspector "
 "window."
 msgstr ""
+"\n"
+"\n"
+"Sie können jeden aktuellen Wert hinzufügen, indem sie die Kurzform in eckige "
+"Klammern setzen z. B. \"[Lat]\" für den Breitengrad. Die möglichen "
+"Kurzformen sind im Inspector Fenster zu sehen."
 
 #: classes/add_output.py:23
 msgid "Add Output"
@@ -322,7 +343,7 @@ msgstr "ziehen"
 
 #: classes/add_topic.py:23
 msgid "Add MQTT topic"
-msgstr ""
+msgstr "MQTT Satz hinzufügen"
 
 #: classes/add_topic.py:27
 #, fuzzy
@@ -331,7 +352,7 @@ msgstr "kurz"
 
 #: classes/add_topic.py:30
 msgid "topic"
-msgstr ""
+msgstr "Thema"
 
 #: classes/add_trigger.py:23
 msgid "Add trigger"
@@ -340,7 +361,7 @@ msgstr "Auslöser hinzufügen"
 #: classes/add_trigger.py:32 classes/add_trigger.py:45 openplotter.py:2163
 #: openplotter.py:2210 openplotter.py:2224
 msgid "None (always true)"
-msgstr ""
+msgstr "nichts (immer Wahr)"
 
 #: classes/add_trigger.py:34 openplotter.py:621
 msgid "trigger"
@@ -356,13 +377,15 @@ msgstr "Wert"
 
 #: classes/add_trigger.py:64
 msgid "The actions of this trigger will always be executed."
-msgstr ""
+msgstr "Die Aktion dieses Schalters wird immer ausgeführt."
 
 #: classes/add_trigger.py:74
 msgid ""
 "Be sure you have filled in GPIO and Pull Down/Up fields in \"Switches\" tab "
 "and enabled the desired switch."
 msgstr ""
+"Vergewissern Sie sich die Felder GPIO und Ein/Aus im Reiter \"Schalter\" "
+"ausgefüllt zu haben und dass die gewünschten Schalter aktiviert sind."
 
 #: classes/datastream.py:31
 msgid "Latitude"
@@ -386,7 +409,7 @@ msgstr ""
 
 #: classes/datastream.py:34
 msgid "Time"
-msgstr ""
+msgstr "Zeit"
 
 #: classes/datastream.py:35
 msgid "Magnetic Variation"
@@ -527,11 +550,11 @@ msgstr ""
 
 #: classes/datastream.py:102
 msgid "was not present in the last (sec.)"
-msgstr "letzter Datensatz vor (s)"
+msgstr "war nicht anwesend während (Sek)"
 
 #: classes/datastream.py:102
 msgid "was present in the last (sec.)"
-msgstr ""
+msgstr "war anwesend während (Sek)"
 
 #: classes/datastream.py:102
 msgid "is equal to"
@@ -624,7 +647,7 @@ msgstr "nur ganze Sätze:"
 
 #: connection.py:74 connection.py:194
 msgid "Ignore sentences:"
-msgstr ""
+msgstr "ignoriere Satz:"
 
 #: connection.py:77 openplotter.py:319 openplotter.py:337
 msgid "Filtering"
@@ -636,7 +659,7 @@ msgstr "löschen"
 
 #: connection.py:82
 msgid "Talker - Sentence"
-msgstr ""
+msgstr "Sender - Datensatz"
 
 #: connection.py:84
 msgid "-"
@@ -687,6 +710,8 @@ msgid ""
 "\"Name\" must be a string between 1 and 13 lowercase letters and/or numbers "
 "which is not used as name for another input/output."
 msgstr ""
+"\"Name\" muss ein eindeutiger Text (string) mit 1 bis 13 Kleinbuchstaben und/"
+"oder Ziffern sein."
 
 #: connection.py:160
 msgid "You must select a Port."
@@ -714,7 +739,7 @@ msgstr "alle Aktionen gestartet"
 
 #: fine_cal.py:39 openplotter.py:297
 msgid "Fine calibration"
-msgstr ""
+msgstr "Feinjustage"
 
 #: fine_cal.py:48 test_sms.py:51
 msgid "Error"
@@ -735,6 +760,10 @@ msgid ""
 "value in \"Correction (ppm)\" field and enable SDR-AIS\n"
 "reception. Estimated time: 1 min."
 msgstr ""
+"Drücke berechnen und warte bis die Berechnung des ppm-\n"
+"Wertes mit dem ausgewähltem Kanal abgeschlossen ist.\n"
+"Übertrage den erhaltenen Wert in das Feld Korrektur (ppm)\n"
+"und aktiviere SDR-AIS. Dauer: ca. eine Minute."
 
 #: fine_cal.py:61
 msgid ""
@@ -742,6 +771,10 @@ msgid ""
 "Write down the strongest channel (power). If you do not find\n"
 "any channel try another band. Estimated time: 5 min."
 msgstr ""
+"Drücke berechnen und warte bis das System das Frequezband\n"
+"geprüft hat. Notiere den stärksten Kanal. Falls nichts gefunden\n"
+"wird, versuch es auf einem anderem Frequenzband.\n"
+"Dauer: ca. 5 Minuten"
 
 #: fine_cal.py:66
 msgid "Working..."
@@ -917,7 +950,7 @@ msgstr "&Hilfe"
 
 #: openplotter.py:135
 msgid "Delay (seconds)"
-msgstr "Verzögerung (Sekunnden)"
+msgstr "Verzögerung (Sek)"
 
 #: openplotter.py:137 openplotter.py:174 openplotter.py:180 openplotter.py:421
 msgid "Ok"
@@ -944,9 +977,8 @@ msgid "VNC remote desktop"
 msgstr ""
 
 #: openplotter.py:155
-#, fuzzy
 msgid "use password"
-msgstr "Gmail Passwort"
+msgstr "benutze Passwort"
 
 #: openplotter.py:160
 #, fuzzy
@@ -955,7 +987,7 @@ msgstr "spiele Geräusch ab"
 
 #: openplotter.py:163
 msgid "Select"
-msgstr ""
+msgstr "Wähle"
 
 #: openplotter.py:166
 msgid "Maximize OpenPlotter"
@@ -1020,18 +1052,16 @@ msgid "Enable access point"
 msgstr "aktiviere Wifi AP"
 
 #: openplotter.py:229
-#, fuzzy
 msgid "Access point device"
-msgstr "Wifi AP gescheitert."
+msgstr "Wifi AP Anschluß"
 
 #: openplotter.py:232
 msgid "Sharing Internet device"
-msgstr ""
+msgstr "Internet Mitbenutzung "
 
 #: openplotter.py:235
-#, fuzzy
 msgid "Access point settings"
-msgstr "Wifi AP gestartet."
+msgstr "Wifi AP Einstellungen"
 
 #: openplotter.py:238
 msgid ""
@@ -1051,11 +1081,11 @@ msgstr "Kanal"
 
 #: openplotter.py:249
 msgid "Mode"
-msgstr ""
+msgstr "Modus"
 
 #: openplotter.py:251 openplotter.py:1096 openplotter.py:1139
 msgid "Both"
-msgstr ""
+msgstr "beide"
 
 #: openplotter.py:253
 msgid "WPA"
@@ -1063,7 +1093,7 @@ msgstr ""
 
 #: openplotter.py:255
 msgid "Defaults"
-msgstr ""
+msgstr "Vorgabewerte"
 
 #: openplotter.py:258
 msgid " Addresses "
@@ -1103,7 +1133,7 @@ msgstr "Kalibrierung"
 
 #: openplotter.py:288
 msgid " Fine calibration using GSM "
-msgstr ""
+msgstr "Feinjustage mittels GSM"
 
 #: openplotter.py:289
 msgid "Band"
@@ -1111,7 +1141,7 @@ msgstr ""
 
 #: openplotter.py:293
 msgid "Check band"
-msgstr ""
+msgstr "Frequenzband"
 
 #: openplotter.py:300
 msgid " VHF "
@@ -1119,11 +1149,11 @@ msgstr ""
 
 #: openplotter.py:302
 msgid "Receive"
-msgstr ""
+msgstr "Empfangen"
 
 #: openplotter.py:305
 msgid "Transmit"
-msgstr ""
+msgstr "übermitteln"
 
 #: openplotter.py:307
 msgid "Experimental"
@@ -1370,22 +1400,20 @@ msgid "Remote broker"
 msgstr ""
 
 #: openplotter.py:589
-#, fuzzy
 msgid "Username"
-msgstr "Name"
+msgstr "Benutzername"
 
 #: openplotter.py:591
-#, fuzzy
 msgid "Password"
-msgstr "Gmail Passwort"
+msgstr "Passwort"
 
 #: openplotter.py:594
 msgid "Topics"
-msgstr ""
+msgstr "Themen"
 
 #: openplotter.py:599
 msgid "Topic"
-msgstr ""
+msgstr "Thema"
 
 #: openplotter.py:616
 msgid " Triggers "
@@ -1447,7 +1475,7 @@ msgstr "Sekunden"
 
 #: openplotter.py:1063
 msgid "Do you want to change your VNC-Password?"
-msgstr ""
+msgstr "Wollen Sie ihr VNC-Passwort ändern?"
 
 #: openplotter.py:1063 openplotter.py:1106
 msgid "Question"
@@ -1553,6 +1581,8 @@ msgid ""
 "SDR-AIS reception disabled. After closing the new window enable SDR-AIS "
 "reception again."
 msgstr ""
+"SDR-AIS Empfang deaktiviert. Nach schließen des neuen Fensters aktiviere SDR-"
+"AIS wieder."
 
 #: openplotter.py:1317
 msgid ""
@@ -1560,6 +1590,9 @@ msgid ""
 "Check the new window. Copy the maximum supported gain value. Wait for ppm "
 "value to stabilize and copy it too."
 msgstr ""
+"SDR-AIS Empfang deaktiviert.\n"
+"Überprüfe das neue Fenster. Kopiere die maximal zulässige Verstärkung. Warte "
+"bis sich der ppm Wert stabilisiert hat und kopiere auch diesen Wert."
 
 #: openplotter.py:1366
 msgid ""
@@ -1582,6 +1615,8 @@ msgstr "Kplex neu gestartet"
 msgid ""
 "Multiplexer configuration file does not exist. Add inputs and apply changes."
 msgstr ""
+"Multiplexer-Konfigurationsdatei existiert nicht. Füge Eingänge hinzu und "
+"übernehme die Eingaben"
 
 #: openplotter.py:1449 openplotter.py:1471
 msgid "accept"
@@ -1658,9 +1693,8 @@ msgstr "Abgebrochen. Wähle pull down oder pull up."
 
 #: openplotter.py:1897 openplotter.py:2022 openplotter.py:2423
 #: openplotter.py:2836
-#, fuzzy
 msgid "Failed. This short name is already used."
-msgstr "Der Ausgang ist schon in Gebrauch."
+msgstr "Abgebrochen. Der Ausgang ist schon in Gebrauch."
 
 #: openplotter.py:1924
 msgid "Select a switch to delete."
@@ -1677,7 +1711,7 @@ msgstr ""
 
 #: openplotter.py:1949
 msgid " is being used in outputs. Switches changes cancelled."
-msgstr ""
+msgstr " ist bereits in Ausgang benutzt. Änderungen abgebrochen."
 
 #: openplotter.py:1957
 msgid "Switches changes applied and restarted"
@@ -1702,7 +1736,7 @@ msgstr ""
 
 #: openplotter.py:2076
 msgid " is being used in switches. Output changes cancelled."
-msgstr ""
+msgstr " ist bereits in Schalter benutzt. Änderungen abgebrochen."
 
 #: openplotter.py:2084
 msgid "Output changes applied and restarted"
@@ -1720,14 +1754,18 @@ msgstr "Aktionen werden neu geladen"
 msgid ""
 "Enter valid Twitter apiKey, apiSecret, accessToken and accessTokenSecret."
 msgstr ""
+"Es müssen korrekte Eingaben für Twitter apiKey, apiSecret, accessToken und "
+"accessTokenSecret gemacht werden."
 
 #: openplotter.py:2131
 msgid "Enter valid Gmail account, Gmail password and Recipient."
 msgstr ""
+"Es müssen korrekte Eingaben für Gmail-Konto Passwort und Empfänger gemacht "
+"werden."
 
 #: openplotter.py:2175
 msgid "Problem with Actions detected. Please check and save again."
-msgstr ""
+msgstr "Problem: im Bereich Aktionen. Bitte überprüfen und nochmal sichern."
 
 #: openplotter.py:2232
 msgid "Failed. Select trigger and operator."
@@ -1825,11 +1863,13 @@ msgstr "Signal K Server neu gestartet"
 
 #: openplotter.py:2631
 msgid "Warning: You have connected the \""
-msgstr ""
+msgstr "Warnung: Sie haben das Gerät \""
 
 #: openplotter.py:2631
 msgid "\" to the USB port which is reserved for another device"
 msgstr ""
+"\" an den USB Steckplatz angeschlossen, der für ein anderes Gerät reserviert "
+"ist"
 
 #: openplotter.py:2639
 msgid "You have to provide name and MMSI."
@@ -1856,42 +1896,35 @@ msgid "You have to provide some text to send."
 msgstr "Es muss ein zu sendender Text angegeben werden."
 
 #: openplotter.py:2831
-#, fuzzy
 msgid "Failed. Write a topic and a short name."
-msgstr "Fehler. Name und kurzer Name eintragen."
+msgstr "Fehler. Thema und kurzer Name eintragen."
 
 #: openplotter.py:2857
-#, fuzzy
 msgid "Select a topic to delete."
-msgstr "Wähle den zu löschenden Schalter."
+msgstr "Wähle das zu löschende Thema."
 
 #: openplotter.py:2866
-#, fuzzy
 msgid ""
 "You have a trigger defined for this topic. You must delete that action "
 "before deleting this topic."
 msgstr ""
-"Es sind Aktionen mit dem Schalter verknüpft. Diese müssen erst gelöscht "
-"werden."
+"Es sind Aktionen mit dem Thema verknüpft. Diese müssen erst gelöscht werden."
 
 #: openplotter.py:2875
 msgid "Enter at least username and password."
-msgstr ""
+msgstr "Mindesteingabe Benutzername und Passwort"
 
 #: openplotter.py:2889
-#, fuzzy
 msgid "MQTT topics changes applied and restarted"
-msgstr "Änderungen der Aktionen  übernehmen"
+msgstr "MQTT Themenänderungen übernehmen"
 
 #: openplotter.py:2893
-#, fuzzy
 msgid "MQTT topics changes cancelled"
-msgstr "Änderungen der Aktionen  abbrechen"
+msgstr "MQTT Themenänderungen abbrechen"
 
 #: output.py:48
-#, fuzzy
 msgid "Magnitude"
-msgstr "Breitengrad"
+msgstr "Absolutwert"
 
 #: output.py:49
 msgid "Value"
@@ -1956,10 +1989,12 @@ msgstr ""
 #: test_sms.py:62
 msgid "Press start to check the settings and connect to the GSM device"
 msgstr ""
+"Drücke Start um die Einstellungen zu überprüfen\n"
+"und die Verbindung zum GSM-Gerät herzustellen."
 
 #: test_sms.py:65
 msgid "Press start to send the text \""
-msgstr ""
+msgstr "Drücke Start zum senden des Textes \""
 
 #: test_sms.py:65
 msgid ""
