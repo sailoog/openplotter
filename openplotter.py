@@ -1484,7 +1484,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		data='# For advanced manual configuration, please visit: http://www.stripydog.com/kplex/configuration.html\n# Please do not modify defaults nor OpenPlotter GUI settings.\n# Add manual settings at the end of the document.\n\n'
 
 		data=data+'###defaults\n\n[udp]\nname=system_input\ndirection=in\noptional=yes\naddress=127.0.0.1\nport=10110\n\n'
-		data=data+'[tcp]\nname=system_output\ndirection=out\nmode=server\nport=10110\n\n###end of defaults\n\n###OpenPlotter GUI settings\n\n'
+		data=data+'[tcp]\nname=system_output\ndirection=out\nofilter=-**RMB\nmode=server\nport=10110\n\n###end of defaults\n\n###OpenPlotter GUI settings\n\n'
 
 		for index,item in enumerate(self.inputs):
 			if 'system_input' not in item[1]:
