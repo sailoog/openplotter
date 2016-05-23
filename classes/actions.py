@@ -211,5 +211,6 @@ class Actions():
 			topic=self.mqtt_list[self.getmqttlistIndex(option)][1]
 			payload= text
 			auth = {'username':conf.get('MQTT','username'), 'password':conf.get('MQTT','password')}
-			publish.single(topic, payload=payload, hostname=conf.get('MQTT','broker'), port=conf.get('MQTT','port'), auth=auth)
 			publish.single(topic, payload=payload, hostname='127.0.0.1', port='1883', auth=auth)
+			publish.single(topic, payload=payload, hostname=conf.get('MQTT','broker'), port=conf.get('MQTT','port'), auth=auth)
+			
