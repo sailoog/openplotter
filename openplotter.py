@@ -865,7 +865,6 @@ class MainFrame(wx.Frame):
 		text='NMEA 0183: system_output - TCP localhost 10110\nSignal K: OpenPlotter sensors - UDP localhost 7777'
 		if self.conf.get('N2K', 'enable')=='1': 
 			self.n2k_enable.SetValue(True)
-			self.can_usb.SetValue(self.conf.get('N2K', 'can_usb'))
 			self.can_usb.Disable()
 			self.button_N2K_setting.Disable()
 			text+='\nNMEA 2K: CAN-USB-CAN - '+self.conf.get('N2K', 'can_usb')
