@@ -72,7 +72,7 @@ class MainFrame(wx.Frame):
 		self.page17 = wx.Panel(self.nb)
 		self.nb.AddPage(self.page14, _('USB manager'))
 		self.nb.AddPage(self.page5, _('NMEA 0183'))
-		self.nb.AddPage(self.page17, _('NMEA 2000'))
+		self.nb.AddPage(self.page17, _('NMEA 2K'))
 		self.nb.AddPage(self.page7, _('Signal K'))
 		self.nb.AddPage(self.page3, _('WiFi AP'))
 		self.nb.AddPage(self.page10, _('Actions'))
@@ -376,7 +376,12 @@ class MainFrame(wx.Frame):
 		
 		wx.StaticBox(self.page7, label=_(' Inputs '), size=(430, 130), pos=(250, 10))
 		self.SKinputs_label=wx.StaticText(self.page7, label='NMEA 0183: system_output - TCP localhost 10110', pos=(260, 30))
-		
+
+		if not self.util_process_exist('node'):
+			print 'SignalK start'
+			self.start_SK()
+			time.sleep(5.0)
+
 		response = requests.get('http://localhost:3000/signalk')
 		data = response.json()
 		text=_('Version: ')
@@ -473,7 +478,7 @@ class MainFrame(wx.Frame):
 		wx.StaticText(self.page6, label=_('NMEA'), pos=(260, 20))
 		wx.StaticText(self.page6, label=_('available'), pos=(s2, 35))
 		wx.StaticText(self.page6, label=_('0183'), pos=(s3, 35))
-		wx.StaticText(self.page6, label=_('2000'), pos=(s4, 35))
+		wx.StaticText(self.page6, label=_('2K'), pos=(s4, 35))
 		wx.StaticText(self.page6, label=_('SignalK'), pos=(s5, 35))
 		wx.StaticText(self.page6, label=_('SignalK type'), pos=(s6, 35))
 		wx.StaticText(self.page6, label=_('offset'), pos=(s7, 35))
@@ -861,7 +866,7 @@ class MainFrame(wx.Frame):
 			self.can_usb.SetValue(self.conf.get('N2K', 'can_usb'))
 			self.can_usb.Disable()
 			self.button_N2K_setting.Disable()
-			text+='\nNMEA 2000: CAN-USB-CAN - '+self.conf.get('N2K', 'can_usb')
+			text+='\nNMEA 2K: CAN-USB-CAN - '+self.conf.get('N2K', 'can_usb')
 		self.n2koutputs_label.SetLabel(self.conf.get('N2K', 'pgn_output'))
 		self.SKinputs_label.SetLabel(text)
 
@@ -898,6 +903,7 @@ class MainFrame(wx.Frame):
 		self.read_outputs()
 		self.read_mqtt()
 		self.i2c_start()
+		self.read_n2k()
 
 	def ShowMessage(self, w_msg):
 			wx.MessageBox(w_msg, 'Info', wx.OK | wx.ICON_INFORMATION)
@@ -2660,6 +2666,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 ###################################### N2K
 
+	def read_n2k(self):
+		self.can_usb.SetValue(self.conf.get('N2K', 'can_usb'))
+
 	def onn2k_enable(self, e):
 		with open(home+'/.config/signalk-server-node/settings/openplotter-settings.json') as data_file:
 			data = json.load(data_file)
@@ -2687,7 +2696,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				new={"id":"CAN-USB","pipeElements":[{"type":"providers/execute","options":{"command":"actisense-serial xxx"}},{"type":"providers/liner"},{"type":"providers/n2kAnalyzer"},{"type":"providers/n2k-signalk"}]}
 				new['pipeElements'][0]['options']['command']='actisense-serial '+self.can_usb.GetValue()
 				data['pipedProviders'].append(new)
-			text+='\nNMEA 2000: CAN-USB-CAN - '+self.conf.get('N2K', 'can_usb')
+			text+='\nNMEA 2K: CAN-USB-CAN - '+self.conf.get('N2K', 'can_usb')
 		else:
 			self.conf.set('N2K', 'enable', '0')
 			self.can_usb.Enable()
@@ -2706,9 +2715,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 
 	def N2K_setting(self, e):
-		if not self.can_usb.GetValue():
+		tty=str(self.can_usb.GetValue())
+		if len(tty)==0:
 			self.SetStatusText(_('You have to select a CAN-USB-CAN device'))
 			return
+		if (self.conf.get('N2K', 'can_usb')!= self.can_usb.GetValue()):
+			self.conf.set('N2K', 'can_usb', self.can_usb.GetValue())
 		subprocess.call(['pkill', '-f', 'CAN-USB-stick.py'])
 		self.stop_sensors()
 		self.stop_1w()
@@ -2725,12 +2737,15 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		url = 'http://localhost:3000'
 		webbrowser.open(url,new=2)
 
+	def start_SK(self):
+		subprocess.Popen(home+'/.config/signalk-server-node/bin/openplotter', cwd=home+'/.config/signalk-server-node')	
+		
 	def restartSK(self, e):
 		self.SetStatusText(_('Closing Signal K server'))
 		subprocess.call(["pkill", '-9', "node"])
 		self.start_sensors()
 		self.start_1w()
-		subprocess.Popen(home+'/.config/signalk-server-node/bin/openplotter', cwd=home+'/.config/signalk-server-node')
+		self.start_SK()
 		self.SetStatusText(_('Signal K server restarted'))	
 
 	def apply_changes_SK(self,e):
@@ -2944,6 +2959,19 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.read_mqtt()
 		self.SetStatusText(_('MQTT topics changes cancelled'))
 
+############################## Util
+	def util_process_exist(self,process_name):		
+		pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
+		exist=False
+		for pid in pids:
+			try:
+				if process_name in open(os.path.join('/proc', pid, 'cmdline'), 'rb').read():
+					exist=True
+			except IOError: # proc has already terminated
+				continue
+		return exist
+		
+		
 ############################## Main
 
 if __name__ == "__main__":
