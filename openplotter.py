@@ -376,12 +376,13 @@ class MainFrame(wx.Frame):
 		
 		wx.StaticBox(self.page7, label=_(' Inputs '), size=(430, 130), pos=(250, 10))
 		self.SKinputs_label=wx.StaticText(self.page7, label='NMEA 0183: system_output - TCP localhost 10110', pos=(260, 30))
-
+		
+		
 		if not self.util_process_exist('node'):
 			print 'SignalK start'
 			self.start_SK()
 			time.sleep(5.0)
-
+		
 		response = requests.get('http://localhost:3000/signalk')
 		data = response.json()
 		text=_('Version: ')
@@ -596,6 +597,7 @@ class MainFrame(wx.Frame):
 		self.list_USBinst.InsertColumn(3, _('port'), width=90)
 		self.list_USBinst.InsertColumn(4, _('serial'), width=130)
 		self.list_USBinst.InsertColumn(5, _('remember'), width=100)
+		self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_USBinst, self.list_USBinst)
 			
 		self.add_USBinst_button =wx.Button(self.page14, label=_('add'), pos=(585, 30))
 		self.Bind(wx.EVT_BUTTON, self.add_USBinst, self.add_USBinst_button)
@@ -2600,8 +2602,16 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if sentence==1 and filesize<10:
 			self.apply_changes_USBinst()
 
+	def edit_USBinst(self,e):
+		selected_USBinst=e.GetIndex()
+		edit=[selected_USBinst,self.USBinst[selected_USBinst][0],self.USBinst[selected_USBinst][1],self.USBinst[selected_USBinst][2],self.USBinst[selected_USBinst][3],self.USBinst[selected_USBinst][4],self.USBinst[selected_USBinst][5],self.USBinst[selected_USBinst][6]]
+		self.edit_add_USBinst(edit)		
+
 	def add_USBinst(self,e):
-		dlg = addUSBinst()
+		self.edit_add_USBinst(0)
+
+	def edit_add_USBinst(self,edit):
+		dlg = addUSBinst(edit)
 		res = dlg.ShowModal()
 		if res == wx.ID_OK:
 			OPname_selection=dlg.OPname_select.GetValue()
@@ -2622,11 +2632,27 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			device=dlg.device
 			device=device.encode('utf8')
 			rem=dlg.rem
-			self.list_USBinst.Append([OPname_selection.decode('utf8'),vendor.decode('utf8'),product.decode('utf8'),con_port.decode('utf8'),serial.decode('utf8'),rem])
-			self.USBinst.append([OPname_selection,vendor,product,serial,con_port,rem,device])
+			if edit==0:
+				self.list_USBinst.Append([OPname_selection.decode('utf8'),vendor.decode('utf8'),product.decode('utf8'),con_port.decode('utf8'),serial.decode('utf8'),rem])
+				self.USBinst.append([OPname_selection,vendor,product,serial,con_port,rem,device])
+			else:
+				self.list_USBinst.SetStringItem(edit[0],0,OPname_selection.decode('utf8'))
+				self.list_USBinst.SetStringItem(edit[0],1,vendor.decode('utf8'))
+				self.list_USBinst.SetStringItem(edit[0],2,product.decode('utf8'))
+				self.list_USBinst.SetStringItem(edit[0],3,con_port.decode('utf8'))
+				self.list_USBinst.SetStringItem(edit[0],4,serial.decode('utf8'))
+				#self.list_USBinst.SetStringItem(edit[0],5,device.decode('utf8'))
+				self.list_USBinst.SetStringItem(edit[0],5,rem)
+				self.USBinst[edit[0]][0]=OPname_selection
+				self.USBinst[edit[0]][1]=vendor
+				self.USBinst[edit[0]][2]=product
+				self.USBinst[edit[0]][3]=serial
+				self.USBinst[edit[0]][4]=con_port
+				self.USBinst[edit[0]][5]=rem
+				self.USBinst[edit[0]][6]=device
 			self.apply_changes_USBinst()
 		dlg.Destroy()
-
+		
 	def delete_USBinst(self,e):
 		selected_USBinst=self.list_USBinst.GetFirstSelected()
 		if selected_USBinst==-1: 
