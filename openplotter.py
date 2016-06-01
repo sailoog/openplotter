@@ -25,6 +25,7 @@ from classes.conf import Conf
 from classes.language import Language
 from classes.add_trigger import addTrigger
 from classes.add_action import addAction
+from classes.add_kplex import addkplex
 from classes.add_DS18B20 import addDS18B20
 from classes.add_switch import addSwitch
 from classes.add_output import addOutput
@@ -41,10 +42,16 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		CheckListCtrlMixin.__init__(self)
 		ListCtrlAutoWidthMixin.__init__(self)
 
+class CheckListCtrl2(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
+	def __init__(self, parent, height):
+		wx.ListCtrl.__init__(self, parent, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(650, height))
+		CheckListCtrlMixin.__init__(self)
+		ListCtrlAutoWidthMixin.__init__(self)		
+		
 class MainFrame(wx.Frame):
 
 	def __init__(self):
-		wx.Frame.__init__(self, None, title="OpenPlotter", size=(700,450))
+		wx.Frame.__init__(self, None, title="OpenPlotter", size=(710,460))
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 		self.conf=Conf()
 		self.language=self.conf.get('GENERAL','lang')
@@ -204,8 +211,8 @@ class MainFrame(wx.Frame):
 		self.TW_SOG.Bind(wx.EVT_CHECKBOX, self.TW)
 		wx.StaticText(self.page2, label=_('Generated NMEA: $OCMWV, $OCMWD'), pos=(360, 130))
 
-		self.show_output7 =wx.Button(self.page2, label=_('Inspector'), pos=(10, 285))
-		self.Bind(wx.EVT_BUTTON, self.show_output_window, self.show_output7)
+		self.show_kplex7 =wx.Button(self.page2, label=_('Inspector'), pos=(10, 285))
+		self.Bind(wx.EVT_BUTTON, self.show_kplex, self.show_kplex7)
 ###########################page2
 ########page3###################
 		wx.StaticBox(self.page3, size=(370, 315), pos=(10, 10))
@@ -282,8 +289,8 @@ class MainFrame(wx.Frame):
 		self.ais_frequencies2 = wx.CheckBox(self.page4, label=_('Channel B 162.025Mhz'), pos=(220, 95))
 		self.ais_frequencies2.Bind(wx.EVT_CHECKBOX, self.ais_frequencies)
 
-		self.show_output6 =wx.Button(self.page4, label=_('Inspector'), pos=(20, 140))
-		self.Bind(wx.EVT_BUTTON, self.show_output_window, self.show_output6)
+		self.show_kplex6 =wx.Button(self.page4, label=_('Inspector'), pos=(20, 140))
+		self.Bind(wx.EVT_BUTTON, self.show_kplex, self.show_kplex6)
 		self.button_test_ppm =wx.Button(self.page4, label=_('Take a look'), pos=(150, 140))
 		self.Bind(wx.EVT_BUTTON, self.test_ppm, self.button_test_ppm)
 		self.button_test_gain =wx.Button(self.page4, label=_('Calibration'), pos=(275, 140))
@@ -312,52 +319,39 @@ class MainFrame(wx.Frame):
 
 ###########################page4
 ########page5###################
-		wx.StaticBox(self.page5, label=_(' Inputs '), size=(670, 130), pos=(10, 10))
-		self.list_input = CheckListCtrl(self.page5, 102)
-		self.list_input.SetPosition((15, 30))
-		self.list_input.InsertColumn(0, _('Name'), width=130)
-		self.list_input.InsertColumn(1, _('Type'), width=45)
-		self.list_input.InsertColumn(2, _('Port/Address'), width=110)
-		self.list_input.InsertColumn(3, _('Bauds/Port'))
-		self.list_input.InsertColumn(4, _('Filter'))
-		self.list_input.InsertColumn(5, _('Filtering'))
-		self.add_serial_in =wx.Button(self.page5, label=_('+ serial'), pos=(585, 30))
-		self.Bind(wx.EVT_BUTTON, self.add_serial_input, self.add_serial_in)
+		wx.StaticBox(self.page5, label=_(' KPLEX '), size=(670, 180), pos=(10, 10))
+		self.list_kplex = CheckListCtrl2(self.page5, 152)
+		self.list_kplex.SetPosition((15, 30))
+		self.list_kplex.InsertColumn(0, _('Name'), width=130)
+		self.list_kplex.InsertColumn(1, _('Type'), width=45)
+		self.list_kplex.InsertColumn(2, _('io'), width=45)
+		self.list_kplex.InsertColumn(3, _('Port/Address'), width=95)
+		self.list_kplex.InsertColumn(4, _('Bauds/Port'),width=60)
+		self.list_kplex.InsertColumn(5, _('inFilter'),width=55)
+		self.list_kplex.InsertColumn(6, _('Filtering'),width=80)
+		self.list_kplex.InsertColumn(7, _('outFilter'),width=60)
+		self.list_kplex.InsertColumn(8, _('Filtering'),width=80)
+		self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_kplex, self.list_kplex)
+		
+		self.add_kplex_b =wx.Button(self.page5, label=_('add'), pos=(10, 200))
+		self.Bind(wx.EVT_BUTTON, self.add_kplex, self.add_kplex_b)
 
-		self.add_network_in =wx.Button(self.page5, label=_('+ network'), pos=(585, 65))
-		self.Bind(wx.EVT_BUTTON, self.add_network_input, self.add_network_in)
+		self.delete_kplex_b =wx.Button(self.page5, label=_('delete'), pos=(110, 200))
+		self.Bind(wx.EVT_BUTTON, self.delete_kplex, self.delete_kplex_b)
 
-		self.button_delete_input =wx.Button(self.page5, label=_('delete'), pos=(585, 100))
-		self.Bind(wx.EVT_BUTTON, self.delete_input, self.button_delete_input)
+		self.delete_kplex_b =wx.Button(self.page5, label=_('debug'), pos=(210, 200))
+		self.Bind(wx.EVT_BUTTON, self.debug_kplex, self.delete_kplex_b)
 
-		wx.StaticBox(self.page5, label=_(' Outputs '), size=(670, 130), pos=(10, 145))
-		self.list_output = CheckListCtrl(self.page5, 102)
-		self.list_output.SetPosition((15, 165))
-		self.list_output.InsertColumn(0, _('Name'), width=130)
-		self.list_output.InsertColumn(1, _('Type'), width=45)
-		self.list_output.InsertColumn(2, _('Port/Address'), width=110)
-		self.list_output.InsertColumn(3, _('Bauds/Port'))
-		self.list_output.InsertColumn(4, _('Filter'))
-		self.list_output.InsertColumn(5, _('Filtering'))
-		self.add_serial_out =wx.Button(self.page5, label=_('+ serial'), pos=(585, 165))
-		self.Bind(wx.EVT_BUTTON, self.add_serial_output, self.add_serial_out)
-
-		self.add_network_out =wx.Button(self.page5, label=_('+ network'), pos=(585, 200))
-		self.Bind(wx.EVT_BUTTON, self.add_network_output, self.add_network_out)
-
-		self.button_delete_output =wx.Button(self.page5, label=_('delete'), pos=(585, 235))
-		self.Bind(wx.EVT_BUTTON, self.delete_output, self.button_delete_output)
-
-		self.show_output =wx.Button(self.page5, label=_('Inspector'), pos=(10, 285))
-		self.Bind(wx.EVT_BUTTON, self.show_output_window, self.show_output)
-		self.restart =wx.Button(self.page5, label=_('Restart'), pos=(130, 285))
-		self.Bind(wx.EVT_BUTTON, self.restart_multiplex, self.restart)
-		self.advanced =wx.Button(self.page5, label=_('Advanced'), pos=(280, 285))
-		self.Bind(wx.EVT_BUTTON, self.advanced_multiplex, self.advanced)
-		self.button_apply =wx.Button(self.page5, label=_('Apply changes'), pos=(570, 285))
-		self.Bind(wx.EVT_BUTTON, self.apply_changes, self.button_apply)
-		self.button_cancel =wx.Button(self.page5, label=_('Cancel changes'), pos=(430, 285))
-		self.Bind(wx.EVT_BUTTON, self.cancel_changes, self.button_cancel)
+		self.show_kplex_b =wx.Button(self.page5, label=_('Inspector'), pos=(10, 285))
+		self.Bind(wx.EVT_BUTTON, self.show_kplex, self.show_kplex_b)
+		self.restart_kplex_b =wx.Button(self.page5, label=_('Restart'), pos=(130, 285))
+		self.Bind(wx.EVT_BUTTON, self.restart_kplex, self.restart_kplex_b)
+		self.advanced_kplex_b =wx.Button(self.page5, label=_('Advanced'), pos=(280, 285))
+		self.Bind(wx.EVT_BUTTON, self.advanced_kplex, self.advanced_kplex_b)
+		self.apply_changes_kplex_b =wx.Button(self.page5, label=_('Apply changes'), pos=(570, 285))
+		self.Bind(wx.EVT_BUTTON, self.apply_changes_kplex, self.apply_changes_kplex_b)
+		self.cancel_changes_kplex_b =wx.Button(self.page5, label=_('Cancel changes'), pos=(430, 285))
+		self.Bind(wx.EVT_BUTTON, self.cancel_changes_kplex, self.cancel_changes_kplex_b)
 ###########################page5
 ########page7###################
 		wx.StaticBox(self.page7, label=_(' Settings '), size=(230, 265), pos=(10, 10))
@@ -369,10 +363,10 @@ class MainFrame(wx.Frame):
 		self.mmsi_label=wx.StaticText(self.page7, label='MMSI', pos=(140, 70))
 
 		self.button_restartSK =wx.Button(self.page7, label=_('Restart'), pos=(20, 115))
-		self.Bind(wx.EVT_BUTTON, self.restartSK, self.button_restartSK)	
+		self.Bind(wx.EVT_BUTTON, self.restart_SK, self.button_restartSK)	
 
-		self.button_apply_SK =wx.Button(self.page7, label=_('Apply changes'), pos=(125, 115))
-		self.Bind(wx.EVT_BUTTON, self.apply_changes_SK, self.button_apply_SK)
+		self.button_apply_changes_SK =wx.Button(self.page7, label=_('Apply changes'), pos=(125, 115))
+		self.Bind(wx.EVT_BUTTON, self.apply_SK, self.button_apply_changes_SK)
 		
 		wx.StaticBox(self.page7, label=_(' Inputs '), size=(430, 130), pos=(250, 10))
 		self.SKinputs_label=wx.StaticText(self.page7, label='NMEA 0183: system_output - TCP localhost 10110', pos=(260, 30))
@@ -395,11 +389,11 @@ class MainFrame(wx.Frame):
 		wx.StaticBox(self.page7, label=_(' Outputs '), size=(430, 130), pos=(250, 145))
 		wx.StaticText(self.page7, label=text, pos=(260, 165))
 
-		self.show_outputSK =wx.Button(self.page7, label=_('Show Web Socket'), pos=(250, 285))
-		self.Bind(wx.EVT_BUTTON, self.signalKout, self.show_outputSK)
+		self.show_SK_b =wx.Button(self.page7, label=_('Show Web Socket'), pos=(250, 285))
+		self.Bind(wx.EVT_BUTTON, self.show_SK, self.show_SK_b)
 
-		self.show_tools_SK =wx.Button(self.page7, label=_('Show Signal K tools'), pos=(420, 285))
-		self.Bind(wx.EVT_BUTTON, self.signalKtools, self.show_tools_SK)
+		self.show_tools_SK_b =wx.Button(self.page7, label=_('Show Signal K tools'), pos=(420, 285))
+		self.Bind(wx.EVT_BUTTON, self.show_tools_SK, self.show_tools_SK_b)
 
 ###########################page7
 ########page17###################
@@ -575,13 +569,13 @@ class MainFrame(wx.Frame):
 		self.delete_DS18B20_button =wx.Button(self.page11, label=_('delete'), pos=(585, 65))
 		self.Bind(wx.EVT_BUTTON, self.delete_DS18B20, self.delete_DS18B20_button)
 
-		self.show_output5 =wx.Button(self.page11, label=_('Inspector'), pos=(10, 285))
-		self.Bind(wx.EVT_BUTTON, self.show_output_window, self.show_output5)
+		self.show_kplex5 =wx.Button(self.page11, label=_('Inspector'), pos=(10, 285))
+		self.Bind(wx.EVT_BUTTON, self.show_kplex, self.show_kplex5)
 
-		self.button_apply_DS18B20 =wx.Button(self.page11, label=_('Apply changes'), pos=(570, 285))
-		self.Bind(wx.EVT_BUTTON, self.apply_changes_DS18B20, self.button_apply_DS18B20)
-		self.button_cancel_DS18B20 =wx.Button(self.page11, label=_('Cancel changes'), pos=(430, 285))
-		self.Bind(wx.EVT_BUTTON, self.cancel_changes_DS18B20, self.button_cancel_DS18B20)
+		self.button_apply_changes_DS18B20 =wx.Button(self.page11, label=_('Apply changes'), pos=(570, 285))
+		self.Bind(wx.EVT_BUTTON, self.apply_changes_DS18B20, self.button_apply_changes_DS18B20)
+		self.button_cancel_changes_DS18B20 =wx.Button(self.page11, label=_('Cancel changes'), pos=(430, 285))
+		self.Bind(wx.EVT_BUTTON, self.cancel_changes_DS18B20, self.button_cancel_changes_DS18B20)
 ###########################page11
 ########page12###################
 		wx.StaticText(self.page12, label=_('Coming soon'), pos=(20, 30))
@@ -622,12 +616,12 @@ class MainFrame(wx.Frame):
 		self.delete_switches_button =wx.Button(self.page8, label=_('delete'), pos=(585, 65))
 		self.Bind(wx.EVT_BUTTON, self.delete_switches, self.delete_switches_button)
 
-		self.show_output2 =wx.Button(self.page8, label=_('Inspector'), pos=(10, 285))
-		self.Bind(wx.EVT_BUTTON, self.show_output_window, self.show_output2)
-		self.button_apply_switches =wx.Button(self.page8, label=_('Apply changes'), pos=(570, 285))
-		self.Bind(wx.EVT_BUTTON, self.apply_changes_switches, self.button_apply_switches)
-		self.button_cancel_switches =wx.Button(self.page8, label=_('Cancel changes'), pos=(430, 285))
-		self.Bind(wx.EVT_BUTTON, self.cancel_changes_switches, self.button_cancel_switches)
+		self.show_kplex2 =wx.Button(self.page8, label=_('Inspector'), pos=(10, 285))
+		self.Bind(wx.EVT_BUTTON, self.show_kplex, self.show_kplex2)
+		self.button_cancel_changes_switches =wx.Button(self.page8, label=_('Apply changes'), pos=(570, 285))
+		self.Bind(wx.EVT_BUTTON, self.cancel_changes_switches, self.button_cancel_changes_switches)
+		self.button_cancel_changes_switches =wx.Button(self.page8, label=_('Cancel changes'), pos=(430, 285))
+		self.Bind(wx.EVT_BUTTON, self.cancel_changes_switches, self.button_cancel_changes_switches)
 ###########################page8
 ########page13###################
 		wx.StaticBox(self.page13, label=_(' Outputs '), size=(670, 265), pos=(10, 10))
@@ -645,12 +639,12 @@ class MainFrame(wx.Frame):
 		self.delete_outputs_button =wx.Button(self.page13, label=_('delete'), pos=(585, 65))
 		self.Bind(wx.EVT_BUTTON, self.delete_outputs, self.delete_outputs_button)
 
-		self.show_output3 =wx.Button(self.page13, label=_('Inspector'), pos=(10, 285))
-		self.Bind(wx.EVT_BUTTON, self.show_output_window, self.show_output3)
-		self.button_apply_outputs =wx.Button(self.page13, label=_('Apply changes'), pos=(570, 285))
-		self.Bind(wx.EVT_BUTTON, self.apply_changes_outputs, self.button_apply_outputs)
-		self.button_cancel_outputs =wx.Button(self.page13, label=_('Cancel changes'), pos=(430, 285))
-		self.Bind(wx.EVT_BUTTON, self.cancel_changes_outputs, self.button_cancel_outputs)
+		self.show_kplex3 =wx.Button(self.page13, label=_('Inspector'), pos=(10, 285))
+		self.Bind(wx.EVT_BUTTON, self.show_kplex, self.show_kplex3)
+		self.button_apply_changes_outputs =wx.Button(self.page13, label=_('Apply changes'), pos=(570, 285))
+		self.Bind(wx.EVT_BUTTON, self.apply_changes_outputs, self.button_apply_changes_outputs)
+		self.button_cancel_changes_outputs =wx.Button(self.page13, label=_('Cancel changes'), pos=(430, 285))
+		self.Bind(wx.EVT_BUTTON, self.cancel_changes_outputs, self.button_cancel_changes_outputs)
 ###########################page13
 ########page9###################
 		wx.StaticBox(self.page9, label=_(' Twitter '), size=(330, 205), pos=(10, 10))
@@ -702,12 +696,12 @@ class MainFrame(wx.Frame):
 		self.delete_topic_button =wx.Button(self.page16, label=_('delete'), pos=(585, 145))
 		self.Bind(wx.EVT_BUTTON, self.delete_topic, self.delete_topic_button)
 
-		self.show_output8 =wx.Button(self.page16, label=_('Inspector'), pos=(10, 285))
-		self.Bind(wx.EVT_BUTTON, self.show_output_window, self.show_output8)
-		self.button_apply_mqtt =wx.Button(self.page16, label=_('Apply changes'), pos=(570, 285))
-		self.Bind(wx.EVT_BUTTON, self.apply_changes_mqtt, self.button_apply_mqtt)
-		self.button_cancel_mqtt =wx.Button(self.page16, label=_('Cancel changes'), pos=(430, 285))
-		self.Bind(wx.EVT_BUTTON, self.cancel_changes_mqtt, self.button_cancel_mqtt)
+		self.show_kplex8 =wx.Button(self.page16, label=_('Inspector'), pos=(10, 285))
+		self.Bind(wx.EVT_BUTTON, self.show_kplex, self.show_kplex8)
+		self.button_apply_changes_mqtt =wx.Button(self.page16, label=_('Apply changes'), pos=(570, 285))
+		self.Bind(wx.EVT_BUTTON, self.apply_changes_mqtt, self.button_apply_changes_mqtt)
+		self.button_cancel_changes_mqtt =wx.Button(self.page16, label=_('Cancel changes'), pos=(430, 285))
+		self.Bind(wx.EVT_BUTTON, self.cancel_changes_mqtt, self.button_cancel_changes_mqtt)
 ###########################page16
 ########page10###################
 		wx.StaticBox(self.page10, label=_(' Triggers '), size=(670, 265), pos=(10, 10))
@@ -744,10 +738,10 @@ class MainFrame(wx.Frame):
 		self.start_all=wx.Button(self.page10, label=_('Start all'), pos=(130, 285))
 		self.Bind(wx.EVT_BUTTON, self.start_actions, self.start_all)
 
-		self.button_apply_actions =wx.Button(self.page10, label=_('Apply changes'), pos=(570, 285))
-		self.Bind(wx.EVT_BUTTON, self.apply_changes_actions, self.button_apply_actions)
-		self.button_cancel_actions =wx.Button(self.page10, label=_('Cancel changes'), pos=(430, 285))
-		self.Bind(wx.EVT_BUTTON, self.cancel_changes_actions, self.button_cancel_actions)
+		self.button_apply_changes_actions =wx.Button(self.page10, label=_('Apply changes'), pos=(570, 285))
+		self.Bind(wx.EVT_BUTTON, self.apply_changes_actions, self.button_apply_changes_actions)
+		self.button_cancel_changes_actions =wx.Button(self.page10, label=_('Cancel changes'), pos=(430, 285))
+		self.Bind(wx.EVT_BUTTON, self.cancel_changes_actions, self.button_cancel_changes_actions)
 ###########################page10
 
 		self.manual_settings=''
@@ -1458,20 +1452,16 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.SetStatusText(msg)
 ###########################################	NMEA 0183
 
-	def show_output_window(self,event):
+	def show_kplex(self,event):
 		close=subprocess.call(['pkill', '-f', 'output.py'])
 		show_output=subprocess.Popen(['python',currentpath+'/output.py'])
 
-	def restart_multiplex(self,event):
-		self.restart_kplex()
-		self.read_kplex_conf()
-
-	def advanced_multiplex(self,event):
+	def advanced_kplex(self,event):
 		self.ShowMessage(_('OpenPlotter will close. Add manual settings at the end of the configuration file. Open OpenPlotter again and restart multiplexer to apply changes.'))
 		subprocess.Popen(['leafpad',home+'/.kplex.conf'])
 		self.Close()
 
-	def restart_kplex(self):
+	def restart_kplex(self,event):
 		self.SetStatusText(_('Closing Kplex'))
 		subprocess.call(["pkill", '-9', "kplex"])
 		subprocess.Popen('kplex')
@@ -1479,13 +1469,41 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		subprocess.call(["pkill", '-9', "node"])
 		subprocess.Popen(home+'/.config/signalk-server-node/bin/openplotter', cwd=home+'/.config/signalk-server-node')
 		self.SetStatusText(_('Kplex and Signal k restarted'))
-
-	def cancel_changes(self,event):
 		self.read_kplex_conf()
 
+	def cancel_changes_kplex(self,event):
+		self.read_kplex_conf()
+
+	def edit_kplex(self,e):
+		idx=e.GetIndex()
+		
+		edit=[]
+		for i in range(9):
+			edit.append(self.list_kplex.GetItem(idx, i).GetText())
+		edit.append(idx)
+		self.edit_add_kplex(edit)
+
+	def add_kplex(self,e):
+		dlg = self.edit_add_kplex(0)
+
+	def edit_add_kplex(self,edit):
+		dlg = addkplex(edit,self.kplex)
+		res = dlg.ShowModal()
+		result = dlg.result
+		dlg.Destroy()
+
+		if result != 0:
+			k=int(result[11])
+			if edit==0:
+				self.kplex.append(result)
+				self.set_list_kplex()
+			else:
+				for i in range(10):		
+					self.kplex[k][i]=result[i]
+				self.set_list_kplex()
+		
 	def read_kplex_conf(self):
-		self.inputs = []
-		self.koutputs = []
+		self.kplex = []
 		try:
 			file=open(home+'/.kplex.conf', 'r')
 			data=file.readlines()
@@ -1494,43 +1512,56 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			l_tmp=[None]*8
 			self.manual_settings=''
 			for index, item in enumerate(data):
+
 				if self.manual_settings:
 					if item!='\n': self.manual_settings+=item
 				else:
 					if re.search('\[*\]', item):
-						if l_tmp[0]=='in': self.inputs.append(l_tmp)
-						if l_tmp[0]=='out': self.koutputs.append(l_tmp)
-						l_tmp=[None]*8
-						l_tmp[5]='none'
-						l_tmp[6]='nothing'
+						if l_tmp[3]=='in' or l_tmp[3]=='out' or l_tmp[3]=='both':
+							self.kplex.append(l_tmp)
+							#print l_tmp
+						l_tmp=[None]*11
+						l_tmp[6]='none'
+						l_tmp[7]='nothing'
+						l_tmp[8]='none'
+						l_tmp[9]='nothing'
 						if '[serial]' in item: l_tmp[2]='Serial'
 						if '[tcp]' in item: l_tmp[2]='TCP'
 						if '[udp]' in item: l_tmp[2]='UDP'
-						if '#[' in item: l_tmp[7]='0'
-						else: l_tmp[7]='1'
+						if '#[' in item: l_tmp[10]='0'
+						else: l_tmp[10]='1'
 					if 'direction=in' in item:
-						l_tmp[0]='in'
+						l_tmp[3]='in'
 					if 'direction=out' in item:
-						l_tmp[0]='out'
+						l_tmp[3]='out'
+					if 'direction=both' in item:
+						l_tmp[3]='both'
 					if 'name=' in item and 'filename=' not in item:
 						l_tmp[1]=self.extract_value(item)
 					if 'address=' in item or 'filename=' in item:
-						l_tmp[3]=self.extract_value(item)
-					if 'port=' in item or 'baud=' in item:
 						l_tmp[4]=self.extract_value(item)
-					if 'filter=' in item and '-all' in item:
-						l_tmp[5]='accept'
-						l_tmp[6]=self.extract_value(item)
-					if 'filter=' in item and '-all' not in item:
-						l_tmp[5]='ignore'
-						l_tmp[6]=self.extract_value(item)
+						if '/dev' in l_tmp[4]: l_tmp[4]=l_tmp[4][5:]
+					if 'port=' in item or 'baud=' in item:
+						l_tmp[5]=self.extract_value(item)
+					if 'ifilter=' in item and '-all' in item:
+						l_tmp[6]='accept'
+						l_tmp[7]=self.extract_value(item)
+					if 'ifilter=' in item and '-all' not in item:
+						l_tmp[6]='ignore'
+						l_tmp[7]=self.extract_value(item)
+					if 'ofilter=' in item and '-all' in item:
+						l_tmp[8]='accept'
+						l_tmp[9]=self.extract_value(item)
+					if 'ofilter=' in item and '-all' not in item:
+						l_tmp[8]='ignore'
+						l_tmp[9]=self.extract_value(item)
 					if '###Manual settings' in item:
 						self.manual_settings='###Manual settings\n\n'
 
-			if l_tmp[0]=='in': self.inputs.append(l_tmp)
-			if l_tmp[0]=='out': self.koutputs.append(l_tmp)
-			self.write_inputs()
-			self.write_outputs()
+			if l_tmp[3]=='in' or l_tmp[3]=='out' or l_tmp[3]=='both':
+				self.kplex.append(l_tmp)
+						
+			self.set_list_kplex()
 
 		except IOError:
 			self.ShowMessage(_('Multiplexer configuration file does not exist. Add inputs and apply changes.'))
@@ -1540,121 +1571,93 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		value=value.strip()
 		return value
 
-	def write_inputs(self):
-		self.list_input.DeleteAllItems()
-		for i in self.inputs:
-			if i[1]: index = self.list_input.InsertStringItem(sys.maxint, i[1])
-			if i[2]: self.list_input.SetStringItem(index, 1, i[2])
-			if i[3]: self.list_input.SetStringItem(index, 2, i[3])
-			else: self.list_input.SetStringItem(index, 2, '127.0.0.1')
-			if i[4]: self.list_input.SetStringItem(index, 3, i[4])
-			if i[5]:
-				if i[5]=='none': self.list_input.SetStringItem(index, 4, _('none'))
-				if i[5]=='accept': self.list_input.SetStringItem(index, 4, _('accept'))
-				if i[5]=='ignore': self.list_input.SetStringItem(index, 4, _('ignore'))
-			if i[6]=='nothing':
-				self.list_input.SetStringItem(index, 5, _('nothing'))
+	def set_list_kplex(self):
+		self.list_kplex.DeleteAllItems()
+		index=1
+		for i in self.kplex:
+			if i[1]: 
+				index = self.list_kplex.InsertStringItem(sys.maxint, i[1])
+			
+			if i[2]: self.list_kplex.SetStringItem(index, 1, i[2])
+			if i[3]: self.list_kplex.SetStringItem(index, 2, i[3])
+			else: self.list_kplex.SetStringItem(index, 2, '127.0.0.1')
+			if i[4]: self.list_kplex.SetStringItem(index, 3, i[4])
+			if i[5]: self.list_kplex.SetStringItem(index, 4, i[5])
+			if i[6]:
+				if i[6]=='none': self.list_kplex.SetStringItem(index, 5, _('none'))
+				if i[6]=='accept': self.list_kplex.SetStringItem(index, 5, _('accept'))
+				if i[6]=='ignore': self.list_kplex.SetStringItem(index, 5, _('ignore'))
+			if i[7]=='nothing':
+				self.list_kplex.SetStringItem(index, 6, _('nothing'))
 			else:
-				filters=i[6].replace(':-all', '')
+				filters=i[7].replace(':-all', '')
 				filters=filters.replace('+', '')
 				filters=filters.replace('-', '')
 				filters=filters.replace(':', ',')
-				self.list_input.SetStringItem(index, 5, filters)
-			if i[7]=='1': self.list_input.CheckItem(index)
+				self.list_kplex.SetStringItem(index, 6, filters)
+			if i[8]:
+				if i[8]=='none': self.list_kplex.SetStringItem(index, 7, _('none'))
+				if i[8]=='accept': self.list_kplex.SetStringItem(index, 7, _('accept'))
+				if i[8]=='ignore': self.list_kplex.SetStringItem(index, 7, _('ignore'))
+			if i[9]=='nothing':
+				self.list_kplex.SetStringItem(index, 8, _('nothing'))
+			else:
+				filters=i[9].replace(':-all', '')
+				filters=filters.replace('+', '')
+				filters=filters.replace('-', '')
+				filters=filters.replace(':', ',')
+				self.list_kplex.SetStringItem(index, 8, filters)
+			if i[10]=='1': self.list_kplex.CheckItem(index)
 	
-	def write_outputs(self):
-		self.list_output.DeleteAllItems()
-		for i in self.koutputs:
-			if i[1]: index = self.list_output.InsertStringItem(sys.maxint, i[1])
-			if i[2]: self.list_output.SetStringItem(index, 1, i[2])
-			if i[3]: self.list_output.SetStringItem(index, 2, i[3])
-			else: self.list_output.SetStringItem(index, 2, 'localhost')
-			if i[4]: self.list_output.SetStringItem(index, 3, i[4])
-			if i[5]:
-				if i[5]=='none': self.list_output.SetStringItem(index, 4, _('none'))
-				if i[5]=='accept': self.list_output.SetStringItem(index, 4, _('accept'))
-				if i[5]=='ignore': self.list_output.SetStringItem(index, 4, _('ignore'))
-			if i[6]=='nothing':
-				self.list_output.SetStringItem(index, 5, _('nothing'))
-			else:
-				filters=i[6].replace(':-all', '')
-				filters=filters.replace('+', '')
-				filters=filters.replace('-', '')
-				filters=filters.replace(':', ',')
-				self.list_output.SetStringItem(index, 5, filters)
-			if i[7]=='1': self.list_output.CheckItem(index)
-
-	def apply_changes(self,event):
+	def apply_changes_kplex(self,event):
 		data='# For advanced manual configuration, please visit: http://www.stripydog.com/kplex/configuration.html\n# Please do not modify defaults nor OpenPlotter GUI settings.\n# Add manual settings at the end of the document.\n\n'
 
 		data=data+'###defaults\n\n[udp]\nname=system_input\ndirection=in\noptional=yes\naddress=127.0.0.1\nport=10110\n\n'
 		data=data+'[tcp]\nname=system_output\ndirection=out\nofilter=-**RMB\nmode=server\nport=10110\n\n###end of defaults\n\n###OpenPlotter GUI settings\n\n'
+		
+		for index,item in enumerate(self.kplex):
+			if 'system_input' not in item[1] and 'system_output' not in item[1]:
+				if self.list_kplex.IsChecked(index): state=''
+				else: state='#'
+				
+				if 'Serial' in item[2]:
+					data+=state+'[serial]\n'+state+'name='+item[1]+'\n'+state+'direction='+item[3]+'\n'+state+'optional=yes\n'
+					data+=state+'filename=/dev/'+item[4]+'\n'+state+'baud='+item[5]+'\n'
+				if 'TCP' in item[2]:
+					data+=state+'[tcp]\n'+state+'name='+item[1]+'\n'+state+'direction='+item[3]+'\n'+state+'optional=yes\n'
+					if item[1]=='gpsd':data+=state+'gpsd=yes\n'
+					if item[3]=='in':data+=state+'mode=client\n'
+					else:data+=state+'mode=server\n'
+					data+=state+'address='+str(item[4])+'\n'+state+'port='+str(item[5])+'\n'
+					data+=state+'persist=yes\n'+state+'retry=10\n'				
+				if 'UDP' in item[2]:
+					data+=state+'[udp]\n'+state+'name='+item[1]+'\n'+state+'direction='+item[3]+'\n'+state+'optional=yes\n'
+					data+=state+'address='+item[4]+'\n'+state+'port='+item[5]+'\n'
 
-		for index,item in enumerate(self.inputs):
-			if 'system_input' not in item[1]:
-				if self.list_input.IsChecked(index): state=''
-				else: state='#'
-				if 'Serial' in item[2]:
-					data=data+state+'[serial]\n'+state+'name='+item[1]+'\n'+state+'direction=in\n'+state+'optional=yes\n'
-					if item[5]=='ignore':data=data+state+'ifilter='+item[6]+'\n'
-					if item[5]=='accept':data=data+state+'ifilter='+item[6]+'\n'
-					data=data+state+'filename='+item[3]+'\n'+state+'baud='+item[4]+'\n\n'
-				if 'TCP' in item[2]:
-					data=data+state+'[tcp]\n'+state+'name='+item[1]+'\n'+state+'direction=in\n'+state+'optional=yes\n'
-					if item[1]=='gpsd':data=data+state+'gpsd=yes\n'
-					if item[5]=='ignore':data=data+state+'ifilter='+item[6]+'\n'
-					if item[5]=='accept':data=data+state+'ifilter='+item[6]+'\n'
-					data=data+state+'mode=client\n'+state+'address='+item[3]+'\n'+state+'port='+item[4]+'\n'
-					data=data+state+'persist=yes\n'+state+'retry=10\n\n'				
-				if 'UDP' in item[2]:
-					data=data+state+'[udp]\n'+state+'name='+item[1]+'\n'+state+'direction=in\n'+state+'optional=yes\n'
-					if item[5]=='ignore':data=data+state+'ifilter='+item[6]+'\n'
-					if item[5]=='accept':data=data+state+'ifilter='+item[6]+'\n'
-					data=data+state+'address='+item[3]+'\n'+state+'port='+item[4]+'\n\n'
-		
-		for index,item in enumerate(self.koutputs):
-			if 'system_output' not in item[1]:
-				if self.list_output.IsChecked(index): state=''
-				else: state='#'
-				if 'Serial' in item[2]:
-					data=data+state+'[serial]\n'+state+'name='+item[1]+'\n'+state+'direction=out\n'+state+'optional=yes\n'
-					if item[5]=='ignore':data=data+state+'ofilter='+item[6]+'\n'
-					if item[5]=='accept':data=data+state+'ofilter='+item[6]+'\n'
-					data=data+state+'filename='+item[3]+'\n'+state+'baud='+item[4]+'\n\n'
-				if 'TCP' in item[2]:
-					data=data+state+'[tcp]\n'+state+'name='+item[1]+'\n'+state+'direction=out\n'+state+'optional=yes\n'
-					if item[5]=='ignore':data=data+state+'ofilter='+item[6]+'\n'
-					if item[5]=='accept':data=data+state+'ofilter='+item[6]+'\n'
-					data=data+state+'mode=server\n'+state+'address='+item[3]+'\n'+state+'port='+item[4]+'\n\n'				
-				if 'UDP' in item[2]:
-					data=data+state+'[udp]\n'+state+'name='+item[1]+'\n'+state+'direction=out\n'+state+'optional=yes\n'
-					if item[5]=='ignore':data=data+state+'ofilter='+item[6]+'\n'
-					if item[5]=='accept':data=data+state+'ofilter='+item[6]+'\n'
-					data=data+state+'address='+item[3]+'\n'+state+'port='+item[4]+'\n\n'
-		
+				if item[6]!='none' and item[7]!='nothing' :data+=state+'ifilter='+item[7]+'\n'
+				if item[8]!='none' and item[9]!='nothing' :data+=state+'ofilter='+item[9]+'\n'
+				data+='\n'
+
 		data=data+'###end of OpenPlotter GUI settings\n\n'
 		if self.manual_settings: data+= self.manual_settings
 		else: data+= '###Manual settings\n\n'
 		
+		#print data
 		file = open(home+'/.kplex.conf', 'w')
 		file.write(data)
 		file.close()
-		self.restart_kplex()
+		self.restart_kplex(0)
 		self.read_kplex_conf()
 
-	def delete_input(self,event):
-		num = len(self.inputs)
+	def delete_kplex(self,event):
+		num = len(self.kplex)
 		for i in range(num):
-			if self.list_input.IsSelected(i):
-				del self.inputs[i]
-		self.write_inputs()
-
-	def delete_output(self,event):
-		num = len(self.koutputs)
-		for i in range(num):
-			if self.list_output.IsSelected(i):
-				del self.koutputs[i]
-		self.write_outputs()
+			if self.list_kplex.IsSelected(i):
+				if self.kplex[i][1]=='system_input' or self.kplex[i][1]=='system_output':
+					self.ShowMessage(_('This name is reserved by the system.'))
+					return
+				del self.kplex[i]
+		self.set_list_kplex()
 
 	def process_name(self,r):
 		list_tmp=[]
@@ -1664,7 +1667,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			list_tmp.append(item)
 		name=list_tmp[1]
 		found=False
-		for sublist in self.inputs:
+		for sublist in self.kplex:
 			if sublist[1] == name:
 				found=True
 		for sublist in self.koutputs:
@@ -1675,75 +1678,38 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			return False
 		else:
 			return list_tmp
-	
-	def add_serial_input(self,event):
-		subprocess.call(['pkill', '-f', 'connection.py'])
-		p=subprocess.Popen(['python', currentpath+'/connection.py', 'in', 'serial'], stdout=subprocess.PIPE)
-		r=stdout = p.communicate()[0]
-		if r:
-			list_tmp=self.process_name(r)
-			if list_tmp:
-				new_port=list_tmp[3]
-				for sublist in self.inputs:
-					if sublist[3] == new_port: 
-						self.ShowMessage(_('This input is already in use.'))
-						return
-				self.inputs.append(list_tmp)
-				self.write_inputs()
 
-	def add_serial_output(self,event):
-		subprocess.call(['pkill', '-f', 'connection.py'])
-		p=subprocess.Popen(['python', currentpath+'/connection.py', 'out', 'serial'], stdout=subprocess.PIPE)
-		r=stdout = p.communicate()[0]
-		if r:
-			list_tmp=self.process_name(r)
-			if list_tmp:
-				new_port=list_tmp[3]
-				for sublist in self.koutputs:
-					if sublist[3] == new_port: 
-						self.ShowMessage(_('This output is already in use.'))
-						return
-				self.koutputs.append(list_tmp)
-				self.write_outputs()
+	def debug_kplex(self,event):
+		num = len(self.kplex)
+		
+		for i in range(num):
+			if self.list_kplex.IsSelected(i):
+				if self.list_kplex.IsChecked(i):
+					self.kplex[i]
+					file = open(home+'/.kplex.conf', 'r')
+					data=file.read()
+					file.close()
+					
+					if self.kplex[i][3]=='in' or self.kplex[i][3]=='both':
+						data=data+'\n\n[tcp]\nname=system_debugi\ndirection=out\nofilter=+*****%'+self.kplex[i][1]+':-all\nmode=server\nport=10112\n\n'
+					if self.kplex[i][3]=='out' or self.kplex[i][3]=='both':
+						data=data+'\n\n[tcp]\nname=system_debugo\ndirection=out\n'
+						if self.kplex[i][8]!='none' and self.kplex[i]!='nothing': data+='ofilter='+self.kplex[i][9]+'\n'
+						data+='mode=server\nport=10113\n\n'
 
-	def add_network_input(self,event):
-		subprocess.call(['pkill', '-f', 'connection.py'])
-		p=subprocess.Popen(['python', currentpath+'/connection.py', 'in', 'network'], stdout=subprocess.PIPE)
-		r=stdout = p.communicate()[0]
-		if r:
-			list_tmp=self.process_name(r)
-			if list_tmp:
-				if list_tmp[4]=='10111':
-					self.ShowMessage(_('Cancelled. Port 10111 is being used by Signal K.'))
-					return
-				new_address_port=str(list_tmp[2])+str(list_tmp[3])+str(list_tmp[4])
-				for sublist in self.inputs:					
-					old_address_port=str(sublist[2])+str(sublist[3])+str(sublist[4])
-					if old_address_port == new_address_port: 
-						self.ShowMessage(_('This input is already in use.'))
-						return
-				self.inputs.append(list_tmp)
-				self.write_inputs()
+					file = open(home+'/.debugkplex.conf', 'w')
+					file.write(data)
+					file.close()
 
-	def add_network_output(self,event):
-		subprocess.call(['pkill', '-f', 'connection.py'])
-		p=subprocess.Popen(['python', currentpath+'/connection.py', 'out', 'network'], stdout=subprocess.PIPE)
-		r=stdout = p.communicate()[0]
-		if r:
-			list_tmp=self.process_name(r)
-			if list_tmp:
-				if list_tmp[4]=='10111':
-					self.ShowMessage(_('Cancelled. Port 10111 is being used by Signal K.'))
-					return
-				new_address_port=str(list_tmp[2])+str(list_tmp[3])+str(list_tmp[4])
-				for sublist in self.koutputs:					
-					old_address_port=str(sublist[2])+str(sublist[3])+str(sublist[4])
-					if old_address_port == new_address_port: 
-						self.ShowMessage(_('This output is already in use.'))
-						return
-				self.koutputs.append(list_tmp)
-				self.write_outputs()
-
+					subprocess.call(["pkill", '-9', "kplex"])
+					subprocess.Popen(['kplex','-f',home+'/.debugkplex.conf'])
+					time.sleep(0.5)
+					close=subprocess.call(['pkill', '-f', 'debug-serial.py'])
+					if self.kplex[i][3]=='in' or self.kplex[i][3]=='both':
+						show_output=subprocess.Popen(['python',currentpath+'/debug-serial.py','10112','debug_input'])
+					if self.kplex[i][3]=='out' or self.kplex[i][3]=='both':
+						show_output=subprocess.Popen(['python',currentpath+'/debug-serial.py','10113','debug_output'])				
+			
 ###################################### I2C sensors
 
 	def start_sensors(self):
@@ -2736,7 +2702,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.SKinputs_label.SetLabel(text)
 		with open(home+'/.config/signalk-server-node/settings/openplotter-settings.json', 'w') as outfile:
 			json.dump(data, outfile)
-		self.restartSK(0)
+		self.restart_SK(0)
 
 
 	def N2K_setting(self, e):
@@ -2754,18 +2720,18 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 ###################################### Signal K
 
-	def signalKout(self, e):
+	def show_SK(self, e):
 		url = 'http://localhost:3000/examples/consumer-example.html'
 		webbrowser.open(url,new=2)
 
-	def signalKtools(self, e):
+	def show_tools_SK(self, e):
 		url = 'http://localhost:3000'
 		webbrowser.open(url,new=2)
 
 	def start_SK(self):
 		subprocess.Popen(home+'/.config/signalk-server-node/bin/openplotter', cwd=home+'/.config/signalk-server-node')	
 		
-	def restartSK(self, e):
+	def restart_SK(self, e):
 		self.SetStatusText(_('Closing Signal K server'))
 		subprocess.call(["pkill", '-9', "node"])
 		self.start_sensors()
@@ -2773,7 +2739,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.start_SK()
 		self.SetStatusText(_('Signal K server restarted'))	
 
-	def apply_changes_SK(self,e):
+	def apply_SK(self,e):
 		name=self.vessel.GetValue()
 		uuid=self.mmsi.GetValue()
 		if name=='' or uuid=='':
@@ -2785,7 +2751,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		data['vessel']['uuid']=uuid
 		with open(home+'/.config/signalk-server-node/settings/openplotter-settings.json', 'w') as outfile:
 			json.dump(data, outfile)
-		self.restartSK(0)
+		self.restart_SK(0)
 
 
 ####################### SMS
