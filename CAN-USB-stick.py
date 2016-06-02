@@ -32,6 +32,7 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 class MyFrame(wx.Frame):
 		
 		def __init__(self):
+			self.ttimer=40
 			self.home=Paths().home
 			self.currentpath=Paths().currentpath
 			self.conf=Conf()
@@ -50,6 +51,9 @@ class MyFrame(wx.Frame):
 			wx.Frame.__init__(self, None, title="N2K setting", size=(650,435))
 			self.Bind(wx.EVT_CLOSE, self.OnClose)
 		
+			self.timer = wx.Timer(self)
+			self.Bind(wx.EVT_TIMER, self.timer_act, self.timer)
+
 			self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 			
 			self.icon = wx.Icon(self.currentpath+'/openplotter.ico', wx.BITMAP_TYPE_ICO)
@@ -65,32 +69,27 @@ class MyFrame(wx.Frame):
 			wx.StaticText(panel, wx.ID_ANY, label="enabled transmit PGN:", style=wx.ALIGN_CENTER, pos=(10,300))
 			self.printing = wx.StaticText(panel, size=(600, 70), pos=(10, 320))
 			
-			self.XallBtn = wx.Button(panel, label=_('check'),size=(70, 32), pos=(550, 20))
-			self.Bind(wx.EVT_BUTTON, self.BtnTXcheck, self.XallBtn)
+			self.check_b = wx.Button(panel, label=_('check'),size=(70, 32), pos=(550, 20))
+			self.Bind(wx.EVT_BUTTON, self.check, self.check_b)
 			
-			self.XnoneBtn = wx.Button(panel, label=_('apply'),size=(70, 32), pos=(550, 60))
-			self.Bind(wx.EVT_BUTTON, self.applyBtn, self.XnoneBtn)
+			self.apply_b = wx.Button(panel, label=_('apply'),size=(70, 32), pos=(550, 60))
+			self.Bind(wx.EVT_BUTTON, self.apply, self.apply_b)
 			
 			self.Centre()
 			self.read_N2K()
+
+			self.timer.Start(self.ttimer)
+
+			self.check(0)
+			
 			self.Show(True)
-
-			self.t2_stop= threading.Event()
-			self.thread2=threading.Thread(target=self.refresh_loop, args=(1,self.t2_stop))
 			
-			if not self.thread2.isAlive(): self.thread2.start()
-
-			time.sleep(0.2)
-			self.Send_Command(1, 0x49, 0)
-			time.sleep(0.2)
-			self.read_stick_check()			
-			
-		def BtnTXcheck(self,e):
+		def check(self,e):
 			self.Send_Command(1, 0x49, 0)
 			time.sleep(0.2)
 			self.read_stick_check()
 		
-		def applyBtn(self,e):
+		def apply(self,e):
 			st=''
 			counter=0
 			for ii in self.list_N2K_txt:
@@ -151,19 +150,11 @@ class MyFrame(wx.Frame):
 				i+=1
 			self.SendCommandtoSerial(data)
 			
-		# thread
-		def refresh_loop(self,arg1,stop_event):
-			while (not stop_event.is_set()):
-				self.getCharfromSerial()
-				time.sleep(0.1)
-		# end thread
+		def timer_act(self,e):
+			self.getCharfromSerial()
 
 		def OnClose(self, event):
-			self.t2_stop.set()
-			i=0
-			while (self.thread2.isAlive() and i<20):
-				time.sleep(0.1)
-				i+=1
+			self.timer.Stop()
 			self.Destroy()
 						
 		def SendCommandtoSerial(self, TXs):
@@ -256,8 +247,7 @@ class MyFrame(wx.Frame):
 					self.printing.SetLabel(st)
 					self.conf.set('N2K', 'pgn_output', st)								
 					
-		def getCommandfromSerial(self, RXs):	
-			
+		def getCommandfromSerial(self, RXs):
 			crc = 0
 			start = (0x10, 0x02)
 			ende = (0x10, 0x03)

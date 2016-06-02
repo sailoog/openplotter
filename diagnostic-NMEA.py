@@ -52,9 +52,9 @@ class MyFrame(wx.Frame):
 
 			self.list = wx.ListCtrl(self, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(540, 220), pos=(5, 155))
 			self.list.InsertColumn(0, _('Device'), width=50)
-			self.list.InsertColumn(1, _('Type'), width=50)
-			self.list.InsertColumn(2, _('Repeat'), width=60)
-			self.list.InsertColumn(3, _('Data'), width=350)
+			self.list.InsertColumn(1, _('Type'), width=40)
+			self.list.InsertColumn(2, _('Interval'), wx.LIST_FORMAT_RIGHT, width=50)
+			self.list.InsertColumn(3, _('Data'), width=500)
 
 			self.button_pause =wx.Button(self, label=_('Pause'), pos=(555, 160))
 			self.Bind(wx.EVT_BUTTON, self.pause, self.button_pause)
@@ -100,6 +100,7 @@ class MyFrame(wx.Frame):
 				self.connect()
 			else:
 				frase_nmea=''
+				self.timer.Stop()
 				try:
 					frase_nmea = self.s2.recv(1024)
 				except Exception as ex:
@@ -130,7 +131,7 @@ class MyFrame(wx.Frame):
 							for i in self.list_iter:
 								if sentence==i[1]:
 									if device==i[0]:
-										td=round(i[2]*0.5+0.5*(tt-i[4]),2)
+										td=round(i[2]*0.5+0.5*(tt-i[4]),1)
 										self.list_iter[index][2]=td
 										self.list_iter[index][4]=tt
 										self.list.SetStringItem(index,2,str(td))
@@ -138,33 +139,16 @@ class MyFrame(wx.Frame):
 										exist=1
 								index+=1						
 							if exist==0:
-								if device[0]>='A' and device[0]<='Z':
-									self.list_iter.append([device,sentence,0,dat,time.time()])
-									self.list.InsertStringItem(index, device)
-									self.list.SetStringItem(index, 1, sentence)
-									self.list.SetStringItem(index, 2, str(0))
-									self.list.SetStringItem(index, 3, dat)
+								self.list_iter.append([device,sentence,0,dat,time.time()])
+								self.list.InsertStringItem(index, device)
+								self.list.SetStringItem(index, 1, sentence)
+								self.list.SetStringItem(index, 2, str(0))
+								self.list.SetStringItem(index, 3, dat)
 						frase_nmea_log+=frase_nmea
-					self.s2=''				
 			if frase_nmea_log:
-				self.logger.AppendText(frase_nmea_log)		
+				self.logger.AppendText(frase_nmea_log)
+			self.timer.Start(self.ttimer)
 			
-		def insert_line(self):
-			self.list_iter.append([self.device,self.sentence,0,self.data,time.time()])
-			self.list.InsertStringItem(self.index, self.device)
-			self.list.SetStringItem(self.index, 1, self.sentence)
-			self.list.SetStringItem(self.index, 2, '0')
-			self.list.SetStringItem(self.index, 3, self.dat)
-		
-		def refresh_data(self):
-			if self.data: 
-				self.list.SetStringItem(self.data[0],self.data[1],self.data[2])
-				self.data=0			
-			#if self.frase_nmea_log: 
-			#	self.logger.AppendText(self.frase_nmea_log)
-			#	self.frase_nmea_log=''
-			#self.SetStatusText(self.status)
-
 		def pause(self, e):
 			if self.pause_all==0: 
 				self.pause_all=1

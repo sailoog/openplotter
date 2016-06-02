@@ -24,6 +24,14 @@ conf=Conf()
 wifi_server=sys.argv[1]
 wlan = conf.get('WIFI', 'device')
 passw = conf.get('WIFI', 'password')
+ip = conf.get('WIFI', 'ip')
+ip_split=ip.split('.')
+if len(ip_split)==4:
+	ip3=ip_split[0]+'.'+ip_split[1]+'.'+ip_split[2]
+else:
+	print('wrong ip format in openplotter.conf switch to standard')
+	ip='10.10.10.1'
+	ip3='10.10.10'
 ssid = conf.get('WIFI', 'ssid')
 hw_mode = conf.get('WIFI', 'hw_mode')
 channel = conf.get('WIFI', 'channel')
@@ -112,7 +120,7 @@ if bak!=data:
 
 if wifi_server=='1':	
 	if bridge=='0':
-		data='# interfaces(5) file used by ifup(8) and ifdown(8)\nauto lo\niface lo inet loopback\n\nauto '+wlan+'\niface '+wlan+' inet static\naddress 10.10.10.1\nnetmask 255.255.255.0'
+		data='# interfaces(5) file used by ifup(8) and ifdown(8)\nauto lo\niface lo inet loopback\n\nauto '+wlan+'\niface '+wlan+' inet static\naddress '+ip+'\nnetmask 255.255.255.0'
 		#data+='\nservice hostapd start\n'
 		#data+='service dnsmasq start\n'
 		#if share!='0':
@@ -127,8 +135,8 @@ if wifi_server=='1':
 		data+='auto br0\n'
 		data+='iface br0 inet static\n'
 		data+='bridge_ports eth0\n'
-		data+='address 10.10.10.1\n'
-		data+='broadcast 10.10.10.255\n'
+		data+='address '+ip+'\n'
+		data+='broadcast '+ip3+'.255\n'
 		data+='netmask 255.255.255.0\n'
 		data+='bridge_maxwait 1\n'
 		#data+='up /etc/init.d/network-manager restart\n'
@@ -148,12 +156,13 @@ if wifi_server=='1':
 		file.close()
 
 	if bridge=='0':
-		data='interface=lo,'+wlan+'\nno-dhcp-interface=lo\ndhcp-range=10.10.10.20,10.10.10.254,255.255.255.0,12h'
+		data='interface=lo,'+wlan+'\nno-dhcp-interface=lo\ndhcp-range='+ip3+'.20,'+ip3+'.254,255.255.255.0,12h'
 	else:
 		data='no-dhcp-interface=lo,eth0,wlan0,wlan1,ppp0\n'
 		data+='interface=br0\n'
-		data+='dhcp-range=10.10.10.100,10.10.10.200,255.255.255.0,12h\n'
+		data+='dhcp-range='+ip3+'.100,'+ip3+'.200,255.255.255.0,12h\n'
 	
+	print data
 	file = open('/etc/dnsmasq.conf', 'r',2000)
 	bak=file.read()
 	file.close()
@@ -163,7 +172,7 @@ if wifi_server=='1':
 		file.close()
 
 	
-	data='ddns-update-style none;\ndefault-lease-time 600;\nmax-lease-time 7200;\nauthoritative;\nlog-facility local7;\nsubnet 10.10.10.0 netmask 255.255.255.0 {\nrange 10.10.10.100 10.10.10.200;\noption broadcast-address 10.10.10.255;\noption routers 10.10.10.1;\noption domain-name "local";\noption domain-name-servers 8.8.8.8, 8.8.4.4;\n'
+	data='ddns-update-style none;\ndefault-lease-time 600;\nmax-lease-time 7200;\nauthoritative;\nlog-facility local7;\nsubnet '+ip3+'.0 netmask 255.255.255.0 {\nrange '+ip3+'.100 '+ip3+'.200;\noption broadcast-address '+ip3+'.255;\noption routers '+ip3+'.1;\noption domain-name "local";\noption domain-name-servers 8.8.8.8, 8.8.4.4;\n'
 	
 	if bridge=='0':
 		data+='interface '+wlan+';\n}\n'
@@ -224,14 +233,13 @@ if wifi_server=='1':
 	else: 
 		print "WiFi access point started.\n"
 		print "SSID: "+ssid
-		print "Adress: 10.10.10.1"
+		print 'Address: '+ip3+'.1'
 
 
 else:
 	file = open('/etc/network/interfaces', 'r',2000)
 	bak=file.read()
 	file.close()
-
 
 	data='# interfaces(5) file used by ifup(8) and ifdown(8)\nauto lo\niface lo inet loopback'
 	if bak!=data:

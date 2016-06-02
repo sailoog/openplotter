@@ -186,9 +186,9 @@ class addkplex(wx.Dialog):
 		self.kplex_baud_select.SetValue('4800')
 		self.kplex_name.SetValue('ap')
 		self.ifilter_select.SetValue(self.mode_ifilter[1])
-		self.ifilter_sentences.SetValue('**RM*,**VHW,**VWR')
+		self.ifilter_sentences.SetValue('**HDM,**RSA')				
 		self.ofilter_select.SetValue(self.mode_ifilter[1])
-		self.ofilter_sentences.SetValue('**HDM,**RSA')				
+		self.ofilter_sentences.SetValue('**RM*,**VHW,**VWR')
 						
 	def SerialCheck(self):
 		self.SerDevLs = [_('none')]

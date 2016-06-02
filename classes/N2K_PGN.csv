@@ -59,12 +59,12 @@
 127251,Rate of Turn
 127257,Attitude
 127258,Magnetic Variation
-127488,"Engine Parameters, Rapid Update"
-127489,"Engine Parameters, Dynamic"
-127493,"Transmission Parameters, Dynamic"
-127496,"Trip Parameters, Vessel"
-127497,"Trip Parameters, Engine"
-127498,"Engine Parameters, Static"
+127488,Engine Parameters, Rapid Update
+127489,Engine Parameters, Dynamic
+127493,Transmission Parameters, Dynamic
+127496,Trip Parameters, Vessel
+127497,Trip Parameters, Engine
+127498,Engine Parameters, Static
 127501,Binary Switch Bank Status
 127502,Switch Bank Control
 127503,AC Input Status
@@ -83,10 +83,10 @@
 128267,Water Depth
 128275,Distance Log
 128520,Tracked Target Data
-129025,"Position, Rapid Update"
-129026,"COG & SOG, Rapid Update"
-129027,"Position Delta, Rapid Update"
-129028,"Altitude Delta, Rapid Update"
+129025,Position, Rapid Update
+129026,COG & SOG, Rapid Update
+129027,Position Delta, Rapid Update
+129028,Altitude Delta, Rapid Update
 129029,GNSS Position Data
 129033,Time & Date
 129038,AIS Class A Position Report
@@ -97,7 +97,7 @@
 129283,Cross Track Error
 129284,Navigation Data
 129285,Navigation - Route/WP Information
-129291,"Set & Drift, Rapid Update"
+129291,Set & Drift, Rapid Update
 129301,Navigation - Route / Time to+from Mark
 129302,Bearing and Distance between two Marks
 129538,GNSS Control Status
@@ -175,7 +175,7 @@
 130839,Simnet: Pressure Sensor Configuration
 130840,Simnet: Data User Group Configuration
 130842,Simnet: AIS Class B static data
-130843,"Simnet: Sonar Status, Frequency and DSP Voltage"
+130843,Simnet: Sonar Status, Frequency and DSP Voltage
 130845,Simnet: Parameter Handle
 130850,Simnet: Event Command: AP command
 130851,Simnet: Event Reply: AP command

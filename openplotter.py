@@ -339,8 +339,8 @@ class MainFrame(wx.Frame):
 		self.delete_kplex_b =wx.Button(self.page5, label=_('delete'), pos=(110, 200))
 		self.Bind(wx.EVT_BUTTON, self.delete_kplex, self.delete_kplex_b)
 
-		self.delete_kplex_b =wx.Button(self.page5, label=_('debug'), pos=(210, 200))
-		self.Bind(wx.EVT_BUTTON, self.debug_kplex, self.delete_kplex_b)
+		self.diagnostic_kplex_b =wx.Button(self.page5, label=_('diagnostic'), pos=(210, 200))
+		self.Bind(wx.EVT_BUTTON, self.diagnostic_kplex, self.diagnostic_kplex_b)
 
 		self.show_kplex_b =wx.Button(self.page5, label=_('Inspector'), pos=(10, 285))
 		self.Bind(wx.EVT_BUTTON, self.show_kplex, self.show_kplex_b)
@@ -409,6 +409,9 @@ class MainFrame(wx.Frame):
 
 		self.button_N2K_setting =wx.Button(self.page17, label=_('Output settings'), pos=(20, 130))
 		self.Bind(wx.EVT_BUTTON, self.N2K_setting, self.button_N2K_setting)	
+
+		self.N2K_diagnostic_b =wx.Button(self.page17, label=_('Diagnostic'), pos=(20, 180))
+		self.Bind(wx.EVT_BUTTON, self.N2K_diagnostic, self.N2K_diagnostic_b)	
 
 		wx.StaticBox(self.page17, label=_(' Inputs '), size=(430, 50), pos=(250, 10))
 		self.n2kinputs_label=wx.StaticText(self.page17, label=_('PGNs: All'), pos=(260, 30))
@@ -1679,7 +1682,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		else:
 			return list_tmp
 
-	def debug_kplex(self,event):
+	def diagnostic_kplex(self,event):
 		num = len(self.kplex)
 		
 		for i in range(num):
@@ -1704,11 +1707,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					subprocess.call(["pkill", '-9', "kplex"])
 					subprocess.Popen(['kplex','-f',home+'/.debugkplex.conf'])
 					time.sleep(0.5)
-					close=subprocess.call(['pkill', '-f', 'debug-serial.py'])
+					close=subprocess.call(['pkill', '-f', 'diagnostic-NMEA.py'])
 					if self.kplex[i][3]=='in' or self.kplex[i][3]=='both':
-						show_output=subprocess.Popen(['python',currentpath+'/debug-serial.py','10112','debug_input'])
+						show_output=subprocess.Popen(['python',currentpath+'/diagnostic-NMEA.py','10112','diagnostic_input'])
 					if self.kplex[i][3]=='out' or self.kplex[i][3]=='both':
-						show_output=subprocess.Popen(['python',currentpath+'/debug-serial.py','10113','debug_output'])				
+						show_output=subprocess.Popen(['python',currentpath+'/diagnostic-NMEA.py','10113','diagnostic_output'])				
 			
 ###################################### I2C sensors
 
@@ -2717,6 +2720,19 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.stop_1w()
 		subprocess.Popen(['python',currentpath+'/CAN-USB-stick.py'])
 		self.SetStatusText(_('Select PGNs to transmit and enable N2K input/output again.'))	
+
+	def N2K_diagnostic(self, e):
+		tty=str(self.can_usb.GetValue())
+		if len(tty)==0:
+			self.SetStatusText(_('You have to select a CAN-USB-CAN device'))
+			return
+		if (self.conf.get('N2K', 'can_usb')!= self.can_usb.GetValue()):
+			self.conf.set('N2K', 'can_usb', self.can_usb.GetValue())
+		subprocess.call(['pkill', '-f', 'diagnostic-N2K-input.py'])
+		self.stop_sensors()
+		self.stop_1w()
+		subprocess.Popen(['python',currentpath+'/diagnostic-N2K-input.py'])
+		self.SetStatusText(_('Show received PGNs.'))	
 
 ###################################### Signal K
 
