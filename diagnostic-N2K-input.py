@@ -90,9 +90,24 @@ class MyFrame(wx.Frame):
 			
 		def sort_PGN(self, e):
 			self.timer.Stop()
-			index=0
 			self.list_iter.sort()
 			self.list.DeleteAllItems()
+			self.init2()
+			self.timer.Start(self.ttimer)
+
+		def sort_SRC(self, e):
+			self.timer.Stop()
+			self.list.DeleteAllItems()
+
+			list_new=[]
+			for i in sorted(self.list_iter, key=lambda item: (item[1], item[0])):
+				list_new.append(i)
+			self.list_iter=list_new
+			self.init2()
+			self.timer.Start(self.ttimer)
+			
+		def init2(self):
+			index=0		
 			for i in self.list_iter:
 				self.list.InsertStringItem(index, str(i[0]))
 				self.list.SetStringItem(index, 1, str(i[1]))
@@ -101,22 +116,6 @@ class MyFrame(wx.Frame):
 				self.list.SetStringItem(index, 4, str(i[4]))
 				self.list.SetStringItem(index, 5, '')
 				index+=1
-			self.timer.Start(self.ttimer)
-
-		def sort_SRC(self, e):
-			self.timer.Stop()
-			index=0
-			self.list_iter.sort()
-			self.list.DeleteAllItems()
-			for i in sorted(self.list_iter, key=lambda item: (item[1], item[0])):
-				self.list.InsertStringItem(index, str(i[0]))
-				self.list.SetStringItem(index, 1, str(i[1]))
-				self.list.SetStringItem(index, 2, str(i[2]))
-				self.list.SetStringItem(index, 3, str(i[3]))
-				self.list.SetStringItem(index, 4, str(i[4]))
-				self.list.SetStringItem(index, 5, '')
-				index+=1
-			self.timer.Start(self.ttimer)
 								
 		def OnClose(self, event):
 			self.timer.Stop()
