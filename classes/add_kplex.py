@@ -113,11 +113,14 @@ class addkplex(wx.Dialog):
 		self.otalker.SetValue('**')
 		self.osent.SetValue('***')
 		
-		self.AP =wx.Button(panel, label=_('AP examp'), pos=(20, 320))
-		self.Bind(wx.EVT_BUTTON, self.AP_examp, self.AP)
+		self.AP_examp_b =wx.Button(panel, label=_('AP examp'), pos=(20, 320))
+		self.Bind(wx.EVT_BUTTON, self.AP_examp, self.AP_examp_b)
 
-		self.GPS =wx.Button(panel, label=_('GPS examp'), pos=(120, 320))
-		self.Bind(wx.EVT_BUTTON, self.GPS_examp, self.GPS)
+		self.GPS_examp_b =wx.Button(panel, label=_('GPS examp'), pos=(120, 320))		
+		self.Bind(wx.EVT_BUTTON, self.GPS_examp, self.GPS_examp_b)
+		
+		self.gpsd_examp_b =wx.Button(panel, label=_('gpsd examp'), pos=(220, 320))		
+		self.Bind(wx.EVT_BUTTON, self.gpsd_examp, self.gpsd_examp_b)
 
 		self.ok =wx.Button(panel, label=_('OK'), pos=(425, 320))
 		self.Bind(wx.EVT_BUTTON, self.ok_conn, self.ok)
@@ -189,7 +192,24 @@ class addkplex(wx.Dialog):
 		self.ifilter_sentences.SetValue('**HDM,**RSA')				
 		self.ofilter_select.SetValue(self.mode_ifilter[1])
 		self.ofilter_sentences.SetValue('**RM*,**VHW,**VWR')
-						
+		
+	def gpsd_examp(self,e):
+		self.kplex_type.SetValue('TCP')
+		self.kplex_io_net.SetValue('in')
+		self.switch_ser_net(False)
+		self.switch_io_out(False)
+		self.switch_io_in(True)
+		self.switch_ser_net(False)
+		self.kplex_address.SetValue('127.0.0.1')
+		self.kplex_netport.SetValue('2947')
+		self.kplex_baud_select.SetValue('4800')
+		self.kplex_name.SetValue('gpsd')
+		self.ifilter_select.SetValue(self.mode_ifilter[0])
+		self.ifilter_sentences.SetValue('nothing')
+		self.ofilter_select.SetValue(self.mode_ifilter[0])
+		self.ofilter_sentences.SetValue('nothing')
+
+		
 	def SerialCheck(self):
 		self.SerDevLs = [_('none')]
 		context = pyudev.Context()

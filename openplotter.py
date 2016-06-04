@@ -365,6 +365,9 @@ class MainFrame(wx.Frame):
 		self.button_restartSK =wx.Button(self.page7, label=_('Restart'), pos=(20, 115))
 		self.Bind(wx.EVT_BUTTON, self.restart_SK, self.button_restartSK)	
 
+		self.diagnostic_SK_b =wx.Button(self.page7, label=_('Diagnostic'), pos=(20, 165))
+		self.Bind(wx.EVT_BUTTON, self.diagnostic_SK, self.diagnostic_SK_b)	
+
 		self.button_apply_changes_SK =wx.Button(self.page7, label=_('Apply changes'), pos=(125, 115))
 		self.Bind(wx.EVT_BUTTON, self.apply_SK, self.button_apply_changes_SK)
 		
@@ -864,6 +867,7 @@ class MainFrame(wx.Frame):
 			self.n2k_enable.SetValue(True)
 			self.can_usb.Disable()
 			self.button_N2K_setting.Disable()
+			self.N2K_diagnostic_b.Disable()
 			text+='\nNMEA 2K: CAN-USB-CAN - '+self.conf.get('N2K', 'can_usb')
 		self.n2koutputs_label.SetLabel(self.conf.get('N2K', 'pgn_output'))
 		self.SKinputs_label.SetLabel(text)
@@ -2678,6 +2682,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.conf.set('N2K', 'can_usb', self.can_usb.GetValue())
 			self.can_usb.Disable()
 			self.button_N2K_setting.Disable()
+			self.N2K_diagnostic_b.Disable()
 			exist=0
 			ii=0
 			for i in data['pipedProviders']:
@@ -2695,6 +2700,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.conf.set('N2K', 'enable', '0')
 			self.can_usb.Enable()
 			self.button_N2K_setting.Enable()
+			self.N2K_diagnostic_b.Enable()
 			ii=0
 			for i in data['pipedProviders']:
 				if i['id']=='CAN-USB':
@@ -2755,6 +2761,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.start_SK()
 		self.SetStatusText(_('Signal K server restarted'))	
 
+	def diagnostic_SK(self, e):
+		close=subprocess.call(['pkill', '-f', 'diagnostic-SK-input.py'])
+		show_output=subprocess.Popen(['python',currentpath+'/diagnostic-SK-input.py'])
+
+	
 	def apply_SK(self,e):
 		name=self.vessel.GetValue()
 		uuid=self.mmsi.GetValue()

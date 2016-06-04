@@ -391,7 +391,7 @@ while True:
 			sock.sendto(xdr2, ('127.0.0.1', 10110))
 		
 		if list_signalk1:
-			SignalK = '{"updates": [{"source": {"type": "Sensors","src" : "bmp180"},"timestamp": "'+str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z","values":[ '
+			SignalK = '{"updates": [{"source": {"type": "Sensors","src" : "bmp"},"timestamp": "'+str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z","values":[ '
 			Erg=''
 			
 			for i in range(0,len(list_signalk1)):

@@ -202,7 +202,7 @@ while True:
 				Send_Engine(1,dataf[datab[2]],dataf[datab[3]])
 			
 	if list_signalk!=[]:				
-		SignalK = '{"updates": [{"source": {"type": "Sensors","src" : "imu"},"timestamp": "'+str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z","values":[ '
+		SignalK = '{"updates": [{"source": {"type": "Sensors","src" : "1W"},"timestamp": "'+str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z","values":[ '
 		Erg=''
 		i=0
 		for j in list_signalk:
