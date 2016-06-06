@@ -345,7 +345,7 @@ while True:
 				list_tmp1.append('B')
 				list_tmp1.append('I2CP')
 			if pressure_sk:
-				list_signalk_path1.append('environment.air.outside.pressure')
+				list_signalk_path1.append('environment.outside.pressure')
 				list_signalk1.append(str(pressure*100))			
 			if p_temp_183:
 				temp= round(temperature_p,1)
@@ -367,7 +367,7 @@ while True:
 				list_tmp1.append('R')
 				list_tmp1.append('I2CH')
 			if humidity_sk:
-				list_signalk_path1.append('environment.air.outside.humidity')
+				list_signalk_path1.append('environment.outside.humidity')
 				list_signalk1.append(str(hum))
 			if humidity_2k:
 				if e_pres and pressure_2k:
