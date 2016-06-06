@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, sys, socket, time, webbrowser, serial, requests
+import wx, sys, socket, time, webbrowser, serial, requests, json
 from classes.datastream import DataStream
 from classes.paths import Paths
 from classes.conf import Conf
@@ -25,12 +25,12 @@ class MyFrame(wx.Frame):
 		
 		def __init__(self):
 			self.ttimer=300
-			
+
 			self.home=Paths().home
 			self.currentpath=Paths().currentpath
 			self.conf=Conf()
 			self.ser = serial.Serial(self.conf.get('N2K', 'can_usb'), 115200, timeout=0.5)
-			
+
 			Language(self.conf.get('GENERAL','lang'))
 
 			self.init1()			
@@ -47,17 +47,19 @@ class MyFrame(wx.Frame):
 			self.SetIcon(self.icon)
 
 			self.list = wx.ListCtrl(self, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(640, 330), pos=(5, 5))
-			self.list.InsertColumn(0, _('SRC'), width=140)
-			self.list.InsertColumn(1, _('Name'), width=380)
+			self.list.InsertColumn(0, _('SRC'), width=130)
+			self.list.InsertColumn(1, _('SignalK'), width=300)
 			self.list.InsertColumn(2, _('Value'), wx.LIST_FORMAT_RIGHT, width=100)
-			self.list.InsertColumn(4, _('Interval'), wx.LIST_FORMAT_RIGHT, width=45)
+			self.list.InsertColumn(3, _('Unit'), width=40)
+			self.list.InsertColumn(4, _('Interval'), wx.LIST_FORMAT_RIGHT, width=55)
 			self.list.InsertColumn(5, _('Status'), width=50)
-
-			self.sort_PGN_b =wx.Button(self, label=_('Sort PGN'), pos=(110, 340))
-			self.Bind(wx.EVT_BUTTON, self.sort_PGN, self.sort_PGN_b)
+			self.list.InsertColumn(6, _('Description'), width=500)
 
 			self.sort_SRC_b =wx.Button(self, label=_('Sort SRC'), pos=(10, 340))
 			self.Bind(wx.EVT_BUTTON, self.sort_SRC, self.sort_SRC_b)
+
+			self.sort_PGN_b =wx.Button(self, label=_('Sort SK'), pos=(110, 340))
+			self.Bind(wx.EVT_BUTTON, self.sort_PGN, self.sort_PGN_b)
 
 			self.reset_b =wx.Button(self, label=_('reset'), pos=(210, 340))
 			self.Bind(wx.EVT_BUTTON, self.reset, self.reset_b)
@@ -93,7 +95,8 @@ class MyFrame(wx.Frame):
 						sk_json=["vessels","xxxxxxxx"]
 						for j in sks.split('.'):
 							sk_json.append(str(j))
-						self.list_SK.append([source,i,timestamp,sk_json,data[source],data[i],data[timestamp],0,1])				
+						self.lookup_star(sk_json,i)							
+						self.list_SK.append([source,i,timestamp,sk_json,data[source],data[i],data[timestamp],0.0,1,self.SK_unit,self.SK_description])				
 # var_source var_value var_timestamp name[] source value timestamp Interval activ				
 #      0          1          2         3     4      5    6        7        8       			
 				
@@ -107,9 +110,12 @@ class MyFrame(wx.Frame):
 			index=0
 			for i in self.list_SK:
 				if i[8]==1:
-					if self.lookup(i[3]):
+					if self.lookup(i[3]):						
 						if self.SKselect[i[2]]!=i[6]:
+							a=self.json_interval(i[6],self.SKselect[i[2]])*0.2+0.8*i[7]
+							self.list.SetStringItem(index, 4, str('%.3f' % a))
 							i[6]=self.SKselect[i[2]]
+							i[7]=a
 							if i[5]!=self.SKselect[i[1]]:
 								i[5]=self.SKselect[i[1]]
 								self.list.SetStringItem(index, 2, str('%.3f' % i[5]))
@@ -118,7 +124,15 @@ class MyFrame(wx.Frame):
 						i[8]==0
 						self.list.SetStringItem(index, 4, str(i[8]))
 				index+=1
-			
+
+		def json_interval(self,time_old,time_new):
+			dif=0
+			sek_n = int(time_new[17:19])
+			sek_o = int(time_old[17:19])
+			if sek_n>=sek_o: dif=sek_n-sek_o
+			else: dif =sek_n+60-sek_o
+			return float(dif)
+					
 		def lookup(self,name):
 			self.SKselect=self.data
 			try:
@@ -127,7 +141,35 @@ class MyFrame(wx.Frame):
 				return 1
 			except:
 				return 0
+
+		def lookup_star(self,name,value):			
+			skip=-1
+			index=0
+			st=''
+			for i in name:
+				if index>1:
+					if skip==0: 
+						st+='.*'
+					else:
+						if i in ['propulsion','inventory']: skip=1
+						elif i == 'resources':skip=2
+						st+='.'+i
+				index+=1
+				skip-=1
 			
+			if value!='value':
+				st+='.'+value
+			
+			st=st[1:]	
+
+			self.SK_unit=''
+			self.SK_description=''
+			try:
+				self.SK_unit=self.data_SK_unit[st]['units']
+				self.SK_description=self.data_SK_unit[st]['description']
+			except:
+				print 'no unit for ',st
+				
 		def sort_PGN(self, e):
 			self.timer.Stop()
 			self.list.DeleteAllItems()
@@ -155,8 +197,14 @@ class MyFrame(wx.Frame):
 		def init1(self):
 			self.list_SK=[]
 			self.SKselect=''
+			self.SK_unit=''
+			self.SK_description=''
 			self.response = requests.get('http://localhost:3000/signalk/v1/api/')
 			self.data = self.response.json()
+
+			self.data_SK_unit=''
+			with open(self.home+'/.config/openplotter/classes/keyswithmetadata.json') as data_file:    
+				self.data_SK_unit = json.load(data_file)
 			
 #var_data var_source var_value var_timestamp name source value timestamp Interval activ
 			sks2=["vessels","xxxxxxxx"]
@@ -211,8 +259,10 @@ class MyFrame(wx.Frame):
 				
 				self.list.SetStringItem(index, 1, text)
 				self.list.SetStringItem(index, 2, str('%.3f' % i[5]))
-				self.list.SetStringItem(index, 3, str(i[7]))
-				self.list.SetStringItem(index, 4, str(i[8]))
+				self.list.SetStringItem(index, 3, str(i[9]))
+				self.list.SetStringItem(index, 4, str(i[7]))
+				self.list.SetStringItem(index, 5, str(i[8]))
+				self.list.SetStringItem(index, 6, str(i[10]))
 				index+=1
 																
 		def OnClose(self, event):
