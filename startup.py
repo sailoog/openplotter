@@ -98,14 +98,10 @@ if not exist:
 	nmea_hum=conf.get('STARTUP', 'nmea_hum')
 	nmea_temp_h=conf.get('STARTUP', 'nmea_temp_h')
 
-	#1W
-	DS18B20='0'
+	DS18B20=[]
 	x=conf.get('1W', 'DS18B20')
-	if x: sensors_list=eval(x)
-	else: sensors_list=[]
-	for i in sensors_list:
-		if i[5]=='1': DS18B20='1'
-		if i[4]=='1': DS18B20='1'
+	if x: DS18B20=eval(x)
+	else: DS18B20=[]
 		
 	nmea_mag_var=conf.get('STARTUP', 'nmea_mag_var')
 	nmea_hdt=conf.get('STARTUP', 'nmea_hdt')
@@ -158,7 +154,7 @@ if not exist:
 		subprocess.Popen(['python', currentpath+'/i2c.py'], cwd=currentpath+'/imu')
 
 	subprocess.call(['pkill', '-f', '1w.py'])
-	if DS18B20=='1': 
+	if DS18B20: 
 		subprocess.Popen(['python', currentpath+'/1w.py'])
 
 	subprocess.call(['pkill', '-f', 'calculate.py'])

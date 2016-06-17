@@ -556,17 +556,13 @@ class MainFrame(wx.Frame):
 ###########################page6
 ########page11###################
 
-		wx.StaticBox(self.page11, label=_(' DS18B20 sensors '), size=(670, 265), pos=(10, 10))
-		self.list_DS18B20 =	wx.ListCtrl(self.page11, size=(565, 237), style=wx.LC_REPORT)
-		#self.list_DS18B20 = CheckListCtrl(self.page11, 237)
-		self.list_DS18B20.SetPosition((15, 30))
-		self.list_DS18B20.InsertColumn(0, _('SignalK name'), width=275)
-		self.list_DS18B20.InsertColumn(1, _('SK'), width=30)
-		self.list_DS18B20.InsertColumn(2, _('N2K'), width=35)
-		self.list_DS18B20.InsertColumn(3, _('Short'), width=60)
-		self.list_DS18B20.InsertColumn(4, _('Unit'), width=35)
-		self.list_DS18B20.InsertColumn(5, _('ID'),width=105)
-		self.list_DS18B20.InsertColumn(6, _('Offset'),width=70)
+		wx.StaticBox(self.page11, label=_(' Temperature sensors '), size=(670, 265), pos=(10, 10))
+		self.list_DS18B20 =	wx.ListCtrl(self.page11, style=wx.LC_REPORT, size=(565, 237), pos=(15, 30))
+		self.list_DS18B20.InsertColumn(0, _('Name'), width=100)
+		self.list_DS18B20.InsertColumn(1, _('Signal K'), width=310)
+		self.list_DS18B20.InsertColumn(2, _('ID'), width=105)
+		self.list_DS18B20.InsertColumn(4, _('Offset'), width=50)
+
 		self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_DS18B20, self.list_DS18B20)
 			
 		self.add_DS18B20_button =wx.Button(self.page11, label=_('add'), pos=(585, 30))
@@ -2454,11 +2450,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		except:temp_list=[]
 		for ii in temp_list:
 			self.DS18B20.append(ii)
-			self.list_DS18B20.Append([ii[0].decode('utf8'),ii[4].decode('utf8'),ii[5].decode('utf8'),ii[1].decode('utf8'),ii[2],ii[3],ii[6]])
+			if '.*.' in ii[1]: SKkey2=ii[1].replace('*', ii[0])
+			else: SKkey2=ii[1]
+			self.list_DS18B20.Append([ii[0],SKkey2,ii[2],ii[3]])
 	
 	def edit_DS18B20(self,e):
 		selected_DS18B20=e.GetIndex()
-		edit=[selected_DS18B20,self.DS18B20[selected_DS18B20][0],self.DS18B20[selected_DS18B20][1],self.DS18B20[selected_DS18B20][2],self.DS18B20[selected_DS18B20][3],self.DS18B20[selected_DS18B20][4],self.DS18B20[selected_DS18B20][5],self.DS18B20[selected_DS18B20][6]]
+		edit=[selected_DS18B20,self.DS18B20[selected_DS18B20][0],self.DS18B20[selected_DS18B20][1],self.DS18B20[selected_DS18B20][2],self.DS18B20[selected_DS18B20][3]]
 		self.edit_add_DS18B20(edit)
 
 	def add_DS18B20(self,e):
@@ -2470,52 +2468,41 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if res == wx.ID_OK:
 			name=dlg.name.GetValue()
 			name=name.encode('utf8')
-			short=dlg.short.GetValue()
-			short=short.encode('utf8')
-			unit_selection=dlg.unit_select.GetValue()
-			id_selection=dlg.id_select.GetValue()
+			SKkey=dlg.SKkey.GetValue()
+			SKkey=SKkey.encode('utf8')
+			sensor_id=dlg.id_select.GetValue()
+			sensor_id=sensor_id.encode('utf8')
 			offset=dlg.offset.GetValue()
-			try:
-				float(offset)
-			except: offset='0.0'
-			id_selection=id_selection.encode('utf8')
-			sk_enable=0
-			n2k_enable=0
-			if dlg.sk_enable.GetValue():sk_enable=1
-			if dlg.n2k_enable.GetValue():n2k_enable=1
-			if not name or not short:
-				self.ShowMessage(_('Failed. Write a name and a short name.'))
-				dlg.Destroy()
-				return				
-			if unit_selection == '':
-				self.ShowMessage(_('Failed. Select unit.'))
+			offset=offset.encode('utf8')
+			if not name or not SKkey:
+				self.ShowMessage(_('Failed. Provide name and Signal K values.'))
 				dlg.Destroy()
 				return
-			if id_selection == '':
+			if not re.match('^[0-9a-zA-Z]+$', name):
+				self.ShowMessage(_('Failed. The name must contain only letters and numbers.'))
+				dlg.Destroy()
+				return
+			if '.*.' in SKkey: SKkey2=SKkey.replace('*', name)
+			else: SKkey2=SKkey
+			if sensor_id == '':
 				self.ShowMessage(_('Failed. Select sensor ID.'))
 				dlg.Destroy()
 				return
-			if unit_selection=='Celsius': unit_selection='C'
-			elif unit_selection=='Fahrenheit': unit_selection='F'
-			elif unit_selection=='Kelvin': unit_selection='K'
+			try:
+				float(offset)
+			except: offset='0.0'
 			if edit==0:
-				self.list_DS18B20.Append([name.decode('utf8'),str(sk_enable),str(n2k_enable),short.decode('utf8'),unit_selection,id_selection,str(offset)])
-				self.DS18B20.append([name,short,unit_selection,id_selection,str(sk_enable),str(n2k_enable),str(offset)])
+				self.list_DS18B20.Append([name,SKkey2,sensor_id,offset])
+				self.DS18B20.append([name,SKkey,sensor_id,offset])
 			else:
-				self.list_DS18B20.SetStringItem(edit[0],0,name.decode('utf8'))
-				self.list_DS18B20.SetStringItem(edit[0],1,str(sk_enable))
-				self.list_DS18B20.SetStringItem(edit[0],2,str(n2k_enable))
-				self.list_DS18B20.SetStringItem(edit[0],3,short.decode('utf8'))
-				self.list_DS18B20.SetStringItem(edit[0],4,unit_selection)
-				self.list_DS18B20.SetStringItem(edit[0],5,id_selection)
-				self.list_DS18B20.SetStringItem(edit[0],6,offset)
+				self.list_DS18B20.SetStringItem(edit[0],0,name)
+				self.list_DS18B20.SetStringItem(edit[0],1,SKkey2)
+				self.list_DS18B20.SetStringItem(edit[0],2,sensor_id)
+				self.list_DS18B20.SetStringItem(edit[0],3,offset)
 				self.DS18B20[edit[0]][0]=name
-				self.DS18B20[edit[0]][1]=short
-				self.DS18B20[edit[0]][2]=unit_selection
-				self.DS18B20[edit[0]][3]=id_selection
-				self.DS18B20[edit[0]][4]=str(sk_enable)
-				self.DS18B20[edit[0]][5]=str(n2k_enable)
-				self.DS18B20[edit[0]][6]=str(offset)
+				self.DS18B20[edit[0]][1]=SKkey
+				self.DS18B20[edit[0]][2]=sensor_id
+				self.DS18B20[edit[0]][3]=offset
 		dlg.Destroy()
 
 	def delete_DS18B20(self,e):
@@ -2523,6 +2510,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if selected_DS18B20==-1: 
 			self.ShowMessage(_('Select a sensor to delete.'))
 			return
+		'''
 		data=self.conf.get('ACTIONS', 'triggers')
 		try:
 			temp_list=eval(data)
@@ -2532,6 +2520,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.read_triggers()
 				self.ShowMessage(_('You have a trigger defined for this sensor. You must delete that action before deleting this sensor.'))
 				return
+		'''
 		del self.DS18B20[selected_DS18B20]
 		self.list_DS18B20.DeleteItem(selected_DS18B20)
 
