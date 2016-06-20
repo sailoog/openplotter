@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 # This file is part of Openplotter.
 # Copyright (C) 2015 by sailoog <https://github.com/sailoog/openplotter>
 #
@@ -14,204 +15,125 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import time, socket, threading, datetime, geomag, pynmea2, math
-from classes.datastream import DataStream
+import wx, subprocess
+from classes.paths import Paths
 from classes.conf import Conf
 from classes.language import Language
 
-conf=Conf()
+class MyFrame(wx.Frame):
+		
+		def __init__(self):
 
-Language(conf.get('GENERAL','lang'))
+			paths=Paths()
+			self.currentpath=paths.currentpath
 
-global sock_in
-global error
-sock_in=''
-error=0
-a=DataStream(conf)
-last_heading=''
-heading_time=''
+			self.conf=Conf()
 
-sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+			Language(self.conf.get('GENERAL','lang'))
 
-accuracy=float(conf.get('STARTUP', 'cal_accuracy'))
-rate=float(conf.get('STARTUP', 'nmea_rate_cal'))
+			wx.Frame.__init__(self, None, title=_('Calculate'), size=(690,320))
+			
+			self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
+			
+			self.icon = wx.Icon(self.currentpath+'/openplotter.ico', wx.BITMAP_TYPE_ICO)
+			self.SetIcon(self.icon)
 
-#thread1
-def parse_nmea():
-	global sock_in
-	global error
-	while True:
-		if not sock_in: connect()
-		else:
-			frase_nmea =''
-			try:
-				frase_nmea = sock_in.recv(1024)
-			except socket.error, error_msg:
-				error= _('Failed to connect with localhost:10110. Error: ')+ str(error_msg[0])
-				print error
-			else:
-				if frase_nmea: 
-					a.parse_nmea(frase_nmea)
-					error=0
-				else:
-					sock_in=''
+			wx.StaticBox(self, size=(330, 50), pos=(10, 10))
+			wx.StaticText(self, label=_('Rate (sec)'), pos=(20, 30))
+			self.rate_list = ['0.1', '0.25', '0.5', '0.75', '1', '1.5', '2']
+			self.rate2= wx.ComboBox(self, choices=self.rate_list, style=wx.CB_READONLY, size=(80, 32), pos=(150, 23))
+			self.button_ok_rate2 =wx.Button(self, label=_('Ok'),size=(70, 32), pos=(250, 23))
+			self.Bind(wx.EVT_BUTTON, self.ok_rate2, self.button_ok_rate2)
 
-def connect():
-	global sock_in
-	global error
-	try:
-		sock_in = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		sock_in.settimeout(5)
-		sock_in.connect(('localhost', 10110))
-	except socket.error, error_msg:
-		error= _('Failed to connect with localhost:10110. Error: ')+ str(error_msg[0])
-		print error
-		sock_in=''
-		time.sleep(7)
-	else: error=0
-#end thread1
+			wx.StaticBox(self, size=(330, 50), pos=(350, 10))
+			wx.StaticText(self, label=_('Accuracy (sec)'), pos=(360, 30))
+			self.accuracy= wx.ComboBox(self, choices=self.rate_list, style=wx.CB_READONLY, size=(80, 32), pos=(500, 23))
+			self.button_ok_accuracy =wx.Button(self, label=_('Ok'),size=(70, 32), pos=(600, 23))
+			self.Bind(wx.EVT_BUTTON, self.ok_accuracy, self.button_ok_accuracy)
 
-def calculate_mag_var(position, date):
-	if position[0] and position[2] and date:
-		try:
-			var=float(geomag.declination(position[0], position[2], 0, date))
-			var=round(var,1)
-			if var >= 0.0:
-				mag_var=[var,'E']
-			if var < 0.0:
-				mag_var=[var*-1,'W']
-		except: mag_var=['','']
-	else: mag_var=['','']
-	return mag_var
+			wx.StaticBox(self, size=(330, 65), pos=(10, 65))
+			self.mag_var = wx.CheckBox(self, label=_('Magnetic variation'), pos=(20, 80))
+			self.mag_var.Bind(wx.EVT_CHECKBOX, self.nmea_mag_var)
+			wx.StaticText(self, label=_('Generated NMEA: $OCHDG'), pos=(20, 105))
 
-thread1=threading.Thread(target=parse_nmea)	
-thread1.start()
+			wx.StaticBox(self, size=(330, 65), pos=(10, 130))
+			self.heading_t = wx.CheckBox(self, label=_('True heading'), pos=(20, 145))
+			self.heading_t.Bind(wx.EVT_CHECKBOX, self.nmea_hdt)
+			wx.StaticText(self, label=_('Generated NMEA: $OCHDT'), pos=(20, 170))
 
-sent=time.time()
-# loop
-while True:
-	#calculations			
-	time.sleep(0.01)
-	now=time.time()
-	# refresh values
-	position =[a.validate('Lat',now,accuracy), a.DataList[a.getDataListIndex('Lat')][3], a.validate('Lon',now,accuracy), a.DataList[a.getDataListIndex('Lon')][3]]
-	date = a.validate('Date',now,accuracy)
-	if not date: date = datetime.date.today()
-	heading_m = a.validate('HDM',now,accuracy)
-	if a.DataList[a.getDataListIndex('Var')][5] == 'OC': mag_var=['','']
-	else: mag_var = [a.validate('Var',now,accuracy), a.DataList[a.getDataListIndex('Var')][3]]
-	if not mag_var[0]: mag_var = calculate_mag_var(position,date)
-	if a.DataList[a.getDataListIndex('HDT')][5] == 'OC': heading_t=''
-	else: heading_t = a.validate('HDT',now,accuracy)
-	if not heading_t:
-		if heading_m and mag_var[0]:
-			var=mag_var[0]
-			if mag_var[1]=='W':var=var*-1
-			heading_t=heading_m+var
-			if heading_t>360: heading_t=heading_t-360
-			if heading_t<0: heading_t=360+heading_t
-	STW = a.validate('STW',now,accuracy)
-	AWS = a.validate('AWS',now,accuracy) 
-	AWA = [a.validate('AWA',now,accuracy), a.DataList[a.getDataListIndex('AWA')][3]]
-	if AWA[0]:
-		if AWA[1]=='D':
-			AWA[1]='R'
-			if AWA[0]>180: 
-				AWA[0]=360-AWA[0]
-				AWA[1]='L'
-	SOG = a.validate('SOG',now,accuracy)
-	COG = a.validate('COG',now,accuracy)
-	# end refresh values
-	# generate NMEA
-	if now-sent >= rate:
-		sent=now
-		#generate magnetic variation
-		if  conf.get('STARTUP', 'nmea_mag_var')=='1' and mag_var[0]:
-			if heading_m: value=str(heading_m)
-			else: value=''
-			hdg = pynmea2.HDG('OC', 'HDG', (value,'','',str(mag_var[0]),mag_var[1]))
-			hdg1=str(hdg)
-			hdg2=hdg1+'\r\n'
-			sock.sendto(hdg2, ('127.0.0.1', 10110))
-		#generate headint_t
-		if  conf.get('STARTUP', 'nmea_hdt')=='1' and heading_t:
-			hdt = pynmea2.HDT('OC', 'HDT', (str(round(heading_t,1)),'T'))
-			hdt1=str(hdt)
-			hdt2=hdt1+'\r\n'
-			sock.sendto(hdt2, ('127.0.0.1', 10110))
-		#generate Rate of Turn (ROT)
-		if conf.get('STARTUP', 'nmea_rot')=='1' and heading_m:
-			if not last_heading: #initialize
-				last_heading = heading_m
-				heading_time = time.time()					
-			else:	#normal run
-				heading_change = heading_m-last_heading
-				last_heading_time = heading_time
-				heading_time = time.time()
-				last_heading = heading_m
-				if heading_change > 180:	#If we are "passing" north
-					heading_change = heading_change - 360
-				if heading_change < -180: 	#if we are "passing north"
-					heading_change = 360 + heading_change
-				rot = float(heading_change)/((heading_time - last_heading_time)/60)
-				rot= round(rot,1)				
-				#consider damping ROT values						
-				rot = pynmea2.ROT('OC', 'ROT', (str(rot),'A'))
-				rot1=str(rot)
-				rot2=rot1+'\r\n'
-				sock.sendto(rot2, ('127.0.0.1', 10110))
-		#generate True Wind STW
-		if conf.get('STARTUP', 'tw_stw')=='1' and STW and AWS and AWA:
-			#TWA
-			TWS=math.sqrt((STW**2+AWS**2)-(2*STW*AWS*math.cos(math.radians(AWA[0]))))
-			TWA=math.degrees(math.acos((AWS**2-TWS**2-STW**2)/(2*TWS*STW)))
-			TWA0=TWA
-			if AWA[1]=='L': TWA0=360-TWA0
-			TWSr=round(TWS,1)
-			TWA0r=round(TWA0,0)
-			mwv = pynmea2.MWV('OC', 'MWV', (str(TWA0r),'T',str(TWSr),'N','A'))
-			mwv1=str(mwv)
-			mwv2=mwv1+'\r\n'
-			sock.sendto(mwv2, ('127.0.0.1', 10110))
-			#TWD
-			if heading_t:
-				if AWA[1]=='R':
-					TWD=heading_t+TWA
-				if AWA[1]=='L':
-					TWD=heading_t-TWA
-				if TWD>360: TWD=TWD-360
-				if TWD<0: TWD=360+TWD
-				TWDr=round(TWD,0)
-				mwd = pynmea2.MWD('OC', 'MWD', (str(TWDr),'T','','M',str(TWSr),'N','',''))
-				mwd1=str(mwd)
-				mwd2=mwd1+'\r\n'
-				sock.sendto(mwd2, ('127.0.0.1', 10110))
-		#generate True Wind SOG
-		if conf.get('STARTUP', 'tw_sog')=='1' and SOG and COG and heading_t and AWS and AWA:
-			#TWD
-			D=heading_t-COG
-			if AWA[1]=='R': AWD=AWA[0]+D
-			if AWA[1]=='L': AWD=(AWA[0]*-1)+D
-			if AWD > 0: AWD0=[AWD,'R']
-			if AWD < 0: AWD0=[AWD*-1,'L']
-			TWS=math.sqrt((SOG**2+AWS**2)-(2*SOG*AWS*math.cos(math.radians(AWD0[0]))))
-			TWAc=math.degrees(math.acos((AWS**2-TWS**2-SOG**2)/(2*TWS*SOG)))
-			if AWD0[1]=='R': TWD=COG+TWAc
-			if AWD0[1]=='L': TWD=COG-TWAc
-			if TWD>360: TWD=TWD-360
-			if TWD<0: TWD=360+TWD
-			TWDr=round(TWD,0)
-			TWSr=round(TWS,1)
-			mwd = pynmea2.MWD('OC', 'MWD', (str(TWDr),'T','','M',str(TWSr),'N','',''))
-			mwd1=str(mwd)
-			mwd2=mwd1+'\r\n'
-			sock.sendto(mwd2, ('127.0.0.1', 10110))
-			#TWA
-			TWA=TWD-heading_t
-			TWA0=TWA
-			if TWA0 < 0: TWA0=360+TWA0
-			TWA0r=round(TWA0,0)
-			mwv = pynmea2.MWV('OC', 'MWV', (str(TWA0r),'T',str(TWSr),'N','A'))
-			mwv1=str(mwv)
-			mwv2=mwv1+'\r\n'
-			sock.sendto(mwv2, ('127.0.0.1', 10110))
+			wx.StaticBox(self, size=(330, 65), pos=(10, 195))
+			self.rot = wx.CheckBox(self, label=_('Rate of turn'), pos=(20, 210))
+			self.rot.Bind(wx.EVT_CHECKBOX, self.nmea_rot)
+			wx.StaticText(self, label=_('Generated NMEA: $OCROT'), pos=(20, 235))
+
+			wx.StaticBox(self, label=_(' True wind '), size=(330, 90), pos=(350, 65))
+			self.TW_STW = wx.CheckBox(self, label=_('Use speed log'), pos=(360, 80))
+			self.TW_STW.Bind(wx.EVT_CHECKBOX, self.TW)
+			self.TW_SOG = wx.CheckBox(self, label=_('Use GPS'), pos=(360, 105))
+			self.TW_SOG.Bind(wx.EVT_CHECKBOX, self.TW)
+			wx.StaticText(self, label=_('Generated NMEA: $OCMWV, $OCMWD'), pos=(360, 130))
+
+			self.CreateStatusBar()
+
+			self.Centre()
+
+			self.Show(True)
+
+			self.rate2.SetValue(self.conf.get('CALCULATE', 'nmea_rate_cal'))
+			self.accuracy.SetValue(self.conf.get('CALCULATE', 'cal_accuracy'))
+			if self.conf.get('CALCULATE', 'nmea_mag_var')=='1': self.mag_var.SetValue(True)
+			if self.conf.get('CALCULATE', 'nmea_hdt')=='1': self.heading_t.SetValue(True)
+			if self.conf.get('CALCULATE', 'nmea_rot')=='1': self.rot.SetValue(True)
+			if self.conf.get('CALCULATE', 'tw_stw')=='1': self.TW_STW.SetValue(True)
+			if self.conf.get('CALCULATE', 'tw_sog')=='1': self.TW_SOG.SetValue(True)
+
+		def start_calculate(self):
+			subprocess.call(['pkill', '-f', 'calculate_d.py'])
+			if self.mag_var.GetValue() or self.heading_t.GetValue() or self.rot.GetValue() or self.TW_STW.GetValue() or self.TW_SOG.GetValue():
+				subprocess.Popen(['python', self.currentpath+'/calculate_d.py'])
+
+		def ok_rate2(self, e):
+			rate=self.rate2.GetValue()
+			self.conf.set('CALCULATE', 'nmea_rate_cal', rate)
+			self.start_calculate()
+			self.ShowMessage(_('Generation rate set to ')+rate+_(' seconds'))
+
+		def ok_accuracy(self,e):
+			accuracy=self.accuracy.GetValue()
+			self.conf.set('CALCULATE', 'cal_accuracy', accuracy)
+			self.start_calculate()
+			self.ShowMessage(_('Calculation accuracy set to ')+accuracy+_(' seconds'))
+
+		def nmea_mag_var(self, e):
+			sender = e.GetEventObject()
+			if sender.GetValue(): self.conf.set('CALCULATE', 'nmea_mag_var', '1')
+			else: self.conf.set('CALCULATE', 'nmea_mag_var', '0')
+			self.start_calculate()
+
+		def nmea_hdt(self, e):
+			sender = e.GetEventObject()
+			if sender.GetValue(): self.conf.set('CALCULATE', 'nmea_hdt', '1')
+			else: self.conf.set('CALCULATE', 'nmea_hdt', '0')
+			self.start_calculate()
+
+		def nmea_rot(self, e):
+			sender = e.GetEventObject()
+			if sender.GetValue(): self.conf.set('CALCULATE', 'nmea_rot', '1')
+			else: self.conf.set('CALCULATE', 'nmea_rot', '0')
+			self.start_calculate()
+
+		def	TW(self, e):
+			sender = e.GetEventObject()
+			state=sender.GetValue()
+			self.TW_STW.SetValue(False)
+			self.TW_SOG.SetValue(False)
+			self.conf.set('CALCULATE', 'tw_stw', '0')
+			self.conf.set('CALCULATE', 'tw_sog', '0')
+			if state: sender.SetValue(True)
+			if self.TW_STW.GetValue(): self.conf.set('CALCULATE', 'tw_stw', '1')
+			if self.TW_SOG.GetValue(): self.conf.set('CALCULATE', 'tw_sog', '1')
+			self.start_calculate()
+
+app = wx.App()
+MyFrame().Show()
+app.MainLoop()

@@ -103,11 +103,11 @@ if not exist:
 	if x: DS18B20=eval(x)
 	else: DS18B20=[]
 		
-	nmea_mag_var=conf.get('STARTUP', 'nmea_mag_var')
-	nmea_hdt=conf.get('STARTUP', 'nmea_hdt')
-	nmea_rot=conf.get('STARTUP', 'nmea_rot')
-	TW_STW=conf.get('STARTUP', 'tw_stw')
-	TW_SOG=conf.get('STARTUP', 'tw_sog')
+	nmea_mag_var=conf.get('CALCULATE', 'nmea_mag_var')
+	nmea_hdt=conf.get('CALCULATE', 'nmea_hdt')
+	nmea_rot=conf.get('CALCULATE', 'nmea_rot')
+	TW_STW=conf.get('CALCULATE', 'tw_stw')
+	TW_SOG=conf.get('CALCULATE', 'tw_sog')
 	play=conf.get('STARTUP', 'play')
 	sound=conf.get('STARTUP', 'sound')
 	#######################################################
@@ -157,9 +157,9 @@ if not exist:
 	if DS18B20: 
 		subprocess.Popen(['python', currentpath+'/1w.py'])
 
-	subprocess.call(['pkill', '-f', 'calculate.py'])
+	subprocess.call(['pkill', '-f', 'calculate_d.py'])
 	if nmea_mag_var=='1' or nmea_hdt=='1' or nmea_rot=='1' or TW_STW=='1' or TW_SOG=='1': 
-		subprocess.Popen(['python', currentpath+'/calculate.py'])
+		subprocess.Popen(['python', currentpath+'/calculate_d.py'])
 
 	subprocess.call(["pkill", '-9', "node"])
 	subprocess.Popen(home+'/.config/signalk-server-node/bin/openplotter', cwd=home+'/.config/signalk-server-node')       

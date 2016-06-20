@@ -61,7 +61,7 @@ class MainFrame(wx.Frame):
 		self.p.SetupScrolling()
 		self.nb = wx.Notebook(self.p)
 		self.page1 = wx.Panel(self.nb)
-		self.page2 = wx.Panel(self.nb)
+		#self.page2 = wx.Panel(self.nb)
 		self.page3 = wx.Panel(self.nb)
 		#self.page4 = wx.Panel(self.nb)
 		self.page5 = wx.Panel(self.nb)
@@ -89,7 +89,7 @@ class MainFrame(wx.Frame):
 		self.nb.AddPage(self.page11, _('1W sensors'))
 		self.nb.AddPage(self.page12, _('SPI sensors'))
 		#self.nb.AddPage(self.page4, _(''))
-		self.nb.AddPage(self.page2, _('Calculate'))
+		#self.nb.AddPage(self.page2, _(''))
 		self.nb.AddPage(self.page9, _('Accounts'))
 		self.nb.AddPage(self.page16, _('MQTT'))
 		self.nb.AddPage(self.page15, _('SMS'))
@@ -116,6 +116,9 @@ class MainFrame(wx.Frame):
 		self.settings.AppendSeparator()
 		self.sdr_ais_item1 = self.settings.Append(wx.ID_ANY, _('SDR-AIS receiver'), _('Set an SDR-AIS receiver in the new window'))
 		self.Bind(wx.EVT_MENU, self.open_sdr_ais, self.sdr_ais_item1)
+		self.settings.AppendSeparator()
+		self.calculate_item1 = self.settings.Append(wx.ID_ANY, _('Calculate'), _('Calculate new data from current values'))
+		self.Bind(wx.EVT_MENU, self.open_calculate, self.calculate_item1)
 		self.menubar.Append(self.settings, _('Tools'))
 
 		self.lang = wx.Menu()
@@ -179,43 +182,7 @@ class MainFrame(wx.Frame):
 		self.op_maximize.Bind(wx.EVT_CHECKBOX, self.startup)
 ###########################page1
 ########page2###################
-		wx.StaticBox(self.page2, size=(330, 50), pos=(10, 10))
-		wx.StaticText(self.page2, label=_('Rate (sec)'), pos=(20, 30))
-		self.rate_list = ['0.1', '0.25', '0.5', '0.75', '1', '1.5', '2']
-		self.rate2= wx.ComboBox(self.page2, choices=self.rate_list, style=wx.CB_READONLY, size=(80, 32), pos=(150, 23))
-		self.button_ok_rate2 =wx.Button(self.page2, label=_('Ok'),size=(70, 32), pos=(250, 23))
-		self.Bind(wx.EVT_BUTTON, self.ok_rate2, self.button_ok_rate2)
 
-		wx.StaticBox(self.page2, size=(330, 50), pos=(350, 10))
-		wx.StaticText(self.page2, label=_('Accuracy (sec)'), pos=(360, 30))
-		self.accuracy= wx.ComboBox(self.page2, choices=self.rate_list, style=wx.CB_READONLY, size=(80, 32), pos=(500, 23))
-		self.button_ok_accuracy =wx.Button(self.page2, label=_('Ok'),size=(70, 32), pos=(600, 23))
-		self.Bind(wx.EVT_BUTTON, self.ok_accuracy, self.button_ok_accuracy)
-
-		wx.StaticBox(self.page2, size=(330, 65), pos=(10, 65))
-		self.mag_var = wx.CheckBox(self.page2, label=_('Magnetic variation'), pos=(20, 80))
-		self.mag_var.Bind(wx.EVT_CHECKBOX, self.nmea_mag_var)
-		wx.StaticText(self.page2, label=_('Generated NMEA: $OCHDG'), pos=(20, 105))
-
-		wx.StaticBox(self.page2, size=(330, 65), pos=(10, 130))
-		self.heading_t = wx.CheckBox(self.page2, label=_('True heading'), pos=(20, 145))
-		self.heading_t.Bind(wx.EVT_CHECKBOX, self.nmea_hdt)
-		wx.StaticText(self.page2, label=_('Generated NMEA: $OCHDT'), pos=(20, 170))
-
-		wx.StaticBox(self.page2, size=(330, 65), pos=(10, 195))
-		self.rot = wx.CheckBox(self.page2, label=_('Rate of turn'), pos=(20, 210))
-		self.rot.Bind(wx.EVT_CHECKBOX, self.nmea_rot)
-		wx.StaticText(self.page2, label=_('Generated NMEA: $OCROT'), pos=(20, 235))
-
-		wx.StaticBox(self.page2, label=_(' True wind '), size=(330, 90), pos=(350, 65))
-		self.TW_STW = wx.CheckBox(self.page2, label=_('Use speed log'), pos=(360, 80))
-		self.TW_STW.Bind(wx.EVT_CHECKBOX, self.TW)
-		self.TW_SOG = wx.CheckBox(self.page2, label=_('Use GPS'), pos=(360, 105))
-		self.TW_SOG.Bind(wx.EVT_CHECKBOX, self.TW)
-		wx.StaticText(self.page2, label=_('Generated NMEA: $OCMWV, $OCMWD'), pos=(360, 130))
-
-		self.show_kplex7 =wx.Button(self.page2, label=_('Inspector'), pos=(10, 285))
-		self.Bind(wx.EVT_BUTTON, self.show_kplex, self.show_kplex7)
 ###########################page2
 ########page3###################
 		wx.StaticBox(self.page3, size=(370, 315), pos=(10, 10))
@@ -497,6 +464,7 @@ class MainFrame(wx.Frame):
 		self.h_temp_skt = wx.ComboBox(self.page6, choices=self.list_sk_path, style=wx.CB_READONLY, size=(150, 25), pos=(s6, z-3))
 		self.h_temp_offset = wx.TextCtrl(self.page6, size=(100, 20), pos=(s7, z))
 		
+		self.rate_list = ['0.1', '0.25', '0.5', '0.75', '1', '1.5', '2']
 		wx.StaticText(self.page6, label=_('Rate (sec)'), pos=(s1, 290))
 		self.rate= wx.ComboBox(self.page6, choices=self.rate_list, style=wx.CB_READONLY, size=(80, 32), pos=(100, 283))
 
@@ -750,15 +718,6 @@ class MainFrame(wx.Frame):
 		if self.conf.get('STARTUP', 'play')=='1':
 			self.startup_play_sound.SetValue(True) 
 
-		self.rate.SetValue(self.conf.get('STARTUP', 'nmea_rate_sen'))
-		self.rate2.SetValue(self.conf.get('STARTUP', 'nmea_rate_cal'))
-		self.accuracy.SetValue(self.conf.get('STARTUP', 'cal_accuracy'))
-		if self.conf.get('STARTUP', 'nmea_mag_var')=='1': self.mag_var.SetValue(True)
-		if self.conf.get('STARTUP', 'nmea_hdt')=='1': self.heading_t.SetValue(True)
-		if self.conf.get('STARTUP', 'nmea_rot')=='1': self.rot.SetValue(True)
-		if self.conf.get('STARTUP', 'tw_stw')=='1': self.TW_STW.SetValue(True)
-		if self.conf.get('STARTUP', 'tw_sog')=='1': self.TW_SOG.SetValue(True)
-
 		detected=subprocess.check_output(['python', currentpath+'/imu/check_sensors.py'], cwd=currentpath+'/imu')
 		l_detected=detected.split('\n')
 		self.imu_sensor=l_detected[0]
@@ -864,7 +823,11 @@ class MainFrame(wx.Frame):
 
 	def open_sdr_ais(self,event):
 		close=subprocess.call(['pkill', '-f', 'sdr_ais.py'])
-		show_output=subprocess.Popen(['python',currentpath+'/sdr_ais.py'])
+		subprocess.Popen(['python',currentpath+'/sdr_ais.py'])
+
+	def open_calculate(self,event):
+		close=subprocess.call(['pkill', '-f', 'calculate.py'])
+		subprocess.Popen(['python',currentpath+'/calculate.py'])
 	
 	def clear_lang(self):
 		self.lang.Check(self.lang_item1.GetId(), False)
@@ -1275,7 +1238,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def show_kplex(self,event):
 		close=subprocess.call(['pkill', '-f', 'output.py'])
-		show_output=subprocess.Popen(['python',currentpath+'/output.py'])
+		subprocess.Popen(['python',currentpath+'/output.py'])
 
 	def advanced_kplex(self,event):
 		self.ShowMessage(_('OpenPlotter will close. Add manual settings at the end of the configuration file. Open OpenPlotter again and restart multiplexer to apply changes.'))
@@ -1527,9 +1490,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					time.sleep(0.5)
 					close=subprocess.call(['pkill', '-f', 'diagnostic-NMEA.py'])
 					if self.kplex[i][3]=='in' or self.kplex[i][3]=='both':
-						show_output=subprocess.Popen(['python',currentpath+'/diagnostic-NMEA.py','10112','diagnostic_input'])
+						subprocess.Popen(['python',currentpath+'/diagnostic-NMEA.py','10112','diagnostic_input'])
 					if self.kplex[i][3]=='out' or self.kplex[i][3]=='both':
-						show_output=subprocess.Popen(['python',currentpath+'/diagnostic-NMEA.py','10113','diagnostic_output'])				
+						subprocess.Popen(['python',currentpath+'/diagnostic-NMEA.py','10113','diagnostic_output'])				
 			
 ###################################### I2C sensors
 
@@ -1662,55 +1625,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		subprocess.Popen('RTIMULibDemoGL', cwd=currentpath+'/imu')
 		msg=_('After calibrating, click apply.')
 		self.ShowMessage(msg)
-
-###################################### Calculate
-		
-	def start_calculate(self):
-		subprocess.call(['pkill', '-f', 'calculate.py'])
-		if self.mag_var.GetValue() or self.heading_t.GetValue() or self.rot.GetValue() or self.TW_STW.GetValue() or self.TW_SOG.GetValue():
-			subprocess.Popen(['python', currentpath+'/calculate.py'])
-
-	def ok_rate2(self, e):
-		rate=self.rate2.GetValue()
-		self.conf.set('STARTUP', 'nmea_rate_cal', rate)
-		self.start_calculate()
-		self.ShowMessage(_('Generation rate set to ')+rate+_(' seconds'))
-
-	def ok_accuracy(self,e):
-		accuracy=self.accuracy.GetValue()
-		self.conf.set('STARTUP', 'cal_accuracy', accuracy)
-		self.start_calculate()
-		self.ShowMessage(_('Calculation accuracy set to ')+accuracy+_(' seconds'))
-
-	def nmea_mag_var(self, e):
-		sender = e.GetEventObject()
-		if sender.GetValue(): self.conf.set('STARTUP', 'nmea_mag_var', '1')
-		else: self.conf.set('STARTUP', 'nmea_mag_var', '0')
-		self.start_calculate()
-
-	def nmea_hdt(self, e):
-		sender = e.GetEventObject()
-		if sender.GetValue(): self.conf.set('STARTUP', 'nmea_hdt', '1')
-		else: self.conf.set('STARTUP', 'nmea_hdt', '0')
-		self.start_calculate()
-
-	def nmea_rot(self, e):
-		sender = e.GetEventObject()
-		if sender.GetValue(): self.conf.set('STARTUP', 'nmea_rot', '1')
-		else: self.conf.set('STARTUP', 'nmea_rot', '0')
-		self.start_calculate()
-
-	def	TW(self, e):
-		sender = e.GetEventObject()
-		state=sender.GetValue()
-		self.TW_STW.SetValue(False)
-		self.TW_SOG.SetValue(False)
-		self.conf.set('STARTUP', 'tw_stw', '0')
-		self.conf.set('STARTUP', 'tw_sog', '0')
-		if state: sender.SetValue(True)
-		if self.TW_STW.GetValue(): self.conf.set('STARTUP', 'tw_stw', '1')
-		if self.TW_SOG.GetValue(): self.conf.set('STARTUP', 'tw_sog', '1')
-		self.start_calculate()
 
 ###################################### Switches
 
@@ -2570,7 +2484,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def diagnostic_SK(self, e):
 		close=subprocess.call(['pkill', '-f', 'diagnostic-SK-input.py'])
-		show_output=subprocess.Popen(['python',currentpath+'/diagnostic-SK-input.py'])
+		subprocess.Popen(['python',currentpath+'/diagnostic-SK-input.py'])
 
 	
 	def apply_SK(self,e):
