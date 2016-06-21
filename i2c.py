@@ -165,6 +165,11 @@ pitch_183=conf.get('I2C', 'nmea_pitch')=='1'
 pitch_2k=conf.get('I2C', 'n2k_pitch')=='1'
 pitch_sk=conf.get('I2C', 'sk_pitch')=='1'
 pressure_183=conf.get('I2C', 'nmea_press')=='1'
+try:
+	nmea_183_nke_instruments=conf.get('I2C', 'nmea_183_nke_instruments')=='1'
+except:
+	nmea_183_nke_instruments=False
+	
 pressure_2k=conf.get('I2C', 'n2k_press')=='1'
 pressure_sk=conf.get('I2C', 'sk_press')=='1'
 p_temp_183=conf.get('I2C', 'nmea_temp_p')=='1'
@@ -320,6 +325,11 @@ while True:
 				list_tmp2.append(str(heel))
 				list_tmp2.append('D')
 				list_tmp2.append('I2CX')
+			if nmea_183_nke_instruments:
+				list_tmp2.append('A')
+				list_tmp2.append(str(pitch))
+				list_tmp2.append('D')
+				list_tmp2.append('ROLL')
 			if heel_sk:
 				list_signalk_path2.append('navigation.attitude.roll')
 				list_signalk2.append(str(0.017453293*heel))
@@ -330,6 +340,12 @@ while True:
 				list_tmp2.append(str(pitch))
 				list_tmp2.append('D')
 				list_tmp2.append('I2CY')
+			if nmea_183_nke_instruments:
+				list_tmp2.append('A')
+				list_tmp2.append(str(pitch))
+				list_tmp2.append('D')
+				list_tmp2.append('PTCH')
+				
 			if pitch_sk:
 				list_signalk_path2.append('navigation.attitude.pitch')
 				list_signalk2.append(str(0.017453293*pitch))
@@ -339,11 +355,27 @@ while True:
 		
 		if e_pres:	
 			if pressure_183:
-				press=round(pressure,2)
 				list_tmp1.append('P')
-				list_tmp1.append(str(press))
+				list_tmp1.append('{:.2f}'.format(pressure))
 				list_tmp1.append('B')
 				list_tmp1.append('I2CP')
+			if nmea_183_nke_instruments:
+				# ----- NKE produces and reads MMB sentences 
+				# ----- but MMB currently is not programmed in pynmea2
+				# $IIMMB,30.3446,I,1.02481,B*65
+				# press_bar=round(pressure,5) 
+				# press_inchHg=round((pressure*29.5299830714),4)
+				# mmb=pynmea2.MMB('II', 'MMB', (str(press_inchHg),'I',str(press_bar),'B'))
+				# mmb1=str(mmb)
+				# mmb2=mmb1+"\r\n"
+				# sock.sendto(mmb2, ('127.0.0.1', 10110))
+				#
+				# ------- as transducer output ------
+				# $IIXDR,P,1.02481,B,Barometer*0D
+				list_tmp1.append('P')
+				list_tmp1.append('{:.6f}'.format(pressure))
+				list_tmp1.append('B')
+				list_tmp1.append('Barometer')
 			if pressure_sk:
 				list_signalk_path1.append('environment.outside.pressure')
 				list_signalk1.append(str(pressure*100))			
@@ -353,6 +385,14 @@ while True:
 				list_tmp1.append(str(temp))
 				list_tmp1.append('C')
 				list_tmp1.append('I2CT')
+			if nmea_183_nke_instruments:
+				# ----- NKE reads 	
+				# ------- as transducer output ------
+				# $IIXDR,C,19.52,C,TempAir*3D
+				list_tmp1.append('C')
+				list_tmp1.append('{:-.2f}'.format(temperature_p))
+				list_tmp1.append('C')
+				list_tmp1.append('TempAir')
 			if p_temp_sk:
 				list_signalk_path1.append(p_temp_skt)
 				list_signalk1.append(str(round(temperature_p,2)+273.15))
