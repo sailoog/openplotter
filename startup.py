@@ -84,19 +84,22 @@ if not exist:
 	x11vnc=conf.get('STARTUP', 'x11vnc')
 	vnc_pass=conf.get('STARTUP', 'vnc_pass')
 	gps_time=conf.get('STARTUP', 'gps_time')
-
+	play=conf.get('STARTUP', 'play')
+	sound=conf.get('STARTUP', 'sound')
+	
 	enable=conf.get('AIS-SDR', 'enable')
 	gain=conf.get('AIS-SDR', 'gain')
 	ppm=conf.get('AIS-SDR', 'ppm')
 	channel=conf.get('AIS-SDR', 'channel')
 
-	nmea_hdg=conf.get('STARTUP', 'nmea_hdg')
-	nmea_heel=conf.get('STARTUP', 'nmea_heel')
-	nmea_pitch=conf.get('STARTUP', 'nmea_pitch')
-	nmea_press=conf.get('STARTUP', 'nmea_press')
-	nmea_temp_p=conf.get('STARTUP', 'nmea_temp_p')
-	nmea_hum=conf.get('STARTUP', 'nmea_hum')
-	nmea_temp_h=conf.get('STARTUP', 'nmea_temp_h')
+	detected=subprocess.check_output(['python', currentpath+'/imu/check_sensors.py'], cwd=currentpath+'/imu')
+	l_detected=detected.split('\n')
+	e_imu=True
+	e_pres=True
+	e_hum=True
+	if 'none' in l_detected[0]:	e_imu=False
+	if 'none' in l_detected[2]:	e_pres=False
+	if 'none' in l_detected[3]:	e_hum=False
 
 	DS18B20=[]
 	x=conf.get('1W', 'DS18B20')
@@ -108,8 +111,7 @@ if not exist:
 	nmea_rot=conf.get('CALCULATE', 'nmea_rot')
 	TW_STW=conf.get('CALCULATE', 'tw_stw')
 	TW_SOG=conf.get('CALCULATE', 'tw_sog')
-	play=conf.get('STARTUP', 'play')
-	sound=conf.get('STARTUP', 'sound')
+
 	#######################################################
 	time.sleep(delay)
 
@@ -139,15 +141,6 @@ if not exist:
 
 	if gps_time=='1':
 		subprocess.call(['sudo', 'python', currentpath+'/time_gps.py'])
-
-	detected=subprocess.check_output(['python', currentpath+'/imu/check_sensors.py'], cwd=currentpath+'/imu')
-	l_detected=detected.split('\n')
-	e_imu=True
-	e_pres=True
-	e_hum=True
-	if 'none' in l_detected[0]:	e_imu=False
-	if 'none' in l_detected[2]:	e_pres=False
-	if 'none' in l_detected[3]:	e_hum=False
 		
 	subprocess.call(['pkill', '-f', 'i2c.py'])
 	if e_imu or e_pres or e_hum:

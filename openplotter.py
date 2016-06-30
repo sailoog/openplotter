@@ -386,103 +386,93 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.sms_test, self.button_sms_test)
 ###########################page15
 ########page6###################
-		z1=55
-		z2=80
+		z0=20
+		z1=45
+		z2=75
 		z3=105
-		z4=135
-		z5=165
-		z6=195
-		z7=220
+		z4=145
+		z5=175
+		z6=215
+		z7=245
+		z8=293
 		s1=20
-		s2=180
-		s3=240
-		s4=280
-		s5=320
-		s6=380
-		s7=550
+		s2=130
+		s3=560
+		s4=300
+		s5=500
+		s6=220
 		
-		with open(home+'/.config/openplotter/classes/SK_temp.txt') as f:
-			self.list_sk_path = [x.strip('\n\r') for x in f.readlines()]
-		
-		wx.StaticBox(self.page6,label=_(' Settings '), size=(675, 320), pos=(5, 5))
-		wx.StaticText(self.page6, label=_('NMEA'), pos=(260, 20))
-		wx.StaticText(self.page6, label=_('available'), pos=(s2, 35))
-		wx.StaticText(self.page6, label=_('0183'), pos=(s3, 35))
-		wx.StaticText(self.page6, label=_('2K'), pos=(s4, 35))
-		wx.StaticText(self.page6, label=_('SignalK'), pos=(s5, 35))
-		wx.StaticText(self.page6, label=_('SignalK type'), pos=(s6, 35))
-		wx.StaticText(self.page6, label=_('offset'), pos=(s7, 35))
-		z=z1
-		wx.StaticText(self.page6, label=_('IMU  Heading'), pos=(s1, z))
-		self.heading_avai = wx.CheckBox(self.page6, pos=(s2, z))
-		self.heading_183 = wx.CheckBox(self.page6, pos=(s3, z))
-		self.heading_2k = wx.CheckBox(self.page6, pos=(s4, z))
-		self.heading_sk = wx.CheckBox(self.page6, pos=(s5, z))
-		self.heading_offset = wx.TextCtrl(self.page6, size=(100, 20), pos=(s7, z))
-		z=z2
-		wx.StaticText(self.page6, label=_('IMU  Heel'), pos=(s1, z))
-		self.heel_avai = wx.CheckBox(self.page6, pos=(s2, z))
-		self.heel_183 = wx.CheckBox(self.page6, pos=(s3, z))
-		self.heel_2k = wx.CheckBox(self.page6, pos=(s4, z))
-		self.heel_sk = wx.CheckBox(self.page6, pos=(s5, z))
-		self.heel_offset = wx.TextCtrl(self.page6, size=(100, 20), pos=(s7, z))
-		z=z3
-		wx.StaticText(self.page6, label=_('IMU  Pitch'), pos=(s1, z))
-		self.pitch_avai = wx.CheckBox(self.page6, pos=(s2, z))
-		self.pitch_183 = wx.CheckBox(self.page6, pos=(s3, z))
-		self.pitch_2k = wx.CheckBox(self.page6, pos=(s4, z))
-		self.pitch_sk = wx.CheckBox(self.page6, pos=(s5, z))
-		self.pitch_offset = wx.TextCtrl(self.page6, size=(100, 20), pos=(s7, z))
-		z=z4
-		wx.StaticText(self.page6, label=_('Pressure'), pos=(s1, z))
-		self.pressure_avai = wx.CheckBox(self.page6, pos=(s2, z))
-		self.pressure_183 = wx.CheckBox(self.page6, pos=(s3, z))
-		self.pressure_2k = wx.CheckBox(self.page6, pos=(s4, z))
-		self.pressure_sk = wx.CheckBox(self.page6, pos=(s5, z))
-		self.pressure_offset = wx.TextCtrl(self.page6, size=(100, 20), pos=(s7, z))
-		z=z5
-		wx.StaticText(self.page6, label=_('Temperature'), pos=(s1, z))
-		self.p_temp_avai = wx.CheckBox(self.page6, pos=(s2, z))
-		self.p_temp_183 = wx.CheckBox(self.page6, pos=(s3, z))
-		self.p_temp_2k = wx.CheckBox(self.page6, pos=(s4, z))
-		self.p_temp_sk = wx.CheckBox(self.page6, pos=(s5, z))
-		self.p_temp_skt = wx.ComboBox(self.page6, choices=self.list_sk_path, style=wx.CB_READONLY, size=(150, 25), pos=(s6, z-3))
-		self.p_temp_offset = wx.TextCtrl(self.page6, size=(100, 20), pos=(s7, z))
-		z=z6
-		wx.StaticText(self.page6, label=_('Humidity'), pos=(s1, z))
-		self.humidity_avai = wx.CheckBox(self.page6, pos=(s2, z))
-		self.humidity_183 = wx.CheckBox(self.page6, pos=(s3, z))
-		self.humidity_2k = wx.CheckBox(self.page6, pos=(s4, z))
-		self.humidity_sk = wx.CheckBox(self.page6, pos=(s5, z))
-		self.humidity_offset = wx.TextCtrl(self.page6, size=(100, 20), pos=(s7, z))
-		z=z7
-		wx.StaticText(self.page6, label=_('Temperature'), pos=(s1, z))
-		self.h_temp_avai = wx.CheckBox(self.page6, pos=(s2, z))
-		self.h_temp_183 = wx.CheckBox(self.page6, pos=(s3, z))
-		self.h_temp_2k = wx.CheckBox(self.page6, pos=(s4, z))
-		self.h_temp_sk = wx.CheckBox(self.page6, pos=(s5, z))
-		self.h_temp_skt = wx.ComboBox(self.page6, choices=self.list_sk_path, style=wx.CB_READONLY, size=(150, 25), pos=(s6, z-3))
-		self.h_temp_offset = wx.TextCtrl(self.page6, size=(100, 20), pos=(s7, z))
-		
+		self.list_sk_path_temp=['environment.inside.temperature','environment.outside.temperature']
+		self.list_sk_path_hum=['environment.inside.humidity','environment.outside.humidity']
+
+		z=z0
+		wx.StaticBox(self.page6,label=_(' Settings '), size=(675, 330), pos=(5, 5))
+		wx.StaticText(self.page6, label=_('Sensors'), pos=(s2, z))
+		wx.StaticText(self.page6, label=_('Signal K'), pos=(s4, z))
+		wx.StaticText(self.page6, label=_('Offset'), pos=(s5, z))
+		wx.StaticText(self.page6, label=_('Rate (sec)'), pos=(s6, z))
 		self.rate_list = ['0.1', '0.25', '0.5', '0.75', '1', '1.5', '2']
-		wx.StaticText(self.page6, label=_('Rate (sec)'), pos=(s1, 290))
-		self.rate= wx.ComboBox(self.page6, choices=self.rate_list, style=wx.CB_READONLY, size=(80, 32), pos=(100, 283))
-
-
-		self.button_calibrate_imu =wx.Button(self.page6, label=_('Calibrate IMU'), pos=(250, 283))
+		z=z1
+		self.heading_label=wx.StaticText(self.page6, label=_('Heading'), pos=(s1, z))
+		self.heading_sensor=wx.StaticText(self.page6, pos=(s2, z))
+		self.button_calibrate_imu =wx.Button(self.page6, label=_('Calibrate'), pos=(s3, z))
 		self.Bind(wx.EVT_BUTTON, self.i2c_calibrate_imu, self.button_calibrate_imu)
-		self.button_i2c_cancel =wx.Button(self.page6, label=_('cancel'), pos=(480, 283))
+		wx.StaticText(self.page6, label=_('navigation.headingMagnetic'), pos=(s4, z))
+		self.heading_offset = wx.TextCtrl(self.page6, size=(45, 20), pos=(s5, z))
+
+		z=z2
+		self.heel_label=wx.StaticText(self.page6, label=_('Heel'), pos=(s1, z))
+		self.heel_sensor=wx.StaticText(self.page6, pos=(s2, z))
+		wx.StaticText(self.page6, label=_('navigation.attitude.roll'), pos=(s4, z))
+		self.heel_offset = wx.TextCtrl(self.page6, size=(45, 20), pos=(s5, z))
+		self.rate_imu= wx.ComboBox(self.page6, choices=self.rate_list, style=wx.CB_READONLY, size=(60, 25), pos=(s6, z-5))
+		z=z3
+		self.pitch_label=wx.StaticText(self.page6, label=_('Pitch'), pos=(s1, z))
+		self.pitch_sensor=wx.StaticText(self.page6, pos=(s2, z))
+		self.button_reset_imu =wx.Button(self.page6, label=_('Reset'), pos=(s3, z-20))
+		self.Bind(wx.EVT_BUTTON, self.reset_imu, self.button_reset_imu)
+		wx.StaticText(self.page6, label=_('navigation.attitude.pitch'), pos=(s4, z))
+		self.pitch_offset = wx.TextCtrl(self.page6, size=(45, 20), pos=(s5, z))
+		z=z4
+		self.pressure_label=wx.StaticText(self.page6, label=_('Pressure'), pos=(s1, z))
+		self.pressure_sensor=wx.StaticText(self.page6, pos=(s2, z))
+		self.button_reset_pressure=wx.Button(self.page6, label=_('Reset'), pos=(s3, z+5))
+		self.Bind(wx.EVT_BUTTON, self.reset_press, self.button_reset_pressure)
+		wx.StaticText(self.page6, label=_('environment.outside.pressure'), pos=(s4, z))
+		self.pressure_offset = wx.TextCtrl(self.page6, size=(45, 20), pos=(s5, z))
+		self.rate_press= wx.ComboBox(self.page6, choices=self.rate_list, style=wx.CB_READONLY, size=(60, 25), pos=(s6, z+10))
+		z=z5
+		self.p_temp_label=wx.StaticText(self.page6, label=_('Temperature'), pos=(s1, z))
+		self.p_temp_sensor=wx.StaticText(self.page6, pos=(s2, z))
+		self.p_temp_skt = wx.ComboBox(self.page6, choices=self.list_sk_path_temp, style=wx.CB_READONLY, size=(180, 25), pos=(s4, z-3))
+		self.p_temp_offset = wx.TextCtrl(self.page6, size=(45, 20), pos=(s5, z))
+		z=z6
+		self.humidity_label=wx.StaticText(self.page6, label=_('Humidity'), pos=(s1, z))
+		self.humidity_sensor=wx.StaticText(self.page6, pos=(s2, z))
+		self.button_reset_humidity=wx.Button(self.page6, label=_('Reset'), pos=(s3, z+5))
+		self.humidity_skt = wx.ComboBox(self.page6, choices=self.list_sk_path_hum, style=wx.CB_READONLY, size=(180, 25), pos=(s4, z-3))
+		self.Bind(wx.EVT_BUTTON, self.reset_hum, self.button_reset_humidity)
+		self.humidity_offset = wx.TextCtrl(self.page6, size=(45, 20), pos=(s5, z))
+		self.rate_hum= wx.ComboBox(self.page6, choices=self.rate_list, style=wx.CB_READONLY, size=(60, 25), pos=(s6, z+10))
+		z=z7
+		self.h_temp_label=wx.StaticText(self.page6, label=_('Temperature'), pos=(s1, z))
+		self.h_temp_sensor=wx.StaticText(self.page6, pos=(s2, z))
+		self.h_temp_skt = wx.ComboBox(self.page6, choices=self.list_sk_path_temp, style=wx.CB_READONLY, size=(180, 25), pos=(s4, z-3))
+		self.h_temp_offset = wx.TextCtrl(self.page6, size=(45, 20), pos=(s5, z))
+		z=z8
+		self.button_reset_graph =wx.Button(self.page6, label=_('Reset graph'), pos=(s1, z))
+		self.Bind(wx.EVT_BUTTON, self.reset_graph, self.button_reset_graph)
+		self.button_graph =wx.Button(self.page6, label=_('Show graph'), pos=(s2, z))
+		self.Bind(wx.EVT_BUTTON, self.show_graph, self.button_graph)
+
+		self.diagnostic_SK_i2c =wx.Button(self.page6, label=_('SK Diagnostic'), pos=(s4, z))
+		self.Bind(wx.EVT_BUTTON, self.diagnostic_SK, self.diagnostic_SK_i2c)	
+
+		self.button_i2c_cancel =wx.Button(self.page6, label=_('cancel'), pos=(480, z))
 		self.Bind(wx.EVT_BUTTON, self.i2c_cancel, self.button_i2c_cancel)
-		self.button_i2c_apply =wx.Button(self.page6, label=_('apply'), pos=(580, 283))
+		self.button_i2c_apply =wx.Button(self.page6, label=_('apply'), pos=(580, z))
 		self.Bind(wx.EVT_BUTTON, self.i2c_apply, self.button_i2c_apply)
 
-		self.heading_avai.Disable()
-		self.heel_avai.Disable()
-		self.pitch_avai.Disable()
-		self.pressure_avai.Disable()
-		self.p_temp_avai.Disable()
-		self.humidity_avai.Disable()
-		self.h_temp_avai.Disable()
 ###########################page6
 ########page11###################
 
@@ -501,8 +491,8 @@ class MainFrame(wx.Frame):
 		self.delete_DS18B20_button =wx.Button(self.page11, label=_('delete'), pos=(585, 65))
 		self.Bind(wx.EVT_BUTTON, self.delete_DS18B20, self.delete_DS18B20_button)
 
-		self.show_kplex5 =wx.Button(self.page11, label=_('Inspector'), pos=(10, 285))
-		self.Bind(wx.EVT_BUTTON, self.show_kplex, self.show_kplex5)
+		self.diagnostic_SK_1w =wx.Button(self.page11, label=_('SK Diagnostic'), pos=(10, 285))
+		self.Bind(wx.EVT_BUTTON, self.diagnostic_SK, self.diagnostic_SK_1w)
 
 		self.button_apply_changes_DS18B20 =wx.Button(self.page11, label=_('Apply changes'), pos=(570, 285))
 		self.Bind(wx.EVT_BUTTON, self.apply_changes_DS18B20, self.button_apply_changes_DS18B20)
@@ -716,14 +706,7 @@ class MainFrame(wx.Frame):
 			self.Maximize()
 		self.startup_path_sound.SetValue(self.conf.get('STARTUP', 'sound'))
 		if self.conf.get('STARTUP', 'play')=='1':
-			self.startup_play_sound.SetValue(True) 
-
-		detected=subprocess.check_output(['python', currentpath+'/imu/check_sensors.py'], cwd=currentpath+'/imu')
-		l_detected=detected.split('\n')
-		self.imu_sensor=l_detected[0]
-		self.calibrated=l_detected[1]
-		self.press_sensor=l_detected[2]
-		self.hum_sensor=l_detected[3]
+			self.startup_play_sound.SetValue(True)
 
 		if self.conf.get('TWITTER', 'apiKey'): self.apiKey.SetValue('********************')
 		if self.conf.get('TWITTER', 'apiSecret'): self.apiSecret.SetValue('********************')
@@ -1498,18 +1481,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def start_sensors(self):
 		self.stop_sensors()
-		if self.humidity_avai.GetValue() or self.pressure_avai.GetValue() or self.heading_avai.GetValue():
+		if self.imu_sensor != 'none' or self.press_sensor != 'none' or self.hum_sensor != 'none':
 			subprocess.Popen(['python', currentpath+'/i2c.py'], cwd=currentpath+'/imu')
 			
 	def stop_sensors(self):
 		subprocess.call(['pkill', 'RTIMULibDemoGL'])
 		subprocess.call(['pkill', '-f', 'i2c.py'])
-
-	def enable_press_temp_log(self, e):
-		sender = e.GetEventObject()
-		if sender.GetValue(): self.conf.set('STARTUP', 'press_temp_log', '1')
-		else: self.conf.set('STARTUP', 'press_temp_log', '0')
-		self.start_sensors()
 
 	def show_graph(self, e):
 		subprocess.call(['pkill', '-f', 'graph.py'])
@@ -1520,31 +1497,21 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		file = open(currentpath+'/weather_log.csv', 'w')
 		file.write(data)
 		file.close()
-		self.start_sensors()
-		self.ShowMessage(_('Weather log restarted'))
+		self.SetStatusText(_('Weather log restarted'))
 
 	def i2c_start(self):
-		self.heading_183.SetValue(self.conf.get('I2C', 'nmea_hdg')=='1')
-		self.heading_2k.SetValue(self.conf.get('I2C', 'n2k_hdg')=='1')
-		self.heading_sk.SetValue(self.conf.get('I2C', 'sk_hdg')=='1')
-		self.heel_183.SetValue(self.conf.get('I2C', 'nmea_heel')=='1')
-		self.heel_2k.SetValue(self.conf.get('I2C', 'n2k_heel')=='1')
-		self.heel_sk.SetValue(self.conf.get('I2C', 'sk_heel')=='1')
-		self.pitch_183.SetValue(self.conf.get('I2C', 'nmea_pitch')=='1')
-		self.pitch_2k.SetValue(self.conf.get('I2C', 'n2k_pitch')=='1')
-		self.pitch_sk.SetValue(self.conf.get('I2C', 'sk_pitch')=='1')
-		self.pressure_183.SetValue(self.conf.get('I2C', 'nmea_press')=='1')
-		self.pressure_2k.SetValue(self.conf.get('I2C', 'n2k_press')=='1')
-		self.pressure_sk.SetValue(self.conf.get('I2C', 'sk_press')=='1')
-		self.p_temp_183.SetValue(self.conf.get('I2C', 'nmea_temp_p')=='1')
-		self.p_temp_2k.SetValue(self.conf.get('I2C', 'n2k_temp_p')=='1')
-		self.p_temp_sk.SetValue(self.conf.get('I2C', 'sk_temp_p')=='1')
-		self.humidity_183.SetValue(self.conf.get('I2C', 'nmea_hum')=='1')
-		self.humidity_2k.SetValue(self.conf.get('I2C', 'n2k_hum')=='1')
-		self.humidity_sk.SetValue(self.conf.get('I2C', 'sk_hum')=='1')
-		self.h_temp_183.SetValue(self.conf.get('I2C', 'nmea_temp_h')=='1')
-		self.h_temp_2k.SetValue(self.conf.get('I2C', 'n2k_temp_h')=='1')
-		self.h_temp_sk.SetValue(self.conf.get('I2C', 'sk_temp_h')=='1')
+		self.imu_sensor='none'
+		self.press_sensor='none'
+		self.hum_sensor='none'
+		self.check_sensors()
+
+		self.rate_imu.SetValue(self.conf.get('I2C', 'rate_imu'))
+		self.rate_press.SetValue(self.conf.get('I2C', 'rate_press'))
+		self.rate_hum.SetValue(self.conf.get('I2C', 'rate_hum'))
+
+		self.p_temp_skt.SetValue(self.conf.get('I2C', 'p_temp_skt'))
+		self.h_temp_skt.SetValue(self.conf.get('I2C', 'h_temp_skt'))
+		self.humidity_skt.SetValue(self.conf.get('I2C', 'hum_skt'))
 
 		self.heading_offset.SetValue(self.conf.get('OFFSET', 'heading'))
 		self.heel_offset.SetValue(self.conf.get('OFFSET', 'heel'))
@@ -1554,54 +1521,82 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.humidity_offset.SetValue(self.conf.get('OFFSET', 'humidity'))
 		self.h_temp_offset.SetValue(self.conf.get('OFFSET', 'temperature_h'))
 
-		self.p_temp_skt.SetValue(self.conf.get('I2C', 'p_temp_skt'))
-		self.h_temp_skt.SetValue(self.conf.get('I2C', 'h_temp_skt'))
-		
-		self.rate.SetValue(self.conf.get('STARTUP', 'nmea_rate_sen'))
-		
-		if 'none' in self.imu_sensor: pass
-		else:
-			self.heading_avai.SetValue(True)
-			self.heel_avai.SetValue(True)
-			self.pitch_avai.SetValue(True)
 
-		if 'none' in self.press_sensor: pass
-		else:
-			self.pressure_avai.SetValue(True)
-			self.p_temp_avai.SetValue(True)
+	def check_sensors(self):
+		detected=subprocess.check_output(['python', currentpath+'/imu/check_sensors.py'], cwd=currentpath+'/imu')
+		l_detected=detected.split('\n')
+		self.imu_sensor=l_detected[0]
+		self.calibrated=l_detected[1]
+		self.press_sensor=l_detected[2]
+		self.hum_sensor=l_detected[3]
 
-		if 'none' in self.hum_sensor: pass
+		if 'none' in self.imu_sensor:
+			self.heading_label.Disable()
+			self.heel_label.Disable()
+			self.pitch_label.Disable()
+			self.button_calibrate_imu.Disable()
+			self.heading_sensor.SetLabel('')
+			self.heel_sensor.SetLabel('')
+			self.pitch_sensor.SetLabel('')
+			self.conf.set('I2C', 'sk_hdg', '0')
+			self.conf.set('I2C', 'sk_heel', '0')
+			self.conf.set('I2C', 'sk_pitch', '0')
 		else:
-			self.humidity_avai.SetValue(True)
-			self.h_temp_avai.SetValue(True)		
-		
+			self.heading_label.Enable()
+			self.heel_label.Enable()
+			self.pitch_label.Enable()
+			if self.calibrated=='1':self.button_calibrate_imu.Disable()
+			else: self.button_calibrate_imu.Enable()
+			self.heading_sensor.SetLabel(self.imu_sensor)
+			self.heel_sensor.SetLabel(self.imu_sensor)
+			self.pitch_sensor.SetLabel(self.imu_sensor)
+			self.conf.set('I2C', 'sk_hdg', '1')
+			self.conf.set('I2C', 'sk_heel', '1')
+			self.conf.set('I2C', 'sk_pitch', '1')
+
+		if 'none' in self.press_sensor:
+			self.pressure_label.Disable()
+			self.p_temp_label.Disable()
+			self.pressure_sensor.SetLabel('')
+			self.p_temp_sensor.SetLabel('')
+			self.conf.set('I2C', 'sk_press', '0')
+			self.conf.set('I2C', 'sk_temp_p', '0')
+		else:
+			self.pressure_label.Enable()
+			self.p_temp_label.Enable()
+			self.pressure_sensor.SetLabel(self.press_sensor)
+			self.p_temp_sensor.SetLabel(self.press_sensor)
+			self.conf.set('I2C', 'sk_press', '1')
+			self.conf.set('I2C', 'sk_temp_p', '1')
+
+		if 'none' in self.hum_sensor:
+			self.humidity_label.Disable()
+			self.h_temp_label.Disable()
+			self.humidity_sensor.SetLabel('')
+			self.h_temp_sensor.SetLabel('')
+			self.conf.set('I2C', 'sk_hum', '0')
+			self.conf.set('I2C', 'sk_temp_h', '0')
+		else:
+			self.humidity_label.Enable()
+			self.h_temp_label.Enable()
+			self.humidity_sensor.SetLabel(self.hum_sensor)
+			self.h_temp_sensor.SetLabel(self.hum_sensor)
+			self.conf.set('I2C', 'sk_hum', '1')
+			self.conf.set('I2C', 'sk_temp_h', '1')
+
+		if 'none' in self.press_sensor and 'none' in self.hum_sensor: 
+			self.conf.set('I2C', 'weather_log', '0')
+		else: 
+			self.conf.set('I2C', 'weather_log', '1')
+
 	def i2c_apply(self, e):
-		self.conf.set('I2C', 'nmea_hdg', str(int(self.heading_183.GetValue())))
-		self.conf.set('I2C', 'n2k_hdg', str(int(self.heading_2k.GetValue())))
-		self.conf.set('I2C', 'sk_hdg', str(int(self.heading_sk.GetValue())))
-		self.conf.set('I2C', 'nmea_heel', str(int(self.heel_183.GetValue())))
-		self.conf.set('I2C', 'n2k_heel', str(int(self.heel_2k.GetValue())))
-		self.conf.set('I2C', 'sk_heel', str(int(self.heel_sk.GetValue())))
-		self.conf.set('I2C', 'nmea_pitch', str(int(self.pitch_183.GetValue())))
-		self.conf.set('I2C', 'n2k_pitch', str(int(self.pitch_2k.GetValue())))
-		self.conf.set('I2C', 'sk_pitch', str(int(self.pitch_sk.GetValue())))
-		self.conf.set('I2C', 'nmea_press', str(int(self.pressure_183.GetValue())))
-		self.conf.set('I2C', 'n2k_press', str(int(self.pressure_2k.GetValue())))
-		self.conf.set('I2C', 'sk_press', str(int(self.pressure_sk.GetValue())))
-		self.conf.set('I2C', 'nmea_temp_p', str(int(self.p_temp_183.GetValue())))
-		self.conf.set('I2C', 'n2k_temp_p', str(int(self.p_temp_2k.GetValue())))
-		self.conf.set('I2C', 'sk_temp_p', str(int(self.p_temp_sk.GetValue())))
-		self.conf.set('I2C', 'nmea_hum', str(int(self.humidity_183.GetValue())))
-		self.conf.set('I2C', 'n2k_hum', str(int(self.humidity_2k.GetValue())))
-		self.conf.set('I2C', 'sk_hum', str(int(self.humidity_sk.GetValue())))
-		self.conf.set('I2C', 'nmea_temp_h', str(int(self.h_temp_183.GetValue())))
-		self.conf.set('I2C', 'n2k_temp_h', str(int(self.h_temp_2k.GetValue())))
-		self.conf.set('I2C', 'sk_temp_h', str(int(self.h_temp_sk.GetValue())))
+		self.conf.set('I2C', 'rate_imu', str(self.rate_imu.GetValue()))
+		self.conf.set('I2C', 'rate_press', str(self.rate_press.GetValue()))
+		self.conf.set('I2C', 'rate_hum', str(self.rate_hum.GetValue()))
 
 		self.conf.set('I2C', 'p_temp_skt', str(self.p_temp_skt.GetValue()))
 		self.conf.set('I2C', 'h_temp_skt', str(self.h_temp_skt.GetValue()))
-
-		self.conf.set('STARTUP', 'nmea_rate_sen', str(self.rate.GetValue()))
+		self.conf.set('I2C', 'hum_skt', str(self.humidity_skt.GetValue()))
 		
 		try:
 			self.conf.set('OFFSET', 'heading',str(float(self.heading_offset.GetValue())))
@@ -1621,10 +1616,40 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.i2c_start()
 		
 	def i2c_calibrate_imu(self, e):
-		subprocess.call(['pkill', '-f', 'i2c.py'])
+		self.stop_sensors()
 		subprocess.Popen('RTIMULibDemoGL', cwd=currentpath+'/imu')
 		msg=_('After calibrating, click apply.')
 		self.ShowMessage(msg)
+
+	def reset_imu(self, e):
+		try:
+			os.remove(currentpath+'/imu/RTIMULib.ini')
+		except Exception,e: print str(e)
+		self.button_calibrate_imu.Enable()
+		self.heading_sensor.SetLabel('')
+		self.heel_sensor.SetLabel('')
+		self.pitch_sensor.SetLabel('')
+		self.check_sensors()
+		self.start_sensors()
+
+	def reset_press(self, e):
+		try:
+			os.remove(currentpath+'/imu/RTIMULib2.ini')
+		except Exception,e: print str(e)
+		self.pressure_sensor.SetLabel('')
+		self.p_temp_sensor.SetLabel('')
+		self.check_sensors()
+		self.start_sensors()
+
+	def reset_hum(self, e):
+		try:
+			os.remove(currentpath+'/imu/RTIMULib3.ini')
+		except Exception,e: print str(e)
+		self.humidity_sensor.SetLabel('')
+		self.h_temp_sensor.SetLabel('')
+		self.check_sensors()
+		self.start_sensors()
+
 
 ###################################### Switches
 
