@@ -805,12 +805,12 @@ class MainFrame(wx.Frame):
 		self.SetStatusText(_('Set GPSD in the new window'))
 
 	def open_sdr_ais(self,event):
-		close=subprocess.call(['pkill', '-f', 'sdr_ais.py'])
-		subprocess.Popen(['python',currentpath+'/sdr_ais.py'])
+		close=subprocess.call(['pkill', '-f', 'SDR_AIS.py'])
+		subprocess.Popen(['python',currentpath+'/tools/SDR_AIS.py'])
 
 	def open_calculate(self,event):
 		close=subprocess.call(['pkill', '-f', 'calculate.py'])
-		subprocess.Popen(['python',currentpath+'/calculate.py'])
+		subprocess.Popen(['python',currentpath+'/tools/calculate.py'])
 	
 	def clear_lang(self):
 		self.lang.Check(self.lang_item1.GetId(), False)

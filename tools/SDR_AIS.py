@@ -17,15 +17,14 @@
 
 import wx, subprocess
 from classes.paths import Paths
-from classes.conf import Conf
+from classes.op_conf import Conf
 from classes.language import Language
 
 class MyFrame(wx.Frame):
 		
 		def __init__(self):
 
-			paths=Paths()
-			self.currentpath=paths.currentpath
+			self.paths=Paths()
 
 			self.conf=Conf()
 
@@ -35,7 +34,7 @@ class MyFrame(wx.Frame):
 			
 			self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 			
-			self.icon = wx.Icon(self.currentpath+'/openplotter.ico', wx.BITMAP_TYPE_ICO)
+			self.icon = wx.Icon(self.paths.op_path+'/openplotter.ico', wx.BITMAP_TYPE_ICO)
 			self.SetIcon(self.icon)
 
 			wx.StaticBox(self, label='', size=(400, 170), pos=(10, 10))
@@ -77,10 +76,6 @@ class MyFrame(wx.Frame):
 			self.button_vhf_Rx =wx.Button(self, label=_('Receive'), pos=(430, 210))
 			self.Bind(wx.EVT_BUTTON, self.vhf_Rx, self.button_vhf_Rx)
 
-			self.button_vhf_Tx =wx.Button(self, label=_('Transmit'), pos=(430, 255))
-			self.Bind(wx.EVT_BUTTON, self.vhf_Tx, self.button_vhf_Tx)
-			self.Tx_exp_label=wx.StaticText(self, label=_('Experimental'), pos=(540, 263))
-
 			self.CreateStatusBar()
 
 			self.Centre()
@@ -121,7 +116,8 @@ class MyFrame(wx.Frame):
 		def kill_sdr(self):
 			subprocess.call(['pkill', '-9', 'aisdecoder'])
 			subprocess.call(['pkill', '-9', 'rtl_fm'])
-			subprocess.call(['pkill', '-f', 'waterfall.py'])
+			subprocess.call(['pkill', '-f', 'SDR_AIS_waterfall.py'])
+			subprocess.call(['pkill', '-f', 'SDR_AIS_fine_cal.py'])
 			subprocess.call(['pkill', '-9', 'rtl_test'])
 			subprocess.call(['pkill', '-9', 'kal'])
 			subprocess.call(['pkill', '-9', 'qtcsdr'])
@@ -188,7 +184,7 @@ class MyFrame(wx.Frame):
 				ppm=ppm.replace(',', '.')
 			channel='a'
 			if self.ais_frequencies2.GetValue(): channel='b'
-			w_open=subprocess.Popen(['python', self.currentpath+'/waterfall.py', gain, ppm, channel])
+			w_open=subprocess.Popen(['python', self.paths.currentpath+'/SDR_AIS_waterfall.py', gain, ppm, channel])
 			msg=_('SDR-AIS reception disabled. After closing the new window enable SDR-AIS reception again.')
 			self.SetStatusText(msg)
 
@@ -208,8 +204,10 @@ class MyFrame(wx.Frame):
 			self.conf.set('AIS-SDR', 'gain', gain)
 			self.conf.set('AIS-SDR', 'ppm', ppm)
 			self.conf.set('AIS-SDR', 'band', band)
-			subprocess.Popen(['python',self.currentpath+'/fine_cal.py', 'b'])
-
+			subprocess.Popen(['python',self.paths.currentpath+'/SDR_AIS_fine_cal.py', 'b'])
+			msg=_('SDR-AIS reception disabled. After closing the new window enable SDR-AIS reception again.')
+			self.SetStatusText(msg)
+			
 		def check_channel(self, event):
 			self.kill_sdr()
 			self.enable_sdr_controls()
@@ -219,7 +217,9 @@ class MyFrame(wx.Frame):
 			self.conf.set('AIS-SDR', 'gain', gain)
 			self.conf.set('AIS-SDR', 'ppm', ppm)
 			self.conf.set('AIS-SDR', 'gsm_channel', channel)
-			if channel: subprocess.Popen(['python',self.currentpath+'/fine_cal.py', 'c'])
+			if channel: subprocess.Popen(['python',self.paths.currentpath+'/SDR_AIS_fine_cal.py', 'c'])
+			msg=_('SDR-AIS reception disabled. After closing the new window enable SDR-AIS reception again.')
+			self.SetStatusText(msg)
 
 		def vhf_Rx(self, event):
 			self.kill_sdr()
@@ -228,12 +228,8 @@ class MyFrame(wx.Frame):
 			msg=_('SDR-AIS reception disabled. After closing the new window enable SDR-AIS reception again.')
 			self.SetStatusText(msg)
 
-		def vhf_Tx(self, event):
-			self.kill_sdr()
-			self.enable_sdr_controls()
-			subprocess.Popen(['lxterminal', '-e', self.currentpath+'/classes/rpi-test.sh'])
-			msg=_('SDR-AIS reception disabled. After closing the new window enable SDR-AIS reception again.')
-			self.SetStatusText(msg)
+		def ShowMessage(self, w_msg):
+			wx.MessageBox(w_msg, 'Info', wx.OK | wx.ICON_INFORMATION)
 
 app = wx.App()
 MyFrame().Show()

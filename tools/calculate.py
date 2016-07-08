@@ -17,15 +17,14 @@
 
 import wx, subprocess
 from classes.paths import Paths
-from classes.conf import Conf
+from classes.op_conf import Conf
 from classes.language import Language
 
 class MyFrame(wx.Frame):
 		
 		def __init__(self):
 
-			paths=Paths()
-			self.currentpath=paths.currentpath
+			self.paths=Paths()
 
 			self.conf=Conf()
 
@@ -35,7 +34,7 @@ class MyFrame(wx.Frame):
 			
 			self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 			
-			self.icon = wx.Icon(self.currentpath+'/openplotter.ico', wx.BITMAP_TYPE_ICO)
+			self.icon = wx.Icon(self.paths.op_path+'/openplotter.ico', wx.BITMAP_TYPE_ICO)
 			self.SetIcon(self.icon)
 
 			wx.StaticBox(self, size=(330, 50), pos=(10, 10))
@@ -90,7 +89,7 @@ class MyFrame(wx.Frame):
 		def start_calculate(self):
 			subprocess.call(['pkill', '-f', 'calculate_d.py'])
 			if self.mag_var.GetValue() or self.heading_t.GetValue() or self.rot.GetValue() or self.TW_STW.GetValue() or self.TW_SOG.GetValue():
-				subprocess.Popen(['python', self.currentpath+'/calculate_d.py'])
+				subprocess.Popen(['python', self.paths.currentpath+'/calculate_d.py'])
 
 		def ok_rate2(self, e):
 			rate=self.rate2.GetValue()

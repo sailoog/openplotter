@@ -152,7 +152,7 @@ if not exist:
 
 	subprocess.call(['pkill', '-f', 'calculate_d.py'])
 	if nmea_mag_var=='1' or nmea_hdt=='1' or nmea_rot=='1' or TW_STW=='1' or TW_SOG=='1': 
-		subprocess.Popen(['python', currentpath+'/calculate_d.py'])
+		subprocess.Popen(['python', currentpath+'/tools/calculate_d.py'])
 
 	subprocess.call(["pkill", '-9', "node"])
 	subprocess.Popen(home+'/.config/signalk-server-node/bin/openplotter', cwd=home+'/.config/signalk-server-node')       
