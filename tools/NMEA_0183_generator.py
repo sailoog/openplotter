@@ -1,0 +1,160 @@
+#!/usr/bin/env python
+
+# This file is part of Openplotter.
+# Copyright (C) 2015 by sailoog <https://github.com/sailoog/openplotter>
+#
+# Openplotter is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# any later version.
+# Openplotter is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
+
+import wx
+from classes.add_NMEA_0183 import addNMEA_0183
+from classes.paths import Paths
+from classes.op_conf import Conf
+from classes.language import Language
+
+class MyFrame(wx.Frame):
+		
+		def __init__(self):
+
+			self.paths=Paths()
+
+			self.conf=Conf()
+
+			Language(self.conf.get('GENERAL','lang'))
+
+			wx.Frame.__init__(self, None, title=_('NMEA 0183 generator'), size=(690,350))
+			
+			self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
+			
+			self.icon = wx.Icon(self.paths.op_path+'/openplotter.ico', wx.BITMAP_TYPE_ICO)
+			self.SetIcon(self.icon)
+
+			wx.StaticBox(self, label=_(' NMEA 0183 '), size=(670, 230), pos=(10, 10))
+			self.list_nmea = wx.ListCtrl(self, style=wx.LC_REPORT, size=(565, 200), pos=(15, 30))
+			self.list_nmea.InsertColumn(0, _('Sentence'), width=100)
+			self.list_nmea.InsertColumn(1, _('Rate'), width=50)
+			self.list_nmea.InsertColumn(2, _('Fields'), width=1500)
+
+			self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_nmea, self.list_nmea)
+				
+			self.add_nmea_button =wx.Button(self, label=_('add'), pos=(585, 30))
+			self.Bind(wx.EVT_BUTTON, self.add_nmea, self.add_nmea_button)
+
+			self.delete_nmea_button =wx.Button(self, label=_('delete'), pos=(585, 65))
+			self.Bind(wx.EVT_BUTTON, self.delete_nmea, self.delete_nmea_button)
+
+			self.diagnostic_nmea_button=wx.Button(self, label=_('NMEA Diagnostic'), pos=(10, 250))
+			self.Bind(wx.EVT_BUTTON, self.kplex_diagnostic, self.diagnostic_nmea_button)
+
+			self.diagnostic_sk_button=wx.Button(self, label=_('SK Diagnostic'), pos=(180, 250))
+			self.Bind(wx.EVT_BUTTON, self.sk_diagnostic, self.diagnostic_sk_button)
+
+
+			self.CreateStatusBar()
+
+			self.Centre()
+
+			self.Show(True)
+
+			self.read_sentences()
+
+		'''
+		def start_1w(self):
+			self.stop_1w()
+			subprocess.Popen(['python',currentpath+'/1w.py'])
+
+		def stop_1w(self):
+			subprocess.call(['pkill', '-f', '1w.py'])
+		'''	
+		def read_sentences(self):
+			self.sentences=[]
+			self.list_nmea.DeleteAllItems()
+			data=self.conf.get('NMEA0183', 'sentences')
+			try:
+				temp_list=eval(data)
+			except:temp_list=[]
+			for ii in temp_list:
+				self.sentences.append(ii)
+				fields=','
+				for i in ii[1]:
+					if not i: fields+=','
+					else:
+						if '=' in i:
+							tmp=i.split('=')
+							fields+=tmp[1]+','
+						else:fields+=i+','
+				self.list_nmea.Append([ii[0],ii[2],fields])
+		
+
+		def edit_nmea(self,e):
+			selected_sentence=e.GetIndex()
+			edit=[selected_sentence,self.sentences[selected_sentence]]
+			self.edit_add_nmea(edit)
+
+		def add_nmea(self,e):
+			self.edit_add_nmea(0)
+
+		def edit_add_nmea(self,edit):
+			dlg = addNMEA_0183(edit)
+			res = dlg.ShowModal()
+			if res == wx.ID_OK:
+				nmea=dlg.nmea
+				if edit==0:
+					fields=','
+					for i in nmea[1]:
+						if not i: fields+=','
+						else:
+							if '=' in i:
+								tmp=i.split('=')
+								fields+=tmp[1]+','
+							else:fields+=i+','
+					self.list_nmea.Append([nmea[0],nmea[2],fields])
+					self.sentences.append([nmea[0],nmea[1],nmea[2]])
+				else:
+					self.list_nmea.SetStringItem(edit[0],0,nmea[0])
+					self.list_nmea.SetStringItem(edit[0],1,nmea[2])
+					fields=','
+					for i in nmea[1]:
+						if not i: fields+=','
+						else:
+							if '=' in i:
+								tmp=i.split('=')
+								fields+=tmp[1]+','
+							else:fields+=i+','
+					self.list_nmea.SetStringItem(edit[0],2,fields)
+					self.sentences[edit[0]][0]=nmea[0]
+					self.sentences[edit[0]][1]=nmea[1]
+					self.sentences[edit[0]][2]=nmea[2]
+				self.conf.set('NMEA0183', 'sentences', str(self.sentences))
+				#self.start_1w()
+			dlg.Destroy()
+
+		def delete_nmea(self,e):
+			selected_sentence=self.list_nmea.GetFirstSelected()
+			if selected_sentence==-1: 
+				self.SetStatusText('Select a sentence to delete.')
+				return
+			del self.sentences[selected_sentence]
+			self.list_nmea.DeleteItem(selected_sentence)
+			self.conf.set('NMEA0183', 'sentences', str(self.sentences))
+			#self.start_1w()
+
+
+		def kplex_diagnostic(self,e):
+			pass
+
+		def sk_diagnostic(self,e):
+			pass
+
+app = wx.App()
+MyFrame().Show()
+app.MainLoop()

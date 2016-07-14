@@ -110,15 +110,15 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_MENU, self.time_zone, self.time_item1)
 		self.time_item2 = self.settings.Append(wx.ID_ANY, _('Set time from NMEA'), _('Set system time from NMEA data'))
 		self.Bind(wx.EVT_MENU, self.time_gps, self.time_item2)
-		self.settings.AppendSeparator()
 		self.gpsd_item1 = self.settings.Append(wx.ID_ANY, _('Set GPSD'), _('Set GPSD in the new window'))
 		self.Bind(wx.EVT_MENU, self.reconfigure_gpsd, self.gpsd_item1)
 		self.settings.AppendSeparator()
 		self.sdr_ais_item1 = self.settings.Append(wx.ID_ANY, _('SDR-AIS receiver'), _('Set an SDR-AIS receiver in the new window'))
 		self.Bind(wx.EVT_MENU, self.open_sdr_ais, self.sdr_ais_item1)
-		self.settings.AppendSeparator()
 		self.calculate_item1 = self.settings.Append(wx.ID_ANY, _('Calculate'), _('Calculate new data from current values'))
 		self.Bind(wx.EVT_MENU, self.open_calculate, self.calculate_item1)
+		self.nmea_0183_item1 = self.settings.Append(wx.ID_ANY, _('NMEA 0183 generator'), _('Generate NMEA 0183 from current values'))
+		self.Bind(wx.EVT_MENU, self.open_nmea_0183, self.nmea_0183_item1)
 		self.menubar.Append(self.settings, _('Tools'))
 
 		self.lang = wx.Menu()
@@ -411,7 +411,7 @@ class MainFrame(wx.Frame):
 		wx.StaticText(self.page6, label=_('Signal K'), pos=(s4, z))
 		wx.StaticText(self.page6, label=_('Offset'), pos=(s5, z))
 		wx.StaticText(self.page6, label=_('Rate (sec)'), pos=(s6, z))
-		self.rate_list = ['0.1', '0.25', '0.5', '0.75', '1', '1.5', '2']
+		self.rate_list = ['0.1', '0.25', '0.5', '0.75', '1', '5', '30', '60', '300']
 		z=z1
 		self.heading_label=wx.StaticText(self.page6, label=_('Heading'), pos=(s1, z))
 		self.heading_sensor=wx.StaticText(self.page6, pos=(s2, z))
@@ -805,13 +805,17 @@ class MainFrame(wx.Frame):
 		self.SetStatusText(_('Set GPSD in the new window'))
 
 	def open_sdr_ais(self,event):
-		close=subprocess.call(['pkill', '-f', 'SDR_AIS.py'])
+		subprocess.call(['pkill', '-f', 'SDR_AIS.py'])
 		subprocess.Popen(['python',currentpath+'/tools/SDR_AIS.py'])
 
 	def open_calculate(self,event):
-		close=subprocess.call(['pkill', '-f', 'calculate.py'])
+		subprocess.call(['pkill', '-f', 'calculate.py'])
 		subprocess.Popen(['python',currentpath+'/tools/calculate.py'])
-	
+
+	def open_nmea_0183(self,event):
+		subprocess.call(['pkill', '-f', 'NMEA_0183_generator.py'])
+		subprocess.Popen(['python',currentpath+'/tools/NMEA_0183_generator.py'])
+
 	def clear_lang(self):
 		self.lang.Check(self.lang_item1.GetId(), False)
 		self.lang.Check(self.lang_item2.GetId(), False)
@@ -1220,7 +1224,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 ###########################################	NMEA 0183
 
 	def show_kplex(self,event):
-		close=subprocess.call(['pkill', '-f', 'output.py'])
+		subprocess.call(['pkill', '-f', 'output.py'])
 		subprocess.Popen(['python',currentpath+'/output.py'])
 
 	def advanced_kplex(self,event):
@@ -1471,7 +1475,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					subprocess.call(["pkill", '-9', "kplex"])
 					subprocess.Popen(['kplex','-f',home+'/.debugkplex.conf'])
 					time.sleep(0.5)
-					close=subprocess.call(['pkill', '-f', 'diagnostic-NMEA.py'])
+					subprocess.call(['pkill', '-f', 'diagnostic-NMEA.py'])
 					if self.kplex[i][3]=='in' or self.kplex[i][3]=='both':
 						subprocess.Popen(['python',currentpath+'/diagnostic-NMEA.py','10112','diagnostic_input'])
 					if self.kplex[i][3]=='out' or self.kplex[i][3]=='both':
@@ -2282,8 +2286,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.list_DS18B20.DeleteItem(selected_DS18B20)
 
 	def apply_changes_DS18B20(self,e):
+		'''
 		for i in self.DS18B20:
 			index=self.DS18B20.index(i)
+		'''
 		self.conf.set('1W', 'DS18B20', str(self.DS18B20))
 		self.start_1w()
 		self.start_monitoring()
@@ -2508,7 +2514,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.SetStatusText(_('Signal K server restarted'))	
 
 	def diagnostic_SK(self, e):
-		close=subprocess.call(['pkill', '-f', 'diagnostic-SK-input.py'])
+		subprocess.call(['pkill', '-f', 'diagnostic-SK-input.py'])
 		subprocess.Popen(['python',currentpath+'/diagnostic-SK-input.py'])
 
 	
