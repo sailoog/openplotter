@@ -165,7 +165,7 @@ while True:
 			list_signalk2.append(str(0.017453293*pitch))
 
 		if list_signalk2:
-			SignalK = '{"updates": [{"source": {"type": "I2C","src" : "IMU"},"timestamp": "'+str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z","values":[ '
+			SignalK = '{"updates": [{"source": {"type": "I2C","src" : "imu"},"timestamp": "'+str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z","values":[ '
 			Erg=''
 			for i in range(0,len(list_signalk2)):
 				Erg += '{"path": "'+list_signalk_path2[i]+'","value":'+list_signalk2[i]+'},'
@@ -186,7 +186,7 @@ while True:
 			list_signalk1.append(str(round(temperature_p,2)+273.15))
 
 		if list_signalk1:
-			SignalK = '{"updates": [{"source": {"type": "I2C","src" : "PRESS"},"timestamp": "'+str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z","values":[ '
+			SignalK = '{"updates": [{"source": {"type": "I2C","src" : "press"},"timestamp": "'+str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z","values":[ '
 			Erg=''
 			for i in range(0,len(list_signalk1)):
 				Erg += '{"path": "'+list_signalk_path1[i]+'","value":'+list_signalk1[i]+'},'
@@ -207,7 +207,7 @@ while True:
 			list_signalk3.append(str(round(temperature_h,2)+273.15))
 
 		if list_signalk3:
-			SignalK = '{"updates": [{"source": {"type": "I2C","src" : "HUM"},"timestamp": "'+str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z","values":[ '
+			SignalK = '{"updates": [{"source": {"type": "I2C","src" : "hum"},"timestamp": "'+str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z","values":[ '
 			Erg=''
 			for i in range(0,len(list_signalk3)):
 				Erg += '{"path": "'+list_signalk_path3[i]+'","value":'+list_signalk3[i]+'},'

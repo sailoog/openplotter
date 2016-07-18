@@ -67,14 +67,12 @@ class MyFrame(wx.Frame):
 
 			self.read_sentences()
 
-		'''
-		def start_1w(self):
-			self.stop_1w()
-			subprocess.Popen(['python',currentpath+'/1w.py'])
 
-		def stop_1w(self):
-			subprocess.call(['pkill', '-f', '1w.py'])
-		'''	
+		def start_d(self):
+			subprocess.call(['pkill', '-f', 'NMEA_0183_generator_d.py'])
+			subprocess.Popen(['python',self.paths.op_path+'/tools/NMEA_0183_generator_d.py'])
+
+
 		def read_sentences(self):
 			self.sentences=[]
 			self.list_nmea.DeleteAllItems()
@@ -108,6 +106,7 @@ class MyFrame(wx.Frame):
 			res = dlg.ShowModal()
 			if res == wx.ID_OK:
 				nmea=dlg.nmea
+				if not nmea[0]: return
 				if edit==0:
 					fields=','
 					for i in nmea[1]:
@@ -135,7 +134,7 @@ class MyFrame(wx.Frame):
 					self.sentences[edit[0]][1]=nmea[1]
 					self.sentences[edit[0]][2]=nmea[2]
 				self.conf.set('NMEA0183', 'sentences', str(self.sentences))
-				#self.start_1w()
+				self.start_d()
 			dlg.Destroy()
 
 		def delete_nmea(self,e):
@@ -146,7 +145,7 @@ class MyFrame(wx.Frame):
 			del self.sentences[selected_sentence]
 			self.list_nmea.DeleteItem(selected_sentence)
 			self.conf.set('NMEA0183', 'sentences', str(self.sentences))
-			#self.start_1w()
+			self.start_d()
 
 
 		def kplex_diagnostic(self,e):

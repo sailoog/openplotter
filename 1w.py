@@ -63,7 +63,7 @@ while True:
 		ib=ib+1
 
 	if list_signalk!=[]:				
-		SignalK = '{"updates": [{"source": {"type": "Sensors","src" : "1W"},"timestamp": "'+str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z","values":[ '
+		SignalK = '{"updates": [{"source": {"type": "1W","src" : "DS18B20"},"timestamp": "'+str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z","values":[ '
 		Erg=''
 		for j in list_signalk:
 			Erg += '{"path": "'+j[0]+'","value":'+j[1]+'},'
