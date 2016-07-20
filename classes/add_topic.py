@@ -20,19 +20,17 @@ class addTopic(wx.Dialog):
 
 	def __init__(self,edit):
 
-		wx.Dialog.__init__(self, None, title=_('Add MQTT topic'), size=(330,250))
+		wx.Dialog.__init__(self, None, title=_('Add MQTT topic'), size=(330,200))
 
 		panel = wx.Panel(self)
 
-		wx.StaticText(panel, label=_('short'), pos=(10, 10))
-		self.short = wx.TextCtrl(panel, size=(100, 30), pos=(10, 35))
+		wx.StaticText(panel, label=_('Topic'), pos=(10, 10))
+		self.topic = wx.TextCtrl(panel, size=(310, 30), pos=(10, 35))
 
-		wx.StaticText(panel, label=_('topic'), pos=(10, 70))
-		self.topic = wx.TextCtrl(panel, size=(310, 30), pos=(10, 95))
+		wx.StaticText(panel, label=_('allowed characters: 0-9, /, a-z, A-Z.'), pos=(10, 70))
 
 		if edit != 0:
-			self.short.SetValue(edit[1])
-			self.topic.SetValue(edit[2])
+			self.topic.SetValue(edit[1])
 
-		cancelBtn = wx.Button(panel, wx.ID_CANCEL, pos=(70, 165))
-		okBtn = wx.Button(panel, wx.ID_OK, pos=(180, 165))
+		cancelBtn = wx.Button(panel, wx.ID_CANCEL, pos=(70, 115))
+		okBtn = wx.Button(panel, wx.ID_OK, pos=(180, 115))

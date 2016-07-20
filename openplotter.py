@@ -604,12 +604,16 @@ class MainFrame(wx.Frame):
 		wx.StaticText(self.page16, label=_('Password'), pos=(410, 30))
 		self.mqtt_pass = wx.TextCtrl(self.page16, -1, size=(120, 32), pos=(410, 50))
 
+		self.button_apply_changes_mqtt =wx.Button(self.page16, label=_('Apply'), pos=(585, 30))
+		self.Bind(wx.EVT_BUTTON, self.apply_changes_mqtt, self.button_apply_changes_mqtt)
+
+		self.button_clear_mqtt =wx.Button(self.page16, label=_('Clear'), pos=(585, 65))
+		self.Bind(wx.EVT_BUTTON, self.clear_mqtt, self.button_clear_mqtt)
+
 		wx.StaticText(self.page16, label=_('Topics'), pos=(20, 90))
 
-		self.list_topics = wx.ListCtrl(self.page16, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(565, 155))
-		self.list_topics.SetPosition((15, 110))
-		self.list_topics.InsertColumn(0, _('Short'), width=80)
-		self.list_topics.InsertColumn(1, _('Topic'), width=485)
+		self.list_topics = wx.ListCtrl(self.page16, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(565, 155), pos=(15, 110))
+		self.list_topics.InsertColumn(1, _('Topic'), width=565)
 		self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_topic, self.list_topics)
 
 		self.add_topic_button =wx.Button(self.page16, label=_('add'), pos=(585, 110))
@@ -618,12 +622,8 @@ class MainFrame(wx.Frame):
 		self.delete_topic_button =wx.Button(self.page16, label=_('delete'), pos=(585, 145))
 		self.Bind(wx.EVT_BUTTON, self.delete_topic, self.delete_topic_button)
 
-		self.show_kplex8 =wx.Button(self.page16, label=_('Inspector'), pos=(10, 285))
-		self.Bind(wx.EVT_BUTTON, self.show_kplex, self.show_kplex8)
-		self.button_apply_changes_mqtt =wx.Button(self.page16, label=_('Apply changes'), pos=(570, 285))
-		self.Bind(wx.EVT_BUTTON, self.apply_changes_mqtt, self.button_apply_changes_mqtt)
-		self.button_cancel_changes_mqtt =wx.Button(self.page16, label=_('Cancel changes'), pos=(430, 285))
-		self.Bind(wx.EVT_BUTTON, self.cancel_changes_mqtt, self.button_cancel_changes_mqtt)
+		self.diagnostic_SK_mqtt =wx.Button(self.page16, label=_('SK Diagnostic'), pos=(10, 285))
+		self.Bind(wx.EVT_BUTTON, self.diagnostic_SK, self.diagnostic_SK_mqtt)
 ###########################page16
 ########page10###################
 		wx.StaticBox(self.page10, label=_(' Triggers '), size=(670, 265), pos=(10, 10))
@@ -880,46 +880,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def op_doc(self, e):
 		url = "http://sailoog.gitbooks.io/openplotter-documentation/"
 		webbrowser.open(url,new=2)
-
-	def check_short_names(self,short,edit,group):
-		exist=False
-		short_switches=[]
-		for i in self.switches:
-			short_switches.append(i[2])	
-		short_outputs=[]
-		for i in self.outputs:
-			short_outputs.append(i[2])
-		short_1W=[]
-		for i in self.DS18B20:
-			short_1W.append(i[1])
-		short_topics=[]
-		for i in self.topics:
-			short_topics.append(i[0])
-		if short in short_switches:
-			if group=='switches':
-				if edit==0: exist=True
-				else:
-					if edit[0]!=short_switches.index(short): exist=True
-			else: exist=True
-		if short in short_outputs:
-			if group=='outputs':
-				if edit==0: exist=True
-				else:
-					if edit[0]!=short_outputs.index(short): exist=True
-			else: exist=True
-		if short in short_1W:
-			if group=='1w':
-				if edit==0: exist=True
-				else:
-					if edit[0]!=short_1W.index(short): exist=True
-			else: exist=True
-		if short in short_topics:
-			if group=='topics':
-				if edit==0: exist=True
-				else:
-					if edit[0]!=short_topics.index(short): exist=True
-			else: exist=True
-		return exist
 
 	def SerialWrongPort(self):
 		try:
@@ -1236,10 +1196,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.SetStatusText(_('Closing Kplex'))
 		subprocess.call(["pkill", '-9', "kplex"])
 		subprocess.Popen('kplex')
-		self.SetStatusText(_('Closing Signal K'))
-		subprocess.call(["pkill", '-9', "node"])
-		subprocess.Popen(home+'/.config/signalk-server-node/bin/openplotter', cwd=home+'/.config/signalk-server-node')
-		self.SetStatusText(_('Kplex and Signal k restarted'))
+		self.restart_SK(0)
+		self.SetStatusText(_('Kplex and Signal K restarted'))
 		self.read_kplex_conf()
 
 	def cancel_changes_kplex(self,event):
@@ -1717,11 +1675,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			if pull_selection == '':
 				self.ShowMessage(_('Failed. Select pull down or pull up.'))
 				dlg.Destroy()
-				return
-			short_exist=self.check_short_names(short,edit,'switches')
-			if short_exist:
-				self.ShowMessage(_('Failed. This short name is already used.'))
-				dlg.Destroy()
 				return				
 			if edit==0:
 				self.list_switches.Append([name.decode('utf8'),short.decode('utf8'),gpio_selection,pull_selection])
@@ -1843,11 +1796,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.ShowMessage(_('Failed. Select GPIO.'))
 				dlg.Destroy()
 				return
-			short_exist=self.check_short_names(short,edit,'outputs')
-			if short_exist:
-				self.ShowMessage(_('Failed. This short name is already used.'))
-				dlg.Destroy()
-				return
 			if edit==0:
 				self.list_outputs.Append([name.decode('utf8'),short.decode('utf8'),gpio_selection])
 				last=self.list_outputs.GetItemCount()-1
@@ -1918,7 +1866,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def start_monitoring(self):
 		self.ShowMessage(_('Actions will be restarted.'))
 		subprocess.call(['pkill', '-f', 'monitoring.py'])
-		subprocess.Popen(['python',currentpath+'/monitoring.py'])
+		#subprocess.Popen(['python',currentpath+'/monitoring.py'])
 
 	def on_twitter_enable(self,e):
 		if not self.apiKey.GetValue() or not self.apiSecret.GetValue() or not self.accessToken.GetValue() or not self.accessTokenSecret.GetValue():
@@ -2271,17 +2219,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if selected_DS18B20==-1: 
 			self.ShowMessage(_('Select a sensor to delete.'))
 			return
-		'''
-		data=self.conf.get('ACTIONS', 'triggers')
-		try:
-			temp_list=eval(data)
-		except:temp_list=[]
-		for i in temp_list:
-			if i[1]==self.DS18B20[selected_DS18B20][4]:
-				self.read_triggers()
-				self.ShowMessage(_('You have a trigger defined for this sensor. You must delete that action before deleting this sensor.'))
-				return
-		'''
 		del self.DS18B20[selected_DS18B20]
 		self.list_DS18B20.DeleteItem(selected_DS18B20)
 
@@ -2508,9 +2445,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def restart_SK(self, e):
 		self.SetStatusText(_('Closing Signal K server'))
 		subprocess.call(["pkill", '-9', "node"])
+		self.start_SK()
+		time.sleep(5)
 		self.start_sensors()
 		self.start_1w()
-		self.start_SK()
+		self.start_mqtt()
 		self.SetStatusText(_('Signal K server restarted'))	
 
 	def diagnostic_SK(self, e):
@@ -2632,12 +2571,31 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 ####################### MQTT
 
-	def read_mqtt(self):
-		if self.conf.get('MQTT', 'broker'): self.mqtt_broker.SetValue(self.conf.get('MQTT', 'broker'))
-		if self.conf.get('MQTT', 'port'): self.mqtt_port.SetValue(self.conf.get('MQTT', 'port'))
-		if self.conf.get('MQTT', 'username'): self.mqtt_user.SetValue(self.conf.get('MQTT', 'username'))
-		if self.conf.get('MQTT', 'password'): self.mqtt_pass.SetValue('***************')
+	def start_mqtt(self):
+		subprocess.call(['pkill', '-f', 'mqtt_d.py'])
+		subprocess.Popen(['python',currentpath+'/mqtt_d.py'])
 
+	def read_mqtt(self):
+		broker=self.conf.get('MQTT', 'broker')
+		port=self.conf.get('MQTT', 'port')
+		username=self.conf.get('MQTT', 'username')
+		password=self.conf.get('MQTT', 'password')
+		if broker: self.mqtt_broker.SetValue(broker)
+		if port: self.mqtt_port.SetValue(port)
+		if username: self.mqtt_user.SetValue(username)
+		if password: self.mqtt_pass.SetValue('***************')
+		if username and password:
+			self.mqtt_broker.Disable()
+			self.mqtt_port.Disable()
+			self.mqtt_user.Disable()
+			self.mqtt_pass.Disable()
+			self.button_apply_changes_mqtt.SetLabel(_('Edit'))
+		else:
+			self.mqtt_broker.Enable()
+			self.mqtt_port.Enable()
+			self.mqtt_user.Enable()
+			self.mqtt_pass.Enable()
+			self.button_apply_changes_mqtt.SetLabel(_('Apply'))
 		self.topics=[]
 		self.list_topics.DeleteAllItems()
 		data=self.conf.get('MQTT', 'topics')
@@ -2646,75 +2604,78 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		except:temp_list=[]
 		for ii in temp_list:
 			self.topics.append(ii)
-			self.list_topics.Append([ii[0].decode('utf8'),ii[1].decode('utf8')])
+			self.list_topics.Append([ii])
 
 	def edit_topic(self,e):
 		selected_topic=e.GetIndex()
-		edit=[selected_topic,self.topics[selected_topic][0],self.topics[selected_topic][1]]
+		edit=[selected_topic,self.topics[selected_topic]]
 		self.edit_add_topic(edit)
 
 	def add_topic(self,e):
 		self.edit_add_topic(0)
 
 	def edit_add_topic(self,edit):
+		if self.mqtt_user.IsEnabled():
+			self.ShowMessage(_('Failed. Apply setting changes.'))
+			return
 		dlg = addTopic(edit)
 		res = dlg.ShowModal()
 		if res == wx.ID_OK:
-			short=dlg.short.GetValue()
-			short=short.encode('utf8')
 			topic=dlg.topic.GetValue()
 			topic=topic.encode('utf8')
-			if not topic or not short:
-				self.ShowMessage(_('Failed. Write a topic and a short name.'))
+			if not topic:
+				self.ShowMessage(_('Failed. Write a topic.'))
 				dlg.Destroy()
 				return
-			short_exist=self.check_short_names(short,edit,'topics')
-			if short_exist:
-				self.ShowMessage(_('Failed. This short name is already used.'))
+			if not re.match('^[0-9a-zA-Z/]+$', topic):
+				self.ShowMessage(_('Failed. Topics must contain only allowed characters.'))
 				dlg.Destroy()
-				return				
+				return	
 			if edit==0:
-				self.list_topics.Append([short.decode('utf8'),topic.decode('utf8')])
-				if len(self.topics)==0: ID='MQTT0'
-				else:
-					last=len(self.topics)-1
-					x=int(self.topics[last][2][4:])
-					ID='MQTT'+str(x+1)
-				self.topics.append([short,topic,ID])
+				self.list_topics.Append([topic])
+				self.topics.append(topic)
 			else:
-				self.list_topics.SetStringItem(edit[0],0,short.decode('utf8'))
-				self.list_topics.SetStringItem(edit[0],1,topic.decode('utf8'))
-				self.topics[edit[0]][0]=short
-				self.topics[edit[0]][1]=topic
+				self.list_topics.SetStringItem(edit[0],0,topic)
+				self.topics[edit[0]]=topic
+			self.conf.set('MQTT', 'topics', str(self.topics))
+			self.restart_SK(0)
 		dlg.Destroy()
 
 	def delete_topic(self,e):
+		if self.mqtt_user.IsEnabled():
+			self.ShowMessage(_('Failed. Apply setting changes.'))
+			return
 		selected_topic=self.list_topics.GetFirstSelected()
 		if selected_topic==-1: 
 			self.ShowMessage(_('Select a topic to delete.'))
 			return
-		data=self.conf.get('ACTIONS', 'triggers')
-		try:
-			temp_list=eval(data)
-		except:temp_list=[]
-		for i in temp_list:
-			if i[1]==self.topics[selected_topic][2]:
-				self.read_triggers()
-				self.ShowMessage(_('You have a trigger defined for this topic. You must delete that action before deleting this topic.'))
-				return
 		del self.topics[selected_topic]
 		self.list_topics.DeleteItem(selected_topic)
+		self.conf.set('MQTT', 'topics', str(self.topics))
+		self.restart_SK(0)
 
 	def apply_changes_mqtt(self,e):
+		if not self.mqtt_user.IsEnabled():
+			self.mqtt_broker.Enable()
+			self.mqtt_port.Enable()
+			self.mqtt_user.Enable()
+			self.mqtt_pass.Enable()
+			self.button_apply_changes_mqtt.SetLabel(_('Apply'))
+			return
 		username=self.mqtt_user.GetValue()
 		passw=self.mqtt_pass.GetValue()
-		if not username or not passw:
+		if username and passw:
+			self.mqtt_broker.Disable()
+			self.mqtt_port.Disable()
+			self.mqtt_user.Disable()
+			self.mqtt_pass.Disable()
+			self.button_apply_changes_mqtt.SetLabel(_('Edit'))
+		else:
 			self.ShowMessage(_('Enter at least username and password.'))
 			return
 		self.conf.set('MQTT', 'broker', self.mqtt_broker.GetValue())
 		self.conf.set('MQTT', 'port', self.mqtt_port.GetValue())
 		self.conf.set('MQTT', 'username', username)
-		self.conf.set('MQTT', 'topics', str(self.topics))
 		if not '*******' in passw:
 			self.mqtt_pass.SetValue('***************')
 			self.conf.set('MQTT', 'password', passw)
@@ -2722,12 +2683,32 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		subprocess.call(['sudo', 'sh', '-c', 'echo "'+username+':'+passw+'" > /etc/mosquitto/passwd.pw'])
 		subprocess.call(['sudo','mosquitto_passwd','-U','/etc/mosquitto/passwd.pw'])
 		subprocess.call(['sudo','service','mosquitto','restart'])
-		self.start_monitoring()
-		self.SetStatusText(_('MQTT topics changes applied and restarted'))
+		self.SetStatusText(_('MQTT settings applied and restarted'))
+		self.start_mqtt()
 
-	def cancel_changes_mqtt(self,e):
-		self.read_mqtt()
-		self.SetStatusText(_('MQTT topics changes cancelled'))
+	def clear_mqtt(self,e):
+		dlg = wx.MessageDialog(None, _('Settings and topics will be deleted. Are you sure?'), _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+		if dlg.ShowModal() != wx.ID_YES:
+			dlg.Destroy()
+			return
+		dlg.Destroy()
+		self.mqtt_broker.Enable()
+		self.mqtt_port.Enable()
+		self.mqtt_user.Enable()
+		self.mqtt_pass.Enable()
+		self.button_apply_changes_mqtt.SetLabel(_('Apply'))
+		self.mqtt_broker.SetValue('')
+		self.mqtt_port.SetValue('')
+		self.mqtt_user.SetValue('')
+		self.mqtt_pass.SetValue('')
+		self.list_topics.DeleteAllItems()
+		self.topics=[]
+		self.conf.set('MQTT', 'broker', '')
+		self.conf.set('MQTT', 'port', '')
+		self.conf.set('MQTT', 'username', '')
+		self.conf.set('MQTT', 'password', '')
+		self.conf.set('MQTT', 'topics', '')
+		self.restart_SK(0)
 
 ############################## Util
 	def util_process_exist(self,process_name):		

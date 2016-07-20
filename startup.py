@@ -105,6 +105,12 @@ if not exist:
 	x=conf.get('1W', 'DS18B20')
 	if x: DS18B20=eval(x)
 	else: DS18B20=[]
+
+	user_mqtt=conf.get('MQTT', 'username')
+	passw_mqtt=conf.get('MQTT', 'password')
+	x=conf.get('MQTT', 'topics')
+	if x: topics_list=eval(x)
+	else: topics_list=[]
 		
 	nmea_mag_var=conf.get('CALCULATE', 'nmea_mag_var')
 	nmea_hdt=conf.get('CALCULATE', 'nmea_hdt')
@@ -137,11 +143,20 @@ if not exist:
 
 	subprocess.call(['pkill', '-9', 'kplex'])
 	if kplex=='1':
-		subprocess.Popen('kplex')        
+		subprocess.Popen('kplex')
+
+	subprocess.call(["pkill", '-9', "node"])
+	subprocess.Popen(home+'/.config/signalk-server-node/bin/openplotter', cwd=home+'/.config/signalk-server-node')               
+
+	time.sleep(5)
 
 	if gps_time=='1':
 		subprocess.call(['sudo', 'python', currentpath+'/time_gps.py'])
-		
+
+	subprocess.call(['pkill', '-f', 'calculate_d.py'])
+	if nmea_mag_var=='1' or nmea_hdt=='1' or nmea_rot=='1' or TW_STW=='1' or TW_SOG=='1': 
+		subprocess.Popen(['python', currentpath+'/tools/calculate_d.py'])
+
 	subprocess.call(['pkill', '-f', 'i2c.py'])
 	if e_imu or e_pres or e_hum:
 		subprocess.Popen(['python', currentpath+'/i2c.py'], cwd=currentpath+'/imu')
@@ -150,12 +165,9 @@ if not exist:
 	if DS18B20: 
 		subprocess.Popen(['python', currentpath+'/1w.py'])
 
-	subprocess.call(['pkill', '-f', 'calculate_d.py'])
-	if nmea_mag_var=='1' or nmea_hdt=='1' or nmea_rot=='1' or TW_STW=='1' or TW_SOG=='1': 
-		subprocess.Popen(['python', currentpath+'/tools/calculate_d.py'])
-
-	subprocess.call(["pkill", '-9', "node"])
-	subprocess.Popen(home+'/.config/signalk-server-node/bin/openplotter', cwd=home+'/.config/signalk-server-node')       
+	subprocess.call(['pkill', '-f', 'mqtt_d.py'])
+	if user_mqtt and passw_mqtt and topics_list: 
+		subprocess.Popen(['python', currentpath+'/mqtt_d.py'])
 
 	subprocess.call(['pkill', '-f', 'monitoring.py'])
 	subprocess.Popen(['python',currentpath+'/monitoring.py'])

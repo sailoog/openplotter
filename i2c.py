@@ -148,6 +148,7 @@ while True:
 				temperature_h=read[3]+h_temp_offset
 
 	#GENERATE
+	# Avoid generation if SK paths are not selected
 	if tick2-tick_imu > rate_imu:
 		tick_imu=time.time()
 	
