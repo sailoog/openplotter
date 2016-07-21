@@ -97,9 +97,9 @@ if not exist:
 	e_imu=True
 	e_pres=True
 	e_hum=True
-	if 'none' in l_detected[0]:	e_imu=False
-	if 'none' in l_detected[2]:	e_pres=False
-	if 'none' in l_detected[3]:	e_hum=False
+	if 'none' in l_detected[0]:	e_imu=None
+	if 'none' in l_detected[2]:	e_pres=None
+	if 'none' in l_detected[3]:	e_hum=None
 
 	DS18B20=[]
 	x=conf.get('1W', 'DS18B20')
@@ -157,13 +157,13 @@ if not exist:
 	if nmea_mag_var=='1' or nmea_hdt=='1' or nmea_rot=='1' or TW_STW=='1' or TW_SOG=='1': 
 		subprocess.Popen(['python', currentpath+'/tools/calculate_d.py'])
 
-	subprocess.call(['pkill', '-f', 'i2c.py'])
+	subprocess.call(['pkill', '-f', 'i2c_d.py'])
 	if e_imu or e_pres or e_hum:
-		subprocess.Popen(['python', currentpath+'/i2c.py'], cwd=currentpath+'/imu')
+		subprocess.Popen(['python', currentpath+'/i2c_d.py'], cwd=currentpath+'/imu')
 
-	subprocess.call(['pkill', '-f', '1w.py'])
+	subprocess.call(['pkill', '-f', '1w_d.py'])
 	if DS18B20: 
-		subprocess.Popen(['python', currentpath+'/1w.py'])
+		subprocess.Popen(['python', currentpath+'/1w_d.py'])
 
 	subprocess.call(['pkill', '-f', 'mqtt_d.py'])
 	if user_mqtt and passw_mqtt and topics_list: 

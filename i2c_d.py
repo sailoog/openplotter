@@ -49,14 +49,15 @@ except:
 	print 'Bad format in offset value' 
 
 p_temp_skt=conf.get('I2C', 'p_temp_skt')
+if not p_temp_skt: p_temp_skt='environment.outside.temperature'
 h_temp_skt=conf.get('I2C', 'h_temp_skt')
+if not h_temp_skt: h_temp_skt='environment.inside.temperature'
 humidity_skt=conf.get('I2C', 'hum_skt')
+if not humidity_skt: humidity_skt='environment.inside.humidity'
 
 rate_imu=float(conf.get('I2C', 'rate_imu'))
 rate_press=float(conf.get('I2C', 'rate_press'))
 rate_hum=float(conf.get('I2C', 'rate_hum'))
-	
-#press_temp_log_b = conf.get('STARTUP', 'press_temp_log')=='1'
 
 
 with open('/home/pi/.config/signalk-server-node/settings/openplotter-settings.json') as data_file:
@@ -85,19 +86,6 @@ if humidity_sk:
 	s3 = RTIMU.Settings(SETTINGS_FILE3)
 	humidity_val = RTIMU.RTHumidity(s3)
 	humidity_val.humidityInit()
-
-'''
-if press_temp_log_b:
-	ifile  = open(currentpath+'/weather_log.csv', "r")
-	reader = csv.reader(ifile)
-	log_list = []
-	for row in reader:
-		log_list.append(row)
-	ifile.close()
-	if log_list: last_log=float(log_list[len(log_list)-1][0])
-	else: last_log=0
-	log_list_b = True
-'''
 
 heading_m=''
 heel=''
@@ -214,41 +202,3 @@ while True:
 				Erg += '{"path": "'+list_signalk_path3[i]+'","value":'+list_signalk3[i]+'},'
 			SignalK+=Erg[0:-1]+']}],"context": "vessels.'+uuid+'"}\n'
 			sock.sendto(SignalK, ('127.0.0.1', 7777))
-
-		'''
-		temperature=''
-		if e_pres: temperature=temperature_p
-		elif e_hum: temperature=temperature_h
-
-		# log temperature pressure humidity
-		try:
-			if press_temp_log_b:
-				if tick-last_log > 300:
-					last_log=tick
-					press2=0
-					temp2=0
-					hum2=0
-					if pressure: press2=pressure
-					if temperature: temp2=temperature
-					if humidity: hum2=humidity
-					new_row=[tick,press2,temp2,hum2]
-					if len(log_list) < 288:
-						log_list.append(new_row)
-						ofile = open(currentpath+'/weather_log.csv', "a")
-						writer = csv.writer(ofile)
-						writer.writerow(new_row)
-					if len(log_list) >= 288:
-						del log_list[0]
-						log_list.append(new_row)
-						ofile = open(currentpath+'/weather_log.csv', "w")
-						writer = csv.writer(ofile)
-						for row in log_list:
-							writer.writerow(row)
-					ofile.close()
-		except Exception,e: print str(e)
-		
-		temperature_p=''
-		temperature_h=''
-		pressure=''
-		humidity=''
-'''

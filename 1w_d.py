@@ -36,36 +36,37 @@ try:
 	sensors_list=eval(conf.get('1W', 'DS18B20'))
 except: sensors_list=[]
 
-sensors=[]
-sensors_list2=[]
-for item in sensors_list:
-	try:
-		type=W1ThermSensor.THERM_SENSOR_DS18B20
-		for sensor in W1ThermSensor.get_available_sensors():
-			if item[2] == sensor.id:
-				type = sensor.type
-		sensors.append(W1ThermSensor(type, item[2]))
-		sensors_list2.append(item)
-	except Exception,e: print str(e)
-		
-while True:
-	time.sleep(0.1)
-	list_signalk=[]
-	ib=0
-	for i in sensors_list2:
+if sensors_list:
+	sensors=[]
+	sensors_list2=[]
+	for item in sensors_list:
 		try:
-			temp=sensors[ib].get_temperature(W1ThermSensor.KELVIN)
-			temp_offset=temp+float(i[3])
-			if '.*.' in i[1]: SKkey=i[1].replace('*', i[0])
-			else: SKkey=i[1]
-			list_signalk.append([SKkey,str(temp_offset)])
+			type=W1ThermSensor.THERM_SENSOR_DS18B20
+			for sensor in W1ThermSensor.get_available_sensors():
+				if item[2] == sensor.id:
+					type = sensor.type
+			sensors.append(W1ThermSensor(type, item[2]))
+			sensors_list2.append(item)
 		except Exception,e: print str(e)
-		ib=ib+1
+			
+	while True:
+		time.sleep(0.1)
+		list_signalk=[]
+		ib=0
+		for i in sensors_list2:
+			try:
+				temp=sensors[ib].get_temperature(W1ThermSensor.KELVIN)
+				temp_offset=temp+float(i[3])
+				if '.*.' in i[1]: SKkey=i[1].replace('*', i[0])
+				else: SKkey=i[1]
+				list_signalk.append([SKkey,str(temp_offset)])
+			except Exception,e: print str(e)
+			ib=ib+1
 
-	if list_signalk!=[]:				
-		SignalK = '{"updates": [{"source": {"type": "1W","src" : "DS18B20"},"timestamp": "'+str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z","values":[ '
-		Erg=''
-		for j in list_signalk:
-			Erg += '{"path": "'+j[0]+'","value":'+j[1]+'},'
-		SignalK+=Erg[0:-1]+']}],"context": "vessels.'+uuid+'"}\n'			
-		sock.sendto(SignalK, ('127.0.0.1', 7777))	
+		if list_signalk!=[]:				
+			SignalK = '{"updates": [{"source": {"type": "1W","src" : "DS18B20"},"timestamp": "'+str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z","values":[ '
+			Erg=''
+			for j in list_signalk:
+				Erg += '{"path": "'+j[0]+'","value":'+j[1]+'},'
+			SignalK+=Erg[0:-1]+']}],"context": "vessels.'+uuid+'"}\n'			
+			sock.sendto(SignalK, ('127.0.0.1', 7777))	

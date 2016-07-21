@@ -460,22 +460,15 @@ class MainFrame(wx.Frame):
 		self.h_temp_skt = wx.ComboBox(self.page6, choices=self.list_sk_path_temp, style=wx.CB_READONLY, size=(180, 25), pos=(s4, z-3))
 		self.h_temp_offset = wx.TextCtrl(self.page6, size=(45, 20), pos=(s5, z))
 		z=z8
-		self.button_reset_graph =wx.Button(self.page6, label=_('Reset graph'), pos=(s1, z))
-		self.Bind(wx.EVT_BUTTON, self.reset_graph, self.button_reset_graph)
-		self.button_graph =wx.Button(self.page6, label=_('Show graph'), pos=(s2, z))
-		self.Bind(wx.EVT_BUTTON, self.show_graph, self.button_graph)
-
-		self.diagnostic_SK_i2c =wx.Button(self.page6, label=_('SK Diagnostic'), pos=(s4, z))
+		self.diagnostic_SK_i2c =wx.Button(self.page6, label=_('SK Diagnostic'), pos=(s1, z))
 		self.Bind(wx.EVT_BUTTON, self.diagnostic_SK, self.diagnostic_SK_i2c)	
 
 		self.button_i2c_cancel =wx.Button(self.page6, label=_('cancel'), pos=(480, z))
 		self.Bind(wx.EVT_BUTTON, self.i2c_cancel, self.button_i2c_cancel)
 		self.button_i2c_apply =wx.Button(self.page6, label=_('apply'), pos=(580, z))
 		self.Bind(wx.EVT_BUTTON, self.i2c_apply, self.button_i2c_apply)
-
 ###########################page6
 ########page11###################
-
 		wx.StaticBox(self.page11, label=_(' Temperature sensors '), size=(670, 265), pos=(10, 10))
 		self.list_DS18B20 =	wx.ListCtrl(self.page11, style=wx.LC_REPORT, size=(565, 237), pos=(15, 30))
 		self.list_DS18B20.InsertColumn(0, _('Name'), width=100)
@@ -493,11 +486,6 @@ class MainFrame(wx.Frame):
 
 		self.diagnostic_SK_1w =wx.Button(self.page11, label=_('SK Diagnostic'), pos=(10, 285))
 		self.Bind(wx.EVT_BUTTON, self.diagnostic_SK, self.diagnostic_SK_1w)
-
-		self.button_apply_changes_DS18B20 =wx.Button(self.page11, label=_('Apply changes'), pos=(570, 285))
-		self.Bind(wx.EVT_BUTTON, self.apply_changes_DS18B20, self.button_apply_changes_DS18B20)
-		self.button_cancel_changes_DS18B20 =wx.Button(self.page11, label=_('Cancel changes'), pos=(430, 285))
-		self.Bind(wx.EVT_BUTTON, self.cancel_changes_DS18B20, self.button_cancel_changes_DS18B20)
 ###########################page11
 ########page12###################
 		wx.StaticText(self.page12, label=_('Coming soon'), pos=(20, 30))
@@ -1442,24 +1430,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 ###################################### I2C sensors
 
 	def start_sensors(self):
-		self.stop_sensors()
 		if self.imu_sensor != 'none' or self.press_sensor != 'none' or self.hum_sensor != 'none':
-			subprocess.Popen(['python', currentpath+'/i2c.py'], cwd=currentpath+'/imu')
+			subprocess.Popen(['python', currentpath+'/i2c_d.py'], cwd=currentpath+'/imu')
 			
 	def stop_sensors(self):
 		subprocess.call(['pkill', 'RTIMULibDemoGL'])
-		subprocess.call(['pkill', '-f', 'i2c.py'])
-
-	def show_graph(self, e):
-		subprocess.call(['pkill', '-f', 'graph.py'])
-		subprocess.Popen(['python', currentpath+'/graph.py'])
-
-	def	reset_graph(self, e):
-		data=''
-		file = open(currentpath+'/weather_log.csv', 'w')
-		file.write(data)
-		file.close()
-		self.SetStatusText(_('Weather log restarted'))
+		subprocess.call(['pkill', '-f', 'i2c_d.py'])
 
 	def i2c_start(self):
 		self.imu_sensor='none'
@@ -1546,11 +1522,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.conf.set('I2C', 'sk_hum', '1')
 			self.conf.set('I2C', 'sk_temp_h', '1')
 
-		if 'none' in self.press_sensor and 'none' in self.hum_sensor: 
-			self.conf.set('I2C', 'weather_log', '0')
-		else: 
-			self.conf.set('I2C', 'weather_log', '1')
-
 	def i2c_apply(self, e):
 		self.conf.set('I2C', 'rate_imu', str(self.rate_imu.GetValue()))
 		self.conf.set('I2C', 'rate_press', str(self.rate_press.GetValue()))
@@ -1569,10 +1540,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.conf.set('OFFSET', 'humidity',str(float(self.humidity_offset.GetValue())))
 			self.conf.set('OFFSET', 'temperature_h',str(float(self.h_temp_offset.GetValue())))
 		except:
-			self.ShowMessage(_("An offset has't the correct decimal number format"))
+			self.ShowMessage(_("An offset is not a number"))
 			self.i2c_start()
 		
-		self.start_sensors()
+		self.restart_SK(0)
 
 	def i2c_cancel(self, e):
 		self.i2c_start()
@@ -1592,7 +1563,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.heel_sensor.SetLabel('')
 		self.pitch_sensor.SetLabel('')
 		self.check_sensors()
-		self.start_sensors()
+		self.restart_SK(0)
 
 	def reset_press(self, e):
 		try:
@@ -1601,7 +1572,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.pressure_sensor.SetLabel('')
 		self.p_temp_sensor.SetLabel('')
 		self.check_sensors()
-		self.start_sensors()
+		self.restart_SK(0)
 
 	def reset_hum(self, e):
 		try:
@@ -1610,7 +1581,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.humidity_sensor.SetLabel('')
 		self.h_temp_sensor.SetLabel('')
 		self.check_sensors()
-		self.start_sensors()
+		self.restart_SK(0)
 
 
 ###################################### Switches
@@ -2144,11 +2115,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 ####################### 1W sensors
 
 	def start_1w(self):
-		self.stop_1w()
-		subprocess.Popen(['python',currentpath+'/1w.py'])
+		subprocess.Popen(['python',currentpath+'/1w_d.py'])
 
 	def stop_1w(self):
-		subprocess.call(['pkill', '-f', '1w.py'])
+		subprocess.call(['pkill', '-f', '1w_d.py'])
 		
 	def read_DS18B20(self):
 		self.DS18B20=[]
@@ -2212,6 +2182,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.DS18B20[edit[0]][1]=SKkey
 				self.DS18B20[edit[0]][2]=sensor_id
 				self.DS18B20[edit[0]][3]=offset
+			self.apply_changes_DS18B20()
 		dlg.Destroy()
 
 	def delete_DS18B20(self,e):
@@ -2221,20 +2192,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			return
 		del self.DS18B20[selected_DS18B20]
 		self.list_DS18B20.DeleteItem(selected_DS18B20)
+		self.apply_changes_DS18B20()
 
-	def apply_changes_DS18B20(self,e):
-		'''
-		for i in self.DS18B20:
-			index=self.DS18B20.index(i)
-		'''
+	def apply_changes_DS18B20(self):
 		self.conf.set('1W', 'DS18B20', str(self.DS18B20))
-		self.start_1w()
-		self.start_monitoring()
-		self.SetStatusText(_('DS18B20 sensors changes applied and restarted'))
-
-	def cancel_changes_DS18B20(self,e):
-		self.read_DS18B20()
-		self.SetStatusText(_('DS18B20 sensors changes cancelled'))
+		self.restart_SK(0)
 
 ####################### USB manager
 
@@ -2445,6 +2407,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def restart_SK(self, e):
 		self.SetStatusText(_('Closing Signal K server'))
 		subprocess.call(["pkill", '-9', "node"])
+		self.stop_sensors()
+		self.stop_1w()
+		self.stop_mqtt()
 		self.start_SK()
 		time.sleep(5)
 		self.start_sensors()
@@ -2572,8 +2537,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 ####################### MQTT
 
 	def start_mqtt(self):
-		subprocess.call(['pkill', '-f', 'mqtt_d.py'])
 		subprocess.Popen(['python',currentpath+'/mqtt_d.py'])
+
+	def stop_mqtt(self):
+		subprocess.call(['pkill', '-f', 'mqtt_d.py'])
 
 	def read_mqtt(self):
 		broker=self.conf.get('MQTT', 'broker')
@@ -2684,6 +2651,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		subprocess.call(['sudo','mosquitto_passwd','-U','/etc/mosquitto/passwd.pw'])
 		subprocess.call(['sudo','service','mosquitto','restart'])
 		self.SetStatusText(_('MQTT settings applied and restarted'))
+		self.stop_mqtt()
 		self.start_mqtt()
 
 	def clear_mqtt(self,e):

@@ -25,7 +25,7 @@ class addDS18B20(wx.Dialog):
 
 	def __init__(self,edit):
 
-		wx.Dialog.__init__(self, None, title=_('Add 1W temperature sensor'), size=(430,290))
+		wx.Dialog.__init__(self, None, title=_('Add 1W temperature sensor'), size=(430,300))
 
 		panel = wx.Panel(self)
 
@@ -44,8 +44,9 @@ class addDS18B20(wx.Dialog):
  		self.description = wx.TextCtrl(panel, -1, style=wx.TE_MULTILINE|wx.TE_READONLY, size=(410, 45), pos=(10, 70))
 		self.description.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_INACTIVECAPTION))
 
-		wx.StaticText(panel, label=_('Name (no symbols)'), pos=(10, 125))
+		wx.StaticText(panel, label=_('Name'), pos=(10, 125))
 		self.name = wx.TextCtrl(panel, size=(150, 30), pos=(10, 150))
+		wx.StaticText(panel, label=_('allowed characters: 0-9, a-z, A-Z.'), pos=(10, 185))
 
 		list_id=[]
 		for sensor in W1ThermSensor.get_available_sensors():
@@ -66,8 +67,8 @@ class addDS18B20(wx.Dialog):
 			self.id_select.SetValue(edit[3])
 			self.offset.SetValue(edit[4])
 			
-		cancelBtn = wx.Button(panel, wx.ID_CANCEL, pos=(115, 210))
-		okBtn = wx.Button(panel, wx.ID_OK, pos=(235, 210))
+		cancelBtn = wx.Button(panel, wx.ID_CANCEL, pos=(115, 220))
+		okBtn = wx.Button(panel, wx.ID_OK, pos=(235, 220))
 
 	def onSelect(self,e):
 		selected= self.SKkey.GetValue()
