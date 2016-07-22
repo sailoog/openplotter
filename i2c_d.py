@@ -154,12 +154,13 @@ while True:
 			list_signalk2.append(str(0.017453293*pitch))
 
 		if list_signalk2:
-			SignalK = '{"updates": [{"source": {"type": "I2C","src" : "imu"},"timestamp": "'+str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z","values":[ '
+			timestamp=str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z'
+			SignalK='{"context": "vessels.'+uuid+'","updates":[{"source":{"type": "I2C","src":"'+imu.IMUName()+'"},"timestamp":"'+timestamp+'","values":['
 			Erg=''
 			for i in range(0,len(list_signalk2)):
 				Erg += '{"path": "'+list_signalk_path2[i]+'","value":'+list_signalk2[i]+'},'
-			SignalK+=Erg[0:-1]+']}],"context": "vessels.'+uuid+'"}\n'			
-			sock.sendto(SignalK, ('127.0.0.1', 7777))	
+			SignalK+=Erg[0:-1]+']}]}\n'		
+			sock.sendto(SignalK, ('127.0.0.1', 55556))	
 
 	if tick2-tick_press > rate_press:
 		tick_press=time.time()
@@ -175,12 +176,13 @@ while True:
 			list_signalk1.append(str(round(temperature_p,2)+273.15))
 
 		if list_signalk1:
-			SignalK = '{"updates": [{"source": {"type": "I2C","src" : "press"},"timestamp": "'+str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z","values":[ '
+			timestamp=str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z'
+			SignalK='{"context": "vessels.'+uuid+'","updates":[{"source":{"type": "I2C","src":"'+pressure_val.pressureName()+'"},"timestamp":"'+timestamp+'","values":['
 			Erg=''
 			for i in range(0,len(list_signalk1)):
 				Erg += '{"path": "'+list_signalk_path1[i]+'","value":'+list_signalk1[i]+'},'
-			SignalK+=Erg[0:-1]+']}],"context": "vessels.'+uuid+'"}\n'
-			sock.sendto(SignalK, ('127.0.0.1', 7777))			
+			SignalK+=Erg[0:-1]+']}]}\n'	
+			sock.sendto(SignalK, ('127.0.0.1', 55556))			
 		
 	if tick2-tick_hum > rate_hum:
 		tick_hum=time.time()
@@ -196,9 +198,10 @@ while True:
 			list_signalk3.append(str(round(temperature_h,2)+273.15))
 
 		if list_signalk3:
-			SignalK = '{"updates": [{"source": {"type": "I2C","src" : "hum"},"timestamp": "'+str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z","values":[ '
+			timestamp=str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z'
+			SignalK='{"context": "vessels.'+uuid+'","updates":[{"source":{"type": "I2C","src":"'+humidity_val.humidityName()+'"},"timestamp":"'+timestamp+'","values":['
 			Erg=''
 			for i in range(0,len(list_signalk3)):
 				Erg += '{"path": "'+list_signalk_path3[i]+'","value":'+list_signalk3[i]+'},'
-			SignalK+=Erg[0:-1]+']}],"context": "vessels.'+uuid+'"}\n'
-			sock.sendto(SignalK, ('127.0.0.1', 7777))
+			SignalK+=Erg[0:-1]+']}]}\n'	
+			sock.sendto(SignalK, ('127.0.0.1', 55556))

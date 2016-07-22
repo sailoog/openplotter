@@ -23,10 +23,10 @@ def on_message(client, userdata, msg):
 	path=msg.topic
 	path=path.replace('/','.')
 	path='notifications.mqtt.'+path
-	SignalK='{"updates": [{"source": {"type": "MQTT","src" : "mqtt"},"timestamp": "'+str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z","values":[ '
-	SignalK+='{"path": "'+path+'","value": {"message": "'+msg.payload+'"}}'
-	SignalK+=']}],"context": "vessels.'+uuid+'"}\n'
-	sock.sendto(SignalK, ('127.0.0.1', 7777))
+	value='{"message": "'+msg.payload+'"}'
+	timestamp=str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z'
+	SignalK='{"context": "vessels.'+uuid+'","updates":[{"source":{"type": "notifications","src":"mqtt"},"timestamp":"'+timestamp+'","values":[{"path":"'+path+'","value":'+value+'}]}]}\n'
+	sock.sendto(SignalK, ('127.0.0.1', 55558))
 
 def on_connect(client, userdata, flags, rc):
 	for i in topics_list:
@@ -51,11 +51,12 @@ def send_null():
 			path_tmp='notifications.mqtt.'+ii
 			if not path_tmp in list_path: list_path.append(path_tmp)
 	values=''
-	SignalK='{"updates": [{"source": {"type": "MQTT","src" : "mqtt"},"timestamp": "'+str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z","values":[ '
+	timestamp=str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z'
+	SignalK='{"context": "vessels.'+uuid+'","updates":[{"source":{"type": "notifications","src":"mqtt"},"timestamp":"'+timestamp+'","values":['
 	for i in list_path:
 		values+= '{"path": "'+i+'","value": {"message": null}},'
-	SignalK+=values[0:-1]+']}],"context": "vessels.'+uuid+'"}\n'
-	sock.sendto(SignalK, ('127.0.0.1', 7777))
+	SignalK+=values[0:-1]+']}]}\n'
+	sock.sendto(SignalK, ('127.0.0.1', 55558))
 
 
 conf=Conf()
