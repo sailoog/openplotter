@@ -18,13 +18,13 @@
 import subprocess, time, ConfigParser, os
 from classes.paths import Paths
 from classes.conf import Conf
+from classes.check_vessel_self import checkVesselSelf
 
 pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
-
 exist=False
 for pid in pids:
 	try:
-		if 'monitoring.py' in open(os.path.join('/proc', pid, 'cmdline'), 'rb').read():
+		if 'node' in open(os.path.join('/proc', pid, 'cmdline'), 'rb').read():
 			exist=True
 	except IOError: # proc has already terminated
 		continue
@@ -32,7 +32,6 @@ for pid in pids:
 
 if not exist:
 	paths=Paths()
-	home=paths.home
 	currentpath=paths.currentpath
 
 	boot_ap=0
@@ -91,26 +90,6 @@ if not exist:
 	gain=conf.get('AIS-SDR', 'gain')
 	ppm=conf.get('AIS-SDR', 'ppm')
 	channel=conf.get('AIS-SDR', 'channel')
-
-	detected=subprocess.check_output(['python', currentpath+'/imu/check_sensors.py'], cwd=currentpath+'/imu')
-	l_detected=detected.split('\n')
-	e_imu=True
-	e_pres=True
-	e_hum=True
-	if 'none' in l_detected[0]:	e_imu=None
-	if 'none' in l_detected[2]:	e_pres=None
-	if 'none' in l_detected[3]:	e_hum=None
-
-	DS18B20=[]
-	x=conf.get('1W', 'DS18B20')
-	if x: DS18B20=eval(x)
-	else: DS18B20=[]
-
-	user_mqtt=conf.get('MQTT', 'username')
-	passw_mqtt=conf.get('MQTT', 'password')
-	x=conf.get('MQTT', 'topics')
-	if x: topics_list=eval(x)
-	else: topics_list=[]
 		
 	nmea_mag_var=conf.get('CALCULATE', 'nmea_mag_var')
 	nmea_hdt=conf.get('CALCULATE', 'nmea_hdt')
@@ -146,9 +125,7 @@ if not exist:
 		subprocess.Popen('kplex')
 
 	subprocess.call(["pkill", '-9', "node"])
-	subprocess.Popen(home+'/.config/signalk-server-node/bin/openplotter', cwd=home+'/.config/signalk-server-node')               
-
-	time.sleep(5)
+	vessel_self=checkVesselSelf()
 
 	if gps_time=='1':
 		subprocess.call(['sudo', 'python', currentpath+'/time_gps.py'])
@@ -156,21 +133,6 @@ if not exist:
 	subprocess.call(['pkill', '-f', 'calculate_d.py'])
 	if nmea_mag_var=='1' or nmea_hdt=='1' or nmea_rot=='1' or TW_STW=='1' or TW_SOG=='1': 
 		subprocess.Popen(['python', currentpath+'/tools/calculate_d.py'])
-
-	subprocess.call(['pkill', '-f', 'i2c_d.py'])
-	if e_imu or e_pres or e_hum:
-		subprocess.Popen(['python', currentpath+'/i2c_d.py'], cwd=currentpath+'/imu')
-
-	subprocess.call(['pkill', '-f', '1w_d.py'])
-	if DS18B20: 
-		subprocess.Popen(['python', currentpath+'/1w_d.py'])
-
-	subprocess.call(['pkill', '-f', 'mqtt_d.py'])
-	if user_mqtt and passw_mqtt and topics_list: 
-		subprocess.Popen(['python', currentpath+'/mqtt_d.py'])
-
-	subprocess.call(['pkill', '-f', 'monitoring.py'])
-	subprocess.Popen(['python',currentpath+'/monitoring.py'])
 
 	subprocess.call(['pkill', '-9', 'aisdecoder'])
 	subprocess.call(['pkill', '-9', 'rtl_fm'])

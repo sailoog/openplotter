@@ -17,7 +17,7 @@
 import paho.mqtt.client as paho
 import time, socket, datetime, json
 from classes.conf import Conf
-from classes.paths import Paths
+from classes.check_vessel_self import checkVesselSelf
 
 def on_message(client, userdata, msg):
 	path=msg.topic
@@ -60,12 +60,9 @@ def send_null():
 
 
 conf=Conf()
-paths=Paths()
-home=paths.home
 
-with open(home+'/.config/signalk-server-node/settings/openplotter-settings.json') as data_file:
-	data = json.load(data_file)
-uuid=data['vessel']['uuid']
+vessel_self=checkVesselSelf()
+uuid=vessel_self.uuid
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 

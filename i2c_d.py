@@ -15,13 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import socket, time, pynmea2, RTIMU, math, csv, datetime, json, subprocess
-from classes.paths import Paths
+import socket, time, pynmea2, RTIMU, math, csv, datetime, subprocess
 from classes.conf import Conf
-
-paths=Paths()
-currentpath=paths.currentpath
-home=paths.home
+from classes.check_vessel_self import checkVesselSelf
 
 conf=Conf()
 
@@ -59,10 +55,8 @@ rate_imu=float(conf.get('I2C', 'rate_imu'))
 rate_press=float(conf.get('I2C', 'rate_press'))
 rate_hum=float(conf.get('I2C', 'rate_hum'))
 
-
-with open('/home/pi/.config/signalk-server-node/settings/openplotter-settings.json') as data_file:
-	data = json.load(data_file)
-uuid=data['vessel']['uuid']
+vessel_self=checkVesselSelf()
+uuid=vessel_self.uuid
 
 if heading_sk or heel_sk or pitch_sk:
 	SETTINGS_FILE = "RTIMULib"

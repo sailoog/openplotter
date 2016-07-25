@@ -27,10 +27,10 @@ from classes.add_trigger import addTrigger
 from classes.add_action import addAction
 from classes.add_kplex import addkplex
 from classes.add_DS18B20 import addDS18B20
-from classes.add_switch import addSwitch
-from classes.add_output import addOutput
+from classes.add_gpio import addGPIO
 from classes.add_USBinst import addUSBinst
 from classes.add_topic import addTopic
+from classes.check_vessel_self import checkVesselSelf
 
 paths=Paths()
 home=paths.home
@@ -52,9 +52,13 @@ class MainFrame(wx.Frame):
 
 	def __init__(self):
 		wx.Frame.__init__(self, None, title="OpenPlotter", size=(710,460))
+		if self.util_process_exist('startup.py'):
+			print "System not ready, try later."
+			sys.exit(0)
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 		self.conf=Conf()
 		self.language=self.conf.get('GENERAL','lang')
+		self.vessel_self=checkVesselSelf()
 		Language(self.language)
 		self.p = scrolled.ScrolledPanel(self, -1, style = wx.TAB_TRAVERSAL|wx.SUNKEN_BORDER)
 		self.p.SetAutoLayout(1)
@@ -72,7 +76,7 @@ class MainFrame(wx.Frame):
 		self.page10 = wx.Panel(self.nb)
 		self.page11 = wx.Panel(self.nb)
 		self.page12 = wx.Panel(self.nb)
-		self.page13 = wx.Panel(self.nb)
+		#self.page13 = wx.Panel(self.nb)
 		self.page14 = wx.Panel(self.nb)
 		self.page15 = wx.Panel(self.nb)
 		self.page16 = wx.Panel(self.nb)
@@ -83,8 +87,8 @@ class MainFrame(wx.Frame):
 		self.nb.AddPage(self.page7, _('Signal K'))
 		self.nb.AddPage(self.page3, _('WiFi AP'))
 		self.nb.AddPage(self.page10, _('Actions'))
-		self.nb.AddPage(self.page8, _('Switches'))
-		self.nb.AddPage(self.page13, _('Outputs'))
+		self.nb.AddPage(self.page8, _('GPIO sensors'))
+		#self.nb.AddPage(self.page13, _(''))
 		self.nb.AddPage(self.page6, _('I2C sensors'))
 		self.nb.AddPage(self.page11, _('1W sensors'))
 		self.nb.AddPage(self.page12, _('SPI sensors'))
@@ -100,6 +104,11 @@ class MainFrame(wx.Frame):
 		self.icon = wx.Icon(currentpath+'/openplotter.ico', wx.BITMAP_TYPE_ICO)
 		self.SetIcon(self.icon)
 		self.CreateStatusBar()
+		font_statusBar = self.GetStatusBar().GetFont()
+		font_statusBar.SetWeight (wx.BOLD)
+		self.GetStatusBar().SetFont(font_statusBar)
+		self.GetStatusBar().SetForegroundColour(wx.BLACK)
+		self.nb.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGING, self.Changingpage)
 		self.Centre()
 
 ########################### menu
@@ -285,9 +294,6 @@ class MainFrame(wx.Frame):
 ########page7###################
 		wx.StaticBox(self.page7, label=_(' Settings '), size=(230, 265), pos=(10, 10))
 
-		self.vessel = wx.TextCtrl(self.page7, -1, size=(110, 32), pos=(20, 30))
-		self.vessel_label=wx.StaticText(self.page7, label=_('Vessel name'), pos=(140, 35))
-
 		self.mmsi = wx.TextCtrl(self.page7, -1, size=(110, 32), pos=(20, 65))
 		self.mmsi_label=wx.StaticText(self.page7, label='MMSI', pos=(140, 70))
 
@@ -302,13 +308,7 @@ class MainFrame(wx.Frame):
 		
 		wx.StaticBox(self.page7, label=_(' Inputs '), size=(430, 130), pos=(250, 10))
 		self.SKinputs_label=wx.StaticText(self.page7, label='NMEA 0183: system_output - TCP localhost 10110', pos=(260, 30))
-		
-		
-		if not self.util_process_exist('node'):
-			print 'SignalK start'
-			self.start_SK()
-			time.sleep(5.0)
-		
+
 		response = requests.get('http://localhost:3000/signalk')
 		data = response.json()
 		text=_('Version: ')
@@ -510,52 +510,24 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.delete_USBinst, self.delete_USBinst_button)
 ###########################page14
 ########page8###################
-		wx.StaticBox(self.page8, label=_(' Switches '), size=(670, 265), pos=(10, 10))
+		wx.StaticBox(self.page8, label=_(' Sensors '), size=(670, 265), pos=(10, 10))
 		
-		self.list_switches = CheckListCtrl(self.page8, 237)
-		self.list_switches.SetPosition((15, 30))
-		self.list_switches.InsertColumn(0, _('Name'), width=300)
-		self.list_switches.InsertColumn(1, _('Short'), width=80)
-		self.list_switches.InsertColumn(2, 'GPIO')
-		self.list_switches.InsertColumn(3, 'Pull')
-		self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_switches, self.list_switches)
+		self.list_gpio = wx.ListCtrl(self.page8, style=wx.LC_REPORT, size=(565, 237), pos=(15, 30))
+		self.list_gpio.InsertColumn(0, _('Name'), width=345)
+		self.list_gpio.InsertColumn(1, _('I/O'), width=80)
+		self.list_gpio.InsertColumn(2, 'GPIO', width=60)
+		self.list_gpio.InsertColumn(3, 'Pull', width=80)
+		self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_gpio, self.list_gpio)
 			
-		self.add_switches_button =wx.Button(self.page8, label=_('add'), pos=(585, 30))
-		self.Bind(wx.EVT_BUTTON, self.add_switches, self.add_switches_button)
+		self.add_gpio_button =wx.Button(self.page8, label=_('add'), pos=(585, 30))
+		self.Bind(wx.EVT_BUTTON, self.add_gpio, self.add_gpio_button)
 
-		self.delete_switches_button =wx.Button(self.page8, label=_('delete'), pos=(585, 65))
-		self.Bind(wx.EVT_BUTTON, self.delete_switches, self.delete_switches_button)
+		self.delete_gpio_button =wx.Button(self.page8, label=_('delete'), pos=(585, 65))
+		self.Bind(wx.EVT_BUTTON, self.delete_gpio, self.delete_gpio_button)
 
-		self.show_kplex2 =wx.Button(self.page8, label=_('Inspector'), pos=(10, 285))
-		self.Bind(wx.EVT_BUTTON, self.show_kplex, self.show_kplex2)
-		self.button_cancel_changes_switches =wx.Button(self.page8, label=_('Apply changes'), pos=(570, 285))
-		self.Bind(wx.EVT_BUTTON, self.cancel_changes_switches, self.button_cancel_changes_switches)
-		self.button_cancel_changes_switches =wx.Button(self.page8, label=_('Cancel changes'), pos=(430, 285))
-		self.Bind(wx.EVT_BUTTON, self.cancel_changes_switches, self.button_cancel_changes_switches)
+		self.diagnostic_SK_gpio =wx.Button(self.page8, label=_('SK Diagnostic'), pos=(10, 285))
+		self.Bind(wx.EVT_BUTTON, self.diagnostic_SK, self.diagnostic_SK_gpio)
 ###########################page8
-########page13###################
-		wx.StaticBox(self.page13, label=_(' Outputs '), size=(670, 265), pos=(10, 10))
-		
-		self.list_outputs = CheckListCtrl(self.page13, 237)
-		self.list_outputs.SetPosition((15, 30))
-		self.list_outputs.InsertColumn(0, _('Name'), width=320)
-		self.list_outputs.InsertColumn(1, _('Short'), width=80)
-		self.list_outputs.InsertColumn(2, 'GPIO')
-		self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_outputs, self.list_outputs)
-			
-		self.add_outputs_button =wx.Button(self.page13, label=_('add'), pos=(585, 30))
-		self.Bind(wx.EVT_BUTTON, self.add_outputs, self.add_outputs_button)
-
-		self.delete_outputs_button =wx.Button(self.page13, label=_('delete'), pos=(585, 65))
-		self.Bind(wx.EVT_BUTTON, self.delete_outputs, self.delete_outputs_button)
-
-		self.show_kplex3 =wx.Button(self.page13, label=_('Inspector'), pos=(10, 285))
-		self.Bind(wx.EVT_BUTTON, self.show_kplex, self.show_kplex3)
-		self.button_apply_changes_outputs =wx.Button(self.page13, label=_('Apply changes'), pos=(570, 285))
-		self.Bind(wx.EVT_BUTTON, self.apply_changes_outputs, self.button_apply_changes_outputs)
-		self.button_cancel_changes_outputs =wx.Button(self.page13, label=_('Cancel changes'), pos=(430, 285))
-		self.Bind(wx.EVT_BUTTON, self.cancel_changes_outputs, self.button_cancel_changes_outputs)
-###########################page13
 ########page9###################
 		wx.StaticBox(self.page9, label=_(' Twitter '), size=(330, 205), pos=(10, 10))
 		self.twitter_enable = wx.CheckBox(self.page9, label=_('Enable'), pos=(20, 32))
@@ -716,11 +688,8 @@ class MainFrame(wx.Frame):
 			self.Gmail_password.Disable()
 			self.Recipient.Disable()
 
-		with open(home+'/.config/signalk-server-node/settings/openplotter-settings.json') as data_file:
-			data = json.load(data_file)
-		self.vessel.SetValue(data['vessel']['name'])
-		self.mmsi.SetValue(data['vessel']['uuid'])
-		text='NMEA 0183: system_output - TCP localhost 10110\nSignal K: OpenPlotter sensors - UDP localhost 7777'
+		self.mmsi.SetValue(self.vessel_self.mmsi)
+		text='NMEA 0183: system_output - TCP localhost 10110\nSignal K: I2C sensors - UDP localhost 55556\nSignal K: 1W sensors - UDP localhost 55557\nSignal K: notifications - UDP localhost 55558'
 		if self.conf.get('N2K', 'enable')=='1': 
 			self.n2k_enable.SetValue(True)
 			self.can_usb.Disable()
@@ -759,8 +728,7 @@ class MainFrame(wx.Frame):
 		self.read_triggers()
 		self.read_DS18B20()
 		self.read_USBinst()
-		self.read_switches()
-		self.read_outputs()
+		self.read_gpio()
 		self.read_mqtt()
 		self.i2c_start()
 		self.read_n2k()
@@ -770,9 +738,11 @@ class MainFrame(wx.Frame):
 
 	def time_zone(self,event):
 		subprocess.Popen(['lxterminal', '-e', 'sudo dpkg-reconfigure tzdata'])
+		self.GetStatusBar().SetForegroundColour(wx.BLACK)
 		self.SetStatusText(_('Set time zone in the new window'))
 
 	def time_gps(self,event):
+		self.GetStatusBar().SetForegroundColour(wx.BLACK)
 		self.SetStatusText(_('Waiting for NMEA time data in localhost:10110 ...'))
 		time_gps_result=subprocess.check_output(['sudo', 'python', currentpath+'/time_gps.py'])
 		msg=''
@@ -790,6 +760,7 @@ class MainFrame(wx.Frame):
 
 	def reconfigure_gpsd(self,event):
 		subprocess.Popen(['lxterminal', '-e', 'sudo nano /etc/default/gpsd'])
+		self.GetStatusBar().SetForegroundColour(wx.BLACK)
 		self.SetStatusText(_('Set GPSD in the new window'))
 
 	def open_sdr_ais(self,event):
@@ -917,6 +888,21 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.sms_dev.Clear()
 		self.can_usb.AppendItems(self.SerDevLs)
 		self.sms_dev.AppendItems(self.SerDevLs)
+
+	def Changingpage(self, e):
+		self.SetStatusText('')
+		self.GetStatusBar().SetForegroundColour(wx.BLACK)
+
+	def util_process_exist(self,process_name):		
+		pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
+		exist=False
+		for pid in pids:
+			try:
+				if process_name in open(os.path.join('/proc', pid, 'cmdline'), 'rb').read():
+					exist=True
+			except IOError: # proc has already terminated
+				continue
+		return exist
 
 ###########################################	startup
 
@@ -1046,7 +1032,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		else: passw=self.passw.GetValue()
 		
 		if not wlan or not passw or not ssid or not share:
-			self.ShowMessage(_('You must fill in all of the fields.'))
+			self.ShowMessage(_('Failed. You must fill in all fields.'))
 			self.enable_disable_wifi(0)
 			return
 		if wlan==share:
@@ -1057,7 +1043,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.ShowMessage(_('Your SSID must have a maximum of 32 characters and your password a minimum of 8.'))
 			self.enable_disable_wifi(0)
 			return
-		self.SetStatusText(_('Configuring WiFi AP, wait please...'))
+		self.GetStatusBar().SetForegroundColour(wx.RED)
+		self.SetStatusText(_('Configuring WiFi AP, wait please ...'))
 		channel=self.wifi_channel.GetValue()
 		mode=self.wifi_mode.GetValue()
 		wpa=self.wifi_wpa.GetValue()
@@ -1181,10 +1168,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.Close()
 
 	def restart_kplex(self,event):
+		self.GetStatusBar().SetForegroundColour(wx.RED)
 		self.SetStatusText(_('Closing Kplex'))
 		subprocess.call(["pkill", '-9', "kplex"])
 		subprocess.Popen('kplex')
 		self.restart_SK(0)
+		self.GetStatusBar().SetForegroundColour(wx.GREEN)
 		self.SetStatusText(_('Kplex and Signal K restarted'))
 		self.read_kplex_conf()
 
@@ -1584,253 +1573,103 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.restart_SK(0)
 
 
-###################################### Switches
+###################################### GPIO
+	def start_gpio(self):
+		subprocess.Popen(['python',currentpath+'/gpio_d.py'])
 
-	def read_switches(self):
-		self.switches=[]
-		self.list_switches.DeleteAllItems()
-		data=self.conf.get('INPUTS', 'switches')
+	def stop_gpio(self):
+		subprocess.call(['pkill', '-f', 'gpio_d.py'])
+
+	def read_gpio(self):
+		self.gpio=[]
+		self.list_gpio.DeleteAllItems()
+		data=self.conf.get('GPIO', 'sensors')
 		try:
 			temp_list=eval(data)
 		except:temp_list=[]
 		for ii in temp_list:
-			self.switches.append(ii)
-			self.list_switches.Append([ii[1].decode('utf8'),ii[2].decode('utf8'),str(ii[3]),ii[4]])
-			if ii[0]=='1':
-				last=self.list_switches.GetItemCount()-1
-				self.list_switches.CheckItem(last)
+			self.gpio.append(ii)
+			#name, io, GPIO, pull
+			if ii[1]=='out':io=_('output')
+			else:io=_('input')
+			self.list_gpio.Append([ii[0],io,ii[2],ii[3]])
 
-	def edit_switches(self,e):
-		selected_switch=e.GetIndex()
-		edit=[selected_switch,self.switches[selected_switch][1],self.switches[selected_switch][2],self.switches[selected_switch][3],self.switches[selected_switch][4]]
-		self.edit_add_switches(edit)
+	def edit_gpio(self,e):
+		selected_gpio=e.GetIndex()
+		edit=[selected_gpio,self.gpio[selected_gpio][0],self.gpio[selected_gpio][1],self.gpio[selected_gpio][2],self.gpio[selected_gpio][3]]
+		self.edit_add_gpio(edit)
 
-	def add_switches(self,e):
-		self.edit_add_switches(0)
-
-	def edit_add_switches(self,edit):
-		avalaible_gpio=[]
-		edited=''
-		if edit!=0: edited=edit[3]
-		list_gpio=[5,6,12,13,16,17,18,19,20,21,22,23,24,25,26,27]
-		gpio_sw=[]
-		for i in self.switches:
-			gpio_sw.append(i[3])	
-		gpio_out=[]
-		for i in self.outputs:
-			gpio_out.append(i[3])
-		for i in list_gpio:
-			if i==edited:
-				avalaible_gpio.append(str(i))
-			else:
-				if i in gpio_sw or i in gpio_out: pass
-				else: avalaible_gpio.append(str(i))
-		dlg = addSwitch(avalaible_gpio,edit)
+	
+	def add_gpio(self,e):
+		self.edit_add_gpio(0)
+	
+	def edit_add_gpio(self,edit):
+		selected_gpio=0
+		if edit!=0: selected_gpio=edit[3]
+		avalaible_gpio=['5','6','12','13','16','17','18','19','20','21','22','23','24','25','26','27']
+		tmp_list1=[]
+		tmp_list2=[]
+		for i in self.gpio:
+			tmp_list1.append(i[2])
+		for i in avalaible_gpio:
+			if i not in tmp_list1 or i==selected_gpio: tmp_list2.append(i)
+		avalaible_gpio=tmp_list2
+		dlg = addGPIO(avalaible_gpio,edit)
 		res = dlg.ShowModal()
 		if res == wx.ID_OK:
 			name=dlg.name.GetValue()
 			name=name.encode('utf8')
-			short=dlg.short.GetValue()
-			short=short.encode('utf8')
+			io_selection=dlg.io_select.GetValue()
+			io_selection=io_selection.encode('utf8')
+			if io_selection==_('output'):io='out'
+			else:io='in'
+			if io=='out':
+				dlg2 = wx.MessageDialog(None, _('CAUTION. If you connect a closed switch or some inappropriate circuit, you could short out and damage your board when this output becomes "High". Are you sure to enable this output?'), _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_EXCLAMATION)
+				if dlg2.ShowModal() == wx.ID_YES:
+					dlg2.Destroy()
+				else:
+					dlg2.Destroy()
+					dlg.Destroy()
+					return
 			gpio_selection=dlg.gpio_select.GetValue()
+			gpio_selection=gpio_selection.encode('utf8')
 			pull_selection=dlg.pull_select.GetValue()
 			pull_selection=pull_selection.encode('utf8')
-			if not name or not short:
-				self.ShowMessage(_('Failed. Write a name and a short name.'))
-				dlg.Destroy()
-				return				
-			if gpio_selection == '':
-				self.ShowMessage(_('Failed. Select GPIO.'))
+			if not name or not io_selection or not gpio_selection or not pull_selection:
+				self.ShowMessage(_('Failed. You must fill in all fields.'))
 				dlg.Destroy()
 				return
-			if pull_selection == '':
-				self.ShowMessage(_('Failed. Select pull down or pull up.'))
+			if not re.match('^[0-9a-zA-Z]+$', name):
+				self.ShowMessage(_('Failed. The name must contain only letters and numbers.'))
 				dlg.Destroy()
-				return				
+				return			
 			if edit==0:
-				self.list_switches.Append([name.decode('utf8'),short.decode('utf8'),gpio_selection,pull_selection])
-				last=self.list_switches.GetItemCount()-1
-				self.list_switches.CheckItem(last)
-				if len(self.switches)==0: ID='SW0'
-				else:
-					last=len(self.switches)-1
-					x=int(self.switches[last][5][2:])
-					ID='SW'+str(x+1)
-				self.switches.append(['1',name,short,int(gpio_selection),pull_selection,ID])
+				self.list_gpio.Append([name,io_selection,gpio_selection,pull_selection])
+				self.gpio.append([name,io,gpio_selection,pull_selection])
 			else:
-				self.list_switches.SetStringItem(edit[0],0,name.decode('utf8'))
-				self.list_switches.SetStringItem(edit[0],1,short.decode('utf8'))
-				self.list_switches.SetStringItem(edit[0],2,gpio_selection)
-				self.list_switches.SetStringItem(edit[0],3,pull_selection)
-				self.switches[edit[0]][1]=name
-				self.switches[edit[0]][2]=short
-				self.switches[edit[0]][3]=int(gpio_selection)
-				self.switches[edit[0]][4]=pull_selection
+				self.list_gpio.SetStringItem(edit[0],0,name)
+				self.list_gpio.SetStringItem(edit[0],1,io_selection)
+				self.list_gpio.SetStringItem(edit[0],2,gpio_selection)
+				self.list_gpio.SetStringItem(edit[0],3,pull_selection)
+				self.gpio[edit[0]][0]=name
+				self.gpio[edit[0]][1]=io
+				self.gpio[edit[0]][2]=gpio_selection
+				self.gpio[edit[0]][3]=pull_selection
+			self.apply_changes_gpio()
 		dlg.Destroy()
 
-	def delete_switches(self,e):
-		selected_switch=self.list_switches.GetFirstSelected()
-		if selected_switch==-1: 
-			self.ShowMessage(_('Select a switch to delete.'))
+	def delete_gpio(self,e):
+		selected_gpio=self.list_gpio.GetFirstSelected()
+		if selected_gpio==-1: 
+			self.ShowMessage(_('Select an item to delete.'))
 			return
-		data=self.conf.get('ACTIONS', 'triggers')
-		try:
-			temp_list=eval(data)
-		except:temp_list=[]
-		for i in temp_list:
-			if i[1]==self.switches[selected_switch][5]:
-				self.read_triggers()
-				self.ShowMessage(_('You have a trigger defined for this switch. You must delete that action before deleting this switch.'))
-				return
-		del self.switches[selected_switch]
-		self.list_switches.DeleteItem(selected_switch)
+		del self.gpio[selected_gpio]
+		self.list_gpio.DeleteItem(selected_gpio)
+		self.apply_changes_gpio()
 
-	def apply_changes_switches(self, e):	
-		gpio_out=[]
-		data=self.conf.get('OUTPUTS', 'outputs')
-		try:
-			temp_list=eval(data)
-		except:temp_list=[]
-		for i in temp_list:
-			gpio_out.append(i[3])
-		for i in self.switches:
-			if i[3] in gpio_out:
-				self.read_outputs()
-				self.ShowMessage('GPIO '+str(i[3])+_(' is being used in outputs. Switches changes cancelled.'))
-				return
-		for i in self.switches:
-			index=self.switches.index(i)
-			if self.list_switches.IsChecked(index): self.switches[index][0]='1'
-			else: self.switches[index][0]='0'
-		self.conf.set('INPUTS', 'switches', str(self.switches))
-		self.start_monitoring()
-		self.SetStatusText(_('Switches changes applied and restarted'))
-
-	def cancel_changes_switches(self, e):
-		self.read_switches()
-		self.SetStatusText(_('Switches changes cancelled'))
-
-###################################### Outputs
-
-	def read_outputs(self):
-		self.outputs=[]
-		self.list_outputs.DeleteAllItems()
-		data=self.conf.get('OUTPUTS', 'outputs')
-		try:
-			temp_list=eval(data)
-		except:temp_list=[]
-		for ii in temp_list:
-			self.outputs.append(ii)
-			self.list_outputs.Append([ii[1].decode('utf8'),ii[2].decode('utf8'),str(ii[3])])
-			if ii[0]=='1':
-				last=self.list_outputs.GetItemCount()-1
-				self.list_outputs.CheckItem(last)
-	
-	def edit_outputs(self,e):
-		selected_output=e.GetIndex()
-		edit=[selected_output,self.outputs[selected_output][1],self.outputs[selected_output][2],self.outputs[selected_output][3]]
-		self.edit_add_outputs(edit)
-
-	def add_outputs(self,e):
-		self.edit_add_outputs(0)
-
-	def edit_add_outputs(self,edit):
-		avalaible_gpio=[]
-		edited=''
-		if edit!=0: edited=edit[3]
-		list_gpio=[5,6,12,13,16,17,18,19,20,21,22,23,24,25,26,27]
-		gpio_sw=[]
-		for i in self.switches:
-			gpio_sw.append(i[3])	
-		gpio_out=[]
-		for i in self.outputs:
-			gpio_out.append(i[3])	
-		for i in list_gpio:
-			if i==edited:
-				avalaible_gpio.append(str(i))
-			else:
-				if i in gpio_sw or i in gpio_out: pass
-				else: avalaible_gpio.append(str(i))	
-		dlg = addOutput(avalaible_gpio,edit)
-		res = dlg.ShowModal()
-		if res == wx.ID_OK:
-			name=dlg.name.GetValue()
-			name=name.encode('utf8')
-			short=dlg.short.GetValue()
-			short=short.encode('utf8')
-			gpio_selection=dlg.gpio_select.GetValue()
-			if not name or not short:
-				self.ShowMessage(_('Failed. Write a name and a short name.'))
-				dlg.Destroy()
-				return				
-			if gpio_selection == '':
-				self.ShowMessage(_('Failed. Select GPIO.'))
-				dlg.Destroy()
-				return
-			if edit==0:
-				self.list_outputs.Append([name.decode('utf8'),short.decode('utf8'),gpio_selection])
-				last=self.list_outputs.GetItemCount()-1
-				self.list_outputs.CheckItem(last)
-				if len(self.outputs)==0: ID='OUT0'
-				else:
-					last=len(self.outputs)-1
-					x=int(self.outputs[last][4][3:])
-					ID='OUT'+str(x+1)
-				self.outputs.append(['1',name,short,int(gpio_selection),ID])
-			else:
-				self.list_outputs.SetStringItem(edit[0],0,name.decode('utf8'))
-				self.list_outputs.SetStringItem(edit[0],1,short.decode('utf8'))
-				self.list_outputs.SetStringItem(edit[0],2,gpio_selection)
-				self.outputs[edit[0]][1]=name
-				self.outputs[edit[0]][2]=short
-				self.outputs[edit[0]][3]=int(gpio_selection)
-		dlg.Destroy()
-
-	def delete_outputs(self,e):
-		selected_output=self.list_outputs.GetFirstSelected()
-		if selected_output==-1: 
-			self.ShowMessage(_('Select an output to delete.'))
-			return
-		data=self.conf.get('ACTIONS', 'triggers')
-		try:
-			temp_list=eval(data)
-		except:temp_list=[]
-		dontdelete=0
-		for i in temp_list:
-			if i[1]==self.outputs[selected_output][4]: dontdelete=1
-			for ii in i[4]:
-				if ii[0][1:]==self.outputs[selected_output][4]: dontdelete=1
-		if dontdelete==1:
-			self.read_triggers()
-			self.ShowMessage(_('You have a trigger defined for this output. You must delete that action before deleting this output.'))
-			return
-		del self.outputs[selected_output]
-		self.list_outputs.DeleteItem(selected_output)
-
-	def apply_changes_outputs(self, e):
-		gpio_sw=[]
-		data=self.conf.get('INPUTS', 'switches')
-		try:
-			temp_list=eval(data)
-		except:temp_list=[]
-		for i in temp_list:
-			gpio_sw.append(i[3])
-		for i in self.outputs:
-			if i[3] in gpio_sw:
-				self.read_switches()
-				self.ShowMessage('GPIO '+str(i[3])+_(' is being used in switches. Output changes cancelled.'))
-				return
-		for i in self.outputs:
-			index=self.outputs.index(i)
-			if self.list_outputs.IsChecked(index): self.outputs[index][0]='1'
-			else: self.outputs[index][0]='0'
-		self.conf.set('OUTPUTS', 'outputs', str(self.outputs))
-		self.start_monitoring()
-		self.SetStatusText(_('Output changes applied and restarted'))
-
-	def cancel_changes_outputs(self, e):
-		self.read_outputs()
-		self.SetStatusText(_('Output changes cancelled'))
+	def apply_changes_gpio(self):
+		self.conf.set('GPIO', 'sensors', str(self.gpio))
+		self.restart_SK(0)
 
 ####################### Accounts
 
@@ -1895,6 +1734,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 ####################### Actions
 
 	def read_triggers(self):
+		pass
+		'''
 		self.a=DataStream(self.conf)
 		self.triggers=[]
 		self.list_triggers.DeleteAllItems()
@@ -1918,6 +1759,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 						last=self.list_triggers.GetItemCount()-1
 						self.list_triggers.CheckItem(last)
 				else: self.ShowMessage(_('Problem with Actions detected. Please check and save again.'))
+		'''
 
 	def print_actions(self, e):
 		self.actions=Actions(self.conf)
@@ -2069,7 +1911,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def delete_trigger(self,e):
 		selected=self.list_triggers.GetFirstSelected()
 		if selected==-1: 
-			self.ShowMessage(_('Select a trigger to delete.'))
+			self.ShowMessage(_('Select an item to delete.'))
 		else:
 			del self.triggers[selected]
 			self.list_triggers.DeleteItem(selected)
@@ -2079,7 +1921,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		selected_trigger=self.list_triggers.GetFirstSelected()
 		selected_action=self.list_actions.GetFirstSelected()
 		if selected_action==-1: 
-			self.ShowMessage(_('Select an action to delete.'))
+			self.ShowMessage(_('Select an item to delete.'))
 		else: 
 			del self.triggers[selected_trigger][4][selected_action]
 			self.list_actions.DeleteItem(selected_action)
@@ -2188,7 +2030,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def delete_DS18B20(self,e):
 		selected_DS18B20=self.list_DS18B20.GetFirstSelected()
 		if selected_DS18B20==-1: 
-			self.ShowMessage(_('Select a sensor to delete.'))
+			self.ShowMessage(_('Select an item to delete.'))
 			return
 		del self.DS18B20[selected_DS18B20]
 		self.list_DS18B20.DeleteItem(selected_DS18B20)
@@ -2279,7 +2121,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def delete_USBinst(self,e):
 		selected_USBinst=self.list_USBinst.GetFirstSelected()
 		if selected_USBinst==-1: 
-			self.ShowMessage(_('Select a device to delete.'))
+			self.ShowMessage(_('Select an item to delete.'))
 			return
 		del self.USBinst[selected_USBinst]
 		self.list_USBinst.DeleteItem(selected_USBinst)
@@ -2307,9 +2149,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			file.write(write_str)
 		file.close()
 		os.system('sudo mv 10-openplotter.rules /etc/udev/rules.d')
-		self.SetStatusText(_('Restarting'))
+		self.GetStatusBar().SetForegroundColour(wx.RED)
+		self.SetStatusText(_('Restarting ...'))
 		self.start_udev()
 		time.sleep(1.5)
+		self.GetStatusBar().SetForegroundColour(wx.GREEN)
 		self.SetStatusText(_('USB names added and restarted'))
 		self.SerialCheck()
 
@@ -2321,11 +2165,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def onn2k_enable(self, e):
 		with open(home+'/.config/signalk-server-node/settings/openplotter-settings.json') as data_file:
 			data = json.load(data_file)
-		text='NMEA 0183: system_output - TCP localhost 10110\nSignal K: OpenPlotter sensors - UDP localhost 7777'
+		text='NMEA 0183: system_output - TCP localhost 10110\nSignal K: I2C sensors - UDP localhost 55556\nSignal K: 1W sensors - UDP localhost 55557\nSignal K: notifications - UDP localhost 55558'
 		isChecked = self.n2k_enable.GetValue()
 		if isChecked:
 			if not self.can_usb.GetValue():
 				self.n2k_enable.SetValue(False)
+				self.GetStatusBar().SetForegroundColour(wx.BLACK)
 				self.SetStatusText(_('You have to select a CAN-USB-CAN device'))
 				return
 			subprocess.call(['pkill', '-f', 'CAN-USB-stick.py'])
@@ -2368,6 +2213,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def N2K_setting(self, e):
 		tty=str(self.can_usb.GetValue())
 		if len(tty)==0:
+			self.GetStatusBar().SetForegroundColour(wx.BLACK)
 			self.SetStatusText(_('You have to select a CAN-USB-CAN device'))
 			return
 		if (self.conf.get('N2K', 'can_usb')!= self.can_usb.GetValue()):
@@ -2376,11 +2222,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.stop_sensors()
 		self.stop_1w()
 		subprocess.Popen(['python',currentpath+'/CAN-USB-stick.py'])
+		self.GetStatusBar().SetForegroundColour(wx.BLACK)
 		self.SetStatusText(_('Select PGNs to transmit and enable N2K input/output again.'))	
 
 	def N2K_diagnostic(self, e):
 		tty=str(self.can_usb.GetValue())
 		if len(tty)==0:
+			self.GetStatusBar().SetForegroundColour(wx.BLACK)
 			self.SetStatusText(_('You have to select a CAN-USB-CAN device'))
 			return
 		if (self.conf.get('N2K', 'can_usb')!= self.can_usb.GetValue()):
@@ -2389,6 +2237,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.stop_sensors()
 		self.stop_1w()
 		subprocess.Popen(['python',currentpath+'/diagnostic-N2K-input.py'])
+		self.GetStatusBar().SetForegroundColour(wx.BLACK)
 		self.SetStatusText(_('Show received PGNs.'))	
 
 ###################################### Signal K
@@ -2401,20 +2250,15 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		url = 'http://localhost:3000'
 		webbrowser.open(url,new=2)
 
-	def start_SK(self):
-		subprocess.Popen(home+'/.config/signalk-server-node/bin/openplotter', cwd=home+'/.config/signalk-server-node')	
-		
 	def restart_SK(self, e):
-		self.SetStatusText(_('Closing Signal K server'))
+		#stopping sk server
+		self.GetStatusBar().SetForegroundColour(wx.RED)
+		self.SetStatusText(_('Closing Signal K server ...'))
+		self.vessel_self=''
 		subprocess.call(["pkill", '-9', "node"])
-		self.stop_sensors()
-		self.stop_1w()
-		self.stop_mqtt()
-		self.start_SK()
-		time.sleep(5)
-		self.start_sensors()
-		self.start_1w()
-		self.start_mqtt()
+		#restarting sk server and providers
+		self.vessel_self=checkVesselSelf()
+		self.GetStatusBar().SetForegroundColour(wx.GREEN)
 		self.SetStatusText(_('Signal K server restarted'))	
 
 	def diagnostic_SK(self, e):
@@ -2423,14 +2267,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	
 	def apply_SK(self,e):
-		name=self.vessel.GetValue()
-		uuid=self.mmsi.GetValue()
-		if name=='' or uuid=='':
-			self.ShowMessage(_('You have to provide name and MMSI.'))
+		mmsi=self.mmsi.GetValue()
+		uuid="urn:mrn:imo:mmsi:"+mmsi
+		if uuid=='':
+			self.ShowMessage(_('You have to provide a MMSI.'))
 			return
 		with open(home+'/.config/signalk-server-node/settings/openplotter-settings.json') as data_file:
 			data = json.load(data_file)
-		data['vessel']['name']=name
+		data['vessel']['mmsi']=mmsi
 		data['vessel']['uuid']=uuid
 		with open(home+'/.config/signalk-server-node/settings/openplotter-settings.json', 'w') as outfile:
 			json.dump(data, outfile)
@@ -2614,7 +2458,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			return
 		selected_topic=self.list_topics.GetFirstSelected()
 		if selected_topic==-1: 
-			self.ShowMessage(_('Select a topic to delete.'))
+			self.ShowMessage(_('Select an item to delete.'))
 			return
 		del self.topics[selected_topic]
 		self.list_topics.DeleteItem(selected_topic)
@@ -2650,6 +2494,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		subprocess.call(['sudo', 'sh', '-c', 'echo "'+username+':'+passw+'" > /etc/mosquitto/passwd.pw'])
 		subprocess.call(['sudo','mosquitto_passwd','-U','/etc/mosquitto/passwd.pw'])
 		subprocess.call(['sudo','service','mosquitto','restart'])
+		self.GetStatusBar().SetForegroundColour(wx.GREEN)
 		self.SetStatusText(_('MQTT settings applied and restarted'))
 		self.stop_mqtt()
 		self.start_mqtt()
@@ -2676,20 +2521,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.conf.set('MQTT', 'username', '')
 		self.conf.set('MQTT', 'password', '')
 		self.conf.set('MQTT', 'topics', '')
-		self.restart_SK(0)
-
-############################## Util
-	def util_process_exist(self,process_name):		
-		pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
-		exist=False
-		for pid in pids:
-			try:
-				if process_name in open(os.path.join('/proc', pid, 'cmdline'), 'rb').read():
-					exist=True
-			except IOError: # proc has already terminated
-				continue
-		return exist
-		
+		self.restart_SK(0)	
 		
 ############################## Main
 

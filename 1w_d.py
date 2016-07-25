@@ -15,20 +15,15 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import socket, time, datetime, json
+import socket, time, datetime
 from w1thermsensor import W1ThermSensor
-from classes.paths import Paths
 from classes.conf import Conf
+from classes.check_vessel_self import checkVesselSelf
 
 conf=Conf()
 
-paths=Paths()
-home=paths.home
-
-with open(home+'/.config/signalk-server-node/settings/openplotter-settings.json') as data_file:
-	data = json.load(data_file)
-
-uuid=data['vessel']['uuid']
+vessel_self=checkVesselSelf()
+uuid=vessel_self.uuid
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
