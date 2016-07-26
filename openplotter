@@ -55,6 +55,7 @@ class MainFrame(wx.Frame):
 		if self.util_process_exist('startup.py'):
 			print "System not ready, try later."
 			sys.exit(0)
+		self.Bind(wx.EVT_CLOSE, self.when_closed)
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 		self.conf=Conf()
 		self.language=self.conf.get('GENERAL','lang')
@@ -108,7 +109,7 @@ class MainFrame(wx.Frame):
 		font_statusBar.SetWeight (wx.BOLD)
 		self.GetStatusBar().SetFont(font_statusBar)
 		self.GetStatusBar().SetForegroundColour(wx.BLACK)
-		self.nb.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGING, self.Changingpage)
+		self.nb.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.Changingpage)
 		self.Centre()
 
 ########################### menu
@@ -893,6 +894,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.SetStatusText('')
 		self.GetStatusBar().SetForegroundColour(wx.BLACK)
 
+	def when_closed(self,e):
+		self.nb.Destroy()
+		sys.exit(0)
+
 	def util_process_exist(self,process_name):		
 		pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
 		exist=False
@@ -1419,8 +1424,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 ###################################### I2C sensors
 
 	def start_sensors(self):
-		if self.imu_sensor != 'none' or self.press_sensor != 'none' or self.hum_sensor != 'none':
-			subprocess.Popen(['python', currentpath+'/i2c_d.py'], cwd=currentpath+'/imu')
+		subprocess.Popen(['python', currentpath+'/i2c_d.py'], cwd=currentpath+'/imu')
 			
 	def stop_sensors(self):
 		subprocess.call(['pkill', 'RTIMULibDemoGL'])

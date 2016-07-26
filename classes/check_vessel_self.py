@@ -19,6 +19,7 @@ from paths import Paths
 
 paths=Paths()
 home=paths.home
+file=paths.file
 currentpath=paths.currentpath
 
 class checkVesselSelf:
@@ -27,16 +28,16 @@ class checkVesselSelf:
 
 		if not self.util_process_exist('node'):
 			print 'Signal K starting'
-			subprocess.call(['pkill', '-f', '1w_d.py'])
-			subprocess.call(['pkill', '-f', 'i2c_d.py'])
-			subprocess.call(['pkill', '-f', 'mqtt_d.py'])
-			subprocess.call(['pkill', '-f', 'gpio_d.py'])
+			if file!='1w_d.py':subprocess.call(['pkill', '-f', '1w_d.py'])
+			if file!='i2c_d.py':subprocess.call(['pkill', '-f', 'i2c_d.py'])
+			if file!='mqtt_d.py':subprocess.call(['pkill', '-f', 'mqtt_d.py'])
+			if file!='gpio_d.py':subprocess.call(['pkill', '-f', 'gpio_d.py'])
 			subprocess.Popen(home+'/.config/signalk-server-node/bin/openplotter', cwd=home+'/.config/signalk-server-node')
 			time.sleep(5)
-			subprocess.Popen(['python',currentpath+'/1w_d.py'])
-			subprocess.Popen(['python',currentpath+'/i2c_d.py'])
-			subprocess.Popen(['python',currentpath+'/mqtt_d.py'])
-			subprocess.Popen(['python',currentpath+'/gpio_d.py'])
+			if file!='1w_d.py':subprocess.Popen(['python',currentpath+'/1w_d.py'])
+			if file!='i2c_d.py':subprocess.Popen(['python',currentpath+'/i2c_d.py'])
+			if file!='mqtt_d.py':subprocess.Popen(['python',currentpath+'/mqtt_d.py'])
+			if file!='gpio_d.py':subprocess.Popen(['python',currentpath+'/gpio_d.py'])
 			subprocess.Popen('keyword')
 
 		response = requests.get('http://localhost:3000/signalk/v1/api/vessels/self')
