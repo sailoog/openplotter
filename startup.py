@@ -38,6 +38,11 @@ if not exist:
 	boot_sh=0
 	boot_conf = ConfigParser.SafeConfigParser()
 	boot_conf.read('/boot/config.txt')
+	enable='0'
+	try:
+		enable=boot_conf.get('OPENPLOTTER', 'wifi_enable')
+	except: 
+		boot_conf.set('OPENPLOTTER', 'wifi_enable','0')
 	try:
 		device=boot_conf.get('OPENPLOTTER', 'device')
 		ssid=boot_conf.get('OPENPLOTTER', 'ssid')
@@ -51,27 +56,41 @@ if not exist:
 		share=boot_conf.get('OPENPLOTTER', 'share')
 		boot_sh=1
 	except: boot_sh=0
+	try:
+		bridge = boot_conf.get('OPENPLOTTER', 'bridge')
+		ip = boot_conf.get('OPENPLOTTER', 'ip')
+	except: pass
 
 	conf=Conf()
 
-	if boot_ap==1:
-		conf.set('WIFI', 'enable', '1')
-		if device: conf.set('WIFI', 'device', device)
-		else: conf.set('WIFI', 'device', 'wlan0')
-		if ssid: conf.set('WIFI', 'ssid', ssid)
-		else: conf.set('WIFI', 'ssid', 'OpenPlotter')
-		if passw: conf.set('WIFI', 'password', passw)
-		else: conf.set('WIFI', 'password', '12345678')
-		if hw_mode: conf.set('WIFI', 'hw_mode', hw_mode)
-		else: conf.set('WIFI', 'hw_mode', 'g')
-		if channel: conf.set('WIFI', 'channel', channel)
-		else: conf.set('WIFI', 'channel', '6')
-		if wpa: conf.set('WIFI', 'wpa', wpa)
-		else: conf.set('WIFI', 'wpa', '2')
-	if boot_sh==1:
-		if share: conf.set('WIFI', 'share', share)
-		else: conf.set('WIFI', 'share', '0')
+	if enable=='1':
+		if not device: device='wlan0'
+		if not ssid: ssid='OpenPlotter'
+		if not passw: passw='12345678'
+		if not hw_mode: hw_mode='g'
+		if not channel: channel='6'
+		if not wpa: wpa='2'
+		if not bridge: bridge='0'
+		if not ip: ip='10.10.10.1'	
+		if conf.get('WIFI', 'enable')!=enable:   conf.set('WIFI', 'enable', enable)
 
+
+		if conf.get('WIFI', 'device')!=device:   conf.set('WIFI', 'device', device)
+
+		if conf.get('WIFI', 'ssid')!=ssid:       conf.set('WIFI', 'ssid', ssid)
+
+		if conf.get('WIFI', 'password')!=passw:  conf.set('WIFI', 'password', passw)
+
+		if conf.get('WIFI', 'hw_mode')!=hw_mode: conf.set('WIFI', 'hw_mode', hw_mode)
+
+		if conf.get('WIFI', 'channel')!=channel: conf.set('WIFI', 'channel', channel)
+		if conf.get('WIFI', 'wpa')!=wpa:         conf.set('WIFI', 'wpa', wpa)
+		if conf.get('WIFI', 'bridge')!=bridge:   conf.set('WIFI', 'bridge', bridge)
+		if conf.get('WIFI', 'ip')!=ip:           conf.set('WIFI', 'ip', ip)
+		
+	if boot_sh==1:
+		if not share: share='0'
+		if conf.get('WIFI', 'share')!=share:           conf.set('WIFI', 'share', share)
 	wifi_server=conf.get('WIFI', 'enable')
 
 	delay=int(conf.get('STARTUP', 'delay'))
@@ -147,3 +166,22 @@ if not exist:
 		if sound:
 			try: subprocess.Popen(['mpg123',sound])
 			except: pass
+			
+	tools_py=[]
+	if conf.has_section('TOOLS'):
+		if conf.has_option('TOOLS', 'py'):
+			data=conf.get('TOOLS', 'py')
+			try:
+				temp_list=eval(data)
+			except:temp_list=[]
+			if type(temp_list) is list: pass
+			else:	temp_list=[]
+			for ii in temp_list:
+				tools_py.append(ii)
+
+	index=0
+	for i in tools_py:
+		if i[3]=='1':
+			subprocess.Popen(['python',currentpath+'/tools/'+tools_py[index][2]])	
+		index+=1
+			

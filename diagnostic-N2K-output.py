@@ -24,18 +24,19 @@ from classes.language import Language
 class MyFrame(wx.Frame):
 		
 		def __init__(self):
+			Quelle='127.0.0.1' # Adresse des eigenen Rechners
+			Port=7778
+			 
+			self.e_udp_sock = socket.socket( socket.AF_INET,  socket.SOCK_DGRAM ) #s.o.
+			self.e_udp_sock.bind( (Quelle,Port) )
+
 			self.ttimer=40
 			
 			self.home=Paths().home
 			self.currentpath=Paths().currentpath
 			self.conf=Conf()
+			self.ser = serial.Serial(self.conf.get('N2K', 'can_usb'), 115200, timeout=0.5)
 			
-			try:
-				self.ser = serial.Serial(self.conf.get('N2K', 'can_usb'), 115200, timeout=0.5)
-			except:
-				print 'failed to start N2K input diagnostic on '+self.conf.get('N2K', 'can_usb')
-				sys.exit(0)
-						
 			Language(self.conf.get('GENERAL','lang'))
 
 			list_N2K_txt=[]
@@ -52,7 +53,7 @@ class MyFrame(wx.Frame):
 			self.Zustand=6
 			self.list_iter=[]
 
-			wx.Frame.__init__(self, None, title='diagnostic N2K input', size=(650,435))
+			wx.Frame.__init__(self, None, title='diagnostic N2K output', size=(650,435))
 			self.Bind(wx.EVT_CLOSE, self.OnClose)
 			
 			self.timer = wx.Timer(self)
@@ -89,9 +90,11 @@ class MyFrame(wx.Frame):
 			self.timer.Start(self.ttimer)
 			
 		def timer_act(self, event):
-			if self.ser: 
-				frase_nmea=''
-				self.getCharfromSerial()
+			data, addr = self.e_udp_sock.recvfrom( 1024 )
+			# Die Puffergroesse muss immer eine Potenz
+			# von 2 sein
+			if ord(data[7])+9==len(data):
+				self.output(data)
 			
 		def sort_PGN(self, e):
 			self.timer.Stop()
@@ -126,61 +129,28 @@ class MyFrame(wx.Frame):
 			self.timer.Stop()
 			self.Destroy()
 
-		def getCharfromSerial(self):
-			bytesToRead = self.ser.inWaiting()
-			if bytesToRead>0:
-				buffer=self.ser.read(bytesToRead)			
-				for i in buffer:
-					#sys.stdout.write(' '+hex(ord(i)))
-					self.parse(ord(i))
+		def refresh_loop(self,arg1,stop_event):
+			data, addr = e_udp_sock.recvfrom( 1024 )
+			# Die Puffergroesse muss immer eine Potenz
+			# von 2 sein
+			if data[7]+8==len(data):
+				self.output(data)
 
-		def parse(self, b):
-			if self.Zustand == 6: # zu Beginn auf 0x10 warten
-				if b == 0x10:
-					self.Zustand = 0x10
-			elif self.Zustand == 0x10:
-				if b == 0x10: # 0x10 Schreiben wenn zweimal hintereinander
-					self.Buffer[self.p] = b
-					self.p += 1
-					self.Zustand = 0
-				elif b == 0x02: # Anfang gefunden
-					self.p = 0
-					self.Zustand = 0
-				elif b == 0x03: # Ende gefunden
-					if self.crcCheck():
-						#print "CRC"
-						self.output()
-					self.p = 0
-					self.Zustand = 6 # Auf Anfang zuruecksetzen
-			elif self.Zustand == 0:
-				if b == 0x10:
-					self.Zustand = 0x10
-				else:
-					self.Buffer[self.p] = b
-					self.p += 1
-
-		def crcCheck(self):
-			crc = 0
-			i = 0
-			while i < self.p:
-				crc =(crc+ self.Buffer[i]) & 255
-				i += 1
-			return (crc == 0)
-
-		def output(self):
+		def output(self,data):
 			k = 0
-			if self.Buffer[0] == 0x93 and self.Buffer[1] == self.p - 3:				
-				nPriority = self.Buffer[2]
-				lPGN=self.Buffer[3]+self.Buffer[4]*256+self.Buffer[5]*256*256
-				nDestAddr = self.Buffer[6];
-				nSrcAddr = self.Buffer[7]
-				length = self.Buffer[12];
+			Buffer=bytearray(data)
+			if Buffer[0] == 0x94:				
+				nPriority = Buffer[2]
+				lPGN=Buffer[3]+Buffer[4]*256+Buffer[5]*256*256
+				nDestAddr = Buffer[6];
+				nSrcAddr = 'own'
+				length = Buffer[7];
 
 				datap=''
 				data=0
-				for i in range(13,13+length):
-					data=data+self.Buffer[i];
-					datap+=' '+('0'+hex(self.Buffer[i])[2:])[-2:]
+				for i in range(8,8+length):
+					data=data+Buffer[i];
+					datap+=' '+('0'+hex(Buffer[i])[2:])[-2:]
 					
 				#print lPGN, nSrcAddr, nDestAddr, datap
 				
