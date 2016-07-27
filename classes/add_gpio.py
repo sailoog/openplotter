@@ -16,32 +16,37 @@
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 import wx
 
-class addSwitch(wx.Dialog):
+class addGPIO(wx.Dialog):
 
 	def __init__(self,avalaible_gpio,edit):
 
-		wx.Dialog.__init__(self, None, title=_('Add Switch'), size=(330,235))
+		wx.Dialog.__init__(self, None, title=_('Add GPIO sensor'), size=(330,265))
 
 		panel = wx.Panel(self)
 
-		wx.StaticText(panel, label=_('name'), pos=(10, 10))
+		wx.StaticText(panel, label=_('Name'), pos=(10, 10))
 		self.name = wx.TextCtrl(panel, size=(310, 30), pos=(10, 35))
 
-		wx.StaticText(panel, label=_('short name'), pos=(10, 70))
-		self.short = wx.TextCtrl(panel, size=(100, 30), pos=(10, 95))
+		wx.StaticText(panel, label=_('allowed characters: 0-9, a-z, A-Z.'), pos=(10, 70))
 
-		wx.StaticText(panel, label=_('GPIO'), pos=(115, 70))
-		self.gpio_select= wx.ComboBox(panel, choices=avalaible_gpio, style=wx.CB_READONLY, size=(100, 32), pos=(115, 95))
+		list_io=[_('input'),_('output')]
+		wx.StaticText(panel, label=_('I/O'), pos=(10, 100))
+		self.io_select= wx.ComboBox(panel, choices=list_io, style=wx.CB_READONLY, size=(100, 32), pos=(10, 125))
+
+		wx.StaticText(panel, label=_('GPIO'), pos=(115, 100))
+		self.gpio_select= wx.ComboBox(panel, choices=avalaible_gpio, style=wx.CB_READONLY, size=(100, 32), pos=(115, 125))
 		
 		list_pull=['down', 'up']
-		wx.StaticText(panel, label=_('pull'), pos=(220, 70))
-		self.pull_select= wx.ComboBox(panel, choices=list_pull, style=wx.CB_READONLY, size=(100, 32), pos=(220, 95))
+		wx.StaticText(panel, label=_('Pull'), pos=(220, 100))
+		self.pull_select= wx.ComboBox(panel, choices=list_pull, style=wx.CB_READONLY, size=(100, 32), pos=(220, 125))
 
 		if edit != 0:
 			self.name.SetValue(edit[1])
-			self.short.SetValue(edit[2])
+			if edit[2]=='out':io=_('output')
+			else:io=_('input')
+			self.io_select.SetValue(io)
 			self.gpio_select.SetValue(str(edit[3]))
 			self.pull_select.SetValue(edit[4])
 
-		cancelBtn = wx.Button(panel, wx.ID_CANCEL, pos=(70, 150))
-		okBtn = wx.Button(panel, wx.ID_OK, pos=(180, 150))
+		cancelBtn = wx.Button(panel, wx.ID_CANCEL, pos=(70, 180))
+		okBtn = wx.Button(panel, wx.ID_OK, pos=(180, 180))

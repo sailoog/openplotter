@@ -18,7 +18,7 @@ import wx, pyudev
 
 class addUSBinst(wx.Dialog):
 
-	def __init__(self):
+	def __init__(self,edit):
 
 		wx.Dialog.__init__(self, None, title=_('Add individual name to serial port'), size=(580,300))
 
@@ -52,26 +52,44 @@ class addUSBinst(wx.Dialog):
 		self.rem_port.Bind(wx.EVT_CHECKBOX, self.on_enable_port)
 		self.rem_port.Disable()
 
-		context = pyudev.Context()	
-		for device in context.list_devices(subsystem='tty'):
-			i=device['DEVNAME']
-			if '/dev/ttyACM' in i or '/dev/ttyUSB' in i:
-				ii=device['DEVLINKS']
-				if '/dev/ttyOP' in ii: pass
-				else:
-					value=device['DEVPATH']
-					value_DEVPATH = value[value.rfind('/usb1/')+6:-(len(value)-value.find('/tty'))]
-					value_DEVPATH = value_DEVPATH[value_DEVPATH.rfind('/')+1:]
-					try:
-						serial=device['ID_SERIAL_SHORT']
-					except: serial=''
-					try:
-						vendor_db=device['ID_VENDOR_FROM_DATABASE']
-					except: vendor_db=''
-					try:
-						model_db=device['ID_MODEL_FROM_DATABASE']
-					except: model_db=''
-					self.list_devices.Append([i,device['ID_VENDOR_ID'],device['ID_MODEL_ID'],value_DEVPATH,serial,vendor_db +' '+ model_db])
+		if edit != 0:
+			self.OPname_select.SetValue(edit[1][6:])
+			self.rem_dev.SetValue(edit[6]=='dev')
+			self.rem_port.SetValue(edit[6]=='port')
+			self.rem=edit[6]
+
+			self.vendor=edit[2]
+			self.product=edit[3]
+			self.serial=edit[4]		
+			self.con_port=edit[5]
+			self.device=edit[7]
+			
+			self.OPname_select.Enable()
+			self.rem_dev.Enable()
+			self.rem_port.Enable()			
+			wx.StaticText(panel, label=self.vendor+'    '+self.product+'    '+self.con_port +'    '+self.serial, pos=(15, 200))
+
+		else:
+			context = pyudev.Context()	
+			for device in context.list_devices(subsystem='tty'):
+				i=device['DEVNAME']
+				if '/dev/ttyACM' in i or '/dev/ttyUSB' in i:
+					ii=device['DEVLINKS']
+					if '/dev/ttyOP' in ii: pass
+					else:
+						value=device['DEVPATH']
+						value_DEVPATH = value[value.rfind('/usb1/')+6:-(len(value)-value.find('/tty'))]
+						value_DEVPATH = value_DEVPATH[value_DEVPATH.rfind('/')+1:]
+						try:
+							serial=device['ID_SERIAL_SHORT']
+						except: serial=''
+						try:
+							vendor_db=device['ID_VENDOR_FROM_DATABASE']
+						except: vendor_db=''
+						try:
+							model_db=device['ID_MODEL_FROM_DATABASE']
+						except: model_db=''
+						self.list_devices.Append([i,device['ID_VENDOR_ID'],device['ID_MODEL_ID'],value_DEVPATH,serial,vendor_db +' '+ model_db])
 
 		cancelBtn = wx.Button(panel, wx.ID_CANCEL, pos=(195, 220))
 		okBtn = wx.Button(panel, wx.ID_OK, pos=(305, 220))

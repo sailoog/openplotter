@@ -18,7 +18,7 @@
 
 import wx, sys, subprocess
 from classes.paths import Paths
-from classes.conf import Conf
+from classes.op_conf import Conf
 from classes.language import Language
 
 
@@ -29,8 +29,7 @@ class MainFrame(wx.Frame):
 
 			self.option=sys.argv[1]
 
-			paths=Paths()
-			self.currentpath=paths.currentpath
+			self.paths=Paths()
 
 			self.conf=Conf()
 
@@ -40,12 +39,19 @@ class MainFrame(wx.Frame):
 
 			self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 			
-			self.icon = wx.Icon(self.currentpath+'/openplotter.ico', wx.BITMAP_TYPE_ICO)
+			self.icon = wx.Icon(self.paths.op_path+'/openplotter.ico', wx.BITMAP_TYPE_ICO)
 			self.SetIcon(self.icon)
 
 			self.CreateStatusBar()
 
 			self.text=wx.StaticText(self, label=_('Error'), pos=(10, 10))
+
+			self.gain=self.conf.get('AIS-SDR', 'gain')
+			self.ppm=self.conf.get('AIS-SDR', 'ppm')
+			self.channel=self.conf.get('AIS-SDR', 'gsm_channel')
+
+			wx.StaticText(self, label=_('gain: ')+self.gain, pos=(10, 70))
+			wx.StaticText(self, label=_('ppm: ')+self.ppm, pos=(100, 70))
 
 			self.output = wx.TextCtrl(self, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_DONTWRAP, size=(480,110), pos=(10,90))
 			
@@ -56,24 +62,23 @@ class MainFrame(wx.Frame):
 			self.Bind(wx.EVT_BUTTON, self.calculate, self.button_calculate)
 			
 			if self.option=='c': 
-				self.text.SetLabel(_('Press Calculate and wait for the system to calculate\nthe ppm value with the selected channel. Put the obtained\nvalue in "Correction (ppm)" field and enable SDR-AIS\nreception. Estimated time: 1 min.'))
+				self.text.SetLabel(_('Press Calculate and wait for the system to calculate the ppm value with\nthe selected channel. Put the obtained value in "Correction (ppm)" field\nand enable SDR-AISreception. Estimated time: 1 min.'))
+				wx.StaticText(self, label=_('channel: ')+self.channel, pos=(200, 70))
 			if self.option=='b':
-				self.text.SetLabel(_('Press Calculate and wait for the system to check the band.\nWrite down the strongest channel (power). If you do not find\nany channel try another band. Estimated time: 5 min.'))
+				self.text.SetLabel(_('Press Calculate and wait for the system to check the band. Write down\nthe strongest channel (power). If you do not find any channel try another\nband. Estimated time: 5 min.'))
 
 			self.Centre()
  	
 		def calculate(self,e):
 			self.SetStatusText(_('Working...'))
 			self.output.SetValue('')
-			gain=self.conf.get('AIS-SDR', 'gain')
-			ppm=self.conf.get('AIS-SDR', 'ppm')
 			if self.option=='c': 
-				channel=self.conf.get('AIS-SDR', 'gsm_channel')
-				try: output=subprocess.check_output(['kal', '-c', channel, '-g', gain, '-e', ppm])
+				
+				try: output=subprocess.check_output(['kal', '-c', self.channel, '-g', self.gain, '-e', self.ppm])
 				except: output=_('error')
 			if self.option=='b': 
 				band=self.conf.get('AIS-SDR', 'band')
-				try: output=subprocess.check_output(['kal', '-s', band, '-g', gain, '-e', ppm])
+				try: output=subprocess.check_output(['kal', '-s', band, '-g', self.gain, '-e', self.ppm])
 				except: output=_('error')
 			self.output.SetValue(output)
 			self.SetStatusText(_('Finished'))

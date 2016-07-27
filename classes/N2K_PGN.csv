@@ -1,0 +1,190 @@
+59392,ISO Acknowledgement
+59904,ISO Request
+60928,ISO Address Claim
+61184,ISO: Manu. Proprietary single-frame addressed
+65001,Bus #1 Phase C Basic AC Quantities
+65002,Bus #1 Phase B Basic AC Quantities
+65003,Bus #1 Phase A Basic AC Quantities
+65004,Bus #1 Average Basic AC Quantities
+65005,Utility Total AC Energy
+65006,Utility Phase C AC Reactive Power
+65007,Utility Phase C AC Power
+65008,Utility Phase C Basic AC Quantities
+65009,Utility Phase B AC Reactive Power
+65010,Utility Phase B AC Power
+65011,Utility Phase B Basic AC Quantities
+65012,Utility Phase A AC Reactive Power
+65013,Utility Phase A AC Power
+65014,Utility Phase A Basic AC Quantities
+65015,Utility Total AC Reactive Power
+65016,Utility Total AC Power
+65017,Utility Average Basic AC Quantities
+65018,Generator Total AC Energy
+65019,Generator Phase C AC Reactive Power
+65020,Generator Phase C AC Power
+65021,Generator Phase C Basic AC Quantities
+65022,Generator Phase B AC Reactive Power
+65023,Generator Phase B AC Power
+65024,Generator Phase B Basic AC Quantities
+65025,Generator Phase A AC Reactive Power
+65026,Generator Phase A AC Power
+65027,Generator Phase A Basic AC Quantities
+65028,Generator Total AC Reactive Power
+65029,Generator Total AC Power
+65030,Generator Average Basic AC Quantities
+65240,ISO Commanded Address
+65280,ISO: Manu. Proprietary single-frame non-addressed
+65285,Boot State Acknowledgment
+65286,Boot State Request
+65287,Access Level
+65289,Trim Tab Sensor Calibration
+65290,Paddle Wheel Speed Configuration
+65292,Clear Fluid Level Warnings
+65293,LGC-2000 Configuration
+65325,Reprogram Status
+65341,Autopilot Mode
+65408,Depth Quality Factor
+65410,Device Information
+65480,Autopilot Mode
+126208,NMEA - Request/Command/Ack group function
+126270,Slave Response
+126464,PGN List (Transmit and Receive)
+126720,NMEA 2000 options
+126992,System Time
+126996,Product Information
+126998,Configuration Information
+127237,Heading/Track control
+127245,Rudder
+127250,Vessel Heading
+127251,Rate of Turn
+127257,Attitude
+127258,Magnetic Variation
+127488,Engine Parameters, Rapid Update
+127489,Engine Parameters, Dynamic
+127493,Transmission Parameters, Dynamic
+127496,Trip Parameters, Vessel
+127497,Trip Parameters, Engine
+127498,Engine Parameters, Static
+127501,Binary Switch Bank Status
+127502,Switch Bank Control
+127503,AC Input Status
+127504,AC Output Status
+127505,Fluid Level
+127506,DC Detailed Status
+127507,Charger Status
+127508,Battery Status
+127509,Inverter Status
+127510,Charger Configuration Status
+127511,Inverter Configuration Status
+127512,AGS Configuration Status
+127513,Battery Configuration Status
+127514,AGS Status
+128259,Speed
+128267,Water Depth
+128275,Distance Log
+128520,Tracked Target Data
+129025,Position, Rapid Update
+129026,COG & SOG, Rapid Update
+129027,Position Delta, Rapid Update
+129028,Altitude Delta, Rapid Update
+129029,GNSS Position Data
+129033,Time & Date
+129038,AIS Class A Position Report
+129039,AIS Class B Position Report
+129040,AIS Class B Extended Position Report
+129044,Datum
+129045,User Datum
+129283,Cross Track Error
+129284,Navigation Data
+129285,Navigation - Route/WP Information
+129291,Set & Drift, Rapid Update
+129301,Navigation - Route / Time to+from Mark
+129302,Bearing and Distance between two Marks
+129538,GNSS Control Status
+129539,GNSS DOPs
+129540,GNSS Sats in View
+129541,GPS Almanac Data
+129542,GNSS Pseudorange Noise Statistics
+129545,GNSS RAIM Output
+129546,GNSS RAIM Settings
+129547,GNSS Pseudorange Error Statistics
+129549,DGNSS Corrections
+129550,GNSS Differential Correction Receiver Interface
+129551,GNSS Differential Correction Receiver Signal
+129556,GLONASS Almanac Data
+129792,AIS DGNSS Broadcast Binary Message
+129793,AIS UTC and Date Report
+129794,AIS Class A Static and Voyage Related Data
+129795,AIS Addressed Binary Message
+129796,AIS Acknowledge
+129797,AIS Binary Broadcast Message
+129798,AIS SAR Aircraft Position Report
+129799,Radio Frequency/Mode/Power
+129800,AIS UTC/Date Inquiry
+129801,AIS Addressed Safety Related Message
+129802,AIS Safety Related Broadcast Message
+129803,AIS Interrogation
+129804,AIS Assignment Mode Command
+129805,AIS Data Link Management Message
+129806,AIS Channel Management
+129807,AIS Class B Group Assignment
+129808,DSC Call Information
+129809,AIS Class B static data (msg 24 Part A)
+129810,AIS Class B static data (msg 24 Part B)
+130064,Route and WP Service - Database List
+130065,Route and WP Service - Route List
+130066,Route and WP Service - Route/WP-List Attributes
+130067,Route and WP Service - Route - WP Name & Position
+130068,Route and WP Service - Route - WP Name
+130069,Route and WP Service - XTE Limit & Navigation Method
+130070,Route and WP Service - WP Comment
+130071,Route and WP Service - Route Comment
+130072,Route and WP Service - Database Comment
+130073,Route and WP Service - Radius of Turn
+130074,Route and WP Service - WP List - WP Name & Position
+130306,Wind Data
+130310,Environmental Parameters
+130311,Environmental Parameters
+130312,Temperature
+130313,Humidity
+130314,Actual Pressure
+130315,Set Pressure
+130316,Temperature Extended Range
+130320,Tide Station Data
+130321,Salinity Station Data
+130322,Current Station Data
+130323,Meteorological Station Data
+130324,Moored Buoy Station Data
+130576,Small Craft Status
+130577,Direction Data
+130578,Vessel Speed Components
+130816,SonicHub
+130817,Navico: Product Information
+130818,Simnet: Reprogram Data
+130819,Simnet: Request Reprogram
+130820,Fusion
+130821,Furuno: Unknown
+130827,Lowrance: unknown
+130828,Simnet: Set Serial Number
+130831,Suzuki: Engine and Storage Device Config
+130832,Simnet: Fuel Used - High Resolution
+130834,Simnet: Engine and Tank Configuration
+130835,Simnet: Set Engine and Tank Configuration
+130836,Simnet: Fluid Level Sensor Configuration
+130837,Simnet: Fuel Flow Turbine Configuration
+130838,Simnet: Fluid Level Warning
+130839,Simnet: Pressure Sensor Configuration
+130840,Simnet: Data User Group Configuration
+130842,Simnet: AIS Class B static data
+130843,Simnet: Sonar Status, Frequency and DSP Voltage
+130845,Simnet: Parameter Handle
+130850,Simnet: Event Command: AP command
+130851,Simnet: Event Reply: AP command
+130856,Simnet: Alarm Message
+130880,Airmar: Additional Weather Data
+130881,Airmar: Heater Control
+130944,Airmar: POST
+262161,Actisense: Operating mode
+262384,Actisense: Startup status
+262386,Actisense: System status
+262388,Actisense: ?

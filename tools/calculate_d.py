@@ -33,8 +33,8 @@ heading_time=''
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-accuracy=float(conf.get('STARTUP', 'cal_accuracy'))
-rate=float(conf.get('STARTUP', 'nmea_rate_cal'))
+accuracy=float(conf.get('CALCULATE', 'cal_accuracy'))
+rate=float(conf.get('CALCULATE', 'nmea_rate_cal'))
 
 #thread1
 def parse_nmea():
@@ -126,7 +126,7 @@ while True:
 	if now-sent >= rate:
 		sent=now
 		#generate magnetic variation
-		if  conf.get('STARTUP', 'nmea_mag_var')=='1' and mag_var[0]:
+		if  conf.get('CALCULATE', 'nmea_mag_var')=='1' and mag_var[0]:
 			if heading_m: value=str(heading_m)
 			else: value=''
 			hdg = pynmea2.HDG('OC', 'HDG', (value,'','',str(mag_var[0]),mag_var[1]))
@@ -134,13 +134,13 @@ while True:
 			hdg2=hdg1+'\r\n'
 			sock.sendto(hdg2, ('127.0.0.1', 10110))
 		#generate headint_t
-		if  conf.get('STARTUP', 'nmea_hdt')=='1' and heading_t:
+		if  conf.get('CALCULATE', 'nmea_hdt')=='1' and heading_t:
 			hdt = pynmea2.HDT('OC', 'HDT', (str(round(heading_t,1)),'T'))
 			hdt1=str(hdt)
 			hdt2=hdt1+'\r\n'
 			sock.sendto(hdt2, ('127.0.0.1', 10110))
 		#generate Rate of Turn (ROT)
-		if conf.get('STARTUP', 'nmea_rot')=='1' and heading_m:
+		if conf.get('CALCULATE', 'nmea_rot')=='1' and heading_m:
 			if not last_heading: #initialize
 				last_heading = heading_m
 				heading_time = time.time()					
@@ -161,7 +161,7 @@ while True:
 				rot2=rot1+'\r\n'
 				sock.sendto(rot2, ('127.0.0.1', 10110))
 		#generate True Wind STW
-		if conf.get('STARTUP', 'tw_stw')=='1' and STW and AWS and AWA:
+		if conf.get('CALCULATE', 'tw_stw')=='1' and STW and AWS and AWA:
 			#TWA
 			TWS=math.sqrt((STW**2+AWS**2)-(2*STW*AWS*math.cos(math.radians(AWA[0]))))
 			TWA=math.degrees(math.acos((AWS**2-TWS**2-STW**2)/(2*TWS*STW)))
@@ -187,7 +187,7 @@ while True:
 				mwd2=mwd1+'\r\n'
 				sock.sendto(mwd2, ('127.0.0.1', 10110))
 		#generate True Wind SOG
-		if conf.get('STARTUP', 'tw_sog')=='1' and SOG and COG and heading_t and AWS and AWA:
+		if conf.get('CALCULATE', 'tw_sog')=='1' and SOG and COG and heading_t and AWS and AWA:
 			#TWD
 			D=heading_t-COG
 			if AWA[1]=='R': AWD=AWA[0]+D
