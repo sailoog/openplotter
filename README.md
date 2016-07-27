@@ -18,6 +18,10 @@
 
 `sudo apt-get install isc-dhcp-server`
 
+* Install websocket-client python package:
+
+`sudo pip install websocket-client`
+
 * Replace the content of file /home/pi/.config/signalk-server-node/settings/openplotter-settings.json by:
 
 `{`
