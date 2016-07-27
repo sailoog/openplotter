@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, sys, socket, time, webbrowser, serial, requests, json
+import wx, sys, socket, time, webbrowser, serial, requests, json,websocket,threading,logging
 from classes.datastream import DataStream
 from classes.paths import Paths
 from classes.conf import Conf
@@ -24,23 +24,31 @@ from classes.language import Language
 class MyFrame(wx.Frame):
 		
 		def __init__(self):
-			self.ttimer=300
+			
 
+			logging.basicConfig()
+			self.buffer=[]
+			self.list_SK=[]
+			self.sortCol=0
+		
 			self.home=Paths().home
 			self.currentpath=Paths().currentpath
 			self.conf=Conf()
-			self.ser = serial.Serial(self.conf.get('N2K', 'can_usb'), 115200, timeout=0.5)
 
 			Language(self.conf.get('GENERAL','lang'))
 
-			self.init1()			
+			self.data_SK_unit=''
+			with open(self.home+'/.config/openplotter/classes/keyswithmetadata.json') as data_file:    
+				self.data_SK_unit = json.load(data_file)
+
 			
 			wx.Frame.__init__(self, None, title='diagnostic SignalK input', size=(650,435))
 			self.Bind(wx.EVT_CLOSE, self.OnClose)
-			
+
+			self.ttimer=100
 			self.timer = wx.Timer(self)
 			self.Bind(wx.EVT_TIMER, self.timer_act, self.timer)
-						
+			
 			self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 			
 			self.icon = wx.Icon(self.currentpath+'/openplotter.ico', wx.BITMAP_TYPE_ICO)
@@ -58,17 +66,14 @@ class MyFrame(wx.Frame):
 			self.sort_SRC_b =wx.Button(self, label=_('Sort SRC'), pos=(10, 340))
 			self.Bind(wx.EVT_BUTTON, self.sort_SRC, self.sort_SRC_b)
 
-			self.sort_PGN_b =wx.Button(self, label=_('Sort SK'), pos=(110, 340))
-			self.Bind(wx.EVT_BUTTON, self.sort_PGN, self.sort_PGN_b)
-
-			self.reset_b =wx.Button(self, label=_('reset'), pos=(210, 340))
-			self.Bind(wx.EVT_BUTTON, self.reset, self.reset_b)
+			self.sort_SK_b =wx.Button(self, label=_('Sort SK'), pos=(110, 340))
+			self.Bind(wx.EVT_BUTTON, self.sort_SK, self.sort_SK_b)			
 
 			self.CreateStatusBar()
 
-			self.init2()
-# var_source var_value var_timestamp name[] source value timestamp Interval activ				
-#      0          1          2         3     4      5    6        7        8       			
+			#self.init2()
+			self.start()
+
 			self.Show(True)
 
 			self.status=''
@@ -78,76 +83,31 @@ class MyFrame(wx.Frame):
 
 			self.timer.Start(self.ttimer)
 
-		def skprint(self,sks,data):
-			#for i in data:
-			#	print sks+'.'+i+' =',data[i]
-			self.sk_list(sks,data)
-
-		def sk_list(self,sks,data):
-			timestamp=''
-			source=''
-			for i in data:
-				if 'timestamp'==i: timestamp=i
-				elif '$source'==i: source=i
-			if timestamp!='' and source!='':
-				for i in data:
-					if 'timestamp'!=i and '$source'!=i and 'source'!=i and 'sentence'!=i and 'pgn'!=i:
-						sk_json=["vessels","xxxxxxxx"]
-						for j in sks.split('.'):
-							sk_json.append(str(j))
-						self.lookup_star(sk_json,i)							
-						self.list_SK.append([source,i,timestamp,sk_json,data[source],data[i],data[timestamp],0.0,1,self.SK_unit,self.SK_description])				
-# var_source var_value var_timestamp name[] source value timestamp Interval activ				
-#      0          1          2         3     4      5    6        7        8       			
-				
 		def timer_act(self, event):
-			try:
-				self.response = requests.get('http://localhost:3000/signalk/v1/api/')
-			except:
-				time.sleep(0.1)
-				return
-			self.data = self.response.json()
-			index=0
-			for i in self.list_SK:
-				if i[8]==1:
-					if self.lookup(i[3]):						
-						if self.SKselect[i[2]]!=i[6]:
-							a=self.json_interval(i[6],self.SKselect[i[2]])*0.2+0.8*i[7]
-							self.list.SetStringItem(index, 4, str('%.3f' % a))
-							i[6]=self.SKselect[i[2]]
-							i[7]=a
-							if i[5]!=self.SKselect[i[1]]:
-								i[5]=self.SKselect[i[1]]
-								self.list.SetStringItem(index, 2, str('%.3f' % i[5]))
-						#str(i[5]))
+			if len(self.buffer)>0:
+				for ii in self.buffer:
+					if ii[0]>=0 and ii[0]<self.list.GetItemCount():
+						self.list.SetStringItem(ii[0], ii[1], ii[2])
 					else:
-						i[8]==0
-						self.list.SetStringItem(index, 4, str(i[8]))
-				index+=1
-
+						self.sorting();
+					del self.buffer[0]
+					#del ii
+			
 		def json_interval(self,time_old,time_new):
 			dif=0
-			sek_n = int(time_new[17:19])
-			sek_o = int(time_old[17:19])
+			sek_n = float(time_new[17:22])
+			sek_o = float(time_old[17:22])
 			if sek_n>=sek_o: dif=sek_n-sek_o
 			else: dif =sek_n+60-sek_o
 			return float(dif)
 					
-		def lookup(self,name):
-			self.SKselect=self.data
-			try:
-				for i in name:
-					self.SKselect=self.SKselect[i]
-				return 1
-			except:
-				return 0
-
-		def lookup_star(self,name,value):			
+		def lookup_star(self,name):			
 			skip=-1
 			index=0
 			st=''
-			for i in name:
-				if index>1:
+			#print name
+			for i in name.split('.'):
+				if index>-1:
 					if skip==0: 
 						st+='.*'
 					else:
@@ -156,12 +116,9 @@ class MyFrame(wx.Frame):
 						st+='.'+i
 				index+=1
 				skip-=1
-			
-			if value!='value':
-				st+='.'+value
-			
+				#print i,st
+						
 			st=st[1:]	
-
 			self.SK_unit=''
 			self.SK_description=''
 			try:
@@ -170,109 +127,149 @@ class MyFrame(wx.Frame):
 			except:
 				print 'no unit for ',st
 				
-		def sort_PGN(self, e):
-			self.timer.Stop()
-			self.list.DeleteAllItems()
-			list_new=[]
-			for i in sorted(self.list_SK, key=lambda item: (item[3])):
-				list_new.append(i)
-			self.list_SK=list_new
-			self.init2()
-			self.timer.Start(self.ttimer)
-
 		def sort_SRC(self, e):
-			self.timer.Stop()
+			self.sortCol=0
+			self.sorting()			
+
+		def sort_SK(self, e):
+			self.sortCol=1
+			self.sorting()
+
+		def sorting(self):
 			self.list.DeleteAllItems()
 			list_new=[]
-			for i in sorted(self.list_SK, key=lambda item: (item[4])):
+			for i in sorted(self.list_SK, key=lambda item: (item[self.sortCol])):
 				list_new.append(i)
 			self.list_SK=list_new
 			self.init2()			
-			self.timer.Start(self.ttimer)
-
-		def reset(self, e):		
-			self.init1()
-			self.sort_SRC(0)
-			
-		def init1(self):
-			self.list_SK=[]
-			self.SKselect=''
-			self.SK_unit=''
-			self.SK_description=''
-			self.response = requests.get('http://localhost:3000/signalk/v1/api/')
-			self.data = self.response.json()
-
-			self.data_SK_unit=''
-			with open(self.home+'/.config/openplotter/classes/keyswithmetadata.json') as data_file:    
-				self.data_SK_unit = json.load(data_file)
-			
-#var_data var_source var_value var_timestamp name source value timestamp Interval activ
-			sks2=["vessels","xxxxxxxx"]
-			sks3=[]
-			sks4=[]
-			sks5=[]
-			sks6=[]
-			sk2=self.data["vessels"]["xxxxxxxx"]
-			for i2 in sk2:
-				i=i2
-				sk3=sk2[i]
-				sks3=i
-				if isinstance(sk3, dict):
-					if 'timestamp' in sk3:
-						self.skprint(sks3,sk3)
-					else:
-						for i3 in sk3:
-							i=i3
-							sk4=sk3[i]
-							sks4=sks3+'.'+i
-							if isinstance(sk4, dict):
-								if 'timestamp' in sk4:
-									self.skprint(sks4,sk4)
-								else:
-									for i4 in sk4:
-										i=i4
-										sk5=sk4[i]
-										sks5=sks4+'.'+i
-										if isinstance(sk5, dict):
-											if 'timestamp' in sk5:
-												self.skprint(sks5,sk5)
-											else:
-												for i5 in sk5:
-														i=i5
-														sk6=sk5[i]
-														sks6=sks5+'.'+i
-														if isinstance(sk6, dict):
-															if 'timestamp' in sk6:
-																self.skprint(sks6,sk6)
 
 		def init2(self):
 			index=0
 			for i in self.list_SK:
-				self.list.InsertStringItem(index, str(i[4]))
-				text=''
-				index2=0
-				for j in i[3]:
-					if index2>1:
-						text+=j+'.'
-					index2+=1
-				text+=i[1]
-				
-				self.list.SetStringItem(index, 1, text)
-				self.list.SetStringItem(index, 2, str('%.3f' % i[5]))
-				self.list.SetStringItem(index, 3, str(i[9]))
-				self.list.SetStringItem(index, 4, str(i[7]))
-				self.list.SetStringItem(index, 5, str(i[8]))
-				self.list.SetStringItem(index, 6, str(i[10]))
+				if type(i[2]) is float: pass
+				else:	i[2]=0.0
+				self.list.InsertStringItem(index, str(i[0]))			
+				self.list.SetStringItem(index, 1, str(i[1]))
+				self.list.SetStringItem(index, 2, str('%.3f' % i[2]))
+				self.list.SetStringItem(index, 3, str(i[3]))
+				self.list.SetStringItem(index, 4, str('%.1f' % i[4]))
+				self.list.SetStringItem(index, 5, str(i[5]))
+				self.list.SetStringItem(index, 6, str(i[6]))
 				index+=1
 																
 		def OnClose(self, event):
 			self.timer.Stop()
+			self.stop()
 			self.Destroy()
 
-		def refresh_loop(self,arg1,stop_event):
-			self.getCharfromSerial()
+		def on_message(self,ws, message):
+			try:
+				js_up=json.loads(message)['updates'][0]
+			except:
+				return
+			label=js_up['source']['label']
 			
-										
+			srcExist=False
+			try:
+				src=js_up['source']['src']
+				srcExist=True
+			except:	pass
+			if not srcExist:
+				try:
+					src=js_up['source']['talker']
+					srcExist=True
+				except:
+					src='xx'
+			try:
+				timestamp=js_up['timestamp']
+			except:
+				timestamp='2000-01-01T00:00:00.000Z'
+						
+			values_=js_up['values']
+			srclabel2=''
+			
+			for values in values_:
+				path=values['path']
+				value=values['value']
+				
+				if type(value) is dict:
+					if 'timestamp' in value:timestamp=value['timestamp']
+					if 'source' in value:
+						try:
+							src2=value['source']['talker']
+						except:
+							src2='xx'
+						srclabel2=label +'.'+ src2
+						
+					for lvalue in value:
+						if lvalue in ['timestamp','source']:pass
+						else:
+							path2=path+'.'+lvalue
+							value2=value[lvalue]
+							self.update_add(value2, path2, srclabel2, timestamp)
+				else:
+					srclabel=label +'.'+ src
+					self.update_add(value, path, srclabel, timestamp)
+				
+
+		def update_add(self,value, path, src, timestamp):
+			# SRC SignalK Value Unit Interval Status Description timestamp				
+			#  0    1      2     3      4        5        6          7           			
+			if type(value) is float: pass
+			elif type(value) is int: value=1.0*value
+			else: value=0.0
+
+			index=0
+			exists=False
+			for i in self.list_SK:
+				if path==i[1]:
+					if src==i[0]:
+						exists=True
+						i[2]=value
+						if type(i[2]) is float: pass
+						else:	i[2]=0.0
+						if i[4]==0.0: i[4]=self.json_interval(i[7],timestamp)
+						else:         i[4]=i[4]*.8+0.2*self.json_interval(i[7],timestamp)
+						i[7]=timestamp
+						self.buffer.append([index, 2, str('%.3f' % i[2])])
+						self.buffer.append([index, 4, str('%.2f' % i[4])])
+				if exists:
+					i=self.list_SK[-1]
+				index+=1
+			if not exists:
+				self.lookup_star(path)
+				self.list_SK.append([src,path,value,self.SK_unit,0.0,1,self.SK_description,timestamp])
+				self.buffer.append([-1, 0,''])						
+					
+		def on_error(self,ws, error):
+			print error
+
+		def on_close(self,ws):
+			ws.close()
+
+		def on_open(self,ws):
+			pass			
+
+		def run(self):
+			self.ws = websocket.WebSocketApp("ws://localhost:3000/signalk/v1/stream?subscribe=self",
+					on_message = lambda ws, msg: self.on_message(ws, msg),
+					on_error = lambda ws, err: self.on_error(ws,err),
+					on_close = lambda ws: self.on_close(ws))
+			self.ws.on_open = lambda ws: self.on_open(ws)
+			self.ws.run_forever()
+			self.ws = None
+						
+		def start(self):
+			def run():
+				self.run()
+			self.thread = threading.Thread(target=run)
+			self.thread.start()
+	  
+		def stop(self):
+			if self.ws is not None:
+				self.ws.close()
+			self.thread.join()
+									
 app = wx.App()
 MyFrame().Show()
 app.MainLoop()

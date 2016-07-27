@@ -29,6 +29,7 @@ from classes.add_kplex import addkplex
 from classes.add_DS18B20 import addDS18B20
 from classes.add_gpio import addGPIO
 from classes.add_USBinst import addUSBinst
+from classes.add_tool10 import addTool10
 from classes.add_topic import addTopic
 from classes.check_vessel_self import checkVesselSelf
 
@@ -129,6 +130,27 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_MENU, self.open_calculate, self.calculate_item1)
 		self.nmea_0183_item1 = self.settings.Append(wx.ID_ANY, _('NMEA 0183 generator'), _('Generate NMEA 0183 from current values'))
 		self.Bind(wx.EVT_MENU, self.open_nmea_0183, self.nmea_0183_item1)
+		self.settings.AppendSeparator()
+
+		self.tools_py=[]
+		if self.conf.has_section('TOOLS'):
+			if self.conf.has_option('TOOLS', 'py'):
+				data=self.conf.get('TOOLS', 'py')
+				try:
+					temp_list=eval(data)
+				except:temp_list=[]
+				if type(temp_list) is list: pass
+				else:	temp_list=[]
+				for ii in temp_list:
+					self.tools_py.append(ii)
+
+		self.tool10_b=[]
+		index=0
+		for i in self.tools_py:
+			self.tool10_b.append(0)
+			self.tool10_b[index] = self.settings.Append(index, i[0], i[1])
+			self.Bind(wx.EVT_MENU, self.tool10, self.tool10_b[index])
+			index+=1
 		self.menubar.Append(self.settings, _('Tools'))
 
 		self.lang = wx.Menu()
@@ -252,6 +274,9 @@ class MainFrame(wx.Frame):
 
 		self.button_refresh_ip =wx.Button(self.page3, label=_('Refresh'), pos=(565, 280))
 		self.Bind(wx.EVT_BUTTON, self.show_ip_info, self.button_refresh_ip)
+		
+		self.check_net_b =wx.Button(self.page3, label=_('Status'), pos=(465, 280))
+		self.Bind(wx.EVT_BUTTON, self.check_net, self.check_net_b)	
 ###########################page3
 ########page4###################
 
@@ -332,20 +357,28 @@ class MainFrame(wx.Frame):
 ########page17###################
 
 		wx.StaticBox(self.page17, label=_(' Settings '), size=(230, 265), pos=(10, 10))
-
-		self.n2k_enable = wx.CheckBox(self.page17, label=_('Enable N2K input/output'), pos=(20, 30))
-		self.n2k_enable.Bind(wx.EVT_CHECKBOX, self.onn2k_enable)
-
-		self.CANUSB_label=wx.StaticText(self.page17, label=_('CAN-USB-CAN device'), pos=(20, 60))
+		i=35
+		self.CANUSB_label=wx.StaticText(self.page17, label=_('CAN-USB-CAN device'), pos=(20, i))
 		self.SerDevLs = []
-		self.can_usb= wx.ComboBox(self.page17, choices=self.SerDevLs, style=wx.CB_READONLY, size=(140, 32), pos=(20, 85))
-
-		self.button_N2K_setting =wx.Button(self.page17, label=_('Output settings'), pos=(20, 130))
-		self.Bind(wx.EVT_BUTTON, self.N2K_setting, self.button_N2K_setting)	
-
-		self.N2K_diagnostic_b =wx.Button(self.page17, label=_('Diagnostic'), pos=(20, 180))
+		i+=20
+		self.can_usb= wx.ComboBox(self.page17, choices=self.SerDevLs, style=wx.CB_READONLY, size=(140, 32), pos=(20, i))
+		self.can_usb.Bind(wx.EVT_COMBOBOX, self.onn2k_device,self.can_usb)
+		i+=35
+		self.n2k_enable = wx.CheckBox(self.page17, label=_('Enable N2K input'), pos=(20, i))
+		self.n2k_enable.Bind(wx.EVT_CHECKBOX, self.onn2k_enable,self.n2k_enable)
+		i+=25
+		self.N2K_diagnostic_b =wx.Button(self.page17, label=_('Diagnostic input'), pos=(20, i))
 		self.Bind(wx.EVT_BUTTON, self.N2K_diagnostic, self.N2K_diagnostic_b)	
-
+		i+=35
+		self.n2k_out_enable = wx.CheckBox(self.page17, label=_('Enable N2K output'), pos=(20, i))
+		self.n2k_out_enable.Bind(wx.EVT_CHECKBOX, self.onn2k_output,self.n2k_out_enable)
+		i+=25	
+		self.N2K_diagnostic_out_b =wx.Button(self.page17, label=_('Diagnostic output'), pos=(20, i))
+		self.Bind(wx.EVT_BUTTON, self.N2K_diagnostic_out, self.N2K_diagnostic_out_b)			
+		i+=40
+		self.button_N2K_setting =wx.Button(self.page17, label=_('Output settings'), pos=(20, i))
+		self.Bind(wx.EVT_BUTTON, self.N2K_setting, self.button_N2K_setting)
+		
 		wx.StaticBox(self.page17, label=_(' Inputs '), size=(430, 50), pos=(250, 10))
 		self.n2kinputs_label=wx.StaticText(self.page17, label=_('PGNs: All'), pos=(260, 30))
 
@@ -699,7 +732,9 @@ class MainFrame(wx.Frame):
 			text+='\nNMEA 2K: CAN-USB-CAN - '+self.conf.get('N2K', 'can_usb')
 		self.n2koutputs_label.SetLabel(self.conf.get('N2K', 'pgn_output'))
 		self.SKinputs_label.SetLabel(text)
-
+		if self.conf.get('N2K', 'output')=='1': 
+			self.n2k_out_enable.SetValue(True)
+			self.N2K_diagnostic_out_b.Disable()
 		if self.conf.get('SMS', 'serial')=='0': self.sms_dev.SetValue(self.SerDevLs[0])
 		else: self.sms_dev.SetValue(self.conf.get('SMS', 'serial'))
 		self.sms_bt.SetValue(self.conf.get('SMS', 'bluetooth'))
@@ -776,6 +811,22 @@ class MainFrame(wx.Frame):
 		subprocess.call(['pkill', '-f', 'NMEA_0183_generator.py'])
 		subprocess.Popen(['python',currentpath+'/tools/NMEA_0183_generator.py'])
 
+	def tool10(self,event):
+		menuId = event.Id
+		dlg = addTool10()
+		res = dlg.ShowModal()
+		res = dlg.ButtonNr
+		dlg.Destroy()
+		if res != 4:
+			if os.path.isfile(currentpath+'/tools/'+self.tools_py[menuId][2]):
+				close=subprocess.call(['pkill', '-f', self.tools_py[menuId][2]])
+				if res == 2: 
+					subprocess.Popen(['python',currentpath+'/tools/'+self.tools_py[menuId][2]])	
+				elif res == 1:
+					subprocess.Popen(['python',currentpath+'/tools/'+self.tools_py[menuId][2],'settings'])	
+			else:
+				print 'file not found: ',self.tools_py[menuId][2]
+			
 	def clear_lang(self):
 		self.lang.Check(self.lang_item1.GetId(), False)
 		self.lang.Check(self.lang_item2.GetId(), False)
@@ -1112,6 +1163,79 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			out+=ip+':10111\n'
 		self.ip_info.SetValue(out)
 
+	def check_net(self, e):
+		msg=''
+		msg1=''
+		network_info=''
+		try: network_info=subprocess.check_output('iw wlan0 info'.split()) 
+		except: pass
+		if 'AP' in network_info: msg1+='wlan0 is AP'
+		network_info=''
+		try: network_info=subprocess.check_output('iw wlan1 info'.split()) 
+		except: pass
+		if 'AP' in network_info: msg1+='wlan1 is AP'
+		if msg1=='': msg1+='missing AP! or driver is not nl80211'
+		msg+=msg1+'\n'
+		
+		msg1=''
+		network_info=''
+		try: network_info=subprocess.check_output('ifconfig'.split()) 
+		except: pass
+		for i in network_info.split('\n'):
+			if 'wlan0' in i: msg1+='wlan0 '
+			if 'wlan1' in i: msg1+='wlan1 '
+		msg+='up network: '+msg1+'\n'
+
+		msg1=''
+		network_info=''
+		try: network_info=subprocess.check_output('service dnsmasq status'.split()) 
+		except: pass
+		for i in network_info.split('\n'):
+			if 'running' in i: msg1+='running'
+		if msg1 == '': msg1+='stopped'
+		msg+='dnsmasq (dhcp-server): '+msg1+'\n'
+		
+		msg1=''
+		network_info=''
+		try: network_info=subprocess.check_output('service hostapd status'.split()) 
+		except: pass
+		for i in network_info.split('\n'):
+			if 'running' in i: msg1+='running'
+		if msg1 == '': msg1+='stopped'
+		msg+='hostapd (AP): '+msg1+'\n'
+		
+		msg1=''
+		network_info=''
+		try: network_info=subprocess.check_output('service networking status'.split()) 
+		except: pass
+		for i in network_info.split('\n'):
+			if 'SUCCESS' in i: msg1+='started'
+		if msg1 == '': msg1+='stopped'
+		msg+='networking: '+msg1+'\n\n'
+		
+		msg1=''
+		network_info=''
+		try: network_info=subprocess.check_output('ip addr show wlan0'.split()) 
+		except: pass
+		for i in network_info.split('\n'):
+			if 'inet ' in i: 
+				if not '169.254' in i.split(' ')[5]: msg1+=i.split(' ')[5][0:-3]+' '+i[-5:]+'\n'
+		network_info=''
+		try: network_info=subprocess.check_output('ip addr show wlan1'.split()) 
+		except: pass
+		for i in network_info.split('\n'):
+			if 'inet ' in i: 
+				if not '169.254' in i.split(' ')[5]: msg1+=i.split(' ')[5][0:-3]+' '+i[-5:]+'\n'
+		network_info=''
+		try: network_info=subprocess.check_output('ip addr show br0'.split()) 
+		except: pass
+		for i in network_info.split('\n'):
+			if 'inet ' in i: 
+				if not '169.254' in i.split(' ')[5]: msg1+=i.split(' ')[5][0:-3]+' '+i[-3:]+'\n'
+		msg+='ip address\n'+msg1+'\n'
+		
+		self.ShowMessage(msg)
+				
 	def wifi_default(self, e):
 		self.ssid.SetValue('OpenPlotter')
 		self.passw.SetValue('12345678')
@@ -2048,7 +2172,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def start_udev(self):
 		subprocess.call(['sudo','udevadm','control','--reload-rules'])
-		subprocess.call(['sudo','udevadm','trigger'])
+		subprocess.call(['sudo','udevadm','trigger','--attr-match=subsystem=tty'])
 
 	def read_USBinst(self):
 		self.USBinst=[]
@@ -2166,6 +2290,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def read_n2k(self):
 		self.can_usb.SetValue(self.conf.get('N2K', 'can_usb'))
 
+	def onn2k_device(self, e):
+		self.conf.set('N2K', 'can_usb', self.can_usb.GetValue())
+		
 	def onn2k_enable(self, e):
 		with open(home+'/.config/signalk-server-node/settings/openplotter-settings.json') as data_file:
 			data = json.load(data_file)
@@ -2213,6 +2340,22 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			json.dump(data, outfile)
 		self.restart_SK(0)
 
+	def onn2k_output(self, e):
+		isChecked = self.n2k_out_enable.GetValue()
+		if isChecked:
+			if not self.can_usb.GetValue():
+				self.n2k_out_enable.SetValue(False)
+				self.SetStatusText(_('You have to select a CAN-USB-CAN device'))
+				return
+			self.N2K_diagnostic_out_b.Disable()
+			self.conf.set('N2K', 'output', '1')			
+			subprocess.call(['pkill', '-f', 'diagnostic-N2K-output.py'])
+			subprocess.call(['pkill', '-f', 'N2K-server.py'])
+			subprocess.Popen(['python',currentpath+'/N2K-server.py'])
+		else:
+			self.conf.set('N2K', 'output', '0')			
+			subprocess.call(['pkill', '-f', 'N2K-server.py'])
+			self.N2K_diagnostic_out_b.Enable()
 
 	def N2K_setting(self, e):
 		tty=str(self.can_usb.GetValue())
@@ -2220,8 +2363,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.GetStatusBar().SetForegroundColour(wx.BLACK)
 			self.SetStatusText(_('You have to select a CAN-USB-CAN device'))
 			return
-		if (self.conf.get('N2K', 'can_usb')!= self.can_usb.GetValue()):
-			self.conf.set('N2K', 'can_usb', self.can_usb.GetValue())
 		subprocess.call(['pkill', '-f', 'CAN-USB-stick.py'])
 		self.stop_sensors()
 		self.stop_1w()
@@ -2235,15 +2376,19 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.GetStatusBar().SetForegroundColour(wx.BLACK)
 			self.SetStatusText(_('You have to select a CAN-USB-CAN device'))
 			return
-		if (self.conf.get('N2K', 'can_usb')!= self.can_usb.GetValue()):
-			self.conf.set('N2K', 'can_usb', self.can_usb.GetValue())
 		subprocess.call(['pkill', '-f', 'diagnostic-N2K-input.py'])
-		self.stop_sensors()
-		self.stop_1w()
 		subprocess.Popen(['python',currentpath+'/diagnostic-N2K-input.py'])
 		self.GetStatusBar().SetForegroundColour(wx.BLACK)
 		self.SetStatusText(_('Show received PGNs.'))	
 
+	def N2K_diagnostic_out(self, e):
+		tty=str(self.can_usb.GetValue())
+		if len(tty)==0:
+			self.SetStatusText(_('You have to select a CAN-USB-CAN device'))
+			return
+		subprocess.call(['pkill', '-f', 'diagnostic-N2K-output.py'])
+		subprocess.Popen(['python',currentpath+'/diagnostic-N2K-output.py'])
+		self.SetStatusText(_('Show sent PGNs.'))	
 ###################################### Signal K
 
 	def show_SK(self, e):

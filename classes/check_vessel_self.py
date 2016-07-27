@@ -42,9 +42,16 @@ class checkVesselSelf:
 
 		response = requests.get('http://localhost:3000/signalk/v1/api/vessels/self')
 		data = response.json()
-
-		self.mmsi=data['mmsi']
 		self.uuid=data['uuid']
+		if 'mmsi' in self.uuid:
+			sp=self.uuid.split(':')
+			self.mmsi=sp[len(sp)-1]
+		else:
+			try:
+				self.mmsi=data['mmsi']
+			except:
+				self.mmsi='0000'
+				print 'Error: No mmsi! mmsi has to be set'
 
 	def util_process_exist(self,process_name):		
 		pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
