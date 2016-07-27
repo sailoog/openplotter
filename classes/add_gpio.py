@@ -32,6 +32,7 @@ class addGPIO(wx.Dialog):
 		list_io=[_('input'),_('output')]
 		wx.StaticText(panel, label=_('I/O'), pos=(10, 100))
 		self.io_select= wx.ComboBox(panel, choices=list_io, style=wx.CB_READONLY, size=(100, 32), pos=(10, 125))
+		self.io_select.Bind(wx.EVT_COMBOBOX, self.onSelectIO)
 
 		wx.StaticText(panel, label=_('GPIO'), pos=(115, 100))
 		self.gpio_select= wx.ComboBox(panel, choices=avalaible_gpio, style=wx.CB_READONLY, size=(100, 32), pos=(115, 125))
@@ -42,11 +43,20 @@ class addGPIO(wx.Dialog):
 
 		if edit != 0:
 			self.name.SetValue(edit[1])
-			if edit[2]=='out':io=_('output')
-			else:io=_('input')
+			if edit[2]=='out':
+				io=_('output')
+				self.pull_select.Disable()
+			else:
+				io=_('input')
+				self.pull_select.Enable()
 			self.io_select.SetValue(io)
 			self.gpio_select.SetValue(str(edit[3]))
 			self.pull_select.SetValue(edit[4])
 
 		cancelBtn = wx.Button(panel, wx.ID_CANCEL, pos=(70, 180))
 		okBtn = wx.Button(panel, wx.ID_OK, pos=(180, 180))
+
+	def onSelectIO(self,e):
+		selected= self.io_select.GetValue()
+		if selected==_('input'):self.pull_select.Enable()
+		if selected==_('output'):self.pull_select.Disable()

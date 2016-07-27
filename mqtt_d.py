@@ -61,11 +61,6 @@ def send_null():
 
 conf=Conf()
 
-vessel_self=checkVesselSelf()
-uuid=vessel_self.uuid
-
-sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
 x=conf.get('MQTT', 'topics')
 if x: topics_list=eval(x)
 else: topics_list=[]
@@ -80,6 +75,9 @@ client=''
 client_local=''
 
 if user and passw and topics_list:
+	vessel_self=checkVesselSelf()
+	uuid=vessel_self.uuid
+	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	if broker and port:
 		client = paho.Client()
 		client.on_message = on_message

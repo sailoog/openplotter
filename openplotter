@@ -1763,10 +1763,17 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			gpio_selection=gpio_selection.encode('utf8')
 			pull_selection=dlg.pull_select.GetValue()
 			pull_selection=pull_selection.encode('utf8')
-			if not name or not io_selection or not gpio_selection or not pull_selection:
-				self.ShowMessage(_('Failed. You must fill in all fields.'))
-				dlg.Destroy()
-				return
+			if io=='in':
+				if not name or not io_selection or not gpio_selection or not pull_selection:
+					self.ShowMessage(_('Failed. You must fill in all avalaible fields.'))
+					dlg.Destroy()
+					return
+			if io=='out':
+				pull_selection=''
+				if not name or not io_selection or not gpio_selection:
+					self.ShowMessage(_('Failed. You must fill in all avalaible fields.'))
+					dlg.Destroy()
+					return
 			if not re.match('^[0-9a-zA-Z]+$', name):
 				self.ShowMessage(_('Failed. The name must contain only letters and numbers.'))
 				dlg.Destroy()

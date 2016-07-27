@@ -30,6 +30,8 @@ humidity_sk=conf.get('I2C', 'sk_hum')=='1'
 h_temp_sk=conf.get('I2C', 'sk_temp_h')=='1'
 
 if heading_sk or heel_sk or pitch_sk or pressure_sk or humidity_sk:
+	vessel_self=checkVesselSelf()
+	uuid=vessel_self.uuid
 	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	poll_interval = 1
 	try:
@@ -54,9 +56,6 @@ if heading_sk or heel_sk or pitch_sk or pressure_sk or humidity_sk:
 	rate_imu=float(conf.get('I2C', 'rate_imu'))
 	rate_press=float(conf.get('I2C', 'rate_press'))
 	rate_hum=float(conf.get('I2C', 'rate_hum'))
-
-	vessel_self=checkVesselSelf()
-	uuid=vessel_self.uuid
 
 	if heading_sk or heel_sk or pitch_sk:
 		SETTINGS_FILE = "RTIMULib"

@@ -90,7 +90,8 @@ if not exist:
 		
 	if boot_sh==1:
 		if not share: share='0'
-		if conf.get('WIFI', 'share')!=share:           conf.set('WIFI', 'share', share)
+		if conf.get('WIFI', 'share')!=share: conf.set('WIFI', 'share', share)
+
 	wifi_server=conf.get('WIFI', 'enable')
 
 	delay=int(conf.get('STARTUP', 'delay'))
@@ -117,6 +118,18 @@ if not exist:
 	TW_SOG=conf.get('CALCULATE', 'tw_sog')
 
 	N2K_output=conf.get('N2K', 'output')
+
+	tools_py=[]
+	if conf.has_section('TOOLS'):
+		if conf.has_option('TOOLS', 'py'):
+			data=conf.get('TOOLS', 'py')
+			try:
+				temp_list=eval(data)
+			except:temp_list=[]
+			if type(temp_list) is list: pass
+			else:	temp_list=[]
+			for ii in temp_list:
+				tools_py.append(ii)
 
 	#######################################################
 	time.sleep(delay)
@@ -171,18 +184,6 @@ if not exist:
 		if sound:
 			try: subprocess.Popen(['mpg123',sound])
 			except: pass
-			
-	tools_py=[]
-	if conf.has_section('TOOLS'):
-		if conf.has_option('TOOLS', 'py'):
-			data=conf.get('TOOLS', 'py')
-			try:
-				temp_list=eval(data)
-			except:temp_list=[]
-			if type(temp_list) is list: pass
-			else:	temp_list=[]
-			for ii in temp_list:
-				tools_py.append(ii)
 
 	index=0
 	for i in tools_py:

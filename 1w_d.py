@@ -22,16 +22,14 @@ from classes.check_vessel_self import checkVesselSelf
 
 conf=Conf()
 
-vessel_self=checkVesselSelf()
-uuid=vessel_self.uuid
-
-sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
 try:
 	sensors_list=eval(conf.get('1W', 'DS18B20'))
 except: sensors_list=[]
 
 if sensors_list:
+	vessel_self=checkVesselSelf()
+	uuid=vessel_self.uuid
+	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	sensors=[]
 	sensors_list2=[]
 	for item in sensors_list:
