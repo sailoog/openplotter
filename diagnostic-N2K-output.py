@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, sys, socket, threading, time, webbrowser,serial
+import wx, sys, socket, threading, time
 from classes.datastream import DataStream
 from classes.paths import Paths
 from classes.conf import Conf
@@ -25,17 +25,16 @@ class MyFrame(wx.Frame):
 		
 		def __init__(self):
 			Quelle='127.0.0.1' # Adresse des eigenen Rechners
-			Port=7778
+			Port=55560
 			 
 			self.e_udp_sock = socket.socket( socket.AF_INET,  socket.SOCK_DGRAM ) #s.o.
 			self.e_udp_sock.bind( (Quelle,Port) )
 
-			self.ttimer=40
+			self.ttimer=100
 			
 			self.home=Paths().home
 			self.currentpath=Paths().currentpath
 			self.conf=Conf()
-			self.ser = serial.Serial(self.conf.get('N2K', 'can_usb'), 115200, timeout=0.5)
 			
 			Language(self.conf.get('GENERAL','lang'))
 
@@ -89,12 +88,13 @@ class MyFrame(wx.Frame):
 
 			self.timer.Start(self.ttimer)
 			
-		def timer_act(self, event):
-			data, addr = self.e_udp_sock.recvfrom( 1024 )
+		def timer_act(self, event):		
+			data1, addr = self.e_udp_sock.recvfrom( 1024 )
 			# Die Puffergroesse muss immer eine Potenz
 			# von 2 sein
-			if ord(data[7])+9==len(data):
-				self.output(data)
+			data=bytearray(data1)
+			if data[7]+9==len(data):
+				self.output(data)				
 			
 		def sort_PGN(self, e):
 			self.timer.Stop()
@@ -129,13 +129,6 @@ class MyFrame(wx.Frame):
 			self.timer.Stop()
 			self.Destroy()
 
-		def refresh_loop(self,arg1,stop_event):
-			data, addr = e_udp_sock.recvfrom( 1024 )
-			# Die Puffergroesse muss immer eine Potenz
-			# von 2 sein
-			if data[7]+8==len(data):
-				self.output(data)
-
 		def output(self,data):
 			k = 0
 			Buffer=bytearray(data)
@@ -164,7 +157,8 @@ class MyFrame(wx.Frame):
 							self.list_iter[index][4]=td
 							self.list_iter[index][5]=tt							
 							self.list.SetStringItem(index,4,str(td))
-							self.list.SetStringItem(index,5,datap)
+							self.list.SetStringItem(index,5,str(datap))
+							self.Update()
 							exist=1
 					index+=1						
 				if exist==0:				

@@ -116,6 +116,8 @@ if not exist:
 	TW_STW=conf.get('CALCULATE', 'tw_stw')
 	TW_SOG=conf.get('CALCULATE', 'tw_sog')
 
+	N2K_output=conf.get('N2K', 'output')
+
 	#######################################################
 	time.sleep(delay)
 
@@ -145,7 +147,10 @@ if not exist:
 
 	subprocess.call(["pkill", '-9', "node"])
 	vessel_self=checkVesselSelf()
-
+	
+	if N2K_output=='1':
+		subprocess.Popen(['python',currentpath+'/N2K-server.py'])
+	
 	if gps_time=='1':
 		subprocess.call(['sudo', 'python', currentpath+'/time_gps.py'])
 
