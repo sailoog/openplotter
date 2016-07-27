@@ -1,19 +1,109 @@
-# What is OpenPlotter?
+## This is the development branch of OpenPlotter project. If you want to test this version, you have to follow these steps:
 
-![OpenPlotter RPI](https://sailoog.gitbooks.io/openplotter-documentation/content/en/openplotter.png)
+* Run OpenPlotter v0.8.0
 
-There are people who buy boats but there are also people who build them, why not build your own electronics too? OpenPlotter is a combination of software and hardware to be used as navigational aid on small and medium boats. It is also a complete home automation system onboard. It works on ARM computers like the [Raspberry Pi](https://www.raspberrypi.org/) and is open-source, low-cost and low-consumption. Its design is modular, so you just have to implement what your boat needs. Do it yourself.
+* Delete the old content and clone this branch in folder /home/pi/.config/openplotter
 
-## Features
+* Type in the terminal:
 
-https://www.gitbook.com/book/sailoog/openplotter-documentation/details
+`sudo chmod 775 /home/pi/.config/openplotter/openplotter`
 
-## Project site
+`sudo chmod 775 /home/pi/.config/openplotter/keyword`
 
-http://www.sailoog.com/openplotter
+* Add to file /home/pi/.profile:
 
-## Build instructions
+`export PATH=$PATH:/home/pi/.config/openplotter`
 
-https://github.com/sailoog/openplotter/wiki
+* Install isc-dhcp-server:
 
-![OpenPlotter RPI](https://sailoog.gitbooks.io/openplotter-documentation/content/en/openplotter_rpi.png)
+`sudo apt-get install isc-dhcp-server`
+
+* Replace the content of file /home/pi/.config/signalk-server-node/settings/openplotter-settings.json by:
+
+`{`
+	`"vessel" : {`
+		`"mmsi" : "000000000",`
+		`"uuid" : "urn:mrn:imo:mmsi:000000000"`
+	`},`
+	`"pipedProviders" : [{`
+			`"pipeElements" : [{`
+					`"type" : "providers/tcp",`
+					`"options" : {`
+						`"host" : "127.0.0.1",`
+						`"port" : "10110"`
+					`}`
+				`}, {`
+					`"type" : "providers/nmea0183-signalk",`
+					`"optionMappings" : [{`
+							`"toOption" : "selfId",`
+							`"fromAppProperty" : "selfId"`
+						`}, {`
+							`"toOption" : "selfType",`
+							`"fromAppProperty" : "selfType"`
+						`}`
+					`]`
+				`}`
+			`],`
+			`"id" : "kplexOutput"`
+		`}, {`
+			`"pipeElements" : [{`
+					`"type" : "providers/udp",`
+					`"options" : {`
+						`"port" : "55556"`
+					`}`
+				`}, {`
+					`"type" : "providers/liner"`
+				`}, {`
+					`"type" : "providers/from_json"`
+				`}`
+			`],`
+			`"id" : "I2Csensors"`
+		`}, {`
+			`"pipeElements" : [{`
+					`"type" : "providers/udp",`
+					`"options" : {`
+						`"port" : "55557"`
+					`}`
+				`}, {`
+					`"type" : "providers/liner"`
+				`}, {`
+					`"type" : "providers/from_json"`
+				`}`
+			`],`
+			`"id" : "1Wsensors"`
+		`}, {`
+			`"pipeElements" : [{`
+					`"type" : "providers/udp",`
+					`"options" : {`
+						`"port" : "55558"`
+					`}`
+				`}, {`
+					`"type" : "providers/liner"`
+				`}, {`
+					`"type" : "providers/from_json"`
+				`}`
+			`],`
+			`"id" : "notifications"`
+		`}, {`
+			`"pipeElements" : [{`
+					`"type" : "providers/execute",`
+					`"options" : {`
+						`"command" : "actisense-serial /dev/ttyOP_N2K"`
+					`}`
+				`}, {`
+					`"type" : "providers/liner"`
+				`}, {`
+					`"type" : "providers/n2kAnalyzer"`
+				`}, {`
+					`"type" : "providers/n2k-signalk"`
+				`}`
+			`],`
+			`"id" : "CAN-USB"`
+		`}`
+	`],`
+	`"interfaces" : {}`
+`}`
+
+* Reset and open OpenPlotter typing:
+
+`openplotter`
