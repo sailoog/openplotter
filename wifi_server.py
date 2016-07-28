@@ -33,6 +33,9 @@ else:
 	print('wrong ip format in openplotter.conf switch to standard')
 	ip='10.10.10.1'
 	ip3='10.10.10'
+ipfix='192.168.7.7'
+ipfix3='192.168.7'
+
 ssid = conf.get('WIFI', 'ssid')
 hw_mode = conf.get('WIFI', 'hw_mode')
 channel = conf.get('WIFI', 'channel')
@@ -47,53 +50,6 @@ driver='nl80211'
 error=0
 
 if wifi_server=='1':
-	original=os.path.isfile('/usr/sbin/hostapd.org')
-	if not original: shutil.copyfile('/usr/sbin/hostapd', '/usr/sbin/hostapd.org')
-
-	chipset= 'default'
-	chipsetconf= ''
-	
-	with open('/etc/hostapd/hostapd.conf') as dataf:
-		for line in dataf:
-			if 'driver=' in line:
-				chipsetconf=line[7:]
-				
-	context = pyudev.Context()
-	file_hostapd='/usr/sbin/hostapd.org'
-	for device in context.list_devices(subsystem='net'):
-		if device['INTERFACE']==wlan:
-			try:
-				if device['ID_NET_DRIVER']=='brcmfmac':
-					file_hostapd='/usr/sbin/hostapd.org'
-					chipset= 'Built-in WiFi'
-				elif device['ID_NET_DRIVER']=='rtl8192cu':
-					driver='rtl871xdrv'
-					file_hostapd=currentpath+'/wifi_drivers/RTL8192CU/hostapd'
-					chipset= 'RTL8192CU'
-				elif device['ID_NET_DRIVER']=='rtl8192eu':
-					driver='rtl871xdrv'
-					chipset= 'RTL8192EU'
-					shutil.copyfile(currentpath+'/wifi_drivers/RTL8192EU/hostapd', '/usr/sbin/hostapd')
-				elif device['ID_NET_DRIVER']=='rtl8188cus':
-					driver='rtl871xdrv'
-					chipset= 'RTL8188CUS'
-					file_hostapd=currentpath+'/wifi_drivers/RTL8188CUS/hostapd'
-				elif device['ID_NET_DRIVER']=='rtl8188eu':
-					driver=''
-					chipset= 'RTL8188EU'
-					file_hostapd=currentpath+'/wifi_drivers/RTL8188EU/hostapd'
-				elif chipset == 'default':
-					file_hostapd='/usr/sbin/hostapd.org'
-			except Exception,e: print str(e)
-					
-	#output=subprocess.call('cmp --silent '+ file_hostapd + ' /usr/sbin/hostapd || echo "1"', shell=True)
-	output=subprocess.call(['cmp',file_hostapd,'/usr/sbin/hostapd'])
-	if output == 1: 
-		change=True
-		shutil.copyfile(file_hostapd, '/usr/sbin/hostapd')	
-		subprocess.call(['chmod', '755', '/usr/sbin/hostapd'])
-		subprocess.call(['rfkill', 'unblock', 'wifi'])
-
 	file = open('/etc/default/hostapd', 'r',2000)
 	bak=file.read()
 	file.close()
@@ -106,7 +62,6 @@ if wifi_server=='1':
 
 data='interface='+wlan+'\n'
 if bridge=='1' and wifi_server=='1':	data+= 'bridge=br0\n'	
-if driver!='': data+= 'driver='+driver+'\n'
 data+= 'hw_mode='+hw_mode+'\n'
 data+= 'channel='+channel+'\n'
 data+= 'ieee80211n=1\n'
@@ -133,12 +88,18 @@ if bridge=='1': lan='br0'
 data=''	
 if wifi_server=='1':	
 	if bridge=='0':
-		#data+='pre-down ifconfig '+wlan+' up\n'
 		data+='auto lo\n'
 		data+='iface lo inet loopback\n'
 		data+='pre-down iwconfig '+wlan+' essid '+ssid+'\n'
 		data+='allow-hotplug eth0\n'
 		data+='iface eth0 inet dhcp\n'
+
+		data+='auto eth0:0\n'
+		data+='iface eth0:0 inet static\n'
+		data+='address '+ipfix+'\n'
+		data+='broadcast '+ipfix3+'.255\n'
+		data+='netmask 255.255.255.0\n'
+		
 		data+='auto '+wlan+'\n'
 		data+='iface '+wlan+' inet static\n'
 		data+='address '+ip+'\n'
@@ -158,7 +119,6 @@ if wifi_server=='1':
 		data+='iface lo inet loopback\n'
 		
 		data+='pre-down iwconfig '+wlan+' essid '+ssid+'\n'
-		#data+='bridge_hw $MAC_ADDRESS_OF_YOUR_WIRELESS_CARD\n'
 		data+='auto '+wlan+'\n'
 		data+='iface '+wlan+' inet manual\n'
 		data+='allow-hotplug eth0\n'
@@ -172,6 +132,13 @@ if wifi_server=='1':
 		data+='broadcast '+ip3+'.255\n'
 		data+='netmask 255.255.255.0\n'
 		data+='bridge_maxwait 1\n'
+		
+		data+='auto br0:0\n'
+		data+='iface br0:0 inet static\n'
+		data+='address '+ipfix+'\n'
+		data+='broadcast '+ipfix3+'.255\n'
+		data+='netmask 255.255.255.0\n'
+		
 		if share != '0':
 			data+='post-up iptables -t nat -A POSTROUTING -o '+share+' -j MASQUERADE\n'
 			data+='post-up iptables -A FORWARD -i '+ share + ' -o ' +lan+ ' -m state --state RELATED,ESTABLISHED -j ACCEPT\n'
@@ -194,11 +161,8 @@ if wifi_server=='1':
 		wlanx='wlan0'
 		if wlan[-1:]=='0':wlanx='wlan1'
 		data='no-dhcp-interface=lo,eth0,'+wlanx+',ppp0\n'
-		#data='no-dhcp-interface=lo,eth0,'+wlanx+',ppp0,br0\n'
-		data+='listen-address=127.0.0.1'
-		data+='listen-address='+ip3+'.1'
 		data+='interface='+wlan+'\n'
-		data+='dhcp-range='+ip3+'.20,'+ip3+'.254,255.255.255.0,12h'
+		data+='dhcp-range='+ip3+'.20,'+ip3+'.254,255.255.255.0,12h\n'
 	else:
 		data='no-dhcp-interface=lo,eth0,wlan0,wlan1,ppp0\n'
 		data+='interface=br0\n'
@@ -242,14 +206,14 @@ if wifi_server=='1':
 		file.close()
 
 	if change:
+		if bridge=='1' and 'eth0:0' in subprocess.check_output('ifconfig'):
+			subprocess.call(['ifconfig', 'eth0:0','down'])
 		output=subprocess.call(['service', 'hostapd', 'stop'])
 		output=subprocess.call(['service', 'dnsmasq', 'stop'])
 		output=subprocess.call(['service', 'networking', 'stop'])
 		output=subprocess.call(['systemctl', 'daemon-reload'])
 		output=subprocess.call(['service', 'networking', 'start'])
 		
-	print 'Chipset: '+chipset+', driver: '+driver+'.\n'
-
 	msg1=''
 	network_info=''
 	try: network_info=subprocess.check_output('service dnsmasq status'.split()) 
@@ -275,7 +239,7 @@ if wifi_server=='1':
 	if msg1 == '': error==1	
 	
 	if error==1: print "WiFi access point failed."
-	else: 
+	else:
 		print "WiFi access point started.\n"
 		print "SSID: "+ssid
 		print 'Address: '+ip3+'.1'
@@ -288,18 +252,26 @@ else:
 	data='# interfaces(5) file used by ifup(8) and ifdown(8)\n'
 	data+='auto lo\n'
 	data+='iface lo inet loopback\n'
+
+	data+='allow-hotplug eth0\n'
+	data+='iface eth0 inet dhcp\n'
+	data+='auto eth0:0\n'
+	data+='iface eth0:0 inet static\n'
+	data+='address '+ipfix+'\n'
+	data+='broadcast '+ipfix3+'.255\n'
+	data+='netmask 255.255.255.0\n'
+	data+='post-up /sbin/ifconfig eth0:0 '+ipfix+' netmask 255.255.255.0\n'
+
+
 	if bak!=data:
 		file = open('/etc/network/interfaces', 'w')
 		file.write(data)
 		file.close()
 
-		if bridge=='1':
-			try:
-				subprocess.call(['brctl', 'delif','br0','eth0'])
-				subprocess.call(['ifconfig', 'br0','down'])
-				subprocess.call(['brctl', 'delbr','br0'])
-				
-			except: pass
+		if 'br0:0' in subprocess.check_output('ifconfig'):
+			subprocess.call(['brctl', 'delif','br0','eth0'])
+			subprocess.call(['ifconfig', 'br0','down'])
+			subprocess.call(['brctl', 'delbr','br0'])
 
 		output=subprocess.call(['iptables', '-F'])
 		if output != 0: error=1
@@ -314,6 +286,9 @@ else:
 		output=subprocess.call(['systemctl', 'restart', 'NetworkManager'])
 		if output != 0: error=1
 
+		if 'eth0:0' in subprocess.check_output('ifconfig'):pass
+		else:
+			subprocess.call(['ifconfig', 'eth0:0', ipfix,'netmask','255.255.255.0'])
 		
 		print "\nWiFi access point stopped."
 			
@@ -348,4 +323,3 @@ if bak!=data:
 	file = open('/boot/config.txt', 'w')
 	file.write(data)
 	file.close()	
-
