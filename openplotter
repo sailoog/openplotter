@@ -229,6 +229,16 @@ class MainFrame(wx.Frame):
 			ii=str(i)
 			if 'wlan'+ii in output: self.available_wireless.append('wlan'+ii)
 
+		self.available_wireless_AP = []
+		for i in self.available_wireless:
+			output2=subprocess.check_output(['iw',i,'info'], stderr=subprocess.STDOUT)
+			startpos=output2.find('wiphy')+5
+			iwphy=int(output2[startpos:startpos+2])
+			output2=subprocess.check_output(['iw','phy'+str(iwphy),'info'], stderr=subprocess.STDOUT)
+			startpos=output2.find('Supported interface modes')
+			if 'AP' in output2[startpos:startpos+80]:
+				self.available_wireless_AP.append(i)
+
 		self.available_share = [_('none')]
 		for i in range (0, 9):
 			ii=str(i)
@@ -240,7 +250,7 @@ class MainFrame(wx.Frame):
 		share_old= self.conf.get('WIFI', 'share')
 		if share_old!='0' and share_old not in self.available_share: self.available_share.append(share_old)
 		self.wlan_label=wx.StaticText(self.page3, label=_('Access point device'), pos=(20, 55))
-		self.wlan = wx.ComboBox(self.page3, choices=self.available_wireless, style=wx.CB_READONLY, size=(100, 32), pos=(20, 75))
+		self.wlan = wx.ComboBox(self.page3, choices=self.available_wireless_AP, style=wx.CB_READONLY, size=(100, 32), pos=(20, 75))
 		
 		self.share_label=wx.StaticText(self.page3, label=_('Sharing Internet device'), pos=(180, 55))
 		self.share = wx.ComboBox(self.page3, choices=self.available_share, style=wx.CB_READONLY, size=(100, 32), pos=(180, 75))
@@ -253,7 +263,7 @@ class MainFrame(wx.Frame):
 		self.passw = wx.TextCtrl(self.page3, -1, size=(120, 32), pos=(20, 173))
 		self.passw_label=wx.StaticText(self.page3, label=_('Password \nminimum 8 characters required'), pos=(160, 175))
 		
-		self.wifi_channel_list=['1','2','3','4','5','6','7','8','9','10','11']
+		self.wifi_channel_list=['1','2','3','4','5','6','7','8','9','10','11','12','13']
 		self.wifi_channel = wx.ComboBox(self.page3, choices=self.wifi_channel_list, style=wx.CB_READONLY, size=(120, 32), pos=(20, 208))
 		self.wifi_channel_label=wx.StaticText(self.page3, label=_('Channel'), pos=(160, 215))
 
@@ -261,7 +271,7 @@ class MainFrame(wx.Frame):
 		self.wifi_mode = wx.ComboBox(self.page3, choices=self.wifi_mode_list, style=wx.CB_READONLY, size=(120, 32), pos=(20, 246))
 		self.wifi_mode_label=wx.StaticText(self.page3, label=_('Mode'), pos=(160, 255))
 
-		self.wifi_wpa_list=['WPA','WPA2', _('Both')]
+		self.wifi_wpa_list=['None','WPA','WPA2', _('Both')]
 		self.wifi_wpa = wx.ComboBox(self.page3, choices=self.wifi_wpa_list, style=wx.CB_READONLY, size=(120, 32), pos=(20, 285))
 		self.wifi_wpa_label=wx.StaticText(self.page3, label=_('WPA'), pos=(160, 290))
 
@@ -1061,6 +1071,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			else: self.share.SetValue(self.conf.get('WIFI', 'share'))
 			if self.conf.get('WIFI', 'hw_mode')=='b': self.wifi_mode.SetValue('IEEE 802.11b')
 			if self.conf.get('WIFI', 'hw_mode')=='g': self.wifi_mode.SetValue('IEEE 802.11g')
+			if self.conf.get('WIFI', 'wpa')=='0': self.wifi_wpa.SetValue('None')
 			if self.conf.get('WIFI', 'wpa')=='1': self.wifi_wpa.SetValue('WPA')
 			if self.conf.get('WIFI', 'wpa')=='2': self.wifi_wpa.SetValue('WPA2')
 			if self.conf.get('WIFI', 'wpa')=='3': self.wifi_wpa.SetValue(_('Both'))
@@ -1109,6 +1120,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if share==_('none'):share='0'
 		if mode=='IEEE 802.11b':mode='b'
 		if mode=='IEEE 802.11g':mode='g'
+		if wpa=='None':wpa='0'
 		if wpa=='WPA':wpa='1'
 		if wpa=='WPA2':wpa='2'
 		if wpa==_('Both'):wpa='3'
@@ -1230,8 +1242,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		try: network_info=subprocess.check_output('ip addr show br0'.split()) 
 		except: pass
 		for i in network_info.split('\n'):
-			if 'inet ' in i: 
-				if not '169.254' in i.split(' ')[5]: msg1+=i.split(' ')[5][0:-3]+' '+i[-3:]+'\n'
+			if 'inet ' in i:
+				
+				if not '169.254' in i.split(' ')[5]: 
+					if 'br0:0' in i:
+						msg1+=i.split(' ')[5][0:-3]+' '+i[-5:]+'\n'
+					else:
+						msg1+=i.split(' ')[5][0:-3]+' '+i[-3:]+'\n'
 		msg+='ip address\n'+msg1+'\n'
 		
 		self.ShowMessage(msg)
