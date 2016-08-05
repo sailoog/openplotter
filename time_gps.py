@@ -19,6 +19,7 @@ import socket, pynmea2, subprocess
 
 fecha=''
 hora=''
+foundtime = False
 
 try:
 	sock_in = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -29,7 +30,7 @@ except socket.error, error_msg:
 	print 'Error: '+ str(error_msg[0])
 else:
 	cont = 0
-	while True:
+	while foundtime == False:
 		frase_nmea =''
 		try:
 			frase_nmea = sock_in.recv(1024)
@@ -51,6 +52,7 @@ else:
 						if nmea_type == 'RMC':
 							fecha = msg.datestamp
 							hora =  msg.timestamp
+							foundtime = True
 							break
 						else: 
 							cont=cont+1
