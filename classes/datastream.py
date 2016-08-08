@@ -174,6 +174,22 @@ class DataStream:
 					if value:
 						unit=msg.lon_dir #E, W
 						self.updateDataList('Lon',value,unit,talker,nmea_type)						
+				if nmea_type == 'ZDA':
+					#date
+					day="{0:0=2d}".format(msg.day)
+					month="{0:0=2d}".format(msg.month)
+					year="{0:0=2d}".format(msg.year)
+					year=year[2:4]
+					value="%s%s%s"%(day,month,year)
+					if value:
+						unit='UTC'
+						self.updateDataList('Date',value,unit,talker,nmea_type)
+					#time
+					value=msg.timestamp
+					#value=value - value.microseconds
+					if value:
+						unit='UTC'
+						self.updateDataList('Time',value,unit,talker,nmea_type)
 				if nmea_type == 'RMC':
 					#date
 					value=msg.datestamp
