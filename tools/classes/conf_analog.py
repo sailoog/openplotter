@@ -18,20 +18,16 @@ import ConfigParser
 from paths import Paths
 
 class Conf_analog:
-
 	def __init__(self):
-
 		self.paths=Paths()
-
 		self.data_conf = ConfigParser.SafeConfigParser()
-		
 		self.read()
 
 	def read(self):
-		self.data_conf.read(self.paths.currentpath+'/openplotter_analog.conf')
+		self.data_conf.read(self.paths.tool_path+'/openplotter_analog.conf')
 
 	def write(self):
-		with open(self.paths.currentpath+'/openplotter_analog.conf', 'wb') as configfile:
+		with open(self.paths.tool_path+'/openplotter_analog.conf', 'wb') as configfile:
 			self.data_conf.write(configfile)
 
 	def get(self,section,item):

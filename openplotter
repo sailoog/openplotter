@@ -27,6 +27,8 @@ from classes.add_trigger import addTrigger
 from classes.add_action import addAction
 from classes.add_kplex import addkplex
 from classes.add_DS18B20 import addDS18B20
+from classes.add_MCP import addMCP
+from classes.add_value_setting import addvaluesetting
 from classes.add_gpio import addGPIO
 from classes.add_USBinst import addUSBinst
 from classes.add_tool10 import addTool10
@@ -50,9 +52,8 @@ class CheckListCtrl2(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		ListCtrlAutoWidthMixin.__init__(self)		
 		
 class MainFrame(wx.Frame):
-
 	def __init__(self):
-		wx.Frame.__init__(self, None, title="OpenPlotter", size=(710,460))
+		wx.Frame.__init__(self, None, title="OpenPlotter", size=(1710,460))
 		if self.util_process_exist('startup.py'):
 			print "System not ready, try later."
 			sys.exit(0)
@@ -165,7 +166,7 @@ class MainFrame(wx.Frame):
 		self.lang_item5 = self.lang.Append(wx.ID_ANY, _('Dutch'), _('Set Dutch language'), kind=wx.ITEM_CHECK)
 		self.Bind(wx.EVT_MENU, self.lang_nl, self.lang_item5)
 		self.lang_item6 = self.lang.Append(wx.ID_ANY, _('German'), _('Set German language'), kind=wx.ITEM_CHECK)
-		self.Bind(wx.EVT_MENU, self.lang_de, self.lang_item6)		
+		self.Bind(wx.EVT_MENU, self.lang_de, self.lang_item6)
 		self.menubar.Append(self.lang, _('Language'))
 
 		self.helpm = wx.Menu()
@@ -182,7 +183,7 @@ class MainFrame(wx.Frame):
 		wx.StaticText(self.page1, label=_('Delay (seconds)'), pos=(20, 30))
 		self.delay = wx.TextCtrl(self.page1, -1, size=(55, 32), pos=(170, 23))
 		self.button_ok_delay =wx.Button(self.page1, label=_('Ok'),size=(70, 32), pos=(250, 23))
-		self.Bind(wx.EVT_BUTTON, self.ok_delay, self.button_ok_delay)
+		self.button_ok_delay.Bind(wx.EVT_BUTTON, self.ok_delay)
 
 		wx.StaticBox(self.page1, size=(330, 230), pos=(10, 65))
 		self.startup_opencpn = wx.CheckBox(self.page1, label=_('OpenCPN'), pos=(20, 80))
@@ -208,7 +209,7 @@ class MainFrame(wx.Frame):
 		self.startup_play_sound.Bind(wx.EVT_CHECKBOX, self.startup)
 		self.startup_path_sound = wx.TextCtrl(self.page1, -1, size=(200, 32), pos=(360, 110))
 		self.button_select_sound =wx.Button(self.page1, label=_('Select'), pos=(570, 110))
-		self.Bind(wx.EVT_BUTTON, self.select_sound, self.button_select_sound)
+		self.button_select_sound.Bind(wx.EVT_BUTTON, self.select_sound)
 
 		self.op_maximize = wx.CheckBox(self.page1, label=_('Maximize OpenPlotter'), pos=(360, 150))
 		self.op_maximize.Bind(wx.EVT_CHECKBOX, self.startup)
@@ -276,26 +277,26 @@ class MainFrame(wx.Frame):
 		self.wifi_wpa_label=wx.StaticText(self.page3, label=_('WPA'), pos=(160, 290))
 
 		self.wifi_button_default =wx.Button(self.page3, label=_('Defaults'), pos=(275, 280))
-		self.Bind(wx.EVT_BUTTON, self.wifi_default, self.wifi_button_default)
+		self.wifi_button_default.Bind(wx.EVT_BUTTON, self.wifi_default)
 
 		wx.StaticBox(self.page3, label=_(' Addresses '), size=(290, 315), pos=(385, 10))
 		self.ip_info = wx.TextCtrl(self.page3, -1, style=wx.TE_MULTILINE|wx.TE_READONLY, size=(270, 245), pos=(395, 30))
 		self.ip_info.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_INACTIVECAPTION))
 
 		self.button_refresh_ip =wx.Button(self.page3, label=_('Refresh'), pos=(565, 280))
-		self.Bind(wx.EVT_BUTTON, self.show_ip_info, self.button_refresh_ip)
+		self.button_refresh_ip.Bind(wx.EVT_BUTTON, self.show_ip_info)
 		
 		self.check_net_b =wx.Button(self.page3, label=_('Status'), pos=(465, 280))
-		self.Bind(wx.EVT_BUTTON, self.check_net, self.check_net_b)	
+		self.check_net_b.Bind(wx.EVT_BUTTON, self.check_net)	
 ###########################page3
 ########page4###################
 
 
 ###########################page4
 ########page5###################
-		wx.StaticBox(self.page5, label=_(' KPLEX '), size=(670, 180), pos=(10, 10))
+		title=wx.StaticText(self.page5, label=_(' KPLEX '))
+
 		self.list_kplex = CheckListCtrl2(self.page5, 152)
-		self.list_kplex.SetPosition((15, 30))
 		self.list_kplex.InsertColumn(0, _('Name'), width=130)
 		self.list_kplex.InsertColumn(1, _('Type'), width=45)
 		self.list_kplex.InsertColumn(2, _('io'), width=45)
@@ -305,27 +306,52 @@ class MainFrame(wx.Frame):
 		self.list_kplex.InsertColumn(6, _('Filtering'),width=80)
 		self.list_kplex.InsertColumn(7, _('outFilter'),width=60)
 		self.list_kplex.InsertColumn(8, _('Filtering'),width=80)
-		self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_kplex, self.list_kplex)
+		self.list_kplex.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_kplex)
 		
-		self.add_kplex_b =wx.Button(self.page5, label=_('add'), pos=(10, 200))
-		self.Bind(wx.EVT_BUTTON, self.add_kplex, self.add_kplex_b)
+		diagnostic =wx.Button(self.page5, label=_('diagnostic'))
+		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_kplex)
 
-		self.delete_kplex_b =wx.Button(self.page5, label=_('delete'), pos=(110, 200))
-		self.Bind(wx.EVT_BUTTON, self.delete_kplex, self.delete_kplex_b)
+		add =wx.Button(self.page5, label=_('add'))
+		add.Bind(wx.EVT_BUTTON, self.on_add_kplex)
+		delete =wx.Button(self.page5, label=_('delete'))
+		delete.Bind(wx.EVT_BUTTON, self.on_delete_kplex)
 
-		self.diagnostic_kplex_b =wx.Button(self.page5, label=_('diagnostic'), pos=(210, 200))
-		self.Bind(wx.EVT_BUTTON, self.diagnostic_kplex, self.diagnostic_kplex_b)
+		inspector =wx.Button(self.page5, label=_('Inspector'))
+		inspector.Bind(wx.EVT_BUTTON, self.on_inspector)
+		restart =wx.Button(self.page5, label=_('Restart'))
+		restart.Bind(wx.EVT_BUTTON, self.on_restart_kplex)
+		advanced =wx.Button(self.page5, label=_('Advanced'))
+		advanced.Bind(wx.EVT_BUTTON, self.on_advanced_kplex)
+		apply_changes =wx.Button(self.page5, label=_('Apply changes'))
+		apply_changes.Bind(wx.EVT_BUTTON, self.on_apply_changes_kplex)
+		cancel_changes =wx.Button(self.page5, label=_('Cancel changes'))
+		cancel_changes.Bind(wx.EVT_BUTTON, self.on_cancel_changes_kplex)
+		
+		hlistbox5 = wx.BoxSizer(wx.HORIZONTAL)
+		hlistbox5.Add(self.list_kplex, 1, wx.ALL|wx.EXPAND, 5)
 
-		self.show_kplex_b =wx.Button(self.page5, label=_('Inspector'), pos=(10, 285))
-		self.Bind(wx.EVT_BUTTON, self.show_kplex, self.show_kplex_b)
-		self.restart_kplex_b =wx.Button(self.page5, label=_('Restart'), pos=(130, 285))
-		self.Bind(wx.EVT_BUTTON, self.restart_kplex, self.restart_kplex_b)
-		self.advanced_kplex_b =wx.Button(self.page5, label=_('Advanced'), pos=(280, 285))
-		self.Bind(wx.EVT_BUTTON, self.advanced_kplex, self.advanced_kplex_b)
-		self.apply_changes_kplex_b =wx.Button(self.page5, label=_('Apply changes'), pos=(570, 285))
-		self.Bind(wx.EVT_BUTTON, self.apply_changes_kplex, self.apply_changes_kplex_b)
-		self.cancel_changes_kplex_b =wx.Button(self.page5, label=_('Cancel changes'), pos=(430, 285))
-		self.Bind(wx.EVT_BUTTON, self.cancel_changes_kplex, self.cancel_changes_kplex_b)
+		hbox5 = wx.BoxSizer(wx.HORIZONTAL)
+		hbox5.Add(diagnostic, 0, wx.RIGHT|wx.LEFT, 5)
+		hbox5.Add((0,0), 1, wx.RIGHT|wx.LEFT, 5)
+		hbox5.Add(add, 0, wx.RIGHT|wx.LEFT, 5)
+		hbox5.Add(delete, 0, wx.RIGHT|wx.LEFT, 5)
+
+		hboxb5 = wx.BoxSizer(wx.HORIZONTAL)
+		hboxb5.Add(inspector, 0, wx.RIGHT|wx.LEFT, 5)
+		hboxb5.Add(restart, 0, wx.RIGHT|wx.LEFT, 5)
+		hboxb5.Add(advanced, 0, wx.RIGHT|wx.LEFT, 5)
+		hboxb5.Add((0,0), 1, wx.RIGHT|wx.LEFT, 5)
+		hboxb5.Add(apply_changes, 0, wx.RIGHT|wx.LEFT, 5)
+		hboxb5.Add(cancel_changes, 0, wx.RIGHT|wx.LEFT, 5)
+
+		vbox5 = wx.BoxSizer(wx.VERTICAL)
+		vbox5.Add(title, 0, wx.ALL|wx.EXPAND, 5)
+		vbox5.Add(hlistbox5, 1, wx.ALL|wx.EXPAND, 0)
+		vbox5.Add(hbox5, 0, wx.ALL|wx.EXPAND, 0)
+		vbox5.AddSpacer(5)
+		vbox5.Add(hboxb5, 0, wx.ALL|wx.EXPAND, 0)	
+
+		self.page5.SetSizer(vbox5)		
 ###########################page5
 ########page7###################
 		wx.StaticBox(self.page7, label=_(' Settings '), size=(230, 265), pos=(10, 10))
@@ -334,13 +360,13 @@ class MainFrame(wx.Frame):
 		self.mmsi_label=wx.StaticText(self.page7, label='MMSI', pos=(140, 70))
 
 		self.button_restartSK =wx.Button(self.page7, label=_('Restart'), pos=(20, 115))
-		self.Bind(wx.EVT_BUTTON, self.restart_SK, self.button_restartSK)	
+		self.button_restartSK.Bind(wx.EVT_BUTTON, self.restart_SK)	
 
-		self.diagnostic_SK_b =wx.Button(self.page7, label=_('Diagnostic'), pos=(20, 165))
-		self.Bind(wx.EVT_BUTTON, self.diagnostic_SK, self.diagnostic_SK_b)	
+		diagnostic =wx.Button(self.page7, label=_('Diagnostic'), pos=(20, 165))
+		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)	
 
-		self.button_apply_changes_SK =wx.Button(self.page7, label=_('Apply changes'), pos=(125, 115))
-		self.Bind(wx.EVT_BUTTON, self.apply_SK, self.button_apply_changes_SK)
+		apply_changes =wx.Button(self.page7, label=_('Apply changes'), pos=(125, 115))
+		apply_changes.Bind(wx.EVT_BUTTON, self.apply_SK)
 		
 		wx.StaticBox(self.page7, label=_(' Inputs '), size=(430, 130), pos=(250, 10))
 		self.SKinputs_label=wx.StaticText(self.page7, label='NMEA 0183: system_output - TCP localhost 10110', pos=(260, 30))
@@ -357,15 +383,13 @@ class MainFrame(wx.Frame):
 		wx.StaticBox(self.page7, label=_(' Outputs '), size=(430, 130), pos=(250, 145))
 		wx.StaticText(self.page7, label=text, pos=(260, 165))
 
-		self.show_SK_b =wx.Button(self.page7, label=_('Show Web Socket'), pos=(250, 285))
-		self.Bind(wx.EVT_BUTTON, self.show_SK, self.show_SK_b)
+		show_SK =wx.Button(self.page7, label=_('Show Web Socket'), pos=(250, 285))
+		show_SK.Bind(wx.EVT_BUTTON, self.show_SK)
 
-		self.show_tools_SK_b =wx.Button(self.page7, label=_('Show Signal K tools'), pos=(420, 285))
-		self.Bind(wx.EVT_BUTTON, self.show_tools_SK, self.show_tools_SK_b)
-
+		tools_SK =wx.Button(self.page7, label=_('Show Signal K tools'), pos=(420, 285))
+		tools_SK.Bind(wx.EVT_BUTTON, self.show_tools_SK)
 ###########################page7
 ########page17###################
-
 		wx.StaticBox(self.page17, label=_(' Settings '), size=(230, 265), pos=(10, 10))
 		i=35
 		self.CANUSB_label=wx.StaticText(self.page17, label=_('CAN-USB-CAN device'), pos=(20, i))
@@ -378,16 +402,16 @@ class MainFrame(wx.Frame):
 		self.n2k_enable.Bind(wx.EVT_CHECKBOX, self.onn2k_enable,self.n2k_enable)
 		i+=25
 		self.N2K_diagnostic_b =wx.Button(self.page17, label=_('Diagnostic input'), pos=(20, i))
-		self.Bind(wx.EVT_BUTTON, self.N2K_diagnostic, self.N2K_diagnostic_b)	
+		self.N2K_diagnostic_b.Bind(wx.EVT_BUTTON, self.N2K_diagnostic)	
 		i+=35
 		self.n2k_out_enable = wx.CheckBox(self.page17, label=_('Enable N2K output'), pos=(20, i))
 		self.n2k_out_enable.Bind(wx.EVT_CHECKBOX, self.onn2k_output,self.n2k_out_enable)
 		i+=25	
 		self.N2K_diagnostic_out_b =wx.Button(self.page17, label=_('Diagnostic output'), pos=(20, i))
-		self.Bind(wx.EVT_BUTTON, self.N2K_diagnostic_out, self.N2K_diagnostic_out_b)			
+		self.N2K_diagnostic_out_b.Bind(wx.EVT_BUTTON, self.N2K_diagnostic_out)			
 		i+=40
 		self.button_N2K_setting =wx.Button(self.page17, label=_('Output settings'), pos=(20, i))
-		self.Bind(wx.EVT_BUTTON, self.N2K_setting, self.button_N2K_setting)
+		self.button_N2K_setting.Bind(wx.EVT_BUTTON, self.N2K_setting)
 		
 		wx.StaticBox(self.page17, label=_(' Inputs '), size=(430, 50), pos=(250, 10))
 		self.n2kinputs_label=wx.StaticText(self.page17, label=_('PGNs: All'), pos=(260, 30))
@@ -395,7 +419,6 @@ class MainFrame(wx.Frame):
 		wx.StaticBox(self.page17, label=_(' Outputs '), size=(430, 210), pos=(250, 65))
 		wx.StaticText(self.page17, label='PGNs:', pos=(260, 85))
 		self.n2koutputs_label=wx.StaticText(self.page17, pos=(260, 105))
-
 ###########################page17
 ########page15###################
 		wx.StaticBox(self.page15, label=_(' Settings '), size=(330, 180), pos=(10, 10))
@@ -413,7 +436,7 @@ class MainFrame(wx.Frame):
 		self.sms_con= wx.ComboBox(self.page15, choices=sms_con_list, style=wx.CB_READONLY, size=(150, 32), pos=(20, 140))
 		
 		self.button_sms_identify =wx.Button(self.page15, label=_('Identify'), pos=(180, 140))
-		self.Bind(wx.EVT_BUTTON, self.sms_identify, self.button_sms_identify)
+		self.button_sms_identify.Bind(wx.EVT_BUTTON, self.sms_identify)
 
 		wx.StaticBox(self.page15, label=_(' Sending '), size=(330, 180), pos=(350, 10))
 
@@ -427,7 +450,7 @@ class MainFrame(wx.Frame):
 		self.sms_text = wx.TextCtrl(self.page15, -1, size=(150, 32), pos=(360, 140))
 
 		self.button_sms_test =wx.Button(self.page15, label=_('Test'), pos=(520, 140))
-		self.Bind(wx.EVT_BUTTON, self.sms_test, self.button_sms_test)
+		self.button_sms_test.Bind(wx.EVT_BUTTON, self.sms_test)
 ###########################page15
 ########page6###################
 		z0=20
@@ -460,7 +483,7 @@ class MainFrame(wx.Frame):
 		self.heading_label=wx.StaticText(self.page6, label=_('Heading'), pos=(s1, z))
 		self.heading_sensor=wx.StaticText(self.page6, pos=(s2, z))
 		self.button_calibrate_imu =wx.Button(self.page6, label=_('Calibrate'), pos=(s3, z))
-		self.Bind(wx.EVT_BUTTON, self.i2c_calibrate_imu, self.button_calibrate_imu)
+		self.button_calibrate_imu.Bind(wx.EVT_BUTTON, self.i2c_calibrate_imu)
 		wx.StaticText(self.page6, label=_('navigation.headingMagnetic'), pos=(s4, z))
 		self.heading_offset = wx.TextCtrl(self.page6, size=(45, 20), pos=(s5, z))
 
@@ -474,14 +497,14 @@ class MainFrame(wx.Frame):
 		self.pitch_label=wx.StaticText(self.page6, label=_('Pitch'), pos=(s1, z))
 		self.pitch_sensor=wx.StaticText(self.page6, pos=(s2, z))
 		self.button_reset_imu =wx.Button(self.page6, label=_('Reset'), pos=(s3, z-20))
-		self.Bind(wx.EVT_BUTTON, self.reset_imu, self.button_reset_imu)
+		self.button_reset_imu.Bind(wx.EVT_BUTTON, self.reset_imu)
 		wx.StaticText(self.page6, label=_('navigation.attitude.pitch'), pos=(s4, z))
 		self.pitch_offset = wx.TextCtrl(self.page6, size=(45, 20), pos=(s5, z))
 		z=z4
 		self.pressure_label=wx.StaticText(self.page6, label=_('Pressure'), pos=(s1, z))
 		self.pressure_sensor=wx.StaticText(self.page6, pos=(s2, z))
 		self.button_reset_pressure=wx.Button(self.page6, label=_('Reset'), pos=(s3, z+5))
-		self.Bind(wx.EVT_BUTTON, self.reset_press, self.button_reset_pressure)
+		self.button_reset_pressure.Bind(wx.EVT_BUTTON, self.reset_press)
 		wx.StaticText(self.page6, label=_('environment.outside.pressure'), pos=(s4, z))
 		self.pressure_offset = wx.TextCtrl(self.page6, size=(45, 20), pos=(s5, z))
 		self.rate_press= wx.ComboBox(self.page6, choices=self.rate_list, style=wx.CB_READONLY, size=(60, 25), pos=(s6, z+10))
@@ -494,8 +517,8 @@ class MainFrame(wx.Frame):
 		self.humidity_label=wx.StaticText(self.page6, label=_('Humidity'), pos=(s1, z))
 		self.humidity_sensor=wx.StaticText(self.page6, pos=(s2, z))
 		self.button_reset_humidity=wx.Button(self.page6, label=_('Reset'), pos=(s3, z+5))
+		self.button_reset_humidity.Bind(wx.EVT_BUTTON, self.reset_hum)
 		self.humidity_skt = wx.ComboBox(self.page6, choices=self.list_sk_path_hum, style=wx.CB_READONLY, size=(180, 25), pos=(s4, z-3))
-		self.Bind(wx.EVT_BUTTON, self.reset_hum, self.button_reset_humidity)
 		self.humidity_offset = wx.TextCtrl(self.page6, size=(45, 20), pos=(s5, z))
 		self.rate_hum= wx.ComboBox(self.page6, choices=self.rate_list, style=wx.CB_READONLY, size=(60, 25), pos=(s6, z+10))
 		z=z7
@@ -505,72 +528,143 @@ class MainFrame(wx.Frame):
 		self.h_temp_offset = wx.TextCtrl(self.page6, size=(45, 20), pos=(s5, z))
 		z=z8
 		self.diagnostic_SK_i2c =wx.Button(self.page6, label=_('SK Diagnostic'), pos=(s1, z))
-		self.Bind(wx.EVT_BUTTON, self.diagnostic_SK, self.diagnostic_SK_i2c)	
+		self.diagnostic_SK_i2c.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)	
 
 		self.button_i2c_cancel =wx.Button(self.page6, label=_('cancel'), pos=(480, z))
-		self.Bind(wx.EVT_BUTTON, self.i2c_cancel, self.button_i2c_cancel)
+		self.button_i2c_cancel.Bind(wx.EVT_BUTTON, self.i2c_cancel)
 		self.button_i2c_apply =wx.Button(self.page6, label=_('apply'), pos=(580, z))
-		self.Bind(wx.EVT_BUTTON, self.i2c_apply, self.button_i2c_apply)
+		self.button_i2c_apply.Bind(wx.EVT_BUTTON, self.i2c_apply)
 ###########################page6
 ########page11###################
-		wx.StaticBox(self.page11, label=_(' Temperature sensors '), size=(670, 265), pos=(10, 10))
-		self.list_DS18B20 =	wx.ListCtrl(self.page11, style=wx.LC_REPORT, size=(565, 237), pos=(15, 30))
+		title = wx.StaticText(self.page11, label=_(' Temperature sensors '))
+
+		self.list_DS18B20 =	wx.ListCtrl(self.page11, style=wx.LC_REPORT)
 		self.list_DS18B20.InsertColumn(0, _('Name'), width=100)
 		self.list_DS18B20.InsertColumn(1, _('Signal K'), width=310)
 		self.list_DS18B20.InsertColumn(2, _('ID'), width=105)
 		self.list_DS18B20.InsertColumn(4, _('Offset'), width=50)
-
-		self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_DS18B20, self.list_DS18B20)
+		self.list_DS18B20.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_DS18B20)
 			
-		self.add_DS18B20_button =wx.Button(self.page11, label=_('add'), pos=(585, 30))
-		self.Bind(wx.EVT_BUTTON, self.add_DS18B20, self.add_DS18B20_button)
+		add = wx.Button(self.page11, label=_('add'))
+		add.Bind(wx.EVT_BUTTON, self.on_add_DS18B20)
 
-		self.delete_DS18B20_button =wx.Button(self.page11, label=_('delete'), pos=(585, 65))
-		self.Bind(wx.EVT_BUTTON, self.delete_DS18B20, self.delete_DS18B20_button)
+		delete = wx.Button(self.page11, label=_('delete'))
+		delete.Bind(wx.EVT_BUTTON, self.on_delete_DS18B20)
 
-		self.diagnostic_SK_1w =wx.Button(self.page11, label=_('SK Diagnostic'), pos=(10, 285))
-		self.Bind(wx.EVT_BUTTON, self.diagnostic_SK, self.diagnostic_SK_1w)
+		diagnostic = wx.Button(self.page11, label=_('SK Diagnostic'))
+		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
+		
+		hlistbox_but11 = wx.BoxSizer(wx.VERTICAL)
+		hlistbox_but11.Add(add, 0, wx.ALL, 5)
+		hlistbox_but11.Add(delete, 0, wx.ALL, 5)
+
+		hlistbox11 = wx.BoxSizer(wx.HORIZONTAL)
+		hlistbox11.Add(self.list_DS18B20, 1, wx.ALL|wx.EXPAND, 5)
+		hlistbox11.Add(hlistbox_but11, 0, wx.RIGHT|wx.LEFT, 0)
+
+		vbox11 = wx.BoxSizer(wx.VERTICAL)
+		vbox11.Add(title, 0, wx.ALL|wx.EXPAND, 5)
+		vbox11.Add(hlistbox11, 1, wx.ALL|wx.EXPAND, 0)
+		vbox11.Add(diagnostic, 0, wx.RIGHT|wx.LEFT, 5)
+
+		self.page11.SetSizer(vbox11)		
 ###########################page11
 ########page12###################
-		wx.StaticText(self.page12, label=_('Coming soon'), pos=(20, 30))
+		title = wx.StaticText(self.page12, label=_(' SPI MCP3008 '))
+		
+		self.list_MCP = wx.ListCtrl(self.page12, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
+		self.list_MCP.InsertColumn(0, _('aktiv'), width=40)
+		self.list_MCP.InsertColumn(1, _('channel'), width=65)
+		self.list_MCP.InsertColumn(2, _('SK name'), width=310)
+		self.list_MCP.InsertColumn(3, _('*'), width=120)
+		self.list_MCP.InsertColumn(4, _('convert'), width=55)
+		self.list_MCP.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit_MCP)		
+		
+		restart =wx.Button(self.page12, label=_('restart'))
+		restart.Bind(wx.EVT_BUTTON, self.on_restart_MCP)
+
+		value_setting =wx.Button(self.page12, label=_('value setting'))
+		value_setting.Bind(wx.EVT_BUTTON, self.on_value_setting)
+		
+		hlistbox12 = wx.BoxSizer(wx.HORIZONTAL)
+		hlistbox12.Add(self.list_MCP, 1, wx.ALL|wx.EXPAND, 5)
+
+		hbox12 = wx.BoxSizer(wx.HORIZONTAL)
+		hbox12.Add(restart, 0, wx.RIGHT|wx.LEFT, 5)
+		hbox12.Add(value_setting, 0, wx.RIGHT|wx.LEFT, 5)
+		
+		vbox12 = wx.BoxSizer(wx.VERTICAL)
+		vbox12.Add(title, 0, wx.ALL|wx.EXPAND, 5)
+		vbox12.Add(hlistbox12, 1, wx.ALL|wx.EXPAND, 0)
+		vbox12.Add(hbox12, 0, wx.ALL, 0)
+
+		self.page12.SetSizer(vbox12)	
 ###########################page12
 ########page14###################
-		wx.StaticBox(self.page14, label=_(' USB Serial ports '), size=(670, 265), pos=(10, 10))
+		title = wx.StaticText(self.page14, label=_(' USB Serial ports '))
 		
-		self.list_USBinst = wx.ListCtrl(self.page14, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(565, 237))
-		self.list_USBinst.SetPosition((15, 30))
+		self.list_USBinst = wx.ListCtrl(self.page14, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
 		self.list_USBinst.InsertColumn(0, _('name'), width=130)
 		self.list_USBinst.InsertColumn(1, _('vendor'), width=55)
 		self.list_USBinst.InsertColumn(2, _('product'), width=60)
 		self.list_USBinst.InsertColumn(3, _('port'), width=90)
 		self.list_USBinst.InsertColumn(4, _('serial'), width=130)
 		self.list_USBinst.InsertColumn(5, _('remember'), width=100)
-		self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_USBinst, self.list_USBinst)
+		self.list_USBinst.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_USBinst)
 			
-		self.add_USBinst_button =wx.Button(self.page14, label=_('add'), pos=(585, 30))
-		self.Bind(wx.EVT_BUTTON, self.add_USBinst, self.add_USBinst_button)
+		add =wx.Button(self.page14, label=_('add'))
+		add.Bind(wx.EVT_BUTTON, self.add_USBinst)
 
-		self.delete_USBinst_button =wx.Button(self.page14, label=_('delete'), pos=(585, 65))
-		self.Bind(wx.EVT_BUTTON, self.delete_USBinst, self.delete_USBinst_button)
+		delete =wx.Button(self.page14, label=_('delete'))
+		delete.Bind(wx.EVT_BUTTON, self.delete_USBinst)
+		
+		hlistbox14 = wx.BoxSizer(wx.HORIZONTAL)
+		hlistbox14.Add(self.list_USBinst, 1, wx.ALL|wx.EXPAND, 5)
+
+		hbox14 = wx.BoxSizer(wx.HORIZONTAL)
+		hbox14.Add(add, 0, wx.RIGHT|wx.LEFT, 5)
+		hbox14.Add(delete, 0, wx.RIGHT|wx.LEFT, 5)
+
+		vbox14 = wx.BoxSizer(wx.VERTICAL)
+		vbox14.Add(title, 0, wx.ALL|wx.EXPAND, 5)
+		vbox14.Add(hlistbox14, 1, wx.ALL|wx.EXPAND, 0)
+		vbox14.Add(hbox14, 0, wx.ALL|wx.EXPAND, 0)	
+
+		self.page14.SetSizer(vbox14)
 ###########################page14
 ########page8###################
-		wx.StaticBox(self.page8, label=_(' Sensors '), size=(670, 265), pos=(10, 10))
+		title = wx.StaticText(self.page8, label=_(' Sensors '))
 		
-		self.list_gpio = wx.ListCtrl(self.page8, style=wx.LC_REPORT, size=(565, 237), pos=(15, 30))
+		self.list_gpio = wx.ListCtrl(self.page8, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
 		self.list_gpio.InsertColumn(0, _('Name'), width=345)
 		self.list_gpio.InsertColumn(1, _('I/O'), width=80)
 		self.list_gpio.InsertColumn(2, 'GPIO', width=60)
 		self.list_gpio.InsertColumn(3, 'Pull', width=80)
-		self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_gpio, self.list_gpio)
+		self.list_gpio.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_gpio)
 			
-		self.add_gpio_button =wx.Button(self.page8, label=_('add'), pos=(585, 30))
-		self.Bind(wx.EVT_BUTTON, self.add_gpio, self.add_gpio_button)
+		add = wx.Button(self.page8, label=_('add'))
+		add.Bind(wx.EVT_BUTTON, self.add_gpio)
 
-		self.delete_gpio_button =wx.Button(self.page8, label=_('delete'), pos=(585, 65))
-		self.Bind(wx.EVT_BUTTON, self.delete_gpio, self.delete_gpio_button)
+		delete = wx.Button(self.page8, label=_('delete'))
+		delete.Bind(wx.EVT_BUTTON, self.delete_gpio)
 
-		self.diagnostic_SK_gpio =wx.Button(self.page8, label=_('SK Diagnostic'), pos=(10, 285))
-		self.Bind(wx.EVT_BUTTON, self.diagnostic_SK, self.diagnostic_SK_gpio)
+		diagnostic = wx.Button(self.page8, label=_('SK Diagnostic'))
+		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
+		
+		hlistbox_but8 = wx.BoxSizer(wx.VERTICAL)
+		hlistbox_but8.Add(add, 0, wx.ALL, 5)
+		hlistbox_but8.Add(delete, 0, wx.ALL, 5)
+
+		hlistbox8 = wx.BoxSizer(wx.HORIZONTAL)
+		hlistbox8.Add(self.list_gpio, 1, wx.ALL|wx.EXPAND, 5)
+		hlistbox8.Add(hlistbox_but8, 0, wx.RIGHT|wx.LEFT, 0)
+
+		vbox8 = wx.BoxSizer(wx.VERTICAL)
+		vbox8.Add(title, 0, wx.ALL|wx.EXPAND, 5)
+		vbox8.Add(hlistbox8, 1, wx.ALL|wx.EXPAND, 0)
+		vbox8.Add(diagnostic, 0, wx.RIGHT|wx.LEFT, 5)
+
+		self.page8.SetSizer(vbox8)
 ###########################page8
 ########page9###################
 		wx.StaticBox(self.page9, label=_(' Twitter '), size=(330, 205), pos=(10, 10))
@@ -597,77 +691,157 @@ class MainFrame(wx.Frame):
 		self.Recipient = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(490, 135))
 ###########################page9
 ########page16###################
-		wx.StaticBox(self.page16, label=_(' MQTT '), size=(670, 265), pos=(10, 10))
-		wx.StaticText(self.page16, label=_('Remote broker'), pos=(20, 30))
-		self.mqtt_broker = wx.TextCtrl(self.page16, -1, size=(190, 32), pos=(20, 50))
-		wx.StaticText(self.page16, label=_('Port'), pos=(220, 30))
-		self.mqtt_port = wx.TextCtrl(self.page16, -1, size=(50, 32), pos=(220, 50))
+		title=wx.StaticText(self.page16, label=_(' MQTT '))
 
-		wx.StaticText(self.page16, label=_('Username'), pos=(280, 30))
-		self.mqtt_user = wx.TextCtrl(self.page16, -1, size=(120, 32), pos=(280, 50))
-		wx.StaticText(self.page16, label=_('Password'), pos=(410, 30))
-		self.mqtt_pass = wx.TextCtrl(self.page16, -1, size=(120, 32), pos=(410, 50))
+		self.mqtt_broker_t = wx.StaticText(self.page16, label=_('Remote broker'))
+		self.mqtt_broker = wx.TextCtrl(self.page16, size=(190, -1))
+		self.mqtt_port_t = wx.StaticText(self.page16, label=_('Port'))
+		self.mqtt_port = wx.TextCtrl(self.page16, size=(50, -1))
+		self.mqtt_user_t = wx.StaticText(self.page16, label=_('Username'))
+		self.mqtt_user = wx.TextCtrl(self.page16, size=(120, -1))
+		self.mqtt_pass_t = wx.StaticText(self.page16, label=_('Password'))
+		self.mqtt_pass = wx.TextCtrl(self.page16, size=(120, -1))
 
-		self.button_apply_changes_mqtt =wx.Button(self.page16, label=_('Apply'), pos=(585, 30))
-		self.Bind(wx.EVT_BUTTON, self.apply_changes_mqtt, self.button_apply_changes_mqtt)
+		self.button_apply_changes_mqtt =wx.Button(self.page16, label=_('Apply'))
+		self.button_apply_changes_mqtt.Bind(wx.EVT_BUTTON, self.apply_changes_mqtt)
 
-		self.button_clear_mqtt =wx.Button(self.page16, label=_('Clear'), pos=(585, 65))
-		self.Bind(wx.EVT_BUTTON, self.clear_mqtt, self.button_clear_mqtt)
+		clear =wx.Button(self.page16, label=_('Clear'))
+		clear.Bind(wx.EVT_BUTTON, self.clear_mqtt)
 
-		wx.StaticText(self.page16, label=_('Topics'), pos=(20, 90))
-
-		self.list_topics = wx.ListCtrl(self.page16, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(565, 155), pos=(15, 110))
+		self.list_topics = wx.ListCtrl(self.page16, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
 		self.list_topics.InsertColumn(1, _('Topic'), width=565)
-		self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_topic, self.list_topics)
+		self.list_topics.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_topic)
 
-		self.add_topic_button =wx.Button(self.page16, label=_('add'), pos=(585, 110))
-		self.Bind(wx.EVT_BUTTON, self.add_topic, self.add_topic_button)
+		add =wx.Button(self.page16, label=_('add'))
+		add.Bind(wx.EVT_BUTTON, self.add_topic)
 
-		self.delete_topic_button =wx.Button(self.page16, label=_('delete'), pos=(585, 145))
-		self.Bind(wx.EVT_BUTTON, self.delete_topic, self.delete_topic_button)
+		delete =wx.Button(self.page16, label=_('delete'))
+		delete.Bind(wx.EVT_BUTTON, self.delete_topic)
 
-		self.diagnostic_SK_mqtt =wx.Button(self.page16, label=_('SK Diagnostic'), pos=(10, 285))
-		self.Bind(wx.EVT_BUTTON, self.diagnostic_SK, self.diagnostic_SK_mqtt)
+		diagnostic =wx.Button(self.page16, label=_('SK Diagnostic'))
+		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
+
+		vbox16c1 = wx.BoxSizer(wx.VERTICAL)
+		vbox16c1.Add(self.mqtt_broker_t, 0, wx.RIGHT|wx.LEFT, 5)
+		vbox16c1.Add(self.mqtt_broker, 0, wx.RIGHT|wx.LEFT, 5)
+		
+		vbox16c2 = wx.BoxSizer(wx.VERTICAL)
+		vbox16c2.Add(self.mqtt_port_t, 0, wx.RIGHT|wx.LEFT, 5)
+		vbox16c2.Add(self.mqtt_port, 0, wx.RIGHT|wx.LEFT, 5)
+		
+		vbox16c3 = wx.BoxSizer(wx.VERTICAL)
+		vbox16c3.Add(self.mqtt_user_t, 0, wx.RIGHT|wx.LEFT, 5)
+		vbox16c3.Add(self.mqtt_user, 0, wx.RIGHT|wx.LEFT, 5)
+		
+		vbox16c4 = wx.BoxSizer(wx.VERTICAL)
+		vbox16c4.Add(self.mqtt_pass_t, 0, wx.RIGHT|wx.LEFT, 5)
+		vbox16c4.Add(self.mqtt_pass, 0, wx.RIGHT|wx.LEFT, 5)
+
+		vbox16cspace = wx.BoxSizer(wx.VERTICAL)
+
+		vbox16c5but = wx.BoxSizer(wx.VERTICAL)
+		vbox16c5but.Add(self.button_apply_changes_mqtt, 0, wx.ALL|wx.EXPAND, 5)
+		vbox16c5but.Add(clear, 0, wx.ALL|wx.EXPAND, 5)
+
+		hinputbox16 = wx.BoxSizer(wx.HORIZONTAL)
+		hinputbox16.Add(vbox16c1, 0, wx.ALL|wx.EXPAND, 5)
+		hinputbox16.Add(vbox16c2, 0, wx.ALL|wx.EXPAND, 5)
+		hinputbox16.Add(vbox16c3, 0, wx.ALL|wx.EXPAND, 5)
+		hinputbox16.Add(vbox16c4, 0, wx.ALL|wx.EXPAND, 5)
+		hinputbox16.Add((0, 0), 1, wx.EXPAND)
+		hinputbox16.Add(vbox16c5but, 0, wx.RIGHT|wx.LEFT, 0)
+		
+		hlistbox_but16 = wx.BoxSizer(wx.VERTICAL)
+		hlistbox_but16.Add(add, 0, wx.ALL, 5)
+		hlistbox_but16.Add(delete, 0, wx.ALL, 5)
+
+		hlistbox16 = wx.BoxSizer(wx.HORIZONTAL)
+		hlistbox16.Add(self.list_topics, 1, wx.ALL|wx.EXPAND, 5)
+		hlistbox16.Add(hlistbox_but16, 0, wx.RIGHT|wx.LEFT, 0)
+
+		hbox16 = wx.BoxSizer(wx.HORIZONTAL)	
+		hbox16.Add(diagnostic, 0, wx.RIGHT|wx.LEFT, 5)
+
+		vbox16 = wx.BoxSizer(wx.VERTICAL)
+		vbox16.Add(title, 0, wx.ALL|wx.EXPAND, 5)
+		vbox16.Add(hinputbox16, 0, wx.ALL|wx.EXPAND, 0)
+		vbox16.AddSpacer(5)
+		vbox16.Add(hlistbox16, 1, wx.ALL|wx.EXPAND, 0)
+		vbox16.Add(hbox16, 0, wx.ALL|wx.EXPAND, 0)	
+				
+		self.page16.SetSizer(vbox16)		
 ###########################page16
 ########page10###################
-		wx.StaticBox(self.page10, label=_(' Triggers '), size=(670, 265), pos=(10, 10))
+		title=wx.StaticText(self.page10, label=_(' Triggers '))
 		
-		self.list_triggers = CheckListCtrl(self.page10, 125)
-		self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.print_actions, self.list_triggers)
-		self.list_triggers.SetPosition((15, 30))
+		self.list_triggers = CheckListCtrl(self.page10, 100)
 		self.list_triggers.InsertColumn(0, _('trigger'), width=275)
 		self.list_triggers.InsertColumn(1, _('operator'), width=170)
 		self.list_triggers.InsertColumn(2, _('value'))
-		self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_triggers, self.list_triggers)
-
-		self.add_trigger_button =wx.Button(self.page10, label=_('add'), pos=(585, 30))
-		self.Bind(wx.EVT_BUTTON, self.add_trigger, self.add_trigger_button)
-
-		self.delete_trigger_button =wx.Button(self.page10, label=_('delete'), pos=(585, 65))
-		self.Bind(wx.EVT_BUTTON, self.delete_trigger, self.delete_trigger_button)
+		self.list_triggers.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_print_actions)
+		self.list_triggers.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit_triggers)
+		self.list_triggers.SetMinSize((10,10));
 		
-		self.list_actions = wx.ListCtrl(self.page10, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(565, 102))
-		self.list_actions.SetPosition((15, 165))
+		add_trigger =wx.Button(self.page10, label=_('add'))
+		add_trigger.Bind(wx.EVT_BUTTON, self.on_add_trigger)
+
+		delete_trigger =wx.Button(self.page10, label=_('delete'))
+		delete_trigger.Bind(wx.EVT_BUTTON, self.on_delete_trigger)
+		
+		self.list_actions = wx.ListCtrl(self.page10, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
 		self.list_actions.InsertColumn(0, _('action'), width=200)
 		self.list_actions.InsertColumn(1, _('data'), width=220)
 		self.list_actions.InsertColumn(2, _('repeat'), width=130)
-		self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_actions, self.list_actions)
+		self.list_actions.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_actions)
+		self.list_actions.SetMinSize((10,10));
 
-		self.add_action_button =wx.Button(self.page10, label=_('add'), pos=(585, 165))
-		self.Bind(wx.EVT_BUTTON, self.add_action, self.add_action_button)
+		add_action =wx.Button(self.page10, label=_('add'))
+		add_action.Bind(wx.EVT_BUTTON, self.on_add_action)
 
-		self.delete_action_button =wx.Button(self.page10, label=_('delete'), pos=(585, 200))
-		self.Bind(wx.EVT_BUTTON, self.delete_action, self.delete_action_button)
+		delete_action =wx.Button(self.page10, label=_('delete'))
+		delete_action.Bind(wx.EVT_BUTTON, self.on_delete_action)
 
-		self.stop_all=wx.Button(self.page10, label=_('Stop all'), pos=(10, 285))
-		self.Bind(wx.EVT_BUTTON, self.stop_actions, self.stop_all)
-		self.start_all=wx.Button(self.page10, label=_('Start all'), pos=(130, 285))
-		self.Bind(wx.EVT_BUTTON, self.start_actions, self.start_all)
+		stop_all=wx.Button(self.page10, label=_('Stop all'))
+		stop_all.Bind(wx.EVT_BUTTON, self.on_stop_actions)
+		
+		start_all=wx.Button(self.page10, label=_('Start all'))
+		start_all.Bind(wx.EVT_BUTTON, self.on_start_actions)
 
-		self.button_apply_changes_actions =wx.Button(self.page10, label=_('Apply changes'), pos=(570, 285))
-		self.Bind(wx.EVT_BUTTON, self.apply_changes_actions, self.button_apply_changes_actions)
-		self.button_cancel_changes_actions =wx.Button(self.page10, label=_('Cancel changes'), pos=(430, 285))
-		self.Bind(wx.EVT_BUTTON, self.cancel_changes_actions, self.button_cancel_changes_actions)
+		apply_changes =wx.Button(self.page10, label=_('Apply changes'))
+		apply_changes.Bind(wx.EVT_BUTTON, self.on_apply_changes_actions)
+		cancel_changes =wx.Button(self.page10, label=_('Cancel changes'))
+		cancel_changes.Bind(wx.EVT_BUTTON, self.on_cancel_changes_actions)
+		
+		hlistbox_but10 = wx.BoxSizer(wx.VERTICAL)
+		hlistbox_but10.Add(add_trigger, 0, wx.ALL, 5)
+		hlistbox_but10.Add(delete_trigger, 0, wx.ALL, 5)
+
+		hlistbox10 = wx.BoxSizer(wx.HORIZONTAL)
+		hlistbox10.Add(self.list_triggers, 1, wx.ALL|wx.EXPAND, 5)
+		hlistbox10.Add(hlistbox_but10, 0, wx.RIGHT|wx.LEFT, 0)
+
+		hlistbox_butb10 = wx.BoxSizer(wx.VERTICAL)
+		hlistbox_butb10.Add(add_action, 0, wx.ALL, 5)
+		hlistbox_butb10.Add(delete_action, 0, wx.ALL, 5)
+
+		hlistboxb10 = wx.BoxSizer(wx.HORIZONTAL)
+		hlistboxb10.Add(self.list_actions, 1, wx.ALL|wx.EXPAND, 5)
+		hlistboxb10.Add(hlistbox_butb10, 0, wx.RIGHT|wx.LEFT, 0)
+		
+		hbox10 = wx.BoxSizer(wx.HORIZONTAL)
+		hbox10.Add(stop_all, 0, wx.RIGHT|wx.LEFT, 5)
+		hbox10.Add(start_all, 0, wx.RIGHT|wx.LEFT, 5)
+		hbox10.Add((0,0), 1, wx.RIGHT|wx.LEFT, 5)
+		hbox10.Add(apply_changes, 0, wx.RIGHT|wx.LEFT, 5)
+		hbox10.Add(cancel_changes, 0, wx.RIGHT|wx.LEFT, 5)
+		
+		vbox10 = wx.BoxSizer(wx.VERTICAL)
+		vbox10.Add(title, 0, wx.ALL|wx.EXPAND, 5)
+		vbox10.Add(hlistbox10, 1, wx.ALL|wx.EXPAND, 0)
+		vbox10.Add(hlistboxb10, 1, wx.ALL|wx.EXPAND, 0)
+		vbox10.Add(hbox10, 0, wx.ALL|wx.EXPAND, 0)	
+		
+		self.page10.SetSizer(vbox10)		
 ###########################page10
 
 		self.manual_settings=''
@@ -776,6 +950,7 @@ class MainFrame(wx.Frame):
 		self.read_USBinst()
 		self.read_gpio()
 		self.read_mqtt()
+		self.read_MCP()
 		self.i2c_start()
 		self.read_n2k()
 
@@ -1304,16 +1479,16 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 ###########################################	NMEA 0183
 
-	def show_kplex(self,event):
+	def on_inspector(self,event):
 		subprocess.call(['pkill', '-f', 'output.py'])
 		subprocess.Popen(['python',currentpath+'/output.py'])
 
-	def advanced_kplex(self,event):
+	def on_advanced_kplex(self,event):
 		self.ShowMessage(_('OpenPlotter will close. Add manual settings at the end of the configuration file. Open OpenPlotter again and restart multiplexer to apply changes.'))
 		subprocess.Popen(['leafpad',home+'/.kplex.conf'])
 		self.Close()
 
-	def restart_kplex(self,event):
+	def on_restart_kplex(self,event):
 		self.GetStatusBar().SetForegroundColour(wx.RED)
 		self.SetStatusText(_('Closing Kplex'))
 		subprocess.call(["pkill", '-9', "kplex"])
@@ -1323,7 +1498,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.SetStatusText(_('Kplex and Signal K restarted'))
 		self.read_kplex_conf()
 
-	def cancel_changes_kplex(self,event):
+	def on_cancel_changes_kplex(self,event):
 		self.read_kplex_conf()
 
 	def edit_kplex(self,e):
@@ -1335,7 +1510,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		edit.append(idx)
 		self.edit_add_kplex(edit)
 
-	def add_kplex(self,e):
+	def on_add_kplex(self,e):
 		dlg = self.edit_add_kplex(0)
 
 	def edit_add_kplex(self,edit):
@@ -1461,7 +1636,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.list_kplex.SetStringItem(index, 8, filters)
 			if i[10]=='1': self.list_kplex.CheckItem(index)
 	
-	def apply_changes_kplex(self,event):
+	def on_apply_changes_kplex(self,event):
 		data='# For advanced manual configuration, please visit: http://www.stripydog.com/kplex/configuration.html\n# Please do not modify defaults nor OpenPlotter GUI settings.\n# Add manual settings at the end of the document.\n\n'
 
 		data=data+'###defaults\n\n[udp]\nname=system_input\ndirection=in\noptional=yes\naddress=127.0.0.1\nport=10110\n\n'
@@ -1498,10 +1673,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		file = open(home+'/.kplex.conf', 'w')
 		file.write(data)
 		file.close()
-		self.restart_kplex(0)
+		self.on_restart_kplex(0)
 		self.read_kplex_conf()
 
-	def delete_kplex(self,event):
+	def on_delete_kplex(self,event):
 		num = len(self.kplex)
 		for i in range(num):
 			if self.list_kplex.IsSelected(i):
@@ -1531,7 +1706,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		else:
 			return list_tmp
 
-	def diagnostic_kplex(self,event):
+	def on_diagnostic_kplex(self,event):
 		num = len(self.kplex)
 		
 		for i in range(num):
@@ -1592,7 +1767,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.p_temp_offset.SetValue(self.conf.get('OFFSET', 'temperature_p'))
 		self.humidity_offset.SetValue(self.conf.get('OFFSET', 'humidity'))
 		self.h_temp_offset.SetValue(self.conf.get('OFFSET', 'temperature_h'))
-
 
 	def check_sensors(self):
 		detected=subprocess.check_output(['python', currentpath+'/imu/check_sensors.py'], cwd=currentpath+'/imu')
@@ -1717,7 +1891,98 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.check_sensors()
 		self.restart_SK(0)
 
+###################################### SPI
+	def on_restart_MCP(self,e):
+		pass
 
+	def read_MCP(self):
+		self.MCP=[]
+		self.list_MCP.DeleteAllItems()
+		data=self.conf.get('SPI', 'mcp')
+		try:
+			temp_list=eval(data)
+		except:temp_list=[]
+		for ii in temp_list:
+			self.MCP.append(ii)
+			if '.*.' in ii[2]: SKkey2=ii[2].replace('*', ii[3])
+			else: SKkey2=ii[2]
+			self.list_MCP.Append([str(ii[0]),str(ii[1]),SKkey2,ii[3],ii[4]])
+
+	def on_restart_MCP(self,e):
+		self.restart_SK(0)
+
+
+	def on_value_setting(self,e):
+		edit=self.list_MCP.GetFirstSelected()
+		if edit==-1:
+			return
+		dlg = addvaluesetting(edit)
+		res = dlg.ShowModal()
+		
+		if self.MCP[edit][4]==1:
+			convert=1
+			self.conf.read()
+			data=self.conf.get('SPI', 'value_'+str(edit))
+			try:
+				temp_list=eval(data)
+			except:temp_list = []
+			print 'temp_list',temp_list
+			min=1023
+			max=0
+			for ii in temp_list:
+				if ii[0]>max: max=ii[0]
+				if ii[0]<min: min=ii[0]
+			print min,max
+			if min>0:
+				wx.MessageBox(_('minimum raw value in setting table > 0'),'info', wx.OK | wx.ICON_INFORMATION)
+				convert=0
+			if max<1023:
+				wx.MessageBox(_('maximum raw value in setting table < 1023'),'info', wx.OK | wx.ICON_INFORMATION)
+				convert=0
+			if convert==0:
+				self.MCP[edit][4]=convert
+				self.conf.set('SPI', 'mcp', str(self.MCP))
+				self.read_MCP()
+				wx.MessageBox(_('convert disabled'),'info', wx.OK | wx.ICON_INFORMATION)
+		
+	def on_edit_MCP(self,e):	
+		selected_MCP=e.GetIndex()
+		edit=[selected_MCP,self.MCP[selected_MCP][0],self.MCP[selected_MCP][1],self.MCP[selected_MCP][2],self.MCP[selected_MCP][3],self.MCP[selected_MCP][4]]
+		
+		dlg = addMCP(edit)
+		res = dlg.ShowModal()
+		if res == wx.ID_OK:
+			aktiv=dlg.aktiv.GetValue()
+			convert=dlg.convert.GetValue()
+			SKkey=dlg.SKkey.GetValue().encode('utf8')
+			asterix=dlg.asterix.GetValue().encode('utf8')
+			if aktiv and (not asterix or not SKkey):
+				self.ShowMessage(_('Failed. Provide name and Signal K values.'))
+				dlg.Destroy()
+				return
+			if not re.match('^[0-9a-zA-Z]+$', asterix):
+				self.ShowMessage(_('Failed. The name must contain only letters and numbers.'))
+				dlg.Destroy()
+				return
+			if '.*.' in SKkey: SKkey2=SKkey.replace('*', asterix)
+			else: SKkey2=SKkey
+
+			if aktiv: aktiv=1
+			else: aktiv=0
+			if convert: 
+				convert=1
+			else: convert=0
+			self.list_MCP.SetStringItem(edit[0],0,str(aktiv))
+			self.list_MCP.SetStringItem(edit[0],2,SKkey2)
+			self.list_MCP.SetStringItem(edit[0],3,asterix)
+			self.list_MCP.SetStringItem(edit[0],4,str(convert))
+			self.MCP[edit[0]][0]=aktiv
+			self.MCP[edit[0]][2]=SKkey
+			self.MCP[edit[0]][3]=asterix
+			self.MCP[edit[0]][4]=convert
+			self.conf.set('SPI', 'mcp', str(self.MCP))
+		dlg.Destroy()		
+		self.conf.read()
 ###################################### GPIO
 	def start_gpio(self):
 		subprocess.Popen(['python',currentpath+'/gpio_d.py'])
@@ -1780,17 +2045,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			gpio_selection=gpio_selection.encode('utf8')
 			pull_selection=dlg.pull_select.GetValue()
 			pull_selection=pull_selection.encode('utf8')
-			if io=='in':
-				if not name or not io_selection or not gpio_selection or not pull_selection:
-					self.ShowMessage(_('Failed. You must fill in all avalaible fields.'))
-					dlg.Destroy()
-					return
-			if io=='out':
-				pull_selection=''
-				if not name or not io_selection or not gpio_selection:
-					self.ShowMessage(_('Failed. You must fill in all avalaible fields.'))
-					dlg.Destroy()
-					return
+			if not name or not io_selection or not gpio_selection or not pull_selection:
+				self.ShowMessage(_('Failed. You must fill in all fields.'))
+				dlg.Destroy()
+				return
 			if not re.match('^[0-9a-zA-Z]+$', name):
 				self.ShowMessage(_('Failed. The name must contain only letters and numbers.'))
 				dlg.Destroy()
@@ -1913,7 +2171,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				else: self.ShowMessage(_('Problem with Actions detected. Please check and save again.'))
 		'''
 
-	def print_actions(self, e):
+	def on_print_actions(self, e):
 		self.actions=Actions(self.conf)
 		selected_trigger=e.GetIndex()
 		self.list_actions.DeleteAllItems()
@@ -1924,7 +2182,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			repeat2=repeat+' '+time_units
 			self.list_actions.Append([self.actions.options[self.actions.getOptionsListIndex(i[0])][0].decode('utf8'),i[1].decode('utf8'),repeat2.decode('utf8')])
 	
-	def edit_triggers(self,e):
+	def on_edit_triggers(self,e):
 		t=e.GetIndex()
 		trigger=self.triggers[t][1]
 		operator=self.triggers[t][2]
@@ -1932,7 +2190,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		edit=[t,trigger,operator,value]
 		self.edit_add_trigger(edit)
 
-	def add_trigger(self,e):
+	def on_add_trigger(self,e):
 		self.edit_add_trigger(0)
 
 	def edit_add_trigger(self,edit):
@@ -2011,7 +2269,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		edit=[a,action,data,repeat,unit]
 		self.edit_add_action(edit)
 
-	def add_action(self,e):
+	def on_add_action(self,e):
 		self.edit_add_action(0)
 
 	def edit_add_action(self,edit):
@@ -2060,7 +2318,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.triggers[selected_trigger_position][4][edit[0]][3]=time_units_selection			
 		dlg.Destroy()
 
-	def delete_trigger(self,e):
+	def on_delete_trigger(self,e):
 		selected=self.list_triggers.GetFirstSelected()
 		if selected==-1: 
 			self.ShowMessage(_('Select an item to delete.'))
@@ -2069,7 +2327,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.list_triggers.DeleteItem(selected)
 			self.list_actions.DeleteAllItems()
 
-	def delete_action(self,e):
+	def on_delete_action(self,e):
 		selected_trigger=self.list_triggers.GetFirstSelected()
 		selected_action=self.list_actions.GetFirstSelected()
 		if selected_action==-1: 
@@ -2078,7 +2336,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			del self.triggers[selected_trigger][4][selected_action]
 			self.list_actions.DeleteItem(selected_action)
 
-	def apply_changes_actions(self,e):
+	def on_apply_changes_actions(self,e):
 		i=0
 		for ii in self.triggers:
 			if self.list_triggers.IsChecked(i): self.triggers[i][0]=1
@@ -2088,18 +2346,18 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.start_monitoring()
 		self.SetStatusText(_('Actions changes applied and restarted'))
 
-	def cancel_changes_actions(self,e):
+	def on_cancel_changes_actions(self,e):
 		self.read_triggers()
 		self.SetStatusText(_('Actions changes cancelled'))
 
-	def stop_actions(self,e):
+	def on_stop_actions(self,e):
 		subprocess.call(['python', currentpath+'/ctrl_actions.py', '0'])
 		self.SetStatusText(_('Actions stopped'))
 		self.conf.read()
 		self.read_triggers()
 		self.list_actions.DeleteAllItems()
 
-	def start_actions(self,e):
+	def on_start_actions(self,e):
 		subprocess.call(['python', currentpath+'/ctrl_actions.py', '1'])
 		self.SetStatusText(_('Actions started'))
 		self.conf.read()
@@ -2132,7 +2390,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		edit=[selected_DS18B20,self.DS18B20[selected_DS18B20][0],self.DS18B20[selected_DS18B20][1],self.DS18B20[selected_DS18B20][2],self.DS18B20[selected_DS18B20][3]]
 		self.edit_add_DS18B20(edit)
 
-	def add_DS18B20(self,e):
+	def on_add_DS18B20(self,e):
 		self.edit_add_DS18B20(0)
 
 	def edit_add_DS18B20(self,edit):
@@ -2179,7 +2437,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.apply_changes_DS18B20()
 		dlg.Destroy()
 
-	def delete_DS18B20(self,e):
+	def on_delete_DS18B20(self,e):
 		selected_DS18B20=self.list_DS18B20.GetFirstSelected()
 		if selected_DS18B20==-1: 
 			self.ShowMessage(_('Select an item to delete.'))
@@ -2434,7 +2692,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.GetStatusBar().SetForegroundColour(wx.GREEN)
 		self.SetStatusText(_('Signal K server restarted'))	
 
-	def diagnostic_SK(self, e):
+	def on_diagnostic_SK(self, e):
 		subprocess.call(['pkill', '-f', 'diagnostic-SK-input.py'])
 		subprocess.Popen(['python',currentpath+'/diagnostic-SK-input.py'])
 

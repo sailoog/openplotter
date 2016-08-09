@@ -79,7 +79,7 @@ Use USB manager to give the board the name ttyOP_FIRM
 Now edit openplotter.conf at the section [TOOLS]
 put in 
 [TOOLS]
-py = [['Analog ads1115','put analog values to SignalK','analog_ads1115.py','0'],['Analog Firmata','put analog values to SignalK','oppymata.py','0']]
+py = [['Analog ads1115','put analog values to SignalK','analog_ads1115.py','0'],['Analog MCP3008','put analog values to SignalK','analog_MCP3008.py','0'],['Analog Firmata','put analog values to SignalK','oppymata.py','0']]
 (change 0 to 1 for autostart)
 
 The config file section for Firmata is easy in comparison with the ads1115.
