@@ -162,7 +162,7 @@ class MyFrame(wx.Frame):
 				Erg += '{"path": "'+i[1]+'","value":'+str(self.Slider_v[i[0]].GetValue()*i[5]+i[6])+'},'
 		if Erg!='':
 			SignalK +=Erg[0:-1]+']}],"context": "vessels.'+self.uuid+'"}\n'
-			self.sock.sendto(SignalK, ('127.0.0.1', 55557))
+			self.sock.sendto(SignalK, ('127.0.0.1', 55561))
 	# end thread
 
 	def OnClose(self, event):

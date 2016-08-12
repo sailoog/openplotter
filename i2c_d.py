@@ -193,7 +193,7 @@ if imu_ or bmp_ or hum_ or analog_:
 				timestamp=str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z'
 				SignalK='{"context": "vessels.'+uuid+'","updates":[{"source":{"type": "I2C","src":"'+imu.IMUName()+'"},"timestamp":"'+timestamp+'","values":['
 				SignalK+=Erg[0:-1]+']}]}\n'		
-				sock.sendto(SignalK, ('127.0.0.1', 55556))	
+				sock.sendto(SignalK, ('127.0.0.1', 55557))	
 
 		# read Pressure and GENERATE
 		if bmp_:	
@@ -214,7 +214,7 @@ if imu_ or bmp_ or hum_ or analog_:
 				timestamp=str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z'
 				SignalK='{"context": "vessels.'+uuid+'","updates":[{"source":{"type": "I2C","src":"'+pressure_val.pressureName()+'"},"timestamp":"'+timestamp+'","values":['
 				SignalK+=Erg[0:-1]+']}]}\n'	
-				sock.sendto(SignalK, ('127.0.0.1', 55556))			
+				sock.sendto(SignalK, ('127.0.0.1', 55557))			
 				
 		# read Humidity and GENERATE
 		if hum_:	
@@ -234,7 +234,7 @@ if imu_ or bmp_ or hum_ or analog_:
 				timestamp=str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z'
 				SignalK='{"context": "vessels.'+uuid+'","updates":[{"source":{"type": "I2C","src":"'+humidity_val.humidityName()+'"},"timestamp":"'+timestamp+'","values":['
 				SignalK+=Erg[0:-1]+']}]}\n'	
-				sock.sendto(SignalK, ('127.0.0.1', 55556))
+				sock.sendto(SignalK, ('127.0.0.1', 55557))
 
 		# read SPI adc and GENERATE
 		if analog_:
@@ -242,14 +242,13 @@ if imu_ or bmp_ or hum_ or analog_:
 				tick_ana+=rate_ana
 
 				timestamp=str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z'
-				SignalK='{"context": "vessels.'+uuid+'","updates":[{"source":{"type": "ANA","src":"MCP"},"timestamp":"'+timestamp+'","values":['
-				Erg=''
+				SignalK=''
 				for i in MCP:
 					if i[0]==1:
 						XValue=read_adc(i[1])
 						if i[4]==1:
 							XValue = interpolread(i[1],XValue)
-						Erg += '{"path": "'+i[2]+'","value":'+str(XValue)+'},'
-				SignalK+=Erg[0:-1]+']}]}\n'	
-				sock.sendto(SignalK, ('127.0.0.1', 55556))
-				
+						Erg ='{"context": "vessels.'+uuid+'","updates":[{"source":{"type": "SPI","src":"MCP3008.'+str(i[1])+'"},'
+						Erg +='"timestamp":"'+timestamp+'","values":[{"path": "'+i[2]+'","value":'+str(XValue)+'}]}]}\n'
+						SignalK+=Erg
+				sock.sendto(SignalK, ('127.0.0.1', 55557))

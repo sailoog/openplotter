@@ -53,7 +53,7 @@ class CheckListCtrl2(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		
 class MainFrame(wx.Frame):
 	def __init__(self):
-		wx.Frame.__init__(self, None, title="OpenPlotter", size=(1710,460))
+		wx.Frame.__init__(self, None, title="OpenPlotter", size=(710,460))
 		if self.util_process_exist('startup.py'):
 			print "System not ready, try later."
 			sys.exit(0)
@@ -67,40 +67,34 @@ class MainFrame(wx.Frame):
 		self.p.SetAutoLayout(1)
 		self.p.SetupScrolling()
 		self.nb = wx.Notebook(self.p)
-		self.page1 = wx.Panel(self.nb)
-		#self.page2 = wx.Panel(self.nb)
-		self.page3 = wx.Panel(self.nb)
-		#self.page4 = wx.Panel(self.nb)
-		self.page5 = wx.Panel(self.nb)
-		self.page6 = wx.Panel(self.nb)
-		self.page7 = wx.Panel(self.nb)
-		self.page8 = wx.Panel(self.nb)
-		self.page9 = wx.Panel(self.nb)
-		self.page10 = wx.Panel(self.nb)
-		self.page11 = wx.Panel(self.nb)
-		self.page12 = wx.Panel(self.nb)
-		#self.page13 = wx.Panel(self.nb)
-		self.page14 = wx.Panel(self.nb)
-		self.page15 = wx.Panel(self.nb)
-		self.page16 = wx.Panel(self.nb)
-		self.page17 = wx.Panel(self.nb)
-		self.nb.AddPage(self.page14, _('USB manager'))
-		self.nb.AddPage(self.page5, _('NMEA 0183'))
-		self.nb.AddPage(self.page17, _('NMEA 2K'))
-		self.nb.AddPage(self.page7, _('Signal K'))
-		self.nb.AddPage(self.page3, _('WiFi AP'))
-		self.nb.AddPage(self.page10, _('Actions'))
-		self.nb.AddPage(self.page8, _('GPIO sensors'))
-		#self.nb.AddPage(self.page13, _(''))
-		self.nb.AddPage(self.page6, _('I2C sensors'))
-		self.nb.AddPage(self.page11, _('1W sensors'))
-		self.nb.AddPage(self.page12, _('SPI sensors'))
-		#self.nb.AddPage(self.page4, _(''))
-		#self.nb.AddPage(self.page2, _(''))
-		self.nb.AddPage(self.page9, _('Accounts'))
-		self.nb.AddPage(self.page16, _('MQTT'))
-		self.nb.AddPage(self.page15, _('SMS'))
-		self.nb.AddPage(self.page1, _('Startup'))
+		self.p_usb = wx.Panel(self.nb)
+		self.p_kplex = wx.Panel(self.nb)
+		self.p_n2k = wx.Panel(self.nb)
+		self.p_sk = wx.Panel(self.nb)
+		self.p_wifi = wx.Panel(self.nb)
+		self.p_action = wx.Panel(self.nb)
+		self.p_gpio = wx.Panel(self.nb)
+		self.p_i2c = wx.Panel(self.nb)
+		self.p_1w = wx.Panel(self.nb)
+		self.p_spi = wx.Panel(self.nb)
+		self.p_account = wx.Panel(self.nb)
+		self.p_mqtt = wx.Panel(self.nb)
+		self.p_sms = wx.Panel(self.nb)
+		self.p_startup = wx.Panel(self.nb)
+		self.nb.AddPage(self.p_usb, _('USB manager'))
+		self.nb.AddPage(self.p_kplex, _('NMEA 0183'))
+		self.nb.AddPage(self.p_n2k, _('NMEA 2K'))
+		self.nb.AddPage(self.p_sk, _('Signal K'))
+		self.nb.AddPage(self.p_wifi, _('WiFi AP'))
+		self.nb.AddPage(self.p_action, _('Actions'))
+		self.nb.AddPage(self.p_gpio, _('GPIO sensors'))
+		self.nb.AddPage(self.p_i2c, _('I2C sensors'))
+		self.nb.AddPage(self.p_1w, _('1W sensors'))
+		self.nb.AddPage(self.p_spi, _('SPI sensors'))
+		self.nb.AddPage(self.p_account, _('Accounts'))
+		self.nb.AddPage(self.p_mqtt, _('MQTT'))
+		self.nb.AddPage(self.p_sms, _('SMS'))
+		self.nb.AddPage(self.p_startup, _('Startup'))
 		sizer = wx.BoxSizer()
 		sizer.Add(self.nb, 1, wx.EXPAND)
 		self.p.SetSizer(sizer)
@@ -178,772 +172,31 @@ class MainFrame(wx.Frame):
 
 		self.SetMenuBar(self.menubar)
 ###########################menu
-########page1###################
-		wx.StaticBox(self.page1, size=(330, 50), pos=(10, 10))
-		wx.StaticText(self.page1, label=_('Delay (seconds)'), pos=(20, 30))
-		self.delay = wx.TextCtrl(self.page1, -1, size=(55, 32), pos=(170, 23))
-		self.button_ok_delay =wx.Button(self.page1, label=_('Ok'),size=(70, 32), pos=(250, 23))
-		self.button_ok_delay.Bind(wx.EVT_BUTTON, self.ok_delay)
-
-		wx.StaticBox(self.page1, size=(330, 230), pos=(10, 65))
-		self.startup_opencpn = wx.CheckBox(self.page1, label=_('OpenCPN'), pos=(20, 80))
-		self.startup_opencpn.Bind(wx.EVT_CHECKBOX, self.startup)
-		self.startup_opencpn_nopengl = wx.CheckBox(self.page1, label=_('no OpenGL'), pos=(40, 105))
-		self.startup_opencpn_nopengl.Bind(wx.EVT_CHECKBOX, self.startup)
-		self.startup_opencpn_fullscreen = wx.CheckBox(self.page1, label=_('fullscreen'), pos=(40, 130))
-		self.startup_opencpn_fullscreen.Bind(wx.EVT_CHECKBOX, self.startup)
-
-		self.startup_multiplexer = wx.CheckBox(self.page1, label=_('NMEA 0183 multiplexer'), pos=(20, 165))
-		self.startup_multiplexer.Bind(wx.EVT_CHECKBOX, self.startup)
-		self.startup_nmea_time = wx.CheckBox(self.page1, label=_('Set time from NMEA'), pos=(40, 190))
-		self.startup_nmea_time.Bind(wx.EVT_CHECKBOX, self.startup)
-
-		self.startup_remote_desktop = wx.CheckBox(self.page1, label=_('VNC remote desktop'), pos=(20, 225))
-		self.startup_remote_desktop.Bind(wx.EVT_CHECKBOX, self.startup)
-		self.startup_vnc_pass = wx.CheckBox(self.page1, label=_('use password'), pos=(40, 250))
-		self.startup_vnc_pass.Bind(wx.EVT_CHECKBOX, self.startup)
-
-		wx.StaticBox(self.page1, size=(330, 230), pos=(350, 65))
-
-		self.startup_play_sound = wx.CheckBox(self.page1, label=_('Play sound'), pos=(360, 80))
-		self.startup_play_sound.Bind(wx.EVT_CHECKBOX, self.startup)
-		self.startup_path_sound = wx.TextCtrl(self.page1, -1, size=(200, 32), pos=(360, 110))
-		self.button_select_sound =wx.Button(self.page1, label=_('Select'), pos=(570, 110))
-		self.button_select_sound.Bind(wx.EVT_BUTTON, self.select_sound)
-
-		self.op_maximize = wx.CheckBox(self.page1, label=_('Maximize OpenPlotter'), pos=(360, 150))
-		self.op_maximize.Bind(wx.EVT_CHECKBOX, self.startup)
-###########################page1
-########page2###################
-
-###########################page2
-########page3###################
-		wx.StaticBox(self.page3, size=(370, 315), pos=(10, 10))
-		self.wifi_enable = wx.CheckBox(self.page3, label=_('Enable access point'), pos=(20, 25))
-		self.wifi_enable.Bind(wx.EVT_CHECKBOX, self.onwifi_enable)
-
-		self.bridge_enable = wx.CheckBox(self.page3, label=_('Enable bridge to eth0'), pos=(180,25))
+		self.page_usb()
+		self.page_kplex()
+		self.page_n2k()
+		self.page_sk()
+		self.page_wifi()
+		self.page_action()
+		self.page_gpio()
+		self.page_i2c()
+		self.page_1w()
+		self.page_spi()
+		self.page_account()
+		self.page_mqtt()
+		self.page_sms()
+		self.page_startup()
 		
-		self.available_wireless = []
-		output=subprocess.check_output('ifconfig', stderr=subprocess.STDOUT)
-		for i in range (0, 9):
-			ii=str(i)
-			if 'wlan'+ii in output: self.available_wireless.append('wlan'+ii)
-
-		self.available_wireless_AP = []
-		for i in self.available_wireless:
-			output2=subprocess.check_output(['iw',i,'info'], stderr=subprocess.STDOUT)
-			startpos=output2.find('wiphy')+5
-			iwphy=int(output2[startpos:startpos+2])
-			output2=subprocess.check_output(['iw','phy'+str(iwphy),'info'], stderr=subprocess.STDOUT)
-			startpos=output2.find('Supported interface modes')
-			if 'AP' in output2[startpos:startpos+80]:
-				self.available_wireless_AP.append(i)
-
-		self.available_share = [_('none')]
-		for i in range (0, 9):
-			ii=str(i)
-			if 'eth'+ii in output: self.available_share.append('eth'+ii)
-			if 'ppp'+ii in output: self.available_share.append('ppp'+ii)
-			if 'usb'+ii in output: self.available_share.append('usb'+ii)
-		for i in self.available_wireless:
-			self.available_share.append(i)
-		share_old= self.conf.get('WIFI', 'share')
-		if share_old!='0' and share_old not in self.available_share: self.available_share.append(share_old)
-		self.wlan_label=wx.StaticText(self.page3, label=_('Access point device'), pos=(20, 55))
-		self.wlan = wx.ComboBox(self.page3, choices=self.available_wireless_AP, style=wx.CB_READONLY, size=(100, 32), pos=(20, 75))
-		
-		self.share_label=wx.StaticText(self.page3, label=_('Sharing Internet device'), pos=(180, 55))
-		self.share = wx.ComboBox(self.page3, choices=self.available_share, style=wx.CB_READONLY, size=(100, 32), pos=(180, 75))
-
-		self.wifi_settings_label=wx.StaticText(self.page3, label=_('Access point settings'), pos=(20, 120))
-
-		self.ssid = wx.TextCtrl(self.page3, -1, size=(120, 32), pos=(20, 140))
-		self.ssid_label=wx.StaticText(self.page3, label=_('SSID \nmaximum 32 characters'), pos=(160, 140))
-
-		self.passw = wx.TextCtrl(self.page3, -1, size=(120, 32), pos=(20, 173))
-		self.passw_label=wx.StaticText(self.page3, label=_('Password \nminimum 8 characters required'), pos=(160, 175))
-		
-		self.wifi_channel_list=['1','2','3','4','5','6','7','8','9','10','11','12','13']
-		self.wifi_channel = wx.ComboBox(self.page3, choices=self.wifi_channel_list, style=wx.CB_READONLY, size=(120, 32), pos=(20, 208))
-		self.wifi_channel_label=wx.StaticText(self.page3, label=_('Channel'), pos=(160, 215))
-
-		self.wifi_mode_list=['IEEE 802.11b', 'IEEE 802.11g']
-		self.wifi_mode = wx.ComboBox(self.page3, choices=self.wifi_mode_list, style=wx.CB_READONLY, size=(120, 32), pos=(20, 246))
-		self.wifi_mode_label=wx.StaticText(self.page3, label=_('Mode'), pos=(160, 255))
-
-		self.wifi_wpa_list=['None','WPA','WPA2', _('Both')]
-		self.wifi_wpa = wx.ComboBox(self.page3, choices=self.wifi_wpa_list, style=wx.CB_READONLY, size=(120, 32), pos=(20, 285))
-		self.wifi_wpa_label=wx.StaticText(self.page3, label=_('WPA'), pos=(160, 290))
-
-		self.wifi_button_default =wx.Button(self.page3, label=_('Defaults'), pos=(275, 280))
-		self.wifi_button_default.Bind(wx.EVT_BUTTON, self.wifi_default)
-
-		wx.StaticBox(self.page3, label=_(' Addresses '), size=(290, 315), pos=(385, 10))
-		self.ip_info = wx.TextCtrl(self.page3, -1, style=wx.TE_MULTILINE|wx.TE_READONLY, size=(270, 245), pos=(395, 30))
-		self.ip_info.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_INACTIVECAPTION))
-
-		self.button_refresh_ip =wx.Button(self.page3, label=_('Refresh'), pos=(565, 280))
-		self.button_refresh_ip.Bind(wx.EVT_BUTTON, self.show_ip_info)
-		
-		self.check_net_b =wx.Button(self.page3, label=_('Status'), pos=(465, 280))
-		self.check_net_b.Bind(wx.EVT_BUTTON, self.check_net)	
-###########################page3
-########page4###################
-
-
-###########################page4
-########page5###################
-		title=wx.StaticText(self.page5, label=_(' KPLEX '))
-
-		self.list_kplex = CheckListCtrl2(self.page5, 152)
-		self.list_kplex.InsertColumn(0, _('Name'), width=130)
-		self.list_kplex.InsertColumn(1, _('Type'), width=45)
-		self.list_kplex.InsertColumn(2, _('io'), width=45)
-		self.list_kplex.InsertColumn(3, _('Port/Address'), width=95)
-		self.list_kplex.InsertColumn(4, _('Bauds/Port'),width=60)
-		self.list_kplex.InsertColumn(5, _('inFilter'),width=55)
-		self.list_kplex.InsertColumn(6, _('Filtering'),width=80)
-		self.list_kplex.InsertColumn(7, _('outFilter'),width=60)
-		self.list_kplex.InsertColumn(8, _('Filtering'),width=80)
-		self.list_kplex.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_kplex)
-		
-		diagnostic =wx.Button(self.page5, label=_('diagnostic'))
-		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_kplex)
-
-		add =wx.Button(self.page5, label=_('add'))
-		add.Bind(wx.EVT_BUTTON, self.on_add_kplex)
-		delete =wx.Button(self.page5, label=_('delete'))
-		delete.Bind(wx.EVT_BUTTON, self.on_delete_kplex)
-
-		inspector =wx.Button(self.page5, label=_('Inspector'))
-		inspector.Bind(wx.EVT_BUTTON, self.on_inspector)
-		restart =wx.Button(self.page5, label=_('Restart'))
-		restart.Bind(wx.EVT_BUTTON, self.on_restart_kplex)
-		advanced =wx.Button(self.page5, label=_('Advanced'))
-		advanced.Bind(wx.EVT_BUTTON, self.on_advanced_kplex)
-		apply_changes =wx.Button(self.page5, label=_('Apply changes'))
-		apply_changes.Bind(wx.EVT_BUTTON, self.on_apply_changes_kplex)
-		cancel_changes =wx.Button(self.page5, label=_('Cancel changes'))
-		cancel_changes.Bind(wx.EVT_BUTTON, self.on_cancel_changes_kplex)
-		
-		hlistbox5 = wx.BoxSizer(wx.HORIZONTAL)
-		hlistbox5.Add(self.list_kplex, 1, wx.ALL|wx.EXPAND, 5)
-
-		hbox5 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox5.Add(diagnostic, 0, wx.RIGHT|wx.LEFT, 5)
-		hbox5.Add((0,0), 1, wx.RIGHT|wx.LEFT, 5)
-		hbox5.Add(add, 0, wx.RIGHT|wx.LEFT, 5)
-		hbox5.Add(delete, 0, wx.RIGHT|wx.LEFT, 5)
-
-		hboxb5 = wx.BoxSizer(wx.HORIZONTAL)
-		hboxb5.Add(inspector, 0, wx.RIGHT|wx.LEFT, 5)
-		hboxb5.Add(restart, 0, wx.RIGHT|wx.LEFT, 5)
-		hboxb5.Add(advanced, 0, wx.RIGHT|wx.LEFT, 5)
-		hboxb5.Add((0,0), 1, wx.RIGHT|wx.LEFT, 5)
-		hboxb5.Add(apply_changes, 0, wx.RIGHT|wx.LEFT, 5)
-		hboxb5.Add(cancel_changes, 0, wx.RIGHT|wx.LEFT, 5)
-
-		vbox5 = wx.BoxSizer(wx.VERTICAL)
-		vbox5.Add(title, 0, wx.ALL|wx.EXPAND, 5)
-		vbox5.Add(hlistbox5, 1, wx.ALL|wx.EXPAND, 0)
-		vbox5.Add(hbox5, 0, wx.ALL|wx.EXPAND, 0)
-		vbox5.AddSpacer(5)
-		vbox5.Add(hboxb5, 0, wx.ALL|wx.EXPAND, 0)	
-
-		self.page5.SetSizer(vbox5)		
-###########################page5
-########page7###################
-		wx.StaticBox(self.page7, label=_(' Settings '), size=(230, 265), pos=(10, 10))
-
-		self.mmsi = wx.TextCtrl(self.page7, -1, size=(110, 32), pos=(20, 65))
-		self.mmsi_label=wx.StaticText(self.page7, label='MMSI', pos=(140, 70))
-
-		self.button_restartSK =wx.Button(self.page7, label=_('Restart'), pos=(20, 115))
-		self.button_restartSK.Bind(wx.EVT_BUTTON, self.restart_SK)	
-
-		diagnostic =wx.Button(self.page7, label=_('Diagnostic'), pos=(20, 165))
-		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)	
-
-		apply_changes =wx.Button(self.page7, label=_('Apply changes'), pos=(125, 115))
-		apply_changes.Bind(wx.EVT_BUTTON, self.apply_SK)
-		
-		wx.StaticBox(self.page7, label=_(' Inputs '), size=(430, 130), pos=(250, 10))
-		self.SKinputs_label=wx.StaticText(self.page7, label='NMEA 0183: system_output - TCP localhost 10110', pos=(260, 30))
-
-		response = requests.get('http://localhost:3000/signalk')
-		data = response.json()
-		text=_('Version: ')
-		text+=data['endpoints']['v1']['version']
-		text+='\n\nhttp: '
-		text+=data['endpoints']['v1']['signalk-http']
-		text+='\nws: '
-		text+=data['endpoints']['v1']['signalk-ws']
-		text+='\nNMEA 0183: TCP localhost 10111'
-		wx.StaticBox(self.page7, label=_(' Outputs '), size=(430, 130), pos=(250, 145))
-		wx.StaticText(self.page7, label=text, pos=(260, 165))
-
-		show_SK =wx.Button(self.page7, label=_('Show Web Socket'), pos=(250, 285))
-		show_SK.Bind(wx.EVT_BUTTON, self.show_SK)
-
-		tools_SK =wx.Button(self.page7, label=_('Show Signal K tools'), pos=(420, 285))
-		tools_SK.Bind(wx.EVT_BUTTON, self.show_tools_SK)
-###########################page7
-########page17###################
-		wx.StaticBox(self.page17, label=_(' Settings '), size=(230, 265), pos=(10, 10))
-		i=35
-		self.CANUSB_label=wx.StaticText(self.page17, label=_('CAN-USB-CAN device'), pos=(20, i))
-		self.SerDevLs = []
-		i+=20
-		self.can_usb= wx.ComboBox(self.page17, choices=self.SerDevLs, style=wx.CB_READONLY, size=(140, 32), pos=(20, i))
-		self.can_usb.Bind(wx.EVT_COMBOBOX, self.onn2k_device,self.can_usb)
-		i+=35
-		self.n2k_enable = wx.CheckBox(self.page17, label=_('Enable N2K input'), pos=(20, i))
-		self.n2k_enable.Bind(wx.EVT_CHECKBOX, self.onn2k_enable,self.n2k_enable)
-		i+=25
-		self.N2K_diagnostic_b =wx.Button(self.page17, label=_('Diagnostic input'), pos=(20, i))
-		self.N2K_diagnostic_b.Bind(wx.EVT_BUTTON, self.N2K_diagnostic)	
-		i+=35
-		self.n2k_out_enable = wx.CheckBox(self.page17, label=_('Enable N2K output'), pos=(20, i))
-		self.n2k_out_enable.Bind(wx.EVT_CHECKBOX, self.onn2k_output,self.n2k_out_enable)
-		i+=25	
-		self.N2K_diagnostic_out_b =wx.Button(self.page17, label=_('Diagnostic output'), pos=(20, i))
-		self.N2K_diagnostic_out_b.Bind(wx.EVT_BUTTON, self.N2K_diagnostic_out)			
-		i+=40
-		self.button_N2K_setting =wx.Button(self.page17, label=_('Output settings'), pos=(20, i))
-		self.button_N2K_setting.Bind(wx.EVT_BUTTON, self.N2K_setting)
-		
-		wx.StaticBox(self.page17, label=_(' Inputs '), size=(430, 50), pos=(250, 10))
-		self.n2kinputs_label=wx.StaticText(self.page17, label=_('PGNs: All'), pos=(260, 30))
-
-		wx.StaticBox(self.page17, label=_(' Outputs '), size=(430, 210), pos=(250, 65))
-		wx.StaticText(self.page17, label='PGNs:', pos=(260, 85))
-		self.n2koutputs_label=wx.StaticText(self.page17, pos=(260, 105))
-###########################page17
-########page15###################
-		wx.StaticBox(self.page15, label=_(' Settings '), size=(330, 180), pos=(10, 10))
-		self.sms_enable = wx.CheckBox(self.page15, label=_('Enable settings'), pos=(20, 30))
-		self.sms_enable.Bind(wx.EVT_CHECKBOX, self.onsms_enable)
-
-		self.sms_dev_label=wx.StaticText(self.page15, label='Serial port', pos=(20, 60))
-		self.sms_dev= wx.ComboBox(self.page15, choices=self.SerDevLs, style=wx.CB_READONLY, size=(150, 32), pos=(20, 80))
-		sms_con_list=['at','at19200','at115200','blueat','bluephonet','bluefbus','blueobex','bluerfgnapbus','bluerfat','blues60','dlr3','dku2','dku2at','dku2phonet','dku5','dku5fbus','fbus','fbusdlr3','fbusdku5','fbusblue','fbuspl2303','irdaphonet','irdaat','irdaobex','irdagnapbus','phonetblue','proxyphonet','proxyfbus','proxyat','proxyobex','proxygnapbus','proxys60','mbus']
-		
-		self.sms_bt_label=wx.StaticText(self.page15, label=_('Bluetooth address'), pos=(180, 60))
-		self.sms_bt = wx.TextCtrl(self.page15, -1, size=(150, 32), pos=(180, 80))
-
-		self.sms_con_label=wx.StaticText(self.page15, label='Connection', pos=(20, 120))
-		self.sms_con= wx.ComboBox(self.page15, choices=sms_con_list, style=wx.CB_READONLY, size=(150, 32), pos=(20, 140))
-		
-		self.button_sms_identify =wx.Button(self.page15, label=_('Identify'), pos=(180, 140))
-		self.button_sms_identify.Bind(wx.EVT_BUTTON, self.sms_identify)
-
-		wx.StaticBox(self.page15, label=_(' Sending '), size=(330, 180), pos=(350, 10))
-
-		self.sms_enable_send = wx.CheckBox(self.page15, label=_('Enable sending SMS'), pos=(360, 30))
-		self.sms_enable_send.Bind(wx.EVT_CHECKBOX, self.onsms_enable_send)
-
-		self.phone_number_label=wx.StaticText(self.page15, label=_('Send to phone'), pos=(360, 60))
-		self.phone_number = wx.TextCtrl(self.page15, -1, size=(150, 32), pos=(360, 80))
-
-		self.sms_text_label=wx.StaticText(self.page15, label=_('Text'), pos=(360, 120))
-		self.sms_text = wx.TextCtrl(self.page15, -1, size=(150, 32), pos=(360, 140))
-
-		self.button_sms_test =wx.Button(self.page15, label=_('Test'), pos=(520, 140))
-		self.button_sms_test.Bind(wx.EVT_BUTTON, self.sms_test)
-###########################page15
-########page6###################
-		z0=20
-		z1=45
-		z2=75
-		z3=105
-		z4=145
-		z5=175
-		z6=215
-		z7=245
-		z8=293
-		s1=20
-		s2=130
-		s3=560
-		s4=300
-		s5=500
-		s6=220
-		
-		self.list_sk_path_temp=['environment.inside.temperature','environment.outside.temperature']
-		self.list_sk_path_hum=['environment.inside.humidity','environment.outside.humidity']
-
-		z=z0
-		wx.StaticBox(self.page6,label=_(' Settings '), size=(675, 330), pos=(5, 5))
-		wx.StaticText(self.page6, label=_('Sensors'), pos=(s2, z))
-		wx.StaticText(self.page6, label=_('Signal K'), pos=(s4, z))
-		wx.StaticText(self.page6, label=_('Offset'), pos=(s5, z))
-		wx.StaticText(self.page6, label=_('Rate (sec)'), pos=(s6, z))
-		self.rate_list = ['0.1', '0.25', '0.5', '0.75', '1', '5', '30', '60', '300']
-		z=z1
-		self.heading_label=wx.StaticText(self.page6, label=_('Heading'), pos=(s1, z))
-		self.heading_sensor=wx.StaticText(self.page6, pos=(s2, z))
-		self.button_calibrate_imu =wx.Button(self.page6, label=_('Calibrate'), pos=(s3, z))
-		self.button_calibrate_imu.Bind(wx.EVT_BUTTON, self.i2c_calibrate_imu)
-		wx.StaticText(self.page6, label=_('navigation.headingMagnetic'), pos=(s4, z))
-		self.heading_offset = wx.TextCtrl(self.page6, size=(45, 20), pos=(s5, z))
-
-		z=z2
-		self.heel_label=wx.StaticText(self.page6, label=_('Heel'), pos=(s1, z))
-		self.heel_sensor=wx.StaticText(self.page6, pos=(s2, z))
-		wx.StaticText(self.page6, label=_('navigation.attitude.roll'), pos=(s4, z))
-		self.heel_offset = wx.TextCtrl(self.page6, size=(45, 20), pos=(s5, z))
-		self.rate_imu= wx.ComboBox(self.page6, choices=self.rate_list, style=wx.CB_READONLY, size=(60, 25), pos=(s6, z-5))
-		z=z3
-		self.pitch_label=wx.StaticText(self.page6, label=_('Pitch'), pos=(s1, z))
-		self.pitch_sensor=wx.StaticText(self.page6, pos=(s2, z))
-		self.button_reset_imu =wx.Button(self.page6, label=_('Reset'), pos=(s3, z-20))
-		self.button_reset_imu.Bind(wx.EVT_BUTTON, self.reset_imu)
-		wx.StaticText(self.page6, label=_('navigation.attitude.pitch'), pos=(s4, z))
-		self.pitch_offset = wx.TextCtrl(self.page6, size=(45, 20), pos=(s5, z))
-		z=z4
-		self.pressure_label=wx.StaticText(self.page6, label=_('Pressure'), pos=(s1, z))
-		self.pressure_sensor=wx.StaticText(self.page6, pos=(s2, z))
-		self.button_reset_pressure=wx.Button(self.page6, label=_('Reset'), pos=(s3, z+5))
-		self.button_reset_pressure.Bind(wx.EVT_BUTTON, self.reset_press)
-		wx.StaticText(self.page6, label=_('environment.outside.pressure'), pos=(s4, z))
-		self.pressure_offset = wx.TextCtrl(self.page6, size=(45, 20), pos=(s5, z))
-		self.rate_press= wx.ComboBox(self.page6, choices=self.rate_list, style=wx.CB_READONLY, size=(60, 25), pos=(s6, z+10))
-		z=z5
-		self.p_temp_label=wx.StaticText(self.page6, label=_('Temperature'), pos=(s1, z))
-		self.p_temp_sensor=wx.StaticText(self.page6, pos=(s2, z))
-		self.p_temp_skt = wx.ComboBox(self.page6, choices=self.list_sk_path_temp, style=wx.CB_READONLY, size=(180, 25), pos=(s4, z-3))
-		self.p_temp_offset = wx.TextCtrl(self.page6, size=(45, 20), pos=(s5, z))
-		z=z6
-		self.humidity_label=wx.StaticText(self.page6, label=_('Humidity'), pos=(s1, z))
-		self.humidity_sensor=wx.StaticText(self.page6, pos=(s2, z))
-		self.button_reset_humidity=wx.Button(self.page6, label=_('Reset'), pos=(s3, z+5))
-		self.button_reset_humidity.Bind(wx.EVT_BUTTON, self.reset_hum)
-		self.humidity_skt = wx.ComboBox(self.page6, choices=self.list_sk_path_hum, style=wx.CB_READONLY, size=(180, 25), pos=(s4, z-3))
-		self.humidity_offset = wx.TextCtrl(self.page6, size=(45, 20), pos=(s5, z))
-		self.rate_hum= wx.ComboBox(self.page6, choices=self.rate_list, style=wx.CB_READONLY, size=(60, 25), pos=(s6, z+10))
-		z=z7
-		self.h_temp_label=wx.StaticText(self.page6, label=_('Temperature'), pos=(s1, z))
-		self.h_temp_sensor=wx.StaticText(self.page6, pos=(s2, z))
-		self.h_temp_skt = wx.ComboBox(self.page6, choices=self.list_sk_path_temp, style=wx.CB_READONLY, size=(180, 25), pos=(s4, z-3))
-		self.h_temp_offset = wx.TextCtrl(self.page6, size=(45, 20), pos=(s5, z))
-		z=z8
-		self.diagnostic_SK_i2c =wx.Button(self.page6, label=_('SK Diagnostic'), pos=(s1, z))
-		self.diagnostic_SK_i2c.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)	
-
-		self.button_i2c_cancel =wx.Button(self.page6, label=_('cancel'), pos=(480, z))
-		self.button_i2c_cancel.Bind(wx.EVT_BUTTON, self.i2c_cancel)
-		self.button_i2c_apply =wx.Button(self.page6, label=_('apply'), pos=(580, z))
-		self.button_i2c_apply.Bind(wx.EVT_BUTTON, self.i2c_apply)
-###########################page6
-########page11###################
-		title = wx.StaticText(self.page11, label=_(' Temperature sensors '))
-
-		self.list_DS18B20 =	wx.ListCtrl(self.page11, style=wx.LC_REPORT)
-		self.list_DS18B20.InsertColumn(0, _('Name'), width=100)
-		self.list_DS18B20.InsertColumn(1, _('Signal K'), width=310)
-		self.list_DS18B20.InsertColumn(2, _('ID'), width=105)
-		self.list_DS18B20.InsertColumn(4, _('Offset'), width=50)
-		self.list_DS18B20.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_DS18B20)
-			
-		add = wx.Button(self.page11, label=_('add'))
-		add.Bind(wx.EVT_BUTTON, self.on_add_DS18B20)
-
-		delete = wx.Button(self.page11, label=_('delete'))
-		delete.Bind(wx.EVT_BUTTON, self.on_delete_DS18B20)
-
-		diagnostic = wx.Button(self.page11, label=_('SK Diagnostic'))
-		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
-		
-		hlistbox_but11 = wx.BoxSizer(wx.VERTICAL)
-		hlistbox_but11.Add(add, 0, wx.ALL, 5)
-		hlistbox_but11.Add(delete, 0, wx.ALL, 5)
-
-		hlistbox11 = wx.BoxSizer(wx.HORIZONTAL)
-		hlistbox11.Add(self.list_DS18B20, 1, wx.ALL|wx.EXPAND, 5)
-		hlistbox11.Add(hlistbox_but11, 0, wx.RIGHT|wx.LEFT, 0)
-
-		vbox11 = wx.BoxSizer(wx.VERTICAL)
-		vbox11.Add(title, 0, wx.ALL|wx.EXPAND, 5)
-		vbox11.Add(hlistbox11, 1, wx.ALL|wx.EXPAND, 0)
-		vbox11.Add(diagnostic, 0, wx.RIGHT|wx.LEFT, 5)
-
-		self.page11.SetSizer(vbox11)		
-###########################page11
-########page12###################
-		title = wx.StaticText(self.page12, label=_(' SPI MCP3008 '))
-		
-		self.list_MCP = wx.ListCtrl(self.page12, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
-		self.list_MCP.InsertColumn(0, _('aktiv'), width=40)
-		self.list_MCP.InsertColumn(1, _('channel'), width=65)
-		self.list_MCP.InsertColumn(2, _('SK name'), width=310)
-		self.list_MCP.InsertColumn(3, _('*'), width=120)
-		self.list_MCP.InsertColumn(4, _('convert'), width=55)
-		self.list_MCP.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit_MCP)		
-		
-		restart =wx.Button(self.page12, label=_('restart'))
-		restart.Bind(wx.EVT_BUTTON, self.on_restart_MCP)
-
-		value_setting =wx.Button(self.page12, label=_('value setting'))
-		value_setting.Bind(wx.EVT_BUTTON, self.on_value_setting)
-		
-		hlistbox12 = wx.BoxSizer(wx.HORIZONTAL)
-		hlistbox12.Add(self.list_MCP, 1, wx.ALL|wx.EXPAND, 5)
-
-		hbox12 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox12.Add(restart, 0, wx.RIGHT|wx.LEFT, 5)
-		hbox12.Add(value_setting, 0, wx.RIGHT|wx.LEFT, 5)
-		
-		vbox12 = wx.BoxSizer(wx.VERTICAL)
-		vbox12.Add(title, 0, wx.ALL|wx.EXPAND, 5)
-		vbox12.Add(hlistbox12, 1, wx.ALL|wx.EXPAND, 0)
-		vbox12.Add(hbox12, 0, wx.ALL, 0)
-
-		self.page12.SetSizer(vbox12)	
-###########################page12
-########page14###################
-		title = wx.StaticText(self.page14, label=_(' USB Serial ports '))
-		
-		self.list_USBinst = wx.ListCtrl(self.page14, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
-		self.list_USBinst.InsertColumn(0, _('name'), width=130)
-		self.list_USBinst.InsertColumn(1, _('vendor'), width=55)
-		self.list_USBinst.InsertColumn(2, _('product'), width=60)
-		self.list_USBinst.InsertColumn(3, _('port'), width=90)
-		self.list_USBinst.InsertColumn(4, _('serial'), width=130)
-		self.list_USBinst.InsertColumn(5, _('remember'), width=100)
-		self.list_USBinst.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_USBinst)
-			
-		add =wx.Button(self.page14, label=_('add'))
-		add.Bind(wx.EVT_BUTTON, self.add_USBinst)
-
-		delete =wx.Button(self.page14, label=_('delete'))
-		delete.Bind(wx.EVT_BUTTON, self.delete_USBinst)
-		
-		hlistbox14 = wx.BoxSizer(wx.HORIZONTAL)
-		hlistbox14.Add(self.list_USBinst, 1, wx.ALL|wx.EXPAND, 5)
-
-		hbox14 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox14.Add(add, 0, wx.RIGHT|wx.LEFT, 5)
-		hbox14.Add(delete, 0, wx.RIGHT|wx.LEFT, 5)
-
-		vbox14 = wx.BoxSizer(wx.VERTICAL)
-		vbox14.Add(title, 0, wx.ALL|wx.EXPAND, 5)
-		vbox14.Add(hlistbox14, 1, wx.ALL|wx.EXPAND, 0)
-		vbox14.Add(hbox14, 0, wx.ALL|wx.EXPAND, 0)	
-
-		self.page14.SetSizer(vbox14)
-###########################page14
-########page8###################
-		title = wx.StaticText(self.page8, label=_(' Sensors '))
-		
-		self.list_gpio = wx.ListCtrl(self.page8, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
-		self.list_gpio.InsertColumn(0, _('Name'), width=345)
-		self.list_gpio.InsertColumn(1, _('I/O'), width=80)
-		self.list_gpio.InsertColumn(2, 'GPIO', width=60)
-		self.list_gpio.InsertColumn(3, 'Pull', width=80)
-		self.list_gpio.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_gpio)
-			
-		add = wx.Button(self.page8, label=_('add'))
-		add.Bind(wx.EVT_BUTTON, self.add_gpio)
-
-		delete = wx.Button(self.page8, label=_('delete'))
-		delete.Bind(wx.EVT_BUTTON, self.delete_gpio)
-
-		diagnostic = wx.Button(self.page8, label=_('SK Diagnostic'))
-		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
-		
-		hlistbox_but8 = wx.BoxSizer(wx.VERTICAL)
-		hlistbox_but8.Add(add, 0, wx.ALL, 5)
-		hlistbox_but8.Add(delete, 0, wx.ALL, 5)
-
-		hlistbox8 = wx.BoxSizer(wx.HORIZONTAL)
-		hlistbox8.Add(self.list_gpio, 1, wx.ALL|wx.EXPAND, 5)
-		hlistbox8.Add(hlistbox_but8, 0, wx.RIGHT|wx.LEFT, 0)
-
-		vbox8 = wx.BoxSizer(wx.VERTICAL)
-		vbox8.Add(title, 0, wx.ALL|wx.EXPAND, 5)
-		vbox8.Add(hlistbox8, 1, wx.ALL|wx.EXPAND, 0)
-		vbox8.Add(diagnostic, 0, wx.RIGHT|wx.LEFT, 5)
-
-		self.page8.SetSizer(vbox8)
-###########################page8
-########page9###################
-		wx.StaticBox(self.page9, label=_(' Twitter '), size=(330, 205), pos=(10, 10))
-		self.twitter_enable = wx.CheckBox(self.page9, label=_('Enable'), pos=(20, 32))
-		self.twitter_enable.Bind(wx.EVT_CHECKBOX, self.on_twitter_enable)
-		
-		wx.StaticText(self.page9, label=_('apiKey'), pos=(20, 70))
-		self.apiKey = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(150, 65))
-		wx.StaticText(self.page9, label=_('apiSecret'), pos=(20, 105))
-		self.apiSecret = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(150, 100))
-		wx.StaticText(self.page9, label=_('accessToken'), pos=(20, 140))
-		self.accessToken = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(150, 135))
-		wx.StaticText(self.page9, label=_('accessTokenSecret'), pos=(20, 175))
-		self.accessTokenSecret = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(150, 170))
-
-		wx.StaticBox(self.page9, label=_(' Gmail '), size=(330, 205), pos=(350, 10))
-		self.gmail_enable = wx.CheckBox(self.page9, label=_('Enable'), pos=(360, 32))
-		self.gmail_enable.Bind(wx.EVT_CHECKBOX, self.on_gmail_enable)
-		wx.StaticText(self.page9, label=_('Gmail account'), pos=(360, 70))
-		self.Gmail_account = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(490, 65))
-		wx.StaticText(self.page9, label=_('Gmail password'), pos=(360, 105))
-		self.Gmail_password = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(490, 100))
-		wx.StaticText(self.page9, label=_('Recipient'), pos=(360, 140))
-		self.Recipient = wx.TextCtrl(self.page9, -1, size=(180, 32), pos=(490, 135))
-###########################page9
-########page16###################
-		title=wx.StaticText(self.page16, label=_(' MQTT '))
-
-		self.mqtt_broker_t = wx.StaticText(self.page16, label=_('Remote broker'))
-		self.mqtt_broker = wx.TextCtrl(self.page16, size=(190, -1))
-		self.mqtt_port_t = wx.StaticText(self.page16, label=_('Port'))
-		self.mqtt_port = wx.TextCtrl(self.page16, size=(50, -1))
-		self.mqtt_user_t = wx.StaticText(self.page16, label=_('Username'))
-		self.mqtt_user = wx.TextCtrl(self.page16, size=(120, -1))
-		self.mqtt_pass_t = wx.StaticText(self.page16, label=_('Password'))
-		self.mqtt_pass = wx.TextCtrl(self.page16, size=(120, -1))
-
-		self.button_apply_changes_mqtt =wx.Button(self.page16, label=_('Apply'))
-		self.button_apply_changes_mqtt.Bind(wx.EVT_BUTTON, self.apply_changes_mqtt)
-
-		clear =wx.Button(self.page16, label=_('Clear'))
-		clear.Bind(wx.EVT_BUTTON, self.clear_mqtt)
-
-		self.list_topics = wx.ListCtrl(self.page16, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
-		self.list_topics.InsertColumn(1, _('Topic'), width=565)
-		self.list_topics.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_topic)
-
-		add =wx.Button(self.page16, label=_('add'))
-		add.Bind(wx.EVT_BUTTON, self.add_topic)
-
-		delete =wx.Button(self.page16, label=_('delete'))
-		delete.Bind(wx.EVT_BUTTON, self.delete_topic)
-
-		diagnostic =wx.Button(self.page16, label=_('SK Diagnostic'))
-		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
-
-		vbox16c1 = wx.BoxSizer(wx.VERTICAL)
-		vbox16c1.Add(self.mqtt_broker_t, 0, wx.RIGHT|wx.LEFT, 5)
-		vbox16c1.Add(self.mqtt_broker, 0, wx.RIGHT|wx.LEFT, 5)
-		
-		vbox16c2 = wx.BoxSizer(wx.VERTICAL)
-		vbox16c2.Add(self.mqtt_port_t, 0, wx.RIGHT|wx.LEFT, 5)
-		vbox16c2.Add(self.mqtt_port, 0, wx.RIGHT|wx.LEFT, 5)
-		
-		vbox16c3 = wx.BoxSizer(wx.VERTICAL)
-		vbox16c3.Add(self.mqtt_user_t, 0, wx.RIGHT|wx.LEFT, 5)
-		vbox16c3.Add(self.mqtt_user, 0, wx.RIGHT|wx.LEFT, 5)
-		
-		vbox16c4 = wx.BoxSizer(wx.VERTICAL)
-		vbox16c4.Add(self.mqtt_pass_t, 0, wx.RIGHT|wx.LEFT, 5)
-		vbox16c4.Add(self.mqtt_pass, 0, wx.RIGHT|wx.LEFT, 5)
-
-		vbox16cspace = wx.BoxSizer(wx.VERTICAL)
-
-		vbox16c5but = wx.BoxSizer(wx.VERTICAL)
-		vbox16c5but.Add(self.button_apply_changes_mqtt, 0, wx.ALL|wx.EXPAND, 5)
-		vbox16c5but.Add(clear, 0, wx.ALL|wx.EXPAND, 5)
-
-		hinputbox16 = wx.BoxSizer(wx.HORIZONTAL)
-		hinputbox16.Add(vbox16c1, 0, wx.ALL|wx.EXPAND, 5)
-		hinputbox16.Add(vbox16c2, 0, wx.ALL|wx.EXPAND, 5)
-		hinputbox16.Add(vbox16c3, 0, wx.ALL|wx.EXPAND, 5)
-		hinputbox16.Add(vbox16c4, 0, wx.ALL|wx.EXPAND, 5)
-		hinputbox16.Add((0, 0), 1, wx.EXPAND)
-		hinputbox16.Add(vbox16c5but, 0, wx.RIGHT|wx.LEFT, 0)
-		
-		hlistbox_but16 = wx.BoxSizer(wx.VERTICAL)
-		hlistbox_but16.Add(add, 0, wx.ALL, 5)
-		hlistbox_but16.Add(delete, 0, wx.ALL, 5)
-
-		hlistbox16 = wx.BoxSizer(wx.HORIZONTAL)
-		hlistbox16.Add(self.list_topics, 1, wx.ALL|wx.EXPAND, 5)
-		hlistbox16.Add(hlistbox_but16, 0, wx.RIGHT|wx.LEFT, 0)
-
-		hbox16 = wx.BoxSizer(wx.HORIZONTAL)	
-		hbox16.Add(diagnostic, 0, wx.RIGHT|wx.LEFT, 5)
-
-		vbox16 = wx.BoxSizer(wx.VERTICAL)
-		vbox16.Add(title, 0, wx.ALL|wx.EXPAND, 5)
-		vbox16.Add(hinputbox16, 0, wx.ALL|wx.EXPAND, 0)
-		vbox16.AddSpacer(5)
-		vbox16.Add(hlistbox16, 1, wx.ALL|wx.EXPAND, 0)
-		vbox16.Add(hbox16, 0, wx.ALL|wx.EXPAND, 0)	
-				
-		self.page16.SetSizer(vbox16)		
-###########################page16
-########page10###################
-		title=wx.StaticText(self.page10, label=_(' Triggers '))
-		
-		self.list_triggers = CheckListCtrl(self.page10, 100)
-		self.list_triggers.InsertColumn(0, _('trigger'), width=275)
-		self.list_triggers.InsertColumn(1, _('operator'), width=170)
-		self.list_triggers.InsertColumn(2, _('value'))
-		self.list_triggers.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_print_actions)
-		self.list_triggers.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit_triggers)
-		self.list_triggers.SetMinSize((10,10));
-		
-		add_trigger =wx.Button(self.page10, label=_('add'))
-		add_trigger.Bind(wx.EVT_BUTTON, self.on_add_trigger)
-
-		delete_trigger =wx.Button(self.page10, label=_('delete'))
-		delete_trigger.Bind(wx.EVT_BUTTON, self.on_delete_trigger)
-		
-		self.list_actions = wx.ListCtrl(self.page10, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
-		self.list_actions.InsertColumn(0, _('action'), width=200)
-		self.list_actions.InsertColumn(1, _('data'), width=220)
-		self.list_actions.InsertColumn(2, _('repeat'), width=130)
-		self.list_actions.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_actions)
-		self.list_actions.SetMinSize((10,10));
-
-		add_action =wx.Button(self.page10, label=_('add'))
-		add_action.Bind(wx.EVT_BUTTON, self.on_add_action)
-
-		delete_action =wx.Button(self.page10, label=_('delete'))
-		delete_action.Bind(wx.EVT_BUTTON, self.on_delete_action)
-
-		stop_all=wx.Button(self.page10, label=_('Stop all'))
-		stop_all.Bind(wx.EVT_BUTTON, self.on_stop_actions)
-		
-		start_all=wx.Button(self.page10, label=_('Start all'))
-		start_all.Bind(wx.EVT_BUTTON, self.on_start_actions)
-
-		apply_changes =wx.Button(self.page10, label=_('Apply changes'))
-		apply_changes.Bind(wx.EVT_BUTTON, self.on_apply_changes_actions)
-		cancel_changes =wx.Button(self.page10, label=_('Cancel changes'))
-		cancel_changes.Bind(wx.EVT_BUTTON, self.on_cancel_changes_actions)
-		
-		hlistbox_but10 = wx.BoxSizer(wx.VERTICAL)
-		hlistbox_but10.Add(add_trigger, 0, wx.ALL, 5)
-		hlistbox_but10.Add(delete_trigger, 0, wx.ALL, 5)
-
-		hlistbox10 = wx.BoxSizer(wx.HORIZONTAL)
-		hlistbox10.Add(self.list_triggers, 1, wx.ALL|wx.EXPAND, 5)
-		hlistbox10.Add(hlistbox_but10, 0, wx.RIGHT|wx.LEFT, 0)
-
-		hlistbox_butb10 = wx.BoxSizer(wx.VERTICAL)
-		hlistbox_butb10.Add(add_action, 0, wx.ALL, 5)
-		hlistbox_butb10.Add(delete_action, 0, wx.ALL, 5)
-
-		hlistboxb10 = wx.BoxSizer(wx.HORIZONTAL)
-		hlistboxb10.Add(self.list_actions, 1, wx.ALL|wx.EXPAND, 5)
-		hlistboxb10.Add(hlistbox_butb10, 0, wx.RIGHT|wx.LEFT, 0)
-		
-		hbox10 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox10.Add(stop_all, 0, wx.RIGHT|wx.LEFT, 5)
-		hbox10.Add(start_all, 0, wx.RIGHT|wx.LEFT, 5)
-		hbox10.Add((0,0), 1, wx.RIGHT|wx.LEFT, 5)
-		hbox10.Add(apply_changes, 0, wx.RIGHT|wx.LEFT, 5)
-		hbox10.Add(cancel_changes, 0, wx.RIGHT|wx.LEFT, 5)
-		
-		vbox10 = wx.BoxSizer(wx.VERTICAL)
-		vbox10.Add(title, 0, wx.ALL|wx.EXPAND, 5)
-		vbox10.Add(hlistbox10, 1, wx.ALL|wx.EXPAND, 0)
-		vbox10.Add(hlistboxb10, 1, wx.ALL|wx.EXPAND, 0)
-		vbox10.Add(hbox10, 0, wx.ALL|wx.EXPAND, 0)	
-		
-		self.page10.SetSizer(vbox10)		
-###########################page10
-
 		self.manual_settings=''
 		self.read_kplex_conf()
 		self.SerialCheck()
 		self.SerialWrongPort()
-		self.set_layout_conf()
+		self.read_language()
 
-###########################################	general functions
-
-	def set_layout_conf(self):
-		if self.language=='en': self.lang.Check(self.lang_item1.GetId(), True)
-		if self.language=='ca': self.lang.Check(self.lang_item2.GetId(), True)
-		if self.language=='es': self.lang.Check(self.lang_item3.GetId(), True)
-		if self.language=='fr': self.lang.Check(self.lang_item4.GetId(), True)
-		if self.language=='nl': self.lang.Check(self.lang_item5.GetId(), True)
-		if self.language=='de': self.lang.Check(self.lang_item6.GetId(), True)
-
-		self.delay.SetValue(self.conf.get('STARTUP', 'delay'))
-
-		if self.conf.get('STARTUP', 'opencpn')=='1': 
-			self.startup_opencpn.SetValue(True)
-		else:
-			self.startup_opencpn_nopengl.Disable()
-			self.startup_opencpn_fullscreen.Disable()
-		if self.conf.get('STARTUP', 'opencpn_no_opengl')=='1': self.startup_opencpn_nopengl.SetValue(True)
-		if self.conf.get('STARTUP', 'opencpn_fullscreen')=='1': self.startup_opencpn_fullscreen.SetValue(True)
-		if self.conf.get('STARTUP', 'kplex')=='1': 
-			self.startup_multiplexer.SetValue(True)
-		else:
-			self.startup_nmea_time.Disable()
-		if self.conf.get('STARTUP', 'gps_time')=='1': self.startup_nmea_time.SetValue(True)
-		if self.conf.get('STARTUP', 'x11vnc')=='1': 
-			self.startup_remote_desktop.SetValue(True)
-		else:
-			self.startup_vnc_pass.Disable()
-		if self.conf.get('STARTUP', 'vnc_pass')=='1': self.startup_vnc_pass.SetValue(True)
-		if self.conf.get('STARTUP', 'maximize')=='1':
-			self.op_maximize.SetValue(True) 
-			self.Maximize()
-		self.startup_path_sound.SetValue(self.conf.get('STARTUP', 'sound'))
-		if self.conf.get('STARTUP', 'play')=='1':
-			self.startup_play_sound.SetValue(True)
-
-		if self.conf.get('TWITTER', 'apiKey'): self.apiKey.SetValue('********************')
-		if self.conf.get('TWITTER', 'apiSecret'): self.apiSecret.SetValue('********************')
-		if self.conf.get('TWITTER', 'accessToken'): self.accessToken.SetValue('********************')
-		if self.conf.get('TWITTER', 'accessTokenSecret'): self.accessTokenSecret.SetValue('********************')
-		if self.conf.get('TWITTER', 'enable')=='1':
-			self.twitter_enable.SetValue(True)
-			self.apiKey.Disable()
-			self.apiSecret.Disable()
-			self.accessToken.Disable()
-			self.accessTokenSecret.Disable()
-
-		if self.conf.get('GMAIL', 'gmail'): self.Gmail_account.SetValue(self.conf.get('GMAIL', 'gmail'))
-		if self.conf.get('GMAIL', 'password'): self.Gmail_password.SetValue('********************')
-		if self.conf.get('GMAIL', 'recipient'): self.Recipient.SetValue(self.conf.get('GMAIL', 'recipient'))
-		if self.conf.get('GMAIL', 'enable')=='1':
-			self.gmail_enable.SetValue(True)
-			self.Gmail_account.Disable()
-			self.Gmail_password.Disable()
-			self.Recipient.Disable()
-
-		self.mmsi.SetValue(self.vessel_self.mmsi)
-		text='NMEA 0183: system_output - TCP localhost 10110\nSignal K: I2C sensors - UDP localhost 55556\nSignal K: 1W sensors - UDP localhost 55557\nSignal K: notifications - UDP localhost 55558'
-		if self.conf.get('N2K', 'enable')=='1': 
-			self.n2k_enable.SetValue(True)
-			self.can_usb.Disable()
-			self.button_N2K_setting.Disable()
-			self.N2K_diagnostic_b.Disable()
-			text+='\nNMEA 2K: CAN-USB-CAN - '+self.conf.get('N2K', 'can_usb')
-		self.n2koutputs_label.SetLabel(self.conf.get('N2K', 'pgn_output'))
-		self.SKinputs_label.SetLabel(text)
-		if self.conf.get('N2K', 'output')=='1': 
-			self.n2k_out_enable.SetValue(True)
-			self.N2K_diagnostic_out_b.Disable()
-		if self.conf.get('SMS', 'serial')=='0': self.sms_dev.SetValue(self.SerDevLs[0])
-		else: self.sms_dev.SetValue(self.conf.get('SMS', 'serial'))
-		self.sms_bt.SetValue(self.conf.get('SMS', 'bluetooth'))
-		self.sms_con.SetValue(self.conf.get('SMS', 'connection'))
-		if self.conf.get('SMS', 'enable')=='1': 
-			self.sms_enable.SetValue(True)
-			self.sms_dev_label.Disable()
-			self.sms_dev.Disable()
-			self.sms_bt_label.Disable()
-			self.sms_bt.Disable()
-			self.sms_con_label.Disable()
-			self.sms_con.Disable()
-		else: 
-			self.button_sms_identify.Disable()
-
-		self.phone_number.SetValue(self.conf.get('SMS', 'phone'))
-		if self.conf.get('SMS', 'enable_sending')=='1': 
-			self.sms_enable_send.SetValue(True)
-			self.phone_number_label.Disable()
-			self.phone_number.Disable()
-		else: 
-			self.button_sms_test.Disable()
-			self.sms_text.Disable()
-			self.sms_text_label.Disable()
-
+		self.read_account()
+		#self.read_sk()
+		self.read_sms()
+		self.read_startup()
 		self.read_wifi_conf()
 		self.read_triggers()
 		self.read_DS18B20()
@@ -951,8 +204,18 @@ class MainFrame(wx.Frame):
 		self.read_gpio()
 		self.read_mqtt()
 		self.read_MCP()
-		self.i2c_start()
+		self.read_i2c()
 		self.read_n2k()
+
+###########################################	general functions
+
+	def read_language(self):
+		if self.language=='en': self.lang.Check(self.lang_item1.GetId(), True)
+		if self.language=='ca': self.lang.Check(self.lang_item2.GetId(), True)
+		if self.language=='es': self.lang.Check(self.lang_item3.GetId(), True)
+		if self.language=='fr': self.lang.Check(self.lang_item4.GetId(), True)
+		if self.language=='nl': self.lang.Check(self.lang_item5.GetId(), True)
+		if self.language=='de': self.lang.Check(self.lang_item6.GetId(), True)
 
 	def ShowMessage(self, w_msg):
 			wx.MessageBox(w_msg, 'Info', wx.OK | wx.ICON_INFORMATION)
@@ -964,12 +227,12 @@ class MainFrame(wx.Frame):
 
 	def time_gps(self,event):
 		self.GetStatusBar().SetForegroundColour(wx.BLACK)
-		self.SetStatusText(_('Waiting for NMEA time data in localhost:10110 ...'))
+		self.SetStatusText(_('Waiting for NMEA time data in localhost:55556 ...'))
 		time_gps_result=subprocess.check_output(['sudo', 'python', currentpath+'/time_gps.py'])
 		msg=''
 		re=time_gps_result.splitlines()
 		for current in re:
-			if 'Failed to connect with localhost:10110.' in current: msg+=_('Failed to connect with localhost:10110.\n')
+			if 'Failed to connect with localhost:55556.' in current: msg+=_('Failed to connect with localhost:55556.\n')
 			if 'Error: ' in current: msg+=current+'\n'
 			if 'Unable to retrieve date or time from NMEA data.' in current: msg+=_('Unable to retrieve date or time from NMEA data.\n')
 			if 'UTC' in current:
@@ -1146,8 +409,70 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		return exist
 
 ###########################################	startup
+	def page_startup(self):
+		wx.StaticBox(self.p_startup, size=(330, 50), pos=(10, 10))
+		wx.StaticText(self.p_startup, label=_('Delay (seconds)'), pos=(20, 30))
+		self.delay = wx.TextCtrl(self.p_startup, -1, size=(55, 32), pos=(170, 23))
+		button_ok_delay =wx.Button(self.p_startup, label=_('Ok'),size=(70, 32), pos=(250, 23))
+		button_ok_delay.Bind(wx.EVT_BUTTON, self.on_ok_delay)
 
-	def select_sound(self, e):
+		wx.StaticBox(self.p_startup, size=(330, 230), pos=(10, 65))
+		self.startup_opencpn = wx.CheckBox(self.p_startup, label=_('OpenCPN'), pos=(20, 80))
+		self.startup_opencpn.Bind(wx.EVT_CHECKBOX, self.startup)
+		self.startup_opencpn_nopengl = wx.CheckBox(self.p_startup, label=_('no OpenGL'), pos=(40, 105))
+		self.startup_opencpn_nopengl.Bind(wx.EVT_CHECKBOX, self.startup)
+		self.startup_opencpn_fullscreen = wx.CheckBox(self.p_startup, label=_('fullscreen'), pos=(40, 130))
+		self.startup_opencpn_fullscreen.Bind(wx.EVT_CHECKBOX, self.startup)
+
+		self.startup_multiplexer = wx.CheckBox(self.p_startup, label=_('NMEA 0183 multiplexer'), pos=(20, 165))
+		self.startup_multiplexer.Bind(wx.EVT_CHECKBOX, self.startup)
+		self.startup_nmea_time = wx.CheckBox(self.p_startup, label=_('Set time from NMEA'), pos=(40, 190))
+		self.startup_nmea_time.Bind(wx.EVT_CHECKBOX, self.startup)
+
+		self.startup_remote_desktop = wx.CheckBox(self.p_startup, label=_('VNC remote desktop'), pos=(20, 225))
+		self.startup_remote_desktop.Bind(wx.EVT_CHECKBOX, self.startup)
+		self.startup_vnc_pass = wx.CheckBox(self.p_startup, label=_('use password'), pos=(40, 250))
+		self.startup_vnc_pass.Bind(wx.EVT_CHECKBOX, self.startup)
+
+		wx.StaticBox(self.p_startup, size=(330, 230), pos=(350, 65))
+
+		self.startup_play_sound = wx.CheckBox(self.p_startup, label=_('Play sound'), pos=(360, 80))
+		self.startup_play_sound.Bind(wx.EVT_CHECKBOX, self.startup)
+		self.startup_path_sound = wx.TextCtrl(self.p_startup, -1, size=(200, 32), pos=(360, 110))
+		self.button_select_sound =wx.Button(self.p_startup, label=_('Select'), pos=(570, 110))
+		self.button_select_sound.Bind(wx.EVT_BUTTON, self.on_select_sound)
+
+		self.op_maximize = wx.CheckBox(self.p_startup, label=_('Maximize OpenPlotter'), pos=(360, 150))
+		self.op_maximize.Bind(wx.EVT_CHECKBOX, self.startup)
+
+	def read_startup(self):	
+		self.delay.SetValue(self.conf.get('STARTUP', 'delay'))
+
+		if self.conf.get('STARTUP', 'opencpn')=='1': 
+			self.startup_opencpn.SetValue(True)
+		else:
+			self.startup_opencpn_nopengl.Disable()
+			self.startup_opencpn_fullscreen.Disable()
+		if self.conf.get('STARTUP', 'opencpn_no_opengl')=='1': self.startup_opencpn_nopengl.SetValue(True)
+		if self.conf.get('STARTUP', 'opencpn_fullscreen')=='1': self.startup_opencpn_fullscreen.SetValue(True)
+		if self.conf.get('STARTUP', 'kplex')=='1': 
+			self.startup_multiplexer.SetValue(True)
+		else:
+			self.startup_nmea_time.Disable()
+		if self.conf.get('STARTUP', 'gps_time')=='1': self.startup_nmea_time.SetValue(True)
+		if self.conf.get('STARTUP', 'x11vnc')=='1': 
+			self.startup_remote_desktop.SetValue(True)
+		else:
+			self.startup_vnc_pass.Disable()
+		if self.conf.get('STARTUP', 'vnc_pass')=='1': self.startup_vnc_pass.SetValue(True)
+		if self.conf.get('STARTUP', 'maximize')=='1':
+			self.op_maximize.SetValue(True) 
+			self.Maximize()
+		self.startup_path_sound.SetValue(self.conf.get('STARTUP', 'sound'))
+		if self.conf.get('STARTUP', 'play')=='1':
+			self.startup_play_sound.SetValue(True)
+		
+	def on_select_sound(self, e):
 		dlg = wx.FileDialog(self, message=_('Choose a file'), defaultDir=currentpath+'/sounds', defaultFile='', wildcard=_('Audio files')+' (*.mp3)|*.mp3|'+_('All files')+' (*.*)|*.*', style=wx.OPEN | wx.CHANGE_DIR)
 		if dlg.ShowModal() == wx.ID_OK:
 			file_path = dlg.GetPath()
@@ -1155,7 +480,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.conf.set('STARTUP', 'sound', file_path)
 		dlg.Destroy()
 
-	def ok_delay(self, e):
+	def on_ok_delay(self, e):
 		delay=self.delay.GetValue()
 		if not re.match('^[0-9]*$', delay):
 				self.ShowMessage(_('You can enter only numbers.'))
@@ -1235,6 +560,77 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.conf.set('STARTUP', 'play', '0')
 
 ########################################### WiFi AP
+	def page_wifi(self):
+		wx.StaticBox(self.p_wifi, size=(370, 315), pos=(10, 10))
+		self.wifi_enable = wx.CheckBox(self.p_wifi, label=_('Enable access point'), pos=(20, 25))
+		self.wifi_enable.Bind(wx.EVT_CHECKBOX, self.onwifi_enable)
+
+		self.bridge_enable = wx.CheckBox(self.p_wifi, label=_('Enable bridge to eth0'), pos=(180,25))
+		
+		self.available_wireless = []
+		output=subprocess.check_output('ifconfig', stderr=subprocess.STDOUT)
+		for i in range (0, 9):
+			ii=str(i)
+			if 'wlan'+ii in output: self.available_wireless.append('wlan'+ii)
+
+		self.available_wireless_AP = []
+		for i in self.available_wireless:
+			output2=subprocess.check_output(['iw',i,'info'], stderr=subprocess.STDOUT)
+			startpos=output2.find('wiphy')+5
+			iwphy=int(output2[startpos:startpos+3])
+			output2=subprocess.check_output(['iw','phy'+str(iwphy),'info'], stderr=subprocess.STDOUT)
+			startpos=output2.find('Supported interface modes')
+			if 'AP' in output2[startpos:startpos+80]:
+				self.available_wireless_AP.append(i)
+
+		self.available_share = [_('none')]
+		for i in range (0, 9):
+			ii=str(i)
+			if 'eth'+ii in output: self.available_share.append('eth'+ii)
+			if 'ppp'+ii in output: self.available_share.append('ppp'+ii)
+			if 'usb'+ii in output: self.available_share.append('usb'+ii)
+		for i in self.available_wireless:
+			self.available_share.append(i)
+		share_old= self.conf.get('WIFI', 'share')
+		if share_old!='0' and share_old not in self.available_share: self.available_share.append(share_old)
+		self.wlan_label=wx.StaticText(self.p_wifi, label=_('Access point device'), pos=(20, 55))
+		self.wlan = wx.ComboBox(self.p_wifi, choices=self.available_wireless_AP, style=wx.CB_READONLY, size=(100, 32), pos=(20, 75))
+		
+		self.share_label=wx.StaticText(self.p_wifi, label=_('Sharing Internet device'), pos=(180, 55))
+		self.share = wx.ComboBox(self.p_wifi, choices=self.available_share, style=wx.CB_READONLY, size=(100, 32), pos=(180, 75))
+
+		self.wifi_settings_label=wx.StaticText(self.p_wifi, label=_('Access point settings'), pos=(20, 120))
+
+		self.ssid = wx.TextCtrl(self.p_wifi, -1, size=(120, 32), pos=(20, 140))
+		self.ssid_label=wx.StaticText(self.p_wifi, label=_('SSID \nmaximum 32 characters'), pos=(160, 140))
+
+		self.passw = wx.TextCtrl(self.p_wifi, -1, size=(120, 32), pos=(20, 173))
+		self.passw_label=wx.StaticText(self.p_wifi, label=_('Password \nminimum 8 characters required'), pos=(160, 175))
+		
+		self.wifi_channel_list=['1','2','3','4','5','6','7','8','9','10','11','12','13']
+		self.wifi_channel = wx.ComboBox(self.p_wifi, choices=self.wifi_channel_list, style=wx.CB_READONLY, size=(120, 32), pos=(20, 208))
+		self.wifi_channel_label=wx.StaticText(self.p_wifi, label=_('Channel'), pos=(160, 215))
+
+		self.wifi_mode_list=['IEEE 802.11b', 'IEEE 802.11g']
+		self.wifi_mode = wx.ComboBox(self.p_wifi, choices=self.wifi_mode_list, style=wx.CB_READONLY, size=(120, 32), pos=(20, 246))
+		self.wifi_mode_label=wx.StaticText(self.p_wifi, label=_('Mode'), pos=(160, 255))
+
+		self.wifi_wpa_list=['None','WPA','WPA2', _('Both')]
+		self.wifi_wpa = wx.ComboBox(self.p_wifi, choices=self.wifi_wpa_list, style=wx.CB_READONLY, size=(120, 32), pos=(20, 285))
+		self.wifi_wpa_label=wx.StaticText(self.p_wifi, label=_('WPA'), pos=(160, 290))
+
+		self.wifi_button_default =wx.Button(self.p_wifi, label=_('Defaults'), pos=(275, 280))
+		self.wifi_button_default.Bind(wx.EVT_BUTTON, self.on_wifi_default)
+
+		wx.StaticBox(self.p_wifi, label=_(' Addresses '), size=(290, 315), pos=(385, 10))
+		self.ip_info = wx.TextCtrl(self.p_wifi, -1, style=wx.TE_MULTILINE|wx.TE_READONLY, size=(270, 245), pos=(395, 30))
+		self.ip_info.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_INACTIVECAPTION))
+
+		self.button_refresh_ip =wx.Button(self.p_wifi, label=_('Refresh'), pos=(565, 280))
+		self.button_refresh_ip.Bind(wx.EVT_BUTTON, self.on_show_ip_info)
+		
+		self.check_net_b =wx.Button(self.p_wifi, label=_('Status'), pos=(465, 280))
+		self.check_net_b.Bind(wx.EVT_BUTTON, self.on_check_net)	
 	
 	def read_wifi_conf(self):
 		if len(self.available_wireless)>0:
@@ -1256,7 +652,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.enable_disable_wifi(1)
 		else:
 			self.enable_disable_wifi(0)
-		self.show_ip_info('')
+		self.on_show_ip_info('')
 
 	def onwifi_enable (self, e):
 		isChecked = self.wifi_enable.GetValue()
@@ -1322,14 +718,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		msg=msg.replace('WiFi access point stopped.', _('WiFi access point stopped.'))
 		self.SetStatusText('')
 		self.ShowMessage(msg)
-		self.show_ip_info('')
+		self.on_show_ip_info('')
 
-	def show_ip_info(self, e):
+	def on_show_ip_info(self, e):
 		ip_info=subprocess.check_output(['hostname', '-I'])
 		out=_(' Multiplexed NMEA 0183:\n')
 		ips=ip_info.split()
 		for ip in ips:
-			out+=ip+':10110\n'
+			out+=ip+':55556\n'
 		out+=_('\n VNC remote desktop:\n')
 		for ip in ips:
 			out+=ip+':5900\n'
@@ -1350,7 +746,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			out+=ip+':10111\n'
 		self.ip_info.SetValue(out)
 
-	def check_net(self, e):
+	def on_check_net(self, e):
 		msg=''
 		msg1=''
 		network_info=''
@@ -1428,7 +824,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		
 		self.ShowMessage(msg)
 				
-	def wifi_default(self, e):
+	def on_wifi_default(self, e):
 		self.ssid.SetValue('OpenPlotter')
 		self.passw.SetValue('12345678')
 		self.wifi_channel.SetValue('6')
@@ -1477,7 +873,66 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.bridge_enable.Enable()
 			self.conf.set('WIFI', 'enable', '0')
 
-###########################################	NMEA 0183
+###########################################	NMEA 0183 kplex
+	def page_kplex(self):
+		title=wx.StaticText(self.p_kplex, label=_(' KPLEX '))
+
+		self.list_kplex = CheckListCtrl2(self.p_kplex, 152)
+		self.list_kplex.InsertColumn(0, _('Name'), width=130)
+		self.list_kplex.InsertColumn(1, _('Type'), width=45)
+		self.list_kplex.InsertColumn(2, _('io'), width=45)
+		self.list_kplex.InsertColumn(3, _('Port/Address'), width=95)
+		self.list_kplex.InsertColumn(4, _('Bauds/Port'),width=60)
+		self.list_kplex.InsertColumn(5, _('inFilter'),width=55)
+		self.list_kplex.InsertColumn(6, _('Filtering'),width=80)
+		self.list_kplex.InsertColumn(7, _('outFilter'),width=60)
+		self.list_kplex.InsertColumn(8, _('Filtering'),width=80)
+		self.list_kplex.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_kplex)
+		
+		diagnostic =wx.Button(self.p_kplex, label=_('diagnostic'))
+		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_kplex)
+
+		add =wx.Button(self.p_kplex, label=_('add'))
+		add.Bind(wx.EVT_BUTTON, self.on_add_kplex)
+		delete =wx.Button(self.p_kplex, label=_('delete'))
+		delete.Bind(wx.EVT_BUTTON, self.on_delete_kplex)
+
+		inspector =wx.Button(self.p_kplex, label=_('Inspector'))
+		inspector.Bind(wx.EVT_BUTTON, self.on_inspector)
+		restart =wx.Button(self.p_kplex, label=_('Restart'))
+		restart.Bind(wx.EVT_BUTTON, self.on_restart_kplex)
+		advanced =wx.Button(self.p_kplex, label=_('Advanced'))
+		advanced.Bind(wx.EVT_BUTTON, self.on_advanced_kplex)
+		apply_changes =wx.Button(self.p_kplex, label=_('Apply changes'))
+		apply_changes.Bind(wx.EVT_BUTTON, self.on_apply_changes_kplex)
+		cancel_changes =wx.Button(self.p_kplex, label=_('Cancel changes'))
+		cancel_changes.Bind(wx.EVT_BUTTON, self.on_cancel_changes_kplex)
+		
+		hlistbox = wx.BoxSizer(wx.HORIZONTAL)
+		hlistbox.Add(self.list_kplex, 1, wx.ALL|wx.EXPAND, 5)
+
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(diagnostic, 0, wx.RIGHT|wx.LEFT, 5)
+		hbox.Add((0,0), 1, wx.RIGHT|wx.LEFT, 5)
+		hbox.Add(add, 0, wx.RIGHT|wx.LEFT, 5)
+		hbox.Add(delete, 0, wx.RIGHT|wx.LEFT, 5)
+
+		hboxb = wx.BoxSizer(wx.HORIZONTAL)
+		hboxb.Add(inspector, 0, wx.RIGHT|wx.LEFT, 5)
+		hboxb.Add(restart, 0, wx.RIGHT|wx.LEFT, 5)
+		hboxb.Add(advanced, 0, wx.RIGHT|wx.LEFT, 5)
+		hboxb.Add((0,0), 1, wx.RIGHT|wx.LEFT, 5)
+		hboxb.Add(apply_changes, 0, wx.RIGHT|wx.LEFT, 5)
+		hboxb.Add(cancel_changes, 0, wx.RIGHT|wx.LEFT, 5)
+
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		vbox.Add(title, 0, wx.ALL|wx.EXPAND, 5)
+		vbox.Add(hlistbox, 1, wx.ALL|wx.EXPAND, 0)
+		vbox.Add(hbox, 0, wx.ALL|wx.EXPAND, 0)
+		vbox.AddSpacer(5)
+		vbox.Add(hboxb, 0, wx.ALL|wx.EXPAND, 0)	
+
+		self.p_kplex.SetSizer(vbox)		
 
 	def on_inspector(self,event):
 		subprocess.call(['pkill', '-f', 'output.py'])
@@ -1639,8 +1094,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def on_apply_changes_kplex(self,event):
 		data='# For advanced manual configuration, please visit: http://www.stripydog.com/kplex/configuration.html\n# Please do not modify defaults nor OpenPlotter GUI settings.\n# Add manual settings at the end of the document.\n\n'
 
-		data=data+'###defaults\n\n[udp]\nname=system_input\ndirection=in\noptional=yes\naddress=127.0.0.1\nport=10110\n\n'
-		data=data+'[tcp]\nname=system_output\ndirection=out\nofilter=-**RMB\nmode=server\nport=10110\n\n###end of defaults\n\n###OpenPlotter GUI settings\n\n'
+		data=data+'###defaults\n\n'
+		data=data+'[udp]\nname=system_output\ndirection=out\nofilter=-**RMB\naddress=127.0.0.1\nport=55556\n\n###end of defaults\n\n###OpenPlotter GUI settings\n\n'
 		
 		for index,item in enumerate(self.kplex):
 			if 'system_input' not in item[1] and 'system_output' not in item[1]:
@@ -1738,6 +1193,88 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 						subprocess.Popen(['python',currentpath+'/diagnostic-NMEA.py','10113','diagnostic_output'])				
 			
 ###################################### I2C sensors
+	def page_i2c(self):
+		z0=20
+		z1=45
+		z2=75
+		z3=105
+		z4=145
+		z5=175
+		z6=215
+		z7=245
+		z8=293
+		s1=20
+		s2=130
+		s3=560
+		s4=300
+		s5=500
+		s6=220
+		
+		self.list_sk_path_temp=['environment.inside.temperature','environment.outside.temperature']
+		self.list_sk_path_hum=['environment.inside.humidity','environment.outside.humidity']
+
+		z=z0
+		wx.StaticBox(self.p_i2c,label=_(' Settings '), size=(675, 330), pos=(5, 5))
+		wx.StaticText(self.p_i2c, label=_('Sensors'), pos=(s2, z))
+		wx.StaticText(self.p_i2c, label=_('Signal K'), pos=(s4, z))
+		wx.StaticText(self.p_i2c, label=_('Offset'), pos=(s5, z))
+		wx.StaticText(self.p_i2c, label=_('Rate (sec)'), pos=(s6, z))
+		self.rate_list = ['0.1', '0.25', '0.5', '0.75', '1', '5', '30', '60', '300']
+		z=z1
+		self.heading_label=wx.StaticText(self.p_i2c, label=_('Heading'), pos=(s1, z))
+		self.heading_sensor=wx.StaticText(self.p_i2c, pos=(s2, z))
+		self.button_calibrate_imu =wx.Button(self.p_i2c, label=_('Calibrate'), pos=(s3, z))
+		self.button_calibrate_imu.Bind(wx.EVT_BUTTON, self.on_i2c_calibrate_imu)
+		wx.StaticText(self.p_i2c, label=_('navigation.headingMagnetic'), pos=(s4, z))
+		self.heading_offset = wx.TextCtrl(self.p_i2c, size=(45, 20), pos=(s5, z))
+
+		z=z2
+		self.heel_label=wx.StaticText(self.p_i2c, label=_('Heel'), pos=(s1, z))
+		self.heel_sensor=wx.StaticText(self.p_i2c, pos=(s2, z))
+		wx.StaticText(self.p_i2c, label=_('navigation.attitude.roll'), pos=(s4, z))
+		self.heel_offset = wx.TextCtrl(self.p_i2c, size=(45, 20), pos=(s5, z))
+		self.rate_imu= wx.ComboBox(self.p_i2c, choices=self.rate_list, style=wx.CB_READONLY, size=(60, 25), pos=(s6, z-5))
+		z=z3
+		self.pitch_label=wx.StaticText(self.p_i2c, label=_('Pitch'), pos=(s1, z))
+		self.pitch_sensor=wx.StaticText(self.p_i2c, pos=(s2, z))
+		button_reset_imu =wx.Button(self.p_i2c, label=_('Reset'), pos=(s3, z-20))
+		button_reset_imu.Bind(wx.EVT_BUTTON, self.on_reset_imu)
+		wx.StaticText(self.p_i2c, label=_('navigation.attitude.pitch'), pos=(s4, z))
+		self.pitch_offset = wx.TextCtrl(self.p_i2c, size=(45, 20), pos=(s5, z))
+		z=z4
+		self.pressure_label=wx.StaticText(self.p_i2c, label=_('Pressure'), pos=(s1, z))
+		self.pressure_sensor=wx.StaticText(self.p_i2c, pos=(s2, z))
+		button_reset_pressure=wx.Button(self.p_i2c, label=_('Reset'), pos=(s3, z+5))
+		button_reset_pressure.Bind(wx.EVT_BUTTON, self.on_reset_press)
+		wx.StaticText(self.p_i2c, label=_('environment.outside.pressure'), pos=(s4, z))
+		self.pressure_offset = wx.TextCtrl(self.p_i2c, size=(45, 20), pos=(s5, z))
+		self.rate_press= wx.ComboBox(self.p_i2c, choices=self.rate_list, style=wx.CB_READONLY, size=(60, 25), pos=(s6, z+10))
+		z=z5
+		self.p_temp_label=wx.StaticText(self.p_i2c, label=_('Temperature'), pos=(s1, z))
+		self.p_temp_sensor=wx.StaticText(self.p_i2c, pos=(s2, z))
+		self.p_temp_skt = wx.ComboBox(self.p_i2c, choices=self.list_sk_path_temp, style=wx.CB_READONLY, size=(180, 25), pos=(s4, z-3))
+		self.p_temp_offset = wx.TextCtrl(self.p_i2c, size=(45, 20), pos=(s5, z))
+		z=z6
+		self.humidity_label=wx.StaticText(self.p_i2c, label=_('Humidity'), pos=(s1, z))
+		self.humidity_sensor=wx.StaticText(self.p_i2c, pos=(s2, z))
+		button_reset_humidity=wx.Button(self.p_i2c, label=_('Reset'), pos=(s3, z+5))
+		button_reset_humidity.Bind(wx.EVT_BUTTON, self.on_reset_hum)
+		self.humidity_skt = wx.ComboBox(self.p_i2c, choices=self.list_sk_path_hum, style=wx.CB_READONLY, size=(180, 25), pos=(s4, z-3))
+		self.humidity_offset = wx.TextCtrl(self.p_i2c, size=(45, 20), pos=(s5, z))
+		self.rate_hum= wx.ComboBox(self.p_i2c, choices=self.rate_list, style=wx.CB_READONLY, size=(60, 25), pos=(s6, z+10))
+		z=z7
+		self.h_temp_label=wx.StaticText(self.p_i2c, label=_('Temperature'), pos=(s1, z))
+		self.h_temp_sensor=wx.StaticText(self.p_i2c, pos=(s2, z))
+		self.h_temp_skt = wx.ComboBox(self.p_i2c, choices=self.list_sk_path_temp, style=wx.CB_READONLY, size=(180, 25), pos=(s4, z-3))
+		self.h_temp_offset = wx.TextCtrl(self.p_i2c, size=(45, 20), pos=(s5, z))
+		z=z8
+		diagnostic =wx.Button(self.p_i2c, label=_('SK Diagnostic'), pos=(s1, z))
+		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)	
+
+		cancel =wx.Button(self.p_i2c, label=_('cancel'), pos=(480, z))
+		cancel.Bind(wx.EVT_BUTTON, self.on_i2c_cancel)
+		apply =wx.Button(self.p_i2c, label=_('apply'), pos=(580, z))
+		apply.Bind(wx.EVT_BUTTON, self.on_i2c_apply)
 
 	def start_sensors(self):
 		subprocess.Popen(['python', currentpath+'/i2c_d.py'], cwd=currentpath+'/imu')
@@ -1746,7 +1283,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		subprocess.call(['pkill', 'RTIMULibDemoGL'])
 		subprocess.call(['pkill', '-f', 'i2c_d.py'])
 
-	def i2c_start(self):
+	def read_i2c(self):
 		self.imu_sensor='none'
 		self.press_sensor='none'
 		self.hum_sensor='none'
@@ -1830,7 +1367,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.conf.set('I2C', 'sk_hum', '1')
 			self.conf.set('I2C', 'sk_temp_h', '1')
 
-	def i2c_apply(self, e):
+	def on_i2c_apply(self, e):
 		self.conf.set('I2C', 'rate_imu', str(self.rate_imu.GetValue()))
 		self.conf.set('I2C', 'rate_press', str(self.rate_press.GetValue()))
 		self.conf.set('I2C', 'rate_hum', str(self.rate_hum.GetValue()))
@@ -1849,20 +1386,20 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.conf.set('OFFSET', 'temperature_h',str(float(self.h_temp_offset.GetValue())))
 		except:
 			self.ShowMessage(_("An offset is not a number"))
-			self.i2c_start()
+			self.read_i2c()
 		
 		self.restart_SK(0)
 
-	def i2c_cancel(self, e):
-		self.i2c_start()
+	def on_i2c_cancel(self, e):
+		self.read_i2c()
 		
-	def i2c_calibrate_imu(self, e):
+	def on_i2c_calibrate_imu(self, e):
 		self.stop_sensors()
 		subprocess.Popen('RTIMULibDemoGL', cwd=currentpath+'/imu')
 		msg=_('After calibrating, click apply.')
 		self.ShowMessage(msg)
 
-	def reset_imu(self, e):
+	def on_reset_imu(self, e):
 		try:
 			os.remove(currentpath+'/imu/RTIMULib.ini')
 		except Exception,e: print str(e)
@@ -1873,7 +1410,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.check_sensors()
 		self.restart_SK(0)
 
-	def reset_press(self, e):
+	def on_reset_press(self, e):
 		try:
 			os.remove(currentpath+'/imu/RTIMULib2.ini')
 		except Exception,e: print str(e)
@@ -1882,7 +1419,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.check_sensors()
 		self.restart_SK(0)
 
-	def reset_hum(self, e):
+	def on_reset_hum(self, e):
 		try:
 			os.remove(currentpath+'/imu/RTIMULib3.ini')
 		except Exception,e: print str(e)
@@ -1892,6 +1429,37 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.restart_SK(0)
 
 ###################################### SPI
+	def page_spi(self):
+		title = wx.StaticText(self.p_spi, label=_(' SPI MCP3008 '))
+		
+		self.list_MCP = wx.ListCtrl(self.p_spi, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
+		self.list_MCP.InsertColumn(0, _('aktiv'), width=40)
+		self.list_MCP.InsertColumn(1, _('channel'), width=65)
+		self.list_MCP.InsertColumn(2, _('SK name'), width=310)
+		self.list_MCP.InsertColumn(3, _('*'), width=120)
+		self.list_MCP.InsertColumn(4, _('convert'), width=55)
+		self.list_MCP.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit_MCP)		
+		
+		restart =wx.Button(self.p_spi, label=_('restart'))
+		restart.Bind(wx.EVT_BUTTON, self.on_restart_MCP)
+
+		value_setting =wx.Button(self.p_spi, label=_('value setting'))
+		value_setting.Bind(wx.EVT_BUTTON, self.on_value_setting)
+		
+		hlistbox = wx.BoxSizer(wx.HORIZONTAL)
+		hlistbox.Add(self.list_MCP, 1, wx.ALL|wx.EXPAND, 5)
+
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(restart, 0, wx.RIGHT|wx.LEFT, 5)
+		hbox.Add(value_setting, 0, wx.RIGHT|wx.LEFT, 5)
+		
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		vbox.Add(title, 0, wx.ALL|wx.EXPAND, 5)
+		vbox.Add(hlistbox, 1, wx.ALL|wx.EXPAND, 0)
+		vbox.Add(hbox, 0, wx.ALL, 0)
+
+		self.p_spi.SetSizer(vbox)	
+
 	def on_restart_MCP(self,e):
 		pass
 
@@ -1984,6 +1552,40 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		dlg.Destroy()		
 		self.conf.read()
 ###################################### GPIO
+	def page_gpio(self):
+		title = wx.StaticText(self.p_gpio, label=_(' Sensors '))
+		
+		self.list_gpio = wx.ListCtrl(self.p_gpio, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
+		self.list_gpio.InsertColumn(0, _('Name'), width=345)
+		self.list_gpio.InsertColumn(1, _('I/O'), width=80)
+		self.list_gpio.InsertColumn(2, 'GPIO', width=60)
+		self.list_gpio.InsertColumn(3, 'Pull', width=80)
+		self.list_gpio.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_gpio)
+			
+		add = wx.Button(self.p_gpio, label=_('add'))
+		add.Bind(wx.EVT_BUTTON, self.on_add_gpio)
+
+		delete = wx.Button(self.p_gpio, label=_('delete'))
+		delete.Bind(wx.EVT_BUTTON, self.on_delete_gpio)
+
+		diagnostic = wx.Button(self.p_gpio, label=_('SK Diagnostic'))
+		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
+		
+		hlistbox_but = wx.BoxSizer(wx.VERTICAL)
+		hlistbox_but.Add(add, 0, wx.ALL, 5)
+		hlistbox_but.Add(delete, 0, wx.ALL, 5)
+
+		hlistbox = wx.BoxSizer(wx.HORIZONTAL)
+		hlistbox.Add(self.list_gpio, 1, wx.ALL|wx.EXPAND, 5)
+		hlistbox.Add(hlistbox_but, 0, wx.RIGHT|wx.LEFT, 0)
+
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		vbox.Add(title, 0, wx.ALL|wx.EXPAND, 5)
+		vbox.Add(hlistbox, 1, wx.ALL|wx.EXPAND, 0)
+		vbox.Add(diagnostic, 0, wx.RIGHT|wx.LEFT, 5)
+
+		self.p_gpio.SetSizer(vbox)
+
 	def start_gpio(self):
 		subprocess.Popen(['python',currentpath+'/gpio_d.py'])
 
@@ -2010,7 +1612,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.edit_add_gpio(edit)
 
 	
-	def add_gpio(self,e):
+	def on_add_gpio(self,e):
 		self.edit_add_gpio(0)
 	
 	def edit_add_gpio(self,edit):
@@ -2045,7 +1647,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			gpio_selection=gpio_selection.encode('utf8')
 			pull_selection=dlg.pull_select.GetValue()
 			pull_selection=pull_selection.encode('utf8')
-			if not name or not io_selection or not gpio_selection or not pull_selection:
+			if not name or not io_selection or not gpio_selection or (not pull_selection and io=='in'):
 				self.ShowMessage(_('Failed. You must fill in all fields.'))
 				dlg.Destroy()
 				return
@@ -2068,7 +1670,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.apply_changes_gpio()
 		dlg.Destroy()
 
-	def delete_gpio(self,e):
+	def on_delete_gpio(self,e):
 		selected_gpio=self.list_gpio.GetFirstSelected()
 		if selected_gpio==-1: 
 			self.ShowMessage(_('Select an item to delete.'))
@@ -2082,7 +1684,51 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.restart_SK(0)
 
 ####################### Accounts
+	def page_account(self):
+		wx.StaticBox(self.p_account, label=_(' Twitter '), size=(330, 205), pos=(10, 10))
+		self.twitter_enable = wx.CheckBox(self.p_account, label=_('Enable'), pos=(20, 32))
+		self.twitter_enable.Bind(wx.EVT_CHECKBOX, self.on_twitter_enable)
+		
+		wx.StaticText(self.p_account, label=_('apiKey'), pos=(20, 70))
+		self.apiKey = wx.TextCtrl(self.p_account, -1, size=(180, 32), pos=(150, 65))
+		wx.StaticText(self.p_account, label=_('apiSecret'), pos=(20, 105))
+		self.apiSecret = wx.TextCtrl(self.p_account, -1, size=(180, 32), pos=(150, 100))
+		wx.StaticText(self.p_account, label=_('accessToken'), pos=(20, 140))
+		self.accessToken = wx.TextCtrl(self.p_account, -1, size=(180, 32), pos=(150, 135))
+		wx.StaticText(self.p_account, label=_('accessTokenSecret'), pos=(20, 175))
+		self.accessTokenSecret = wx.TextCtrl(self.p_account, -1, size=(180, 32), pos=(150, 170))
 
+		wx.StaticBox(self.p_account, label=_(' Gmail '), size=(330, 205), pos=(350, 10))
+		self.gmail_enable = wx.CheckBox(self.p_account, label=_('Enable'), pos=(360, 32))
+		self.gmail_enable.Bind(wx.EVT_CHECKBOX, self.on_gmail_enable)
+		wx.StaticText(self.p_account, label=_('Gmail account'), pos=(360, 70))
+		self.Gmail_account = wx.TextCtrl(self.p_account, -1, size=(180, 32), pos=(490, 65))
+		wx.StaticText(self.p_account, label=_('Gmail password'), pos=(360, 105))
+		self.Gmail_password = wx.TextCtrl(self.p_account, -1, size=(180, 32), pos=(490, 100))
+		wx.StaticText(self.p_account, label=_('Recipient'), pos=(360, 140))
+		self.Recipient = wx.TextCtrl(self.p_account, -1, size=(180, 32), pos=(490, 135))
+
+	def read_account(self):	
+		if self.conf.get('TWITTER', 'apiKey'): self.apiKey.SetValue('********************')
+		if self.conf.get('TWITTER', 'apiSecret'): self.apiSecret.SetValue('********************')
+		if self.conf.get('TWITTER', 'accessToken'): self.accessToken.SetValue('********************')
+		if self.conf.get('TWITTER', 'accessTokenSecret'): self.accessTokenSecret.SetValue('********************')
+		if self.conf.get('TWITTER', 'enable')=='1':
+			self.twitter_enable.SetValue(True)
+			self.apiKey.Disable()
+			self.apiSecret.Disable()
+			self.accessToken.Disable()
+			self.accessTokenSecret.Disable()
+
+		if self.conf.get('GMAIL', 'gmail'): self.Gmail_account.SetValue(self.conf.get('GMAIL', 'gmail'))
+		if self.conf.get('GMAIL', 'password'): self.Gmail_password.SetValue('********************')
+		if self.conf.get('GMAIL', 'recipient'): self.Recipient.SetValue(self.conf.get('GMAIL', 'recipient'))
+		if self.conf.get('GMAIL', 'enable')=='1':
+			self.gmail_enable.SetValue(True)
+			self.Gmail_account.Disable()
+			self.Gmail_password.Disable()
+			self.Recipient.Disable()
+				
 	def start_monitoring(self):
 		self.ShowMessage(_('Actions will be restarted.'))
 		subprocess.call(['pkill', '-f', 'monitoring.py'])
@@ -2142,6 +1788,77 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.start_monitoring()
 
 ####################### Actions
+	def page_action(self):
+		title=wx.StaticText(self.p_action, label=_(' Triggers '))
+		
+		self.list_triggers = CheckListCtrl(self.p_action, 100)
+		self.list_triggers.InsertColumn(0, _('trigger'), width=275)
+		self.list_triggers.InsertColumn(1, _('operator'), width=170)
+		self.list_triggers.InsertColumn(2, _('value'))
+		self.list_triggers.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_print_actions)
+		self.list_triggers.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit_triggers)
+		self.list_triggers.SetMinSize((10,10));
+		
+		add_trigger =wx.Button(self.p_action, label=_('add'))
+		add_trigger.Bind(wx.EVT_BUTTON, self.on_add_trigger)
+
+		delete_trigger =wx.Button(self.p_action, label=_('delete'))
+		delete_trigger.Bind(wx.EVT_BUTTON, self.on_delete_trigger)
+		
+		self.list_actions = wx.ListCtrl(self.p_action, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
+		self.list_actions.InsertColumn(0, _('action'), width=200)
+		self.list_actions.InsertColumn(1, _('data'), width=220)
+		self.list_actions.InsertColumn(2, _('repeat'), width=130)
+		self.list_actions.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_actions)
+		self.list_actions.SetMinSize((10,10));
+
+		add_action =wx.Button(self.p_action, label=_('add'))
+		add_action.Bind(wx.EVT_BUTTON, self.on_add_action)
+
+		delete_action =wx.Button(self.p_action, label=_('delete'))
+		delete_action.Bind(wx.EVT_BUTTON, self.on_delete_action)
+
+		stop_all=wx.Button(self.p_action, label=_('Stop all'))
+		stop_all.Bind(wx.EVT_BUTTON, self.on_stop_actions)
+		
+		start_all=wx.Button(self.p_action, label=_('Start all'))
+		start_all.Bind(wx.EVT_BUTTON, self.on_start_actions)
+
+		apply_changes =wx.Button(self.p_action, label=_('Apply changes'))
+		apply_changes.Bind(wx.EVT_BUTTON, self.on_apply_changes_actions)
+		cancel_changes =wx.Button(self.p_action, label=_('Cancel changes'))
+		cancel_changes.Bind(wx.EVT_BUTTON, self.on_cancel_changes_actions)
+		
+		hlistbox_but = wx.BoxSizer(wx.VERTICAL)
+		hlistbox_but.Add(add_trigger, 0, wx.ALL, 5)
+		hlistbox_but.Add(delete_trigger, 0, wx.ALL, 5)
+
+		hlistbox = wx.BoxSizer(wx.HORIZONTAL)
+		hlistbox.Add(self.list_triggers, 1, wx.ALL|wx.EXPAND, 5)
+		hlistbox.Add(hlistbox_but, 0, wx.RIGHT|wx.LEFT, 0)
+
+		hlistbox_butb10 = wx.BoxSizer(wx.VERTICAL)
+		hlistbox_butb10.Add(add_action, 0, wx.ALL, 5)
+		hlistbox_butb10.Add(delete_action, 0, wx.ALL, 5)
+
+		hlistboxb = wx.BoxSizer(wx.HORIZONTAL)
+		hlistboxb.Add(self.list_actions, 1, wx.ALL|wx.EXPAND, 5)
+		hlistboxb.Add(hlistbox_butb10, 0, wx.RIGHT|wx.LEFT, 0)
+		
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(stop_all, 0, wx.RIGHT|wx.LEFT, 5)
+		hbox.Add(start_all, 0, wx.RIGHT|wx.LEFT, 5)
+		hbox.Add((0,0), 1, wx.RIGHT|wx.LEFT, 5)
+		hbox.Add(apply_changes, 0, wx.RIGHT|wx.LEFT, 5)
+		hbox.Add(cancel_changes, 0, wx.RIGHT|wx.LEFT, 5)
+		
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		vbox.Add(title, 0, wx.ALL|wx.EXPAND, 5)
+		vbox.Add(hlistbox, 1, wx.ALL|wx.EXPAND, 0)
+		vbox.Add(hlistboxb, 1, wx.ALL|wx.EXPAND, 0)
+		vbox.Add(hbox, 0, wx.ALL|wx.EXPAND, 0)	
+		
+		self.p_action.SetSizer(vbox)		
 
 	def read_triggers(self):
 		pass
@@ -2365,6 +2082,39 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.list_actions.DeleteAllItems()
 
 ####################### 1W sensors
+	def page_1w(self):
+		title = wx.StaticText(self.p_1w, label=_(' Temperature sensors '))
+
+		self.list_DS18B20 =	wx.ListCtrl(self.p_1w, style=wx.LC_REPORT)
+		self.list_DS18B20.InsertColumn(0, _('Name'), width=100)
+		self.list_DS18B20.InsertColumn(1, _('Signal K'), width=310)
+		self.list_DS18B20.InsertColumn(2, _('ID'), width=105)
+		self.list_DS18B20.InsertColumn(4, _('Offset'), width=50)
+		self.list_DS18B20.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_DS18B20)
+			
+		add = wx.Button(self.p_1w, label=_('add'))
+		add.Bind(wx.EVT_BUTTON, self.on_add_DS18B20)
+
+		delete = wx.Button(self.p_1w, label=_('delete'))
+		delete.Bind(wx.EVT_BUTTON, self.on_delete_DS18B20)
+
+		diagnostic = wx.Button(self.p_1w, label=_('SK Diagnostic'))
+		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
+		
+		hlistbox_but = wx.BoxSizer(wx.VERTICAL)
+		hlistbox_but.Add(add, 0, wx.ALL, 5)
+		hlistbox_but.Add(delete, 0, wx.ALL, 5)
+
+		hlistbox = wx.BoxSizer(wx.HORIZONTAL)
+		hlistbox.Add(self.list_DS18B20, 1, wx.ALL|wx.EXPAND, 5)
+		hlistbox.Add(hlistbox_but, 0, wx.RIGHT|wx.LEFT, 0)
+
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		vbox.Add(title, 0, wx.ALL|wx.EXPAND, 5)
+		vbox.Add(hlistbox, 1, wx.ALL|wx.EXPAND, 0)
+		vbox.Add(diagnostic, 0, wx.RIGHT|wx.LEFT, 5)
+
+		self.p_1w.SetSizer(vbox)		
 
 	def start_1w(self):
 		subprocess.Popen(['python',currentpath+'/1w_d.py'])
@@ -2451,6 +2201,37 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.restart_SK(0)
 
 ####################### USB manager
+	def page_usb(self):
+		title = wx.StaticText(self.p_usb, label=_(' USB Serial ports '))
+		
+		self.list_USBinst = wx.ListCtrl(self.p_usb, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
+		self.list_USBinst.InsertColumn(0, _('name'), width=130)
+		self.list_USBinst.InsertColumn(1, _('vendor'), width=55)
+		self.list_USBinst.InsertColumn(2, _('product'), width=60)
+		self.list_USBinst.InsertColumn(3, _('port'), width=90)
+		self.list_USBinst.InsertColumn(4, _('serial'), width=130)
+		self.list_USBinst.InsertColumn(5, _('remember'), width=100)
+		self.list_USBinst.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_USBinst)
+			
+		add =wx.Button(self.p_usb, label=_('add'))
+		add.Bind(wx.EVT_BUTTON, self.on_add_USBinst)
+
+		delete =wx.Button(self.p_usb, label=_('delete'))
+		delete.Bind(wx.EVT_BUTTON, self.on_delete_USBinst)
+		
+		hlistbox = wx.BoxSizer(wx.HORIZONTAL)
+		hlistbox.Add(self.list_USBinst, 1, wx.ALL|wx.EXPAND, 5)
+
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(add, 0, wx.RIGHT|wx.LEFT, 5)
+		hbox.Add(delete, 0, wx.RIGHT|wx.LEFT, 5)
+
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		vbox.Add(title, 0, wx.ALL|wx.EXPAND, 5)
+		vbox.Add(hlistbox, 1, wx.ALL|wx.EXPAND, 0)
+		vbox.Add(hbox, 0, wx.ALL|wx.EXPAND, 0)	
+
+		self.p_usb.SetSizer(vbox)
 
 	def start_udev(self):
 		subprocess.call(['sudo','udevadm','control','--reload-rules'])
@@ -2482,7 +2263,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		edit=[selected_USBinst,self.USBinst[selected_USBinst][0],self.USBinst[selected_USBinst][1],self.USBinst[selected_USBinst][2],self.USBinst[selected_USBinst][3],self.USBinst[selected_USBinst][4],self.USBinst[selected_USBinst][5],self.USBinst[selected_USBinst][6]]
 		self.edit_add_USBinst(edit)		
 
-	def add_USBinst(self,e):
+	def on_add_USBinst(self,e):
 		self.edit_add_USBinst(0)
 
 	def edit_add_USBinst(self,edit):
@@ -2528,7 +2309,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.apply_changes_USBinst()
 		dlg.Destroy()
 		
-	def delete_USBinst(self,e):
+	def on_delete_USBinst(self,e):
 		selected_USBinst=self.list_USBinst.GetFirstSelected()
 		if selected_USBinst==-1: 
 			self.ShowMessage(_('Select an item to delete.'))
@@ -2568,17 +2349,57 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.SerialCheck()
 
 ###################################### N2K
+	def page_n2k(self):
+		wx.StaticBox(self.p_n2k, label=_(' Settings '), size=(230, 265), pos=(10, 10))
+		i=35
+		self.CANUSB_label=wx.StaticText(self.p_n2k, label=_('CAN-USB-CAN device'), pos=(20, i))
+		self.SerDevLs = []
+		i+=20
+		self.can_usb= wx.ComboBox(self.p_n2k, choices=self.SerDevLs, style=wx.CB_READONLY, size=(140, 32), pos=(20, i))
+		self.can_usb.Bind(wx.EVT_COMBOBOX, self.on_n2k_device)
+		i+=35
+		self.n2k_enable = wx.CheckBox(self.p_n2k, label=_('Enable N2K input'), pos=(20, i))
+		self.n2k_enable.Bind(wx.EVT_CHECKBOX, self.on_n2k_enable)
+		i+=25
+		self.N2K_diagnostic_b =wx.Button(self.p_n2k, label=_('Diagnostic input'), pos=(20, i))
+		self.N2K_diagnostic_b.Bind(wx.EVT_BUTTON, self.on_N2K_diagnostic)	
+		i+=35
+		self.n2k_out_enable = wx.CheckBox(self.p_n2k, label=_('Enable N2K output'), pos=(20, i))
+		self.n2k_out_enable.Bind(wx.EVT_CHECKBOX, self.on_n2k_output)
+		i+=25	
+		self.N2K_diagnostic_out_b =wx.Button(self.p_n2k, label=_('Diagnostic output'), pos=(20, i))
+		self.N2K_diagnostic_out_b.Bind(wx.EVT_BUTTON, self.on_N2K_diagnostic_out)			
+		i+=40
+		self.button_N2K_setting =wx.Button(self.p_n2k, label=_('Output settings'), pos=(20, i))
+		self.button_N2K_setting.Bind(wx.EVT_BUTTON, self.on_N2K_setting)
+		
+		wx.StaticBox(self.p_n2k, label=_(' Inputs '), size=(430, 50), pos=(250, 10))
+		self.n2kinputs_label=wx.StaticText(self.p_n2k, label=_('PGNs: All'), pos=(260, 30))
 
-	def read_n2k(self):
+		wx.StaticBox(self.p_n2k, label=_(' Outputs '), size=(430, 210), pos=(250, 65))
+		wx.StaticText(self.p_n2k, label='PGNs:', pos=(260, 85))
+		self.n2koutputs_label=wx.StaticText(self.p_n2k, pos=(260, 105))
+
+	def read_n2k(self):	
+		self.mmsi.SetValue(self.vessel_self.mmsi)
+		self.set_label_SK()
+		if self.conf.get('N2K', 'enable')=='1': 
+			self.n2k_enable.SetValue(True)
+			self.can_usb.Disable()
+			self.button_N2K_setting.Disable()
+			self.N2K_diagnostic_b.Disable()
+		self.n2koutputs_label.SetLabel(self.conf.get('N2K', 'pgn_output'))
+		if self.conf.get('N2K', 'output')=='1': 
+			self.n2k_out_enable.SetValue(True)
+			self.N2K_diagnostic_out_b.Disable()
 		self.can_usb.SetValue(self.conf.get('N2K', 'can_usb'))
-
-	def onn2k_device(self, e):
+		
+	def on_n2k_device(self, e):
 		self.conf.set('N2K', 'can_usb', self.can_usb.GetValue())
 		
-	def onn2k_enable(self, e):
+	def on_n2k_enable(self, e):
 		with open(home+'/.config/signalk-server-node/settings/openplotter-settings.json') as data_file:
 			data = json.load(data_file)
-		text='NMEA 0183: system_output - TCP localhost 10110\nSignal K: I2C sensors - UDP localhost 55556\nSignal K: 1W sensors - UDP localhost 55557\nSignal K: notifications - UDP localhost 55558'
 		isChecked = self.n2k_enable.GetValue()
 		if isChecked:
 			if not self.can_usb.GetValue():
@@ -2604,7 +2425,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				new={"id":"CAN-USB","pipeElements":[{"type":"providers/execute","options":{"command":"actisense-serial xxx"}},{"type":"providers/liner"},{"type":"providers/n2kAnalyzer"},{"type":"providers/n2k-signalk"}]}
 				new['pipeElements'][0]['options']['command']='actisense-serial '+self.can_usb.GetValue()
 				data['pipedProviders'].append(new)
-			text+='\nNMEA 2K: CAN-USB-CAN - '+self.conf.get('N2K', 'can_usb')
 		else:
 			self.conf.set('N2K', 'enable', '0')
 			self.can_usb.Enable()
@@ -2617,12 +2437,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					del data['pipedProviders'][ii]
 				ii=ii+1
 		self.n2koutputs_label.SetLabel(self.conf.get('N2K', 'pgn_output'))
-		self.SKinputs_label.SetLabel(text)
+		self.set_label_SK()
 		with open(home+'/.config/signalk-server-node/settings/openplotter-settings.json', 'w') as outfile:
 			json.dump(data, outfile)
 		self.restart_SK(0)
 
-	def onn2k_output(self, e):
+	def on_n2k_output(self, e):
 		isChecked = self.n2k_out_enable.GetValue()
 		if isChecked:
 			if not self.can_usb.GetValue():
@@ -2639,7 +2459,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			subprocess.call(['pkill', '-f', 'N2K-server.py'])
 			self.N2K_diagnostic_out_b.Enable()
 
-	def N2K_setting(self, e):
+	def on_N2K_setting(self, e):
 		tty=str(self.can_usb.GetValue())
 		if len(tty)==0:
 			self.GetStatusBar().SetForegroundColour(wx.BLACK)
@@ -2652,7 +2472,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.GetStatusBar().SetForegroundColour(wx.BLACK)
 		self.SetStatusText(_('Select PGNs to transmit and enable N2K input/output again.'))	
 
-	def N2K_diagnostic(self, e):
+	def on_N2K_diagnostic(self, e):
 		tty=str(self.can_usb.GetValue())
 		if len(tty)==0:
 			self.GetStatusBar().SetForegroundColour(wx.BLACK)
@@ -2663,7 +2483,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.GetStatusBar().SetForegroundColour(wx.BLACK)
 		self.SetStatusText(_('Show received PGNs.'))	
 
-	def N2K_diagnostic_out(self, e):
+	def on_N2K_diagnostic_out(self, e):
 		tty=str(self.can_usb.GetValue())
 		if len(tty)==0:
 			self.SetStatusText(_('You have to select a CAN-USB-CAN device'))
@@ -2672,6 +2492,41 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		subprocess.Popen(['python',currentpath+'/diagnostic-N2K-output.py'])
 		self.SetStatusText(_('Show sent PGNs.'))	
 ###################################### Signal K
+	def page_sk(self):
+		wx.StaticBox(self.p_sk, label=_(' Settings '), size=(230, 265), pos=(10, 10))
+
+		self.mmsi = wx.TextCtrl(self.p_sk, -1, size=(110, 32), pos=(20, 65))
+		self.mmsi_label=wx.StaticText(self.p_sk, label='MMSI', pos=(140, 70))
+
+		self.button_restartSK =wx.Button(self.p_sk, label=_('Restart'), pos=(20, 115))
+		self.button_restartSK.Bind(wx.EVT_BUTTON, self.restart_SK)	
+
+		diagnostic =wx.Button(self.p_sk, label=_('Diagnostic'), pos=(20, 165))
+		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)	
+
+		apply_changes =wx.Button(self.p_sk, label=_('Apply changes'), pos=(125, 115))
+		apply_changes.Bind(wx.EVT_BUTTON, self.apply_SK)
+		
+		wx.StaticBox(self.p_sk, label=_(' Inputs '), size=(430, 130), pos=(250, 10))
+		self.SKinputs_label=wx.StaticText(self.p_sk, label='NMEA 0183: system_output - UDP localhost 55556', pos=(260, 30))
+
+		response = requests.get('http://localhost:3000/signalk')
+		data = response.json()
+		text=_('Version: ')
+		text+=data['endpoints']['v1']['version']
+		text+='\n\nhttp: '
+		text+=data['endpoints']['v1']['signalk-http']
+		text+='\nws: '
+		text+=data['endpoints']['v1']['signalk-ws']
+		text+='\nNMEA 0183: TCP localhost 10111'
+		wx.StaticBox(self.p_sk, label=_(' Outputs '), size=(430, 130), pos=(250, 145))
+		wx.StaticText(self.p_sk, label=text, pos=(260, 165))
+
+		show_SK =wx.Button(self.p_sk, label=_('Show Web Socket'), pos=(250, 285))
+		show_SK.Bind(wx.EVT_BUTTON, self.show_SK)
+
+		tools_SK =wx.Button(self.p_sk, label=_('Show Signal K tools'), pos=(420, 285))
+		tools_SK.Bind(wx.EVT_BUTTON, self.show_tools_SK)
 
 	def show_SK(self, e):
 		url = 'http://localhost:3000/examples/consumer-example.html'
@@ -2695,7 +2550,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def on_diagnostic_SK(self, e):
 		subprocess.call(['pkill', '-f', 'diagnostic-SK-input.py'])
 		subprocess.Popen(['python',currentpath+'/diagnostic-SK-input.py'])
-
 	
 	def apply_SK(self,e):
 		mmsi=self.mmsi.GetValue()
@@ -2711,9 +2565,77 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			json.dump(data, outfile)
 		self.restart_SK(0)
 
-
+	def set_label_SK(self):
+		text ='kplex output: UDP 55556 (NMEA 0183)\n'
+		text+='OP-sensors: UDP 55557 (I2C-, 1W-, SPI-sensors)\n'
+		text+='notifications: UDP 55558 ( status of GPIO pins for switches, MQTT\n'
+		text+='   messages, SMS messages, opencpn alarm messages)\n'
+		text+='serial: UDP 55559 (any sensor connected to USB/UART)\n'
+		text+='wifi: UDP 55561 (any sensor connected by wifi, ex. esp8266)\n'
+		if self.conf.get('N2K', 'enable')=='1': 
+			text+='NMEA 2K: CAN-USB-CAN - '+self.conf.get('N2K', 'can_usb')
+		self.SKinputs_label.SetLabel(text)
+	
 ####################### SMS
+	def page_sms(self):
+		wx.StaticBox(self.p_sms, label=_(' Settings '), size=(330, 180), pos=(10, 10))
+		self.sms_enable = wx.CheckBox(self.p_sms, label=_('Enable settings'), pos=(20, 30))
+		self.sms_enable.Bind(wx.EVT_CHECKBOX, self.onsms_enable)
 
+		self.sms_dev_label=wx.StaticText(self.p_sms, label='Serial port', pos=(20, 60))
+		self.sms_dev= wx.ComboBox(self.p_sms, choices=self.SerDevLs, style=wx.CB_READONLY, size=(150, 32), pos=(20, 80))
+		sms_con_list=['at','at19200','at115200','blueat','bluephonet','bluefbus','blueobex','bluerfgnapbus','bluerfat','blues60','dlr3','dku2','dku2at','dku2phonet','dku5','dku5fbus','fbus','fbusdlr3','fbusdku5','fbusblue','fbuspl2303','irdaphonet','irdaat','irdaobex','irdagnapbus','phonetblue','proxyphonet','proxyfbus','proxyat','proxyobex','proxygnapbus','proxys60','mbus']
+		
+		self.sms_bt_label=wx.StaticText(self.p_sms, label=_('Bluetooth address'), pos=(180, 60))
+		self.sms_bt = wx.TextCtrl(self.p_sms, -1, size=(150, 32), pos=(180, 80))
+
+		self.sms_con_label=wx.StaticText(self.p_sms, label='Connection', pos=(20, 120))
+		self.sms_con= wx.ComboBox(self.p_sms, choices=sms_con_list, style=wx.CB_READONLY, size=(150, 32), pos=(20, 140))
+		
+		self.button_sms_identify =wx.Button(self.p_sms, label=_('Identify'), pos=(180, 140))
+		self.button_sms_identify.Bind(wx.EVT_BUTTON, self.on_sms_identify)
+
+		wx.StaticBox(self.p_sms, label=_(' Sending '), size=(330, 180), pos=(350, 10))
+
+		self.sms_enable_send = wx.CheckBox(self.p_sms, label=_('Enable sending SMS'), pos=(360, 30))
+		self.sms_enable_send.Bind(wx.EVT_CHECKBOX, self.onsms_enable_send)
+
+		self.phone_number_label=wx.StaticText(self.p_sms, label=_('Send to phone'), pos=(360, 60))
+		self.phone_number = wx.TextCtrl(self.p_sms, -1, size=(150, 32), pos=(360, 80))
+
+		self.sms_text_label=wx.StaticText(self.p_sms, label=_('Text'), pos=(360, 120))
+		self.sms_text = wx.TextCtrl(self.p_sms, -1, size=(150, 32), pos=(360, 140))
+
+		self.button_sms_test =wx.Button(self.p_sms, label=_('Test'), pos=(520, 140))
+		self.button_sms_test.Bind(wx.EVT_BUTTON, self.on_sms_test)
+
+	def read_sms(self):	
+		if self.conf.get('SMS', 'serial')=='0': self.sms_dev.SetValue(self.SerDevLs[0])
+		else: self.sms_dev.SetValue(self.conf.get('SMS', 'serial'))
+		self.sms_bt.SetValue(self.conf.get('SMS', 'bluetooth'))
+		self.sms_con.SetValue(self.conf.get('SMS', 'connection'))
+		if self.conf.get('SMS', 'enable')=='1': 
+			self.sms_enable.SetValue(True)
+			self.sms_dev_label.Disable()
+			self.sms_dev.Disable()
+			self.sms_bt_label.Disable()
+			self.sms_bt.Disable()
+			self.sms_con_label.Disable()
+			self.sms_con.Disable()
+		else: 
+			self.button_sms_identify.Disable()
+
+		self.phone_number.SetValue(self.conf.get('SMS', 'phone'))
+		if self.conf.get('SMS', 'enable_sending')=='1': 
+			self.sms_enable_send.SetValue(True)
+			self.phone_number_label.Disable()
+			self.phone_number.Disable()
+		else: 
+			self.button_sms_test.Disable()
+			self.sms_text.Disable()
+			self.sms_text_label.Disable()
+		
+		
 	def save_gammu_settings(self,port,con):
 		gammu_conf = ConfigParser.SafeConfigParser()
 		gammu_conf.read(home+'/.gammurc')
@@ -2797,11 +2719,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.sms_text.Disable()
 			self.button_sms_test.Disable()
 
-	def sms_identify(self,e):
+	def on_sms_identify(self,e):
 		subprocess.call(['pkill', '-f', 'test_sms.py'])
 		subprocess.Popen(['python',currentpath+'/test_sms.py', 'i', '0', '0'])
 
-	def sms_test(self,e):
+	def on_sms_test(self,e):
 		text=self.sms_text.GetValue()
 		if text=='':
 			self.ShowMessage(_('You have to provide some text to send.'))
@@ -2810,6 +2732,84 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		subprocess.Popen(['python',currentpath+'/test_sms.py', 't', text, self.phone_number.GetValue()])
 
 ####################### MQTT
+	def page_mqtt(self):
+		title=wx.StaticText(self.p_mqtt, label=_(' MQTT '))
+
+		self.mqtt_broker_t = wx.StaticText(self.p_mqtt, label=_('Remote broker'))
+		self.mqtt_broker = wx.TextCtrl(self.p_mqtt, size=(190, -1))
+		self.mqtt_port_t = wx.StaticText(self.p_mqtt, label=_('Port'))
+		self.mqtt_port = wx.TextCtrl(self.p_mqtt, size=(50, -1))
+		self.mqtt_user_t = wx.StaticText(self.p_mqtt, label=_('Username'))
+		self.mqtt_user = wx.TextCtrl(self.p_mqtt, size=(120, -1))
+		self.mqtt_pass_t = wx.StaticText(self.p_mqtt, label=_('Password'))
+		self.mqtt_pass = wx.TextCtrl(self.p_mqtt, size=(120, -1))
+
+		self.button_apply_changes_mqtt =wx.Button(self.p_mqtt, label=_('Apply'))
+		self.button_apply_changes_mqtt.Bind(wx.EVT_BUTTON, self.on_apply_changes_mqtt)
+
+		clear =wx.Button(self.p_mqtt, label=_('Clear'))
+		clear.Bind(wx.EVT_BUTTON, self.on_clear_mqtt)
+
+		self.list_topics = wx.ListCtrl(self.p_mqtt, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
+		self.list_topics.InsertColumn(1, _('Topic'), width=565)
+		self.list_topics.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_topic)
+
+		add =wx.Button(self.p_mqtt, label=_('add'))
+		add.Bind(wx.EVT_BUTTON, self.on_add_topic)
+
+		delete =wx.Button(self.p_mqtt, label=_('delete'))
+		delete.Bind(wx.EVT_BUTTON, self.delete_topic)
+
+		diagnostic =wx.Button(self.p_mqtt, label=_('SK Diagnostic'))
+		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
+
+		vboxc1 = wx.BoxSizer(wx.VERTICAL)
+		vboxc1.Add(self.mqtt_broker_t, 0, wx.RIGHT|wx.LEFT, 5)
+		vboxc1.Add(self.mqtt_broker, 0, wx.RIGHT|wx.LEFT, 5)
+		
+		vboxc2 = wx.BoxSizer(wx.VERTICAL)
+		vboxc2.Add(self.mqtt_port_t, 0, wx.RIGHT|wx.LEFT, 5)
+		vboxc2.Add(self.mqtt_port, 0, wx.RIGHT|wx.LEFT, 5)
+		
+		vboxc3 = wx.BoxSizer(wx.VERTICAL)
+		vboxc3.Add(self.mqtt_user_t, 0, wx.RIGHT|wx.LEFT, 5)
+		vboxc3.Add(self.mqtt_user, 0, wx.RIGHT|wx.LEFT, 5)
+		
+		vboxc4 = wx.BoxSizer(wx.VERTICAL)
+		vboxc4.Add(self.mqtt_pass_t, 0, wx.RIGHT|wx.LEFT, 5)
+		vboxc4.Add(self.mqtt_pass, 0, wx.RIGHT|wx.LEFT, 5)
+
+		vboxc5but = wx.BoxSizer(wx.VERTICAL)
+		vboxc5but.Add(self.button_apply_changes_mqtt, 0, wx.ALL|wx.EXPAND, 5)
+		vboxc5but.Add(clear, 0, wx.ALL|wx.EXPAND, 5)
+
+		hinputbox = wx.BoxSizer(wx.HORIZONTAL)
+		hinputbox.Add(vboxc1, 0, wx.ALL|wx.EXPAND, 5)
+		hinputbox.Add(vboxc2, 0, wx.ALL|wx.EXPAND, 5)
+		hinputbox.Add(vboxc3, 0, wx.ALL|wx.EXPAND, 5)
+		hinputbox.Add(vboxc4, 0, wx.ALL|wx.EXPAND, 5)
+		hinputbox.Add((0, 0), 1, wx.EXPAND)
+		hinputbox.Add(vboxc5but, 0, wx.RIGHT|wx.LEFT, 0)
+		
+		hlistbox_but = wx.BoxSizer(wx.VERTICAL)
+		hlistbox_but.Add(add, 0, wx.ALL, 5)
+		hlistbox_but.Add(delete, 0, wx.ALL, 5)
+
+		hlistbox = wx.BoxSizer(wx.HORIZONTAL)
+		hlistbox.Add(self.list_topics, 1, wx.ALL|wx.EXPAND, 5)
+		hlistbox.Add(hlistbox_but, 0, wx.RIGHT|wx.LEFT, 0)
+
+		hbox = wx.BoxSizer(wx.HORIZONTAL)	
+		hbox.Add(diagnostic, 0, wx.RIGHT|wx.LEFT, 5)
+
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		vbox.Add(title, 0, wx.ALL|wx.EXPAND, 5)
+		vbox.Add(hinputbox, 0, wx.ALL|wx.EXPAND, 0)
+		vbox.AddSpacer(5)
+		vbox.Add(hlistbox, 1, wx.ALL|wx.EXPAND, 0)
+		vbox.Add(hbox, 0, wx.ALL|wx.EXPAND, 0)	
+				
+		self.p_mqtt.SetSizer(vbox)		
 
 	def start_mqtt(self):
 		subprocess.Popen(['python',currentpath+'/mqtt_d.py'])
@@ -2853,7 +2853,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		edit=[selected_topic,self.topics[selected_topic]]
 		self.edit_add_topic(edit)
 
-	def add_topic(self,e):
+	def on_add_topic(self,e):
 		self.edit_add_topic(0)
 
 	def edit_add_topic(self,edit):
@@ -2896,7 +2896,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.conf.set('MQTT', 'topics', str(self.topics))
 		self.restart_SK(0)
 
-	def apply_changes_mqtt(self,e):
+	def on_apply_changes_mqtt(self,e):
 		if not self.mqtt_user.IsEnabled():
 			self.mqtt_broker.Enable()
 			self.mqtt_port.Enable()
@@ -2930,7 +2930,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.stop_mqtt()
 		self.start_mqtt()
 
-	def clear_mqtt(self,e):
+	def on_clear_mqtt(self,e):
 		dlg = wx.MessageDialog(None, _('Settings and topics will be deleted. Are you sure?'), _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 		if dlg.ShowModal() != wx.ID_YES:
 			dlg.Destroy()

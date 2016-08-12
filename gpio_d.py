@@ -26,7 +26,7 @@ def publish_sk(io,channel,current_state):
 	path='notifications.gpio.'+io+'.gpio'+channel
 	value='{"message": "'+current_state+'"}'
 	timestamp=str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z'
-	SignalK='{"context": "vessels.'+uuid+'","updates":[{"source":{"type": "notifications","src":"gpio'+channel+'"},"timestamp":"'+timestamp+'","values":[{"path":"'+path+'","value":'+value+'}]}]}\n'
+	SignalK='{"context": "vessels.'+uuid+'","updates":[{"source":{"type": "GPIO","src":"GPIO'+channel+'"},"timestamp":"'+timestamp+'","values":[{"path":"'+path+'","value":'+value+'}]}]}\n'
 	sock.sendto(SignalK, ('127.0.0.1', 55558))
 
 conf=Conf()

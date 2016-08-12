@@ -120,6 +120,6 @@ else:
 			
 			SignalK +=Erg[0:-1]+']}],"context": "vessels.'+uuid+'"}\n'
 			#print SignalK
-			sock.sendto(SignalK, ('127.0.0.1', 55557))
+			sock.sendto(SignalK, ('127.0.0.1', 55559))
 			time.sleep(0.100)
 			
