@@ -2,7 +2,7 @@
 
 # This file is part of Openplotter.
 # Copyright (C) 2015 by sailoog <https://github.com/sailoog/openplotter>
-#
+# 					  e-sailing <https://github.com/e-sailing/openplotter>
 # Openplotter is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 2 of the License, or
@@ -40,14 +40,14 @@ class addMCP(wx.Dialog):
 		list_sk_path=sorted(list_tmp)
 
 		titl = wx.StaticText(panel, label='Signal K')
-		self.SKkey= wx.ComboBox(panel, choices=list_sk_path, style=wx.CB_READONLY, size=(410, 30))
- 		self.SKkey.Bind(wx.EVT_COMBOBOX, self.onSelect)
- 		self.description = wx.TextCtrl(panel, -1, style=wx.TE_MULTILINE|wx.TE_READONLY, size=(410, -1))
+		self.SKkey= wx.ComboBox(panel, choices=list_sk_path, style=wx.CB_READONLY)
+ 		self.SKkey.Bind(wx.EVT_COMBOBOX, self.on_SKkey)
+ 		self.description = wx.TextCtrl(panel, -1, style=wx.TE_MULTILINE|wx.TE_READONLY)
 		self.description.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_INACTIVECAPTION))
 
-		asterix_t = wx.StaticText(panel, label=_('*'))
-		self.asterix = wx.TextCtrl(panel, size=(150, 30))
-		asterix_t2 = wx.StaticText(panel, label=_('allowed characters: 0-9, a-z, A-Z.'))
+		self.asterix_t = wx.StaticText(panel, label=_('*'))
+		self.asterix = wx.TextCtrl(panel, size=(150, -1))
+		self.asterix_t2 = wx.StaticText(panel, label=_('allowed characters: 0-9, a-z, A-Z.'))
 
 		self.aktiv = wx.CheckBox(panel, label=_('aktiv'))
 		self.convert = wx.CheckBox(panel, label=_('convert'))
@@ -61,6 +61,10 @@ class addMCP(wx.Dialog):
 		hbox.Add(cancelBtn, 0, wx.ALL|wx.EXPAND, 5)
 		hbox.Add(okBtn, 0, wx.ALL|wx.EXPAND, 5)
 		
+		hboxb = wx.BoxSizer(wx.HORIZONTAL)
+		hboxb.Add(self.asterix_t, 0, wx.RIGHT|wx.LEFT|wx.EXPAND, 5)
+		hboxb.Add(self.asterix, 0, wx.RIGHT|wx.LEFT, 5)
+		hboxb.Add(self.asterix_t2, 0, wx.RIGHT|wx.LEFT|wx.EXPAND, 5)
 		
 		vbox = wx.BoxSizer(wx.VERTICAL)
 		vbox.Add(self.aktiv, 0, wx.ALL|wx.EXPAND, 5)
@@ -69,22 +73,18 @@ class addMCP(wx.Dialog):
 		vbox.Add(self.SKkey, 0, wx.RIGHT|wx.LEFT|wx.EXPAND, 5)
 		vbox.Add(self.description, 0, wx.RIGHT|wx.LEFT|wx.EXPAND, 5)
 		vbox.AddSpacer(5)
-		vbox.Add(asterix_t, 0, wx.RIGHT|wx.LEFT|wx.EXPAND, 5)
-		vbox.Add(self.asterix, 0, wx.RIGHT|wx.LEFT, 5)
-		vbox.Add(asterix_t2, 0, wx.RIGHT|wx.LEFT|wx.EXPAND, 5)
+		vbox.Add(hboxb, 0, wx.RIGHT|wx.LEFT|wx.EXPAND, 5)
 		vbox.Add((0,0), 1, wx.ALL|wx.EXPAND, 0)
 		vbox.Add(self.convert, 0, wx.ALL|wx.EXPAND, 5)		
-		vbox.Add(hbox, 1, wx.RIGHT|wx.LEFT|wx.EXPAND, 5)
+		vbox.Add(hbox, 0, wx.RIGHT|wx.LEFT|wx.EXPAND, 5)
 
 		panel.SetSizer(vbox)		
-
+		self.panel=panel
 		
-		self.asterix.SetValue(edit[4])
 		self.SKkey.SetValue(edit[3])
-		for i in self.data:
-			if edit[4]==i:
-				try: self.description.SetValue(self.data[i]['description'])
-				except: self.description.SetValue('')
+		self.find_description(edit[3])
+		self.star_enable(edit[3])
+		self.asterix.SetValue(edit[4])
 		state=False
 		if edit[1]==1: state=True
 		self.aktiv.SetValue(state)
@@ -92,13 +92,34 @@ class addMCP(wx.Dialog):
 		if edit[5]==1: state=True
 		self.convert.SetValue(state)			
 
-	def onSelect(self,e):
-		selected= self.SKkey.GetValue()
+	def find_description(self,SK):
 		for i in self.data:
-			if selected==i:
-				try: self.description.SetValue(self.data[i]['description'])
-				except: self.description.SetValue('')
-
+			if SK==i:
+				try: value_str=self.data[i]['description']
+				except: value_str=''
+				self.description.SetValue(value_str)
+				if value_str=='': self.description.Hide()
+				else: self.description.Show()
+				self.panel.Layout()
+		
+	def star_enable(self,SK):
+		if '*' in SK:
+			self.asterix.Enable()
+			self.asterix_t.Show()
+			self.asterix.Show()
+			self.asterix_t2.Show()			
+		else: 
+			self.asterix.Disable()
+			self.asterix_t.Hide()
+			self.asterix.Hide()
+			self.asterix_t2.Hide()
+		self.panel.Layout()
+		
+	def on_SKkey(self,e):
+		selected= self.SKkey.GetValue()
+		self.find_description(selected)
+		self.star_enable(selected)
+					
 	def on_convert(self,e):
 		convert=0
 		if self.convert.GetValue(): 

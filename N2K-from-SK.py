@@ -3,7 +3,6 @@
 # This file is part of Openplotter.
 # Copyright (C) 2015 by sailoog <https://github.com/sailoog/openplotter>
 # 					  e-sailing <https://github.com/e-sailing/openplotter>
-#
 # Openplotter is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 2 of the License, or
@@ -161,32 +160,64 @@ class MyFrame(wx.Frame):
 	def updCB(self,event):
 		self.aktPGN()
 
+	#self.PGN_list = ['126992','127245','127250','127257','127488','127488_1','127489','127489_1','127505','127505_1','127505_2','127505_3','127508','128259','128267','128275','129025','129026','130306','130310','130311','130316','130316_1']
+	self.PGN_list = ['126992','127245']
+		
 	def aktPGN(self):
-		self.akt126992=self.Check126992.GetValue()
-		self.akt127245=self.Check127245.GetValue()
-		self.akt127250=self.Check127250.GetValue()
-		self.akt127257=self.Check127257.GetValue()
-		self.akt127488=self.Check127488.GetValue()
-		self.akt127488_1=self.Check127488_1.GetValue()
-		self.akt127489=self.Check127489.GetValue()
-		self.akt127489_1=self.Check127489_1.GetValue()
-		self.akt127505=self.Check127505.GetValue()
-		self.akt127505_1=self.Check127505_1.GetValue()
-		self.akt127505_2=self.Check127505_2.GetValue()
-		self.akt127505_3=self.Check127505_3.GetValue()
-		self.akt127508=self.Check127508.GetValue()
-		self.akt128259=self.Check128259.GetValue()
-		self.akt128267=self.Check128267.GetValue()
-		self.akt128275=self.Check128275.GetValue()
-		self.akt129025=self.Check129025.GetValue()
-		self.akt129026=self.Check129026.GetValue()
-		self.akt130306=self.Check130306.GetValue()
-		self.akt130310=self.Check130310.GetValue()
-		self.akt130311=self.Check130311.GetValue()
-		self.akt130316=self.Check130316.GetValue()
-		self.akt130316_1=self.Check130316_1.GetValue()
+		self.akt126992='126992' in self.PGN_list
+		self.akt127245='127245' in self.PGN_list
+		self.akt127250='127250' in self.PGN_list
+		self.akt127257='127257' in self.PGN_list
+		self.akt127488='127488' in self.PGN_list
+		self.akt127488_1='127488_1' in self.PGN_list
+		self.akt127489='127489' in self.PGN_list
+		self.akt127489_1='127489_1' in self.PGN_list
+		self.akt127505='127505' in self.PGN_list
+		self.akt127505_1='127505_1' in self.PGN_list
+		self.akt127505_2='127505_2' in self.PGN_list
+		self.akt127505_3='127505_3' in self.PGN_list
+		self.akt127508='127508' in self.PGN_list
+		self.akt128259='128259' in self.PGN_list
+		self.akt128267='128267' in self.PGN_list
+		self.akt128275='128275' in self.PGN_list
+		self.akt129025='129025' in self.PGN_list
+		self.akt129026='129026' in self.PGN_list
+		self.akt130306='130306' in self.PGN_list
+		self.akt130310='130310' in self.PGN_list
+		self.akt130311='130311' in self.PGN_list
+		self.akt130316='130316' in self.PGN_list
+		self.akt130316_1='130316_1' in self.PGN_list
 
+	def setlist(self,list)
+		exist=False
+		for i in list_SK
+			if i == list:
+		
+		if not exist:
+			self.list_SK.append(list)
+		return list
+			
 	def defvar(self):
+		for i in self.PGN_list:
+	#self.PGN_list = ['127488','akt127488_1','127489','127489_1','127505','127505_1','127505_2','127505_3','127508','128259','128267','128275','129025','129026','130306','130310','130311','130316','130316_1']
+			if i == '126992':
+			elif i == '127245':
+			elif i == '127250':
+			elif i == '127257':
+			elif i == '127488':
+			elif i == '127488_1':
+			elif i == '127245':
+			elif i == '127245':
+			elif i == '127245':
+			elif i == '127245':
+			elif i == '127245':
+			elif i == '127245':
+			elif i == '127245':
+			elif i == '127245':
+			elif i == '127245':
+			elif i == '127245':
+				self.DC_Electrical_Properties_dcSource_voltage=self.setlist(['DC Electrical Properties.dcSource.voltage',0,0,0])
+	
 		self.list_SK.append(['DC Electrical Properties.dcSource.voltage',0,0,0])
 		self.list_SK.append(['DC Electrical Properties.dcSource.current',0,0,0])
 		self.list_SK.append(['DC Electrical Properties.dcSource.temperature',0,0,0])

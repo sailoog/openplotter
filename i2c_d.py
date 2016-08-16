@@ -2,7 +2,7 @@
 
 # This file is part of Openplotter.
 # Copyright (C) 2015 by sailoog <https://github.com/sailoog/openplotter>
-#
+# 					  e-sailing <https://github.com/e-sailing/openplotter>
 # Openplotter is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 2 of the License, or
@@ -18,6 +18,7 @@
 import socket, time, pynmea2, RTIMU, math, csv, datetime, subprocess, spidev
 from classes.conf import Conf
 from classes.check_vessel_self import checkVesselSelf
+import RPi.GPIO as GPIO
 
 
 def interpolread(idx,erg):
@@ -46,7 +47,16 @@ def read_adc(channel):
   adc = spi.xfer2([1,(8+channel)<<4,0])
   data = ((adc[1]&3) << 8) + adc[2]
   return data
-		
+
+def publish_sk(io,channel,current_state,timestamp):
+	if io=='in':io='input'
+	else: io='output'
+	if current_state: current_state='1'
+	else: current_state='0'
+	SignalK='{"context": "vessels.'+uuid+'","updates":[{"source":{"type": "GPIO","src":"GPIO'+str(channel)+'"},"timestamp":"'+timestamp+'","values":[{"path":"notifications.gpio.'+io+'.gpio'+str(channel)+'","value":['+current_state+']}]}]}\n'
+	sock.sendto(SignalK, ('127.0.0.1', 55558))
+
+  
 conf=Conf()
 
 #init SPI MCP
@@ -82,8 +92,34 @@ for ii in temp_list:
 	else:
 		adjust_point.append([])
 
+#init GPIO
+try:
+	gpio_list=eval(conf.get('GPIO', 'sensors'))
+except: gpio_list=[]
 
-	
+gpio_=False
+if gpio_list:
+	gpio_=True
+
+	#sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+	GPIO.setmode(GPIO.BCM)
+	GPIO.setwarnings(False)
+
+	c=0
+	for i in gpio_list:
+		channel=int(i[2])
+		if i[1]=='out':
+			GPIO.setup(channel, GPIO.OUT)
+			GPIO.output(channel, 0)
+		if i[1]=='in':
+			pull_up_down=GPIO.PUD_DOWN
+			if i[3]=='up': pull_up_down=GPIO.PUD_UP
+			GPIO.setup(channel, GPIO.IN, pull_up_down=pull_up_down)
+		gpio_list[c].append('')
+		c=c+1
+
+		
+		
 heading_sk=conf.get('I2C', 'sk_hdg')=='1'
 heel_sk=conf.get('I2C', 'sk_heel')=='1'
 pitch_sk=conf.get('I2C', 'sk_pitch')=='1'
@@ -124,7 +160,10 @@ if imu_ or bmp_ or hum_ or analog_:
 	rate_press=float(conf.get('I2C', 'rate_press'))
 	rate_hum=float(conf.get('I2C', 'rate_hum'))
 	rate_ana=rate_imu
-
+	rate_gpio=0.1
+	counter_gpio=10
+	count_gpio=0
+	
 	vessel_self=checkVesselSelf()
 	uuid=vessel_self.uuid
 
@@ -163,6 +202,7 @@ if imu_ or bmp_ or hum_ or analog_:
 	tick_press=time.time()+0.01
 	tick_hum=time.time()+0.02
 	tick_ana=time.time()+0.03
+	tick_gpio=time.time()+0.04
 		
 	while True:
 		tick2=time.time()
@@ -252,3 +292,26 @@ if imu_ or bmp_ or hum_ or analog_:
 						Erg +='"timestamp":"'+timestamp+'","values":[{"path": "'+i[2]+'","value":'+str(XValue)+'}]}]}\n'
 						SignalK+=Erg
 				sock.sendto(SignalK, ('127.0.0.1', 55557))
+
+		# read gpio and GENERATE
+		if gpio_:
+			if tick2>tick_gpio:
+				tick_gpio+=rate_gpio
+
+				count_gpio+=1
+				if count_gpio>counter_gpio:
+					count_gpio=0
+
+				
+				timestamp=str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z'
+				c=0
+				for i in gpio_list:
+					channel=int(i[2])
+					current_state = GPIO.input(channel)
+					last_state=gpio_list[c][4]
+					if current_state!=last_state or count_gpio==10:
+						gpio_list[c][4]=current_state
+						publish_sk(i[1],channel,current_state,timestamp)
+					c+=1
+				
+		

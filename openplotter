@@ -206,6 +206,7 @@ class MainFrame(wx.Frame):
 		self.read_MCP()
 		self.read_i2c()
 		self.read_n2k()
+		self.read_triggers()
 
 ###########################################	general functions
 
@@ -897,8 +898,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		delete =wx.Button(self.p_kplex, label=_('delete'))
 		delete.Bind(wx.EVT_BUTTON, self.on_delete_kplex)
 
-		inspector =wx.Button(self.p_kplex, label=_('Inspector'))
-		inspector.Bind(wx.EVT_BUTTON, self.on_inspector)
 		restart =wx.Button(self.p_kplex, label=_('Restart'))
 		restart.Bind(wx.EVT_BUTTON, self.on_restart_kplex)
 		advanced =wx.Button(self.p_kplex, label=_('Advanced'))
@@ -912,13 +911,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		hlistbox.Add(self.list_kplex, 1, wx.ALL|wx.EXPAND, 5)
 
 		hbox = wx.BoxSizer(wx.HORIZONTAL)
-		hbox.Add(diagnostic, 0, wx.RIGHT|wx.LEFT, 5)
 		hbox.Add((0,0), 1, wx.RIGHT|wx.LEFT, 5)
 		hbox.Add(add, 0, wx.RIGHT|wx.LEFT, 5)
 		hbox.Add(delete, 0, wx.RIGHT|wx.LEFT, 5)
 
 		hboxb = wx.BoxSizer(wx.HORIZONTAL)
-		hboxb.Add(inspector, 0, wx.RIGHT|wx.LEFT, 5)
+		hboxb.Add(diagnostic, 0, wx.RIGHT|wx.LEFT, 5)
 		hboxb.Add(restart, 0, wx.RIGHT|wx.LEFT, 5)
 		hboxb.Add(advanced, 0, wx.RIGHT|wx.LEFT, 5)
 		hboxb.Add((0,0), 1, wx.RIGHT|wx.LEFT, 5)
@@ -933,10 +931,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		vbox.Add(hboxb, 0, wx.ALL|wx.EXPAND, 0)	
 
 		self.p_kplex.SetSizer(vbox)		
-
-	def on_inspector(self,event):
-		subprocess.call(['pkill', '-f', 'output.py'])
-		subprocess.Popen(['python',currentpath+'/output.py'])
 
 	def on_advanced_kplex(self,event):
 		self.ShowMessage(_('OpenPlotter will close. Add manual settings at the end of the configuration file. Open OpenPlotter again and restart multiplexer to apply changes.'))
@@ -1001,7 +995,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					if re.search('\[*\]', item):
 						if l_tmp[3]=='in' or l_tmp[3]=='out' or l_tmp[3]=='both':
 							self.kplex.append(l_tmp)
-							#print l_tmp
 						l_tmp=[None]*11
 						l_tmp[6]='none'
 						l_tmp[7]='nothing'
@@ -1094,11 +1087,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def on_apply_changes_kplex(self,event):
 		data='# For advanced manual configuration, please visit: http://www.stripydog.com/kplex/configuration.html\n# Please do not modify defaults nor OpenPlotter GUI settings.\n# Add manual settings at the end of the document.\n\n'
 
-		data=data+'###defaults\n\n'
-		data=data+'[udp]\nname=system_output\ndirection=out\nofilter=-**RMB\naddress=127.0.0.1\nport=55556\n\n###end of defaults\n\n###OpenPlotter GUI settings\n\n'
+		data+='###defaults\n\n'
+		data+='[tcp]\nname=system_opencpn\ndirection=out\nmode=server\nofilter=-**RMB\naddress=127.0.0.1\nport=10109\n\n'
+		data+='[udp]\nname=system_SKout\ndirection=out\nofilter=-OC***\naddress=127.0.0.1\nport=55556\n\n'
+		data+='[udp]\nname=system_SKin\ndirection=in\naddress=127.0.0.1\nport=55565\n\n'
+		data+='###end of defaults\n\n###OpenPlotter GUI settings\n\n'
 		
 		for index,item in enumerate(self.kplex):
-			if 'system_input' not in item[1] and 'system_output' not in item[1]:
+			if not ('system_opencpn' in item[1] or 'system_SKout' in item[1] or 'system_SKin' in item[1]):
 				if self.list_kplex.IsChecked(index): state=''
 				else: state='#'
 				
@@ -1108,10 +1104,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				if 'TCP' in item[2]:
 					data+=state+'[tcp]\n'+state+'name='+item[1]+'\n'+state+'direction='+item[3]+'\n'+state+'optional=yes\n'
 					if item[1]=='gpsd':data+=state+'gpsd=yes\n'
-					if item[3]=='in':data+=state+'mode=client\n'
+					if item[3]=='in':
+						data+=state+'mode=client\n'
+						data+=state+'persist=yes\n'+state+'retry=10\n'				
 					else:data+=state+'mode=server\n'
 					data+=state+'address='+str(item[4])+'\n'+state+'port='+str(item[5])+'\n'
-					data+=state+'persist=yes\n'+state+'retry=10\n'				
 				if 'UDP' in item[2]:
 					data+=state+'[udp]\n'+state+'name='+item[1]+'\n'+state+'direction='+item[3]+'\n'+state+'optional=yes\n'
 					data+=state+'address='+item[4]+'\n'+state+'port='+item[5]+'\n'
@@ -1124,7 +1121,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if self.manual_settings: data+= self.manual_settings
 		else: data+= '###Manual settings\n\n'
 		
-		#print data
 		file = open(home+'/.kplex.conf', 'w')
 		file.write(data)
 		file.close()
@@ -1494,13 +1490,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			try:
 				temp_list=eval(data)
 			except:temp_list = []
-			print 'temp_list',temp_list
 			min=1023
 			max=0
 			for ii in temp_list:
 				if ii[0]>max: max=ii[0]
 				if ii[0]<min: min=ii[0]
-			print min,max
 			if min>0:
 				wx.MessageBox(_('minimum raw value in setting table > 0'),'info', wx.OK | wx.ICON_INFORMATION)
 				convert=0
@@ -1528,11 +1522,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.ShowMessage(_('Failed. Provide name and Signal K values.'))
 				dlg.Destroy()
 				return
-			if not re.match('^[0-9a-zA-Z]+$', asterix):
-				self.ShowMessage(_('Failed. The name must contain only letters and numbers.'))
-				dlg.Destroy()
-				return
-			if '.*.' in SKkey: SKkey2=SKkey.replace('*', asterix)
+			if '*' in SKkey:
+				if not re.match('^[0-9a-zA-Z]+$', asterix):
+					self.ShowMessage(_('Failed. The name must contain only letters and numbers.'))
+					dlg.Destroy()
+					return
+				SKkey2=SKkey.replace('*', asterix)
 			else: SKkey2=SKkey
 
 			if aktiv: aktiv=1
@@ -1585,12 +1580,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		vbox.Add(diagnostic, 0, wx.RIGHT|wx.LEFT, 5)
 
 		self.p_gpio.SetSizer(vbox)
-
-	def start_gpio(self):
-		subprocess.Popen(['python',currentpath+'/gpio_d.py'])
-
-	def stop_gpio(self):
-		subprocess.call(['pkill', '-f', 'gpio_d.py'])
 
 	def read_gpio(self):
 		self.gpio=[]
@@ -1860,16 +1849,27 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		
 		self.p_action.SetSizer(vbox)		
 
+		
 	def read_triggers(self):
-		pass
-		'''
-		self.a=DataStream(self.conf)
+		self.home=home
+		self.operators_list=[_('was not present in the last (sec.)'),_('was present in the last (sec.)'),_('='), _('<'), _('<='), _('>'), _('>='), _('is on'), _('is off')]
+	
 		self.triggers=[]
 		self.list_triggers.DeleteAllItems()
 		data=self.conf.get('ACTIONS', 'triggers')
 		try:
 			temp_list=eval(data)
 		except:temp_list=[]
+		for ii in temp_list:
+			self.triggers.append(ii)
+			if '.*.' in ii[1]: SKkey2=ii[1].replace('*', ii[2])
+			else: SKkey2=ii[1]
+			self.list_triggers.Append([SKkey2,self.operators_list[ii[3]],ii[4]])
+			if ii[0]==1:
+				last=self.list_triggers.GetItemCount()-1
+				self.list_triggers.CheckItem(last)
+			
+		'''
 		for ii in temp_list:
 			if ii[1]==-1:
 				self.triggers.append(ii)
@@ -1878,22 +1878,19 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					last=self.list_triggers.GetItemCount()-1
 					self.list_triggers.CheckItem(last)
 			else:
-				x=self.a.getDataListIndex(ii[1])
-				if x:
-					self.triggers.append(ii)
-					self.list_triggers.Append([self.a.DataList[x][0].decode('utf8'),self.a.operators_list[ii[2]].decode('utf8'),ii[3]])
-					if ii[0]==1:
-						last=self.list_triggers.GetItemCount()-1
-						self.list_triggers.CheckItem(last)
-				else: self.ShowMessage(_('Problem with Actions detected. Please check and save again.'))
+				self.triggers.append(ii)
+				#self.list_triggers.Append([self.a.DataList[x][0].decode('utf8'),self.a.operators_list[ii[2]].decode('utf8'),ii[3]])
+				self.list_triggers.Append([ii[1],ii[2],self.operators_list[ii[3]],ii[4]])
+				if ii[0]==1:
+					last=self.list_triggers.GetItemCount()-1
+					self.list_triggers.CheckItem(last)
 		'''
-
 	def on_print_actions(self, e):
 		self.actions=Actions(self.conf)
 		selected_trigger=e.GetIndex()
 		self.list_actions.DeleteAllItems()
-		for i in  self.triggers[selected_trigger][4]:
-			if i[2]==0.0: repeat=''
+		for i in  self.triggers[selected_trigger][5]:
+			if i[3]==0.0: repeat=''
 			else: repeat=str(i[2])
 			time_units=self.actions.time_units[i[3]]
 			repeat2=repeat+' '+time_units
@@ -1901,10 +1898,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	
 	def on_edit_triggers(self,e):
 		t=e.GetIndex()
-		trigger=self.triggers[t][1]
-		operator=self.triggers[t][2]
-		value=self.triggers[t][3]
-		edit=[t,trigger,operator,value]
+		SKkey=self.triggers[t][1]
+		SKstar=self.triggers[t][2]
+		operator=self.triggers[t][3]
+		value=self.triggers[t][4]
+		edit=[t,SKkey,SKstar,operator,value]
 		self.edit_add_trigger(edit)
 
 	def on_add_trigger(self,e):
@@ -1912,77 +1910,52 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def edit_add_trigger(self,edit):
 		self.datastream_list=[]
-		self.a=DataStream(self.conf)
-		for i in self.a.DataList:
-			self.datastream_list.append(i[1]+': '+i[0])
-		dlg = addTrigger(self.datastream_list, self.a,edit)
+		dlg = addTrigger(self,edit)
 		res = dlg.ShowModal()
 		if res == wx.ID_OK:
-			trigger_selection=dlg.trigger_select.GetCurrentSelection()
-			if trigger_selection==len(self.datastream_list):
-				if edit==0:
-					self.list_triggers.Append([_('None (always true)'),'',''])
-					tmp=[]
-					tmp.append(1)
-					tmp.append(-1)
-					tmp.append(-1)
-					tmp.append(-1)
-					tmp.append([])
-					self.triggers.append(tmp)
-					total=self.list_triggers.GetItemCount()
-					for x in xrange(0, total, 1):
-						self.list_triggers.Select(x, on=0)
-					self.list_triggers.Select(total-1, on=1)
-					self.list_triggers.CheckItem(total-1)
-				else:
-					self.list_triggers.SetStringItem(edit[0],0,_('None (always true)'))
-					self.list_triggers.SetStringItem(edit[0],1,'')
-					self.list_triggers.SetStringItem(edit[0],2,'')
-					self.triggers[edit[0]][1]=-1
-					self.triggers[edit[0]][2]=-1
-					self.triggers[edit[0]][3]=-1
+			SKkey=dlg.SKkey.GetValue()
+			SKstar=dlg.asterix.GetValue()
+			operator=dlg.operator.GetCurrentSelection()
+			if SKkey == '' or operator == -1 or (SKstar=='' and ('*' in SKkey)):
+				self.ShowMessage(_('Failed. Select trigger and operator.'))
+				dlg.Destroy()
+				return
+			if dlg.value.GetValue(): value=dlg.value.GetValue()
+			else: value=0
+			value2=str(value)
+			operator_str=self.operators_list[operator]
+			if '.*.' in SKkey: SKkey2=SKkey.replace('*', SKstar)
+			else: 
+				SKkey2=SKkey
+				SKstar=''
+			
+			if edit==0:
+				self.list_triggers.Append([SKkey2.decode('utf8'),operator_str.decode('utf8'),value2.decode('utf8')])				
+				tmp=[1,str(SKkey),str(SKstar),operator,value2,[]]
+				self.triggers.append(tmp)
+				total=self.list_triggers.GetItemCount()
+				for x in xrange(0, total, 1):
+					self.list_triggers.Select(x, on=0)
+				self.list_triggers.Select(total-1, on=1)
+				self.list_triggers.CheckItem(total-1)
 			else:
-				if trigger_selection == -1 or dlg.operator_select.GetCurrentSelection() == -1:
-					self.ShowMessage(_('Failed. Select trigger and operator.'))
-					dlg.Destroy()
-					return
-				trigger0=self.a.DataList[trigger_selection]
-				operator_selection=trigger0[7][dlg.operator_select.GetCurrentSelection()]
-				if dlg.value.GetValue(): value=dlg.value.GetValue()
-				else: value=0
-				value2=str(value)
-				operator=self.a.operators_list[operator_selection]
-				if edit==0:
-					self.list_triggers.Append([trigger0[0].decode('utf8'),operator.decode('utf8'),value2.decode('utf8')])				
-					tmp=[]
-					tmp.append(1)
-					tmp.append(trigger0[9])
-					tmp.append(operator_selection)
-					tmp.append(value2)
-					tmp.append([])
-					self.triggers.append(tmp)
-					total=self.list_triggers.GetItemCount()
-					for x in xrange(0, total, 1):
-						self.list_triggers.Select(x, on=0)
-					self.list_triggers.Select(total-1, on=1)
-					self.list_triggers.CheckItem(total-1)
-				else:
-					self.list_triggers.SetStringItem(edit[0],0,trigger0[0].decode('utf8'))
-					self.list_triggers.SetStringItem(edit[0],1,operator.decode('utf8'))
-					self.list_triggers.SetStringItem(edit[0],2,value2.decode('utf8'))
-					self.triggers[edit[0]][1]=trigger0[9]
-					self.triggers[edit[0]][2]=operator_selection
-					self.triggers[edit[0]][3]=value2					
-			dlg.Destroy()
+				self.list_triggers.SetStringItem(edit[0],0,SKkey2.decode('utf8'))
+				self.list_triggers.SetStringItem(edit[0],1,operator_str.decode('utf8'))
+				self.list_triggers.SetStringItem(edit[0],2,value2.decode('utf8'))
+				self.triggers[edit[0]][1]=str(SKkey)
+				self.triggers[edit[0]][2]=str(SKstar)
+				self.triggers[edit[0]][3]=operator
+				self.triggers[edit[0]][4]=value2
+		dlg.Destroy()
 	
 	def edit_actions(self,e):
 		self.actions=Actions(self.conf)
 		a=e.GetIndex()
 		t= self.list_triggers.GetFirstSelected()
-		action=self.actions.getOptionsListIndex(self.triggers[t][4][a][0])
-		data=self.triggers[t][4][a][1]
-		repeat=self.triggers[t][4][a][2]
-		unit=self.triggers[t][4][a][3]
+		action=self.actions.getOptionsListIndex(self.triggers[t][5][a][0])
+		data=self.triggers[t][5][a][1]
+		repeat=self.triggers[t][5][a][2]
+		unit=self.triggers[t][5][a][3]
 		edit=[a,action,data,repeat,unit]
 		self.edit_add_action(edit)
 
@@ -2024,15 +1997,15 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				tmp.append(data)
 				tmp.append(repeat)
 				tmp.append(time_units_selection)
-				self.triggers[selected_trigger_position][4].append(tmp)
+				self.triggers[selected_trigger_position][5].append(tmp)
 			else:
 				self.list_actions.SetStringItem(edit[0],0,action.decode('utf8'))
 				self.list_actions.SetStringItem(edit[0],1,data.decode('utf8'))
 				self.list_actions.SetStringItem(edit[0],2,repeat2.decode('utf8'))
-				self.triggers[selected_trigger_position][4][edit[0]][0]=self.actions.options[action_selection][3]
-				self.triggers[selected_trigger_position][4][edit[0]][1]=data
-				self.triggers[selected_trigger_position][4][edit[0]][2]=repeat
-				self.triggers[selected_trigger_position][4][edit[0]][3]=time_units_selection			
+				self.triggers[selected_trigger_position][5][edit[0]][0]=self.actions.options[action_selection][3]
+				self.triggers[selected_trigger_position][5][edit[0]][1]=data
+				self.triggers[selected_trigger_position][5][edit[0]][2]=repeat
+				self.triggers[selected_trigger_position][5][edit[0]][3]=time_units_selection			
 		dlg.Destroy()
 
 	def on_delete_trigger(self,e):
@@ -2050,7 +2023,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if selected_action==-1: 
 			self.ShowMessage(_('Select an item to delete.'))
 		else: 
-			del self.triggers[selected_trigger][4][selected_action]
+			del self.triggers[selected_trigger][5][selected_action]
 			self.list_actions.DeleteItem(selected_action)
 
 	def on_apply_changes_actions(self,e):
@@ -2452,8 +2425,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.N2K_diagnostic_out_b.Disable()
 			self.conf.set('N2K', 'output', '1')			
 			subprocess.call(['pkill', '-f', 'diagnostic-N2K-output.py'])
-			subprocess.call(['pkill', '-f', 'N2K-server.py'])
-			subprocess.Popen(['python',currentpath+'/N2K-server.py'])
+			subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
+			subprocess.Popen(['python',currentpath+'/N2K-server_d.py'])
 		else:
 			self.conf.set('N2K', 'output', '0')			
 			subprocess.call(['pkill', '-f', 'N2K-server.py'])
