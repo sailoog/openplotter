@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx
+import wx, subprocess
 from classes.add_NMEA_0183 import addNMEA_0183
 from classes.paths import Paths
 from classes.op_conf import Conf
@@ -84,12 +84,9 @@ class MyFrame(wx.Frame):
 				self.sentences.append(ii)
 				fields=','
 				for i in ii[1]:
-					if not i: fields+=','
-					else:
-						if '=' in i:
-							tmp=i.split('=')
-							fields+=tmp[1]+','
-						else:fields+=i+','
+					if type(i) is str: fields+=i+','
+					elif type(i) is list:
+						fields+=i[1]+','
 				self.list_nmea.Append([ii[0],ii[2],fields])
 		
 
@@ -110,12 +107,9 @@ class MyFrame(wx.Frame):
 				if edit==0:
 					fields=','
 					for i in nmea[1]:
-						if not i: fields+=','
-						else:
-							if '=' in i:
-								tmp=i.split('=')
-								fields+=tmp[1]+','
-							else:fields+=i+','
+						if type(i) is str: fields+=i+','
+						elif type(i) is list:
+							fields+=i[1]+','
 					self.list_nmea.Append([nmea[0],nmea[2],fields])
 					self.sentences.append([nmea[0],nmea[1],nmea[2]])
 				else:
@@ -123,14 +117,12 @@ class MyFrame(wx.Frame):
 					self.list_nmea.SetStringItem(edit[0],1,nmea[2])
 					fields=','
 					for i in nmea[1]:
-						if not i: fields+=','
-						else:
-							if '=' in i:
-								tmp=i.split('=')
-								fields+=tmp[1]+','
-							else:fields+=i+','
+						if type(i) is str: fields+=i+','
+						elif type(i) is list:
+							fields+=i[1]+','
 					self.list_nmea.SetStringItem(edit[0],2,fields)
 					self.sentences[edit[0]][0]=nmea[0]
+					if '[' in nmea[1]: nmea[1]=eval(nmea[1])
 					self.sentences[edit[0]][1]=nmea[1]
 					self.sentences[edit[0]][2]=nmea[2]
 				self.conf.set('NMEA0183', 'sentences', str(self.sentences))

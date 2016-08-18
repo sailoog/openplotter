@@ -47,3 +47,6 @@ class Conf:
 		
 	def has_section(self,section):
 		return self.data_conf.has_section(section)
+		
+	def add_section(self,section):
+		return self.data_conf.add_section(section)		

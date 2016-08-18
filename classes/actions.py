@@ -24,7 +24,7 @@ import paho.mqtt.publish as publish
 class Actions():
 
 	def __init__(self,conf):
-
+		self.conf=conf
 		self.options=[]
 		#ATENTION. If order changes, edit "run_action()" and ctrl_actions.py
 		# 0 name, 1 message, 2 field data, 3 unique ID
@@ -51,15 +51,15 @@ class Actions():
 		self.options.append([_('stop all actions'),_('This action will stop all the triggers except the trigger which has an action "start all actions" defined.'),0,'ACT20'])
 
 		#Outputs
-		x=conf.get('OUTPUTS', 'outputs')
-		if x: self.out_list=eval(x)
-		else: self.out_list=[]
-		for i in self.out_list:
-			try:
-				if i[0]=='1':
-					self.options.append([i[1]+_(': High'),_('ATTENTION! if you set this output to "High" and there is not a resistor or a circuit connected to the selected GPIO pin, YOU CAN DAMAGE YOUR BOARD.'),0,'H'+i[4]])
-					self.options.append([i[1]+_(': Low'),0,0,'L'+i[4]])
-			except Exception,e: print str(e)
+		#x=conf.get('OUTPUTS', 'outputs')
+		#if x: self.out_list=eval(x)
+		#else: self.out_list=[]
+		#for i in self.out_list:
+		#	try:
+		#		if i[0]=='1':
+		#			self.options.append([i[1]+_(': High'),_('ATTENTION! if you set this output to "High" and there is not a resistor or a circuit connected to the selected GPIO pin, YOU CAN DAMAGE YOUR BOARD.'),0,'H'+i[4]])
+		#			self.options.append([i[1]+_(': Low'),0,0,'L'+i[4]])
+		#	except Exception,e: print str(e)
 
 		#mqtt
 		x=conf.get('MQTT', 'topics')
@@ -88,11 +88,14 @@ class Actions():
 		for index, item in enumerate(self.mqtt_list):
 			if item[2]==data: return index
 
-	def run_action(self,option,text,conf,a):
-		if text:
-			text=a.getVariablesValue(text)
+	def run_action(self,option,text):
+		conf=self.conf
 		conf.read()
-		if option=='ACT1': time.sleep(float(text))
+		if option=='ACT1': 
+			try:
+				wait=float(text)
+			except: wait=1.0
+			time.sleep(wait)
 		if option=='ACT2':
 			if text:
 				try:
@@ -155,20 +158,6 @@ class Actions():
 		if option=='ACT14':
 			subject = text
 			body = ''
-			for ii in a.DataList:
-				timestamp=ii[4]
-				if timestamp:
-					now=time.time()
-					age=now-timestamp
-					if age < 20:
-						data=''
-						value=''
-						unit=''
-						data=ii[0]
-						value=ii[2]
-						unit=ii[3]
-						if unit: body += data+': '+str(value)+' '+str(unit)+'\n'
-						else: body+= data+': '+str(value)+'\n'
 			GMAIL_USERNAME = conf.get('GMAIL', 'gmail')
 			GMAIL_PASSWORD = conf.get('GMAIL', 'password')
 			recipient = conf.get('GMAIL', 'recipient')

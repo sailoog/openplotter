@@ -2,7 +2,7 @@
 
 # This file is part of Openplotter.
 # Copyright (C) 2015 by sailoog <https://github.com/sailoog/openplotter>
-#
+# 					  e-sailing <https://github.com/e-sailing/openplotter>
 # Openplotter is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 2 of the License, or
@@ -82,7 +82,7 @@ else:
 				for i in range(0,len(list_signalk1)):
 					Erg += '{"path": "'+list_signalk_path1[i]+'","value":'+list_signalk1[i]+'},'
 				SignalK+=Erg[0:-1]+']}],"context": "vessels.'+uuid+'"}\n'
-				sock.sendto(SignalK, ('127.0.0.1', 55556))			
+				sock.sendto(SignalK, ('127.0.0.1', 55557))			
 		else:
 			index+=1
 			if index>3: index=0

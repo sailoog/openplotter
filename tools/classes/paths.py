@@ -21,6 +21,8 @@ class Paths:
 	def __init__(self):
 
 		self.home = os.path.expanduser('~')
-		self.currentpath = os.path.dirname(sys.argv[0])
-		op_path = os.path.join(self.currentpath, '..')
+		self.currentpath = os.path.dirname(os.path.realpath(__file__))
+		tool_path = os.path.join(self.currentpath, '..')
+		op_path = os.path.join(self.currentpath, '../..')
+		self.tool_path = os.path.abspath(tool_path)
 		self.op_path = os.path.abspath(op_path)

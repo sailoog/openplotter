@@ -99,17 +99,17 @@ class addNMEA_0183(wx.Dialog):
 
 		if edit == 0:
 			self.rate.SetValue('1')
-			self.nmea=['',[],self.rate.GetValue()]
+			self.nmea=['',[],float(self.rate.GetValue())]
 
 		else:
-			self.rate.SetValue(edit[1][2])
+			self.rate.SetValue(str(edit[1][2]))
 			self.sentence.SetValue('$--'+edit[1][0])
 			self.nmea=edit[1]
 			for index,item in enumerate(self.sentences):
 				if edit[1][0] in item: sent=index
 			for index, item in enumerate(self.fields[sent]):
 				self.list_fields.InsertStringItem(index,item[0])
-				self.list_fields.SetStringItem(index,1,self.nmea[1][index])
+				self.list_fields.SetStringItem(index,1,str(self.nmea[1][index]))
 
 		self.disable_all()
 
@@ -169,7 +169,7 @@ class addNMEA_0183(wx.Dialog):
 
 	def onSelect_rate(self,e):
 		tmp=self.rate.GetValue()
-		self.nmea[2]=tmp.encode('utf8')
+		self.nmea[2]=float(tmp)
 
 	def onSelect(self,e):
 		selected=self.sentence.GetCurrentSelection()
@@ -214,18 +214,23 @@ class addNMEA_0183(wx.Dialog):
 				self.list_fields.SetStringItem(selected_field,1,_('FAILED. This is not a valid expression.'))
 				self.nmea[1][selected_field]=''
 				return
-			txt='['+vessel+'.'+group+'.'+key+']'+operator+str_num+'='+formats2
-			self.list_fields.SetStringItem(selected_field,1,_(txt))
-			self.nmea[1][selected_field]=txt.encode('utf8')
+			#txt='['+vessel+'.'+group+'.'+key+']'+operator+str_num+'='+formats2
+			if '.value' in key: key=key[:-6]
+			txt=[(group+'.'+key).encode('utf8'),formats2.encode('utf8'),operator,float(str_num)]
+			
+			self.list_fields.SetStringItem(selected_field,1,_(txt[1]))
+			self.nmea[1][selected_field]=txt
 		#signal k
 		if selected_type==self.list_value_type[2]:
 			if '--' in vessel or '--' in group or '--' in key or '--' in formats:
 				self.list_fields.SetStringItem(selected_field,1,_('FAILED. Fill in all the available fields.'))
 				self.nmea[1][selected_field]=''
 				return
-			txt='['+vessel+'.'+group+'.'+key+']'+'='+formats2
-			self.list_fields.SetStringItem(selected_field,1,_(txt))
-			self.nmea[1][selected_field]=txt.encode('utf8')
+			#txt='[\''+group+'.'+key+'\',\''+formats2+'\']'
+			if '.value' in key: key=key[:-6]
+			txt=[(group+'.'+key).encode('utf8'),formats2.encode('utf8'),'+',0.0]
+			self.list_fields.SetStringItem(selected_field,1,_(txt[1]))
+			self.nmea[1][selected_field]=txt
 		#number
 		if selected_type==self.list_value_type[3]:
 			if not str_num:

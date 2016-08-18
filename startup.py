@@ -161,9 +161,6 @@ if not exist:
 	subprocess.call(["pkill", '-9', "node"])
 	vessel_self=checkVesselSelf()
 	
-	if N2K_output=='1':
-		subprocess.Popen(['python',currentpath+'/N2K-server.py'])
-	
 	if gps_time=='1':
 		subprocess.call(['sudo', 'python', currentpath+'/time_gps.py'])
 

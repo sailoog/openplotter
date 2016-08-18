@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 # This file is part of Openplotter.
-# Copyright (C) 2015 by e-sailing
-#
+# Copyright (C) 2015 by sailoog <https://github.com/sailoog/openplotter>
+# 					  e-sailing <https://github.com/e-sailing/openplotter>
 # Openplotter is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 2 of the License, or
@@ -15,15 +15,17 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import socket, serial,codecs,sys
+import socket, serial,codecs,sys,time
 from classes.paths import Paths
 from classes.conf import Conf
 
 home=Paths().home
 currentpath=Paths().currentpath
 conf=Conf()
+activ = False
 try:
 	ser = serial.Serial(conf.get('N2K', 'can_usb'), 115200, timeout=0.5)
+	activ = conf.get('N2K', 'output')=='1'
 except:
 	print 'failed to start N2K output server on '+conf.get('N2K', 'can_usb')
 	sys.exit(0)
@@ -61,12 +63,17 @@ def SendCommandtoSerial(data):
 
 def put_recive_to_serial():
 	while 1:                                        
-		data1, addr = e_udp_sock.recvfrom( 1024 )
-		# Die Puffergroesse muss immer eine Potenz
-		# von 2 sein
+		data1, addr = e_udp_sock.recvfrom( 512 )
+		# Data buffer had to be potenz of 2
 		data=bytearray(data1)
 		if data[7]+9==len(data):
 			SendCommandtoSerial(data)
- 
-put_recive_to_serial()
+			datap=''
+			dat=0
+			for i in range(8,data[7]+9):
+				dat=dat+data[i];
+				datap+=' '+('0'+hex(data[i])[2:])[-2:]
+
+if activ:
+	put_recive_to_serial()
  
