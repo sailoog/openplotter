@@ -38,7 +38,7 @@ class checkVesselSelf:
 			if file!='1w_d.py':subprocess.Popen(['python',currentpath+'/1w_d.py'])
 			if file!='mqtt_d.py':subprocess.Popen(['python',currentpath+'/mqtt_d.py'])
 			if file!='SK-base_d.py':subprocess.Popen(['python',currentpath+'/SK-base_d.py'])
-			if file!='i2c_d.py':subprocess.Popen(['python',currentpath+'/i2c_d.py'])
+			if file!='i2c_d.py':subprocess.Popen(['python',currentpath+'/i2c_d.py'], cwd=currentpath+'/imu') 
 			if file!='N2K-server_d.py':subprocess.Popen(['python',currentpath+'/N2K-server_d.py'])
 			subprocess.Popen('keyword')
 
