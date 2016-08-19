@@ -136,7 +136,13 @@
 
 `openplotter`
 
-In opencpn options connections change 10110 to 10109
+* In opencpn Options>Connections, replace: localhost:10110  TCP input to 10109
+
+`localhost:10110 TCP input`
+
+by
+
+`localhost:10109 TCP input`
 
 if you want to use the analog tools for firmata and ads1115, then read tools/install analog.txt
 
