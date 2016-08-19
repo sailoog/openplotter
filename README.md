@@ -130,6 +130,7 @@
 	"interfaces" : {}
 }
 
+* Delete file /home/pi/.kplex.conf
 
 * Reset and open OpenPlotter typing:
 
