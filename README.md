@@ -136,7 +136,7 @@
 
 `openplotter`
 
-* In opencpn Options>Connections, replace: localhost:10110  TCP input to 10109
+* In opencpn Options>Connections, replace:
 
 `localhost:10110 TCP input`
 
