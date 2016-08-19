@@ -151,7 +151,7 @@ changes:
 -analog input MCP3008
 -SignalK emulator
 -generating nmea0183 sentences from SignalK
-	can be tested with command `nc -ul 127.0.0.1 55565`
+	can be tested with command `nc -ul 127.0.0.1 10110`
 -generating nmea2000 sentences from SignalK
 	not implemented in the ide, so you have to choose the pgn in openplotter.conf [N2K] pgn_generate =['127489']
 -many pages are resizeable
