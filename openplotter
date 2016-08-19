@@ -942,9 +942,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.SetStatusText(_('Closing Kplex'))
 		subprocess.call(["pkill", '-9', "kplex"])
 		subprocess.Popen('kplex')
-		self.restart_SK(0)
 		self.GetStatusBar().SetForegroundColour(wx.GREEN)
-		self.SetStatusText(_('Kplex and Signal K restarted'))
+		self.SetStatusText(_('Kplex restarted'))
 		self.read_kplex_conf()
 
 	def on_cancel_changes_kplex(self,event):
