@@ -1088,13 +1088,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		data='# For advanced manual configuration, please visit: http://www.stripydog.com/kplex/configuration.html\n# Please do not modify defaults nor OpenPlotter GUI settings.\n# Add manual settings at the end of the document.\n\n'
 
 		data+='###defaults\n\n'
-		data+='[tcp]\nname=system_opencpn\ndirection=out\nmode=server\nofilter=-**RMB\naddress=127.0.0.1\nport=10109\n\n'
-		data+='[udp]\nname=system_SKout\ndirection=out\nofilter=-OC***\naddress=127.0.0.1\nport=55556\n\n'
-		data+='[udp]\nname=system_SKin\ndirection=in\naddress=127.0.0.1\nport=55565\n\n'
+		data+='[udp]\nname=system\ndirection=in\naddress=127.0.0.1\nport=10110\n\n'
+		data+='[tcp]\nname=opencpn\ndirection=out\nmode=server\nofilter=-**RMB\naddress=127.0.0.1\nport=10109\n\n'
+		data+='[udp]\nname=signalk\ndirection=out\nofilter=-OC***\naddress=127.0.0.1\nport=55556\n\n'
 		data+='###end of defaults\n\n###OpenPlotter GUI settings\n\n'
 		
 		for index,item in enumerate(self.kplex):
-			if not ('system_opencpn' in item[1] or 'system_SKout' in item[1] or 'system_SKin' in item[1]):
+			if not ('system' in item[1] or 'opencpn' in item[1] or 'signalk' in item[1]):
 				if self.list_kplex.IsChecked(index): state=''
 				else: state='#'
 				
@@ -1131,8 +1131,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		num = len(self.kplex)
 		for i in range(num):
 			if self.list_kplex.IsSelected(i):
-				if self.kplex[i][1]=='system_input' or self.kplex[i][1]=='system_output':
-					self.ShowMessage(_('This name is reserved by the system.'))
+				if self.kplex[i][1]=='system' or self.kplex[i][1]=='opencpn' or self.kplex[i][1]=='signalk':
+					self.ShowMessage(_('You can not delete this.'))
 					return
 				del self.kplex[i]
 		self.set_list_kplex()

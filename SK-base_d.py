@@ -538,7 +538,7 @@ class MySK_to_NMEA():
 				NMEA_string+=','+value_str
 		NMEA_string='$OC'+NMEA_string+'*'+hex(reduce(operator.xor, map(ord, 'OC'+NMEA_string), 0)).upper()[2:]+'\r\n'
 		#print NMEA_string
-		self.sock.sendto(NMEA_string, ('127.0.0.1', 55565))
+		self.sock.sendto(NMEA_string, ('127.0.0.1', 10110))
 		
 	def NMEA_cycle(self, tick2):
 		for i in self.cycle_list:		
