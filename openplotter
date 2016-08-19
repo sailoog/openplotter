@@ -951,7 +951,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def edit_kplex(self,e):
 		idx=e.GetIndex()
-		
+		if self.kplex[idx][1]=='system' or self.kplex[idx][1]=='opencpn' or self.kplex[idx][1]=='signalk':
+			self.GetStatusBar().SetForegroundColour(wx.RED)
+			self.SetStatusText(_('You can not edit this.'))
+			return
 		edit=[]
 		for i in range(9):
 			edit.append(self.list_kplex.GetItem(idx, i).GetText())
@@ -1127,15 +1130,22 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.read_kplex_conf()
 
 	def on_delete_kplex(self,event):
+		selected=self.list_kplex.GetFirstSelected()
+		if selected==-1: 
+			self.GetStatusBar().SetForegroundColour(wx.RED)
+			self.SetStatusText(_('Select an item.'))
+			return
 		num = len(self.kplex)
 		for i in range(num):
 			if self.list_kplex.IsSelected(i):
 				if self.kplex[i][1]=='system' or self.kplex[i][1]=='opencpn' or self.kplex[i][1]=='signalk':
-					self.ShowMessage(_('You can not delete this.'))
+					self.GetStatusBar().SetForegroundColour(wx.RED)
+					self.SetStatusText(_('You can not delete this.'))
 					return
 				del self.kplex[i]
 		self.set_list_kplex()
 
+	''' TODO check unique name
 	def process_name(self,r):
 		list_tmp=[]
 		l=r.split(',')
@@ -1151,14 +1161,20 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			if sublist[1] == name:
 				found=True
 		if found==True:
-			self.ShowMessage(_('This name already exists.'))
+			self.GetStatusBar().SetForegroundColour(wx.RED)
+			self.SetStatusText(_('Failed. This name already exists.'))
 			return False
 		else:
 			return list_tmp
+	'''
 
 	def on_diagnostic_kplex(self,event):
+		selected=self.list_kplex.GetFirstSelected()
+		if selected==-1: 
+			self.GetStatusBar().SetForegroundColour(wx.RED)
+			self.SetStatusText(_('Select an item.'))
+			return
 		num = len(self.kplex)
-		
 		for i in range(num):
 			if self.list_kplex.IsSelected(i):
 				if self.list_kplex.IsChecked(i):
