@@ -1,8 +1,14 @@
 ## This is the development branch of OpenPlotter project. If you want to test this version, you have to follow these steps:
 
-* Run OpenPlotter v0.8.0
+* Run OpenPlotter RPI v0.8.0
 
-* Delete the old content and clone this branch in folder /home/pi/.config/openplotter
+* Delete OpenPlotter v0.8.0 scripts and clone v0.9.0 branch:
+
+`cd /home/pi/.config`
+
+`rm -rf openplotter/`
+
+`git clone -b v0.9.0 https://github.com/sailoog/openplotter.git`
 
 * Type in the terminal:
 
