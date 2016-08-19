@@ -144,6 +144,8 @@ by
 
 `localhost:10109 TCP input`
 
+## Notes
+
 if you want to use the analog tools for firmata and ads1115, then read tools/install analog.txt
 
 changes:
