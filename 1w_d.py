@@ -15,49 +15,50 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import socket, time, datetime
-from w1thermsensor import W1ThermSensor
-from classes.conf import Conf
-from classes.check_vessel_self import checkVesselSelf
+import socket, time, datetime,platform
+if platform.machine()[0:3]!='arm':
+	print 'this is not a raspberry pi -> no W1ThermSensor'
+else:
+	from w1thermsensor import W1ThermSensor
+	from classes.conf import Conf
+	from classes.check_vessel_self import checkVesselSelf
 
-conf=Conf()
+	conf=Conf()
 
-try:
-	sensors_list=eval(conf.get('1W', 'DS18B20'))
-except: sensors_list=[]
+	try:
+		sensors_list=eval(conf.get('1W', 'DS18B20'))
+	except: sensors_list=[]
 
-if sensors_list:
-	vessel_self=checkVesselSelf()
-	uuid=vessel_self.uuid
-	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	sensors=[]
-	sensors_list2=[]
-	for item in sensors_list:
-		try:
-			type=W1ThermSensor.THERM_SENSOR_DS18B20
-			for sensor in W1ThermSensor.get_available_sensors():
-				if item[2] == sensor.id:
-					type = sensor.type
-			sensors.append(W1ThermSensor(type, item[2]))
-			sensors_list2.append(item)
-		except Exception,e: print str(e)
-			
-	while True:
-		time.sleep(0.1)
-		list_signalk=[]
-		ib=0
-		for i in sensors_list2:
+	if sensors_list:
+		vessel_self=checkVesselSelf()
+		uuid=vessel_self.uuid
+		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		sensors=[]
+		sensors_list2=[]
+		for item in sensors_list:
 			try:
-				temp=sensors[ib].get_temperature(W1ThermSensor.KELVIN)
-				temp_offset=temp+float(i[3])
-				value=str(temp_offset)
-				if '*' in i[1]: path=i[1].replace('*', i[0],1)
-				else: path=i[1]
-				sensorid=i[2]
-				timestamp=str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z'
-				SignalK='{"context": "vessels.'+uuid+'","updates":[{"source":{"type": "1W","src":"'+sensorid+'"},"timestamp":"'+timestamp+'","values":[{"path":"'+path+'","value":'+value+'}]}]}\n'
-				sock.sendto(SignalK, ('127.0.0.1', 55557))
+				type=W1ThermSensor.THERM_SENSOR_DS18B20
+				for sensor in W1ThermSensor.get_available_sensors():
+					if item[2] == sensor.id:
+						type = sensor.type
+				sensors.append(W1ThermSensor(type, item[2]))
+				sensors_list2.append(item)
 			except Exception,e: print str(e)
-			ib=ib+1
-
-	
+				
+		while True:
+			time.sleep(0.1)
+			list_signalk=[]
+			ib=0
+			for i in sensors_list2:
+				try:
+					temp=sensors[ib].get_temperature(W1ThermSensor.KELVIN)
+					temp_offset=temp+float(i[3])
+					value=str(temp_offset)
+					if '*' in i[1]: path=i[1].replace('*', i[0],1)
+					else: path=i[1]
+					sensorid=i[2]
+					timestamp=str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z'
+					SignalK='{"context": "vessels.'+uuid+'","updates":[{"source":{"type": "1W","src":"'+sensorid+'"},"timestamp":"'+timestamp+'","values":[{"path":"'+path+'","value":'+value+'}]}]}\n'
+					sock.sendto(SignalK, ('127.0.0.1', 55557))
+				except Exception,e: print str(e)
+				ib=ib+1	

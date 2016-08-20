@@ -24,7 +24,7 @@ pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
 exist=False
 for pid in pids:
 	try:
-		if 'node' in open(os.path.join('/proc', pid, 'cmdline'), 'rb').read():
+		if 'signalk-server' in open(os.path.join('/proc', pid, 'cmdline'), 'rb').read():
 			exist=True
 	except IOError: # proc has already terminated
 		continue
@@ -134,10 +134,12 @@ if not exist:
 	#######################################################
 	time.sleep(delay)
 
-	subprocess.call(['pkill', '-9', 'x11vnc'])
-	if x11vnc=='1':
-		if vnc_pass=='1': subprocess.Popen(['x11vnc', '-forever', '-shared', '-usepw'])
-		else: subprocess.Popen(['x11vnc', '-forever', '-shared' ])         
+	try:
+		subprocess.call(['pkill', '-9', 'x11vnc'])
+		if x11vnc=='1':
+			if vnc_pass=='1': subprocess.Popen(['x11vnc', '-forever', '-shared', '-usepw'])
+			else: subprocess.Popen(['x11vnc', '-forever', '-shared' ])         
+	except: print 'x11vnc not installed'
 
 	opencpn_commands=[]
 	opencpn_commands.append('opencpn')
@@ -151,7 +153,7 @@ if not exist:
 		subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '1'])
 	else:
 		subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '0'])
-		
+	
 	time.sleep(16)
 
 	subprocess.call(['pkill', '-9', 'kplex'])
