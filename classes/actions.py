@@ -14,12 +14,15 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
-import subprocess, time, gammu
+import subprocess, time, gammu, platform
 from paths import Paths
 from classes.twitterbot import TwitterBot
 from classes.gmailbot import GmailBot
-import RPi.GPIO as GPIO
 import paho.mqtt.publish as publish
+if platform.machine()[0:3]=='arm':
+	import RPi.GPIO as GPIO
+else:
+	import emulator.GPIO as GPIO
 
 class Actions():
 

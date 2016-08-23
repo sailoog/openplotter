@@ -15,8 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import sys, socket, time, webbrowser, serial, requests, json,websocket,threading,logging, subprocess, signal, operator, datetime
-from classes.datastream import DataStream
+import sys, socket, time, webbrowser, requests, json,websocket,threading,logging, subprocess, signal, operator, datetime
 from classes.paths import Paths
 from classes.conf import Conf
 from classes.actions import Actions
@@ -26,8 +25,6 @@ from classes.language import Language
 class MySK():
 		
 	def __init__(self):
-		self.private_unit_s = 1
-
 		logging.basicConfig()
 		self.list_SK=[]
 		self.static_list=[[]]
@@ -189,11 +186,7 @@ class MySK():
 					i[2]=value
 					if type(i[2]) is float: pass
 					else:	i[2]=0.0
-					if i[4]==0.0: i[4]=self.json_interval(i[7],timestamp)
-					else:         i[4]=i[4]*.8+0.2*self.json_interval(i[7],timestamp)
 					i[7]=timestamp
-					if self.private_unit_s:
-						i[9]=i[2]/i[10]+i[11]
 				#print 'updated ',i[2]
 			if exists:
 				i=self.list_SK[-1]
@@ -201,8 +194,6 @@ class MySK():
 		if not exists:
 			self.lookup_star(path)
 			value_priv = 0
-			if self.private_unit_s:
-				value_priv = value/self.SK_Faktor_priv+self.SK_Offset_priv			
 			self.list_SK.append([src,path,value,str(self.SK_unit),0.0,1,self.SK_description,timestamp,str(self.SK_unit_priv),value_priv,self.SK_Faktor_priv,self.SK_Offset_priv])
 			#print 'new ',self.list_SK[-1]
 			
@@ -538,7 +529,7 @@ class MySK_to_NMEA():
 				NMEA_string+=','+value_str
 		NMEA_string='$OC'+NMEA_string+'*'+hex(reduce(operator.xor, map(ord, 'OC'+NMEA_string), 0)).upper()[2:]+'\r\n'
 		#print NMEA_string
-		self.sock.sendto(NMEA_string, ('127.0.0.1', 10110))
+		self.sock.sendto(NMEA_string, ('127.0.0.1', 55565))
 		
 	def NMEA_cycle(self, tick2):
 		for i in self.cycle_list:		
@@ -577,7 +568,9 @@ class MySK_to_Action():
 					if iii[3]==4: iii[2]=((iii[2]*24)*60)*60
 					iii.append('')# 4 last run
 				self.triggers.append(ii)
-				self.SKc.append([ii[1],[0,0,0,0,0,0,0,0]])
+				if '.*.' in ii[1]: SKkey2=ii[1].replace('*', ii[2])
+				else: SKkey2=ii[1]
+				self.SKc.append([SKkey2,[0,0,0,0,0,0,0,0]])
 				ii[1]=self.SKc[-1]
 				
 		#for i in self.triggers:
@@ -587,7 +580,6 @@ class MySK_to_Action():
 		if start:
 			if item[6]==False:
 				re=''
-				#print item
 				for i in item[5]:
 					try:
 						re=self.actions.run_action(i[0],i[1])
@@ -635,9 +627,9 @@ class MySK_to_Action():
 					if operator==0: self.Action_set(item, now-trigger_value_timestamp > data_value) 
 					#present in the last
 					elif operator==1: self.Action_set(item, now-trigger_value_timestamp < data_value)
-					#equal (number)
 
-					if trigger_value_timestamp:
+					elif trigger_value_timestamp:
+						#equal (number)
 						if operator==2 and data_value: self.Action_set(item, float(trigger_value) == data_value)
 						#equal (string)
 						elif operator==2 and not data_value: self.Action_set(item, trigger_value == data_string)
@@ -650,9 +642,9 @@ class MySK_to_Action():
 						#greater than or equal to
 						elif operator==6: self.Action_set(item, float(trigger_value) >= data_value)
 					#switch on
-					if operator==7: self.Action_set(item, trigger_value==1)
+					elif operator==7: self.Action_set(item, trigger_value==1)
 					#switch off
-					if operator==8: self.Action_set(item, trigger_value==0)
+					elif operator==8: self.Action_set(item, trigger_value==0)
 
 				except Exception,e: print str(e)
 				#except: pass				

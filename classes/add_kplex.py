@@ -15,7 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 import wx, re, pyudev
-from w1thermsensor import W1ThermSensor
 from classes.paths import Paths
 
 paths=Paths()

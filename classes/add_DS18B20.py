@@ -14,8 +14,11 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
-import wx, subprocess, json
-from w1thermsensor import W1ThermSensor
+import wx, subprocess, json, platform
+if platform.machine()[0:3]=='arm':
+	from w1thermsensor import W1ThermSensor
+else:
+	from emulator.w1thermsensor import W1ThermSensor
 from classes.paths import Paths
 
 paths=Paths()

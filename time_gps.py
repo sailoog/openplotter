@@ -24,9 +24,9 @@ foundtime = False
 try:
 	sock_in = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	sock_in.settimeout(10)
-	sock_in.connect(('127.0.0.1', 10110))
+	sock_in.connect(('127.0.0.1', 10109))
 except socket.error, error_msg:
-	print 'Failed to connect with localhost:10110.'
+	print 'Failed to connect with localhost:10109.'
 	print 'Error: '+ str(error_msg[0])
 else:
 	cont = 0
@@ -36,7 +36,7 @@ else:
 			frase_nmea = sock_in.recv(1024)
 		except socket.error, error_msg:
 			try:
-				print 'Failed to connect with localhost:10110.'
+				print 'Failed to connect with localhost:10109.'
 				print 'Error: '+ str(error_msg[0])
 				sys.stdout.flush()
 			except: pass

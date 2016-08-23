@@ -16,7 +16,6 @@
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 import wx, subprocess, json
 import matplotlib.pyplot as plt
-from w1thermsensor import W1ThermSensor
 from classes.paths import Paths
 from classes.conf import Conf
 

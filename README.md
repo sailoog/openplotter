@@ -161,3 +161,4 @@ changes:
 -generating nmea2000 sentences from SignalK not implemented in the ide, so you have to choose the pgn in openplotter.conf [N2K] pgn_generate =['127489']
 
 -many pages are resizeable
+

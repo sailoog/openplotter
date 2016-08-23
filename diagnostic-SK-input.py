@@ -15,8 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, sys, socket, time, webbrowser, serial, requests, json,websocket,threading,logging, subprocess
-from classes.datastream import DataStream
+import wx, sys, socket, time, webbrowser, requests, json,websocket,threading,logging, subprocess
 from classes.paths import Paths
 from classes.conf import Conf
 from classes.language import Language
@@ -24,6 +23,8 @@ from classes.language import Language
 class MyFrame(wx.Frame):
 		
 	def __init__(self):
+		self.s=True
+
 		self.private_unit_s = 1
 
 		logging.basicConfig()
@@ -107,7 +108,7 @@ class MyFrame(wx.Frame):
 		self.timer.Start(self.ttimer)
 
 	def timer_act(self, event):
-		if len(self.buffer)>0:
+		if len(self.buffer)>0 and self.s:
 			for ii in self.buffer:
 				if ii[0]>=0 and ii[0]<self.list.GetItemCount():
 					self.list.SetStringItem(ii[0], ii[1], ii[2])
@@ -214,60 +215,62 @@ class MyFrame(wx.Frame):
 		subprocess.Popen(['python',self.currentpath+'/unit-private.py'])
 			
 	def OnClose(self, event):
+		self.s=False
 		self.timer.Stop()
+		time.sleep(0.1)
 		self.stop()
 		self.Destroy()
 
 	def on_message(self,ws, message):
-		try:
-			js_up=json.loads(message)['updates'][0]
-		except:
-			return
-		label=js_up['source']['label']
-		
-		srcExist=False
-		try:
-			src=js_up['source']['src']
-			srcExist=True
-		except:	pass
-		if not srcExist:
+		if self.s:
 			try:
-				src=js_up['source']['talker']
-				srcExist=True
+				js_up=json.loads(message)['updates'][0]
 			except:
-				src='xx'
-		try:
-			timestamp=js_up['timestamp']
-		except:
-			timestamp='2000-01-01T00:00:00.000Z'
-					
-		values_=js_up['values']
-		srclabel2=''
-		
-		for values in values_:
-			path=values['path']
-			value=values['value']
+				return
+			label=js_up['source']['label']
 			
-			if type(value) is dict:
-				if 'timestamp' in value:timestamp=value['timestamp']
-				if 'source' in value:
-					try:
-						src2=value['source']['talker']
-					except:
-						src2='xx'
-					srclabel2=label +'.'+ src2
-					
-				for lvalue in value:
-					if lvalue in ['timestamp','source']:pass
-					else:
-						path2=path+'.'+lvalue
-						value2=value[lvalue]
-						self.update_add(value2, path2, srclabel2, timestamp)
-			else:
-				srclabel=label +'.'+ src
-				self.update_add(value, path, srclabel, timestamp)
+			srcExist=False
+			try:
+				src=js_up['source']['src']
+				srcExist=True
+			except:	pass
+			if not srcExist:
+				try:
+					src=js_up['source']['talker']
+					srcExist=True
+				except:
+					src='xx'
+			try:
+				timestamp=js_up['timestamp']
+			except:
+				timestamp='2000-01-01T00:00:00.000Z'
+						
+			values_=js_up['values']
+			srclabel2=''
 			
-
+			for values in values_:
+				path=values['path']
+				value=values['value']
+				
+				if type(value) is dict:
+					if 'timestamp' in value:timestamp=value['timestamp']
+					if 'source' in value:
+						try:
+							src2=value['source']['talker']
+						except:
+							src2='xx'
+						srclabel2=label +'.'+ src2
+						
+					for lvalue in value:
+						if lvalue in ['timestamp','source']:pass
+						else:
+							path2=path+'.'+lvalue
+							value2=value[lvalue]
+							self.update_add(value2, path2, srclabel2, timestamp)
+				else:
+					srclabel=label +'.'+ src
+					self.update_add(value, path, srclabel, timestamp)
+			
 	def update_add(self,value, path, src, timestamp):
 		# SRC SignalK Value Unit Interval Status Description timestamp	private_Unit private_Value priv_Faktor priv_Offset		
 		#  0    1      2     3      4        5        6          7           8             9           10          11			

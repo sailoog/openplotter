@@ -16,7 +16,6 @@
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
 import wx, sys, socket, time, webbrowser, serial, requests, json,websocket,threading,logging
-from classes.datastream import DataStream
 from classes.paths import Paths
 from classes.conf import Conf
 from classes.language import Language

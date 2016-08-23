@@ -68,9 +68,13 @@ stm32 have 12 to 16 bit adc
 For Arduino you must have:
 	Arduino ide compatible board with usb
 	Arduino ide
-	Installed Pymata
+	Install Pymata:
+		sudo apt-get install python-pip
+		sudo pip install pymata
+
 For ads1115 you must have:
-	Installed smbus (sudo apt-get install python-smbus)
+	Install smbus:
+		sudo apt-get install python-smbus
 	
 First you upload FirmataStandard from Arduino ide to your board (for help use google)
 Connect the board to your rpi.
