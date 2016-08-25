@@ -184,7 +184,7 @@ class MyFrame(wx.Frame):
 				ppm=ppm.replace(',', '.')
 			channel='a'
 			if self.ais_frequencies2.GetValue(): channel='b'
-			w_open=subprocess.Popen(['python', self.paths.currentpath+'/SDR_AIS_waterfall.py', gain, ppm, channel])
+			w_open=subprocess.Popen(['python', self.paths.tool_path+'/SDR_AIS_waterfall.py', gain, ppm, channel])
 			msg=_('SDR-AIS reception disabled. After closing the new window enable SDR-AIS reception again.')
 			self.SetStatusText(msg)
 
@@ -204,7 +204,7 @@ class MyFrame(wx.Frame):
 			self.conf.set('AIS-SDR', 'gain', gain)
 			self.conf.set('AIS-SDR', 'ppm', ppm)
 			self.conf.set('AIS-SDR', 'band', band)
-			subprocess.Popen(['python',self.paths.currentpath+'/SDR_AIS_fine_cal.py', 'b'])
+			subprocess.Popen(['python',self.paths.tool_path+'/SDR_AIS_fine_cal.py', 'b'])
 			msg=_('SDR-AIS reception disabled. After closing the new window enable SDR-AIS reception again.')
 			self.SetStatusText(msg)
 			
@@ -217,7 +217,7 @@ class MyFrame(wx.Frame):
 			self.conf.set('AIS-SDR', 'gain', gain)
 			self.conf.set('AIS-SDR', 'ppm', ppm)
 			self.conf.set('AIS-SDR', 'gsm_channel', channel)
-			if channel: subprocess.Popen(['python',self.paths.currentpath+'/SDR_AIS_fine_cal.py', 'c'])
+			if channel: subprocess.Popen(['python',self.paths.tool_path+'/SDR_AIS_fine_cal.py', 'c'])
 			msg=_('SDR-AIS reception disabled. After closing the new window enable SDR-AIS reception again.')
 			self.SetStatusText(msg)
 
