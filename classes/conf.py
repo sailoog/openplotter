@@ -15,38 +15,35 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 import ConfigParser
-from paths import Paths
+#from paths import Paths
+
 
 class Conf:
-
-	def __init__(self):
-
-		self.paths=Paths()
-
+	def __init__(self, paths):
+		self.paths = paths
 		self.data_conf = ConfigParser.SafeConfigParser()
-		
 		self.read()
 
 	def read(self):
-		self.data_conf.read(self.paths.currentpath+'/openplotter.conf')
+		self.data_conf.read(self.paths.currentpath + '/openplotter.conf')
 
 	def write(self):
-		with open(self.paths.currentpath+'/openplotter.conf', 'wb') as configfile:
+		with open(self.paths.currentpath + '/openplotter.conf', 'wb') as configfile:
 			self.data_conf.write(configfile)
 
-	def get(self,section,item):
-		return self.data_conf.get(section,item)
+	def get(self, section, item):
+		return self.data_conf.get(section, item)
 
-	def set(self,section,item,value):
+	def set(self, section, item, value):
 		self.read()
 		self.data_conf.set(section, item, value)
 		self.write()
 
-	def has_option(self,section,item):
-		return self.data_conf.has_option(section,item)
-		
-	def has_section(self,section):
+	def has_option(self, section, item):
+		return self.data_conf.has_option(section, item)
+
+	def has_section(self, section):
 		return self.data_conf.has_section(section)
-		
-	def add_section(self,section):
-		return self.data_conf.add_section(section)		
+
+	def add_section(self, section):
+		return self.data_conf.add_section(section)

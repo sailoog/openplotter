@@ -22,6 +22,18 @@ from classes.check_vessel_self import checkVesselSelf
 
 pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
 exist=False
+
+device = ''
+ssid = ''
+passw = ''
+hw_mode = ''
+channel = ''
+wpa = ''
+boot_ap = 0
+bridge = ''
+ip = ''
+share = ''
+
 for pid in pids:
 	try:
 		if 'signalk-server' in open(os.path.join('/proc', pid, 'cmdline'), 'rb').read():
@@ -61,7 +73,7 @@ if not exist:
 		ip = boot_conf.get('OPENPLOTTER', 'ip')
 	except: pass
 
-	conf=Conf()
+	conf=Conf(paths)
 
 	if enable=='1':
 		if not device: device='wlan0'
@@ -73,16 +85,10 @@ if not exist:
 		if not bridge: bridge='0'
 		if not ip: ip='10.10.10.1'	
 		if conf.get('WIFI', 'enable')!=enable:   conf.set('WIFI', 'enable', enable)
-
-
 		if conf.get('WIFI', 'device')!=device:   conf.set('WIFI', 'device', device)
-
 		if conf.get('WIFI', 'ssid')!=ssid:       conf.set('WIFI', 'ssid', ssid)
-
 		if conf.get('WIFI', 'password')!=passw:  conf.set('WIFI', 'password', passw)
-
 		if conf.get('WIFI', 'hw_mode')!=hw_mode: conf.set('WIFI', 'hw_mode', hw_mode)
-
 		if conf.get('WIFI', 'channel')!=channel: conf.set('WIFI', 'channel', channel)
 		if conf.get('WIFI', 'wpa')!=wpa:         conf.set('WIFI', 'wpa', wpa)
 		if conf.get('WIFI', 'bridge')!=bridge:   conf.set('WIFI', 'bridge', bridge)
@@ -137,12 +143,12 @@ if not exist:
 	try:
 		subprocess.call(['pkill', '-9', 'x11vnc'])
 		if x11vnc=='1':
-			if vnc_pass=='1': subprocess.Popen(['x11vnc', '-forever', '-shared', '-usepw'])
-			else: subprocess.Popen(['x11vnc', '-forever', '-shared' ])         
+			if vnc_pass=='1': process = subprocess.Popen(['x11vnc', '-forever', '-shared', '-usepw'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+			else: process = subprocess.Popen(['x11vnc', '-forever', '-shared' ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+			time.sleep(5)
 	except: print 'x11vnc not installed'
 
-	opencpn_commands=[]
-	opencpn_commands.append('opencpn')
+	opencpn_commands = ['opencpn']
 	if opencpn_no=='1': opencpn_commands.append('-no_opengl')
 	if opencpn_fullscreen=='1': opencpn_commands.append('-fullscreen')
 
@@ -150,11 +156,11 @@ if not exist:
 	if opencpn=='1' and len(opencpn_commands)==1: subprocess.Popen('opencpn')
 
 	if wifi_server=='1':
-		subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '1'])
+		process = subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '1'])
 	else:
-		subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '0'])
-	
-	time.sleep(16)
+		process = subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '0'])
+
+	process.wait()
 
 	subprocess.call(['pkill', '-9', 'kplex'])
 	if kplex=='1':
@@ -181,7 +187,7 @@ if not exist:
 	subprocess.call(['pkill', '-9', 'mpg123'])
 	if play=='1':
 		if sound:
-			try: subprocess.Popen(['mpg123',sound])
+			try: subprocess.Popen(['mpg123', '-q', sound])
 			except: pass
 
 	index=0

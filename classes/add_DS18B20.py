@@ -14,68 +14,74 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
-import wx, subprocess, json, platform
-if platform.machine()[0:3]=='arm':
+import json
+import platform
+import subprocess
+import wx
+
+if platform.machine()[0:3] == 'arm':
 	from w1thermsensor import W1ThermSensor
 else:
 	from emulator.w1thermsensor import W1ThermSensor
-from classes.paths import Paths
 
-paths=Paths()
-home=paths.home
 
 class addDS18B20(wx.Dialog):
+	def __init__(self, edit, parent):
 
-	def __init__(self,edit):
-
-		wx.Dialog.__init__(self, None, title=_('Add 1W temperature sensor'), size=(430,300))
+		wx.Dialog.__init__(self, None, title=_('Add 1W temperature sensor'), size=(430, 300))
 
 		panel = wx.Panel(self)
 
-		list_tmp=[]
-		response = subprocess.check_output(home+'/.config/signalk-server-node/node_modules/signalk-schema/scripts/extractKeysAndMeta.js')
-		self.data = json.loads(response)
+		list_tmp = []
+		response = subprocess.Popen(
+			[parent.home + '/.config/signalk-server-node/node_modules/signalk-schema/scripts/extractKeysAndMeta.js'],
+			stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		self.data = json.loads(response.communicate()[0])
 		for i in self.data:
 			if 'temperature' in i or 'Temperature' in i:
-				if not 'electrical.' in i:
+				if 'electrical.' not in i:
 					list_tmp.append(i)
-		list_sk_path=sorted(list_tmp)
+		list_sk_path = sorted(list_tmp)
 
 		wx.StaticText(panel, label='Signal K', pos=(10, 10))
-		self.SKkey= wx.ComboBox(panel, choices=list_sk_path, style=wx.CB_READONLY, size=(410, 30), pos=(10, 35))
- 		self.SKkey.Bind(wx.EVT_COMBOBOX, self.onSelect)
- 		self.description = wx.TextCtrl(panel, -1, style=wx.TE_MULTILINE|wx.TE_READONLY, size=(410, 45), pos=(10, 70))
+		self.SKkey = wx.ComboBox(panel, choices=list_sk_path, style=wx.CB_READONLY, size=(410, 30), pos=(10, 35))
+		self.SKkey.Bind(wx.EVT_COMBOBOX, self.onSelect)
+		self.description = wx.TextCtrl(panel, -1, style=wx.TE_MULTILINE | wx.TE_READONLY, size=(410, 45), pos=(10, 70))
 		self.description.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_INACTIVECAPTION))
 
 		wx.StaticText(panel, label=_('Name'), pos=(10, 125))
 		self.name = wx.TextCtrl(panel, size=(150, 30), pos=(10, 150))
 		wx.StaticText(panel, label=_('allowed characters: 0-9, a-z, A-Z.'), pos=(10, 185))
 
-		list_id=[]
+		list_id = []
 		for sensor in W1ThermSensor.get_available_sensors():
 			list_id.append(sensor.id)
 		wx.StaticText(panel, label=_('Sensor ID'), pos=(190, 125))
-		self.id_select= wx.ComboBox(panel, choices=list_id, style=wx.CB_READONLY, size=(150, 32), pos=(190, 150))
+		self.id_select = wx.ComboBox(panel, choices=list_id, style=wx.CB_READONLY, size=(150, 32), pos=(190, 150))
 
 		wx.StaticText(panel, label=_('Offset'), pos=(370, 125))
 		self.offset = wx.TextCtrl(panel, size=(50, 30), pos=(370, 150))
-		
+
 		if edit != 0:
 			self.name.SetValue(edit[1])
 			self.SKkey.SetValue(edit[2])
 			for i in self.data:
-				if edit[2]==i:
-					try: self.description.SetValue(self.data[i]['description'])
-					except: self.description.SetValue('')
+				if edit[2] == i:
+					try:
+						self.description.SetValue(self.data[i]['description'])
+					except:
+						self.description.SetValue('')
 			self.id_select.SetValue(edit[3])
 			self.offset.SetValue(edit[4])
-			
+
 		cancelBtn = wx.Button(panel, wx.ID_CANCEL, pos=(115, 220))
 		okBtn = wx.Button(panel, wx.ID_OK, pos=(235, 220))
 
-	def onSelect(self,e):
-		selected= self.SKkey.GetValue()
+	def onSelect(self, e):
+		selected = self.SKkey.GetValue()
 		for i in self.data:
-			if selected==i:
-				try: self.description.SetValue(self.data[i]['description'])
-				except: self.description.SetValue('')
+			if selected == i:
+				try:
+					self.description.SetValue(self.data[i]['description'])
+				except:
+					self.description.SetValue('')

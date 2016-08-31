@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, threading, time, datetime,websocket, logging, json
+import wx, threading, time, websocket, logging, json
 from classes.paths import Paths
 from classes.conf import Conf
 from classes.language import Language

@@ -20,10 +20,12 @@ if platform.machine()[0:3]!='arm':
 	print 'this is not a raspberry pi -> no W1ThermSensor'
 else:
 	from w1thermsensor import W1ThermSensor
+	from classes.paths import Paths
 	from classes.conf import Conf
 	from classes.check_vessel_self import checkVesselSelf
-
-	conf=Conf()
+	
+	
+	conf=Conf(Paths())
 
 	try:
 		sensors_list=eval(conf.get('1W', 'DS18B20'))

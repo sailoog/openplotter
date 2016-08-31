@@ -15,41 +15,55 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import RTIMU, os
+import platform
 
-detected_imu=''
-detected_pressure=''
-detected_humidity=''
-calibrated=''
+if platform.machine()[0:3] == 'arm':
+	import RTIMU
 
+	detected_imu = ''
+	detected_pressure = ''
+	detected_humidity = ''
+	calibrated = ''
 
-SETTINGS_FILE = "RTIMULib"
-s = RTIMU.Settings(SETTINGS_FILE)
-imu = RTIMU.RTIMU(s)
-if imu.IMUName()!='Null IMU': 
-		detected_imu=imu.IMUName()
-		if imu.getCompassCalibrationValid() and imu.getCompassCalibrationEllipsoidValid() and imu.getAccelCalibrationValid(): 
-			calibrated=1
+	SETTINGS_FILE = "RTIMULib"
+	s = RTIMU.Settings(SETTINGS_FILE)
+	imu = RTIMU.RTIMU(s)
+	if imu.IMUName() != 'Null IMU':
+		detected_imu = imu.IMUName()
+		if imu.getCompassCalibrationValid() and imu.getCompassCalibrationEllipsoidValid() and imu.getAccelCalibrationValid():
+			calibrated = 1
 
-SETTINGS_FILE2 = "RTIMULib2"
-s2 = RTIMU.Settings(SETTINGS_FILE2)
-pressure = RTIMU.RTPressure(s2)
-if pressure.pressureName()!='none': detected_pressure=pressure.pressureName()
+	SETTINGS_FILE2 = "RTIMULib2"
+	s2 = RTIMU.Settings(SETTINGS_FILE2)
+	pressure = RTIMU.RTPressure(s2)
+	if pressure.pressureName() != 'none': detected_pressure = pressure.pressureName()
 
-SETTINGS_FILE3 = "RTIMULib3"
-s3 = RTIMU.Settings(SETTINGS_FILE3)
-humidity = RTIMU.RTHumidity(s3)
-if humidity.humidityName()!='none': detected_humidity=humidity.humidityName()
+	SETTINGS_FILE3 = "RTIMULib3"
+	s3 = RTIMU.Settings(SETTINGS_FILE3)
+	humidity = RTIMU.RTHumidity(s3)
+	if humidity.humidityName() != 'none': detected_humidity = humidity.humidityName()
 
+	if detected_imu:
+		print detected_imu
+	else:
+		print 'none'
 
-if detected_imu: print detected_imu
-else: print 'none'
+	if calibrated:
+		print calibrated
+	else:
+		print '0'
 
-if calibrated: print calibrated
-else: print '0'
+	if detected_pressure:
+		print detected_pressure
+	else:
+		print 'none'
 
-if detected_pressure: print detected_pressure
-else: print 'none'
-
-if detected_humidity: print detected_humidity
-else: print 'none'
+	if detected_humidity:
+		print detected_humidity
+	else:
+		print 'none'
+else:
+	print 'none'
+	print '0'
+	print 'none'
+	print 'none'

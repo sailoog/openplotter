@@ -16,11 +16,10 @@
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 import wx
 
+
 class addTopic(wx.Dialog):
-
-	def __init__(self,edit):
-
-		wx.Dialog.__init__(self, None, title=_('Add MQTT topic'), size=(330,200))
+	def __init__(self, edit):
+		wx.Dialog.__init__(self, None, title=_('Add MQTT topic'), size=(330, 200))
 
 		panel = wx.Panel(self)
 

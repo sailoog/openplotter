@@ -15,31 +15,31 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 import wx
-from paths import Paths
+
 
 class addAction(wx.Dialog):
+	def __init__(self, parent, actions_options, time_units, edit):
 
-	def __init__(self,conf,actions_options,time_units,edit):
-
-		wx.Dialog.__init__(self, None, title=_('Add action'), size=(330,290))
+		wx.Dialog.__init__(self, None, title=_('Add action'), size=(330, 290))
 
 		panel = wx.Panel(self)
-		self.conf=conf
-		self.actions_options=actions_options
+		self.conf = parent.conf
+		self.actions_options = actions_options
 
-		list_actions=[]
+		list_actions = []
 		for i in self.actions_options:
 			list_actions.append(i[0])
 
 		wx.StaticText(panel, label=_('action'), pos=(10, 10))
-		self.action_select= wx.ComboBox(panel, choices=list_actions, style=wx.CB_READONLY, size=(310, 32), pos=(10, 35))
+		self.action_select = wx.ComboBox(panel, choices=list_actions, style=wx.CB_READONLY, size=(310, 32),
+										 pos=(10, 35))
 		self.action_select.Bind(wx.EVT_COMBOBOX, self.onSelect)
 		wx.StaticText(panel, label=_('data'), pos=(10, 70))
 		self.data = wx.TextCtrl(panel, size=(310, 32), pos=(10, 95))
 		wx.StaticText(panel, label=_('repeat after'), pos=(10, 130))
 		self.repeat = wx.TextCtrl(panel, size=(150, 32), pos=(10, 155))
 		self.repeat.Disable()
-		self.repeat_unit= wx.ComboBox(panel, choices=time_units, style=wx.CB_READONLY, size=(150, 32), pos=(170, 155))
+		self.repeat_unit = wx.ComboBox(panel, choices=time_units, style=wx.CB_READONLY, size=(150, 32), pos=(170, 155))
 		self.repeat_unit.Bind(wx.EVT_COMBOBOX, self.onSelectUnit)
 		self.repeat_unit.SetValue(_('no repeat'))
 
@@ -54,36 +54,39 @@ class addAction(wx.Dialog):
 		cancelBtn = wx.Button(panel, wx.ID_CANCEL, pos=(70, 205))
 		okBtn = wx.Button(panel, wx.ID_OK, pos=(180, 205))
 
-		paths=Paths()
-		self.home=paths.home
-		self.currentpath=paths.currentpath
+		self.home = parent.paths.home
+		self.currentpath = parent.currentpath
 
-	def onSelect(self,e):
-		msg=self.actions_options[self.action_select.GetCurrentSelection()][1]
-		field=self.actions_options[self.action_select.GetCurrentSelection()][2]
+	def onSelect(self, e):
+		msg = self.actions_options[self.action_select.GetCurrentSelection()][1]
+		field = self.actions_options[self.action_select.GetCurrentSelection()][2]
 		self.data.SetValue('')
-		if field==0: 
+		if field == 0:
 			self.data.Disable()
-		if field==1: 
+		if field == 1:
 			self.data.Enable()
 			self.data.SetFocus()
 		if msg:
-			if msg=='OpenFileDialog':
-				path=''
-				dlg = wx.FileDialog(self, message=_('Choose a file'), defaultDir=self.currentpath+'/sounds', defaultFile='', wildcard=_('Audio files')+' (*.mp3)|*.mp3|'+_('All files')+' (*.*)|*.*', style=wx.OPEN | wx.CHANGE_DIR)
+			if msg == 'OpenFileDialog':
+				dlg = wx.FileDialog(self, message=_('Choose a file'), defaultDir=self.currentpath + '/sounds',
+									defaultFile='',
+									wildcard=_('Audio files') + ' (*.mp3)|*.mp3|' + _('All files') + ' (*.*)|*.*',
+									style=wx.OPEN | wx.CHANGE_DIR)
 				if dlg.ShowModal() == wx.ID_OK:
 					file_path = dlg.GetPath()
+					self.data.SetValue(file_path)
 				dlg.Destroy()
-				self.data.SetValue(file_path)
 			else:
-				if msg==0: pass
-				else: 
-					if field==1:msg=msg+_('\n\nYou can add the current value of any magnitude typing its short name between brackets, e.g. [Lat] for Latitude. See available short names in Inspector window.')
+				if msg == 0:
+					pass
+				else:
+					if field == 1: msg = msg + _(
+						'\n\nYou can add the current value of any magnitude typing its short name between brackets, e.g. [Lat] for Latitude. See available short names in Inspector window.')
 					wx.MessageBox(msg, 'Info', wx.OK | wx.ICON_INFORMATION)
 
-	def onSelectUnit(self,e):
-		if self.repeat_unit.GetCurrentSelection()==0: 
+	def onSelectUnit(self, e):
+		if self.repeat_unit.GetCurrentSelection() == 0:
 			self.repeat.Disable()
 			self.repeat.SetValue('')
-		else: 
+		else:
 			self.repeat.Enable()

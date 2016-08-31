@@ -25,9 +25,10 @@ class MyFrame(wx.Frame):
 	def __init__(self):
 		self.ttimer=40
 		
-		self.home=Paths().home
-		self.currentpath=Paths().currentpath
-		self.conf=Conf()
+		paths = Paths()
+		self.home=paths.home
+		self.currentpath=paths.currentpath
+		self.conf=Conf(paths)
 		
 		try:
 			self.ser = serial.Serial(self.conf.get('N2K', 'can_usb'), 115200, timeout=0.5)
