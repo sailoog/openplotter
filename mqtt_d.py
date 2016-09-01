@@ -16,6 +16,7 @@
 
 import paho.mqtt.client as paho
 import time, socket, datetime, json
+from classes.paths import Paths
 from classes.conf import Conf
 from classes.check_vessel_self import checkVesselSelf
 
@@ -59,7 +60,7 @@ def send_null():
 	sock.sendto(SignalK, ('127.0.0.1', 55558))
 
 
-conf=Conf()
+conf=Conf(Paths())
 
 x=conf.get('MQTT', 'topics')
 if x: topics_list=eval(x)

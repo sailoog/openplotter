@@ -37,9 +37,9 @@ tw_sog = 0
 
 [N2K]
 enable = 0
-can_usb = /dev/ttyOP_N2K
+can_usb = 
 pgn_output = 
-pgn_generate = ['127505']
+pgn_generate = ['127245','127250','127257','127488','127489','127505','127505_1','127505_2','127505_3','130310','130311']
 rem_pgn_generate = ['126992','127245','127250','127257','127488','127488_1','127489','127489_1','127505','127505_1','127505_2','127505_3','127508','128259','128267','128275','129025','129026','130306','130310','130311','130316','130316_1']
 output = 0
 
@@ -78,7 +78,7 @@ triggers =
 ds18b20 = 
 
 [UDEV]
-usbinst = [['ttyOP_N2K', '0403', 'd9aa', '285D6', '2-2:1.0', 'dev', 'ttyUSB'], ['ttyOP_GP', '1546', '01a7', '', '2-4:1.0', 'dev', 'ttyACM']]
+usbinst =
 
 [SMS]
 enable = 0
@@ -123,5 +123,5 @@ rate_hum = 1
 mcp = [[0, 0, '', '', 0], [0, 1, '', '', 0], [0, 2, '', '', 0], [0, 3, '', '', 0], [0, 4, '', '', 0], [0, 5, '', '', 0], [0, 6, '', '', 0], [1, 7, 'design.airHeight', '', 0]]
 
 [TOOLS]
-py = [['Analog ads1115', 'put analog values to SignalK', 'analog_ads1115.py', '0'], ['Analog Firmata', 'put analog values to SignalK', 'oppymata.py', '0'], ['SignalK Simulator', 'change values with sliders and send values to SignalK', 'SK-simulator.py', '0'], ['Auto Setup', 'configure basic system', 'autosetup_tty.py', '1']]
+py = [['Analog ads1115','put analog values to SignalK','analog_ads1115.py','0'],['Analog Firmata','put analog values to SignalK','oppymata.py','0'],['SignalK Simulator','change values with sliders and send values to SignalK','SK-simulator.py','0']]
 

@@ -19,7 +19,7 @@ import socket, time, pynmea2, math, csv, datetime, subprocess, platform
 if platform.machine()[0:3]!='arm':
 	print 'this is not a raspberry pi -> no i2c and spi'
 else:
-
+	from classes.paths import Paths
 	from classes.conf import Conf
 	from classes.check_vessel_self import checkVesselSelf
 	import RPi.GPIO as GPIO
@@ -62,7 +62,7 @@ else:
 		sock.sendto(SignalK, ('127.0.0.1', 55558))
 
 	  
-	conf=Conf()
+	conf=Conf(Paths())
 
 	#init SPI MCP
 	MCP=[]

@@ -28,14 +28,16 @@ class MyFrame(wx.Frame):
 		 
 		self.e_udp_sock = socket.socket( socket.AF_INET,  socket.SOCK_DGRAM ) #s.o.
 		self.e_udp_sock.bind( (Quelle,Port) )
+		self.e_udp_sock.settimeout(1)
 
 		self.ttimer=20
-		
-		self.home=Paths().home
-		self.currentpath=Paths().currentpath
-		self.conf=Conf()
+		paths = Paths()
+		self.home=paths.home
+		self.currentpath=paths.currentpath
+		self.conf=Conf(paths)
 		
 		Language(self.conf.get('GENERAL','lang'))
+		print self.conf.get('GENERAL','lang')
 
 		list_N2K_txt=[]
 		self.list_N2K=[]
@@ -91,21 +93,29 @@ class MyFrame(wx.Frame):
 		self.CreateStatusBar()
 
 		self.Show(True)
-
+		
 		self.status=''
 		self.data=[]
-		self.baudc=0
-		self.baud=0
 
 		self.timer.Start(self.ttimer)
 		
-	def timer_act(self, event):		
-		data1, addr = self.e_udp_sock.recvfrom( 1024 )
+		
+	def timer_actx(self, event):		
+		pass
+			
+	def timer_act(self, event):
+		self.timer.Stop()
+		try:
+			data1, addr = self.e_udp_sock.recvfrom( 512 )
+		except:
+			self.timer.Start(self.ttimer)
+			return
 		# Die Puffergroesse muss immer eine Potenz
 		# von 2 sein
 		data=bytearray(data1)
 		if data[7]+9==len(data):
 			self.output(data)
+		self.timer.Start(self.ttimer)
 		
 	def on_sort_PGN(self, e):
 		self.timer.Stop()
