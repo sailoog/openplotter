@@ -23,7 +23,6 @@ import paho.mqtt.publish as publish
 
 from classes.gmailbot import GmailBot
 from classes.twitterbot import TwitterBot
-from paths import Paths
 
 if platform.machine()[0:3] == 'arm':
 	import RPi.GPIO as GPIO
@@ -32,8 +31,9 @@ else:
 
 
 class Actions:
-	def __init__(self, conf):
-		self.conf = conf
+	def __init__(self, SK):
+		self.SK = SK
+		self.conf = SK.conf
 		self.options = []
 		# ATENTION. If order changes, edit "run_action()" and ctrl_actions.py
 		# 0 name, 1 message, 2 field data, 3 unique ID
@@ -72,19 +72,28 @@ class Actions:
 			'This action will stop all the triggers except the trigger which has an action "start all actions" defined.'),
 							 0, 'ACT20'])
 
-		# Outputs
-		# x=conf.get('OUTPUTS', 'outputs')
-		# if x: self.out_list=eval(x)
-		# else: self.out_list=[]
-		# for i in self.out_list:
-		#	try:
-		#		if i[0]=='1':
-		#			self.options.append([i[1]+_(': High'),_('ATTENTION! if you set this output to "High" and there is not a resistor or a circuit connected to the selected GPIO pin, YOU CAN DAMAGE YOUR BOARD.'),0,'H'+i[4]])
-		#			self.options.append([i[1]+_(': Low'),0,0,'L'+i[4]])
-		#	except Exception,e: print str(e)
+		#init GPIO
+		GPIO.setmode(GPIO.BCM)
+		GPIO.setwarnings(False)
+
+		x=self.conf.get('GPIO', 'sensors')
+		if x: self.out_list=eval(x)
+		else: self.out_list=[]
+		for i in self.out_list:
+			#try:
+			if i[1]=='out':
+				GPIO.setup(int(i[2]), GPIO.OUT)
+				self.options.append([i[0]+_(': High'),_('ATTENTION! if you set this output to "High" and there is not a resistor or a circuit connected to the selected GPIO pin, YOU CAN DAMAGE YOUR BOARD.'),0,'H'+i[2]])
+				self.options.append([i[0]+_(': Low'),0,0,'L'+i[2]])
+			else:
+				pull_up_down=GPIO.PUD_DOWN
+				if i[3]=='up': pull_up_down=GPIO.PUD_UP
+				GPIO.setup(int(i[2]), GPIO.IN, pull_up_down)
+
+			#except Exception,e: print str(e)
 
 		# mqtt
-		x = conf.get('MQTT', 'topics')
+		x = self.conf.get('MQTT', 'topics')
 		if x:
 			self.mqtt_list = eval(x)
 		else:
@@ -97,9 +106,8 @@ class Actions:
 
 		self.time_units = [_('no repeat'), _('seconds'), _('minutes'), _('hours'), _('days')]
 
-		paths = Paths()
-		self.home = paths.home
-		self.currentpath = paths.currentpath
+		self.home = SK.home
+		self.currentpath = SK.currentpath
 
 	def getOptionsListIndex(self, data):
 		for index, item in enumerate(self.options):
@@ -115,52 +123,54 @@ class Actions:
 
 	def run_action(self, option, text):
 		conf = self.conf
-		conf.read()
-		if option == 'ACT1':
+		if option[0] == 'H':
+			channel = int(option[1:])
+			GPIO.output(channel, 1)
+		elif option[0] == 'L':
+			channel = int(option[1:])
+			GPIO.output(channel, 0)
+		elif option == 'ACT1':
 			try:
 				wait = float(text)
 			except:
 				wait = 1.0
 			time.sleep(wait)
-		if option == 'ACT2':
+		elif option == 'ACT2':
 			if text:
 				try:
 					text = text.split(' ')
 					subprocess.Popen(text)
 				except Exception, e:
 					print str(e)
-		if option == 'ACT3':
+		elif option == 'ACT3':
 			subprocess.Popen(['sudo', 'reboot'])
-		if option == 'ACT4':
+		elif option == 'ACT4':
 			subprocess.Popen(['sudo', 'shutdown', '-h', 'now'])
-		if option == 'ACT5':
+		elif option == 'ACT5':
 			subprocess.Popen(['pkill', '-9', 'kplex'])
-		if option == 'ACT6':
+		elif option == 'ACT6':
 			subprocess.call(['pkill', '-9', 'kplex'])
 			subprocess.Popen('kplex')
-		if option == 'ACT7':
+		elif option == 'ACT7':
 			subprocess.Popen(["pkill", '-9', "node"])
-		if option == 'ACT8':
+		elif option == 'ACT8':
 			subprocess.call(["pkill", '-9', "node"])
 			subprocess.Popen(self.home + '/.config/signalk-server-node/bin/openplotter',
 							 cwd=self.home + '/.config/signalk-server-node')
-		if option == 'ACT9':
-			wlan = conf.get('WIFI', 'device')
-			passw2 = conf.get('WIFI', 'password')
-			ssid2 = conf.get('WIFI', 'ssid')
-			subprocess.Popen(['sudo', 'python', self.currentpath + '/wifi_server.py', '0', wlan, passw2, ssid2])
+		elif option == 'ACT9':
+			subprocess.Popen(['sudo', 'python', self.currentpath + '/wifi_server.py', '0'])
 			conf.set('WIFI', 'enable', '0')
-		if option == 'ACT10':
-			wlan = conf.get('WIFI', 'device')
-			passw2 = conf.get('WIFI', 'password')
-			ssid2 = conf.get('WIFI', 'ssid')
+			conf.read()
+		elif option == 'ACT10':
 			subprocess.Popen(['sudo', 'python', self.currentpath + '/wifi_server.py', '1', wlan, passw2, ssid2])
 			conf.set('WIFI', 'enable', '1')
-		if option == 'ACT11':
+			conf.read()
+		elif option == 'ACT11':
 			subprocess.Popen(['pkill', '-9', 'aisdecoder'])
 			subprocess.Popen(['pkill', '-9', 'rtl_fm'])
 			conf.set('AIS-SDR', 'enable', '0')
-		if option == 'ACT12':
+			conf.read()
+		elif option == 'ACT12':
 			gain = conf.get('AIS-SDR', 'gain')
 			ppm = conf.get('AIS-SDR', 'ppm')
 			channel = conf.get('AIS-SDR', 'channel')
@@ -174,7 +184,8 @@ class Actions:
 				['aisdecoder', '-h', '127.0.0.1', '-p', '10110', '-a', 'file', '-c', 'mono', '-d', '-f', '/dev/stdin'],
 				stdin=rtl_fm.stdout)
 			conf.set('AIS-SDR', 'enable', '1')
-		if option == 'ACT13':
+			conf.read()
+		elif option == 'ACT13':
 			now = time.strftime("%H:%M:%S")
 			tweetStr = now + ' ' + text
 			apiKey = conf.get('TWITTER', 'apiKey')
@@ -187,7 +198,7 @@ class Actions:
 				msg.send(tweetStr)
 			except Exception, e:
 				print str(e)
-		if option == 'ACT14':
+		elif option == 'ACT14':
 			subject = text
 			body = ''
 			GMAIL_USERNAME = conf.get('GMAIL', 'gmail')
@@ -199,25 +210,19 @@ class Actions:
 				msg.send(subject, body)
 			except Exception, e:
 				print str(e)
-		if option == 'ACT15':
+		elif option == 'ACT15':
 			subprocess.Popen(['mpg123', '-q', text])
-		if option == 'ACT16':
+		elif option == 'ACT16':
 			subprocess.Popen(['pkill', '-9', 'mpg123'])
-		if option == 'ACT17':
+		elif option == 'ACT17':
 			subprocess.Popen(['python', self.currentpath + '/message.py', text, conf.get('GENERAL', 'lang')])
-		if option == 'ACT18':
+		elif option == 'ACT18':
 			subprocess.Popen(['pkill', '-f', 'message.py'])
-		if option == 'ACT19':
-			return 'read'
-		if option == 'ACT20':
+		elif option == 'ACT19':
+			subprocess.Popen(['python', self.currentpath+'/ctrl_actions.py', '1'])
+		elif option == 'ACT20':
 			subprocess.Popen(['python', self.currentpath + '/ctrl_actions.py', '0'])
-		if option[:4] == 'HOUT':
-			channel = self.out_list[self.getoutlistIndex(option[1:])][3]
-			GPIO.output(channel, 1)
-		if option[:4] == 'LOUT':
-			channel = self.out_list[self.getoutlistIndex(option[1:])][3]
-			GPIO.output(channel, 0)
-		if option == 'ACT21':
+		elif option == 'ACT21':
 			try:
 				sm = gammu.StateMachine()
 				sm.ReadConfig()
@@ -230,7 +235,7 @@ class Actions:
 				sm.SendSMS(message)
 			except Exception, e:
 				print str(e)
-		if option[:4] == 'MQTT':
+		elif option[:4] == 'MQTT':
 			topic = self.mqtt_list[self.getmqttlistIndex(option)][1]
 			payload = text
 			auth = {'username': conf.get('MQTT', 'username'), 'password': conf.get('MQTT', 'password')}
