@@ -241,15 +241,27 @@ class MainFrame(wx.Frame):
 
 	def ShowMessage(self, w_msg):
 		wx.MessageBox(w_msg, 'Info', wx.OK | wx.ICON_INFORMATION)
+		
+	def ShowStatusBar(self, w_msg, colour):
+		self.GetStatusBar().SetForegroundColour(colour)
+		self.SetStatusText(w_msg)
 
+	def ShowStatusBarRED(self, w_msg):
+		self.ShowStatusBar(w_msg, wx.RED)
+
+	def ShowStatusBarGREEN(self, w_msg):
+		self.ShowStatusBar(w_msg, wx.GREEN)
+
+	def ShowStatusBarBLACK(self, w_msg):
+		self.ShowStatusBar(w_msg, wx.BLACK)	
+		
 	def time_zone(self, event):
 		subprocess.Popen(['lxterminal', '-e', 'sudo dpkg-reconfigure tzdata'])
 		self.GetStatusBar().SetForegroundColour(wx.BLACK)
 		self.SetStatusText(_('Set time zone in the new window'))
 
 	def time_gps(self, event):
-		self.GetStatusBar().SetForegroundColour(wx.BLACK)
-		self.SetStatusText(_('Waiting for NMEA time data in localhost:55556 ...'))
+		self.ShowStatusBarBLACK(_('Waiting for NMEA time data in localhost:55556 ...'))
 		time_gps_result = subprocess.check_output(['sudo', 'python', self.currentpath + '/time_gps.py'])
 		msg = ''
 		re = time_gps_result.splitlines()
@@ -264,13 +276,12 @@ class MainFrame(wx.Frame):
 			if 'Date and time retrieved from NMEA data successfully.' in current: msg += _(
 				'Date and time retrieved from NMEA data successfully.')
 
-		self.SetStatusText('')
+		self.ShowStatusBarBLACK('')
 		self.ShowMessage(msg)
 
 	def reconfigure_gpsd(self, event):
 		subprocess.Popen(['lxterminal', '-e', 'sudo nano /etc/default/gpsd'])
-		self.GetStatusBar().SetForegroundColour(wx.BLACK)
-		self.SetStatusText(_('Set GPSD in the new window'))
+		self.ShowStatusBarBLACK(_('Set GPSD in the new window'))
 
 	def open_sdr_ais(self, event):
 		subprocess.call(['pkill', '-f', 'SDR_AIS.py'])
@@ -426,8 +437,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.sms_dev.AppendItems(self.SerDevLs)
 
 	def Changingpage(self, e):
-		self.SetStatusText('')
-		self.GetStatusBar().SetForegroundColour(wx.BLACK)
+		self.ShowStatusBarBLACK('')
 
 	def when_closed(self, e):
 		self.nb.Destroy()
@@ -523,12 +533,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def on_ok_delay(self, e):
 		delay = self.delay.GetValue()
 		if not re.match('^[0-9]*$', delay):
-			self.ShowMessage(_('You can enter only numbers.'))
+			self.ShowStatusBarRED(_('You can enter only numbers.'))
 			return
 		else:
 			if delay != '0': delay = delay.lstrip('0')
 			self.conf.set('STARTUP', 'delay', delay)
-			self.ShowMessage(_('Startup delay set to ') + delay + _(' seconds'))
+			self.ShowStatusBarBLACK(_('Startup delay set to ') + delay + _(' seconds'))
 
 	def startup(self, e):
 		sender = e.GetEventObject()
@@ -731,19 +741,18 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			passw = self.passw.GetValue()
 
 		if not wlan or not passw or not ssid or not share:
-			self.ShowMessage(_('Failed. You must fill in all fields.'))
+			self.ShowStatusBarRED(_('Failed. You must fill in all fields.'))
 			self.enable_disable_wifi(0)
 			return
 		if wlan == share:
-			self.ShowMessage(_('"Access point device" and "Sharing Internet device" must be different'))
+			self.ShowStatusBarRED(_('"Access point device" and "Sharing Internet device" must be different'))
 			self.enable_disable_wifi(0)
 			return
 		if len(ssid) > 32 or len(passw) < 8:
-			self.ShowMessage(_('Your SSID must have a maximum of 32 characters and your password a minimum of 8.'))
+			self.ShowStatusBarRED(_('Your SSID must have a maximum of 32 characters and your password a minimum of 8.'))
 			self.enable_disable_wifi(0)
 			return
-		self.GetStatusBar().SetForegroundColour(wx.RED)
-		self.SetStatusText(_('Configuring WiFi AP, wait please ...'))
+		self.ShowStatusBarRED(_('Configuring WiFi AP, wait please ...'))
 		channel = self.wifi_channel.GetValue()
 		mode = self.wifi_mode.GetValue()
 		wpa = self.wifi_wpa.GetValue()
@@ -777,7 +786,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		msg = msg.replace('WiFi access point failed.', _('WiFi access point failed.'))
 		msg = msg.replace('WiFi access point started.', _('WiFi access point started.'))
 		msg = msg.replace('WiFi access point stopped.', _('WiFi access point stopped.'))
-		self.SetStatusText('')
+		self.ShowStatusBarBLACK('')
 		self.ShowMessage(msg)
 		self.on_show_ip_info('')
 
@@ -1018,23 +1027,21 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.Close()
 
 	def on_restart_kplex(self, event):
-		self.GetStatusBar().SetForegroundColour(wx.RED)
-		self.SetStatusText(_('Closing Kplex'))
+		self.ShowStatusBarRED(_('Closing Kplex'))
 		subprocess.call(["pkill", '-9', "kplex"])
 		subprocess.Popen('kplex')
-		self.GetStatusBar().SetForegroundColour(wx.GREEN)
-		self.SetStatusText(_('Kplex restarted'))
+		self.ShowStatusBarGREEN(_('Kplex restarted'))
 		self.read_kplex_conf()
 
 	def on_cancel_changes_kplex(self, event):
 		self.read_kplex_conf()
+		self.ShowStatusBarBLACK('')
 
 	def edit_kplex(self, e):
 		idx = e.GetIndex()
 
 		if self.kplex[idx][1] == 'system' or self.kplex[idx][1] == 'opencpn' or self.kplex[idx][1] == 'signalk':
-			self.GetStatusBar().SetForegroundColour(wx.RED)
-			self.SetStatusText(_('You can not edit this.'))
+			self.ShowStatusBarRED(_('You can not edit this.'))
 			return
 		edit = []
 		for i in range(9):
@@ -1225,15 +1232,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def on_delete_kplex(self, event):
 		selected = self.list_kplex.GetFirstSelected()
 		if selected == -1:
-			self.GetStatusBar().SetForegroundColour(wx.RED)
-			self.SetStatusText(_('Select an item.'))
+			self.ShowStatusBarRED(_('Select an item.'))
 			return
 		num = len(self.kplex)
 		for i in range(num):
 			if self.list_kplex.IsSelected(i):
 				if self.kplex[i][1] == 'system' or self.kplex[i][1] == 'opencpn' or self.kplex[i][1] == 'signalk':
-					self.GetStatusBar().SetForegroundColour(wx.RED)
-					self.SetStatusText(_('You can not delete this.'))
+					self.ShowStatusBarRED(_('You can not delete this.'))
 					return
 				del self.kplex[i]
 		self.set_list_kplex()
@@ -1264,8 +1269,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def on_diagnostic_kplex(self, event):
 		selected = self.list_kplex.GetFirstSelected()
 		if selected == -1:
-			self.GetStatusBar().SetForegroundColour(wx.RED)
-			self.SetStatusText(_('Select an item.'))
+			self.ShowStatusBarRED(_('Select an item.'))
 			return
 		num = len(self.kplex)
 		for i in range(num):
@@ -1499,7 +1503,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.conf.set('OFFSET', 'humidity', str(float(self.humidity_offset.GetValue())))
 			self.conf.set('OFFSET', 'temperature_h', str(float(self.h_temp_offset.GetValue())))
 		except:
-			self.ShowMessage(_("An offset is not a number"))
+			self.ShowStatusBarRED(_("An offset is not a number"))
 			self.read_i2c()
 
 		self.restart_SK(0)
@@ -1641,12 +1645,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			SKkey = dlg.SKkey.GetValue().encode('utf8')
 			asterix = dlg.asterix.GetValue().encode('utf8')
 			if aktiv and not SKkey:
-				self.ShowMessage(_('Failed. Provide name and Signal K values.'))
+				self.ShowStatusBarRED(_('Failed. Provide name and Signal K values.'))
 				dlg.Destroy()
 				return
 			if '*' in SKkey:
 				if not re.match('^[0-9a-zA-Z]+$', asterix):
-					self.ShowMessage(_('Failed. The name must contain only letters and numbers.'))
+					self.ShowStatusBarRED(_('Failed. The name must contain only letters and numbers.'))
 					dlg.Destroy()
 					return
 				SKkey2 = SKkey.replace('*', asterix)
@@ -1796,7 +1800,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def on_delete_gpio(self, e):
 		selected_gpio = self.list_gpio.GetFirstSelected()
 		if selected_gpio == -1:
-			self.ShowMessage(_('Select an item to delete.'))
+			self.ShowStatusBarBLACK(_('Select an item to delete.'))
 			return
 		del self.gpio[selected_gpio]
 		self.list_gpio.DeleteItem(selected_gpio)
@@ -1853,14 +1857,15 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.Recipient.Disable()
 
 	def start_monitoring(self):
-		self.ShowMessage(_('Actions will be restarted.'))
+		self.ShowStatusBarRED(_('Closing Actions and converter server.'))
 		subprocess.call(['pkill', '-f', 'SK-base_d.py'])
 		subprocess.Popen(['python', self.currentpath + '/SK-base_d.py'])
+		self.ShowStatusBarGREEN(_('Actions and converter server restarted.'))		
 
 	def on_twitter_enable(self, e):
 		if not self.apiKey.GetValue() or not self.apiSecret.GetValue() or not self.accessToken.GetValue() or not self.accessTokenSecret.GetValue():
 			self.twitter_enable.SetValue(False)
-			self.ShowMessage(_('Enter valid Twitter apiKey, apiSecret, accessToken and accessTokenSecret.'))
+			self.ShowStatusBarRED(_('Enter valid Twitter apiKey, apiSecret, accessToken and accessTokenSecret.'))
 			return
 		if self.twitter_enable.GetValue():
 			self.apiKey.Disable()
@@ -1891,7 +1896,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def on_gmail_enable(self, e):
 		if not self.Gmail_account.GetValue() or not self.Gmail_password.GetValue() or not self.Recipient.GetValue():
 			self.gmail_enable.SetValue(False)
-			self.ShowMessage(_('Enter valid Gmail account, Gmail password and Recipient.'))
+			self.ShowStatusBarRED(_('Enter valid Gmail account, Gmail password and Recipient.'))
 			return
 		if self.gmail_enable.GetValue():
 			self.Gmail_account.Disable()
@@ -1996,7 +2001,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			temp_list = []
 		for ii in temp_list:
 			self.triggers.append(ii)
-			if '.*.' in ii[1]:
+			if '.*' in ii[1]:
 				SKkey2 = ii[1].replace('*', ii[2])
 			else:
 				SKkey2 = ii[1]
@@ -2023,7 +2028,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		'''
 
 	def on_print_actions(self, e):
-		self.actions = Actions(self.conf)
+		self.actions = Actions(self)
 		selected_trigger = e.GetIndex()
 		self.list_actions.DeleteAllItems()
 		for i in self.triggers[selected_trigger][5]:
@@ -2066,7 +2071,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				value = 0
 			value2 = str(value)
 			operator_str = self.operators_list[operator]
-			if '.*.' in SKkey:
+			if '.*' in SKkey:
 				SKkey2 = SKkey.replace('*', SKstar)
 			else:
 				SKkey2 = SKkey
@@ -2092,7 +2097,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		dlg.Destroy()
 
 	def edit_actions(self, e):
-		self.actions = Actions(self.conf)
+		self.actions = Actions(self)
 		a = e.GetIndex()
 		t = self.list_triggers.GetFirstSelected()
 		action = self.actions.getOptionsListIndex(self.triggers[t][5][a][0])
@@ -2106,10 +2111,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.edit_add_action(0)
 
 	def edit_add_action(self, edit):
-		self.actions = Actions(self.conf)
+		self.actions = Actions(self)
 		selected_trigger_position = self.list_triggers.GetFirstSelected()
 		if selected_trigger_position == -1:
-			self.ShowMessage(_('Select a trigger to add actions.'))
+			self.ShowStatusBarBLACK(_('Select a trigger to add actions.'))
 			return
 		dlg = addAction(self, self.actions.options, self.actions.time_units, edit)
 		res = dlg.ShowModal()
@@ -2159,7 +2164,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def on_delete_trigger(self, e):
 		selected = self.list_triggers.GetFirstSelected()
 		if selected == -1:
-			self.ShowMessage(_('Select an item to delete.'))
+			self.ShowStatusBarBLACK(_('Select an item to delete.'))
 		else:
 			del self.triggers[selected]
 			self.list_triggers.DeleteItem(selected)
@@ -2169,7 +2174,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		selected_trigger = self.list_triggers.GetFirstSelected()
 		selected_action = self.list_actions.GetFirstSelected()
 		if selected_action == -1:
-			self.ShowMessage(_('Select an item to delete.'))
+			self.ShowStatusBarBLACK(_('Select an item to delete.'))
 		else:
 			del self.triggers[selected_trigger][5][selected_action]
 			self.list_actions.DeleteItem(selected_action)
@@ -2183,23 +2188,24 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.triggers[i][0] = 0
 			i += 1
 		self.conf.set('ACTIONS', 'triggers', str(self.triggers))
+		self.conf.read()
 		self.start_monitoring()
-		self.SetStatusText(_('Actions changes applied and restarted'))
+		self.ShowStatusBarBLACK(_('Actions changes applied and restarted'))
 
 	def on_cancel_changes_actions(self, e):
 		self.read_triggers()
-		self.SetStatusText(_('Actions changes cancelled'))
+		self.ShowStatusBarBLACK(_('Actions changes cancelled'))
 
 	def on_stop_actions(self, e):
 		subprocess.call(['python', self.currentpath + '/ctrl_actions.py', '0'])
-		self.SetStatusText(_('Actions stopped'))
+		self.ShowStatusBarBLACK(_('Actions stopped'))
 		self.conf.read()
 		self.read_triggers()
 		self.list_actions.DeleteAllItems()
 
 	def on_start_actions(self, e):
 		subprocess.call(['python', self.currentpath + '/ctrl_actions.py', '1'])
-		self.SetStatusText(_('Actions started'))
+		self.ShowStatusBarBLACK(_('Actions started'))
 		self.conf.read()
 		self.read_triggers()
 		self.list_actions.DeleteAllItems()
@@ -2320,7 +2326,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def on_delete_DS18B20(self, e):
 		selected_DS18B20 = self.list_DS18B20.GetFirstSelected()
 		if selected_DS18B20 == -1:
-			self.ShowMessage(_('Select an item to delete.'))
+			self.ShowStatusBarBLACK(_('Select an item to delete.'))
 			return
 		del self.DS18B20[selected_DS18B20]
 		self.list_DS18B20.DeleteItem(selected_DS18B20)
@@ -2450,7 +2456,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def on_delete_USBinst(self, e):
 		selected_USBinst = self.list_USBinst.GetFirstSelected()
 		if selected_USBinst == -1:
-			self.ShowMessage(_('Select an item to delete.'))
+			self.ShowStatusBarBLACK(_('Select an item to delete.'))
 			return
 		del self.USBinst[selected_USBinst]
 		self.list_USBinst.DeleteItem(selected_USBinst)
@@ -2480,12 +2486,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		test = 0
 		test = os.system('sudo mv 10-openplotter.rules /etc/udev/rules.d')
 		print test
-		self.GetStatusBar().SetForegroundColour(wx.RED)
-		self.SetStatusText(_('Restarting ...'))
+		self.ShowStatusBarRED(_('Restarting ...'))
 		self.start_udev()
 		time.sleep(1.5)
-		self.GetStatusBar().SetForegroundColour(wx.GREEN)
-		self.SetStatusText(_('USB names added and restarted'))
+		self.ShowStatusBarGREEN(_('USB names added and restarted'))
 		self.SerialCheck()
 
 	###################################### N2K
@@ -2544,8 +2548,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if isChecked:
 			if not self.can_usb.GetValue():
 				self.n2k_enable.SetValue(False)
-				self.GetStatusBar().SetForegroundColour(wx.BLACK)
-				self.SetStatusText(_('You have to select a CAN-USB-CAN device'))
+				self.ShowStatusBarBLACK(_('You have to select a CAN-USB-CAN device'))
 				return
 			subprocess.call(['pkill', '-f', 'CAN-USB-stick.py'])
 			self.conf.set('N2K', 'enable', '1')
@@ -2591,7 +2594,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if isChecked:
 			if not self.can_usb.GetValue():
 				self.n2k_out_enable.SetValue(False)
-				self.SetStatusText(_('You have to select a CAN-USB-CAN device'))
+				self.ShowStatusBarBLACK(_('You have to select a CAN-USB-CAN device'))
 				return
 			self.N2K_diagnostic_out_b.Disable()
 			self.conf.set('N2K', 'output', '1')
@@ -2606,35 +2609,31 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def on_N2K_setting(self, e):
 		tty = str(self.can_usb.GetValue())
 		if len(tty) == 0:
-			self.GetStatusBar().SetForegroundColour(wx.BLACK)
-			self.SetStatusText(_('You have to select a CAN-USB-CAN device'))
+			self.ShowStatusBarBLACK(_('You have to select a CAN-USB-CAN device'))
 			return
 		subprocess.call(['pkill', '-f', 'CAN-USB-stick.py'])
 		self.stop_sensors()
 		self.stop_1w()
 		subprocess.Popen(['python', self.currentpath + '/CAN-USB-stick.py'])
-		self.GetStatusBar().SetForegroundColour(wx.BLACK)
-		self.SetStatusText(_('Select PGNs to transmit and enable N2K input/output again.'))
+		self.ShowStatusBarBLACK(_('Select PGNs to transmit and enable N2K input/output again.'))
 
 	def on_N2K_diagnostic(self, e):
 		tty = str(self.can_usb.GetValue())
 		if len(tty) == 0:
-			self.GetStatusBar().SetForegroundColour(wx.BLACK)
-			self.SetStatusText(_('You have to select a CAN-USB-CAN device'))
+			self.ShowStatusBarBLACK(_('You have to select a CAN-USB-CAN device'))
 			return
 		subprocess.call(['pkill', '-f', 'diagnostic-N2K-input.py'])
 		subprocess.Popen(['python', self.currentpath + '/diagnostic-N2K-input.py'])
-		self.GetStatusBar().SetForegroundColour(wx.BLACK)
-		self.SetStatusText(_('Show received PGNs.'))
+		self.ShowStatusBarBLACK(_('Show received PGNs.'))
 
 	def on_N2K_diagnostic_out(self, e):
 		tty = str(self.can_usb.GetValue())
 		if len(tty) == 0:
-			self.SetStatusText(_('You have to select a CAN-USB-CAN device'))
+			self.ShowStatusBarBLACK(_('You have to select a CAN-USB-CAN device'))
 			return
 		subprocess.call(['pkill', '-f', 'diagnostic-N2K-output.py'])
 		subprocess.Popen(['python', self.currentpath + '/diagnostic-N2K-output.py'])
-		self.SetStatusText(_('Show sent PGNs.'))
+		self.ShowStatusBarBLACK(_('Show sent PGNs.'))
 
 	###################################### Signal K
 	def page_sk(self):
@@ -2687,16 +2686,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def restart_SK(self, e):
 		# stopping sk server
-		self.GetStatusBar().SetForegroundColour(wx.RED)
-		self.SetStatusText(_('Closing Signal K server ...'))
+		self.ShowStatusBarRED(_('Closing Signal K server ...'))
 		self.vessel_self = ''
 		subprocess.call(["pkill", '-9', "node"])
 		while self.util_process_exist("node"):
 			time.sleep(0.01)
 		# restarting sk server and providers
 		self.vessel_self = checkVesselSelf()
-		self.GetStatusBar().SetForegroundColour(wx.GREEN)
-		self.SetStatusText(_('Signal K server restarted'))
+		self.ShowStatusBarGREEN(_('Signal K server restarted'))
 
 	def on_diagnostic_SK(self, e):
 		subprocess.call(['pkill', '-f', 'diagnostic-SK-input.py'])
@@ -2706,7 +2703,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		mmsi = self.mmsi.GetValue()
 		uuid = "urn:mrn:imo:mmsi:" + mmsi
 		if uuid == '':
-			self.ShowMessage(_('You have to provide a MMSI.'))
+			self.ShowStatusBarRED(_('You have to provide a MMSI.'))
 			return
 		with open(self.home + '/.config/signalk-server-node/settings/openplotter-settings.json') as data_file:
 			data = json.load(data_file)
@@ -2807,7 +2804,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if isChecked:
 			if self.sms_dev.GetValue() == _('none'):
 				if self.sms_bt.GetValue() == '':
-					self.ShowMessage(_('You have to provide a serial port or a bluetooth address.'))
+					self.ShowStatusBarRED(_('You have to provide a serial port or a bluetooth address.'))
 					self.sms_enable.SetValue(False)
 					return
 				else:
@@ -2817,7 +2814,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.sms_bt.SetValue(bluetooth)
 				serial = self.sms_dev.GetValue()
 			if self.sms_con.GetValue() == '':
-				self.ShowMessage(_('You have to provide a connection type.'))
+				self.ShowStatusBarRED(_('You have to provide a connection type.'))
 				self.sms_enable.SetValue(False)
 				return
 			else:
@@ -2856,11 +2853,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		isChecked = self.sms_enable_send.GetValue()
 		if isChecked:
 			if not self.sms_enable.GetValue():
-				self.ShowMessage(_('You have to enable settings.'))
+				self.ShowStatusBarBLACK(_('You have to enable settings.'))
 				self.sms_enable_send.SetValue(False)
 				return
 			if self.phone_number.GetValue() == '':
-				self.ShowMessage(_('You have to provide a phone number.'))
+				self.ShowStatusBarRED(_('You have to provide a phone number.'))
 				self.sms_enable_send.SetValue(False)
 				return
 			self.conf.set('SMS', 'enable_sending', '1')
@@ -2885,7 +2882,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def on_sms_test(self, e):
 		text = self.sms_text.GetValue()
 		if text == '':
-			self.ShowMessage(_('You have to provide some text to send.'))
+			self.ShowStatusBarRED(_('You have to provide some text to send.'))
 			return
 		subprocess.call(['pkill', '-f', 'test_sms.py'])
 		subprocess.Popen(['python', self.currentpath + '/test_sms.py', 't', text, self.phone_number.GetValue()])
@@ -3018,7 +3015,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def edit_add_topic(self, edit):
 		if self.mqtt_user.IsEnabled():
-			self.ShowMessage(_('Failed. Apply setting changes.'))
+			self.ShowStatusBarRED(_('Failed. Apply setting changes.'))
 			return
 		dlg = addTopic(edit)
 		res = dlg.ShowModal()
@@ -3045,11 +3042,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def delete_topic(self, e):
 		if self.mqtt_user.IsEnabled():
-			self.ShowMessage(_('Failed. Apply setting changes.'))
+			self.ShowStatusBarRED(_('Failed. Apply setting changes.'))
 			return
 		selected_topic = self.list_topics.GetFirstSelected()
 		if selected_topic == -1:
-			self.ShowMessage(_('Select an item to delete.'))
+			self.ShowStatusBarBLACK(_('Select an item to delete.'))
 			return
 		del self.topics[selected_topic]
 		self.list_topics.DeleteItem(selected_topic)
@@ -3073,7 +3070,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.mqtt_pass.Disable()
 			self.button_apply_changes_mqtt.SetLabel(_('Edit'))
 		else:
-			self.ShowMessage(_('Enter at least username and password.'))
+			self.ShowStatusBarRED(_('Enter at least username and password.'))
 			return
 		self.conf.set('MQTT', 'broker', self.mqtt_broker.GetValue())
 		self.conf.set('MQTT', 'port', self.mqtt_port.GetValue())
@@ -3086,8 +3083,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		subprocess.call(['sudo', 'sh', '-c', 'echo "' + username + ':' + passw + '" > /etc/mosquitto/passwd.pw'])
 		subprocess.call(['sudo', 'mosquitto_passwd', '-U', '/etc/mosquitto/passwd.pw'])
 		subprocess.call(['sudo', 'service', 'mosquitto', 'restart'])
-		self.GetStatusBar().SetForegroundColour(wx.GREEN)
-		self.SetStatusText(_('MQTT settings applied and restarted'))
+		self.ShowStatusBarGREEN(_('MQTT settings applied and restarted'))
 		self.stop_mqtt()
 		self.start_mqtt()
 

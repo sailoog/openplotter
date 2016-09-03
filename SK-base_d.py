@@ -130,7 +130,7 @@ class MySK:
 					exists = True
 					i[2] = value
 					i[7] = timestamp
-					break
+					#break
 			index += 1
 		if not exists:
 			self.list_SK.append([src, path, value, '', 0.0, 1, '', timestamp, '', 1, 0])
@@ -140,7 +140,7 @@ class MySK:
 				for im in il:
 					if im[0] == path:
 						im[1] = self.list_SK[-1]
-						break
+						#break
 					indexm += 1
 
 	def on_error(self, ws, error):
@@ -514,7 +514,7 @@ class MySK_to_Action:
 		self.tdif = time.time() - time.mktime(datetime.datetime.utcnow().timetuple())
 		self.tdif = round(self.tdif, 0)
 		self.triggers = []
-		self.actions = Actions(SK.conf)
+		self.actions = Actions(SK)
 
 		self.SK = SK_
 		self.SKc = []
@@ -541,12 +541,13 @@ class MySK_to_Action:
 					if iii[3] == 4: iii[2] = ((iii[2] * 24) * 60) * 60
 					iii.append('')  # 4 last run
 				self.triggers.append(ii)
-				if '.*.' in ii[1]:
+				if '.*' in ii[1]:
 					SKkey2 = ii[1].replace('*', ii[2])
 				else:
 					SKkey2 = ii[1]
 				self.SKc.append([SKkey2, [0, 0, 0, 0, 0, 0, 0, 0]])
 				ii[1] = self.SKc[-1]
+				#print self.SKc[-1]
 
 	def Action_set(self, item, start):
 		if start:
@@ -554,13 +555,9 @@ class MySK_to_Action:
 				re = ''
 				for i in item[5]:
 					try:
-						re = self.actions.run_action(i[0], i[1])
+						self.actions.run_action(i[0], i[1])
 					except Exception, e:
 						print str(e)
-					if re == 'read':
-						pass
-					# startall()
-					# todo: what should startall do?
 
 			item[6] = True
 		else:
@@ -586,15 +583,17 @@ class MySK_to_Action:
 					else:
 						trigger_value_timestamp = datetime.datetime.strptime(item[1][1][7][:-5], '%Y-%m-%dT%H:%M:%S')
 						trigger_value_timestamp = time.mktime(trigger_value_timestamp.timetuple())
+
 					try:
 						data_value = float(data)
 					except:
 						data_value = ''
 					data_string = str(data)
-
+					#print trigger_value,operator_,data
 				try:
 					# if True:
 					# not present for
+
 					if operator_ == 0:
 						self.Action_set(item, now - trigger_value_timestamp > data_value)
 					# present in the last
@@ -603,7 +602,7 @@ class MySK_to_Action:
 
 					elif trigger_value_timestamp:
 						# equal (number)
-						if operator_ == 2 and data_value:
+						if operator_ == 2 and type(data_value) is float:
 							self.Action_set(item, float(trigger_value) == data_value)
 						# equal (string)
 						elif operator_ == 2 and not data_value:

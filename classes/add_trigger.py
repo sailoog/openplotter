@@ -36,6 +36,7 @@ class addTrigger(wx.Dialog):
 		for i in self.data:
 			list_tmp.append(i)
 		list_sk_path = sorted(list_tmp)
+		list_sk_path.append(_('notifications.*'))
 		list_sk_path.append(_('None (always true)'))
 
 		titl = wx.StaticText(panel, label=_('trigger'))

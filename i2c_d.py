@@ -64,6 +64,25 @@ else:
 	  
 	conf=Conf(Paths())
 
+	#init GPIO
+	GPIO.setmode(GPIO.BCM)
+	GPIO.setwarnings(False)
+	gpio = []
+	data = conf.get('GPIO', 'sensors')
+	try:
+		temp_list = eval(data)
+	except:
+		temp_list = []
+	for ii in temp_list:
+		gpio.append(ii)
+		# name, io, GPIO, pull
+		if ii[1] == 'out':
+			GPIO.setup(int(ii[2]), GPIO.OUT)
+		else:
+			pull_up_down=GPIO.PUD_DOWN
+			if ii[3]=='up': pull_up_down=GPIO.PUD_UP
+			GPIO.setup(int(ii[2]), GPIO.IN, pull_up_down)
+	
 	#init SPI MCP
 	MCP=[]
 	adjust_point=[]
