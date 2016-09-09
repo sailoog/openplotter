@@ -1854,13 +1854,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.gmail_enable.SetValue(True)
 			self.Gmail_account.Disable()
 			self.Gmail_password.Disable()
-			self.Recipient.Disable()
-
-	def start_monitoring(self):
-		self.ShowStatusBarRED(_('Closing Actions and converter server.'))
-		subprocess.call(['pkill', '-f', 'SK-base_d.py'])
-		subprocess.Popen(['python', self.currentpath + '/SK-base_d.py'])
-		self.ShowStatusBarGREEN(_('Actions and converter server restarted.'))		
+			self.Recipient.Disable()	
 
 	def on_twitter_enable(self, e):
 		if not self.apiKey.GetValue() or not self.apiSecret.GetValue() or not self.accessToken.GetValue() or not self.accessTokenSecret.GetValue():
@@ -1891,7 +1885,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.apiSecret.Enable()
 			self.accessToken.Enable()
 			self.accessTokenSecret.Enable()
-		self.start_monitoring()
+		self.restart_SK(0)
 
 	def on_gmail_enable(self, e):
 		if not self.Gmail_account.GetValue() or not self.Gmail_password.GetValue() or not self.Recipient.GetValue():
@@ -1913,15 +1907,15 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.Gmail_account.Enable()
 			self.Gmail_password.Enable()
 			self.Recipient.Enable()
-		self.start_monitoring()
+		self.restart_SK(0)
 
 	####################### Actions
 	def page_action(self):
 		title = wx.StaticText(self.p_action, label=_(' Triggers '))
 
 		self.list_triggers = CheckListCtrl(self.p_action, 100)
-		self.list_triggers.InsertColumn(0, _('trigger'), width=275)
-		self.list_triggers.InsertColumn(1, _('operator'), width=170)
+		self.list_triggers.InsertColumn(0, _('trigger'), width=400)
+		self.list_triggers.InsertColumn(1, _('operator'), width=100)
 		self.list_triggers.InsertColumn(2, _('value'))
 		self.list_triggers.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_print_actions)
 		self.list_triggers.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit_triggers)
@@ -1989,8 +1983,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.p_action.SetSizer(vbox)
 
 	def read_triggers(self):
-		self.operators_list = [_('was not present in the last (sec.)'), _('was present in the last (sec.)'), _('='),
-							   _('<'), _('<='), _('>'), _('>='), _('is on'), _('is off')]
+		self.operators_list = [_('was not updated in the last (sec.)'), _('was updated in the last (sec.)'), '=',
+							   '<', '<=', '>', '>=', _('is on'), _('is off'), _('contains')]
 
 		self.triggers = []
 		self.list_triggers.DeleteAllItems()
@@ -2001,37 +1995,22 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			temp_list = []
 		for ii in temp_list:
 			self.triggers.append(ii)
-			if '.*' in ii[1]:
-				SKkey2 = ii[1].replace('*', ii[2])
-			else:
-				SKkey2 = ii[1]
-			self.list_triggers.Append([SKkey2, self.operators_list[ii[3]], ii[4]])
+			if ii[1] == -1: 
+				sk = _('Always')
+				op = ''
+			else: 
+				sk = ii[1]
+				op = self.operators_list[ii[2]]
+			self.list_triggers.Append([sk, op, ii[3]])
 			if ii[0] == 1:
 				last = self.list_triggers.GetItemCount() - 1
 				self.list_triggers.CheckItem(last)
-
-		'''
-		for ii in temp_list:
-			if ii[1]==-1:
-				self.triggers.append(ii)
-				self.list_triggers.Append([_('None (always true)'),'','',])
-				if ii[0]==1:
-					last=self.list_triggers.GetItemCount()-1
-					self.list_triggers.CheckItem(last)
-			else:
-				self.triggers.append(ii)
-				#self.list_triggers.Append([self.a.DataList[x][0].decode('utf8'),self.a.operators_list[ii[2]].decode('utf8'),ii[3]])
-				self.list_triggers.Append([ii[1],ii[2],self.operators_list[ii[3]],ii[4]])
-				if ii[0]==1:
-					last=self.list_triggers.GetItemCount()-1
-					self.list_triggers.CheckItem(last)
-		'''
 
 	def on_print_actions(self, e):
 		self.actions = Actions(self)
 		selected_trigger = e.GetIndex()
 		self.list_actions.DeleteAllItems()
-		for i in self.triggers[selected_trigger][5]:
+		for i in self.triggers[selected_trigger][4]:
 			if i[3] == 0.0:
 				repeat = ''
 			else:
@@ -2045,10 +2024,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def on_edit_triggers(self, e):
 		t = e.GetIndex()
 		SKkey = self.triggers[t][1]
-		SKstar = self.triggers[t][2]
-		operator = self.triggers[t][3]
-		value = self.triggers[t][4]
-		edit = [t, SKkey, SKstar, operator, value]
+		operator = self.triggers[t][2]
+		value = self.triggers[t][3]
+		edit = [t, SKkey, operator, value]
 		self.edit_add_trigger(edit)
 
 	def on_add_trigger(self, e):
@@ -2058,28 +2036,49 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		dlg = addTrigger(self, edit)
 		res = dlg.ShowModal()
 		if res == wx.ID_OK:
-			SKkey = dlg.SKkey.GetValue()
-			SKstar = dlg.asterix.GetValue()
-			operator = dlg.operator.GetCurrentSelection()
-			if SKkey == '' or operator == -1 or (SKstar == '' and ('*' in SKkey)):
-				self.ShowMessage(_('Failed. Select trigger and operator.'))
-				dlg.Destroy()
-				return
-			if dlg.value.GetValue():
+			if dlg.always.GetValue():
+				SKkey0 = _('Always')
+				SKkey = -1
+				operator0 = ''
+				operator = ''
+				value0 = ''
+				value = ''
+			else:
+				group=dlg.skgroups.GetValue()
+				signalk=dlg.signalk.GetValue()
+				SKkey = group+'.'+signalk
+				SKkey = SKkey.encode('utf8')
+				SKkey0 = SKkey.decode('utf8')
+				operator0 = dlg.operator.GetValue()
+				operator0 = operator0.decode('utf8')
+				operator = None
+				c = 0
+				for i in self.operators_list:
+					if operator0 == i: operator = c
+					c = c + 1
 				value = dlg.value.GetValue()
-			else:
-				value = 0
-			value2 = str(value)
-			operator_str = self.operators_list[operator]
-			if '.*' in SKkey:
-				SKkey2 = SKkey.replace('*', SKstar)
-			else:
-				SKkey2 = SKkey
-				SKstar = ''
-
+				value = value.encode('utf8')
+				value0 = value.decode('utf8')
+				if '--' in SKkey :
+					self.ShowMessage(_('Failed. Select group and key.'))
+					dlg.Destroy()
+					return
+				if operator == None :
+					self.ShowMessage(_('Failed. Select operator.'))
+					dlg.Destroy()
+					return
+				if operator == 7 or operator == 8:
+					operator0='='
+					operator == 2
+					if operator == 7: value = '1'
+					if operator == 8: value = '0'
+				if not value :
+					self.ShowMessage(_('Failed. Enter value.'))
+					dlg.Destroy()
+					return
 			if edit == 0:
-				self.list_triggers.Append([SKkey2.decode('utf8'), operator_str.decode('utf8'), value2.decode('utf8')])
-				tmp = [1, str(SKkey), str(SKstar), operator, value2, []]
+				self.list_triggers.Append([SKkey0, operator0, value0])
+				tmp = [1, SKkey, operator, value, []]
 				self.triggers.append(tmp)
 				total = self.list_triggers.GetItemCount()
 				for x in xrange(0, total, 1):
@@ -2087,23 +2086,22 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.list_triggers.Select(total - 1, on=1)
 				self.list_triggers.CheckItem(total - 1)
 			else:
-				self.list_triggers.SetStringItem(edit[0], 0, SKkey2.decode('utf8'))
-				self.list_triggers.SetStringItem(edit[0], 1, operator_str.decode('utf8'))
-				self.list_triggers.SetStringItem(edit[0], 2, value2.decode('utf8'))
-				self.triggers[edit[0]][1] = str(SKkey)
-				self.triggers[edit[0]][2] = str(SKstar)
-				self.triggers[edit[0]][3] = operator
-				self.triggers[edit[0]][4] = value2
+				self.list_triggers.SetStringItem(edit[0], 0, SKkey0)
+				self.list_triggers.SetStringItem(edit[0], 1, operator0)
+				self.list_triggers.SetStringItem(edit[0], 2, value0)
+				self.triggers[edit[0]][1] = SKkey
+				self.triggers[edit[0]][2] = operator
+				self.triggers[edit[0]][3] = value
 		dlg.Destroy()
 
 	def edit_actions(self, e):
 		self.actions = Actions(self)
 		a = e.GetIndex()
 		t = self.list_triggers.GetFirstSelected()
-		action = self.actions.getOptionsListIndex(self.triggers[t][5][a][0])
-		data = self.triggers[t][5][a][1]
-		repeat = self.triggers[t][5][a][2]
-		unit = self.triggers[t][5][a][3]
+		action = self.actions.getOptionsListIndex(self.triggers[t][4][a][0])
+		data = self.triggers[t][4][a][1]
+		repeat = self.triggers[t][4][a][2]
+		unit = self.triggers[t][4][a][3]
 		edit = [a, action, data, repeat, unit]
 		self.edit_add_action(edit)
 
@@ -2150,15 +2148,15 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				tmp.append(data)
 				tmp.append(repeat)
 				tmp.append(time_units_selection)
-				self.triggers[selected_trigger_position][5].append(tmp)
+				self.triggers[selected_trigger_position][4].append(tmp)
 			else:
 				self.list_actions.SetStringItem(edit[0], 0, action.decode('utf8'))
 				self.list_actions.SetStringItem(edit[0], 1, data.decode('utf8'))
 				self.list_actions.SetStringItem(edit[0], 2, repeat2.decode('utf8'))
-				self.triggers[selected_trigger_position][5][edit[0]][0] = self.actions.options[action_selection][3]
-				self.triggers[selected_trigger_position][5][edit[0]][1] = data
-				self.triggers[selected_trigger_position][5][edit[0]][2] = repeat
-				self.triggers[selected_trigger_position][5][edit[0]][3] = time_units_selection
+				self.triggers[selected_trigger_position][4][edit[0]][0] = self.actions.options[action_selection][3]
+				self.triggers[selected_trigger_position][4][edit[0]][1] = data
+				self.triggers[selected_trigger_position][4][edit[0]][2] = repeat
+				self.triggers[selected_trigger_position][4][edit[0]][3] = time_units_selection
 		dlg.Destroy()
 
 	def on_delete_trigger(self, e):
@@ -2188,9 +2186,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.triggers[i][0] = 0
 			i += 1
 		self.conf.set('ACTIONS', 'triggers', str(self.triggers))
-		self.conf.read()
-		self.start_monitoring()
-		self.ShowStatusBarBLACK(_('Actions changes applied and restarted'))
+		self.restart_SK(0)
 
 	def on_cancel_changes_actions(self, e):
 		self.read_triggers()

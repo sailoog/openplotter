@@ -25,7 +25,6 @@ else:
 	import RPi.GPIO as GPIO
 	import spidev,RTIMU
 
-
 	def interpolread(idx,erg):
 		lin = -999999
 		for index,item in enumerate(adjust_point[idx]):
@@ -58,30 +57,10 @@ else:
 		else: io='output'
 		if current_state: current_state='1'
 		else: current_state='0'
-		SignalK='{"context": "vessels.'+uuid+'","updates":[{"source":{"type": "GPIO","src":"GPIO'+str(channel)+'"},"timestamp":"'+timestamp+'","values":[{"path":"notifications.gpio.'+io+'.gpio'+str(channel)+'","value":['+current_state+']}]}]}\n'
+		SignalK='{"context": "vessels.'+uuid+'","updates":[{"source":{"type": "GPIO","src":"GPIO'+str(channel)+'"},"timestamp":"'+timestamp+'","values":[{"path":"notifications.gpio.'+io+'.gpio'+str(channel)+'","value":'+current_state+'}]}]}\n'
 		sock.sendto(SignalK, ('127.0.0.1', 55558))
-
 	  
 	conf=Conf(Paths())
-
-	#init GPIO
-	GPIO.setmode(GPIO.BCM)
-	GPIO.setwarnings(False)
-	gpio = []
-	data = conf.get('GPIO', 'sensors')
-	try:
-		temp_list = eval(data)
-	except:
-		temp_list = []
-	for ii in temp_list:
-		gpio.append(ii)
-		# name, io, GPIO, pull
-		if ii[1] == 'out':
-			GPIO.setup(int(ii[2]), GPIO.OUT)
-		else:
-			pull_up_down=GPIO.PUD_DOWN
-			if ii[3]=='up': pull_up_down=GPIO.PUD_UP
-			GPIO.setup(int(ii[2]), GPIO.IN, pull_up_down)
 	
 	#init SPI MCP
 	MCP=[]
@@ -124,11 +103,8 @@ else:
 	gpio_=False
 	if gpio_list:
 		gpio_=True
-
-		#sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		GPIO.setmode(GPIO.BCM)
 		GPIO.setwarnings(False)
-
 		c=0
 		for i in gpio_list:
 			channel=int(i[2])
@@ -142,8 +118,6 @@ else:
 			gpio_list[c].append('')
 			c=c+1
 
-			
-			
 	heading_sk=conf.get('I2C', 'sk_hdg')=='1'
 	heel_sk=conf.get('I2C', 'sk_heel')=='1'
 	pitch_sk=conf.get('I2C', 'sk_pitch')=='1'
@@ -158,9 +132,12 @@ else:
 	if pressure_sk or p_temp_sk: bmp_=True
 	if humidity_sk or h_temp_sk: hum_=True
 
-	if imu_ or bmp_ or hum_ or analog_:
+	if imu_ or bmp_ or hum_ or analog_ or gpio_:
+		
 		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
 		poll_interval = 1
+
 		try:
 			heading_offset=float(conf.get('OFFSET', 'heading'))
 			heel_offset=float(conf.get('OFFSET', 'heel'))
@@ -185,8 +162,6 @@ else:
 		rate_hum=float(conf.get('I2C', 'rate_hum'))
 		rate_ana=rate_imu
 		rate_gpio=0.1
-		counter_gpio=10
-		count_gpio=0
 		
 		vessel_self=checkVesselSelf()
 		uuid=vessel_self.uuid
@@ -230,8 +205,7 @@ else:
 			
 		while True:
 			tick2=time.time()
-			time.sleep(poll_interval*0.01)
-					
+			time.sleep(poll_interval*1.0/1000.0)		
 			# read IMU and GENERATE
 			if imu_:
 				if tick2>tick_imu:
@@ -321,19 +295,13 @@ else:
 			if gpio_:
 				if tick2>tick_gpio:
 					tick_gpio+=rate_gpio
-
-					count_gpio+=1
-					if count_gpio>counter_gpio:
-						count_gpio=0
-
-					
 					timestamp=str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z'
 					c=0
 					for i in gpio_list:
 						channel=int(i[2])
 						current_state = GPIO.input(channel)
 						last_state=gpio_list[c][4]
-						if current_state!=last_state or count_gpio==10:
+						if current_state!=last_state:
 							gpio_list[c][4]=current_state
 							publish_sk(i[1],channel,current_state,timestamp)
 						c+=1

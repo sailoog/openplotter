@@ -108,19 +108,21 @@ class MySK:
 						self.update_add(value2, path2, srclabel2, timestamp)
 			else:
 				srclabel = label + '.' + src
-				self.update_add(value, path, srclabel, timestamp)
+				path2 = path + '.' + 'value'
+				self.update_add(value, path2, srclabel, timestamp)
 
 	def update_add(self, value, path, src, timestamp):
 		# SRC SignalK Value Unit Interval Status Description timestamp	private_Unit private_Value priv_Faktor priv_Offset		
 		#  0    1      2     3      4        5        6          7           8             9           10          11			
+
 		if type(value) is list: value = value[0]
 
 		if type(value) is float:
 			pass
 		elif type(value) is int:
 			value = float(value)
-		else:
-			value = 0.0
+		#else:
+			#value = 0.0
 
 		index = 0
 		exists = False
@@ -173,7 +175,6 @@ class MySK:
 		if self.ws is not None:
 			self.ws.close()
 		self.thread.join()
-
 
 class MySK_to_N2K:
 	def __init__(self, SK_):
@@ -507,9 +508,8 @@ class MySK_to_NMEA:
 
 class MySK_to_Action:
 	def __init__(self, SK_):
-		self.operators_list = [_('was not present in the last (sec.)'), _('was present in the last (sec.)'),
-							   _('is equal to'), _('is less than'), _('is less than or equal to'), _('is greater than'),
-							   _('is greater than or equal to'), _('is on'), _('is off')]
+		self.operators_list = [_('was not updated in the last (sec.)'), _('was updated in the last (sec.)'), '=',
+							   '<', '<=', '>', '>=', _('is on'), _('is off'), _('contains')]
 
 		self.tdif = time.time() - time.mktime(datetime.datetime.utcnow().timetuple())
 		self.tdif = round(self.tdif, 0)
@@ -519,7 +519,6 @@ class MySK_to_Action:
 		self.SK = SK_
 		self.SKc = []
 
-		# mqtt=Mqtt(SK.conf,a)
 		self.cycle10 = time.time() + 0.01
 		self.read_Action()
 
@@ -535,100 +534,103 @@ class MySK_to_Action:
 		for ii in temp_list:
 			if ii[0] == 1:
 				ii.append(False)  # 5 state
-				for iii in ii[5]:
+				for iii in ii[4]:
 					if iii[3] == 2: iii[2] *= 60
 					if iii[3] == 3: iii[2] = (iii[2] * 60) * 60
 					if iii[3] == 4: iii[2] = ((iii[2] * 24) * 60) * 60
 					iii.append('')  # 4 last run
 				self.triggers.append(ii)
-				if '.*' in ii[1]:
-					SKkey2 = ii[1].replace('*', ii[2])
+				if ii[1] == -1: pass
 				else:
 					SKkey2 = ii[1]
-				self.SKc.append([SKkey2, [0, 0, 0, 0, 0, 0, 0, 0]])
-				ii[1] = self.SKc[-1]
-				#print self.SKc[-1]
+					self.SKc.append([SKkey2, [0, 0, 0, 0, 0, 0, 0, 0]])
+					ii[1] = self.SKc[-1]
 
 	def Action_set(self, item, start):
 		if start:
-			if not item[6]:
-				re = ''
-				for i in item[5]:
+			now = time.time()
+			for i in item[4]:
+				if item[5] == False:
+					item[5] = True
 					try:
 						self.actions.run_action(i[0], i[1])
-					except Exception, e:
-						print str(e)
-
-			item[6] = True
+						i[4] = now
+					except Exception, e: print str(e)
+				else:
+					if i[3] == 0: pass
+					else:
+						if now - i[4] > i[2]:
+							try:
+								self.actions.run_action(i[0], i[1])
+								i[4] = now
+							except Exception, e: print str(e)				
 		else:
-			item[6] = False
+			item[5] = False
 
 	def Action_cycle(self, tick2a):
 		if tick2a > self.cycle10:
 			self.cycle10 += 0.1
 			for index, item in enumerate(self.triggers):
 				if item[1] == -1:
-					operator_ = ''
-					# start_actions(index)
-					self.triggers[index][6] = True
-					data_string = ''
+					self.Action_set(item, True)
 				else:
 					# trigger = item[1][0]
 					trigger_value = item[1][1][2]
 					now = time.time() - self.tdif
-					operator_ = item[3]
-					data = item[4]
+					operator_ = item[2]
+					data = item[3]
 					if type(item[1][1][7]) is int:
 						trigger_value_timestamp = 0
 					else:
 						trigger_value_timestamp = datetime.datetime.strptime(item[1][1][7][:-5], '%Y-%m-%dT%H:%M:%S')
 						trigger_value_timestamp = time.mktime(trigger_value_timestamp.timetuple())
-
 					try:
 						data_value = float(data)
 					except:
-						data_value = ''
-					data_string = str(data)
-					#print trigger_value,operator_,data
-				try:
-					# if True:
-					# not present for
-
-					if operator_ == 0:
-						self.Action_set(item, now - trigger_value_timestamp > data_value)
-					# present in the last
-					elif operator_ == 1:
-						self.Action_set(item, now - trigger_value_timestamp < data_value)
-
-					elif trigger_value_timestamp:
-						# equal (number)
-						if operator_ == 2 and type(data_value) is float:
-							self.Action_set(item, float(trigger_value) == data_value)
-						# equal (string)
-						elif operator_ == 2 and not data_value:
-							self.Action_set(item, trigger_value == data_string)
-						# less than
-						elif operator_ == 3:
-							self.Action_set(item, float(trigger_value) < data_value)
-						# less than or equal to
-						elif operator_ == 4:
-							self.Action_set(item, float(trigger_value) <= data_value)
-						# greater than
-						elif operator_ == 5:
-							self.Action_set(item, float(trigger_value) > data_value)
-						# greater than or equal to
-						elif operator_ == 6:
-							self.Action_set(item, float(trigger_value) >= data_value)
-					# switch on
-					elif operator_ == 7:
-						self.Action_set(item, trigger_value == 1)
-					# switch off
-					elif operator_ == 8:
-						self.Action_set(item, trigger_value == 0)
-
-				except Exception, e:
-					print str(e)
-				# except: pass
+						data_value = str(data)
+					try:
+						if trigger_value_timestamp:
+							if type(data_value) is float:
+								# not present for
+								if operator_ == 0:
+									self.Action_set(item, now - trigger_value_timestamp > data_value)
+								# present in the last
+								elif operator_ == 1:
+									self.Action_set(item, now - trigger_value_timestamp < data_value)
+								# equal (number)
+								elif operator_ == 2:
+									self.Action_set(item, float(trigger_value) == data_value)
+								# less than
+								elif operator_ == 3:
+									self.Action_set(item, float(trigger_value) < data_value)
+								# less than or equal to
+								elif operator_ == 4:
+									self.Action_set(item, float(trigger_value) <= data_value)
+								# greater than
+								elif operator_ == 5:
+									self.Action_set(item, float(trigger_value) > data_value)
+								# greater than or equal to
+								elif operator_ == 6:
+									self.Action_set(item, float(trigger_value) >= data_value)
+								# switch on
+								elif operator_ == 7:
+									self.Action_set(item, float(trigger_value) == 1.0)
+								# switch off
+								elif operator_ == 8:
+									self.Action_set(item, float(trigger_value) == 0.0)
+								# contain (number)
+								if operator_ == 9:
+									self.Action_set(item, data_value in float(trigger_value))
+							else:
+								# equal (string)
+								if operator_ == 2:
+									self.Action_set(item, trigger_value == data_value)
+								# contain (string)
+								elif operator_ == 9:
+									self.Action_set(item, data_value in trigger_value)
+					except Exception, e:
+						print str(e)
+					# except: pass
 
 
 def signal_handler(signal_, frame):
