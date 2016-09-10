@@ -31,7 +31,7 @@ class MyFrame(wx.Frame):
 		#self.Check127489_pos=100
 		#self.Check127505_pos=100
 		#self.Check130316_pos=100
-		self.conf=Conf()
+		self.conf=Conf(paths)
 		self.N2K=N2K_send()
 		self.tick=0
 		self.list_SK=[]

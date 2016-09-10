@@ -35,7 +35,7 @@ class MyFrame(wx.Frame):
 			self.ttimer=40
 			self.home=Paths().home
 			self.currentpath=Paths().currentpath
-			self.conf=Conf()
+			self.conf=Conf(Paths())
 			
 			try:
 				self.ser = serial.Serial(self.conf.get('N2K', 'can_usb'), 115200, timeout=0.5)
@@ -69,7 +69,7 @@ class MyFrame(wx.Frame):
 			self.list_N2K = CheckListCtrl(panel, 400,260)
 			self.list_N2K.SetBackgroundColour((230,230,230))
 			self.list_N2K.SetPosition((10, 25))
-			self.list_N2K.InsertColumn(0, _('PGN'), width=80)
+			self.list_N2K.InsertColumn(0, _('PGN'), width=90)
 			self.list_N2K.InsertColumn(1, _('info'), width=200)
 			wx.StaticText(panel, wx.ID_ANY, label="enabled transmit PGN:", style=wx.ALIGN_CENTER, pos=(10,300))
 			self.printing = wx.StaticText(panel, size=(600, 70), pos=(10, 320))

@@ -35,7 +35,7 @@ class MainFrame(wx.Frame):
 			paths=Paths()
 			self.currentpath=paths.currentpath
 
-			self.conf=Conf()
+			self.conf=Conf(paths)
 
 			Language(self.conf.get('GENERAL','lang'))
 

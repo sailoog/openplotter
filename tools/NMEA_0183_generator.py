@@ -114,7 +114,7 @@ class MyFrame(wx.Frame):
 					self.sentences.append([nmea[0],nmea[1],nmea[2]])
 				else:
 					self.list_nmea.SetStringItem(edit[0],0,nmea[0])
-					self.list_nmea.SetStringItem(edit[0],1,nmea[2])
+					self.list_nmea.SetStringItem(edit[0],1,str(nmea[2]))
 					fields=','
 					for i in nmea[1]:
 						if type(i) is str: fields+=i+','
@@ -141,10 +141,11 @@ class MyFrame(wx.Frame):
 
 
 		def kplex_diagnostic(self,e):
-			pass
+			wx.MessageBox('use diagnostic on NMEA0183\nselect system\npush diagnostic', 'Info', wx.OK | wx.ICON_INFORMATION)
 
 		def sk_diagnostic(self,e):
-			pass
+			subprocess.call(['pkill', '-f', 'diagnostic-SK-input.py'])
+			subprocess.Popen(['python',self.paths.op_path+'/diagnostic-SK-input.py'])
 
 app = wx.App()
 MyFrame().Show()

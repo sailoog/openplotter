@@ -185,81 +185,81 @@ class MySK_to_N2K:
 				if i == '126992':
 					pass
 				elif i == '127245':
-					self.steering_rudderAngle = self.setlist(['steering.rudderAngle', [0, 0, 0, 0]])
+					self.steering_rudderAngle = self.setlist(['steering.rudderAngle.value', [0, 0, 0, 0]])
 				elif i == '127250':
-					self.navigation_headingMagnetic = self.setlist(['navigation.headingMagnetic', [0, 0, 0, 0]])
+					self.navigation_headingMagnetic = self.setlist(['navigation.headingMagnetic.value', [0, 0, 0, 0]])
 				elif i == '127257':
-					self.navigation_attitude_pitch = self.setlist(['navigation.attitude.pitch', [0, 0, 0, 0]])
-					self.navigation_attitude_roll = self.setlist(['navigation.attitude.roll', [0, 0, 0, 0]])
-					self.navigation_attitude_yaw = self.setlist(['navigation.attitude.yaw', [0, 0, 0, 0]])
+					self.navigation_attitude_pitch = self.setlist(['navigation.attitude.pitch.value', [0, 0, 0, 0]])
+					self.navigation_attitude_roll = self.setlist(['navigation.attitude.roll.value', [0, 0, 0, 0]])
+					self.navigation_attitude_yaw = self.setlist(['navigation.attitude.yaw.value', [0, 0, 0, 0]])
 				elif i == '127488':
-					self.propulsion_port_revolutions = self.setlist(['propulsion.port.revolutions', [0, 0, 0, 0]])
+					self.propulsion_port_revolutions = self.setlist(['propulsion.port.revolutions.value', [0, 0, 0, 0]])
 				elif i == '127488_1':
 					self.propulsion_starboard_revolutions = self.setlist(
-						['propulsion.starboard.revolutions', [0, 0, 0, 0]])
+						['propulsion.starboard.revolutions.value', [0, 0, 0, 0]])
 				elif i == '127489':
-					self.propulsion_port_oilTemperature = self.setlist(['propulsion.port.oilTemperature', [0, 0, 0, 0]])
-					self.propulsion_port_temperature = self.setlist(['propulsion.port.temperature', [0, 0, 0, 0]])
+					self.propulsion_port_oilTemperature = self.setlist(['propulsion.port.oilTemperature.value', [0, 0, 0, 0]])
+					self.propulsion_port_temperature = self.setlist(['propulsion.port.temperature.value', [0, 0, 0, 0]])
 				elif i == '127489_1':
 					self.propulsion_starboard_oilTemperature = self.setlist(
-						['propulsion.starboard.oilTemperature', [0, 0, 0, 0]])
+						['propulsion.starboard.oilTemperature.value', [0, 0, 0, 0]])
 					self.propulsion_starboard_temperature = self.setlist(
-						['propulsion.starboard.temperature', [0, 0, 0, 0]])
+						['propulsion.starboard.temperature.value', [0, 0, 0, 0]])
 				elif i == '127505':
-					self.tank_diesel_capacity = self.setlist(['tanks.fuel.standard.capacity', [0, 0, 0, 0]])
-					self.tank_diesel_level = self.setlist(['tanks.fuel.standard.currentLevel', [0, 0, 0, 0]])
+					self.tank_diesel_capacity = self.setlist(['tanks.fuel.standard.capacity.value', [0, 0, 0, 0]])
+					self.tank_diesel_level = self.setlist(['tanks.fuel.standard.currentLevel.value', [0, 0, 0, 0]])
 				elif i == '127505_1':
-					self.tank_freshwater_capacity = self.setlist(['tanks.liveWell.standard.capacity', [0, 0, 0, 0]])
-					self.tank_freshwater_level = self.setlist(['tanks.liveWell.standard.currentLevel', [0, 0, 0, 0]])
+					self.tank_freshwater_capacity = self.setlist(['tanks.liveWell.standard.capacity.value', [0, 0, 0, 0]])
+					self.tank_freshwater_level = self.setlist(['tanks.liveWell.standard.currentLevel.value', [0, 0, 0, 0]])
 				elif i == '127505_2':
-					self.tank_greywater_capacity = self.setlist(['tanks.wasteWater.standard.capacity', [0, 0, 0, 0]])
-					self.tank_greywater_level = self.setlist(['tanks.wasteWater.standard.currentLevel', [0, 0, 0, 0]])
+					self.tank_greywater_capacity = self.setlist(['tanks.wasteWater.standard.capacity.value', [0, 0, 0, 0]])
+					self.tank_greywater_level = self.setlist(['tanks.wasteWater.standard.currentLevel.value', [0, 0, 0, 0]])
 				elif i == '127505_3':
-					self.tank_holding_capacity = self.setlist(['tanks.blackWater.standard.capacity', [0, 0, 0, 0]])
-					self.tank_holding_level = self.setlist(['tanks.blackWater.standard.currentLevel', [0, 0, 0, 0]])
+					self.tank_holding_capacity = self.setlist(['tanks.blackWater.standard.capacity.value', [0, 0, 0, 0]])
+					self.tank_holding_level = self.setlist(['tanks.blackWater.standard.currentLevel.value', [0, 0, 0, 0]])
 				elif i == '127508':
 					self.DC_Electrical_Properties_dcSource_voltage = self.setlist(
-						['DC Electrical Properties.dcSource.voltage', [0, 0, 0, 0]])
+						['DC Electrical Properties.dcSource.voltage.value', [0, 0, 0, 0]])
 					self.DC_Electrical_Properties_dcSource_current = self.setlist(
-						['DC Electrical Properties.dcSource.current', [0, 0, 0, 0]])
+						['DC Electrical Properties.dcSource.current.value', [0, 0, 0, 0]])
 					self.DC_Electrical_Properties_dcSource_temperature = self.setlist(
-						['DC Electrical Properties.dcSource.temperature', [0, 0, 0, 0]])
+						['DC Electrical Properties.dcSource.temperature.value', [0, 0, 0, 0]])
 				elif i == '128259':
-					self.navigation_speedOverGround = self.setlist(['navigation.speedOverGround', [0, 0, 0, 0]])
-					self.navigation_speedThroughWater = self.setlist(['navigation.speedThroughWater', [0, 0, 0, 0]])
+					self.navigation_speedOverGround = self.setlist(['navigation.speedOverGround.value', [0, 0, 0, 0]])
+					self.navigation_speedThroughWater = self.setlist(['navigation.speedThroughWater.value', [0, 0, 0, 0]])
 				elif i == '128267':
 					self.environment_depth_belowTransducer = self.setlist(
-						['environment.depth.belowTransducer', [0, 0, 0, 0]])
+						['environment.depth.belowTransducer.value', [0, 0, 0, 0]])
 					self.environment_depth_surfaceToTransducer = self.setlist(
-						['environment.depth.surfaceToTransducer', [0, 0, 0, 0]])
+						['environment.depth.surfaceToTransducer.value', [0, 0, 0, 0]])
 				elif i == '128275':
-					self.navigation_log = self.setlist(['navigation.log', [0, 0, 0, 0]])
-					self.navigation_logTrip = self.setlist(['navigation.logTrip', [0, 0, 0, 0]])
+					self.navigation_log = self.setlist(['navigation.log.value', [0, 0, 0, 0]])
+					self.navigation_logTrip = self.setlist(['navigation.logTrip.value', [0, 0, 0, 0]])
 				elif i == '129025':
 					self.navigation_position_latitude = self.setlist(['navigation.position.latitude', [0, 0, 0, 0]])
 					self.navigation_position_longitude = self.setlist(['navigation.position.longitude', [0, 0, 0, 0]])
 				elif i == '129026':
 					self.navigation_courseOverGroundTrue = self.setlist(
-						['navigation.courseOverGroundTrue', [0, 0, 0, 0]])
-					self.navigation_speedOverGround = self.setlist(['navigation.speedOverGround', [0, 0, 0, 0]])
+						['navigation.courseOverGroundTrue.value', [0, 0, 0, 0]])
+					self.navigation_speedOverGround = self.setlist(['navigation.speedOverGround.value', [0, 0, 0, 0]])
 				elif i == '130306':
-					self.environment_wind_directionTrue = self.setlist(['environment.wind.directionTrue', [0, 0, 0, 0]])
-					self.environment_wind_speedTrue = self.setlist(['environment.wind.speedTrue', [0, 0, 0, 0]])
+					self.environment_wind_directionTrue = self.setlist(['environment.wind.directionTrue.value', [0, 0, 0, 0]])
+					self.environment_wind_speedTrue = self.setlist(['environment.wind.speedTrue.value', [0, 0, 0, 0]])
 				elif i == '130310':
-					self.environment_outside_pressure = self.setlist(['environment.outside.pressure', [0, 0, 0, 0]])
+					self.environment_outside_pressure = self.setlist(['environment.outside.pressure.value', [0, 0, 0, 0]])
 					self.environment_outside_temperature = self.setlist(
-						['environment.outside.temperature', [0, 0, 0, 0]])
-					self.environment_water_temperature = self.setlist(['environment.water.temperature', [0, 0, 0, 0]])
+						['environment.outside.temperature.value', [0, 0, 0, 0]])
+					self.environment_water_temperature = self.setlist(['environment.water.temperature.value', [0, 0, 0, 0]])
 				elif i == '130311':
-					self.environment_outside_pressure = self.setlist(['environment.outside.pressure', [0, 0, 0, 0]])
-					self.environment_humidity = self.setlist(['environment.humidity', [0, 0, 0, 0]])
-					self.environment_water_temperature = self.setlist(['environment.water.temperature', [0, 0, 0, 0]])
+					self.environment_outside_pressure = self.setlist(['environment.outside.pressure.value', [0, 0, 0, 0]])
+					self.environment_humidity = self.setlist(['environment.humidity.value', [0, 0, 0, 0]])
+					self.environment_water_temperature = self.setlist(['environment.water.temperature.value', [0, 0, 0, 0]])
 				elif i == '130316':
 					self.environment_inside_refrigerator_temperature = self.setlist(
-						['environment.inside.refrigerator.temperature', [0, 0, 0, 0]])
+						['environment.inside.refrigerator.temperature.value', [0, 0, 0, 0]])
 				elif i == '130316_1':
 					self.propulsion_port_exhaustTemperature = self.setlist(
-						['propulsion.port.exhaustTemperature', [0, 0, 0, 0]])
+						['propulsion.port.exhaustTemperature.value', [0, 0, 0, 0]])
 
 		self.SK = SK_
 		data = self.SK.conf.get('N2K', 'pgn_generate')
@@ -497,7 +497,7 @@ class MySK_to_NMEA:
 		NMEA_string = '$OC' + NMEA_string + '*' + hex(reduce(operator.xor, map(ord, 'OC' + NMEA_string), 0)).upper()[
 												  2:] + '\r\n'
 		# print NMEA_string
-		self.sock.sendto(NMEA_string, ('127.0.0.1', 55565))
+		self.sock.sendto(NMEA_string, ('127.0.0.1', 10110))
 
 	def NMEA_cycle(self, tick2a):
 		for k in self.cycle_list:

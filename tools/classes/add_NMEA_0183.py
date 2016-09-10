@@ -227,7 +227,7 @@ class addNMEA_0183(wx.Dialog):
 				self.nmea[1][selected_field]=''
 				return
 			#txt='[\''+group+'.'+key+'\',\''+formats2+'\']'
-			if '.value' in key: key=key[:-6]
+			#if '.value' in key: key=key[:-6]
 			txt=[(group+'.'+key).encode('utf8'),formats2.encode('utf8'),'+',0.0]
 			self.list_fields.SetStringItem(selected_field,1,_(txt[1]))
 			self.nmea[1][selected_field]=txt
