@@ -549,9 +549,10 @@ class MySK_to_Action:
 	def Action_set(self, item, start):
 		if start:
 			now = time.time()
+			itemsafe = False
 			for i in item[4]:
 				if item[5] == False:
-					item[5] = True
+					itemsafe = True
 					try:
 						self.actions.run_action(i[0], i[1])
 						i[4] = now
@@ -563,7 +564,9 @@ class MySK_to_Action:
 							try:
 								self.actions.run_action(i[0], i[1])
 								i[4] = now
-							except Exception, e: print str(e)				
+							except Exception, e: print str(e)			
+			item[5] = itemsafe
+
 		else:
 			item[5] = False
 
