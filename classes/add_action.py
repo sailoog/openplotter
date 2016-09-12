@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 import wx
+import os
 
 
 class addAction(wx.Dialog):
@@ -75,6 +76,8 @@ class addAction(wx.Dialog):
 				if dlg.ShowModal() == wx.ID_OK:
 					file_path = dlg.GetPath()
 					self.data.SetValue(file_path)
+				print self.currentpath
+				os.chdir(self.currentpath)			
 				dlg.Destroy()
 			else:
 				if msg == 0:

@@ -141,6 +141,9 @@ class MainFrame(wx.Frame):
 		self.nmea_0183_item1 = self.settings.Append(wx.ID_ANY, _('NMEA 0183 generator'),
 													_('Generate NMEA 0183 from current values'))
 		self.Bind(wx.EVT_MENU, self.open_nmea_0183, self.nmea_0183_item1)
+		self.nmea_2000_item1 = self.settings.Append(wx.ID_ANY, _('NMEA 2000 generator'),
+													_('Generate NMEA 2000 from current values'))
+		self.Bind(wx.EVT_MENU, self.open_nmea_2000, self.nmea_2000_item1)
 		self.settings.AppendSeparator()
 
 		self.tools_py = []
@@ -294,6 +297,10 @@ class MainFrame(wx.Frame):
 	def open_nmea_0183(self, event):
 		subprocess.call(['pkill', '-f', 'NMEA_0183_generator.py'])
 		subprocess.Popen(['python', self.currentpath + '/tools/NMEA_0183_generator.py'])
+
+	def open_nmea_2000(self, event):
+		subprocess.call(['pkill', '-f', 'NMEA_2000_generator.py'])
+		subprocess.Popen(['python', self.currentpath + '/tools/NMEA_2000_generator.py'])
 
 	def tool10(self, event):
 		menuId = event.Id
@@ -2174,7 +2181,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if selected_action == -1:
 			self.ShowStatusBarBLACK(_('Select an item to delete.'))
 		else:
-			del self.triggers[selected_trigger][5][selected_action]
+			del self.triggers[selected_trigger][4][selected_action]
 			self.list_actions.DeleteItem(selected_action)
 
 	def on_apply_changes_actions(self, e):
@@ -2647,7 +2654,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		apply_changes = wx.Button(self.p_sk, label=_('Apply changes'), pos=(125, 115))
 		apply_changes.Bind(wx.EVT_BUTTON, self.apply_SK)
 
-		wx.StaticBox(self.p_sk, label=_(' Inputs '), size=(430, 130), pos=(250, 10))
+		wx.StaticBox(self.p_sk, label=_(' Inputs '), size=(430, 140), pos=(250, 10))
 		self.SKinputs_label = wx.StaticText(self.p_sk, label='NMEA 0183: system_output - UDP localhost 55556',
 											pos=(260, 30))
 		try:
@@ -2663,8 +2670,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		text += '\nws: '
 		text += data['endpoints']['v1']['signalk-ws']
 		text += '\nNMEA 0183: TCP localhost 10111'
-		wx.StaticBox(self.p_sk, label=_(' Outputs '), size=(430, 130), pos=(250, 145))
-		wx.StaticText(self.p_sk, label=text, pos=(260, 165))
+		wx.StaticBox(self.p_sk, label=_(' Outputs '), size=(430, 120), pos=(250, 155))
+		wx.StaticText(self.p_sk, label=text, pos=(260, 175))
 
 		show_SK = wx.Button(self.p_sk, label=_('Show Web Socket'), pos=(250, 285))
 		show_SK.Bind(wx.EVT_BUTTON, self.show_SK)
@@ -2712,8 +2719,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def set_label_SK(self):
 		text = 'kplex output: UDP 55556 (NMEA 0183)\n'
 		text += 'OP-sensors: UDP 55557 (I2C-, 1W-, SPI-sensors)\n'
-		text += 'notifications: UDP 55558 ( status of GPIO pins for switches, MQTT\n'
-		text += '   messages, SMS messages, opencpn alarm messages)\n'
+		text += 'notifications: UDP 55558 (status of GPIO for switches, MQTT,\n'
+		text += '     messages, SMS messages, opencpn alarm messages)\n'
 		text += 'serial: UDP 55559 (any sensor connected to USB/UART)\n'
 		text += 'wifi: UDP 55561 (any sensor connected by wifi, ex. esp8266)\n'
 		if self.conf.get('N2K', 'enable') == '1':
