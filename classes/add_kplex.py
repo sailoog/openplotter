@@ -181,9 +181,9 @@ class addkplex(wx.Dialog):
 		self.kplex_baud_select.SetValue('4800')
 		self.kplex_name.SetValue('gps')
 		self.ifilter_select.SetValue(self.mode_ifilter[0])
-		self.ifilter_sentences.SetValue('nothing')
+		self.ifilter_sentences.SetValue(_('nothing'))
 		self.ofilter_select.SetValue(self.mode_ifilter[0])
-		self.ofilter_sentences.SetValue('nothing')
+		self.ofilter_sentences.SetValue(_('nothing'))
 
 	def AP_examp(self, e):
 		self.kplex_type.SetValue('Serial')
@@ -210,9 +210,9 @@ class addkplex(wx.Dialog):
 		self.kplex_baud_select.SetValue('4800')
 		self.kplex_name.SetValue('gpsd')
 		self.ifilter_select.SetValue(self.mode_ifilter[0])
-		self.ifilter_sentences.SetValue('nothing')
+		self.ifilter_sentences.SetValue(_('nothing'))
 		self.ofilter_select.SetValue(self.mode_ifilter[0])
-		self.ofilter_sentences.SetValue('nothing')
+		self.ofilter_sentences.SetValue(_('nothing'))
 
 	def SerialCheck(self):
 		self.SerDevLs = [_('none')]
@@ -341,8 +341,8 @@ class addkplex(wx.Dialog):
 			self.ifilter_add_b.Disable()
 			self.ifilter_sentences.Disable()
 			self.ifilter_del_b.Disable()
-			self.ifilter_sentences.SetValue('nothing')
-			self.ifilter_select.SetValue('none')
+			self.ifilter_sentences.SetValue(_('nothing'))
+			self.ifilter_select.SetValue(_('none'))
 
 	def switch_io_out(self, b):
 		if b:
@@ -365,8 +365,8 @@ class addkplex(wx.Dialog):
 			self.ofilter_add_b.Disable()
 			self.ofilter_sentences.Disable()
 			self.ofilter_del_b.Disable()
-			self.ofilter_sentences.SetValue('nothing')
-			self.ofilter_select.SetValue('none')
+			self.ofilter_sentences.SetValue(_('nothing'))
+			self.ofilter_select.SetValue(_('none'))
 
 	def create_gpsd(self, event):
 		self.name.SetValue('gpsd')
@@ -443,10 +443,10 @@ class addkplex(wx.Dialog):
 			self.ShowMessage(_('You must select a Filter type.'))
 			return
 
-		filter_type = 'none'
-		filtering = 'nothing'
+		filter_type = _('none')
+		filtering = _('nothing')
 
-		if self.ifilter_select.GetValue() == _('Accept only sentences:') and self.ifilter_sentences.GetValue() != _(
+		if self.ifilter_select.GetValue().encode('utf8') == _('Accept only sentences:') and self.ifilter_sentences.GetValue() != _(
 				'nothing'):
 			filter_type = 'accept'
 			filtering = ''
@@ -467,10 +467,10 @@ class addkplex(wx.Dialog):
 				if index != 0: filtering += ':'
 				filtering += '-' + item
 
-		ofilter_type = 'none'
-		ofiltering = 'nothing'
+		ofilter_type = _('none')
+		ofiltering = _('nothing')
 
-		if self.ofilter_select.GetValue() == _('Accept only sentences:') and self.ofilter_sentences.GetValue() != _(
+		if self.ofilter_select.GetValue().encode('utf8') == _('Accept only sentences:') and self.ofilter_sentences.GetValue() != _(
 				'nothing'):
 			ofilter_type = 'accept'
 			ofiltering = ''

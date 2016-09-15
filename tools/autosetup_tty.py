@@ -13,6 +13,7 @@ from classes.paths import Paths
 class AutoDetect:
     def __init__(self):
         self.serial = 0
+        self.mpx = 0
 
     def readNMEA0183(self, port, baudrate):
         try:
@@ -41,7 +42,35 @@ class AutoDetect:
                         text += c
 
                 else:
+                    #print 'countwrong ', b
                     countwrong += 1
+
+        if index > 10 and countwrong < index/10:
+            print 'found NMEA0183 on ' + port + ' with baudrate ' + str(baudrate)
+            return True
+        else:
+            return False
+
+    def readNMEA0183false(self, port, baudrate):
+        try:
+            self.serial = serial.Serial(port, baudrate, timeout=1)
+        except:
+            return False
+        timewait = time.time() + 1.5
+        index = 0
+        countwrong = 0
+        print 'search NMEA0183 on ' + port + ' with baudrate ' + baudrate
+        text = ''
+        nmea = self.serial.readline()
+        while time.time() < timewait:
+            nmea = self.serial.readline()
+            if len(nmea)>0:
+              if nmea[0] in ['$', '!']:
+                index += 4
+              else:
+                countwrong += 1
+            else:
+                countwrong += 1
 
         if index > 10 and countwrong < 2:
             print 'found NMEA0183 on ' + port + ' with baudrate ' + str(baudrate)
@@ -53,6 +82,7 @@ class AutoDetect:
         self.serial = serial.Serial(port, baudrate, timeout=1)
         timewait = time.time() + 10.1
         name_list = []
+        nmea = self.serial.readline()
         while time.time() < timewait:
             wx.Yield()
             nmea = self.serial.readline()
@@ -62,7 +92,8 @@ class AutoDetect:
                     name_list.append(nmea[1:3])
 
         if len(name_list) > 1:
-            return 'MPX'
+            self.mpx+=1
+            return 'MPX'+str(self.mpx)
         elif len(name_list) == 1:
             return name_list[0]
         else:
@@ -73,14 +104,13 @@ class AutoDetect:
             self.serial = serial.Serial(port, baudrate, timeout=1)
         except:
             return False
-        timewait = time.time() + 0.05
+        timewait = time.time() + 0.5
         print 'search NMEA2000 on ' + port + ' with baudrate ' + baudrate
 
         data = [0x10, 0x2, 0xa1, 0x01, 0x01, 0x5d, 0x10, 0x03]
         for i in data:
             self.serial.write(chr(i))
         while time.time() < timewait:
-            wx.Yield()
             c = self.serial.read(1)
             if c != '':
                 b = ord(c)
@@ -90,7 +120,10 @@ class AutoDetect:
                         b = ord(c)
                         if b == 0x02:
                             print 'found NMEA2000 on ' + port + ' with baudrate ' + str(baudrate)
+                            wx.Yield()
                             return True
+        print 'not found NMEA2000 on ' + port + ' with baudrate ' + str(baudrate)
+        wx.Yield()
         return False
 
 
@@ -106,7 +139,6 @@ class RedirectText(object):
 
 
 def on_setup(event):
-    print 'hallo'
     time.sleep(0.1)
     context = pyudev.Context()
     tty_list = []
@@ -183,6 +215,7 @@ def on_setup(event):
     safe = 0
     index = 0
     for i in tty_list:
+        print 'test ',i
         if t0 == i[0] and t1 == i[1] and t2 == i[2]:
             tty_list[safe][5] = 'port'
             i[5] = 'port'
@@ -199,8 +232,8 @@ def on_setup(event):
     wx.Yield()
     # self.update()
 
-    baudrate_list = ['115200', '38400', '4800', '9600', '19200', '57600']
-    baudrate_listN2K = ['115200', '230400', '460800']
+    baudrate_list = ['4800', '38400', '115200', '9600', '19200', '57600']
+    baudrate_listN2K = ['115200']
     auto = AutoDetect()
 
     for i in tty_list:
@@ -229,17 +262,28 @@ def on_setup(event):
 
     print
     print 'search for NMEA2000 in tty devices'
+    wx.Yield()
 
     for i in tty_list:
-        for baud in baudrate_listN2K:
+        if i[7] != '/dev/ttyAMA0' and i[0]=='':
+         print i
+         for baud in baudrate_listN2K:
+            print 'n2k',i,baud
+            wx.Yield()
             if i[10] == 0:
+                print 'start'
+                wx.Yield()
                 if auto.readNMEA2000(i[7], baud):
                     i[10] = str(baud)
                     i[0] = 'ttyOP_N2K'
                     baud = baudrate_listN2K[-1]
                     i = tty_list[-1]
+                    print 'ja'
+                    wx.Yield()
+                    # break
     print
     print '########################## result ################################'
+    wx.Yield()
     print
     print 'add new devices to openplotter.conf'
 
@@ -247,6 +291,7 @@ def on_setup(event):
     for i in tty_list:
         if i[10] != 0:
             exists = False
+            print i
             for ii in conf_list:
                 if (i[1] == ii[1] and i[2] == ii[2] and i[3] == ii[3]) and i[5] != 'port':
                     exists = True

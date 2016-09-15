@@ -101,11 +101,11 @@ elif len(sys.argv) > 1:
 			data += 'allow-hotplug eth0\n'
 			data += 'iface eth0 inet dhcp\n'
 
-			data += 'auto eth0:0\n'
-			data += 'iface eth0:0 inet static\n'
-			data += 'address ' + ipfix + '\n'
-			data += 'broadcast ' + ipfix3 + '.255\n'
-			data += 'netmask 255.255.255.0\n'
+			#data += 'auto eth0:0\n'
+			#data += 'iface eth0:0 inet static\n'
+			#data += 'address ' + ipfix + '\n'
+			#data += 'broadcast ' + ipfix3 + '.255\n'
+			#data += 'netmask 255.255.255.0\n'
 
 			data += 'auto ' + wlan + '\n'
 			data += 'iface ' + wlan + ' inet static\n'
@@ -138,17 +138,16 @@ elif len(sys.argv) > 1:
 			data += 'auto br0\n'
 			data += 'iface br0 inet static\n'
 			data += 'bridge_ports eth0\n'
-			data += 'bridge_ports eth0 ' + wlan + '\n'
 			data += 'address ' + ip + '\n'
 			data += 'broadcast ' + ip3 + '.255\n'
 			data += 'netmask 255.255.255.0\n'
 			data += 'bridge_maxwait 1\n'
 
-			data += 'auto br0:0\n'
-			data += 'iface br0:0 inet static\n'
-			data += 'address ' + ipfix + '\n'
-			data += 'broadcast ' + ipfix3 + '.255\n'
-			data += 'netmask 255.255.255.0\n'
+			#data += 'auto br0:0\n'
+			#data += 'iface br0:0 inet static\n'
+			#data += 'address ' + ipfix + '\n'
+			#data += 'broadcast ' + ipfix3 + '.255\n'
+			#data += 'netmask 255.255.255.0\n'
 
 			if share != '0':
 				data += 'post-up iptables -t nat -A POSTROUTING -o ' + share + ' -j MASQUERADE\n'
@@ -158,6 +157,7 @@ elif len(sys.argv) > 1:
 			data += 'post-up service dnsmasq restart\n'
 			data += 'post-up service hostapd restart\n'
 			data += 'post-up ifconfig br0 ' + ip3 + '.1 netmask 255.255.255.0\n'
+			data += 'post-up service networking restart\n'
 
 		wififile = open('/etc/network/interfaces', 'r', 2000)
 		bak = wififile.read()
@@ -279,12 +279,12 @@ elif len(sys.argv) > 1:
 
 		data += 'allow-hotplug eth0\n'
 		data += 'iface eth0 inet dhcp\n'
-		data += 'auto eth0:0\n'
-		data += 'iface eth0:0 inet static\n'
-		data += 'address ' + ipfix + '\n'
-		data += 'broadcast ' + ipfix3 + '.255\n'
-		data += 'netmask 255.255.255.0\n'
-		data += 'post-up /sbin/ifconfig eth0:0 ' + ipfix + ' netmask 255.255.255.0\n'
+		#data += 'auto eth0:0\n'
+		#data += 'iface eth0:0 inet static\n'
+		#data += 'address ' + ipfix + '\n'
+		#data += 'broadcast ' + ipfix3 + '.255\n'
+		#data += 'netmask 255.255.255.0\n'
+		#data += 'post-up /sbin/ifconfig eth0:0 ' + ipfix + ' netmask 255.255.255.0\n'
 
 		if bak != data:
 			wififile = open('/etc/network/interfaces', 'w')
@@ -318,10 +318,10 @@ elif len(sys.argv) > 1:
 			output.wait()
 			if output != 0: error = 1
 
-			if 'eth0:0' in subprocess.check_output('ifconfig'):
-				pass
-			else:
-				subprocess.call(['ifconfig', 'eth0:0', ipfix, 'netmask', '255.255.255.0'])
+			#if 'eth0:0' in subprocess.check_output('ifconfig'):
+			#	pass
+			#else:
+			#	subprocess.call(['ifconfig', 'eth0:0', ipfix, 'netmask', '255.255.255.0'])
 
 			print "\nWiFi access point stopped."
 
