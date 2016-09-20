@@ -1319,7 +1319,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		z5 = 175
 		z6 = 215
 		z7 = 245
-		z8 = 293
+		z8 = 290
 		s1 = 20
 		s2 = 130
 		s3 = 560
@@ -1331,7 +1331,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.list_sk_path_hum = ['environment.inside.humidity', 'environment.outside.humidity']
 
 		z = z0
-		wx.StaticBox(self.p_i2c, label=_(' Settings '), size=(675, 330), pos=(5, 5))
+		wx.StaticBox(self.p_i2c, label=_(' Settings '), size=(675, 325), pos=(5, 5))
 		wx.StaticText(self.p_i2c, label=_('Sensors'), pos=(s2, z))
 		wx.StaticText(self.p_i2c, label=_('Signal K'), pos=(s4, z))
 		wx.StaticText(self.p_i2c, label=_('Offset'), pos=(s5, z))
