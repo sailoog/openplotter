@@ -190,6 +190,7 @@ else:
 			humidity_val.humidityInit()
 
 		heading_m=0.0
+		heading=0.0
 		heel=0.0
 		pitch=0.0
 		pressure=0.0
@@ -264,6 +265,7 @@ else:
 						if (read[0]): humidity=read[1]+humidity_offset
 						if (read[2]): temperature_h=read[3]+h_temp_offset
 
+					Erg=''
 					if humidity_sk:
 						Erg += '{"path": "'+humidity_skt+'","value":'+str(humidity)+'},'
 					if h_temp_sk:

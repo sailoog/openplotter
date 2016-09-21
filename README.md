@@ -27,6 +27,11 @@
 * Install isc-dhcp-server:
 
 `sudo apt-get install isc-dhcp-server`
+`sudo update-rc.d isc-dhcp-server disable`
+
+* Install bridge:
+
+`sudo apt-get install bridge-utils`
 
 * Install python packages:
 
@@ -144,6 +149,8 @@ by
 
 `localhost:10109 TCP input`
 
+* In the menu go to openplotter right click settings change ...openplotter.py to ...openplotter
+
 ## Notes
 
 if you want to use the analog tools for firmata and ads1115, then read tools/install analog.txt
@@ -156,9 +163,11 @@ changes:
 
 -SignalK emulator
 
--generating nmea0183 sentences from SignalK can be tested with command `nc -ul 127.0.0.1 10110`
+-generating nmea0183 sentences from SignalK can be tested by switching to tab NMEA0183 select system click diagnostic or from cmd with command `nc -ul 127.0.0.1 10110`
 
--generating nmea2000 sentences from SignalK not implemented in the ide, so you have to choose the pgn in openplotter.conf [N2K] pgn_generate =['127489']
+-generating nmea2000 sentences from SignalK can be tested by switching to tab NMEA 2K uncheck Enable N2K output click diagnostic output
+
+
 
 -many pages are resizeable
 
