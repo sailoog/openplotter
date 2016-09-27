@@ -2695,6 +2695,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		while self.util_process_exist("node"):
 			time.sleep(0.01)
 		# restarting sk server and providers
+		subprocess.Popen(home+'/.config/signalk-server-node/bin/openplotter', cwd=home+'/.config/signalk-server-node')
 		self.vessel_self = checkVesselSelf()
 		self.ShowStatusBarGREEN(_('Signal K server restarted'))
 
