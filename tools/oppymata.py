@@ -98,7 +98,20 @@ else:
 	SK_name=[]
 	index=0
 	SignalK=''
-	board = PyMata("/dev/ttyOP_FIRM")
+
+	output = subprocess.check_output(['python', toolspath+'/op_pymata_check.py'])
+	if 'Total Number' in output:
+		pass
+	else:
+		print 'some errors so second try'
+		output = subprocess.check_output(['python', toolspath+'/op_pymata_check.py'])
+		if 'Total Number' in output:
+			pass
+		else:
+			print 'No Firmata on /dev/ttyOP_FIRM'
+			sys.exit(0)
+		
+	board = PyMata("/dev/ttyOP_FIRM")		
 	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 				
 	init()

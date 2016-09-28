@@ -36,7 +36,8 @@ class MyFrame(wx.Frame):
 			
 			self.icon = wx.Icon(self.paths.op_path+'/openplotter.ico', wx.BITMAP_TYPE_ICO)
 			self.SetIcon(self.icon)
-
+	
+			'''
 			wx.StaticBox(self, size=(330, 50), pos=(10, 10))
 			wx.StaticText(self, label=_('Rate (sec)'), pos=(20, 30))
 			self.rate_list = ['0.1', '0.25', '0.5', '0.75', '1', '1.5', '2']
@@ -64,13 +65,13 @@ class MyFrame(wx.Frame):
 			self.rot = wx.CheckBox(self, label=_('Rate of turn'), pos=(20, 210))
 			self.rot.Bind(wx.EVT_CHECKBOX, self.nmea_rot)
 			wx.StaticText(self, label=_('Generated NMEA: $OCROT'), pos=(20, 235))
-
+			'''
 			wx.StaticBox(self, label=_(' True wind '), size=(330, 90), pos=(350, 65))
-			self.TW_STW = wx.CheckBox(self, label=_('Use speed log'), pos=(360, 80))
-			self.TW_STW.Bind(wx.EVT_CHECKBOX, self.TW)
-			self.TW_SOG = wx.CheckBox(self, label=_('Use GPS'), pos=(360, 105))
-			self.TW_SOG.Bind(wx.EVT_CHECKBOX, self.TW)
-			wx.StaticText(self, label=_('Generated NMEA: $OCMWV, $OCMWD'), pos=(360, 130))
+			self.TW_STW = wx.CheckBox(self, label=_('boat referenced (use speed log)'), pos=(360, 80))
+			self.TW_STW.Bind(wx.EVT_CHECKBOX, self.on_TW_STW)
+			self.TW_SOG = wx.CheckBox(self, label=_('referenced to North (Use GPS)'), pos=(360, 105))
+			self.TW_SOG.Bind(wx.EVT_CHECKBOX, self.on_TW_SOG)
+			wx.StaticText(self, label=_('Generate SK sentence'), pos=(360, 130))
 
 			self.CreateStatusBar()
 
@@ -78,18 +79,19 @@ class MyFrame(wx.Frame):
 
 			self.Show(True)
 
-			self.rate2.SetValue(self.conf.get('CALCULATE', 'nmea_rate_cal'))
-			self.accuracy.SetValue(self.conf.get('CALCULATE', 'cal_accuracy'))
-			if self.conf.get('CALCULATE', 'nmea_mag_var')=='1': self.mag_var.SetValue(True)
-			if self.conf.get('CALCULATE', 'nmea_hdt')=='1': self.heading_t.SetValue(True)
-			if self.conf.get('CALCULATE', 'nmea_rot')=='1': self.rot.SetValue(True)
+			#self.rate2.SetValue(self.conf.get('CALCULATE', 'nmea_rate_cal'))
+			#self.accuracy.SetValue(self.conf.get('CALCULATE', 'cal_accuracy'))
+			#if self.conf.get('CALCULATE', 'nmea_mag_var')=='1': self.mag_var.SetValue(True)
+			#if self.conf.get('CALCULATE', 'nmea_hdt')=='1': self.heading_t.SetValue(True)
+			#if self.conf.get('CALCULATE', 'nmea_rot')=='1': self.rot.SetValue(True)
 			if self.conf.get('CALCULATE', 'tw_stw')=='1': self.TW_STW.SetValue(True)
 			if self.conf.get('CALCULATE', 'tw_sog')=='1': self.TW_SOG.SetValue(True)
 
 		def start_calculate(self):
-			subprocess.call(['pkill', '-f', 'calculate_d.py'])
-			if self.mag_var.GetValue() or self.heading_t.GetValue() or self.rot.GetValue() or self.TW_STW.GetValue() or self.TW_SOG.GetValue():
-				subprocess.Popen(['python', self.paths.currentpath+'/calculate_d.py'])
+			#subprocess.call(['pkill', '-f', 'calculate_d.py'])
+			#if self.mag_var.GetValue() or self.heading_t.GetValue() or self.rot.GetValue() or self.TW_STW.GetValue() or self.TW_SOG.GetValue():
+			#	subprocess.Popen(['python', self.paths.currentpath+'/calculate_d.py'])
+			pass
 
 		def ok_rate2(self, e):
 			rate=self.rate2.GetValue()
@@ -121,17 +123,17 @@ class MyFrame(wx.Frame):
 			else: self.conf.set('CALCULATE', 'nmea_rot', '0')
 			self.start_calculate()
 
-		def	TW(self, e):
+		def	on_TW_STW(self, e):
 			sender = e.GetEventObject()
 			state=sender.GetValue()
-			self.TW_STW.SetValue(False)
-			self.TW_SOG.SetValue(False)
-			self.conf.set('CALCULATE', 'tw_stw', '0')
-			self.conf.set('CALCULATE', 'tw_sog', '0')
-			if state: sender.SetValue(True)
-			if self.TW_STW.GetValue(): self.conf.set('CALCULATE', 'tw_stw', '1')
-			if self.TW_SOG.GetValue(): self.conf.set('CALCULATE', 'tw_sog', '1')
-			self.start_calculate()
+			if state: self.conf.set('CALCULATE', 'tw_stw', '1')
+			else:     self.conf.set('CALCULATE', 'tw_stw', '0')
+
+		def	on_TW_SOG(self, e):
+			sender = e.GetEventObject()
+			state=sender.GetValue()
+			if state: self.conf.set('CALCULATE', 'tw_sog', '1')
+			else:     self.conf.set('CALCULATE', 'tw_sog', '0')
 
 app = wx.App()
 MyFrame().Show()

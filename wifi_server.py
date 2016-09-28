@@ -158,6 +158,8 @@ elif len(sys.argv) > 1:
 			data += 'post-up service dnsmasq restart\n'
 			data += 'post-up service hostapd restart\n'
 			data += 'post-up ifconfig br0 ' + ip3 + '.1 netmask 255.255.255.0\n'
+			data += 'post-up ifconfig eth0 down\n'
+			data += 'post-up ifconfig eth0 up\n'
 
 		wififile = open('/etc/network/interfaces', 'r', 2000)
 		bak = wififile.read()

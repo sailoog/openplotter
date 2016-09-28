@@ -25,9 +25,11 @@ import sys
 import threading
 import time
 import websocket
+import math
 
 from classes.N2K_send import N2K_send
 from classes.actions import Actions
+from classes.check_vessel_self import checkVesselSelf
 from classes.conf import Conf
 from classes.language import Language
 from classes.paths import Paths
@@ -178,7 +180,7 @@ class MySK:
 
 class MySK_to_N2K:
 	def __init__(self, SK_):
-		# self.PGN_list = ['126992','127245','127250','127257','127488','127488_1','127489','127489_1','127505','127505_1','127505_2','127505_3','127508','128259','128267','128275','129025','129026','130306','130310','130311','130316','130316_1']
+		# self.PGN_list = ['126992','127245','127250','127257','127488','127488_1','127489','127489_1','127505','127505_1','127505_2','127505_3','127508','128259','128267','128275','129025','129026','130306_2','130306_3','130310','130311','130316','130316_1']
 
 		def defvar():
 			for i in self.PGN_list:
@@ -242,8 +244,11 @@ class MySK_to_N2K:
 					self.navigation_courseOverGroundTrue = self.setlist(
 						['navigation.courseOverGroundTrue.value', [0, 0, 0, 0]])
 					self.navigation_speedOverGround = self.setlist(['navigation.speedOverGround.value', [0, 0, 0, 0]])
-				elif i == '130306':
-					self.environment_wind_directionTrue = self.setlist(['environment.wind.directionTrue.value', [0, 0, 0, 0]])
+				elif i == '130306_2':
+					self.environment_wind_angleApparent = self.setlist(['environment.wind.angleApparent.value', [0, 0, 0, 0]])
+					self.environment_wind_speedApparent = self.setlist(['environment.wind.speedApparent.value', [0, 0, 0, 0]])
+				elif i == '130306_3':
+					self.environment_wind_angleTrueWater = self.setlist(['environment.wind.angleTrueWater.value', [0, 0, 0, 0]])
 					self.environment_wind_speedTrue = self.setlist(['environment.wind.speedTrue.value', [0, 0, 0, 0]])
 				elif i == '130310':
 					self.environment_outside_pressure = self.setlist(['environment.outside.pressure.value', [0, 0, 0, 0]])
@@ -252,7 +257,7 @@ class MySK_to_N2K:
 					self.environment_water_temperature = self.setlist(['environment.water.temperature.value', [0, 0, 0, 0]])
 				elif i == '130311':
 					self.environment_outside_pressure = self.setlist(['environment.outside.pressure.value', [0, 0, 0, 0]])
-					self.environment_humidity = self.setlist(['environment.humidity.value', [0, 0, 0, 0]])
+					self.environment_inside_humidity = self.setlist(['environment.inside.humidity.value', [0, 0, 0, 0]])
 					self.environment_water_temperature = self.setlist(['environment.water.temperature.value', [0, 0, 0, 0]])
 				elif i == '130316':
 					self.environment_inside_refrigerator_temperature = self.setlist(
@@ -286,7 +291,8 @@ class MySK_to_N2K:
 		self.akt128275 = '128275' in self.PGN_list
 		self.akt129025 = '129025' in self.PGN_list
 		self.akt129026 = '129026' in self.PGN_list
-		self.akt130306 = '130306' in self.PGN_list
+		self.akt130306_2 = '130306_2' in self.PGN_list
+		self.akt130306_3 = '130306_3' in self.PGN_list
 		self.akt130310 = '130310' in self.PGN_list
 		self.akt130311 = '130311' in self.PGN_list
 		self.akt130316 = '130316' in self.PGN_list
@@ -322,33 +328,35 @@ class MySK_to_N2K:
 			if self.akt127245: self.N2K.Send_Rudder(self.steering_rudderAngle[1][2])
 			if self.akt127250: self.N2K.Send_Heading(self.navigation_headingMagnetic[1][2])
 			if self.akt128267: self.N2K.Send_Depth(self.environment_depth_belowTransducer[1][2],
-												   self.environment_depth_surfaceToTransducer[1][2])
+													self.environment_depth_surfaceToTransducer[1][2])
+			if self.akt130306_3: self.N2K.Send_Wind_Data(self.environment_wind_speedTrue[1][2],
+													self.environment_wind_angleTrueWater[1][2],3)
 
 		if tick2a > self.cycle250_2:
 			self.cycle250_2 += 0.250
 			if self.akt127488_1: self.N2K.Send_Engine_Rapid(1, int(self.propulsion_starboard_revolutions[1][2]),
-															self.N2K.empty16, self.N2K.empty8)
+													self.N2K.empty16, self.N2K.empty8)
 
 			if self.akt129025: self.N2K.Send_Position_Rapid(self.navigation_position_latitude[1][2],
-															self.navigation_position_longitude[1][2])
+													self.navigation_position_longitude[1][2])
 			if self.akt129026: self.N2K.Send_COG_SOG(self.navigation_courseOverGroundTrue[1][2],
 													 self.navigation_speedOverGround[1][2])
-			if self.akt130306: self.N2K.Send_Wind_Data(self.environment_wind_speedTrue[1][2],
-													   self.environment_wind_directionTrue[1][2])
+			if self.akt130306_2: self.N2K.Send_Wind_Data(self.environment_wind_speedApparent[1][2],
+													self.environment_wind_angleApparent[1][2],2)
 		if tick2a > self.cycle500:
 			self.cycle500 += 0.500
 			if self.akt127257: self.N2K.Send_Attitude(self.navigation_attitude_roll[1][2],
-													  self.navigation_attitude_pitch[1][2],
-													  self.navigation_attitude_yaw[1][2])
+													self.navigation_attitude_pitch[1][2],
+													self.navigation_attitude_yaw[1][2])
 			if self.akt127505: self.N2K.Send_FluidLevel(0, 'diesel', self.tank_diesel_level[1][2],
-														self.tank_diesel_capacity[1][2])
+													self.tank_diesel_capacity[1][2])
 			if self.akt130316: self.N2K.Send_Temperature(self.environment_inside_refrigerator_temperature[1][2],
-														 'refrigerator')
+													 'refrigerator')
 
 		if tick2a > self.cycle500_2:
 			self.cycle500_2 += 0.500
 			if self.akt127505_1: self.N2K.Send_FluidLevel(0, 'fresh water', self.tank_freshwater_level[1][2],
-														  self.tank_freshwater_capacity[1][2])
+													self.tank_freshwater_capacity[1][2])
 			if self.akt127489:
 				self.N2K.Send_Engine(
 					0,
@@ -367,15 +375,15 @@ class MySK_to_N2K:
 		if tick2a > self.cycle500_3:
 			self.cycle500_3 += 0.500
 			if self.akt127505_2: self.N2K.Send_FluidLevel(0, 'greywater', self.tank_greywater_level[1][2],
-														  self.tank_greywater_capacity[1][2])
+													self.tank_greywater_capacity[1][2])
 			if self.akt130316_1: self.N2K.Send_Temperature(self.propulsion_port_exhaustTemperature[1][2],
-														   'exhaustTemperature')
+													'exhaustTemperature')
 		if tick2a > self.cycle500_4:
 			self.cycle500_4 += 0.500
 			if self.akt127505_3: self.N2K.Send_FluidLevel(0, 'holding', self.tank_holding_level[1][2],
-														  self.tank_holding_capacity[1][2])
+													self.tank_holding_capacity[1][2])
 			if self.akt128259: self.N2K.Send_Speed(self.navigation_speedThroughWater[1][2],
-												   self.navigation_speedOverGround[1][2])
+													self.navigation_speedOverGround[1][2])
 
 			if self.akt127489_1:
 				self.N2K.Send_Engine(
@@ -396,16 +404,16 @@ class MySK_to_N2K:
 			self.cycle1000 += 1.000
 			if self.akt126992: self.N2K.Send_System_Time()
 			if self.akt127508: self.N2K.Send_Battery_Status(self.DC_Electrical_Properties_dcSource_voltage[1][2],
-															self.DC_Electrical_Properties_dcSource_current[1][2],
-															self.DC_Electrical_Properties_dcSource_temperature[1][2])
+													self.DC_Electrical_Properties_dcSource_current[1][2],
+													self.DC_Electrical_Properties_dcSource_temperature[1][2])
 		if tick2a > self.cycle1000_2:
 			self.cycle1000_2 += 1.000
 			if self.akt130310: self.N2K.Send_Environmental_Parameters(self.environment_water_temperature[1][2],
-																	  self.environment_outside_temperature[1][2],
-																	  self.environment_outside_pressure[1][2])
+													self.environment_outside_temperature[1][2],
+													self.environment_outside_pressure[1][2])
 			if self.akt130311: self.N2K.Send_Environmental_Parameters2(self.environment_water_temperature[1][2],
-																	   self.environment_humidity[1][2],
-																	   self.environment_outside_pressure[1][2])
+													self.environment_inside_humidity[1][2],
+													self.environment_outside_pressure[1][2])
 			if self.akt128275: self.N2K.Send_Distance_Log(self.navigation_log[1][2], self.navigation_logTrip[1][2])
 
 
@@ -506,7 +514,7 @@ class MySK_to_NMEA:
 				self.nmea_make(k[2])
 
 
-class MySK_to_Action:
+class MySK_to_Action_Calc:
 	def __init__(self, SK_):
 		self.operators_list = [_('was not updated in the last (sec.)'), _('was updated in the last (sec.)'), '=',
 							   '<', '<=', '>', '>=', _('is on'), _('is off'), _('contains')]
@@ -521,6 +529,14 @@ class MySK_to_Action:
 
 		self.cycle10 = time.time() + 0.01
 		self.read_Action()
+		
+		self.calcWindTrueWater = self.SK.conf.get('CALCULATE', 'tw_stw')=='1'
+		self.calcWindTrueGround = self.SK.conf.get('CALCULATE', 'tw_sog')=='1'
+		if self.calcWindTrueWater | self.calcWindTrueGround:
+			self.read_Calc()
+			vessel_self=checkVesselSelf()
+			self.uuid=vessel_self.uuid
+			self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 	def read_Action(self):
 		self.SK.static_list.append([])
@@ -546,6 +562,21 @@ class MySK_to_Action:
 					self.SKc.append([SKkey2, [0, 0, 0, 0, 0, 0, 0, 0]])
 					ii[1] = self.SKc[-1]
 
+	def setlist(self, listx):
+		self.SKc.append(listx)
+		return listx					
+					
+	def read_Calc(self):
+		self.environment_wind_angleApparent = self.setlist(['environment.wind.angleApparent.value', [0, 0, 0, 0]])
+		self.environment_wind_speedApparent = self.setlist(['environment.wind.speedApparent.value', [0, 0, 0, 0]])		
+		if self.calcWindTrueWater:
+			self.navigation_speedThroughWater = self.setlist(['navigation.speedThroughWater.value', [0, 0, 0, 0]])
+		if self.calcWindTrueGround:
+			self.navigation_courseOverGroundTrue = self.setlist(['navigation.courseOverGroundTrue.value', [0, 0, 0, 0]])
+			self.navigation_speedOverGround = self.setlist(['navigation.speedOverGround.value', [0, 0, 0, 0]])
+			self.navigation_headingMagnetic = self.setlist(['navigation.headingMagnetic.value', [0, 0, 0, 0]])
+			
+					
 	def Action_set(self, item, start):
 		if start:
 			now = time.time()
@@ -570,7 +601,7 @@ class MySK_to_Action:
 		else:
 			item[5] = False
 
-	def Action_cycle(self, tick2a):
+	def Action_Calc_cycle(self, tick2a):
 		if tick2a > self.cycle10:
 			self.cycle10 += 0.1
 			for index, item in enumerate(self.triggers):
@@ -635,6 +666,60 @@ class MySK_to_Action:
 						print str(e)
 					# except: pass
 
+			if self.calcWindTrueWater | self.calcWindTrueGround:
+				Erg = ''
+				if self.calcWindTrueWater:
+					x = self.environment_wind_speedApparent[1][2] * math.sin(self.environment_wind_angleApparent[1][2])
+					y1 = self.environment_wind_speedApparent[1][2] * math.cos(self.environment_wind_angleApparent[1][2])
+					y2 = y1 - self.navigation_speedThroughWater[1][2]
+
+					speed = math.sqrt(x**2+y2**2)
+					if y2 != 0:
+						beta2 = math.degrees(math.atan(x/y2))
+						if y2 < 0:
+							if self.environment_wind_angleApparent[1][2]>=0:
+								beta2 += 180
+							else:
+								beta2 -= 180
+					else:
+						if self.environment_wind_angleApparent[1][2]>0:
+							beta2 = 90
+						else:
+							beta2 = -90
+					Erg += '{"path": "environment.wind.angleTrueWater","value":'+str(0.017453293*beta2)+'},'
+					Erg += '{"path": "environment.wind.speedTrue","value":'+str(speed)+'},'
+
+				if self.calcWindTrueGround:
+					beta1 = self.environment_wind_angleApparent[1][2] + self.navigation_headingMagnetic[1][2]
+					x1 = self.environment_wind_speedApparent[1][2] * math.sin(beta1)
+					y1 = self.environment_wind_speedApparent[1][2] * math.cos(beta1)
+					x2 = self.navigation_speedOverGround[1][2] * math.sin(self.navigation_courseOverGroundTrue[1][2])
+					y2 = self.navigation_speedOverGround[1][2] * math.cos(self.navigation_courseOverGroundTrue[1][2])
+					x3 = x1 - x2
+					y3 = y1 - y2
+					
+					speed = math.sqrt(x3**2+y3**2)
+					if y3 != 0:
+						beta3 = math.degrees(math.atan(x3/y3))
+						if y3 > 0:
+							if x3 < 0:
+								beta3 += 360
+						else:
+							beta3 += 180
+					else:
+						if x3 > 0:
+							beta3 = 90
+						else:
+							beta3 = 270
+
+					Erg += '{"path": "environment.wind.angleTrueGround","value":'+str(0.017453293*beta3)+'},'
+					Erg += '{"path": "environment.wind.speedOverGround","value":'+str(speed)+'},'
+	
+				timestamp=str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z'
+				SignalK='{"context": "vessels.'+self.uuid+'","updates":[{"source":{"type": "OP","src":"SK"},"timestamp":"'+timestamp+'","values":['
+				SignalK+=Erg[0:-1]+']}]}\n'		
+				self.sock.sendto(SignalK, ('127.0.0.1', 55557))	
+
 
 def signal_handler(signal_, frame):
 	print 'You pressed Ctrl+C!'
@@ -646,16 +731,18 @@ signal.signal(signal.SIGINT, signal_handler)
 SK = MySK()
 SKN2K = MySK_to_N2K(SK)
 SKNMEA = MySK_to_NMEA(SK)
-SKAction = MySK_to_Action(SK)
+SKAction = MySK_to_Action_Calc(SK)
 SK.daemon = True
 SK.start()
 
 aktiv_N2K = True
 aktiv_NMEA = True
-aktiv_Action = True
+aktiv_Action = False
 if not SKN2K.PGN_list: aktiv_N2K = False
 if not SKNMEA.nmea_list: aktiv_NMEA = False
-if not SKAction.triggers: aktiv_Action = False
+if SKAction.triggers: aktiv_Action = True
+if SKAction.calcWindTrueWater: aktiv_Action = True
+if SKAction.calcWindTrueGround: aktiv_Action = True
 
 stop = 0
 run_ = True
@@ -665,7 +752,7 @@ while run_:
 	tick2 = time.time()
 	if aktiv_N2K: SKN2K.N2K_cycle(tick2)
 	if aktiv_NMEA: SKNMEA.NMEA_cycle(tick2)
-	if aktiv_Action: SKAction.Action_cycle(tick2)
+	if aktiv_Action: SKAction.Action_Calc_cycle(tick2)
 	#if stop > 5000:
 	#	SK.stop()
 	# run_=False
