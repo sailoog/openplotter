@@ -554,7 +554,8 @@ class MySK_to_Action_Calc:
 					if iii[3] == 2: iii[2] *= 60
 					if iii[3] == 3: iii[2] = (iii[2] * 60) * 60
 					if iii[3] == 4: iii[2] = ((iii[2] * 24) * 60) * 60
-					iii.append('')  # 4 last run
+					if iii[3] != 0: iii.append(time.time())  # 4 last run
+					else: iii.append('')
 				self.triggers.append(ii)
 				if ii[1] == -1: pass
 				else:
@@ -575,31 +576,28 @@ class MySK_to_Action_Calc:
 			self.navigation_courseOverGroundTrue = self.setlist(['navigation.courseOverGroundTrue.value', [0, 0, 0, 0]])
 			self.navigation_speedOverGround = self.setlist(['navigation.speedOverGround.value', [0, 0, 0, 0]])
 			self.navigation_headingMagnetic = self.setlist(['navigation.headingMagnetic.value', [0, 0, 0, 0]])
-			
-					
+							
 	def Action_set(self, item, start):
 		if start:
 			now = time.time()
 			itemsafe = False
 			for i in item[4]:
-				if item[5] == False:
-					itemsafe = True
-					try:
-						self.actions.run_action(i[0], i[1])
-						i[4] = now
-					except Exception, e: print str(e)
-				else:
-					if i[3] == 0: pass
+				if i[3] == 0:
+					if item[5] == False:
+						itemsafe = True
+						try:
+							self.actions.run_action(i[0], i[1])
+							i[4] = now
+						except Exception, e: print str(e)
 					else:
-						if now - i[4] > i[2]:
-							try:
-								self.actions.run_action(i[0], i[1])
-								i[4] = now
-							except Exception, e: print str(e)			
+						item[5] = False		
+				else:
+					if now - i[4] > i[2]:
+						try:
+							self.actions.run_action(i[0], i[1])
+							i[4] = now
+						except Exception, e: print str(e)			
 			item[5] = itemsafe
-
-		else:
-			item[5] = False
 
 	def Action_Calc_cycle(self, tick2a):
 		if tick2a > self.cycle10:
