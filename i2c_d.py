@@ -15,7 +15,19 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import socket, time, pynmea2, math, csv, datetime, subprocess, platform
+import socket, time, pynmea2, math, csv, datetime, subprocess, platform, threading
+
+class MyVar:
+	heading_m=0.0
+	heading=0.0
+	heel=0.0
+	pitch=0.0
+	pressure=0.0
+	temperature_p=0.0
+	humidity=0.0
+	temperature_h=0.0
+
+
 if platform.machine()[0:3]!='arm':
 	print 'this is not a raspberry pi -> no i2c and spi'
 else:
@@ -158,7 +170,7 @@ else:
 		if not humidity_skt: humidity_skt='environment.inside.humidity'
 
 		rate_imu=float(conf.get('I2C', 'rate_imu'))
-		rate_press=float(conf.get('I2C', 'rate_press'))
+		rate_bmp=float(conf.get('I2C', 'rate_press'))
 		rate_hum=float(conf.get('I2C', 'rate_hum'))
 		rate_ana=rate_imu
 		rate_gpio=0.1
@@ -182,6 +194,7 @@ else:
 			s2 = RTIMU.Settings(SETTINGS_FILE2)
 			pressure_val = RTIMU.RTPressure(s2)
 			pressure_val.pressureInit()
+			print pressure_val.pressureRead()
 
 		if humidity_sk:
 			SETTINGS_FILE3 = "RTIMULib3"
@@ -189,45 +202,24 @@ else:
 			humidity_val = RTIMU.RTHumidity(s3)
 			humidity_val.humidityInit()
 
-		heading_m=0.0
-		heading=0.0
-		heel=0.0
-		pitch=0.0
-		pressure=0.0
-		temperature_p=0.0
-		humidity=0.0
-		temperature_h=0.0
-
-		tick_imu=time.time()
-		tick_press=time.time()+0.01
-		tick_hum=time.time()+0.02
-		tick_ana=time.time()+0.03
-		tick_gpio=time.time()+0.04
-			
-		while True:
-			tick2=time.time()
-			time.sleep(poll_interval*1.0/1000.0)		
-			# read IMU and GENERATE
-			if imu_:
-				if tick2>tick_imu:
-					tick_imu+=rate_imu
-
+		def work_imu():
+					threading.Timer(rate_imu, work_imu).start()
 					if imu.IMURead():
 						data = imu.getIMUData()
 						fusionPose = data["fusionPose"]
-						heading=math.degrees(fusionPose[2])+heading_offset
-						heel=math.degrees(fusionPose[0])+heel_offset
-						pitch=math.degrees(fusionPose[1])+pitch_offset
+						MyVar.heading=math.degrees(fusionPose[2])+heading_offset
+						MyVar.heel=math.degrees(fusionPose[0])+heel_offset
+						MyVar.pitch=math.degrees(fusionPose[1])+pitch_offset
 						if heading<0: heading=360+heading
 						elif heading>360: heading=-360+heading
 					
 					Erg=''
 					if heading_sk:
-						Erg += '{"path": "navigation.headingMagnetic","value":'+str(0.017453293*heading)+'},'
+						Erg += '{"path": "navigation.headingMagnetic","value":'+str(0.017453293*MyVar.heading)+'},'
 					if heel_sk:
-						Erg += '{"path": "navigation.attitude.roll","value":'+str(0.017453293*heel)+'},'
+						Erg += '{"path": "navigation.attitude.roll","value":'+str(0.017453293*MyVar.heel)+'},'
 					if pitch_sk:
-						Erg += '{"path": "navigation.attitude.pitch","value":'+str(0.017453293*pitch)+'},'
+						Erg += '{"path": "navigation.attitude.pitch","value":'+str(0.017453293*MyVar.pitch)+'},'
 
 					timestamp=str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z'
 					SignalK='{"context": "vessels.'+uuid+'","updates":[{"source":{"type": "I2C","src":"'+imu.IMUName()+'"},"timestamp":"'+timestamp+'","values":['
@@ -235,20 +227,18 @@ else:
 					sock.sendto(SignalK, ('127.0.0.1', 55557))	
 
 			# read Pressure and GENERATE
-			if bmp_:	
-				if tick2>tick_press:
-					tick_press+=rate_press
-					
+		def work_bmp():
+					threading.Timer(rate_bmp, work_bmp).start()
 					read=pressure_val.pressureRead()
 					if read:
-						if (read[0]): pressure=read[1]+pressure_offset
-						if (read[2]): temperature_p=read[3]+p_temp_offset
+						if (read[0]): MyVar.pressure=read[1]+pressure_offset
+						if (read[2]): MyVar.temperature_p=read[3]+p_temp_offset
 
 					Erg=''
 					if pressure_sk:
-						Erg += '{"path": "environment.outside.pressure","value":'+str(pressure*100)+'},'
+						Erg += '{"path": "environment.outside.pressure","value":'+str(MyVar.pressure*100)+'},'
 					if p_temp_sk:
-						Erg += '{"path": "'+p_temp_skt+'","value":'+str(round(temperature_p,2)+273.15)+'},'
+						Erg += '{"path": "'+p_temp_skt+'","value":'+str(round(MyVar.temperature_p,2)+273.15)+'},'
 					
 					timestamp=str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z'
 					SignalK='{"context": "vessels.'+uuid+'","updates":[{"source":{"type": "I2C","src":"'+pressure_val.pressureName()+'"},"timestamp":"'+timestamp+'","values":['
@@ -256,20 +246,18 @@ else:
 					sock.sendto(SignalK, ('127.0.0.1', 55557))			
 					
 			# read Humidity and GENERATE
-			if hum_:	
-				if tick2>tick_hum:
-					tick_hum+=rate_hum
-
+		def work_hum():
+					threading.Timer(rate_hum, work_hum).start()
 					read=humidity_val.humidityRead()
 					if read:
-						if (read[0]): humidity=read[1]+humidity_offset
-						if (read[2]): temperature_h=read[3]+h_temp_offset
+						if (read[0]): MyVar.humidity=read[1]+humidity_offset
+						if (read[2]): MyVar.temperature_h=read[3]+h_temp_offset
 
 					Erg=''
 					if humidity_sk:
-						Erg += '{"path": "'+humidity_skt+'","value":'+str(humidity)+'},'
+						Erg += '{"path": "'+humidity_skt+'","value":'+str(MyVar.humidity)+'},'
 					if h_temp_sk:
-						Erg += '{"path": "'+h_temp_skt+'","value":'+str(round(temperature_h,2)+273.15)+'},'
+						Erg += '{"path": "'+h_temp_skt+'","value":'+str(round(MyVar.temperature_h,2)+273.15)+'},'
 							
 					timestamp=str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z'
 					SignalK='{"context": "vessels.'+uuid+'","updates":[{"source":{"type": "I2C","src":"'+humidity_val.humidityName()+'"},"timestamp":"'+timestamp+'","values":['
@@ -277,10 +265,8 @@ else:
 					sock.sendto(SignalK, ('127.0.0.1', 55557))
 
 			# read SPI adc and GENERATE
-			if analog_:
-				if tick2>tick_ana:
-					tick_ana+=rate_ana
-
+		def work_analog():
+					threading.Timer(rate_ana, work_analog).start()
 					timestamp=str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z'
 					SignalK=''
 					for i in MCP:
@@ -294,9 +280,8 @@ else:
 					sock.sendto(SignalK, ('127.0.0.1', 55557))
 
 			# read gpio and GENERATE
-			if gpio_:
-				if tick2>tick_gpio:
-					tick_gpio+=rate_gpio
+		def work_gpio():
+					threading.Timer(rate_gpio, work_gpio).start()
 					timestamp=str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z'
 					c=0
 					for i in gpio_list:
@@ -307,5 +292,11 @@ else:
 							gpio_list[c][4]=current_state
 							publish_sk(i[1],channel,current_state,timestamp)
 						c+=1
-				
+
+		if imu_:    work_imu()
+		if bmp_:	work_bmp()
+		if hum_:	work_hum()
+		if analog_: work_analog()
+		if gpio_:   work_gpio()
+			
 		

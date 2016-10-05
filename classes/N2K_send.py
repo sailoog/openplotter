@@ -218,7 +218,13 @@ class N2K_send:
 		self.set_data16(4, int(SpeedGround * 100.0), SpeedGround)
 		self.send_UDP()
 
-	def Send_Wind_Data(self, Speed, Angle):
+	def Send_Wind_Data(self, Speed, Angle, type):
+		# type 
+		# 0=True (referenced to North)
+		# 1=Magnetic
+		# 2=Apparent
+		# 3=True (boat referenced)
+	
 		length = 8
 		lPGN = 130306
 		self.set_header(length, lPGN)
@@ -228,6 +234,7 @@ class N2K_send:
 
 		self.set_data16(1, int(Speed * 100.0), Speed)
 		self.set_data16(3, int(Angle * 10000.0), Angle)
+		self.set_data8(5, type, type)
 		self.send_UDP()
 
 	def Send_Environmental_Parameters(self, WaterTemp, OutsideAirTemp, Pressure):

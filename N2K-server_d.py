@@ -27,13 +27,17 @@ home = paths.home
 currentpath = paths.currentpath
 conf = Conf(paths)
 activ = False
+activ = conf.get('N2K', 'output') == '1'
+if not activ:
+	sys.exit(0)
+
 try:
 	ser = serial.Serial(conf.get('N2K', 'can_usb'), 115200, timeout=0.5)
-	activ = conf.get('N2K', 'output') == '1'
 except:
 	print 'failed to start N2K output server on ' + conf.get('N2K', 'can_usb')
 	sys.exit(0)
 
+	
 Quelle = '127.0.0.1'  # Adresse des eigenen Rechners
 Port = 55560
 
@@ -77,5 +81,4 @@ def put_recive_to_serial():
 				dat = dat + data[i]
 				datap += ' ' + ('0' + hex(data[i])[2:])[-2:]
 
-if activ:
-	put_recive_to_serial()
+put_recive_to_serial()

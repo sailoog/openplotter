@@ -66,9 +66,10 @@ class MyFrame(wx.Frame):
 			['128275','Distance_Log','navigation.log.value, navigation.logTrip.value'],
 			['129025','Position_Rapid','navigation.position.latitude, navigation.position.longitude'],
 			['129026','COG_SOG','navigation.courseOverGroundTrue.value, navigation.speedOverGround.value'],
-			['130306','Wind Data','environment.wind.directionTrue.value, environment.wind.speedTrue.value'],
+			['130306_2','Wind Data','environment.wind.angleApparent.value, environment.wind.speedApparent.value'],
+			['130306_3','Wind Data','environment.wind.angleTrueWater.value, environment.wind.speedTrue.value'],
 			['130310','Environmental_Parameters','environment.outside.pressure.value, environment.outside.temperature.value, environment.water.temperature.value'],
-			['130311','Environmental_Parameters','environment.outside.pressure.value, environment.humidity.value, environment.water.temperature.value'],
+			['130311','Environmental_Parameters','environment.outside.pressure.value, environment.inside.humidity.value, environment.water.temperature.value'],
 			['130316','Temperature','environment.inside.refrigerator.temperature.value'],
 			['130316_1','Temperature','propulsion.port.exhaustTemperature.value']
 		]

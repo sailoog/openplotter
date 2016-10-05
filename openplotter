@@ -310,7 +310,7 @@ class MainFrame(wx.Frame):
 		dlg.Destroy()
 		if res != 4:
 			if os.path.isfile(self.currentpath + '/tools/' + self.tools_py[menuId][2]):
-				close = subprocess.call(['pkill', '-f', self.tools_py[menuId][2]])
+				subprocess.call(['pkill', '-9', '-f', self.tools_py[menuId][2]])					
 				if res == 2:
 					subprocess.Popen(['python', self.currentpath + '/tools/' + self.tools_py[menuId][2]])
 				elif res == 1:

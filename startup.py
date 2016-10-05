@@ -172,10 +172,6 @@ if not exist:
 	if gps_time=='1':
 		subprocess.call(['sudo', 'python', currentpath+'/time_gps.py'])
 
-	subprocess.call(['pkill', '-f', 'calculate_d.py'])
-	if nmea_mag_var=='1' or nmea_hdt=='1' or nmea_rot=='1' or TW_STW=='1' or TW_SOG=='1': 
-		subprocess.Popen(['python', currentpath+'/tools/calculate_d.py'])
-
 	subprocess.call(['pkill', '-9', 'aisdecoder'])
 	subprocess.call(['pkill', '-9', 'rtl_fm'])
 	if enable=='1':
