@@ -138,7 +138,7 @@ elif len(sys.argv) > 1:
 			data += 'auto br0\n'
 			data += 'iface br0 inet static\n'
 			data += 'bridge_ports eth0\n'
-			data += 'bridge_ports eth0 ' + wlan + '\n'
+			#data += 'bridge_ports eth0 ' + wlan + '\n'
 			data += 'address ' + ip + '\n'
 			data += 'broadcast ' + ip3 + '.255\n'
 			data += 'netmask 255.255.255.0\n'
@@ -159,10 +159,12 @@ elif len(sys.argv) > 1:
 			data += 'post-up service hostapd restart\n'
 			data += 'post-up ifconfig br0 ' + ip3 + '.1 netmask 255.255.255.0\n'
 			#workaround eth0 kevent 0
-			data += 'post-up iw ' + wlan + ' set power_save off\n'
-			data += 'post-up ifconfig eth0 down\n'
-			data += 'post-up ifconfig eth0 up\n'
-			data += 'post-up iw ' + wlan + ' set power_save on\n'
+			#data += 'post-up iw dev ' + wlan + ' set power_save off\n'
+			#data += 'post-up ifconfig eth0 down\n'
+			#data += 'post-up ifconfig eth0 up\n'
+			data += 'post-up systemctl daemon-reload\n'
+			data += 'post-up systemctl restart NetworkManager\n'
+			data += 'post-up service networking force-reload\n'
 
 		wififile = open('/etc/network/interfaces', 'r', 2000)
 		bak = wififile.read()
