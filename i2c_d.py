@@ -210,8 +210,8 @@ else:
 						MyVar.heading=math.degrees(fusionPose[2])+heading_offset
 						MyVar.heel=math.degrees(fusionPose[0])+heel_offset
 						MyVar.pitch=math.degrees(fusionPose[1])+pitch_offset
-						if heading<0: heading=360+heading
-						elif heading>360: heading=-360+heading
+						if MyVar.heading<0: MyVar.heading=360+MyVar.heading
+						elif MyVar.heading>360: MyVar.heading=-360+MyVar.heading
 					
 					Erg=''
 					if heading_sk:
