@@ -45,6 +45,7 @@ for pid in pids:
 if not exist:
 	paths=Paths()
 	currentpath=paths.currentpath
+	home=paths.home
 
 	boot_ap=0
 	boot_sh=0
@@ -181,7 +182,10 @@ if not exist:
 		aisdecoder=subprocess.Popen(['aisdecoder', '-h', '127.0.0.1', '-p', '10110', '-a', 'file', '-c', 'mono', '-d', '-f', '/dev/stdin'], stdin = rtl_fm.stdout)
 
 	subprocess.call(['sudo', 'python', currentpath+'/display800x480.py'])
-
+	
+	try: subprocess.Popen('grunt', cwd=home + '/.config/freeboard')
+	except: pass
+	
 	subprocess.call(['pkill', '-9', 'mpg123'])
 	if play=='1':
 		if sound:
