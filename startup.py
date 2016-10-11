@@ -180,6 +180,8 @@ if not exist:
 		rtl_fm=subprocess.Popen(['rtl_fm', '-f', frecuency, '-g', gain, '-p', ppm, '-s', '48k'], stdout = subprocess.PIPE)
 		aisdecoder=subprocess.Popen(['aisdecoder', '-h', '127.0.0.1', '-p', '10110', '-a', 'file', '-c', 'mono', '-d', '-f', '/dev/stdin'], stdin = rtl_fm.stdout)
 
+	subprocess.call(['sudo', 'python', currentpath+'/display800x480.py'])
+
 	subprocess.call(['pkill', '-9', 'mpg123'])
 	if play=='1':
 		if sound:
