@@ -19,9 +19,13 @@ import subprocess
 
 output = subprocess.check_output(['tvservice', '-d', '/dev/stdout'])
 output = output[:128]
-editfile = open('edid.dat', 'r', 5000)
-bak = editfile.read()
-editfile.close()
+try:
+	editfile = open('edid.dat', 'r', 5000)
+	bak = editfile.read()
+	editfile.close()
+except:
+	bak = ''
+
 if output != bak:
 	subprocess.check_output(['tvservice', '-d', 'edid.dat'])
 output = subprocess.check_output(['edidparser', 'edid.dat'])
@@ -42,7 +46,7 @@ if '800x480' in output:
 					data += 'hdmi_group=2\n'
 					data += 'hdmi_mode=1\n'
 					data += 'hdmi_mode=87\n'
-					data += 'hdmi_cvt 800 480 60 6 0 0 0\n'				
+					data += 'hdmi_cvt=800 480 60 6 0 0 0\n'				
 				data += l+'\n'
 		else:
 			data += '[EDID=' + output + ']\n'
