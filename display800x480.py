@@ -53,7 +53,7 @@ if '800x480' in output:
 			data += 'hdmi_group=2\n'
 			data += 'hdmi_mode=1\n'
 			data += 'hdmi_mode=87\n'
-			data += 'hdmi_cvt 800 480 60 6 0 0 0\n'
+			data += 'hdmi_cvt=800 480 60 6 0 0 0\n'
 			data += '[all]\n'
 		configfile = open('/boot/config.txt', 'w')
 		configfile.write(data)

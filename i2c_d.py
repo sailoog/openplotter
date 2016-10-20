@@ -194,7 +194,7 @@ else:
 			s2 = RTIMU.Settings(SETTINGS_FILE2)
 			pressure_val = RTIMU.RTPressure(s2)
 			pressure_val.pressureInit()
-			print pressure_val.pressureRead()
+			#print pressure_val.pressureRead()
 
 		if humidity_sk:
 			SETTINGS_FILE3 = "RTIMULib3"

@@ -153,20 +153,18 @@ class addkplex(wx.Dialog):
 				self.kplex_address.SetValue(edit[3])
 				self.kplex_netport.SetValue(edit[4])
 			self.on_kplex_io_change(0)
-
-			if edit[5] != 'none':
-				if edit[5] == 'accept':
+			if edit[5] != _('none').decode("utf-8"):
+				if edit[5] == _('accept').decode("utf-8"):
 					self.ifilter_select.SetValue(self.mode_ifilter[1])
-				if edit[5] == 'ignore':
+				if edit[5] == _('ignore').decode("utf-8"):
 					self.ifilter_select.SetValue(self.mode_ifilter[2])
 				self.ifilter_sentences.SetValue(edit[6])
 			else:
 				self.ifilter_select.SetValue(self.mode_ifilter[0])
-
-			if edit[7] != 'none':
-				if edit[7] == 'accept':
+			if edit[7] != _('none').decode("utf-8"):
+				if edit[7] == _('accept').decode("utf-8"):
 					self.ofilter_select.SetValue(self.mode_ofilter[1])
-				if edit[7] == 'ignore':
+				if edit[7] == _('ignore').decode("utf-8"):
 					self.ofilter_select.SetValue(self.mode_ofilter[2])
 				self.ofilter_sentences.SetValue(edit[8])
 			else:
