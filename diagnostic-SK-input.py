@@ -114,9 +114,12 @@ class MyFrame(wx.Frame):
 		self.baud = 0
 
 		self.timer.Start(self.ttimer)
+		self.no_action = 0
+		self.no_action_limit = 5000 / self.ttimer
 
 	def timer_act(self, e):
 		if len(self.buffer) > 0:
+			self.no_action = 0
 			for ii in self.buffer:
 				if 0 <= ii[0] < self.list.GetItemCount():
 					self.list.SetStringItem(ii[0], ii[1], ii[2])
@@ -124,6 +127,13 @@ class MyFrame(wx.Frame):
 					self.sorting()
 				del self.buffer[0]
 				# del ii
+		else:
+			self.no_action += 1
+			if self.no_action > self.no_action_limit:
+				if self.ws:
+					self.ws.close()
+				self.start()
+				self.no_action = 0
 
 	def json_interval(self, time_old, time_new):
 		sek_n = float(time_new[17:22])
