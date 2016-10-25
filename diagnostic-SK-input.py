@@ -209,20 +209,27 @@ class MyFrame(wx.Frame):
 		self.SK_Faktor_priv = 1
 		self.SK_Offset_priv = 0
 		if self.SK_unit_priv != self.SK_unit:
-			if self.SK_unit == 'm':
+			if self.SK_unit == 'Hz':
+				if self.SK_unit_priv == 'RPM':
+					self.SK_Faktor_priv = 0.0166666666
+			elif self.SK_unit == 'K':
+				if self.SK_unit_priv == 'C':
+					self.SK_Offset_priv = -273.15
+				elif self.SK_unit_priv == 'F':
+					self.SK_Faktor_priv = 1.8
+					self.SK_Offset_priv = -459.67
+			elif self.SK_unit == 'J':
+				if self.SK_unit_priv == 'Ah(12V)':
+					self.SK_Faktor_priv = 43200.
+				if self.SK_unit_priv == 'Ah(24V)':
+					self.SK_Faktor_priv = 86400
+			elif self.SK_unit == 'm':
 				if self.SK_unit_priv == 'ft':
 					self.SK_Faktor_priv = 0.3048
 				elif self.SK_unit_priv == 'nm':
 					self.SK_Faktor_priv = 1852
 				elif self.SK_unit_priv == 'km':
 					self.SK_Faktor_priv = 1000
-			elif self.SK_unit == 'Pa':
-				if self.SK_unit_priv == 'hPa':
-					self.SK_Faktor_priv = 100
-				elif self.SK_unit_priv == 'Bar':
-					self.SK_Faktor_priv = 100000
-			elif self.SK_unit == 'rad' and self.SK_unit_priv == 'deg':
-				self.SK_Faktor_priv = 0.0174533
 			elif self.SK_unit == 'm/s':
 				if self.SK_unit_priv == 'kn':
 					self.SK_Faktor_priv = 0.514444444
@@ -235,6 +242,18 @@ class MyFrame(wx.Frame):
 					self.SK_Faktor_priv = 0.001
 				elif self.SK_unit_priv == 'gal':
 					self.SK_Faktor_priv = 0.00378541
+			elif self.SK_unit == 'm3/s':
+				if self.SK_unit_priv == 'l/h':
+					self.SK_Faktor_priv = 2.777778E-7
+				elif self.SK_unit_priv == 'gal/h':
+					self.SK_Faktor_priv = 0.0000010515
+			elif self.SK_unit == 'Pa':
+				if self.SK_unit_priv == 'hPa':
+					self.SK_Faktor_priv = 100
+				elif self.SK_unit_priv == 'Bar':
+					self.SK_Faktor_priv = 100000
+			elif self.SK_unit == 'rad' and self.SK_unit_priv == 'deg':
+				self.SK_Faktor_priv = 0.0174533
 			elif self.SK_unit == 's':
 				if self.SK_unit_priv == 'h':
 					self.SK_Faktor_priv = 3600
@@ -242,12 +261,6 @@ class MyFrame(wx.Frame):
 					self.SK_Faktor_priv = 86400
 				elif self.SK_unit_priv == 'y':
 					self.SK_Faktor_priv = 31536000
-			elif self.SK_unit == 'K':
-				if self.SK_unit_priv == 'C':
-					self.SK_Offset_priv = -273.15
-				elif self.SK_unit_priv == 'F':
-					self.SK_Faktor_priv = 1.8
-					self.SK_Offset_priv = -459, 67
 		else:
 			self.SK_Faktor_priv = 1
 			self.SK_Offset_priv = 0
