@@ -20,14 +20,22 @@ import logging
 import wx
 import subprocess
 import os
+from classes.paths import Paths
+from classes.conf import Conf
+from classes.language import Language
+
 
 
 class MyFrame(wx.Frame):
-	def __init__(self, parent):
+	def __init__(self):
 		self.list_SK = []
 		self.data_SK_unit_private = []
 		self.SK_unit = ''
 		self.SK_description = ''
+		self.paths = Paths()
+		self.conf = Conf(self.paths)
+		self.language = self.conf.get('GENERAL', 'lang')
+		Language(self.language)
 
 		logging.basicConfig()
 		self.buffer = []
@@ -39,7 +47,7 @@ class MyFrame(wx.Frame):
 
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 
-		self.icon = wx.Icon(parent.currentpath + '/openplotter.ico', wx.BITMAP_TYPE_ICO)
+		self.icon = wx.Icon(self.paths.currentpath + '/openplotter.ico', wx.BITMAP_TYPE_ICO)
 		self.SetIcon(self.icon)
 
 		self.list = wx.ListCtrl(panel, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
@@ -60,9 +68,18 @@ class MyFrame(wx.Frame):
 		self.change_selected = wx.Button(panel, label=_('change selected'))
 		self.change_selected.Bind(wx.EVT_BUTTON, self.on_change_selected)
 
-		list_convert = ['m', 'm ft', 'm nm', 'm km', 'Pa', 'Pa hPa', 'Pa Bar', 'rad', 'rad deg', 'm/s kn',
-						'm/s', 'm/s kmh', 'm/s mph', 'm3', 'm3 dm3', 'm3 gal', 's', 's h', 's d', 's y', 'K', 'K C',
-						'K F']
+		list_convert = [
+						'Hz', 'Hz RPM', 
+						'J', 'J Ah(12V)', 'J Ah(24V)',
+						'K', 'K C',	'K F',
+						'm', 'm ft', 'm nm', 'm km',
+						'm/s', 'm/s kn','m/s kmh', 'm/s mph',
+						'm3', 'm3 dm3', 'm3 gal',
+						'm3/s', 'm3/s l/h', 'm3/s gal/h',
+						'Pa', 'Pa hPa', 'Pa Bar',
+						'rad', 'rad deg',
+						's', 's h', 's d', 's y'
+						]
 		self.select_Unit_t = wx.StaticText(panel, label=_('convert'))
 		self.select_Unit = wx.ComboBox(panel, choices=list_convert, style=wx.CB_READONLY, size=(150, 32))
 
@@ -91,13 +108,13 @@ class MyFrame(wx.Frame):
 	def read(self):
 		self.list_SK = []
 		response = subprocess.Popen(
-			[self.home + '/.config/signalk-server-node/node_modules/signalk-schema/scripts/extractKeysAndMeta.js'],
+			[self.paths.home + '/.config/signalk-server-node/node_modules/signalk-schema/scripts/extractKeysAndMeta.js'],
 			stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		data = json.loads(response.communicate()[0])
 
 		self.data_SK_unit_private = []
-		if os.path.isfile(self.home + '/.config/openplotter/classes/private_unit.json'):
-			with open(self.home + '/.config/openplotter/classes/private_unit.json') as data_file:
+		if os.path.isfile(self.paths.home + '/.config/openplotter/classes/private_unit.json'):
+			with open(self.paths.home + '/.config/openplotter/classes/private_unit.json') as data_file:
 				self.data_SK_unit_private = json.load(data_file)
 
 		for i in data:
@@ -174,11 +191,11 @@ class MyFrame(wx.Frame):
 			for i in self.list_SK:
 				if i[2] != '':
 					self.data_SK_unit_private.append([i[0], i[1], i[2]])
-			with open(self.home + '/.config/openplotter/classes/private_unit.json', 'w') as data_file:
+			with open(self.paths.home + '/.config/openplotter/classes/private_unit.json', 'w') as data_file:
 				json.dump(self.data_SK_unit_private, data_file)
 
 			self.data_SK_unit_private = []
-			with open(self.home + '/.config/openplotter/classes/private_unit.json') as data_file:
+			with open(self.paths.home + '/.config/openplotter/classes/private_unit.json') as data_file:
 				self.data_SK_unit_private = json.load(data_file)
 			self.read()
 			self.sorting()
