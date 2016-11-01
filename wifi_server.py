@@ -42,8 +42,6 @@ elif len(sys.argv) > 1:
 		print('wrong ip format in openplotter.conf switch to standard')
 		ip = '10.10.10.1'
 		ip3 = '10.10.10'
-	ipfix = '192.168.7.7'
-	ipfix3 = '192.168.7'
 
 	ssid = conf.get('WIFI', 'ssid')
 	hw_mode = conf.get('WIFI', 'hw_mode')
@@ -101,12 +99,6 @@ elif len(sys.argv) > 1:
 			data += 'allow-hotplug eth0\n'
 			data += 'iface eth0 inet dhcp\n'
 
-			data += 'auto eth0:0\n'
-			data += 'iface eth0:0 inet static\n'
-			data += 'address ' + ipfix + '\n'
-			data += 'broadcast ' + ipfix3 + '.255\n'
-			data += 'netmask 255.255.255.0\n'
-
 			data += 'auto ' + wlan + '\n'
 			data += 'iface ' + wlan + ' inet static\n'
 			data += 'address ' + ip + '\n'
@@ -137,18 +129,12 @@ elif len(sys.argv) > 1:
 
 			data += 'auto br0\n'
 			data += 'iface br0 inet static\n'
-			data += 'bridge_ports eth0\n'
-			#data += 'bridge_ports eth0 ' + wlan + '\n'
+			#data += 'bridge_ports eth0\n'
+			data += 'bridge_ports eth0 ' + wlan + '\n'
 			data += 'address ' + ip + '\n'
 			data += 'broadcast ' + ip3 + '.255\n'
 			data += 'netmask 255.255.255.0\n'
 			data += 'bridge_maxwait 1\n'
-
-			data += 'auto br0:0\n'
-			data += 'iface br0:0 inet static\n'
-			data += 'address ' + ipfix + '\n'
-			data += 'broadcast ' + ipfix3 + '.255\n'
-			data += 'netmask 255.255.255.0\n'
 
 			if share != '0':
 				data += 'post-up iptables -t nat -A POSTROUTING -o ' + share + ' -j MASQUERADE\n'
@@ -158,13 +144,8 @@ elif len(sys.argv) > 1:
 			data += 'post-up service dnsmasq restart\n'
 			data += 'post-up service hostapd restart\n'
 			data += 'post-up ifconfig br0 ' + ip3 + '.1 netmask 255.255.255.0\n'
-			#workaround eth0 kevent 0
-			#data += 'post-up iw dev ' + wlan + ' set power_save off\n'
-			#data += 'post-up ifconfig eth0 down\n'
-			#data += 'post-up ifconfig eth0 up\n'
-			data += 'post-up systemctl daemon-reload\n'
-			data += 'post-up systemctl restart NetworkManager\n'
-			data += 'post-up service networking force-reload\n'
+			data += 'post-up ifconfig eth0 down\n'
+			data += 'post-up ifconfig eth0 up\n'
 
 		wififile = open('/etc/network/interfaces', 'r', 2000)
 		bak = wififile.read()
@@ -286,12 +267,6 @@ elif len(sys.argv) > 1:
 
 		data += 'allow-hotplug eth0\n'
 		data += 'iface eth0 inet dhcp\n'
-		data += 'auto eth0:0\n'
-		data += 'iface eth0:0 inet static\n'
-		data += 'address ' + ipfix + '\n'
-		data += 'broadcast ' + ipfix3 + '.255\n'
-		data += 'netmask 255.255.255.0\n'
-		data += 'post-up /sbin/ifconfig eth0:0 ' + ipfix + ' netmask 255.255.255.0\n'
 
 		if bak != data:
 			wififile = open('/etc/network/interfaces', 'w')
@@ -324,11 +299,6 @@ elif len(sys.argv) > 1:
 			output = subprocess.Popen(['systemctl', 'restart', 'NetworkManager'])
 			output.wait()
 			if output != 0: error = 1
-
-			if 'eth0:0' in subprocess.check_output('ifconfig'):
-				pass
-			else:
-				subprocess.call(['ifconfig', 'eth0:0', ipfix, 'netmask', '255.255.255.0'])
 
 			print "\nWiFi access point stopped."
 

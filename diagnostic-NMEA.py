@@ -52,7 +52,7 @@ class MyFrame(wx.Frame):
 
 		self.list = wx.ListCtrl(panel, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
 		self.list.InsertColumn(0, _('Device'), width=50)
-		self.list.InsertColumn(1, _('Type'), width=40)
+		self.list.InsertColumn(1, _('Type'), width=50)
 		self.list.InsertColumn(2, _('Interval'), wx.LIST_FORMAT_RIGHT, width=50)
 		self.list.InsertColumn(3, _('Data'), width=500)
 
