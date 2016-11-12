@@ -132,8 +132,8 @@ class MainFrame(wx.Frame):
 		self.gpsd_item1 = self.settings.Append(wx.ID_ANY, _('Set GPSD'), _('Set GPSD in the new window'))
 		self.Bind(wx.EVT_MENU, self.reconfigure_gpsd, self.gpsd_item1)
 		self.settings.AppendSeparator()
-		self.sdr_ais_item1 = self.settings.Append(wx.ID_ANY, _('SDR-AIS receiver'),
-												  _('Set an SDR-AIS receiver in the new window'))
+		self.sdr_ais_item1 = self.settings.Append(wx.ID_ANY, _('SDR receiver'),
+												  _('Set an SDR receiver in the new window'))
 		self.Bind(wx.EVT_MENU, self.open_sdr_ais, self.sdr_ais_item1)
 		self.calculate_item1 = self.settings.Append(wx.ID_ANY, _('Calculate'),
 													_('Calculate new data from current values'))
