@@ -2705,12 +2705,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def apply_SK(self, e):
 		mmsi = self.mmsi.GetValue()
 		uuid = "urn:mrn:imo:mmsi:" + mmsi
-		if uuid == '':
+		if mmsi == '':
 			self.ShowStatusBarRED(_('You have to provide a MMSI.'))
 			return
 		with open(self.home + '/.config/signalk-server-node/settings/openplotter-settings.json') as data_file:
 			data = json.load(data_file)
-		data['vessel']['mmsi'] = mmsi
 		data['vessel']['uuid'] = uuid
 		with open(self.home + '/.config/signalk-server-node/settings/openplotter-settings.json', 'w') as outfile:
 			json.dump(data, outfile)
