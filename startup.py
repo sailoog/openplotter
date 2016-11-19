@@ -183,9 +183,6 @@ if not exist:
 
 	subprocess.call(['sudo', 'python', currentpath+'/display800x480.py'])
 	
-	try: subprocess.Popen('grunt', cwd=home + '/.config/freeboard')
-	except: pass
-	
 	subprocess.call(['pkill', '-9', 'mpg123'])
 	if play=='1':
 		if sound:

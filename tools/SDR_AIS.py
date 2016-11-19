@@ -30,7 +30,7 @@ class MyFrame(wx.Frame):
 
 			Language(self.conf.get('GENERAL','lang'))
 
-			wx.Frame.__init__(self, None, title=_('SDR-AIS receiver'), size=(690,370))
+			wx.Frame.__init__(self, None, title=_('SDR receiver'), size=(690,370))
 			
 			self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 			
@@ -39,7 +39,7 @@ class MyFrame(wx.Frame):
 
 			wx.StaticBox(self, label='', size=(400, 170), pos=(10, 10))
 
-			self.ais_sdr_enable = wx.CheckBox(self, label=_('Enable AIS NMEA generation'), pos=(20, 25))
+			self.ais_sdr_enable = wx.CheckBox(self, label=_('Enable AIS reception'), pos=(20, 25))
 			self.ais_sdr_enable.Bind(wx.EVT_CHECKBOX, self.OnOffAIS)
 
 			self.gain = wx.TextCtrl(self, -1, size=(55, 32), pos=(150, 60))
@@ -71,9 +71,9 @@ class MyFrame(wx.Frame):
 			self.check_channels =wx.Button(self, label=_('Fine calibration'), pos=(495, 140))
 			self.Bind(wx.EVT_BUTTON, self.check_channel, self.check_channels)
 
-			wx.StaticBox(self, label=_(' VHF '), size=(260, 120), pos=(420, 185))
+			wx.StaticBox(self, label=_(' Radio '), size=(260, 120), pos=(420, 185))
 
-			self.button_vhf_Rx =wx.Button(self, label=_('Receive'), pos=(430, 210))
+			self.button_vhf_Rx =wx.Button(self, label=_('Gqrx'), pos=(430, 210))
 			self.Bind(wx.EVT_BUTTON, self.vhf_Rx, self.button_vhf_Rx)
 
 			self.CreateStatusBar()
@@ -120,7 +120,7 @@ class MyFrame(wx.Frame):
 			subprocess.call(['pkill', '-f', 'SDR_AIS_fine_cal.py'])
 			subprocess.call(['pkill', '-9', 'rtl_test'])
 			subprocess.call(['pkill', '-9', 'kal'])
-			subprocess.call(['pkill', '-9', 'qtcsdr'])
+			subprocess.call(['pkill', '-9', 'gqrx'])
 
 		def enable_sdr_controls(self):
 			self.gain.Enable()
@@ -185,7 +185,7 @@ class MyFrame(wx.Frame):
 			channel='a'
 			if self.ais_frequencies2.GetValue(): channel='b'
 			w_open=subprocess.Popen(['python', self.paths.tool_path+'/SDR_AIS_waterfall.py', gain, ppm, channel])
-			msg=_('SDR-AIS reception disabled. After closing the new window enable SDR-AIS reception again.')
+			msg=_('AIS reception disabled. After closing the new window enable AIS reception again.')
 			self.SetStatusText(msg)
 
 		def test_gain(self,event):
@@ -205,7 +205,7 @@ class MyFrame(wx.Frame):
 			self.conf.set('AIS-SDR', 'ppm', ppm)
 			self.conf.set('AIS-SDR', 'band', band)
 			subprocess.Popen(['python',self.paths.tool_path+'/SDR_AIS_fine_cal.py', 'b'])
-			msg=_('SDR-AIS reception disabled. After closing the new window enable SDR-AIS reception again.')
+			msg=_('AIS reception disabled. After closing the new window enable AIS reception again.')
 			self.SetStatusText(msg)
 			
 		def check_channel(self, event):
@@ -218,14 +218,14 @@ class MyFrame(wx.Frame):
 			self.conf.set('AIS-SDR', 'ppm', ppm)
 			self.conf.set('AIS-SDR', 'gsm_channel', channel)
 			if channel: subprocess.Popen(['python',self.paths.tool_path+'/SDR_AIS_fine_cal.py', 'c'])
-			msg=_('SDR-AIS reception disabled. After closing the new window enable SDR-AIS reception again.')
+			msg=_('AIS reception disabled. After closing the new window enable AIS reception again.')
 			self.SetStatusText(msg)
 
 		def vhf_Rx(self, event):
 			self.kill_sdr()
 			self.enable_sdr_controls()
-			subprocess.Popen('qtcsdr')
-			msg=_('SDR-AIS reception disabled. After closing the new window enable SDR-AIS reception again.')
+			subprocess.Popen('/home/pi/.config/gqrx-2.6-rpi3-1/run_gqrx.sh')
+			msg=_('AIS reception disabled. After closing the new window enable AIS reception again.')
 			self.SetStatusText(msg)
 
 		def ShowMessage(self, w_msg):
