@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 # This file is part of Openplotter.
 # Copyright (C) 2015 by sailoog <https://github.com/sailoog/openplotter>
 #
@@ -18,15 +18,15 @@ import socket, datetime, sys
 from classes.check_vessel_self import checkVesselSelf
 
 vessel_self=checkVesselSelf()
-uuid=vessel_self.uuid
+mmsi=vessel_self.mmsi
+
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 def sendSK(keyword,source):
 	value='{"message": "'+keyword+'"}'
-	timestamp=str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z'
 	path='notifications.keyword.'+source
-	SignalK='{"context": "vessels.'+uuid+'","updates":[{"source":{"type": "notifications","src":"'+source+'"},"timestamp":"'+timestamp+'","values":[{"path":"'+path+'","value":'+value+'}]}]}\n'
+	SignalK='{"mmsi":"'+mmsi+'","updates":[{"source":{"type": "notifications","src":"'+source+'"},"values":[{"path":"'+path+'","value":'+value+'}]}]}\n'
 	sock.sendto(SignalK, ('127.0.0.1', 55558))
 
 try: 

@@ -70,7 +70,7 @@ class MyFrame(wx.Frame):
 		self.list.InsertColumn(0, _('SRC'), width=200)
 		self.list.InsertColumn(1, _('SignalK'), width=300)
 		self.list.InsertColumn(2, _('Value'), wx.LIST_FORMAT_RIGHT, width=100)
-		self.list.InsertColumn(3, _('Unit'), width=40)
+		self.list.InsertColumn(3, _('Unit'), width=45)
 		self.list.InsertColumn(4, _('Interval'), wx.LIST_FORMAT_RIGHT, width=55)
 		self.list.InsertColumn(5, _('Status'), width=50)
 		self.list.InsertColumn(6, _('Description'), width=500)

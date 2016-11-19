@@ -33,7 +33,7 @@ else:
 
 	if sensors_list:
 		vessel_self=checkVesselSelf()
-		uuid=vessel_self.uuid
+		mmsi=vessel_self.mmsi
 		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		sensors=[]
 		sensors_list2=[]
@@ -60,7 +60,7 @@ else:
 					else: path=i[1]
 					sensorid=i[2]
 					timestamp=str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z'
-					SignalK='{"context": "vessels.'+uuid+'","updates":[{"source":{"type": "1W","src":"'+sensorid+'"},"timestamp":"'+timestamp+'","values":[{"path":"'+path+'","value":'+value+'}]}]}\n'
+					SignalK='{"mmsi":"'+mmsi+'","updates":[{"source":{"type":"1W","src":"'+sensorid+'"},"values":[{"path":"'+path+'","value":'+value+'}]}]}\n'
 					sock.sendto(SignalK, ('127.0.0.1', 55557))
 				except Exception,e: print str(e)
 				ib=ib+1	
