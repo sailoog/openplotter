@@ -323,7 +323,7 @@ class MySK_to_N2K:
 
 		if tick2a > self.cycle250:
 			self.cycle250 += 0.250
-			if self.akt127488: self.N2K.Send_Engine_Rapid(0, self.propulsion_port_revolutions[1][2], self.N2K.empty16,
+			if self.akt127488: self.N2K.Send_Engine_Rapid(0, self.propulsion_port_revolutions[1][2]*60., self.N2K.empty16,
 														  self.N2K.empty8)
 			if self.akt127245: self.N2K.Send_Rudder(self.steering_rudderAngle[1][2])
 			if self.akt127250: self.N2K.Send_Heading(self.navigation_headingMagnetic[1][2])
@@ -334,7 +334,7 @@ class MySK_to_N2K:
 
 		if tick2a > self.cycle250_2:
 			self.cycle250_2 += 0.250
-			if self.akt127488_1: self.N2K.Send_Engine_Rapid(1, int(self.propulsion_starboard_revolutions[1][2]),
+			if self.akt127488_1: self.N2K.Send_Engine_Rapid(1, int(self.propulsion_starboard_revolutions[1][2])*60.,
 													self.N2K.empty16, self.N2K.empty8)
 
 			if self.akt129025: self.N2K.Send_Position_Rapid(self.navigation_position_latitude[1][2],

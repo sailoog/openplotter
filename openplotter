@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 
 # This file is part of Openplotter.
 # Copyright (C) 2015 by sailoog <https://github.com/sailoog/openplotter>
@@ -1030,7 +1030,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def on_advanced_kplex(self, event):
 		self.ShowMessage(_(
 			'OpenPlotter will close. Add manual settings at the end of the configuration file. Open OpenPlotter again and restart multiplexer to apply changes.'))
-		subprocess.Popen(['leafpad', home + '/.kplex.conf'])
+		subprocess.Popen(['leafpad', self.home + '/.kplex.conf'])
 		self.Close()
 
 	def on_restart_kplex(self, event):

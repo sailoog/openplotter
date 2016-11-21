@@ -64,12 +64,12 @@ else:
 	  data = ((adc[1]&3) << 8) + adc[2]
 	  return data
 
-	def publish_sk(io,channel,current_state,timestamp):
+	def publish_sk(io,channel,current_state):
 		if io=='in':io='input'
 		else: io='output'
 		if current_state: current_state='1'
 		else: current_state='0'
-		SignalK='{"context": "vessels.'+uuid+'","updates":[{"source":{"type": "GPIO","src":"GPIO'+str(channel)+'"},"timestamp":"'+timestamp+'","values":[{"path":"notifications.gpio.'+io+'.gpio'+str(channel)+'","value":'+current_state+'}]}]}\n'
+		SignalK='{"mmsi":"'+mmsi+'","updates":[{"source":{"type": "GPIO","src":"GPIO'+str(channel)+'"},"values":[{"path":"notifications.gpio.'+io+'.gpio'+str(channel)+'","value":'+current_state+'}]}]}\n'
 		sock.sendto(SignalK, ('127.0.0.1', 55558))
 	  
 	conf=Conf(Paths())
@@ -176,7 +176,7 @@ else:
 		rate_gpio=0.1
 		
 		vessel_self=checkVesselSelf()
-		uuid=vessel_self.uuid
+		mmsi=vessel_self.mmsi
 
 		if heading_sk or heel_sk or pitch_sk:
 			SETTINGS_FILE = "RTIMULib"
@@ -221,8 +221,7 @@ else:
 					if pitch_sk:
 						Erg += '{"path": "navigation.attitude.pitch","value":'+str(0.017453293*MyVar.pitch)+'},'
 
-					timestamp=str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z'
-					SignalK='{"context": "vessels.'+uuid+'","updates":[{"source":{"type": "I2C","src":"'+imu.IMUName()+'"},"timestamp":"'+timestamp+'","values":['
+					SignalK='{"mmsi":"'+mmsi+'","updates":[{"source":{"type": "I2C","src":"'+imu.IMUName()+'"},"values":['
 					SignalK+=Erg[0:-1]+']}]}\n'		
 					sock.sendto(SignalK, ('127.0.0.1', 55557))	
 
@@ -240,8 +239,7 @@ else:
 					if p_temp_sk:
 						Erg += '{"path": "'+p_temp_skt+'","value":'+str(round(MyVar.temperature_p,2)+273.15)+'},'
 					
-					timestamp=str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z'
-					SignalK='{"context": "vessels.'+uuid+'","updates":[{"source":{"type": "I2C","src":"'+pressure_val.pressureName()+'"},"timestamp":"'+timestamp+'","values":['
+					SignalK='{"mmsi":"'+mmsi+'","updates":[{"source":{"type": "I2C","src":"'+pressure_val.pressureName()+'"},"values":['
 					SignalK+=Erg[0:-1]+']}]}\n'	
 					sock.sendto(SignalK, ('127.0.0.1', 55557))			
 					
@@ -259,30 +257,27 @@ else:
 					if h_temp_sk:
 						Erg += '{"path": "'+h_temp_skt+'","value":'+str(round(MyVar.temperature_h,2)+273.15)+'},'
 							
-					timestamp=str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z'
-					SignalK='{"context": "vessels.'+uuid+'","updates":[{"source":{"type": "I2C","src":"'+humidity_val.humidityName()+'"},"timestamp":"'+timestamp+'","values":['
+					SignalK='{"mmsi":"'+mmsi+'","updates":[{"source":{"type": "I2C","src":"'+humidity_val.humidityName()+'"},"values":['
 					SignalK+=Erg[0:-1]+']}]}\n'	
 					sock.sendto(SignalK, ('127.0.0.1', 55557))
 
 			# read SPI adc and GENERATE
 		def work_analog():
 					threading.Timer(rate_ana, work_analog).start()
-					timestamp=str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z'
 					SignalK=''
 					for i in MCP:
 						if i[0]==1:
 							XValue=read_adc(i[1])
 							if i[4]==1:
 								XValue = interpolread(i[1],XValue)
-							Erg ='{"context": "vessels.'+uuid+'","updates":[{"source":{"type": "SPI","src":"MCP3008.'+str(i[1])+'"},'
-							Erg +='"timestamp":"'+timestamp+'","values":[{"path": "'+i[2]+'","value":'+str(XValue)+'}]}]}\n'
+							Erg ='{"mmsi":"'+mmsi+'","updates":[{"source":{"type": "SPI","src":"MCP3008.'+str(i[1])+'"},'
+							Erg +='"values":[{"path": "'+i[2]+'","value":'+str(XValue)+'}]}]}\n'
 							SignalK+=Erg
 					sock.sendto(SignalK, ('127.0.0.1', 55557))
 
 			# read gpio and GENERATE
 		def work_gpio():
 					threading.Timer(rate_gpio, work_gpio).start()
-					timestamp=str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z'
 					c=0
 					for i in gpio_list:
 						channel=int(i[2])
@@ -290,7 +285,7 @@ else:
 						last_state=gpio_list[c][4]
 						if current_state!=last_state:
 							gpio_list[c][4]=current_state
-							publish_sk(i[1],channel,current_state,timestamp)
+							publish_sk(i[1],channel,current_state)
 						c+=1
 
 		if imu_:    work_imu()
