@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 # This file is part of Openplotter.
 # Copyright (C) 2015 by sailoog <https://github.com/sailoog/openplotter>
 #
@@ -25,8 +25,7 @@ def on_message(client, userdata, msg):
 	path=path.replace('/','.')
 	path='notifications.mqtt.'+path
 	value='{"message": "'+msg.payload+'"}'
-	timestamp=str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z'
-	SignalK='{"context": "vessels.'+uuid+'","updates":[{"source":{"type": "notifications","src":"mqtt"},"timestamp":"'+timestamp+'","values":[{"path":"'+path+'","value":'+value+'}]}]}\n'
+	SignalK='{"updates":[{"source":{"type": "notifications","src":"mqtt"},"values":[{"path":"'+path+'","value":'+value+'}]}]}\n'
 	sock.sendto(SignalK, ('127.0.0.1', 55558))
 
 def on_connect(client, userdata, flags, rc):
@@ -52,8 +51,7 @@ def send_null():
 			path_tmp='notifications.mqtt.'+ii
 			if not path_tmp in list_path: list_path.append(path_tmp)
 	values=''
-	timestamp=str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z'
-	SignalK='{"context": "vessels.'+uuid+'","updates":[{"source":{"type": "notifications","src":"mqtt"},"timestamp":"'+timestamp+'","values":['
+	SignalK='{"updates":[{"source":{"type": "notifications","src":"mqtt"},"values":['
 	for i in list_path:
 		values+= '{"path": "'+i+'","value": {"message": null}},'
 	SignalK+=values[0:-1]+']}]}\n'
@@ -77,7 +75,7 @@ client_local=''
 
 if user and passw and topics_list:
 	vessel_self=checkVesselSelf()
-	uuid=vessel_self.uuid
+	mmsi=vessel_self.mmsi
 	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	if broker and port:
 		client = paho.Client()
