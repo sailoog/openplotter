@@ -112,7 +112,7 @@ if not exist:
 	gps_time=conf.get('STARTUP', 'gps_time')
 	play=conf.get('STARTUP', 'play')
 	sound=conf.get('STARTUP', 'sound')
-	
+	node_red=conf.get('STARTUP', 'node_red')
 	enable=conf.get('AIS-SDR', 'enable')
 	gain=conf.get('AIS-SDR', 'gain')
 	ppm=conf.get('AIS-SDR', 'ppm')
@@ -169,7 +169,11 @@ if not exist:
 
 	subprocess.call(["pkill", '-f', "signalk-server-node"])
 	vessel_self=checkVesselSelf()
-	
+
+	if node_red=='1':
+		try: subprocess.Popen(['node-red-pi', '--max-old-space-size=128'])
+		except: pass
+
 	if gps_time=='1':
 		subprocess.call(['sudo', 'python', currentpath+'/time_gps.py'])
 
