@@ -27,7 +27,7 @@ class checkVesselSelf:
 		home = paths.home
 		file = paths.file
 		currentpath = paths.currentpath
-		if not self.util_process_exist('signalk-server'):
+		if not self.util_process_exist('signalk-server-node'):
 			print 'Signal K starting'
 			if file != '1w_d.py': subprocess.call(['pkill', '-f', '1w_d.py'])
 			if file != 'i2c_d.py': subprocess.call(['pkill', '-f', 'i2c_d.py'])

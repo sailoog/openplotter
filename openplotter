@@ -2691,8 +2691,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		# stopping sk server
 		self.ShowStatusBarRED(_('Closing Signal K server ...'))
 		self.vessel_self = ''
-		subprocess.call(["pkill", '-9', "node"])
-		while self.util_process_exist("node"):
+		subprocess.call(["pkill", '-f', "signalk-server-node"])
+		while self.util_process_exist("signalk-server-node"):
 			time.sleep(0.01)
 		# restarting sk server and providers
 		self.vessel_self = checkVesselSelf()

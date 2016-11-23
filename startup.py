@@ -167,7 +167,7 @@ if not exist:
 	if kplex=='1':
 		subprocess.Popen('kplex')
 
-	subprocess.call(["pkill", '-9', "node"])
+	subprocess.call(["pkill", '-f', "signalk-server-node"])
 	vessel_self=checkVesselSelf()
 	
 	if gps_time=='1':
