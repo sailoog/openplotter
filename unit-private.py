@@ -107,10 +107,9 @@ class MyFrame(wx.Frame):
 
 	def read(self):
 		self.list_SK = []
-		response = subprocess.Popen(
-			[self.paths.home + '/.config/signalk-server-node/node_modules/signalk-schema/scripts/extractKeysAndMeta.js'],
-			stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-		data = json.loads(response.communicate()[0])
+
+		with open(self.paths.home+'/.config/signalk-server-node/node_modules/signalk-schema/keyswithmetadata.json') as data_file:
+			data = json.load(data_file)
 
 		self.data_SK_unit_private = []
 		if os.path.isfile(self.paths.home + '/.config/openplotter/classes/private_unit.json'):
@@ -120,9 +119,12 @@ class MyFrame(wx.Frame):
 		for i in data:
 			if 'units' in data[i].keys():
 				if 'description' in data[i].keys():
-					self.list_SK.append([str(i), str(data[i]['units']), '', str(data[i]['description'])])
+					ii = i.replace('/vessels/*/','')
+					ii = ii.replace('RegExp','*')
+					ii = ii.replace('/','.')
+					self.list_SK.append([str(ii), str(data[i]['units']), '', str(data[i]['description'])])
 				else:
-					self.list_SK.append([str(i), str(data[i]['units']), '', ''])
+					self.list_SK.append([str(ii), str(data[i]['units']), '', ''])
 		for j in self.data_SK_unit_private:
 			for i in self.list_SK:
 				if j[0] == i[0]:
