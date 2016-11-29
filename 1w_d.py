@@ -21,9 +21,7 @@ if platform.machine()[0:3]!='arm':
 else:
 	from w1thermsensor import W1ThermSensor
 	from classes.paths import Paths
-	from classes.conf import Conf
-	from classes.check_vessel_self import checkVesselSelf
-	
+	from classes.conf import Conf	
 	
 	conf=Conf(Paths())
 
@@ -32,8 +30,6 @@ else:
 	except: sensors_list=[]
 
 	if sensors_list:
-		vessel_self=checkVesselSelf()
-		mmsi=vessel_self.mmsi
 		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		sensors=[]
 		sensors_list2=[]
@@ -60,7 +56,7 @@ else:
 					else: path=i[1]
 					sensorid=i[2]
 					timestamp=str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z'
-					SignalK='{"mmsi":"'+mmsi+'","updates":[{"source":{"type":"1W","src":"'+sensorid+'"},"values":[{"path":"'+path+'","value":'+value+'}]}]}\n'
+					SignalK='{"updates":[{"source":{"type":"1W","src":"'+sensorid+'"},"values":[{"path":"'+path+'","value":'+value+'}]}]}\n'
 					sock.sendto(SignalK, ('127.0.0.1', 55557))
 				except Exception,e: print str(e)
 				ib=ib+1	

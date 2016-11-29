@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import socket, time, RTIMU, math, csv, datetime, json, subprocess, sys
+import socket, time, RTIMU, math, csv, datetime, subprocess, sys
 from classes.paths import Paths
 from classes.ads1115 import Ads1115
 from classes.conf_analog import Conf_analog
@@ -54,10 +54,6 @@ else:
 
 			SK_name[i] = conf_analog.get(ADS1115+str(i), 'sk_name')
 
-	with open('/home/pi/.config/signalk-server-node/settings/openplotter-settings.json') as data_file:
-		data = json.load(data_file)
-	uuid=data['vessel']['uuid']
-
 	tick_analog=time.time()
 
 	while True:
@@ -77,11 +73,11 @@ else:
 					list_signalk1.append(str(a_value[i]))			
 
 			if list_signalk1:
-				SignalK = '{"updates": [{"source": {"type": "I2C","src" : "ANA"},"timestamp": "'+str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z","values":[ '
+				SignalK = '{"updates": [{"source": {"type": "I2C","src" : "ANA"},"values":[ '
 				Erg=''
 				for i in range(0,len(list_signalk1)):
 					Erg += '{"path": "'+list_signalk_path1[i]+'","value":'+list_signalk1[i]+'},'
-				SignalK+=Erg[0:-1]+']}],"context": "vessels.'+uuid+'"}\n'
+					SignalK +=Erg[0:-1]+']}]}\n'
 				sock.sendto(SignalK, ('127.0.0.1', 55557))			
 		else:
 			index+=1
