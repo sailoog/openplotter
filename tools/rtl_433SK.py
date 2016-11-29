@@ -15,7 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 import signal, sys, time, socket, subprocess
-import requests
 import shlex
 
 
@@ -67,14 +66,6 @@ def init():
 
 	conf_analog=Conf_analog()
 
-	global mmsi
-	global uuid
-	
-	response = requests.get('http://localhost:3000/signalk/v1/api/vessels/self')
-	data = response.json()
-	mmsi = data['mmsi']
-	uuid = 'urn:mrn:imo:mmsi:' + mmsi
-
 	SK_name.append(sen_temp_SK);
 	SK_name.append(sen_humi_SK);
 
@@ -125,7 +116,7 @@ else:
 			finish=False
 			print output
 			output=''
-			SignalK = '{"mmsi":"'+mmsi+'","updates":[{"source": {"type": "433","src" : "'+type_rtl+channel_rtl+'"},"values":[ '
+			SignalK = '{"updates":[{"source": {"type": "433","src" : "'+type_rtl+channel_rtl+'"},"values":[ '
 			Erg=''
 			Erg += '{"path": "'+SK_name[1]+'","value":'+str(humidity_rtl)+'},'
 			Erg += '{"path": "'+SK_name[0]+'","value":'+str(temperature_rtl)+'},'

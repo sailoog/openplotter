@@ -33,7 +33,6 @@ if platform.machine()[0:3]!='arm':
 else:
 	from classes.paths import Paths
 	from classes.conf import Conf
-	from classes.check_vessel_self import checkVesselSelf
 	import RPi.GPIO as GPIO
 	import spidev,RTIMU
 
@@ -69,7 +68,7 @@ else:
 		else: io='output'
 		if current_state: current_state='1'
 		else: current_state='0'
-		SignalK='{"mmsi":"'+mmsi+'","updates":[{"source":{"type": "GPIO","src":"GPIO'+str(channel)+'"},"values":[{"path":"notifications.gpio.'+io+'.gpio'+str(channel)+'","value":'+current_state+'}]}]}\n'
+		SignalK='{"updates":[{"source":{"type": "GPIO","src":"GPIO'+str(channel)+'"},"values":[{"path":"notifications.gpio.'+io+'.gpio'+str(channel)+'","value":'+current_state+'}]}]}\n'
 		sock.sendto(SignalK, ('127.0.0.1', 55558))
 	  
 	conf=Conf(Paths())
@@ -175,9 +174,6 @@ else:
 		rate_ana=rate_imu
 		rate_gpio=0.1
 		
-		vessel_self=checkVesselSelf()
-		mmsi=vessel_self.mmsi
-
 		if heading_sk or heel_sk or pitch_sk:
 			SETTINGS_FILE = "RTIMULib"
 			s = RTIMU.Settings(SETTINGS_FILE)
@@ -221,7 +217,7 @@ else:
 					if pitch_sk:
 						Erg += '{"path": "navigation.attitude.pitch","value":'+str(0.017453293*MyVar.pitch)+'},'
 
-					SignalK='{"mmsi":"'+mmsi+'","updates":[{"source":{"type": "I2C","src":"'+imu.IMUName()+'"},"values":['
+					SignalK='{"updates":[{"source":{"type": "I2C","src":"'+imu.IMUName()+'"},"values":['
 					SignalK+=Erg[0:-1]+']}]}\n'		
 					sock.sendto(SignalK, ('127.0.0.1', 55557))	
 
@@ -239,7 +235,7 @@ else:
 					if p_temp_sk:
 						Erg += '{"path": "'+p_temp_skt+'","value":'+str(round(MyVar.temperature_p,2)+273.15)+'},'
 					
-					SignalK='{"mmsi":"'+mmsi+'","updates":[{"source":{"type": "I2C","src":"'+pressure_val.pressureName()+'"},"values":['
+					SignalK='{"updates":[{"source":{"type": "I2C","src":"'+pressure_val.pressureName()+'"},"values":['
 					SignalK+=Erg[0:-1]+']}]}\n'	
 					sock.sendto(SignalK, ('127.0.0.1', 55557))			
 					
@@ -257,7 +253,7 @@ else:
 					if h_temp_sk:
 						Erg += '{"path": "'+h_temp_skt+'","value":'+str(round(MyVar.temperature_h,2)+273.15)+'},'
 							
-					SignalK='{"mmsi":"'+mmsi+'","updates":[{"source":{"type": "I2C","src":"'+humidity_val.humidityName()+'"},"values":['
+					SignalK='{"updates":[{"source":{"type": "I2C","src":"'+humidity_val.humidityName()+'"},"values":['
 					SignalK+=Erg[0:-1]+']}]}\n'	
 					sock.sendto(SignalK, ('127.0.0.1', 55557))
 
@@ -270,7 +266,7 @@ else:
 							XValue=read_adc(i[1])
 							if i[4]==1:
 								XValue = interpolread(i[1],XValue)
-							Erg ='{"mmsi":"'+mmsi+'","updates":[{"source":{"type": "SPI","src":"MCP3008.'+str(i[1])+'"},'
+							Erg ='{"updates":[{"source":{"type": "SPI","src":"MCP3008.'+str(i[1])+'"},'
 							Erg +='"values":[{"path": "'+i[2]+'","value":'+str(XValue)+'}]}]}\n'
 							SignalK+=Erg
 					sock.sendto(SignalK, ('127.0.0.1', 55557))

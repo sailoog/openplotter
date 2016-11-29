@@ -18,6 +18,7 @@ import os
 import requests
 import subprocess
 import time
+import json
 from paths import Paths
 
 
@@ -66,9 +67,13 @@ class checkVesselSelf:
 
 			subprocess.Popen(['keyword'])
 
-		response = requests.get('http://localhost:3000/signalk/v1/api/vessels/self')
-		data = response.json()
-		self.mmsi = data['mmsi']
+		with open(home + '/.config/signalk-server-node/settings/openplotter-settings.json') as data_file:
+			data = json.load(data_file)
+		raw_uuid = data['vessel']['uuid']
+		#response = requests.get('http://localhost:3000/signalk/v1/api/vessels/self')
+		#data = response.json()
+		#self.mmsi = data['mmsi']
+		self.mmsi = raw_uuid.split(':')[-1]
 		self.uuid = 'urn:mrn:imo:mmsi:'+self.mmsi
 
 

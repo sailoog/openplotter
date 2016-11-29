@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
-import signal, sys, time, socket, datetime,json,subprocess
+import signal, sys, time, socket, datetime,subprocess
 
 from PyMata.pymata import PyMata
 from classes.conf_analog import Conf_analog
@@ -58,12 +58,6 @@ def init():
 	signal.signal(signal.SIGINT, signal_handler)
 
 	conf_analog=Conf_analog()
-
-	global uuid
-	with open('/home/pi/.config/signalk-server-node/settings/openplotter-settings.json') as data_file:
-		data = json.load(data_file)
-	uuid=data['vessel']['uuid']
-
 
 	FIRMATA='FIRMATA_'
 
@@ -143,12 +137,12 @@ else:
 		if index > length:
 			index=0
 
-			SignalK = '{"updates": [{"source": {"type": "ARD","src" : "ANA"},"timestamp": "'+str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z","values":[ '
+			SignalK = '{"updates": [{"source": {"type": "ARD","src" : "ANA"},"values":[ '
 			Erg=''
 			for i in channel_index:
 				Erg += '{"path": "'+SK_name[i]+'","value":'+str(interpolread(i,RawValue[i]))+'},'
 			
-			SignalK +=Erg[0:-1]+']}],"context": "vessels.'+uuid+'"}\n'
+			SignalK +=Erg[0:-1]+']}]}\n'
 			#print SignalK
 			sock.sendto(SignalK, ('127.0.0.1', 55559))
 			time.sleep(0.100)
