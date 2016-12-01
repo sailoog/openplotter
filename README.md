@@ -1,19 +1,172 @@
-# What is OpenPlotter?
+## This is the development branch of OpenPlotter project. If you want to test this version, you have to follow these steps:
 
-![OpenPlotter RPI](https://sailoog.gitbooks.io/openplotter-documentation/content/en/openplotter.png)
+* Run OpenPlotter RPI v0.8.0
 
-There are people who buy boats but there are also people who build them, why not build your own electronics too? OpenPlotter is a combination of software and hardware to be used as navigational aid on small and medium boats. It is also a complete home automation system onboard. It works on ARM computers like the [Raspberry Pi](https://www.raspberrypi.org/) and is open-source, low-cost and low-consumption. Its design is modular, so you just have to implement what your boat needs. Do it yourself.
+* Delete OpenPlotter v0.8.0 scripts and clone v0.9.0 branch:
 
-## Features
+`cd /home/pi/.config`
 
-https://www.gitbook.com/book/sailoog/openplotter-documentation/details
+`rm -rf openplotter/`
 
-## Project site
+`git clone -b v0.9.0 https://github.com/sailoog/openplotter.git`
 
-http://www.sailoog.com/openplotter
+* Type in the terminal:
 
-## Build instructions
+`sudo apt-get update`
 
-https://github.com/sailoog/openplotter/wiki
+`sudo apt-get upgrade`
 
-![OpenPlotter RPI](https://sailoog.gitbooks.io/openplotter-documentation/content/en/openplotter_rpi.png)
+`sudo chmod 775 /home/pi/.config/openplotter/openplotter`
+
+`sudo chmod 775 /home/pi/.config/openplotter/keyword`
+
+* Add to file /home/pi/.profile:
+
+`export PATH=$PATH:/home/pi/.config/openplotter`
+
+* Install isc-dhcp-server:
+
+`sudo apt-get install isc-dhcp-server`
+`sudo update-rc.d isc-dhcp-server disable`
+
+* Install bridge:
+
+`sudo apt-get install bridge-utils`
+
+* Install python packages:
+
+`sudo pip install websocket-client spidev`
+
+* Replace the content of file /home/pi/.config/signalk-server-node/settings/openplotter-settings.json by:
+
+{
+	"vessel" : {
+		"uuid" : "urn:mrn:imo:mmsi:00000000"
+	},
+	"pipedProviders" : [{
+			"pipeElements" : [{
+					"type" : "providers/udp",
+					"options" : {
+						"port" : "55556"
+					}
+				}, {
+					"optionMappings" : [{
+							"toOption" : "selfId",
+							"fromAppProperty" : "selfId"
+						}, {
+							"toOption" : "selfType",
+							"fromAppProperty" : "selfType"
+						}
+					],
+					"type" : "providers/nmea0183-signalk"
+				}
+			],
+			"id" : "kplexOutput"
+		}, {
+			"pipeElements" : [{
+					"type" : "providers/udp",
+					"options" : {
+						"port" : "55557"
+					}
+				}, {
+					"type" : "providers/liner"
+				}, {
+					"type" : "providers/from_json"
+				}
+			],
+			"id" : "OP_sensors"
+		}, {
+			"pipeElements" : [{
+					"type" : "providers/udp",
+					"options" : {
+						"port" : "55558"
+					}
+				}, {
+					"type" : "providers/liner"
+				}, {
+					"type" : "providers/from_json"
+				}
+			],
+			"id" : "notifications"
+		}, {
+			"pipeElements" : [{
+					"type" : "providers/udp",
+					"options" : {
+						"port" : "55559"
+					}
+				}, {
+					"type" : "providers/liner"
+				}, {
+					"type" : "providers/from_json"
+				}
+			],
+			"id" : "serial"
+		}, {
+			"pipeElements" : [{
+					"type" : "providers/udp",
+					"options" : {
+						"port" : "55561"
+					}
+				}, {
+					"type" : "providers/liner"
+				}, {
+					"type" : "providers/from_json"
+				}
+			],
+			"id" : "wifi"
+		}, {
+			"pipeElements" : [{
+					"type" : "providers/execute",
+					"options" : {
+						"command" : "actisense-serial /dev/ttyOP_N2K"
+					}
+				}, {
+					"type" : "providers/liner"
+				}, {
+					"type" : "providers/n2kAnalyzer"
+				}, {
+					"type" : "providers/n2k-signalk"
+				}
+			],
+			"id" : "CAN-USB"
+		}
+	],
+	"interfaces" : {}
+}
+
+* Delete file /home/pi/.kplex.conf
+
+* Reset and open OpenPlotter typing:
+
+`openplotter`
+
+* In opencpn Options>Connections, replace:
+
+`localhost:10110 TCP input`
+
+by
+
+`localhost:10109 TCP input`
+
+* In the menu go to openplotter right click settings change ...openplotter.py to ...openplotter
+
+## Notes
+
+if you want to use the analog tools for firmata and ads1115, then read tools/install analog.txt
+
+changes:
+
+-action on SignalK
+
+-analog input MCP3008
+
+-SignalK emulator
+
+-generating nmea0183 sentences from SignalK can be tested by switching to tab NMEA0183 select system click diagnostic or from cmd with command `nc -ul 127.0.0.1 10110`
+
+-generating nmea2000 sentences from SignalK can be tested by switching to tab NMEA 2K uncheck Enable N2K output click diagnostic output
+
+
+
+-many pages are resizeable
+
