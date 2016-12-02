@@ -36,11 +36,6 @@ class MyFrame(wx.Frame):
 		
 		Language(self.conf.get('GENERAL','lang'))
 		
-		with open('/home/pi/.config/signalk-server-node/settings/openplotter-settings.json') as data_file:
-			data = json.load(data_file)
-		self.uuid=data['vessel']['uuid']
-		
-
 		wx.Frame.__init__(self, None, title="SK-Simulator", size=(650,435))
 		self.Bind(wx.EVT_CLOSE, self.OnClose)
 		self.panel = wx.Panel(self)
@@ -155,20 +150,19 @@ class MyFrame(wx.Frame):
 			
 	# thread
 	def timer_act(self, event):
-		SignalK = '{"updates": [{"source": {"type": "SIM","src" : "SIM"},"timestamp": "'+str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z","values":[ '
+		SignalK = '{"updates": [{"source": {"type": "SIM","src" : "SIM"},"values":[ '
 		Erg=''
 		for i in self.Slider_list:
 			if i[7]:
 				Erg += '{"path": "'+i[1]+'","value":'+str(self.Slider_v[i[0]].GetValue()*i[5]+i[6])+'},'
 		if Erg!='':
-			SignalK +=Erg[0:-1]+']}],"context": "vessels.'+self.uuid+'"}\n'
+			SignalK +=Erg[0:-1]+']}]}\n'
 			self.sock.sendto(SignalK, ('127.0.0.1', 55561))
 	# end thread
 
 	def OnClose(self, event):
 		self.timer.Stop()
 		self.Destroy()
-
 	
 if len(sys.argv)>1:
 	if sys.argv[1]=='settings':

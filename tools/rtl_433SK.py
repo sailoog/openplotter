@@ -18,7 +18,6 @@ import signal, sys, time, socket, subprocess
 import shlex
 
 
-from PyMata.pymata import PyMata
 from classes.conf_analog import Conf_analog
 from classes.paths import Paths
 

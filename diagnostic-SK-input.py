@@ -125,8 +125,7 @@ class MyFrame(wx.Frame):
 					self.list.SetStringItem(ii[0], ii[1], ii[2])
 				else:
 					self.sorting()
-				del self.buffer[0]
-				# del ii
+			self.buffer = []
 		else:
 			self.no_action += 1
 			if self.no_action > self.no_action_limit:
@@ -146,10 +145,9 @@ class MyFrame(wx.Frame):
 
 	def read(self):
 		self.list_SK_unit = []
-		response = subprocess.Popen(
-			[self.home + '/.config/signalk-server-node/node_modules/signalk-schema/scripts/extractKeysAndMeta.js'],
-			stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-		data = json.loads(response.communicate()[0])
+
+		with open(self.home+'/.config/signalk-server-node/node_modules/signalk-schema/keyswithmetadata.json') as data_file:
+			data = json.load(data_file)
 
 		data_sk_unit_private = []
 		if os.path.isfile(self.home + '/.config/openplotter/classes/private_unit.json'):
@@ -159,9 +157,12 @@ class MyFrame(wx.Frame):
 		for i in data:
 			if 'units' in data[i].keys():
 				if 'description' in data[i].keys():
-					self.list_SK_unit.append([str(i), str(data[i]['units']), '', str(data[i]['description'])])
+					ii = i.replace('/vessels/*/','')
+					ii = ii.replace('RegExp','*')
+					ii = ii.replace('/','.')
+					self.list_SK_unit.append([str(ii), str(data[i]['units']), '', str(data[i]['description'])])
 				else:
-					self.list_SK_unit.append([str(i), str(data[i]['units']), '', ''])
+					self.list_SK_unit.append([str(ii), str(data[i]['units']), '', ''])
 		for j in data_sk_unit_private:
 			for i in self.list_SK_unit:
 				if j[0] == i[0]:
