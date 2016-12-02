@@ -125,8 +125,7 @@ class MyFrame(wx.Frame):
 					self.list.SetStringItem(ii[0], ii[1], ii[2])
 				else:
 					self.sorting()
-				del self.buffer[0]
-				# del ii
+			self.buffer = []
 		else:
 			self.no_action += 1
 			if self.no_action > self.no_action_limit:

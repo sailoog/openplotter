@@ -132,6 +132,9 @@ class MySK:
 			if path == i[1]:
 				if src == i[0]:
 					exists = True
+					#if i[2] != value:
+					#	if i[0] == 'wifi.SIM':
+					#		print value, i[2], i[0]
 					i[2] = value
 					i[7] = timestamp
 					#break
@@ -457,11 +460,15 @@ class MySK_to_NMEA:
 
 		# print self.nmea_list[index][1]
 		for i in self.nmea_list[index][1]:
-			# print 'i ',i
+			#print 'i ',i
 			if type(i) is str:
 				NMEA_string += ',' + i
 			elif type(i) is list:
 				value = i[4][1][2]
+				if type(value) is float:
+					pass
+				else:
+					value = 0.0
 				if i[2] == '+':
 					value = value + i[3]
 				elif i[2] == '-':
@@ -502,8 +509,8 @@ class MySK_to_NMEA:
 					else:
 						value_str = 'W'
 				NMEA_string += ',' + value_str
-		NMEA_string = '$OC' + NMEA_string + '*' + hex(reduce(operator.xor, map(ord, 'OC' + NMEA_string), 0)).upper()[
-												  2:] + '\r\n'
+		CRC = hex(reduce(operator.xor, map(ord, 'OC' + NMEA_string), 0)).upper()[2:]
+		NMEA_string = '$OC' + NMEA_string + '*' + ('0' + CRC)[-2:] + '\r\n'
 		# print NMEA_string
 		self.sock.sendto(NMEA_string, ('127.0.0.1', 10110))
 
