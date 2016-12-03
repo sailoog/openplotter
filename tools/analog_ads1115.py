@@ -21,12 +21,13 @@ from classes.ads1115 import Ads1115
 from classes.conf_analog import Conf_analog
 
 paths=Paths()
-currentpath=paths.currentpath
+toolspath=paths.op_path + '/tools'
 home=paths.home
 
 if len(sys.argv)>1:
 	if sys.argv[1]=='settings':
-		subprocess.Popen(['leafpad',currentpath+'/openplotter_analog.conf'])
+		print toolspath+'openplotter_analog.conf'
+		subprocess.Popen(['leafpad',toolspath+'/openplotter_analog.conf'])
 	exit
 else:
 
