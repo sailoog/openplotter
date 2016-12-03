@@ -36,7 +36,7 @@ share = ''
 
 for pid in pids:
 	try:
-		if 'signalk-server' in open(os.path.join('/proc', pid, 'cmdline'), 'rb').read():
+		if 'signalk-server-node' in open(os.path.join('/proc', pid, 'cmdline'), 'rb').read():
 			exist=True
 	except IOError: # proc has already terminated
 		continue
@@ -170,6 +170,7 @@ if not exist:
 	subprocess.call(["pkill", '-f', "signalk-server-node"])
 	vessel_self=checkVesselSelf()
 
+	subprocess.call(["pkill", '-f', "node-red"])
 	if node_red=='1':
 		try: subprocess.Popen(['node-red-pi', '--max-old-space-size=128'])
 		except: pass
