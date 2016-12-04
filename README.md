@@ -10,6 +10,11 @@ https://sailoog.gitbooks.io/openplotter-documentation/content/en/
 
 - [ ] SDR AIS decodification doesn't work if network connection is not present. Possible cause: https://www.reddit.com/r/RTLSDR/comments/4yu0a6/rtl_ais_error_on_raspberry_pi/
 
+### To Do list
+
+- [ ] Write a GUI for startup script to show startup process, inform of errors and show recommendations (changing pi user, access point and VNC passwords)
+- [ ] Build a better default Node-RED flow to feed freeboard and Node-RED Dashboard
+
 
 
 
