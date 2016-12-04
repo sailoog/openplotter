@@ -33,14 +33,17 @@ class addDS18B20(wx.Dialog):
 		panel = wx.Panel(self)
 
 		list_tmp = []
-		response = subprocess.Popen(
-			[parent.home + '/.config/signalk-server-node/node_modules/signalk-schema/scripts/extractKeysAndMeta.js'],
-			stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-		self.data = json.loads(response.communicate()[0])
+
+		with open(parent.home +'/.config/signalk-server-node/node_modules/signalk-schema/keyswithmetadata.json') as data_file:
+			self.data = json.load(data_file)
+
 		for i in self.data:
 			if 'temperature' in i or 'Temperature' in i:
-				if 'electrical.' not in i:
-					list_tmp.append(i)
+				if 'electrical' not in i:
+					ii = i.replace('/vessels/*/','')
+					ii = ii.replace('RegExp','*')
+					ii = ii.replace('/','.')
+					list_tmp.append(ii)
 		list_sk_path = sorted(list_tmp)
 
 		wx.StaticText(panel, label='Signal K', pos=(10, 10))
@@ -66,7 +69,10 @@ class addDS18B20(wx.Dialog):
 			self.name.SetValue(edit[1])
 			self.SKkey.SetValue(edit[2])
 			for i in self.data:
-				if edit[2] == i:
+				ii = i.replace('/vessels/*/','')
+				ii = ii.replace('RegExp','*')
+				ii = ii.replace('/','.')
+				if edit[2] == ii:
 					try:
 						self.description.SetValue(self.data[i]['description'])
 					except:
@@ -80,7 +86,10 @@ class addDS18B20(wx.Dialog):
 	def onSelect(self, e):
 		selected = self.SKkey.GetValue()
 		for i in self.data:
-			if selected == i:
+			ii = i.replace('/vessels/*/','')
+			ii = ii.replace('RegExp','*')
+			ii = ii.replace('/','.')
+			if selected == ii:
 				try:
 					self.description.SetValue(self.data[i]['description'])
 				except:

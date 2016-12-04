@@ -152,9 +152,9 @@ class Actions:
 			subprocess.call(['pkill', '-9', 'kplex'])
 			subprocess.Popen('kplex')
 		elif option == 'ACT7':
-			subprocess.Popen(["pkill", '-9', "node"])
+			subprocess.Popen(["pkill", '-f', "signalk-server-node"])
 		elif option == 'ACT8':
-			subprocess.call(["pkill", '-9', "node"])
+			subprocess.call(["pkill", '-f', "signalk-server-node"])
 			subprocess.Popen(self.home + '/.config/signalk-server-node/bin/openplotter',
 							 cwd=self.home + '/.config/signalk-server-node')
 		elif option == 'ACT9':

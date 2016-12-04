@@ -41,7 +41,6 @@
 
 {
 	"vessel" : {
-		"mmsi" : "00000000",
 		"uuid" : "urn:mrn:imo:mmsi:00000000"
 	},
 	"pipedProviders" : [{

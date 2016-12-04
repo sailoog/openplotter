@@ -500,6 +500,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.op_maximize = wx.CheckBox(self.p_startup, label=_('Maximize OpenPlotter'), pos=(360, 150))
 		self.op_maximize.Bind(wx.EVT_CHECKBOX, self.startup)
 
+		self.node_red = wx.CheckBox(self.p_startup, label=_('Node-Red (Dashboard, Freeboard)'), pos=(360, 180))
+		self.node_red.Bind(wx.EVT_CHECKBOX, self.startup)
+
 	def read_startup(self):
 		self.delay.SetValue(self.conf.get('STARTUP', 'delay'))
 
@@ -523,6 +526,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if self.conf.get('STARTUP', 'maximize') == '1':
 			self.op_maximize.SetValue(True)
 			self.Maximize()
+		if self.conf.get('STARTUP', 'node_red') == '1': self.node_red.SetValue(True)
 		self.startup_path_sound.SetValue(self.conf.get('STARTUP', 'sound'))
 		if self.conf.get('STARTUP', 'play') == '1':
 			self.startup_play_sound.SetValue(True)
@@ -616,6 +620,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.conf.set('STARTUP', 'play', '1')
 			else:
 				self.conf.set('STARTUP', 'play', '0')
+
+		if sender == self.node_red:
+			if self.node_red.GetValue():
+				self.conf.set('STARTUP', 'node_red', '1')
+			else:
+				self.conf.set('STARTUP', 'node_red', '0')
 
 				########################################### WiFi AP
 
@@ -2691,8 +2701,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		# stopping sk server
 		self.ShowStatusBarRED(_('Closing Signal K server ...'))
 		self.vessel_self = ''
-		subprocess.call(["pkill", '-9', "node"])
-		while self.util_process_exist("node"):
+		subprocess.call(["pkill", '-f', "signalk-server-node"])
+		while self.util_process_exist("signalk-server-node"):
 			time.sleep(0.01)
 		# restarting sk server and providers
 		self.vessel_self = checkVesselSelf()

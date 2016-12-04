@@ -28,12 +28,13 @@ class addMCP(wx.Dialog):
 		panel = wx.Panel(self)
 
 		list_tmp = []
-		response = subprocess.Popen(
-			[parent.home + '/.config/signalk-server-node/node_modules/signalk-schema/scripts/extractKeysAndMeta.js'],
-			stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-		self.data = json.loads(response.communicate()[0])
+		with open(parent.home +'/.config/signalk-server-node/node_modules/signalk-schema/keyswithmetadata.json') as data_file:
+			self.data = json.load(data_file)
 		for i in self.data:
-			list_tmp.append(i)
+			ii = i.replace('/vessels/*/','')
+			ii = ii.replace('RegExp','*')
+			ii = ii.replace('/','.')
+			list_tmp.append(ii)
 		list_sk_path = sorted(list_tmp)
 
 		titl = wx.StaticText(panel, label='Signal K')
@@ -92,7 +93,10 @@ class addMCP(wx.Dialog):
 
 	def find_description(self, SK):
 		for i in self.data:
-			if SK == i:
+			ii = i.replace('/vessels/*/','')
+			ii = ii.replace('RegExp','*')
+			ii = ii.replace('/','.')
+			if SK == ii:
 				try:
 					value_str = self.data[i]['description']
 				except:
