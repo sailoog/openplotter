@@ -14,6 +14,9 @@ https://sailoog.gitbooks.io/openplotter-documentation/content/en/
 
 - [ ] Write a GUI for startup script to show startup process, inform of errors and show recommendations (changing pi user, access point and VNC passwords)
 - [ ] Build a better default Node-RED flow to feed freeboard and Node-RED Dashboard
+- [ ] Rebuild the Actions system to implement the new signalk-server-node plugin to create alarm zones for signalk keys.
+- [ ] Rebuild the MQTT system to perform the signalk specification.
+- [ ] Translations
 
 
 
