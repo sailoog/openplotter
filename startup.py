@@ -184,7 +184,7 @@ if not exist:
 		frecuency='161975000'
 		if channel=='b': frecuency='162025000'
 		rtl_fm=subprocess.Popen(['rtl_fm', '-f', frecuency, '-g', gain, '-p', ppm, '-s', '48k'], stdout = subprocess.PIPE)
-		aisdecoder=subprocess.Popen(['aisdecoder', '-h', '127.0.0.1', '-p', '10110', '-a', 'file', '-c', 'mono', '-d', '-f', '/dev/stdin'], stdin = rtl_fm.stdout)
+		aisdecoder=subprocess.Popen(['aisdecoder', '-h', 'localhost', '-p', '10110', '-a', 'file', '-c', 'mono', '-d', '-f', '/dev/stdin'], stdin = rtl_fm.stdout)
 
 	subprocess.call(['sudo', 'python', currentpath+'/display800x480.py'])
 	
