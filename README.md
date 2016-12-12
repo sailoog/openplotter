@@ -19,6 +19,7 @@ To apply updates and solved issues, delete the openplotter folder and download i
 ### Known issues
 
 - [x] [SOLVED] SDR AIS decodification doesn't work if network connection is not present.
+- [ ] Node-Red crashes after hours of function.
 
 ### To Do list
 
@@ -27,7 +28,11 @@ To apply updates and solved issues, delete the openplotter folder and download i
 - [ ] Rebuild calculations.
 - [ ] Rebuild the Actions system to implement the new signalk-server-node plugin to create alarm zones for signalk keys.
 - [ ] Rebuild the MQTT system to perform the signalk specification.
-- [ ] Translations
+- [ ] Set beginners/expert modes.
+- [ ] Add local documentation (pdf).
+- [ ] Set Android USB tethering for internet connection (and SMS?).
+- [ ] Use gprx for better AIS reception?.
+- [ ] Translations.
 
 ### We are updating documentation:
 
