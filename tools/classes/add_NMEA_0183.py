@@ -87,8 +87,9 @@ class addNMEA_0183(wx.Dialog):
 		self.string_number = wx.TextCtrl(panel, size=(80, 30), pos=(140, 332))
 
 		self.equal=wx.StaticText(panel, label=_('='), pos=(225, 335))
+ 
+		self.list_formats=[_('--format'),_('decimals: x.x'),_('decimals: x.xx'),_('decimals: x.xxxxxx'),_('time: hhmmss.ss'),_('date: ddmmyy'),_('lat: ddmm.mm'),_('lon: dddmm.mm'),_('lat: N/S'),_('lon: E/W')]
 
-		self.list_formats=[_('--format'),_('decimals: x.x'),_('decimals: x.xx'),_('time: hhmmss.ss'),_('date: ddmmyy'),_('lat: ddmm.mm'),_('lon: dddmm.mm'),_('lat: N/S'),_('lon: E/W')]
 		self.formats= wx.ComboBox(panel, choices=self.list_formats, style=wx.CB_READONLY, size=(150, 30), pos=(240, 332))
 
  		self.button_add_value =wx.Button(panel, label=_('Add value'), pos=(460, 330))
