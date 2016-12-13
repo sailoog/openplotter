@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
-import wx, pynmea2, inspect, webbrowser, json, subprocess, requests
+import wx, pynmea2, inspect, webbrowser, json, subprocess, requests, re
 from classes.paths import Paths
 
 class addNMEA_0183(wx.Dialog):
@@ -197,6 +197,12 @@ class addNMEA_0183(wx.Dialog):
 		key=self.signalk.GetValue()
 		operator=self.operator.GetValue()
 		str_num=self.string_number.GetValue()
+		if not re.match('^[0-9a-zA-Z/]+$', str_num) and len(str_num) > 0 :
+			self.list_fields.SetStringItem(selected_field,1,_('Failed. String must contain only allowed characters.'))
+			str_num=''
+			self.string_number.SetValue('')
+			return
+			
 		formats=self.formats.GetValue()
 		if not '--' in formats:
 			formats2=formats.split(':')
