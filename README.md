@@ -1,172 +1,34 @@
-## This is the development branch of OpenPlotter project. If you want to test this version, you have to follow these steps:
+## This is the development branch of OpenPlotter project. If you want to test this version, you have to download the system image from:
 
-* Run OpenPlotter RPI v0.8.0
+http://www.sailoog.com/en/blog/download-openplotter-rpi-v090alpha-noobs
 
-* Delete OpenPlotter v0.8.0 scripts and clone v0.9.0 branch:
+To apply updates and solved issues, delete the openplotter folder and download it again:
 
-`cd /home/pi/.config`
+`cd`
+
+`cd .config`
 
 `rm -rf openplotter/`
 
 `git clone -b v0.9.0 https://github.com/sailoog/openplotter.git`
 
-* Type in the terminal:
-
-`sudo apt-get update`
-
-`sudo apt-get upgrade`
-
 `sudo chmod 775 /home/pi/.config/openplotter/openplotter`
 
 `sudo chmod 775 /home/pi/.config/openplotter/keyword`
 
-* Add to file /home/pi/.profile:
+### Known issues
 
-`export PATH=$PATH:/home/pi/.config/openplotter`
+- [x] [SOLVED] SDR AIS decodification doesn't work if network connection is not present.
 
-* Install isc-dhcp-server:
+### To Do list
 
-`sudo apt-get install isc-dhcp-server`
-`sudo update-rc.d isc-dhcp-server disable`
+- [ ] Write a GUI for startup script to show startup process, inform of errors and show recommendations (changing pi user, access point and VNC passwords)
+- [ ] Build a better default Node-RED flow to feed freeboard and Node-RED Dashboard
+- [ ] Rebuild calculations.
+- [ ] Rebuild the Actions system to implement the new signalk-server-node plugin to create alarm zones for signalk keys.
+- [ ] Rebuild the MQTT system to perform the signalk specification.
+- [ ] Translations
 
-* Install bridge:
+### We are updating documentation:
 
-`sudo apt-get install bridge-utils`
-
-* Install python packages:
-
-`sudo pip install websocket-client spidev`
-
-* Replace the content of file /home/pi/.config/signalk-server-node/settings/openplotter-settings.json by:
-
-{
-	"vessel" : {
-		"uuid" : "urn:mrn:imo:mmsi:00000000"
-	},
-	"pipedProviders" : [{
-			"pipeElements" : [{
-					"type" : "providers/udp",
-					"options" : {
-						"port" : "55556"
-					}
-				}, {
-					"optionMappings" : [{
-							"toOption" : "selfId",
-							"fromAppProperty" : "selfId"
-						}, {
-							"toOption" : "selfType",
-							"fromAppProperty" : "selfType"
-						}
-					],
-					"type" : "providers/nmea0183-signalk"
-				}
-			],
-			"id" : "kplexOutput"
-		}, {
-			"pipeElements" : [{
-					"type" : "providers/udp",
-					"options" : {
-						"port" : "55557"
-					}
-				}, {
-					"type" : "providers/liner"
-				}, {
-					"type" : "providers/from_json"
-				}
-			],
-			"id" : "OP_sensors"
-		}, {
-			"pipeElements" : [{
-					"type" : "providers/udp",
-					"options" : {
-						"port" : "55558"
-					}
-				}, {
-					"type" : "providers/liner"
-				}, {
-					"type" : "providers/from_json"
-				}
-			],
-			"id" : "notifications"
-		}, {
-			"pipeElements" : [{
-					"type" : "providers/udp",
-					"options" : {
-						"port" : "55559"
-					}
-				}, {
-					"type" : "providers/liner"
-				}, {
-					"type" : "providers/from_json"
-				}
-			],
-			"id" : "serial"
-		}, {
-			"pipeElements" : [{
-					"type" : "providers/udp",
-					"options" : {
-						"port" : "55561"
-					}
-				}, {
-					"type" : "providers/liner"
-				}, {
-					"type" : "providers/from_json"
-				}
-			],
-			"id" : "wifi"
-		}, {
-			"pipeElements" : [{
-					"type" : "providers/execute",
-					"options" : {
-						"command" : "actisense-serial /dev/ttyOP_N2K"
-					}
-				}, {
-					"type" : "providers/liner"
-				}, {
-					"type" : "providers/n2kAnalyzer"
-				}, {
-					"type" : "providers/n2k-signalk"
-				}
-			],
-			"id" : "CAN-USB"
-		}
-	],
-	"interfaces" : {}
-}
-
-* Delete file /home/pi/.kplex.conf
-
-* Reset and open OpenPlotter typing:
-
-`openplotter`
-
-* In opencpn Options>Connections, replace:
-
-`localhost:10110 TCP input`
-
-by
-
-`localhost:10109 TCP input`
-
-* In the menu go to openplotter right click settings change ...openplotter.py to ...openplotter
-
-## Notes
-
-if you want to use the analog tools for firmata and ads1115, then read tools/install analog.txt
-
-changes:
-
--action on SignalK
-
--analog input MCP3008
-
--SignalK emulator
-
--generating nmea0183 sentences from SignalK can be tested by switching to tab NMEA0183 select system click diagnostic or from cmd with command `nc -ul 127.0.0.1 10110`
-
--generating nmea2000 sentences from SignalK can be tested by switching to tab NMEA 2K uncheck Enable N2K output click diagnostic output
-
-
-
--many pages are resizeable
-
+https://sailoog.gitbooks.io/openplotter-documentation/content/en/

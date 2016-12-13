@@ -181,7 +181,7 @@ class Actions:
 			rtl_fm = subprocess.Popen(['rtl_fm', '-f', frecuency, '-g', gain, '-p', ppm, '-s', '48k'],
 									  stdout=subprocess.PIPE)
 			aisdecoder = subprocess.Popen(
-				['aisdecoder', '-h', '127.0.0.1', '-p', '10110', '-a', 'file', '-c', 'mono', '-d', '-f', '/dev/stdin'],
+				['aisdecoder', '-h', 'localhost', '-p', '10110', '-a', 'file', '-c', 'mono', '-d', '-f', '/dev/stdin'],
 				stdin=rtl_fm.stdout)
 			conf.set('AIS-SDR', 'enable', '1')
 			conf.read()

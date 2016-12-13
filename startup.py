@@ -36,7 +36,7 @@ share = ''
 
 for pid in pids:
 	try:
-		if 'signalk-server' in open(os.path.join('/proc', pid, 'cmdline'), 'rb').read():
+		if 'signalk-server-node' in open(os.path.join('/proc', pid, 'cmdline'), 'rb').read():
 			exist=True
 	except IOError: # proc has already terminated
 		continue
@@ -170,6 +170,7 @@ if not exist:
 	subprocess.call(["pkill", '-f', "signalk-server-node"])
 	vessel_self=checkVesselSelf()
 
+	subprocess.call(["pkill", '-f', "node-red"])
 	if node_red=='1':
 		try: subprocess.Popen(['node-red-pi', '--max-old-space-size=128'])
 		except: pass
@@ -183,7 +184,7 @@ if not exist:
 		frecuency='161975000'
 		if channel=='b': frecuency='162025000'
 		rtl_fm=subprocess.Popen(['rtl_fm', '-f', frecuency, '-g', gain, '-p', ppm, '-s', '48k'], stdout = subprocess.PIPE)
-		aisdecoder=subprocess.Popen(['aisdecoder', '-h', '127.0.0.1', '-p', '10110', '-a', 'file', '-c', 'mono', '-d', '-f', '/dev/stdin'], stdin = rtl_fm.stdout)
+		aisdecoder=subprocess.Popen(['aisdecoder', '-h', 'localhost', '-p', '10110', '-a', 'file', '-c', 'mono', '-d', '-f', '/dev/stdin'], stdin = rtl_fm.stdout)
 
 	subprocess.call(['sudo', 'python', currentpath+'/display800x480.py'])
 	
