@@ -2,7 +2,7 @@
 
 # This file is part of Openplotter.
 # Copyright (C) 2015 by sailoog <https://github.com/sailoog/openplotter>
-#
+# 					  e-sailing <https://github.com/e-sailing/openplotter>
 # Openplotter is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 2 of the License, or
@@ -15,188 +15,333 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import subprocess, time, ConfigParser, os
+import wx, subprocess, time, ConfigParser, os, threading
 from classes.paths import Paths
 from classes.conf import Conf
+from classes.language import Language
 from classes.check_vessel_self import checkVesselSelf
 
-pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
-exist=False
-
-device = ''
-ssid = ''
-passw = ''
-hw_mode = ''
-channel = ''
-wpa = ''
-boot_ap = 0
-bridge = ''
-ip = ''
-share = ''
-
-for pid in pids:
-	try:
-		if 'signalk-server-node' in open(os.path.join('/proc', pid, 'cmdline'), 'rb').read():
-			exist=True
-	except IOError: # proc has already terminated
-		continue
-#exist=False
-
-if not exist:
-	paths=Paths()
-	currentpath=paths.currentpath
-	home=paths.home
-
-	boot_ap=0
-	boot_sh=0
-	boot_conf = ConfigParser.SafeConfigParser()
-	boot_conf.read('/boot/config.txt')
-	enable='0'
-	try:
-		enable=boot_conf.get('OPENPLOTTER', 'wifi_enable')
-	except: 
-		boot_conf.set('OPENPLOTTER', 'wifi_enable','0')
-	try:
-		device=boot_conf.get('OPENPLOTTER', 'device')
-		ssid=boot_conf.get('OPENPLOTTER', 'ssid')
-		passw=boot_conf.get('OPENPLOTTER', 'pass')
-		hw_mode = boot_conf.get('OPENPLOTTER', 'hw_mode')
-		channel = boot_conf.get('OPENPLOTTER', 'channel')
-		wpa = boot_conf.get('OPENPLOTTER', 'wpa')
-		boot_ap=1
-	except: boot_ap=0
-	try:
-		share=boot_conf.get('OPENPLOTTER', 'share')
-		boot_sh=1
-	except: boot_sh=0
-	try:
-		bridge = boot_conf.get('OPENPLOTTER', 'bridge')
-		ip = boot_conf.get('OPENPLOTTER', 'ip')
-	except: pass
-
-	conf=Conf(paths)
-
-	if enable=='1':
-		if not device: device='wlan0'
-		if not ssid: ssid='OpenPlotter'
-		if not passw: passw='12345678'
-		if not hw_mode: hw_mode='g'
-		if not channel: channel='6'
-		if not wpa: wpa='2'
-		if not bridge: bridge='0'
-		if not ip: ip='10.10.10.1'	
-		if conf.get('WIFI', 'enable')!=enable:   conf.set('WIFI', 'enable', enable)
-		if conf.get('WIFI', 'device')!=device:   conf.set('WIFI', 'device', device)
-		if conf.get('WIFI', 'ssid')!=ssid:       conf.set('WIFI', 'ssid', ssid)
-		if conf.get('WIFI', 'password')!=passw:  conf.set('WIFI', 'password', passw)
-		if conf.get('WIFI', 'hw_mode')!=hw_mode: conf.set('WIFI', 'hw_mode', hw_mode)
-		if conf.get('WIFI', 'channel')!=channel: conf.set('WIFI', 'channel', channel)
-		if conf.get('WIFI', 'wpa')!=wpa:         conf.set('WIFI', 'wpa', wpa)
-		if conf.get('WIFI', 'bridge')!=bridge:   conf.set('WIFI', 'bridge', bridge)
-		if conf.get('WIFI', 'ip')!=ip:           conf.set('WIFI', 'ip', ip)
+class MyFrame(wx.Frame):
 		
-	if boot_sh==1:
-		if not share: share='0'
-		if conf.get('WIFI', 'share')!=share: conf.set('WIFI', 'share', share)
+	def __init__(self):
 
-	wifi_server=conf.get('WIFI', 'enable')
+		paths=Paths()
+		self.conf=Conf(paths)
+		Language(self.conf.get('GENERAL','lang'))
+		self.currentpath=paths.currentpath
 
-	delay=int(conf.get('STARTUP', 'delay'))
+		self.ttimer=100
+		self.logger_data=''
+		self.warnings_data=''
+		self.warnings_flag=False
 
-	kplex=conf.get('STARTUP', 'kplex')
-	opencpn=conf.get('STARTUP', 'opencpn')
-	opencpn_no=conf.get('STARTUP', 'opencpn_no_opengl')
-	opencpn_fullscreen=conf.get('STARTUP', 'opencpn_fullscreen')
-	x11vnc=conf.get('STARTUP', 'x11vnc')
-	vnc_pass=conf.get('STARTUP', 'vnc_pass')
-	gps_time=conf.get('STARTUP', 'gps_time')
-	play=conf.get('STARTUP', 'play')
-	sound=conf.get('STARTUP', 'sound')
-	node_red=conf.get('STARTUP', 'node_red')
-	enable=conf.get('AIS-SDR', 'enable')
-	gain=conf.get('AIS-SDR', 'gain')
-	ppm=conf.get('AIS-SDR', 'ppm')
-	channel=conf.get('AIS-SDR', 'channel')
+		wx.Frame.__init__(self, None, title=_('Starting OpenPlotter'), style=wx.STAY_ON_TOP, size=(650,435))
+		self.Bind(wx.EVT_CLOSE, self.OnClose)
+		panel = wx.Panel(self, wx.ID_ANY)		
 		
-	nmea_mag_var=conf.get('CALCULATE', 'nmea_mag_var')
-	nmea_hdt=conf.get('CALCULATE', 'nmea_hdt')
-	nmea_rot=conf.get('CALCULATE', 'nmea_rot')
-	TW_STW=conf.get('CALCULATE', 'tw_stw')
-	TW_SOG=conf.get('CALCULATE', 'tw_sog')
+		self.timer = wx.Timer(self)
+		self.Bind(wx.EVT_TIMER, self.refresh, self.timer)
 
-	N2K_output=conf.get('N2K', 'output')
+		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
+		
+		self.icon = wx.Icon(self.currentpath+'/openplotter.ico', wx.BITMAP_TYPE_ICO)
+		self.SetIcon(self.icon)
 
-	tools_py=[]
-	if conf.has_section('TOOLS'):
-		if conf.has_option('TOOLS', 'py'):
-			data=conf.get('TOOLS', 'py')
+		self.logger = wx.TextCtrl(panel, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_DONTWRAP|wx.LC_SORT_ASCENDING)
+		self.warnings = wx.TextCtrl(panel, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_DONTWRAP|wx.LC_SORT_ASCENDING)
+
+
+		self.button_close =wx.Button(panel, label=_('Close'), pos=(555, 160))
+		self.button_close.Bind(wx.EVT_BUTTON, self.OnClose_button)
+		self.button_close.Disable()
+		
+		htextbox = wx.BoxSizer(wx.HORIZONTAL)
+		htextbox.Add(self.logger, 1, wx.ALL|wx.EXPAND, 5)
+
+		hwarnbox = wx.BoxSizer(wx.HORIZONTAL)
+		hwarnbox.Add(self.warnings, 1, wx.ALL|wx.EXPAND, 5)
+
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(self.button_close, 0, wx.RIGHT|wx.LEFT, 5)
+
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		vbox.Add(htextbox, 1, wx.ALL|wx.EXPAND, 0)
+		vbox.Add(hwarnbox, 1, wx.ALL|wx.EXPAND, 0)
+		vbox.Add(hbox, 0, wx.ALL|wx.EXPAND, 0)	
+		panel.SetSizer(vbox)
+		
+		self.CreateStatusBar()
+		font_statusBar = self.GetStatusBar().GetFont()
+		font_statusBar.SetWeight(wx.BOLD)
+		self.GetStatusBar().SetFont(font_statusBar)
+		self.SetStatusText(_('Starting OpenPlotter. Please wait for all services to start.'))
+		self.Centre()
+		self.Show(True)
+
+		self.thread1=threading.Thread(target=self.starting)
+		if not self.thread1.isAlive(): self.thread1.start()
+
+		self.timer.Start(self.ttimer)
+		
+	def refresh(self,event):
+		if self.logger_data: 
+			self.logger.AppendText(self.logger_data)
+			self.logger_data=''
+		if self.warnings_data:
+			self.warnings_flag=True
+			self.warnings.AppendText(self.warnings_data)
+			self.warnings_data=''
+		if not self.thread1.isAlive():
+			if not self.warnings_flag: self.destroy_window()
+			else: 
+				self.button_close.Enable()
+				self.GetStatusBar().SetForegroundColour(wx.RED)
+				self.SetStatusText(_('There are some warnings. Please close this window and check your system.'))
+			
+
+	def add_logger_data(self, msg):
+		while self.logger_data:
+			time.sleep(0.1)
+		self.logger_data=msg
+
+	def add_warnings_data(self, msg):
+		while self.warnings_data:
+			time.sleep(0.1)
+		self.warnings_data=msg
+
+	def starting(self):
+		pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
+		exist=False
+
+		device = ''
+		ssid = ''
+		passw = ''
+		hw_mode = ''
+		channel = ''
+		wpa = ''
+		boot_ap = 0
+		bridge = ''
+		ip = ''
+		share = ''
+
+		for pid in pids:
 			try:
-				temp_list=eval(data)
-			except:temp_list=[]
-			if type(temp_list) is list: pass
-			else:	temp_list=[]
-			for ii in temp_list:
-				tools_py.append(ii)
+				if 'signalk-server-node' in open(os.path.join('/proc', pid, 'cmdline'), 'rb').read():
+					exist=True
+			except IOError: # proc has already terminated
+				continue
 
-	#######################################################
-	time.sleep(delay)
+		if not exist:
 
-	try:
-		subprocess.call(['pkill', '-9', 'x11vnc'])
-		if x11vnc=='1':
-			if vnc_pass=='1': process = subprocess.Popen(['x11vnc', '-forever', '-shared', '-usepw'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-			else: process = subprocess.Popen(['x11vnc', '-forever', '-shared' ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-			time.sleep(5)
-	except: print 'x11vnc not installed'
-
-	opencpn_commands = ['opencpn']
-	if opencpn_no=='1': opencpn_commands.append('-no_opengl')
-	if opencpn_fullscreen=='1': opencpn_commands.append('-fullscreen')
-
-	if opencpn=='1' and len(opencpn_commands)>1: subprocess.Popen(opencpn_commands)
-	if opencpn=='1' and len(opencpn_commands)==1: subprocess.Popen('opencpn')
-
-	if wifi_server=='1':
-		process = subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '1'])
-	else:
-		process = subprocess.Popen(['sudo', 'python', currentpath+'/wifi_server.py', '0'])
-
-	process.wait()
-
-	subprocess.call(['pkill', '-9', 'kplex'])
-	if kplex=='1':
-		subprocess.Popen('kplex')
-
-	subprocess.call(["pkill", '-f', "signalk-server-node"])
-	vessel_self=checkVesselSelf()
-
-	subprocess.call(["pkill", '-f', "node-red"])
-	if node_red=='1':
-		try: subprocess.Popen(['node-red-pi', '--max-old-space-size=128'])
-		except: pass
-
-	if gps_time=='1':
-		subprocess.call(['sudo', 'python', currentpath+'/time_gps.py'])
-
-	subprocess.call(['pkill', '-9', 'aisdecoder'])
-	subprocess.call(['pkill', '-9', 'rtl_fm'])
-	if enable=='1':
-		frecuency='161975000'
-		if channel=='b': frecuency='162025000'
-		rtl_fm=subprocess.Popen(['rtl_fm', '-f', frecuency, '-g', gain, '-p', ppm, '-s', '48k'], stdout = subprocess.PIPE)
-		aisdecoder=subprocess.Popen(['aisdecoder', '-h', 'localhost', '-p', '10110', '-a', 'file', '-c', 'mono', '-d', '-f', '/dev/stdin'], stdin = rtl_fm.stdout)
-
-	subprocess.call(['sudo', 'python', currentpath+'/display800x480.py'])
-	
-	subprocess.call(['pkill', '-9', 'mpg123'])
-	if play=='1':
-		if sound:
-			try: subprocess.Popen(['mpg123', '-q', sound])
+			boot_ap=0
+			boot_sh=0
+			boot_conf = ConfigParser.SafeConfigParser()
+			boot_conf.read('/boot/config.txt')
+			enable='0'
+			try:
+				enable=boot_conf.get('OPENPLOTTER', 'wifi_enable')
+			except: 
+				boot_conf.set('OPENPLOTTER', 'wifi_enable','0')
+			try:
+				device=boot_conf.get('OPENPLOTTER', 'device')
+				ssid=boot_conf.get('OPENPLOTTER', 'ssid')
+				passw=boot_conf.get('OPENPLOTTER', 'pass')
+				hw_mode = boot_conf.get('OPENPLOTTER', 'hw_mode')
+				channel = boot_conf.get('OPENPLOTTER', 'channel')
+				wpa = boot_conf.get('OPENPLOTTER', 'wpa')
+				boot_ap=1
+			except: boot_ap=0
+			try:
+				share=boot_conf.get('OPENPLOTTER', 'share')
+				boot_sh=1
+			except: boot_sh=0
+			try:
+				bridge = boot_conf.get('OPENPLOTTER', 'bridge')
+				ip = boot_conf.get('OPENPLOTTER', 'ip')
 			except: pass
 
-	index=0
-	for i in tools_py:
-		if i[3]=='1':
-			subprocess.Popen(['python',currentpath+'/tools/'+tools_py[index][2]])	
-		index+=1
-			
+			if enable=='1':
+				if not device: device='wlan0'
+				if not ssid: ssid='OpenPlotter'
+				if not passw: passw='12345678'
+				if not hw_mode: hw_mode='g'
+				if not channel: channel='6'
+				if not wpa: wpa='2'
+				if not bridge: bridge='0'
+				if not ip: ip='10.10.10.1'	
+				if self.conf.get('WIFI', 'enable')!=enable:   self.conf.set('WIFI', 'enable', enable)
+				if self.conf.get('WIFI', 'device')!=device:   self.conf.set('WIFI', 'device', device)
+				if self.conf.get('WIFI', 'ssid')!=ssid:       self.conf.set('WIFI', 'ssid', ssid)
+				if self.conf.get('WIFI', 'password')!=passw:  self.conf.set('WIFI', 'password', passw)
+				if self.conf.get('WIFI', 'hw_mode')!=hw_mode: self.conf.set('WIFI', 'hw_mode', hw_mode)
+				if self.conf.get('WIFI', 'channel')!=channel: self.conf.set('WIFI', 'channel', channel)
+				if self.conf.get('WIFI', 'wpa')!=wpa:         self.conf.set('WIFI', 'wpa', wpa)
+				if self.conf.get('WIFI', 'bridge')!=bridge:   self.conf.set('WIFI', 'bridge', bridge)
+				if self.conf.get('WIFI', 'ip')!=ip:           self.conf.set('WIFI', 'ip', ip)
+				
+			if boot_sh==1:
+				if not share: share='0'
+				if self.conf.get('WIFI', 'share')!=share: self.conf.set('WIFI', 'share', share)
+
+			wifi_server=self.conf.get('WIFI', 'enable')
+			wifi_server_pass=self.conf.get('WIFI', 'password')
+
+			delay=int(self.conf.get('STARTUP', 'delay'))
+
+			kplex=self.conf.get('STARTUP', 'kplex')
+			opencpn=self.conf.get('STARTUP', 'opencpn')
+			opencpn_no=self.conf.get('STARTUP', 'opencpn_no_opengl')
+			opencpn_fullscreen=self.conf.get('STARTUP', 'opencpn_fullscreen')
+			x11vnc=self.conf.get('STARTUP', 'x11vnc')
+			vnc_pass=self.conf.get('STARTUP', 'vnc_pass')
+			gps_time=self.conf.get('STARTUP', 'gps_time')
+			play=self.conf.get('STARTUP', 'play')
+			sound=self.conf.get('STARTUP', 'sound')
+			node_red=self.conf.get('STARTUP', 'node_red')
+			enable=self.conf.get('AIS-SDR', 'enable')
+			gain=self.conf.get('AIS-SDR', 'gain')
+			ppm=self.conf.get('AIS-SDR', 'ppm')
+			channel=self.conf.get('AIS-SDR', 'channel')
+				
+			nmea_mag_var=self.conf.get('CALCULATE', 'nmea_mag_var')
+			nmea_hdt=self.conf.get('CALCULATE', 'nmea_hdt')
+			nmea_rot=self.conf.get('CALCULATE', 'nmea_rot')
+			TW_STW=self.conf.get('CALCULATE', 'tw_stw')
+			TW_SOG=self.conf.get('CALCULATE', 'tw_sog')
+
+			N2K_output=self.conf.get('N2K', 'output')
+
+			tools_py=[]
+			if self.conf.has_section('TOOLS'):
+				if self.conf.has_option('TOOLS', 'py'):
+					data=self.conf.get('TOOLS', 'py')
+					try:
+						temp_list=eval(data)
+					except:temp_list=[]
+					if type(temp_list) is list: pass
+					else:	temp_list=[]
+					for ii in temp_list:
+						tools_py.append(ii)
+
+			#######################################################
+			self.add_logger_data(_('\nChecking pi password...'))
+			out = subprocess.check_output(['sudo', '-n', 'grep', '-E', '^pi:', '/etc/shadow'])
+			tmp = out.split(':')
+			passw_a = tmp[1]
+			tmp = passw_a.split('$')
+			salt = tmp[2]
+			passw_b = subprocess.check_output(['mkpasswd', '-msha-512', 'raspberry', salt])
+			if passw_a.rstrip() == passw_b.rstrip():
+				self.add_warnings_data(_('\n\nSecurity warning: You are using the default password for "pi" user.\nPlease change password in Menu > Preferences > Raspberry Pi Configuration.'))
+			self.add_logger_data(_(' Done.'))
+
+			if delay!=0:
+				self.add_logger_data(_('\nApplying ')+str(delay)+_(' seconds of delay...'))
+				time.sleep(delay)
+				self.add_logger_data(_(' Done.'))
+
+			subprocess.call(['pkill', '-9', 'x11vnc'])
+			if x11vnc=='1':
+				self.add_logger_data(_('\nStarting VNC...'))
+				if vnc_pass=='1': process = subprocess.Popen(['x11vnc', '-forever', '-shared', '-usepw'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+				else: process = subprocess.Popen(['x11vnc', '-forever', '-shared' ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+				self.add_logger_data(_(' Done.'))
+				self.add_logger_data(_('\nChecking VNC password...'))
+				if vnc_pass=='1':
+					try: out = subprocess.check_output(['cat', '/home/pi/.vnc/passwd'])
+					except: self.add_warnings_data(_('\n\nSecurity warning: You have not set a password for VNC.\nPlease set a password in OpenPlotter > Startup.'))
+				else: 
+					self.add_warnings_data(_('\n\nSecurity warning: You have not set a password for VNC.\nPlease set a password in OpenPlotter > Startup.'))
+				self.add_logger_data(_(' Done.'))
+
+			subprocess.call(['pkill', '-9', 'opencpn'])
+			if opencpn=='1':
+				self.add_logger_data(_('\nStarting OpenCPN...'))
+				opencpn_commands = ['opencpn']
+				if opencpn_no=='1': opencpn_commands.append('-no_opengl')
+				if opencpn_fullscreen=='1': opencpn_commands.append('-fullscreen')
+				if len(opencpn_commands)>1: subprocess.Popen(opencpn_commands)
+				if len(opencpn_commands)==1: subprocess.Popen('opencpn')
+				self.add_logger_data(_(' Done.'))
+
+			if wifi_server=='1':
+				self.add_logger_data(_('\nStarting WIFI Access Point...'))
+				process = subprocess.Popen(['sudo', 'python', self.currentpath+'/wifi_server.py', '1'])
+			else:
+				self.add_logger_data(_('\nStarting WIFI Client...'))
+				process = subprocess.Popen(['sudo', 'python', self.currentpath+'/wifi_server.py', '0'])
+			process.wait()
+			self.add_logger_data(_(' Done.'))
+			if wifi_server=='1':
+				self.add_logger_data(_('\nchecking WIFI Access Point password...'))
+				if wifi_server_pass=='12345678':
+					self.add_warnings_data(_('\n\nSecurity warning: You are using the default WIFI Access Point password.\nPlease change password in OpenPlotter > WiFi AP.'))
+				self.add_logger_data(_(' Done.'))
+
+			subprocess.call(['pkill', '-9', 'kplex'])
+			if kplex=='1':
+				self.add_logger_data(_('\nStarting NMEA 0183 Multiplexer...'))
+				subprocess.Popen('kplex')
+				self.add_logger_data(_(' Done.'))
+
+			subprocess.call(["pkill", '-f', "signalk-server-node"])
+			self.add_logger_data(_('\nStarting SignalK Server...'))
+			vessel_self=checkVesselSelf()
+			self.add_logger_data(_(' Done.'))
+
+			subprocess.call(["pkill", '-f', "node-red"])
+			self.add_logger_data(_('\nStarting Node-RED...'))
+			if node_red=='1':
+				try: 
+					subprocess.Popen(['node-red-pi', '--max-old-space-size=128'])
+					self.add_logger_data(_(' Done.'))
+				except: pass
+
+			if gps_time=='1':
+				self.add_logger_data(_('\nGetting system time from NMEA 0183...'))
+				subprocess.call(['sudo', 'python', self.currentpath+'/time_gps.py'])
+				self.add_logger_data(_(' Done.'))
+
+			subprocess.call(['pkill', '-9', 'aisdecoder'])
+			subprocess.call(['pkill', '-9', 'rtl_fm'])
+			if enable=='1':
+				self.add_logger_data(_('\nStarting SDR AIS reception...'))
+				frecuency='161975000'
+				if channel=='b': frecuency='162025000'
+				rtl_fm=subprocess.Popen(['rtl_fm', '-f', frecuency, '-g', gain, '-p', ppm, '-s', '48k'], stdout = subprocess.PIPE)
+				aisdecoder=subprocess.Popen(['aisdecoder', '-h', 'localhost', '-p', '10110', '-a', 'file', '-c', 'mono', '-d', '-f', '/dev/stdin'], stdin = rtl_fm.stdout)
+			self.add_logger_data(_(' Done.'))
+
+			self.add_logger_data(_('\nCheck 800x480 display...'))
+			subprocess.call(['sudo', 'python', self.currentpath+'/display800x480.py'])
+			self.add_logger_data(_(' Done.'))
+
+			self.add_logger_data(_('\nStarting Tools...'))
+			index=0
+			for i in tools_py:
+				if i[3]=='1':
+					subprocess.Popen(['python',self.currentpath+'/tools/'+tools_py[index][2]])	
+				index+=1
+			self.add_logger_data(_(' Done.'))
+
+			subprocess.call(['pkill', '-9', 'mpg123'])
+			if play=='1':
+				if sound:
+					try: subprocess.Popen(['mpg123', '-q', sound])
+					except: pass
+
+
+	def OnClose(self, event):
+		pass
+
+	def OnClose_button(self, event):
+		self.destroy_window()
+
+	def destroy_window(self):
+		self.timer.Stop()
+		self.Destroy()
+
+
+app = wx.App()
+MyFrame().Show()
+app.MainLoop()
