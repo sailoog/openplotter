@@ -142,7 +142,7 @@ class addTrigger(wx.Dialog):
 		self.keys(self.data)
 		list_tmp2=sorted(self.data_keys)
 		for i in list_tmp2:
-			if group in i:
+			if group == i[:len(group)]:
 				self.list_signalk.append(i.replace(group,'',1))
 		self.signalk.AppendItems(self.list_signalk)
 		self.signalk.SetSelection(0)
