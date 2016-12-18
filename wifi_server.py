@@ -98,6 +98,8 @@ elif len(sys.argv) > 1:
 			data += 'pre-down iwconfig ' + wlan + ' essid ' + ssid + '\n'
 			data += 'allow-hotplug eth0\n'
 			data += 'iface eth0 inet dhcp\n'
+			data += 'allow-hotplug usb0\n'
+			data += 'iface usb0 inet dhcp\n'
 
 			data += 'auto ' + wlan + '\n'
 			data += 'iface ' + wlan + ' inet static\n'
@@ -109,11 +111,11 @@ elif len(sys.argv) > 1:
 				data += 'post-up iptables -A FORWARD -i ' + share + ' -o ' + lan + ' -m state --state RELATED,ESTABLISHED -j ACCEPT\n'
 				data += 'post-up iptables -A FORWARD -i ' + lan + ' -o ' + share + ' -j ACCEPT\n'
 			data += 'post-up systemctl restart NetworkManager\n'
-			data += 'sleep 1\n'
+			#data += 'sleep 1\n'
 			data += 'post-up service dnsmasq restart\n'
-			data += 'sleep 1\n'
+			#data += 'sleep 1\n'
 			data += 'post-up service hostapd restart\n'
-			data += 'sleep 1\n'
+			#data += 'sleep 1\n'
 			data += 'post-up ifconfig ' + wlan + ' ' + ip3 + '.1 netmask 255.255.255.0\n'
 			data += 'sleep 1\n'
 
@@ -126,6 +128,8 @@ elif len(sys.argv) > 1:
 			data += 'iface ' + wlan + ' inet manual\n'
 			data += 'allow-hotplug eth0\n'
 			data += 'iface eth0 inet manual\n'
+			data += 'allow-hotplug usb0\n'
+			data += 'iface usb0 inet dhcp\n'
 
 			data += 'auto br0\n'
 			data += 'iface br0 inet static\n'
@@ -159,11 +163,11 @@ elif len(sys.argv) > 1:
 		if bridge == '0':
 			wlanx = 'wlan0'
 			if wlan[-1:] == '0': wlanx = 'wlan1'
-			data = 'no-dhcp-interface=lo,eth0,' + wlanx + ',ppp0\n'
+			data = 'no-dhcp-interface=lo,eth0,' + wlanx + ',usb0,ppp0\n'
 			data += 'interface=' + wlan + '\n'
 			data += 'dhcp-range=' + ip3 + '.20,' + ip3 + '.254,255.255.255.0,12h\n'
 		else:
-			data = 'no-dhcp-interface=lo,eth0,wlan0,wlan1,ppp0\n'
+			data = 'no-dhcp-interface=lo,eth0,wlan0,wlan1,usb0,ppp0\n'
 			data += 'interface=br0\n'
 			data += 'dhcp-range=' + ip3 + '.100,' + ip3 + '.200,255.255.255.0,12h\n'
 
@@ -203,21 +207,31 @@ elif len(sys.argv) > 1:
 			wififile = open('/etc/dhcp/dhcpd.conf', 'w')
 			wififile.write(data)
 			wififile.close()
-
+		print 'restarting'
 		if change:
-			if bridge == '1' and 'eth0:0' in subprocess.check_output('ifconfig'):
-				output = subprocess.Popen(['ifconfig', 'eth0:0', 'down'])
-				output.wait()
-			output = subprocess.Popen(['service', 'hostapd', 'stop'])
+			#if bridge == '1' and 'eth0:0' in subprocess.check_output('ifconfig'):
+			#	output = subprocess.Popen(['ifconfig', 'eth0:0', 'down'],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+			#	output.wait()
+			output = subprocess.Popen(['service', 'hostapd', 'stop'],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+			#print '1'
 			output.wait()
-			output = subprocess.Popen(['service', 'dnsmasq', 'stop'])
+			#print output.communicate()
+			output = subprocess.Popen(['service', 'dnsmasq', 'stop'],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+			#print '2'
 			output.wait()
-			output = subprocess.Popen(['service', 'networking', 'stop'])
+			#print output.communicate()
+			output = subprocess.Popen(['service', 'networking', 'stop'],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+			#print '3'
 			output.wait()
-			output = subprocess.Popen(['systemctl', 'daemon-reload'])
+			#print output.communicate()
+			output = subprocess.Popen(['systemctl', 'daemon-reload'],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+			#print '4'
 			output.wait()
-			output = subprocess.Popen(['service', 'networking', 'start'])
+			#print output.communicate()
+			output = subprocess.Popen(['service', 'networking', 'start'],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+			#print '5'
 			output.wait()
+			#print output.communicate()
 
 		msg1 = ''
 		network_info = ''
@@ -255,6 +269,7 @@ elif len(sys.argv) > 1:
 			print "WiFi access point started.\n"
 			print "SSID: " + ssid
 			print 'Address: ' + ip3 + '.1'
+			print 'It is recommended to restart the computer'
 
 	else:
 		wififile = open('/etc/network/interfaces', 'r', 2000)
@@ -267,13 +282,15 @@ elif len(sys.argv) > 1:
 
 		data += 'allow-hotplug eth0\n'
 		data += 'iface eth0 inet dhcp\n'
+		data += 'allow-hotplug usb0\n'
+		data += 'iface usb0 inet dhcp\n'
 
 		if bak != data:
 			wififile = open('/etc/network/interfaces', 'w')
 			wififile.write(data)
 			wififile.close()
 
-			if 'br0:0' in subprocess.check_output('ifconfig'):
+			if 'br0' in subprocess.check_output('ifconfig'):
 				output = subprocess.Popen(['brctl', 'delif', 'br0', 'eth0'])
 				output.wait()
 				output = subprocess.Popen(['ifconfig', 'br0', 'down'])
@@ -301,6 +318,7 @@ elif len(sys.argv) > 1:
 			if output != 0: error = 1
 
 			print "\nWiFi access point stopped."
+			print 'It is recommended to restart the computer'
 
 	data = ''
 

@@ -29,7 +29,19 @@ except:
 if output != bak:
 	subprocess.check_output(['tvservice', '-d', 'edid.dat'])
 output = subprocess.check_output(['edidparser', 'edid.dat'])
+
+DisplayResolution = ''
+
 if '800x480' in output:
+	DisplayResolution = '800 480'
+	#DisplayResolution = '1024 600'
+	#DisplayResolution = '1120 630'	
+elif '1024:600' in output:
+	DisplayResolution = '1024 600'
+elif '1280:800' in output:
+	DisplayResolution = '1280 800'
+
+if DisplayResolution != '':
 	configfile = open('/boot/config.txt', 'r', 5000)
 	data = configfile.read()
 	configfile.close()
@@ -44,18 +56,15 @@ if '800x480' in output:
 				if '[all]' in l:
 					data += '[EDID=' + output + ']\n'
 					data += 'hdmi_group=2\n'
-					data += 'hdmi_mode=1\n'
 					data += 'hdmi_mode=87\n'
-					data += 'hdmi_cvt=800 480 60 6 0 0 0\n'				
+					data += 'hdmi_cvt='+ DisplayResolution +' 60 6 0 0 0\n'
 				data += l+'\n'
 		else:
 			data += '[EDID=' + output + ']\n'
 			data += 'hdmi_group=2\n'
-			data += 'hdmi_mode=1\n'
 			data += 'hdmi_mode=87\n'
-			data += 'hdmi_cvt=800 480 60 6 0 0 0\n'
+			data += 'hdmi_cvt='+ DisplayResolution +' 60 6 0 0 0\n'
 			data += '[all]\n'
 		configfile = open('/boot/config.txt', 'w')
 		configfile.write(data)
 		configfile.close()
-		

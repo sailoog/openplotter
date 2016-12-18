@@ -16,6 +16,8 @@ To apply updates and solved issues, delete the openplotter folder and download i
 
 `sudo chmod 775 /home/pi/.config/openplotter/keyword`
 
+`sudo chmod 775 /home/pi/.config/openplotter/startup`
+
 ### Known issues
 
 - [x] [SOLVED] SDR AIS decodification doesn't work if network connection is not present.
@@ -24,6 +26,7 @@ To apply updates and solved issues, delete the openplotter folder and download i
 ### To Do list
 
 - [x] [DONE] Write a GUI for startup script to show startup process, inform of errors and show recommendations (changing pi user, access point and VNC passwords)
+- [x] [DONE] startup can be started from terminal `startup stop` + `startup` is the same as `startup restart` (for debug, warm restart and stop OpenPlotter server processes)
 - [ ] Build a better default Node-RED flow to feed freeboard and Node-RED Dashboard
 - [ ] Rebuild calculations.
 - [ ] Rebuild the Actions system to implement the new signalk-server-node plugin to create alarm zones for signalk keys.
