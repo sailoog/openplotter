@@ -482,6 +482,8 @@ class MySK_to_NMEA:
 					value_str = str(round(value, 1))
 				elif i[1] == 'x.xx':
 					value_str = str(round(value, 2))
+                                elif i[1] =='x.xxxxxx':
+                                        value_str = str(round(value, 6))
 				elif i[1] == 'hhmmss.ss':
 					value_str = datetime.datetime.utcnow().strftime('%H%M%S.00')
 				elif i[1] == 'ddmmyy':
