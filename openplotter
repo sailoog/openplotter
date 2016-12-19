@@ -1057,7 +1057,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def edit_kplex(self, e):
 		idx = e.GetIndex()
 
-		if self.kplex[idx][1] == 'system' or self.kplex[idx][1] == 'opencpn' or self.kplex[idx][1] == 'signalk':
+		if self.kplex[idx][1] == 'system_a' or self.kplex[idx][1] == 'system_b' or self.kplex[idx][1] == 'opencpn' or self.kplex[idx][1] == 'signalk':
 			self.ShowStatusBarRED(_('You can not edit this.'))
 			return
 		edit = []
@@ -1199,13 +1199,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		data = '# For advanced manual configuration, please visit: http://www.stripydog.com/kplex/configuration.html\n# Please do not modify defaults nor OpenPlotter GUI settings.\n# Add manual settings at the end of the document.\n\n'
 
 		data += '###defaults\n\n'
-		data += '[udp]\nname=system\ndirection=in\naddress=localhost\nport=10110\n\n'
+		data += '[udp]\nname=system_a\ndirection=in\naddress=localhost\nport=10110\n\n'
+		data += '[udp]\nname=system_b\ndirection=in\nport=10110\n\n'
 		data += '[tcp]\nname=opencpn\ndirection=out\nmode=server\nofilter=-**RMB\nport=10109\n\n'
 		data += '[udp]\nname=signalk\ndirection=out\nofilter=-OC***\naddress=127.0.0.1\nport=55556\n\n'
 		data += '###end of defaults\n\n###OpenPlotter GUI settings\n\n'
 
 		for index, item in enumerate(self.kplex):
-			if not ('system' in item[1] or 'opencpn' in item[1] or 'signalk' in item[1]):
+			if not ('system_a' in item[1] or 'system_b' in item[1] or 'opencpn' in item[1] or 'signalk' in item[1]):
 				if self.list_kplex.IsChecked(index):
 					state = ''
 				else:
@@ -1254,7 +1255,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		num = len(self.kplex)
 		for i in range(num):
 			if self.list_kplex.IsSelected(i):
-				if self.kplex[i][1] == 'system' or self.kplex[i][1] == 'opencpn' or self.kplex[i][1] == 'signalk':
+				if self.kplex[i][1] == 'system_a' or self.kplex[i][1] == 'system_b' or self.kplex[i][1] == 'opencpn' or self.kplex[i][1] == 'signalk':
 					self.ShowStatusBarRED(_('You can not delete this.'))
 					return
 				del self.kplex[i]
