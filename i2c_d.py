@@ -78,13 +78,18 @@ else:
 	adjust_point=[]
 	SignalK=''
 
-	spi = spidev.SpiDev()
-	spi.open(0,0)
 
 	data=conf.get('SPI', 'mcp')
 	try:
 		temp_list=eval(data)
 	except:temp_list=[]
+
+	spi = spidev.SpiDev()
+	try:
+		spi.open(0,0)
+	except:
+		print "Can't open spi!"
+		temp_list=[]
 
 	analog_=False
 	for ii in temp_list:
