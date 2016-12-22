@@ -66,6 +66,11 @@ class MyFrame(wx.Frame):
 			self.rot.Bind(wx.EVT_CHECKBOX, self.nmea_rot)
 			wx.StaticText(self, label=_('Generated NMEA: $OCROT'), pos=(20, 235))
 			'''
+
+			wx.StaticBox(self, size=(330, 50), pos=(350, 10))
+			self.back = wx.CheckBox(self, label=_('NMEA for imu and pressure (compatibility v0.8)'), pos=(360, 30))
+			self.back.Bind(wx.EVT_CHECKBOX, self.on_back)
+
 			wx.StaticBox(self, label=_(' True wind '), size=(330, 90), pos=(350, 65))
 			self.TW_STW = wx.CheckBox(self, label=_('boat referenced (use speed log)'), pos=(360, 80))
 			self.TW_STW.Bind(wx.EVT_CHECKBOX, self.on_TW_STW)
@@ -86,6 +91,8 @@ class MyFrame(wx.Frame):
 			#if self.conf.get('CALCULATE', 'nmea_rot')=='1': self.rot.SetValue(True)
 			if self.conf.get('CALCULATE', 'tw_stw')=='1': self.TW_STW.SetValue(True)
 			if self.conf.get('CALCULATE', 'tw_sog')=='1': self.TW_SOG.SetValue(True)
+			if self.conf.has_option('CALCULATE', 'oldnmeav08'):
+				if self.conf.get('CALCULATE', 'oldnmeav08')=='1': self.back.SetValue(True)
 
 		def start_calculate(self):
 			#subprocess.call(['pkill', '-f', 'calculate_d.py'])
@@ -134,6 +141,12 @@ class MyFrame(wx.Frame):
 			state=sender.GetValue()
 			if state: self.conf.set('CALCULATE', 'tw_sog', '1')
 			else:     self.conf.set('CALCULATE', 'tw_sog', '0')
+
+		def	on_back(self, e):
+			sender = e.GetEventObject()
+			state=sender.GetValue()
+			if state: self.conf.set('CALCULATE', 'oldnmeav08', '1')
+			else:     self.conf.set('CALCULATE', 'oldnmeav08', '0')
 
 app = wx.App()
 MyFrame().Show()

@@ -41,3 +41,13 @@ class Conf:
 		self.read()
 		self.data_conf.set(section, item, value)
 		self.write()
+
+	def has_option(self, section, item):
+		return self.data_conf.has_option(section, item)
+
+	def has_section(self, section):
+		return self.data_conf.has_section(section)
+
+	def add_section(self, section):
+		return self.data_conf.add_section(section)
+		

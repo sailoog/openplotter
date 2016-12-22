@@ -78,18 +78,13 @@ else:
 	adjust_point=[]
 	SignalK=''
 
+	spi = spidev.SpiDev()
+	spi.open(0,0)
 
 	data=conf.get('SPI', 'mcp')
 	try:
 		temp_list=eval(data)
 	except:temp_list=[]
-
-	spi = spidev.SpiDev()
-	try:
-		spi.open(0,0)
-	except:
-		print "Can't open spi!"
-		temp_list=[]
 
 	analog_=False
 	for ii in temp_list:
@@ -141,6 +136,11 @@ else:
 	p_temp_sk=conf.get('I2C', 'sk_temp_p')=='1'
 	humidity_sk=conf.get('I2C', 'sk_hum')=='1'
 	h_temp_sk=conf.get('I2C', 'sk_temp_h')=='1'
+	if conf.has_option('CALCULATE', 'oldnmeav08'):
+		backwards_comp=conf.get('CALCULATE', 'oldnmeav08')=='1'
+	else:
+	    backwards_comp = False
+	
 	imu_=False
 	bmp_=False
 	hum_=False
@@ -204,95 +204,108 @@ else:
 			humidity_val.humidityInit()
 
 		def work_imu():
-					threading.Timer(rate_imu, work_imu).start()
-					if imu.IMURead():
-						data = imu.getIMUData()
-						fusionPose = data["fusionPose"]
-						MyVar.heading=math.degrees(fusionPose[2])+heading_offset
-						MyVar.heel=math.degrees(fusionPose[0])+heel_offset
-						MyVar.pitch=math.degrees(fusionPose[1])+pitch_offset
-						if MyVar.heading<0: MyVar.heading=360+MyVar.heading
-						elif MyVar.heading>360: MyVar.heading=-360+MyVar.heading
-					
-					Erg=''
-					if heading_sk:
-						Erg += '{"path": "navigation.headingMagnetic","value":'+str(0.017453293*MyVar.heading)+'},'
-					if heel_sk:
-						Erg += '{"path": "navigation.attitude.roll","value":'+str(0.017453293*MyVar.heel)+'},'
-					if pitch_sk:
-						Erg += '{"path": "navigation.attitude.pitch","value":'+str(0.017453293*MyVar.pitch)+'},'
+			threading.Timer(rate_imu, work_imu).start()
+			if imu.IMURead():
+				data = imu.getIMUData()
+				fusionPose = data["fusionPose"]
+				MyVar.heading=math.degrees(fusionPose[2])+heading_offset
+				MyVar.heel=math.degrees(fusionPose[0])+heel_offset
+				MyVar.pitch=math.degrees(fusionPose[1])+pitch_offset
+				if MyVar.heading<0: MyVar.heading=360+MyVar.heading
+				elif MyVar.heading>360: MyVar.heading=-360+MyVar.heading
+			
+			Erg=''
+			if heading_sk:
+				Erg += '{"path": "navigation.headingMagnetic","value":'+str(0.017453293*MyVar.heading)+'},'
+			if heel_sk:
+				Erg += '{"path": "navigation.attitude.roll","value":'+str(0.017453293*MyVar.heel)+'},'
+			if pitch_sk:
+				Erg += '{"path": "navigation.attitude.pitch","value":'+str(0.017453293*MyVar.pitch)+'},'
 
-					SignalK='{"updates":[{"source":{"type": "I2C","src":"'+imu.IMUName()+'"},"values":['
-					SignalK+=Erg[0:-1]+']}]}\n'		
-					sock.sendto(SignalK, ('127.0.0.1', 55557))	
+			SignalK='{"updates":[{"source":{"type": "I2C","src":"'+imu.IMUName()+'"},"values":['
+			SignalK+=Erg[0:-1]+']}]}\n'		
+			sock.sendto(SignalK, ('127.0.0.1', 55557))	
 
+			if backwards_comp:
+				hdg = pynmea2.HDG('OS', 'HDG', (str(MyVar.heading),'','','',''))
+				sock.sendto(str(hdg)+"\r\n", ('127.0.0.1', 10110))
+
+				xdr = pynmea2.XDR('OS', 'XDR', ('A', str(MyVar.heel), 'D','I2CX', 'A', str(MyVar.pitch), 'D','I2CY'))
+				sock.sendto(str(xdr)+"\r\n", ('127.0.0.1', 10110))
+										
 			# read Pressure and GENERATE
 		def work_bmp():
-					threading.Timer(rate_bmp, work_bmp).start()
-					read=pressure_val.pressureRead()
-					if read:
-						if (read[0]): MyVar.pressure=read[1]+pressure_offset
-						if (read[2]): MyVar.temperature_p=read[3]+p_temp_offset
+			threading.Timer(rate_bmp, work_bmp).start()
+			read=pressure_val.pressureRead()
+			if read:
+				if (read[0]): MyVar.pressure=read[1]+pressure_offset
+				if (read[2]): MyVar.temperature_p=read[3]+p_temp_offset
 
-					Erg=''
-					if pressure_sk:
-						Erg += '{"path": "environment.outside.pressure","value":'+str(MyVar.pressure*100)+'},'
-					if p_temp_sk:
-						Erg += '{"path": "'+p_temp_skt+'","value":'+str(round(MyVar.temperature_p,2)+273.15)+'},'
-					
-					SignalK='{"updates":[{"source":{"type": "I2C","src":"'+pressure_val.pressureName()+'"},"values":['
-					SignalK+=Erg[0:-1]+']}]}\n'	
-					sock.sendto(SignalK, ('127.0.0.1', 55557))			
-					
+			Erg=''
+			if pressure_sk:
+				Erg += '{"path": "environment.outside.pressure","value":'+str(MyVar.pressure*100)+'},'
+			if p_temp_sk:
+				Erg += '{"path": "'+p_temp_skt+'","value":'+str(round(MyVar.temperature_p,2)+273.15)+'},'
+			
+			SignalK='{"updates":[{"source":{"type": "I2C","src":"'+pressure_val.pressureName()+'"},"values":['
+			SignalK+=Erg[0:-1]+']}]}\n'	
+			sock.sendto(SignalK, ('127.0.0.1', 55557))
+			
+			if backwards_comp:
+				xdr = pynmea2.XDR('OS', 'XDR', ('P', str(round(MyVar.pressure/1000,4)), 'B','I2CP', 'C', str(round(MyVar.temperature_p,2)), 'C','I2CT'))
+				
+				#sock.sendto(str("$OCAAM,,,,,*6D\r\n"), ('127.0.0.1', 10110))			
+				sock.sendto(str(xdr)+"\r\n", ('127.0.0.1', 10110))			
+
 			# read Humidity and GENERATE
 		def work_hum():
-					threading.Timer(rate_hum, work_hum).start()
-					read=humidity_val.humidityRead()
-					if read:
-						if (read[0]): MyVar.humidity=read[1]+humidity_offset
-						if (read[2]): MyVar.temperature_h=read[3]+h_temp_offset
+			threading.Timer(rate_hum, work_hum).start()
+			read=humidity_val.humidityRead()
+			if read:
+				if (read[0]): MyVar.humidity=read[1]+humidity_offset
+				if (read[2]): MyVar.temperature_h=read[3]+h_temp_offset
 
-					Erg=''
-					if humidity_sk:
-						Erg += '{"path": "'+humidity_skt+'","value":'+str(MyVar.humidity)+'},'
-					if h_temp_sk:
-						Erg += '{"path": "'+h_temp_skt+'","value":'+str(round(MyVar.temperature_h,2)+273.15)+'},'
-							
-					SignalK='{"updates":[{"source":{"type": "I2C","src":"'+humidity_val.humidityName()+'"},"values":['
-					SignalK+=Erg[0:-1]+']}]}\n'	
-					sock.sendto(SignalK, ('127.0.0.1', 55557))
+			Erg=''
+			if humidity_sk:
+				Erg += '{"path": "'+humidity_skt+'","value":'+str(MyVar.humidity)+'},'
+			if h_temp_sk:
+				Erg += '{"path": "'+h_temp_skt+'","value":'+str(round(MyVar.temperature_h,2)+273.15)+'},'
+					
+			SignalK='{"updates":[{"source":{"type": "I2C","src":"'+humidity_val.humidityName()+'"},"values":['
+			SignalK+=Erg[0:-1]+']}]}\n'	
+			sock.sendto(SignalK, ('127.0.0.1', 55557))
 
 			# read SPI adc and GENERATE
 		def work_analog():
-					threading.Timer(rate_ana, work_analog).start()
-					SignalK=''
-					for i in MCP:
-						if i[0]==1:
-							XValue=read_adc(i[1])
-							if i[4]==1:
-								XValue = interpolread(i[1],XValue)
-							Erg ='{"updates":[{"source":{"type": "SPI","src":"MCP3008.'+str(i[1])+'"},'
-							Erg +='"values":[{"path": "'+i[2]+'","value":'+str(XValue)+'}]}]}\n'
-							SignalK+=Erg
-					sock.sendto(SignalK, ('127.0.0.1', 55557))
+			threading.Timer(rate_ana, work_analog).start()
+			SignalK=''
+			for i in MCP:
+				if i[0]==1:
+					XValue=read_adc(i[1])
+					if i[4]==1:
+						XValue = interpolread(i[1],XValue)
+					Erg ='{"updates":[{"source":{"type": "SPI","src":"MCP3008.'+str(i[1])+'"},'
+					Erg +='"values":[{"path": "'+i[2]+'","value":'+str(XValue)+'}]}]}\n'
+					SignalK+=Erg
+			sock.sendto(SignalK, ('127.0.0.1', 55557))
 
 			# read gpio and GENERATE
 		def work_gpio():
-					threading.Timer(rate_gpio, work_gpio).start()
-					c=0
-					for i in gpio_list:
-						channel=int(i[2])
-						current_state = GPIO.input(channel)
-						last_state=gpio_list[c][4]
-						if current_state!=last_state:
-							gpio_list[c][4]=current_state
-							publish_sk(i[1],channel,current_state)
-						c+=1
+			threading.Timer(rate_gpio, work_gpio).start()
+			c=0
+			for i in gpio_list:
+				channel=int(i[2])
+				current_state = GPIO.input(channel)
+				last_state=gpio_list[c][4]
+				if current_state!=last_state:
+					gpio_list[c][4]=current_state
+					publish_sk(i[1],channel,current_state)
+				c+=1
 
-		if imu_:    work_imu()
+		if imu_:	work_imu()	
 		if bmp_:	work_bmp()
 		if hum_:	work_hum()
-		if analog_: work_analog()
-		if gpio_:   work_gpio()
+		if analog_:	work_analog()
+		if gpio_:	work_gpio()
 			
 		
