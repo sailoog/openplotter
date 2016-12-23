@@ -356,6 +356,15 @@ if len(sys.argv)>1:
 		subprocess.call(['pkill', '-f', 'node-red'])
 		subprocess.call(['pkill', '-9', 'aisdecoder'])
 		subprocess.call(['pkill', '-9', 'rtl_fm'])
+		subprocess.call(['pkill', '-f', '1w_d.py'])
+		subprocess.call(['pkill', '-f', 'i2c_d.py'])
+		subprocess.call(['pkill', '-f', 'mqtt_d.py'])
+		subprocess.call(['pkill', '-f', 'SK-base_d.py'])
+		subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
+		subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
+		subprocess.call(['pkill', '-f', '/openplotter'])
+		subprocess.call(['killall', 'diagnostic-'])
+		
 	elif sys.argv[1]=='restart':
 		subprocess.call(['pkill', '-f', 'signalk-server-node'])
 		app = wx.App()

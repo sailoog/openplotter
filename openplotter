@@ -191,6 +191,9 @@ class MainFrame(wx.Frame):
 		self.helpm_item2 = self.helpm.Append(wx.ID_ANY, _('OpenPlotter online documentation'),
 											 _('OpenPlotter online documentation'))
 		self.Bind(wx.EVT_MENU, self.op_doc, self.helpm_item2)
+		self.helpm_item2 = self.helpm.Append(wx.ID_ANY, _('OpenPlotter offline documentation'),
+											 _('OpenPlotter offline documentation'))
+		self.Bind(wx.EVT_MENU, self.op_doc_off, self.helpm_item2)
 		self.menubar.Append(self.helpm, _('&Help'))
 
 		self.SetMenuBar(self.menubar)
@@ -389,6 +392,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def op_doc(self, e):
 		url = "http://sailoog.gitbooks.io/openplotter-documentation/"
 		webbrowser.open(url, new=2)
+
+	def op_doc_off(self, e):
+		subprocess.Popen(['xpdf', self.currentpath+'/docs/openplotter-documentation-en.pdf'])
 
 	def SerialWrongPort(self):
 		try:
@@ -1206,7 +1212,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		data += '###end of defaults\n\n###OpenPlotter GUI settings\n\n'
 
 		for index, item in enumerate(self.kplex):
-			if not ('system_a' in item[1] or 'system_b' in item[1] or 'opencpn' in item[1] or 'signalk' in item[1]):
+			if not ('system' in item[1] or 'opencpn' in item[1] or 'signalk' in item[1]):
 				if self.list_kplex.IsChecked(index):
 					state = ''
 				else:
@@ -2778,7 +2784,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def read_sms(self):
 		if self.conf.get('SMS', 'serial') == '0':
-			self.sms_dev.SetValue(self.SerDevLs[0])
+			try:
+				self.sms_dev.SetValue(self.SerDevLs[0])
+			except:
+				pass
 		else:
 			self.sms_dev.SetValue(self.conf.get('SMS', 'serial'))
 		self.sms_bt.SetValue(self.conf.get('SMS', 'bluetooth'))
