@@ -28,7 +28,7 @@ class checkVesselSelf:
 		home = paths.home
 		file = paths.file
 		currentpath = paths.currentpath
-		if not self.util_process_exist('signalk-server-node'):
+		if not self.util_process_exist('signalk-server'):
 			print 'Signal K starting'
 			if file != '1w_d.py': subprocess.call(['pkill', '-f', '1w_d.py'])
 			if file != 'i2c_d.py': subprocess.call(['pkill', '-f', 'i2c_d.py'])
@@ -36,8 +36,7 @@ class checkVesselSelf:
 			if file != 'SK-base_d.py': subprocess.call(['pkill', '-f', 'SK-base_d.py'])
 			if file != 'N2K-server_d.py': subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
 			time.sleep(2)
-			subprocess.Popen(home + '/.config/signalk-server-node/bin/openplotter',
-							 cwd=home + '/.config/signalk-server-node')
+			subprocess.Popen(['bin/signalk-server','-s','../openplotter/OP-signalk/openplotter-settings.json'],cwd=home + '/.config/signalk-server-node')							 
 			starttime = time.time()
 			error = True
 			while starttime + 10 > time.time() and error:
@@ -66,9 +65,13 @@ class checkVesselSelf:
 				time.sleep(1)		
 
 			subprocess.Popen(['keyword'])
+		try:
+			with open(home + '/.config/openplotter/OP-signalk/openplotter-settings.json') as data_file:
+				data = json.load(data_file)
+		except:
+			data = []
+			print "Error: Can't open file " + home + "/.config/openplotter/OP-signalk/openplotter-settings.json"
 
-		with open(home + '/.config/signalk-server-node/settings/openplotter-settings.json') as data_file:
-			data = json.load(data_file)
 		raw_uuid = data['vessel']['uuid']
 		#response = requests.get('http://localhost:3000/signalk/v1/api/vessels/self')
 		#data = response.json()

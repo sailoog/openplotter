@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, subprocess, time, ConfigParser, os, threading, sys
+import wx, subprocess, time, ConfigParser, os, threading, sys, platform
 from classes.paths import Paths
 from classes.conf import Conf
 from classes.language import Language
@@ -112,6 +112,17 @@ class MyFrame(wx.Frame):
 		while self.warnings_data:
 			time.sleep(0.1)
 		self.warnings_data=msg
+		
+	def util_process_exist(self, process_name):
+		pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
+		exist = False
+		for pid in pids:
+			try:
+				if process_name in open(os.path.join('/proc', pid, 'cmdline'), 'rb').read():
+					exist = True
+			except IOError:  # proc has already terminated
+				continue
+		return exist	
 
 	def starting(self):
 		pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
@@ -226,26 +237,26 @@ class MyFrame(wx.Frame):
 					else:	temp_list=[]
 					for ii in temp_list:
 						tools_py.append(ii)
-
+			
 			#######################################################
-			self.add_logger_data(_('\nChecking pi password...'))
-			out = subprocess.check_output(['sudo', '-n', 'grep', '-E', '^pi:', '/etc/shadow'])
-			tmp = out.split(':')
-			passw_a = tmp[1]
-			tmp = passw_a.split('$')
-			salt = tmp[2]
-			passw_b = subprocess.check_output(['mkpasswd', '-msha-512', 'raspberry', salt])
-			if passw_a.rstrip() == passw_b.rstrip():
-				self.add_warnings_data(_('\n\nSecurity warning: You are using the default password for "pi" user.\nPlease change password in Menu > Preferences > Raspberry Pi Configuration.'))
-			self.add_logger_data(_(' Done.'))
+			if platform.machine()[0:3]=='arm':
+				self.add_logger_data(_('\nChecking pi password...'))
+				out = subprocess.check_output(['sudo', '-n', 'grep', '-E', '^pi:', '/etc/shadow'])
+				tmp = out.split(':')
+				passw_a = tmp[1]
+				tmp = passw_a.split('$')
+				salt = tmp[2]
+				passw_b = subprocess.check_output(['mkpasswd', '-msha-512', 'raspberry', salt])
+				if passw_a.rstrip() == passw_b.rstrip():
+					self.add_warnings_data(_('\n\nSecurity warning: You are using the default password for "pi" user.\nPlease change password in Menu > Preferences > Raspberry Pi Configuration.'))
+				self.add_logger_data(_(' Done.'))
 
 			if delay!=0:
 				self.add_logger_data(_('\nApplying ')+str(delay)+_(' seconds of delay...'))
 				time.sleep(delay)
 				self.add_logger_data(_(' Done.'))
 
-			subprocess.call(['pkill', '-9', 'x11vnc'])
-			if x11vnc=='1':
+			if x11vnc=='1' and not self.util_process_exist('x11vnc'):
 				self.add_logger_data(_('\nStarting VNC...'))
 				if vnc_pass=='1': process = subprocess.Popen(['x11vnc', '-forever', '-shared', '-usepw'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 				else: process = subprocess.Popen(['x11vnc', '-forever', '-shared' ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -287,6 +298,7 @@ class MyFrame(wx.Frame):
 				self.add_logger_data(_('\nStarting NMEA 0183 Multiplexer...'))
 				subprocess.Popen('kplex')
 				self.add_logger_data(_(' Done.'))
+
 
 			subprocess.call(["pkill", '-f', "signalk-server-node"])
 			self.add_logger_data(_('\nStarting SignalK Server...'))
@@ -336,7 +348,6 @@ class MyFrame(wx.Frame):
 					try: subprocess.Popen(['mpg123', '-q', sound])
 					except: pass
 
-
 	def OnClose(self, event):
 		pass
 
@@ -349,7 +360,6 @@ class MyFrame(wx.Frame):
 
 if len(sys.argv)>1:
 	if sys.argv[1]=='stop':
-		subprocess.call(['pkill', '-9', 'x11vnc'])
 		subprocess.call(['pkill', '-9', 'opencpn'])
 		subprocess.call(['pkill', '-9', 'kplex'])
 		subprocess.call(['pkill', '-f', 'signalk-server-node'])

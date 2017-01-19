@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cd /home/pi/.config/signalk-server-node
+bin/signalk-server -s ../openplotter/OP-signalk/openplotter-settings.json $*
