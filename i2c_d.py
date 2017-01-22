@@ -78,14 +78,11 @@ else:
 	adjust_point=[]
 	SignalK=''
 
-	spi = spidev.SpiDev()
-	spi.open(0,0)
-
 	data=conf.get('SPI', 'mcp')
 	try:
 		temp_list=eval(data)
 	except:temp_list=[]
-
+	
 	analog_=False
 	for ii in temp_list:
 		if '.*.' in ii[2]: ii[2]=ii[2].replace('*', ii[3])
@@ -106,6 +103,14 @@ else:
 		else:
 			adjust_point.append([])
 
+	if analog_:
+		try:
+			spi = spidev.SpiDev()
+			spi.open(0,0)
+		except:
+			analog_=False
+			print 'spi is disabled in raspberry-pi-configuration device tab'
+			
 	#init GPIO
 	try:
 		gpio_list=eval(conf.get('GPIO', 'sensors'))

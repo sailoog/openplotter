@@ -444,7 +444,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 						if value.find('/dev/ttyOP_') >= 0:
 							self.SerDevLs.append(value)
 				except Exception, e:
-					print str(e)
+					print 'no tty DEVLINKS found', str(e)
 		self.can_usb.Clear()
 		self.sms_dev.Clear()
 		self.can_usb.AppendItems(self.SerDevLs)
@@ -2506,7 +2506,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		file.close()
 		test = 0
 		test = os.system('sudo mv 10-openplotter.rules /etc/udev/rules.d')
-		print test
 		self.ShowStatusBarRED(_('Restarting ...'))
 		self.start_udev()
 		time.sleep(1.5)

@@ -306,8 +306,8 @@ class MyFrame(wx.Frame):
 			self.add_logger_data(_(' Done.'))
 
 			subprocess.call(["pkill", '-f', "node-red"])
-			self.add_logger_data(_('\nStarting Node-RED...'))
 			if node_red=='1':
+				self.add_logger_data(_('\nStarting Node-RED...'))
 				try: 
 					subprocess.Popen(['node-red-pi', '--max-old-space-size=128'])
 					self.add_logger_data(_(' Done.'))
@@ -362,7 +362,7 @@ if len(sys.argv)>1:
 	if sys.argv[1]=='stop':
 		subprocess.call(['pkill', '-9', 'opencpn'])
 		subprocess.call(['pkill', '-9', 'kplex'])
-		subprocess.call(['pkill', '-f', 'signalk-server-node'])
+		subprocess.call(['pkill', '-f', 'signalk-server'])
 		subprocess.call(['pkill', '-f', 'node-red'])
 		subprocess.call(['pkill', '-9', 'aisdecoder'])
 		subprocess.call(['pkill', '-9', 'rtl_fm'])
@@ -376,7 +376,7 @@ if len(sys.argv)>1:
 		subprocess.call(['killall', 'diagnostic-'])
 		
 	elif sys.argv[1]=='restart':
-		subprocess.call(['pkill', '-f', 'signalk-server-node'])
+		subprocess.call(['pkill', '-f', 'signalk-server'])
 		app = wx.App()
 		MyFrame().Show()
 		app.MainLoop()
@@ -384,3 +384,4 @@ else:
 	app = wx.App()
 	MyFrame().Show()
 	app.MainLoop()
+	

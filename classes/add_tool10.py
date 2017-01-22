@@ -40,4 +40,5 @@ class addTool10(wx.Dialog):
 			self.ButtonNr = 3
 		if self.cancel_b.Id == event.Id:
 			self.ButtonNr = 4
+		event.Skip()
 		self.Close()

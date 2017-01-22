@@ -2,21 +2,11 @@
 
 http://www.sailoog.com/en/blog/download-openplotter-rpi-v090alpha-noobs
 
-To apply updates and solved issues, delete the openplotter folder and download it again:
+To apply updates/install and solved issues, start:
 
-`cd`
+'bash update_OP.sh'
 
-`cd .config`
-
-`rm -rf openplotter/`
-
-`git clone -b v0.9.0 https://github.com/sailoog/openplotter.git`
-
-`sudo chmod 775 /home/pi/.config/openplotter/openplotter`
-
-`sudo chmod 775 /home/pi/.config/openplotter/keyword`
-
-`sudo chmod 775 /home/pi/.config/openplotter/startup`
+(If the file isn't in the home directory you can find it here: https://github.com/sailoog/openplotter/blob/v0.9.0/OP-signalk/update_OP.sh )
 
 ### Known issues
 
@@ -32,10 +22,12 @@ To apply updates and solved issues, delete the openplotter folder and download i
 - [ ] Rebuild the Actions system to implement the new signalk-server-node plugin to create alarm zones for signalk keys.
 - [ ] Rebuild the MQTT system to perform the signalk specification.
 - [ ] Set beginners/expert modes.
-- [ ] Add local documentation (pdf).
+- [x] Add local documentation (pdf).
 - [ ] Set Android USB tethering for internet connection (and SMS?).
 - [ ] Use gprx for better AIS reception?.
 - [ ] Translations.
+- [x] SignalK can be installed/updated without adding any OpenPlotter setting files
+- [x] OpenPlotter SPI can be completly disabled (issues with some touch screen drivers)
 
 ### We are updating documentation:
 
