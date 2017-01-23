@@ -459,7 +459,7 @@ class MyForm(wx.Frame):
 			self.conf.set('TOOLS', 'py', str(self.tool_list))
 
 	def on_close(self, event):
-		subprocess.Popen(['python', Paths().op_path + '/startup.py'])
+		#subprocess.Popen(['python', Paths().op_path + '/startup.py'])
 		self.Close()
 
 
