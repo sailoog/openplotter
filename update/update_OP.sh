@@ -43,5 +43,5 @@ then
     sudo chmod 755 openplotter
     sudo chmod 755 keyword
     sudo chmod 755 startup
-    cp ~/.config/openplotter/OP-signalk/*.sh ~/	
+    cp ~/.config/openplotter/update/*.sh ~/	
 fi
