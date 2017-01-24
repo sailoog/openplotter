@@ -438,12 +438,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			if '/dev/ttyU' in i or '/dev/ttyA' in i or '/dev/ttyS' in i or '/dev/ttyO' in i or '/dev/r' in i or '/dev/i' in i:
 				self.SerDevLs.append(i)
 				try:
-					ii = device['DEVLINKS']
-					value = ii[ii.rfind('/dev/ttyOP_'):]
-					if value.find('/dev/ttyOP_') >= 0:
-						self.SerDevLs.append(value)
+					if 'DEVLINKS' in device:
+						ii = device['DEVLINKS']
+						value = ii[ii.rfind('/dev/ttyOP_'):]
+						if value.find('/dev/ttyOP_') >= 0:
+							self.SerDevLs.append(value)
 				except Exception, e:
-					print str(e)
+					print 'no tty DEVLINKS found', str(e)
 		self.can_usb.Clear()
 		self.sms_dev.Clear()
 		self.can_usb.AppendItems(self.SerDevLs)
@@ -2505,7 +2506,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		file.close()
 		test = 0
 		test = os.system('sudo mv 10-openplotter.rules /etc/udev/rules.d')
-		print test
 		self.ShowStatusBarRED(_('Restarting ...'))
 		self.start_udev()
 		time.sleep(1.5)
@@ -2562,7 +2562,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.conf.set('N2K', 'can_usb', self.can_usb.GetValue())
 
 	def on_n2k_enable(self, e):
-		with open(self.home + '/.config/signalk-server-node/settings/openplotter-settings.json') as data_file:
+		with open(self.home + '/.config/openplotter/OP-signalk/openplotter-settings.json') as data_file:
 			data = json.load(data_file)
 		isChecked = self.n2k_enable.GetValue()
 		if isChecked:
@@ -2605,7 +2605,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				ii += 1
 		self.n2koutputs_label.SetLabel(self.conf.get('N2K', 'pgn_output'))
 		self.set_label_SK()
-		with open(self.home + '/.config/signalk-server-node/settings/openplotter-settings.json', 'w') as outfile:
+		with open(self.home + '/.config/openplotter/OP-signalk/openplotter-settings.json', 'w') as outfile:
 			json.dump(data, outfile)
 		self.restart_SK(0)
 
@@ -2708,8 +2708,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		# stopping sk server
 		self.ShowStatusBarRED(_('Closing Signal K server ...'))
 		self.vessel_self = ''
-		subprocess.call(["pkill", '-f', "signalk-server-node"])
-		while self.util_process_exist("signalk-server-node"):
+		subprocess.call(["pkill", '-f', "signalk-server"])
+		while self.util_process_exist("signalk-server"):
 			time.sleep(0.01)
 		# restarting sk server and providers
 		self.vessel_self = checkVesselSelf()
@@ -2725,10 +2725,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if mmsi == '':
 			self.ShowStatusBarRED(_('You have to provide a MMSI.'))
 			return
-		with open(self.home + '/.config/signalk-server-node/settings/openplotter-settings.json') as data_file:
+		with open(self.home + '/.config/openplotter/OP-signalk/openplotter-settings.json') as data_file:
 			data = json.load(data_file)
 		data['vessel']['uuid'] = uuid
-		with open(self.home + '/.config/signalk-server-node/settings/openplotter-settings.json', 'w') as outfile:
+		with open(self.home + '/.config/openplotter/OP-signalk/openplotter-settings.json', 'w') as outfile:
 			json.dump(data, outfile)
 		self.restart_SK(0)
 

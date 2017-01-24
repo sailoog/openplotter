@@ -269,7 +269,8 @@ elif len(sys.argv) > 1:
 			print "WiFi access point started.\n"
 			print "SSID: " + ssid
 			print 'Address: ' + ip3 + '.1'
-			print 'It is recommended to restart the computer'
+			if change:
+				print 'It is recommended to restart the computer'
 
 	else:
 		wififile = open('/etc/network/interfaces', 'r', 2000)

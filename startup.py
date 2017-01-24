@@ -17,7 +17,6 @@
 
 import subprocess
 
-
 '''
 this file is only for boot compatibility
 if you change /home/pi/.config/autostart/start_openplotter.desktop as followed you don't need it any more.
@@ -27,4 +26,4 @@ Type=Application
 Exec=python /home/pi/.config/openplotter/startup
 
 '''
-subprocess.call(['startup'])
+subprocess.Popen('startup')

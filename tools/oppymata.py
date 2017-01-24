@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
-import signal, sys, time, socket, datetime,subprocess
+import signal, sys, time, socket, datetime, subprocess, os
 
 from PyMata.pymata import PyMata
 from classes.conf_analog import Conf_analog
@@ -90,11 +90,11 @@ def init():
 				else: adjust_point[index]=[]
 			index+=1
 
-
 paths=Paths()
 toolspath=paths.op_path + '/tools'
 
 if len(sys.argv)>1:
+	index=1
 	if sys.argv[1]=='settings':
 		print toolspath+'openplotter_analog.conf'
 		subprocess.Popen(['leafpad',toolspath+'/openplotter_analog.conf'])
@@ -109,6 +109,7 @@ else:
 	index=0
 	SignalK=''
 
+if os.path.exists('/dev/ttyOP_FIRM') and index == 0:
 	output = subprocess.check_output(['python', toolspath+'/op_pymata_check.py'])
 	if 'Total Number' in output:
 		pass
@@ -146,4 +147,6 @@ else:
 			#print SignalK
 			sock.sendto(SignalK, ('127.0.0.1', 55559))
 			time.sleep(0.100)
-			
+else:
+	print 'No serialport ttyOP_FIRM (Arduino with Firmata) found.'
+	print 'Have you add the Arduino port in USB manager?'
