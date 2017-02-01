@@ -1238,8 +1238,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 						3] + '\n' + state + 'optional=yes\n'
 					data += state + 'address=' + item[4] + '\n' + state + 'port=' + item[5] + '\n'
 
-				if item[6] != 'none' and item[7] != 'nothing': data += state + 'ifilter=' + item[7] + '\n'
-				if item[8] != 'none' and item[9] != 'nothing': data += state + 'ofilter=' + item[9] + '\n'
+				if not (item[6] == _('none') or item[6] == 'none') and not (item[7] == _('nothing') or item[7] == 'nothing'): 
+					data += state + 'ifilter=' + item[7] + '\n'
+				if not (item[8] == _('none') or item[8] == 'none') and not (item[9] == _('nothing') or item[9] == 'nothing'): 
+					data += state + 'ofilter=' + item[9] + '\n'
 				data += '\n'
 
 		data += '###end of OpenPlotter GUI settings\n\n'
