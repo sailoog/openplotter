@@ -108,8 +108,6 @@ class MyFrame(wx.Frame):
 				self.channel.Disable()
 				self.check_channels.Disable()
 				self.check_bands.Disable()
-				self.button_vhf_Tx.Disable()
-				self.Tx_exp_label.Disable()
 				self.button_vhf_Rx.Disable()
 
 
