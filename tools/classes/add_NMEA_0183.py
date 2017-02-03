@@ -197,11 +197,18 @@ class addNMEA_0183(wx.Dialog):
 		key=self.signalk.GetValue()
 		operator=self.operator.GetValue()
 		str_num=self.string_number.GetValue()
-		if not re.match('^[0-9a-zA-Z/]+$', str_num) and len(str_num) > 0 :
-			self.list_fields.SetStringItem(selected_field,1,_('Failed. String must contain only allowed characters.'))
-			str_num=''
-			self.string_number.SetValue('')
-			return
+		if selected_type == _('String'):
+			if not re.match('^[0-9a-zA-Z/]+$', str_num) and len(str_num) > 0 :
+				self.list_fields.SetStringItem(selected_field,1,_('Failed. String must contain only allowed characters.'))
+				str_num=''
+				self.string_number.SetValue('')
+				return		
+		else:
+			if not re.match('^[0-9./]+$', str_num) and len(str_num) > 0 :
+				self.list_fields.SetStringItem(selected_field,1,_('Failed. String must contain only allowed characters.'))
+				str_num=''
+				self.string_number.SetValue('')
+				return
 			
 		formats=self.formats.GetValue()
 		if not '--' in formats:
@@ -222,7 +229,7 @@ class addNMEA_0183(wx.Dialog):
 				return
 			#txt='['+vessel+'.'+group+'.'+key+']'+operator+str_num+'='+formats2
 			#if '.value' in key: key=key[:-6]
-			txt=[(group+'.'+key).encode('utf8'),formats2.encode('utf8'),operator,float(str_num)]
+			txt=[(group+'.'+key).encode('utf8'),formats2.encode('utf8'),operator.encode('utf8'),float(str_num)]
 			
 			self.list_fields.SetStringItem(selected_field,1,_(txt[1]))
 			self.nmea[1][selected_field]=txt
