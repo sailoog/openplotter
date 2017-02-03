@@ -1,17 +1,28 @@
 #!/bin/bash
 
 cd ~/.config/openplotter
-
+ANSWER=""
 if [ -d ~/.config/openplotter/.git ]
 then
-    ANSWER="$(git status | grep up-to-date)"
-    echo ".git exist"
+	UPSTREAM=${1:-'@{u}'}
+	LOCAL=$(git rev-parse @)
+	REMOTE=$(git rev-parse "$UPSTREAM")
+	BASE=$(git merge-base @ "$UPSTREAM")
+
+	if [ $LOCAL = $REMOTE ]; then
+		echo "Up-to-date"
+		ANSWER="Up-to-date"
+	elif [ $LOCAL = $BASE ]; then
+		echo "Need to pull"
+	elif [ $REMOTE = $BASE ]; then
+		echo "Need to push"
+	else
+		echo "Diverged"
+	fi
 else
-    ANSWER=""
     echo "no .git found"
 fi
 
-echo "Answer: " $ANSWER
 if [ "$ANSWER" == "" ]
 then
     cd ~
