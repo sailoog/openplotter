@@ -1,5 +1,5 @@
 #!/bin/bash
-
+startup stop
 cd /home/pi/.config
 
 if [ -d /home/pi/.config/signalk-server-node ]
@@ -19,6 +19,8 @@ echo "signalk-server-node doesn't exist"
 git clone https://github.com/SignalK/signalk-server-node.git
 cd signalk-server-node
 #npm install mdns
+npm install request
+sudo npm install serialport --unsafe-perm
 npm install
 
 cd ~/.config/signalk-server-node/bower_components
@@ -26,5 +28,5 @@ rm -rf sailgauge
 rm -rf simplegauges
 cd ..
 sudo npm install -g bower
-bower install https://github.com/SignalK/sailgauge.git
-bower install https://github.com/SignalK/simplegauges.git
+bower install https://github.com/e-sailing/sailgauge.git
+bower install https://github.com/e-sailing/simplegauges.git
