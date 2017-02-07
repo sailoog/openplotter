@@ -669,6 +669,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			if 'eth' + ii in output: self.available_share.append('eth' + ii)
 			if 'ppp' + ii in output: self.available_share.append('ppp' + ii)
 			if 'usb' + ii in output: self.available_share.append('usb' + ii)
+			if 'wwan' + ii in output: self.available_share.append('wwan' + ii)
 		for i in self.available_wireless:
 			self.available_share.append(i)
 		share_old = self.conf.get('WIFI', 'share')

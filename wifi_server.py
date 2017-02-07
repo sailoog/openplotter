@@ -96,6 +96,7 @@ elif len(sys.argv) > 1:
 			data += 'auto lo\n'
 			data += 'iface lo inet loopback\n'
 			data += 'pre-down iwconfig ' + wlan + ' essid ' + ssid + '\n'
+			data += 'pre-down ifconfig ' + wlan + ' down\n'
 			data += 'allow-hotplug eth0\n'
 			data += 'iface eth0 inet dhcp\n'
 			data += 'allow-hotplug usb0\n'
@@ -110,20 +111,23 @@ elif len(sys.argv) > 1:
 				data += 'post-up iptables -t nat -A POSTROUTING -o ' + share + ' -j MASQUERADE\n'
 				data += 'post-up iptables -A FORWARD -i ' + share + ' -o ' + lan + ' -m state --state RELATED,ESTABLISHED -j ACCEPT\n'
 				data += 'post-up iptables -A FORWARD -i ' + lan + ' -o ' + share + ' -j ACCEPT\n'
-			data += 'post-up systemctl restart NetworkManager\n'
-			#data += 'sleep 1\n'
 			data += 'post-up service dnsmasq restart\n'
-			#data += 'sleep 1\n'
-			data += 'post-up service hostapd restart\n'
-			#data += 'sleep 1\n'
-			data += 'post-up ifconfig ' + wlan + ' ' + ip3 + '.1 netmask 255.255.255.0\n'
-			data += 'sleep 1\n'
+			data += 'post-up service hostapd stop\n'
+			data += 'post-up systemctl restart NetworkManager\n'
+			data += 'while [ "$(systemctl status NetworkManager | grep running)" == "" ];  do sleep 0.2; done\n'			
+			data += 'post-up service hostapd start\n'
+			data += 'post-up service dnsmasq stop\n'
+			data += 'post-up service dnsmasq start\n'
+			
+			data += 'post-up ifconfig ' + wlan + ' up\n'
 
 		else:
 			data = 'auto lo\n'
 			data += 'iface lo inet loopback\n'
 
 			data += 'pre-down iwconfig ' + wlan + ' essid ' + ssid + '\n'
+			data += 'pre-down ifconfig eth0 down\n'
+			data += 'pre-down ifconfig ' + wlan + ' down\n'
 			data += 'auto ' + wlan + '\n'
 			data += 'iface ' + wlan + ' inet manual\n'
 			data += 'allow-hotplug eth0\n'
@@ -144,12 +148,19 @@ elif len(sys.argv) > 1:
 				data += 'post-up iptables -t nat -A POSTROUTING -o ' + share + ' -j MASQUERADE\n'
 				data += 'post-up iptables -A FORWARD -i ' + share + ' -o ' + lan + ' -m state --state RELATED,ESTABLISHED -j ACCEPT\n'
 				data += 'post-up iptables -A FORWARD -i ' + lan + ' -o ' + share + ' -j ACCEPT\n'
-			data += 'post-up systemctl restart NetworkManager\n'
 			data += 'post-up service dnsmasq restart\n'
-			data += 'post-up service hostapd restart\n'
-			data += 'post-up ifconfig br0 ' + ip3 + '.1 netmask 255.255.255.0\n'
+			data += 'post-up service hostapd stop\n'
+			data += 'post-up systemctl restart NetworkManager\n'
+			data += 'while [ "$(systemctl status NetworkManager | grep running)" == "" ];  do sleep 0.2; done\n'			
+			data += 'post-up service hostapd start\n'
+			data += 'post-up service dnsmasq stop\n'
+			data += 'post-up service dnsmasq start\n'
+			
+			#data += 'post-up ifconfig br0 ' + ip3 + '.1 netmask 255.255.255.0\n'
 			data += 'post-up ifconfig eth0 down\n'
+			data += 'while [ "$(ifconfig | grep eth0)" != "" ];  do sleep 0.2; done\n'
 			data += 'post-up ifconfig eth0 up\n'
+			data += 'post-up ifconfig ' + wlan + ' up\n'
 
 		wififile = open('/etc/network/interfaces', 'r', 2000)
 		bak = wififile.read()
@@ -167,7 +178,10 @@ elif len(sys.argv) > 1:
 			data += 'interface=' + wlan + '\n'
 			data += 'dhcp-range=' + ip3 + '.20,' + ip3 + '.254,255.255.255.0,12h\n'
 		else:
-			data = 'no-dhcp-interface=lo,eth0,wlan0,wlan1,usb0,ppp0\n'
+			#data =	'resolv-file=/etc/resolv.conf\n'
+			data = 'listen-address=127.0.0.1\n'
+			data += 'listen-address='+ ip3 +'.1\n'
+			data += 'no-dhcp-interface=lo,eth0,wlan0,wlan1,usb0,ppp0\n'
 			data += 'interface=br0\n'
 			data += 'dhcp-range=' + ip3 + '.100,' + ip3 + '.200,255.255.255.0,12h\n'
 
@@ -207,31 +221,14 @@ elif len(sys.argv) > 1:
 			wififile = open('/etc/dhcp/dhcpd.conf', 'w')
 			wififile.write(data)
 			wififile.close()
-		print 'restarting'
 		if change:
-			#if bridge == '1' and 'eth0:0' in subprocess.check_output('ifconfig'):
-			#	output = subprocess.Popen(['ifconfig', 'eth0:0', 'down'],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-			#	output.wait()
-			output = subprocess.Popen(['service', 'hostapd', 'stop'],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-			#print '1'
+			print 'restarting'
+			output = subprocess.Popen(['service', 'network-manager', 'restart'],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
 			output.wait()
-			#print output.communicate()
-			output = subprocess.Popen(['service', 'dnsmasq', 'stop'],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-			#print '2'
-			output.wait()
-			#print output.communicate()
-			output = subprocess.Popen(['service', 'networking', 'stop'],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-			#print '3'
-			output.wait()
-			#print output.communicate()
 			output = subprocess.Popen(['systemctl', 'daemon-reload'],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-			#print '4'
 			output.wait()
-			#print output.communicate()
-			output = subprocess.Popen(['service', 'networking', 'start'],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-			#print '5'
+			output = subprocess.Popen(['/etc/init.d/networking', 'restart'],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
 			output.wait()
-			#print output.communicate()
 
 		msg1 = ''
 		network_info = ''
@@ -259,7 +256,7 @@ elif len(sys.argv) > 1:
 			network_info = subprocess.check_output('service networking status'.split())
 		except:
 			pass
-		if 'SUCCESS' not in network_info: 
+		if 'active' not in network_info: 
 			print 'failed service networking'
 			error = 1
 
@@ -273,6 +270,18 @@ elif len(sys.argv) > 1:
 				print 'It is recommended to restart the computer'
 
 	else:
+		data = ''
+
+		wififile = open('/etc/dnsmasq.conf', 'r', 2000)
+		bak = wififile.read()
+		wififile.close()
+		if bak != data:
+			change = True
+			wififile = open('/etc/dnsmasq.conf', 'w')
+			wififile.write(data)
+			wififile.close()
+
+
 		wififile = open('/etc/network/interfaces', 'r', 2000)
 		bak = wififile.read()
 		wififile.close()
@@ -308,15 +317,15 @@ elif len(sys.argv) > 1:
 			output = subprocess.Popen(['service', 'hostapd', 'stop'])
 			output.wait()
 			if output != 0: error = 1
-			# output=subprocess.Popen(['service', 'networking', 'restart'])
-			# output.wait()
-			# if output != 0: error=1
-			output = subprocess.Popen(['systemctl', 'daemon-reload'])
+			output = subprocess.Popen(['service', 'network-manager', 'restart'],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
 			output.wait()
 			if output != 0: error = 1
-			output = subprocess.Popen(['systemctl', 'restart', 'NetworkManager'])
+			output = subprocess.Popen(['systemctl', 'daemon-reload'],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
 			output.wait()
 			if output != 0: error = 1
+			output = subprocess.Popen(['/etc/init.d/networking', 'restart'],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+			#output = subprocess.Popen(['service', 'avahi-daemon', 'restart'],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+			#output.wait()
 
 			print "\nWiFi access point stopped."
 			print 'It is recommended to restart the computer'
