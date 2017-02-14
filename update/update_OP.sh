@@ -4,6 +4,7 @@ cd ~/.config/openplotter
 ANSWER=""
 if [ -d ~/.config/openplotter/.git ]
 then
+	git fetch origin
 	UPSTREAM=${1:-'@{u}'}
 	LOCAL=$(git rev-parse @)
 	REMOTE=$(git rev-parse "$UPSTREAM")
@@ -28,6 +29,7 @@ then
     cd ~
 	startup stop
     DIRDATE=`date +op_backup_%Y_%m_%d:%H:%M:%S`
+	echo "backup files to:" $DIRDATE
     mkdir $DIRDATE
     mkdir $DIRDATE/classes
     mkdir $DIRDATE/OP-signalk

@@ -777,7 +777,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.ShowStatusBarRED(_('Your SSID must have a maximum of 32 characters and your password a minimum of 8.'))
 			self.enable_disable_wifi(0)
 			return
-		self.ShowStatusBarRED(_('Configuring WiFi AP, wait please ...'))
 		channel = self.wifi_channel.GetValue()
 		mode = self.wifi_mode.GetValue()
 		wpa = self.wifi_wpa.GetValue()
@@ -801,9 +800,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.passw.SetValue('**********')
 		if isChecked:
 			self.enable_disable_wifi(1)
+			self.ShowStatusBarRED(_('Configuring WiFi AP, please wait max 3 min...'))
 			wifi_result = subprocess.check_output(['sudo', 'python', self.currentpath + '/wifi_server.py', '1'])
 		else:
 			self.enable_disable_wifi(0)
+			self.ShowStatusBarRED(_('Shutdown WiFi AP, please wait max 3 min...'))
 			wifi_result = subprocess.check_output(['sudo', 'python', self.currentpath + '/wifi_server.py', '0'])
 		msg = wifi_result
 		if 'WiFi access point failed.' in msg:
@@ -899,7 +900,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		except:
 			pass
 		for i in network_info.split('\n'):
-			if 'SUCCESS' in i: msg1 += 'started'
+			if 'SUCCESS' in i and not 'started' in msg1: msg1 += 'started'
 		if msg1 == '': msg1 += 'stopped'
 		msg += 'networking: ' + msg1 + '\n\n'
 

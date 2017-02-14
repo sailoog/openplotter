@@ -83,7 +83,7 @@ class MyFrame(wx.Frame):
 			self.Show(True)
 
 			output=subprocess.check_output('lsusb')
-			supported_dev=['0bda:2832','0bda:2838','0ccd:00a9','0ccd:00b3','0ccd:00d3','0ccd:00e0','185b:0620','185b:0650','1f4d:b803','1f4d:c803','1b80:d3a4','1d19:1101','1d19:1102','1d19:1103','0458:707f','1b80:d393','1b80:d394','1b80:d395','1b80:d39d']
+			supported_dev=['0bda:2832','0bda:2838','0ccd:00a9','0ccd:00b3','0ccd:00d3','0ccd:00d4','0ccd:00e0','185b:0620','185b:0650','1f4d:b803','1f4d:c803','1b80:d3a4','1d19:1101','1d19:1102','1d19:1103','0458:707f','1b80:d393','1b80:d394','1b80:d395','1b80:d39d']
 			found=False
 			for i in supported_dev:
 				if i in output:found=True
