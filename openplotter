@@ -376,11 +376,22 @@ See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see http://www.gnu.org/licenses/"""
 
+
+		origWD = os.getcwd() # remember our original working directory
+
+		os.chdir(self.currentpath)
+		git_key = ''
+		try:
+			git_key = subprocess.check_output('git rev-parse --short @'.split())
+		except:
+			pass
+		os.chdir(origWD)
+
 		info = wx.AboutDialogInfo()
 		info.SetName('OpenPlotter')
-		info.SetVersion(self.conf.get('GENERAL', 'version'))
+		info.SetVersion(self.conf.get('GENERAL', 'version')+'.'+git_key)
 		info.SetDescription(description)
-		info.SetCopyright('2016 Sailoog')
+		info.SetCopyright('2017 Sailoog')
 		info.SetWebSite('http://www.sailoog.com')
 		info.SetLicence(licence)
 		info.AddDeveloper(
