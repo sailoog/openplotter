@@ -638,8 +638,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def page_wifi(self):
 		wx.StaticBox(self.p_wifi, size=(370, 315), pos=(10, 10))
+
 		self.wifi_enable = wx.CheckBox(self.p_wifi, label=_('Enable access point'), pos=(20, 25))
-		self.wifi_enable.Bind(wx.EVT_CHECKBOX, self.onwifi_enable)
 
 		self.bridge_enable = wx.CheckBox(self.p_wifi, label=_('Enable bridge to eth0'), pos=(180, 25))
 
@@ -701,13 +701,16 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 									 pos=(20, 246))
 		self.wifi_mode_label = wx.StaticText(self.p_wifi, label=_('Mode'), pos=(160, 255))
 
-		self.wifi_wpa_list = ['None', 'WPA', 'WPA2', _('Both')]
+		self.wifi_wpa_list = [_('none'), 'WPA', 'WPA2', _('Both')]
 		self.wifi_wpa = wx.ComboBox(self.p_wifi, choices=self.wifi_wpa_list, style=wx.CB_READONLY, size=(120, 32),
 									pos=(20, 285))
 		self.wifi_wpa_label = wx.StaticText(self.p_wifi, label=_('WPA'), pos=(160, 290))
 
-		self.wifi_button_default = wx.Button(self.p_wifi, label=_('Defaults'), pos=(275, 280))
+		self.wifi_button_default = wx.Button(self.p_wifi, label=_('Defaults'), pos=(275, 240))
 		self.wifi_button_default.Bind(wx.EVT_BUTTON, self.on_wifi_default)
+
+		self.wifi_button_apply = wx.Button(self.p_wifi, label=_('Apply'), pos=(275, 280))
+		self.wifi_button_apply.Bind(wx.EVT_BUTTON, self.onwifi_enable)
 
 		wx.StaticBox(self.p_wifi, label=_(' Addresses '), size=(290, 315), pos=(385, 10))
 		self.ip_info = wx.TextCtrl(self.p_wifi, -1, style=wx.TE_MULTILINE | wx.TE_READONLY, size=(270, 245),
@@ -732,7 +735,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.share.SetValue(self.conf.get('WIFI', 'share'))
 			if self.conf.get('WIFI', 'hw_mode') == 'b': self.wifi_mode.SetValue('IEEE 802.11b')
 			if self.conf.get('WIFI', 'hw_mode') == 'g': self.wifi_mode.SetValue('IEEE 802.11g')
-			if self.conf.get('WIFI', 'wpa') == '0': self.wifi_wpa.SetValue('None')
+			if self.conf.get('WIFI', 'wpa') == '0': self.wifi_wpa.SetValue(_('none'))
 			if self.conf.get('WIFI', 'wpa') == '1': self.wifi_wpa.SetValue('WPA')
 			if self.conf.get('WIFI', 'wpa') == '2': self.wifi_wpa.SetValue('WPA2')
 			if self.conf.get('WIFI', 'wpa') == '3': self.wifi_wpa.SetValue(_('Both'))
@@ -748,15 +751,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def onwifi_enable(self, e):
 		isChecked = self.wifi_enable.GetValue()
-		if not isChecked:
-			dlg = wx.MessageDialog(None, _(
-				'Are you sure to disable?\nIf you are connected by remote, you may not be able to reconnect again.'),
-								   _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
-			if dlg.ShowModal() != wx.ID_YES:
-				self.wifi_enable.SetValue(True)
-				dlg.Destroy()
-				return
-			dlg.Destroy()
 		wlan = self.wlan.GetValue()
 		ssid = self.ssid.GetValue()
 		share = self.share.GetValue()
@@ -767,15 +761,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		if not wlan or not passw or not ssid or not share:
 			self.ShowStatusBarRED(_('Failed. You must fill in all fields.'))
-			self.enable_disable_wifi(0)
 			return
 		if wlan == share:
 			self.ShowStatusBarRED(_('"Access point device" and "Sharing Internet device" must be different'))
-			self.enable_disable_wifi(0)
 			return
 		if len(ssid) > 32 or len(passw) < 8:
 			self.ShowStatusBarRED(_('Your SSID must have a maximum of 32 characters and your password a minimum of 8.'))
-			self.enable_disable_wifi(0)
 			return
 		channel = self.wifi_channel.GetValue()
 		mode = self.wifi_mode.GetValue()
@@ -785,10 +776,27 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if share == _('none'): share = '0'
 		if mode == 'IEEE 802.11b': mode = 'b'
 		if mode == 'IEEE 802.11g': mode = 'g'
-		if wpa == 'None': wpa = '0'
+		if wpa == _('none'): wpa = '0'
 		if wpa == 'WPA': wpa = '1'
 		if wpa == 'WPA2': wpa = '2'
 		if wpa == _('Both'): wpa = '3'
+		if not isChecked and self.conf.get('WIFI', 'enable') == '1':
+			dlg = wx.MessageDialog(None, _(
+				'Access point will be disabled.\n\nIf you are on a headless system, you will not be able to reconnect again.\n\nAre you sure?'),
+								   _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+			if dlg.ShowModal() != wx.ID_YES:
+				self.enable_disable_wifi(1)
+				dlg.Destroy()
+				return
+			dlg.Destroy()
+		else:
+			dlg = wx.MessageDialog(None, _(
+				'Changes will be applied.\n\nIf something goes wrong and you are on a headless system,\nyou may not be able to reconnect again.\n\nAre you sure?'),
+								   _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+			if dlg.ShowModal() != wx.ID_YES:
+				dlg.Destroy()
+				return
+			dlg.Destroy()
 		self.conf.set('WIFI', 'device', wlan)
 		self.conf.set('WIFI', 'password', passw)
 		self.conf.set('WIFI', 'ssid', ssid)
@@ -815,6 +823,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.ShowStatusBarBLACK('')
 		self.ShowMessage(msg)
 		self.on_show_ip_info('')
+
+	def enable_disable_wifi(self, s):
+		if s == 1:
+			self.wifi_enable.SetValue(True)
+			self.conf.set('WIFI', 'enable', '1')
+		else:
+			self.wifi_enable.SetValue(False)
+			self.conf.set('WIFI', 'enable', '0')
 
 	def on_show_ip_info(self, e):
 		ip_info = subprocess.check_output(['hostname', '-I'])
@@ -944,48 +960,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.wifi_channel.SetValue('6')
 		self.wifi_mode.SetValue('IEEE 802.11g')
 		self.wifi_wpa.SetValue('WPA2')
-
-	def enable_disable_wifi(self, s):
-		if s == 1:
-			self.wlan.Disable()
-			self.passw.Disable()
-			self.ssid.Disable()
-			self.share.Disable()
-			self.wlan_label.Disable()
-			self.passw_label.Disable()
-			self.ssid_label.Disable()
-			self.share_label.Disable()
-			self.wifi_settings_label.Disable()
-			self.wifi_channel.Disable()
-			self.wifi_channel_label.Disable()
-			self.wifi_mode.Disable()
-			self.wifi_mode_label.Disable()
-			self.wifi_wpa.Disable()
-			self.wifi_wpa_label.Disable()
-			self.wifi_button_default.Disable()
-			self.wifi_enable.SetValue(True)
-			self.bridge_enable.Disable()
-			self.conf.set('WIFI', 'enable', '1')
-		else:
-			self.wlan.Enable()
-			self.passw.Enable()
-			self.ssid.Enable()
-			self.share.Enable()
-			self.wlan_label.Enable()
-			self.passw_label.Enable()
-			self.ssid_label.Enable()
-			self.share_label.Enable()
-			self.wifi_settings_label.Enable()
-			self.wifi_channel.Enable()
-			self.wifi_channel_label.Enable()
-			self.wifi_mode.Enable()
-			self.wifi_mode_label.Enable()
-			self.wifi_wpa.Enable()
-			self.wifi_wpa_label.Enable()
-			self.wifi_button_default.Enable()
-			self.wifi_enable.SetValue(False)
-			self.bridge_enable.Enable()
-			self.conf.set('WIFI', 'enable', '0')
 
 			###########################################	NMEA 0183 kplex
 

@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, subprocess, time, ConfigParser, os, threading, sys, platform
+import wx, subprocess, time, os, threading, sys, platform
 from classes.paths import Paths
 from classes.conf import Conf
 from classes.language import Language
@@ -136,62 +136,6 @@ class MyFrame(wx.Frame):
 				continue
 
 		if not exist:
-
-			boot_ap=0
-			boot_sh=0
-			boot_conf = ConfigParser.SafeConfigParser()
-			try:
-				boot_conf.read('/boot/config.txt')
-				exist=True
-			except:
-				pass
-
-			enable='0'
-
-			if exist:
-				try:
-					enable=boot_conf.get('OPENPLOTTER', 'wifi_enable')
-				except: 
-					boot_conf.set('OPENPLOTTER', 'wifi_enable','0')
-				try:
-					device=boot_conf.get('OPENPLOTTER', 'device')
-					ssid=boot_conf.get('OPENPLOTTER', 'ssid')
-					passw=boot_conf.get('OPENPLOTTER', 'pass')
-					hw_mode = boot_conf.get('OPENPLOTTER', 'hw_mode')
-					channel = boot_conf.get('OPENPLOTTER', 'channel')
-					wpa = boot_conf.get('OPENPLOTTER', 'wpa')
-					boot_ap=1
-				except: boot_ap=0
-				try:
-					share=boot_conf.get('OPENPLOTTER', 'share')
-					boot_sh=1
-				except: boot_sh=0
-				try:
-					bridge = boot_conf.get('OPENPLOTTER', 'bridge')
-					ip = boot_conf.get('OPENPLOTTER', 'ip')
-				except: pass
-			if enable=='1':
-				if not device: device='wlan0'
-				if not ssid: ssid='OpenPlotter'
-				if not passw: passw='12345678'
-				if not hw_mode: hw_mode='g'
-				if not channel: channel='6'
-				if not wpa: wpa='2'
-				if not bridge: bridge='0'
-				if not ip: ip='10.10.10.1'	
-				if self.conf.get('WIFI', 'enable')!=enable:   self.conf.set('WIFI', 'enable', enable)
-				if self.conf.get('WIFI', 'device')!=device:   self.conf.set('WIFI', 'device', device)
-				if self.conf.get('WIFI', 'ssid')!=ssid:       self.conf.set('WIFI', 'ssid', ssid)
-				if self.conf.get('WIFI', 'password')!=passw:  self.conf.set('WIFI', 'password', passw)
-				if self.conf.get('WIFI', 'hw_mode')!=hw_mode: self.conf.set('WIFI', 'hw_mode', hw_mode)
-				if self.conf.get('WIFI', 'channel')!=channel: self.conf.set('WIFI', 'channel', channel)
-				if self.conf.get('WIFI', 'wpa')!=wpa:         self.conf.set('WIFI', 'wpa', wpa)
-				if self.conf.get('WIFI', 'bridge')!=bridge:   self.conf.set('WIFI', 'bridge', bridge)
-				if self.conf.get('WIFI', 'ip')!=ip:           self.conf.set('WIFI', 'ip', ip)
-				
-			if boot_sh==1:
-				if not share: share='0'
-				if self.conf.get('WIFI', 'share')!=share: self.conf.set('WIFI', 'share', share)
 
 			wifi_server=self.conf.get('WIFI', 'enable')
 			wifi_server_pass=self.conf.get('WIFI', 'password')
