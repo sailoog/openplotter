@@ -15,48 +15,36 @@
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
 import paho.mqtt.client as paho
-import time, socket, datetime, json
+import socket
 from classes.paths import Paths
 from classes.conf import Conf
-from classes.check_vessel_self import checkVesselSelf
 
 def on_message(client, userdata, msg):
-	path=msg.topic
-	path=path.replace('/','.')
-	path='notifications.mqtt.'+path
-	value='{"message": "'+msg.payload+'"}'
-	SignalK='{"updates":[{"source":{"type": "notifications","src":"mqtt"},"values":[{"path":"'+path+'","value":'+value+'}]}]}\n'
-	sock.sendto(SignalK, ('127.0.0.1', 55558))
+	try:
+		for i in topics_list:
+			if msg.topic == i[0]:
+				if i[1] == 0: #general
+					path='notifications.'+msg.topic
+					value = msg.payload
+					value = value.replace('"', "'")
+					SignalK='{"updates":[{"source":"MQTT.'+msg.topic+'","values":[{"path":"'+path+'","value":"'+value+'"}]}]}\n'
+					sock.sendto(SignalK, ('127.0.0.1', 55558))
+				if i[1] == 1: #signal k key
+					path = i[2]
+					value = msg.payload
+					value = value.replace('"', "'")
+					SignalK='{"updates":[{"source":"MQTT.'+msg.topic+'","values":[{"path":"'+path+'","value":"'+value+'"}]}]}\n'			
+					sock.sendto(SignalK, ('127.0.0.1', 55557))
+				if i[1] == 2: #signal k delta
+					SignalK = msg.payload		
+					sock.sendto(SignalK, ('127.0.0.1', 55557))
+	except Exception,e: print str(e)
 
 def on_connect(client, userdata, flags, rc):
-	for i in topics_list:
-		try:
-			client.subscribe(i, qos=0)
-		except Exception,e: print str(e)
-
-def stop():
-	if client: client.loop_stop()
-	if client_local: client_local.loop_stop()
-
-def send_null():
-	list_path=[]
-	for ii in topics_list:
-		if '/' in ii:
-			list_tmp=ii.split('/')
-			path_tmp='notifications.mqtt'
-			for iii in list_tmp:
-				path_tmp=path_tmp+'.'+iii
-				if not path_tmp in list_path: list_path.append(path_tmp)
-		else:
-			path_tmp='notifications.mqtt.'+ii
-			if not path_tmp in list_path: list_path.append(path_tmp)
-	values=''
-	SignalK='{"updates":[{"source":{"type": "notifications","src":"mqtt"},"values":['
-	for i in list_path:
-		values+= '{"path": "'+i+'","value": {"message": null}},'
-	SignalK+=values[0:-1]+']}]}\n'
-	sock.sendto(SignalK, ('127.0.0.1', 55558))
-
+	try:
+		for i in topics_list:
+			client.subscribe(i[0], qos=0)
+	except Exception,e: print str(e)
 
 conf=Conf(Paths())
 
@@ -74,8 +62,6 @@ client=''
 client_local=''
 
 if user and passw and topics_list:
-	vessel_self=checkVesselSelf()
-	mmsi=vessel_self.mmsi
 	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	if broker and port:
 		client = paho.Client()
@@ -91,5 +77,4 @@ if user and passw and topics_list:
 	client_local.on_connect = on_connect
 	client_local.username_pw_set(user, passw)
 	client_local.connect(local_broker, local_port)
-	send_null()
 	client_local.loop_forever()

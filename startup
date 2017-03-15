@@ -232,6 +232,9 @@ class MyFrame(wx.Frame):
 					self.add_warnings_data(_('\n\nSecurity warning: You are using the default WIFI Access Point password.\nPlease change password in OpenPlotter > WiFi AP.'))
 				self.add_logger_data(_(' Done.'))
 
+			subprocess.call(['pkill', '-f', 'mqtt_d.py'])
+			subprocess.Popen(['python', self.currentpath+'/mqtt_d.py'])
+
 			subprocess.call(["pkill", '-f', "signalk-server"])
 			self.add_logger_data(_('\nStarting SignalK Server...'))
 			vessel_self=checkVesselSelf()

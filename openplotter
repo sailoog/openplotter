@@ -2907,7 +2907,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		clear.Bind(wx.EVT_BUTTON, self.on_clear_mqtt)
 
 		self.list_topics = wx.ListCtrl(self.p_mqtt, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
-		self.list_topics.InsertColumn(1, _('Topic'), width=565)
+		self.list_topics.InsertColumn(0, _('Topic'), width=145)
+		self.list_topics.InsertColumn(1, _('Type'), width=100)
+		self.list_topics.InsertColumn(2, _('Signal K key'), width=200)
+		self.list_topics.InsertColumn(3, _('Source'), width=145)
 		self.list_topics.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_topic)
 
 		add = wx.Button(self.p_mqtt, label=_('add'))
@@ -2969,8 +2972,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def start_mqtt(self):
 		subprocess.Popen(['python', self.currentpath + '/mqtt_d.py'])
+		self.ShowStatusBarGREEN(_('MQTT restarted'))
 
 	def stop_mqtt(self):
+		self.ShowStatusBarRED(_('MQTT stopped'))
 		subprocess.call(['pkill', '-f', 'mqtt_d.py'])
 
 	def read_mqtt(self):
@@ -3003,7 +3008,20 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			temp_list = []
 		for ii in temp_list:
 			self.topics.append(ii)
-			self.list_topics.Append([ii])
+			topic = ii[0].encode('utf8')
+			if ii[1] == 0: 
+				topic_type = _('General').encode('utf8')
+				skkey = 'notifications.'+topic
+				source = 'mqtt.'+topic
+			if ii[1] == 1: 
+				topic_type = _('Signal K key').encode('utf8')
+				skkey = ii[2]
+				source = 'mqtt.'+topic
+			if ii[1] == 2: 
+				topic_type = _('Signal K delta').encode('utf8')
+				skkey = _('multiple keys').encode('utf8')
+				source = _('multiple sources').encode('utf8')
+			self.list_topics.Append([topic,topic_type,skkey,source])
 
 	def edit_topic(self, e):
 		selected_topic = e.GetIndex()
@@ -3015,34 +3033,74 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def edit_add_topic(self, edit):
 		if self.mqtt_user.IsEnabled():
-			self.ShowStatusBarRED(_('Failed. Apply setting changes.'))
+			self.ShowStatusBarRED(_('Failed. Apply settings change.'))
 			return
 		dlg = addTopic(edit)
 		res = dlg.ShowModal()
 		if res == wx.ID_OK:
 			topic = dlg.topic.GetValue()
-			topic = topic.encode('utf8')
+			topic_type = dlg.type.GetValue()
+			skkey = dlg.skkey.GetValue()
 			if not topic:
-				self.ShowMessage(_('Failed. Write a topic.'))
+				self.ShowMessage(_('Failed. You have to provide a name for the topic.'))
 				dlg.Destroy()
 				return
-			if not re.match('^[0-9a-zA-Z/]+$', topic):
+			if not re.match('^[0-9a-zA-Z]+$', topic):
 				self.ShowMessage(_('Failed. Topics must contain only allowed characters.'))
 				dlg.Destroy()
 				return
 			if edit == 0:
-				self.list_topics.Append([topic])
-				self.topics.append(topic)
+				for i in self.topics:
+					if i[0] == topic:
+						self.ShowMessage(_('Failed. Topic name must be unique.'))
+						dlg.Destroy()
+						return
+			else:
+				for i in self.topics:
+					if i[0] == topic and edit[1][0] != topic:
+						self.ShowMessage(_('Failed. Topic name must be unique.'))
+						dlg.Destroy()
+						return
+			if topic_type == _('General'): 
+				topic_type2 = 0
+				skkey = 'notifications.'+topic
+				skkey2 = ''
+				source = 'mqtt.'+topic
+			elif topic_type == _('Signal K key'): 
+				topic_type2 = 1
+				if not skkey:
+					self.ShowMessage(_('Failed. You have to provide a Signal K key.'))
+					dlg.Destroy()
+					return
+				else:
+					skkey2 = skkey
+					source = 'mqtt.'+topic
+			elif topic_type == _('Signal K delta'): 
+				topic_type2 = 2
+				skkey = _('multiple keys')
+				skkey2 = ''
+				source = _('multiple sources')
+			else:
+				self.ShowMessage(_('Failed. You have to select a type for the topic.'))
+				dlg.Destroy()
+				return
+			if edit == 0:
+				self.list_topics.Append([topic,topic_type.encode('utf8'),skkey,source])
+				self.topics.append([topic,topic_type2,skkey2])
 			else:
 				self.list_topics.SetStringItem(edit[0], 0, topic)
-				self.topics[edit[0]] = topic
+				self.list_topics.SetStringItem(edit[0], 1, topic_type.encode('utf8'))
+				self.list_topics.SetStringItem(edit[0], 2, skkey)
+				self.list_topics.SetStringItem(edit[0], 3, source)
+				self.topics[edit[0]] = [topic,topic_type2,skkey2]
 			self.conf.set('MQTT', 'topics', str(self.topics))
-			self.restart_SK(0)
+			self.stop_mqtt()
+			self.start_mqtt()
 		dlg.Destroy()
 
 	def delete_topic(self, e):
 		if self.mqtt_user.IsEnabled():
-			self.ShowStatusBarRED(_('Failed. Apply setting changes.'))
+			self.ShowStatusBarRED(_('Failed. Apply settings change.'))
 			return
 		selected_topic = self.list_topics.GetFirstSelected()
 		if selected_topic == -1:
@@ -3051,7 +3109,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		del self.topics[selected_topic]
 		self.list_topics.DeleteItem(selected_topic)
 		self.conf.set('MQTT', 'topics', str(self.topics))
-		self.restart_SK(0)
+		self.stop_mqtt()
+		self.start_mqtt()
 
 	def on_apply_changes_mqtt(self, e):
 		if not self.mqtt_user.IsEnabled():
@@ -3083,7 +3142,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		subprocess.call(['sudo', 'sh', '-c', 'echo "' + username + ':' + passw + '" > /etc/mosquitto/passwd.pw'])
 		subprocess.call(['sudo', 'mosquitto_passwd', '-U', '/etc/mosquitto/passwd.pw'])
 		subprocess.call(['sudo', 'service', 'mosquitto', 'restart'])
-		self.ShowStatusBarGREEN(_('MQTT settings applied and restarted'))
 		self.stop_mqtt()
 		self.start_mqtt()
 
@@ -3110,7 +3168,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.conf.set('MQTT', 'username', '')
 		self.conf.set('MQTT', 'password', '')
 		self.conf.set('MQTT', 'topics', '')
-		self.restart_SK(0)
+		self.stop_mqtt()
 
 
 ############################## Main
