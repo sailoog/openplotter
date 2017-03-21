@@ -185,6 +185,14 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_MENU, self.lang_de, self.lang_item6)
 		self.menubar.Append(self.lang, _('Language'))
 
+		self.update = wx.Menu()
+		self.opencpn_item1 = self.update.Append(wx.ID_ANY, _('Update OpenCPN'), _('Update OpenCPN to latest stable release'))
+		self.Bind(wx.EVT_MENU, self.update_opencpn, self.opencpn_item1)
+		self.opencpn_item2 = self.update.Append(wx.ID_ANY, _('Update OpenCPN plugins'), _('Update OpenCPN plugins to latest stable releases'))
+		self.Bind(wx.EVT_MENU, self.update_opencpn_plugins, self.opencpn_item2)
+		self.update.AppendSeparator()
+		self.menubar.Append(self.update, _('Updates'))
+
 		self.helpm = wx.Menu()
 		self.helpm_item1 = self.helpm.Append(wx.ID_ANY, _('&About'), _('About OpenPlotter'))
 		self.Bind(wx.EVT_MENU, self.OnAboutBox, self.helpm_item1)
@@ -359,6 +367,14 @@ class MainFrame(wx.Frame):
 		self.clear_lang()
 		self.lang.Check(self.lang_item6.GetId(), True)
 		self.conf.set('GENERAL', 'lang', 'de')
+
+	def update_opencpn(self, e):
+		subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/update_OpenCPN.sh'])
+		self.ShowStatusBarBLACK(_('Follow the instructions in the new window'))
+
+	def update_opencpn_plugins(self, e):
+		subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/update_OpenCPN_plugins.sh'])
+		self.ShowStatusBarBLACK(_('Follow the instructions in the new window'))
 
 	def OnAboutBox(self, e):
 		description = _(
