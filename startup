@@ -235,6 +235,9 @@ class MyFrame(wx.Frame):
 			subprocess.call(['pkill', '-f', 'mqtt_d.py'])
 			subprocess.Popen(['python', self.currentpath+'/mqtt_d.py'])
 
+			subprocess.call(['pkill', '-f', '1w_d.py'])
+			subprocess.Popen(['python', self.currentpath+'/1w_d.py'])
+
 			subprocess.call(["pkill", '-f', "signalk-server"])
 			self.add_logger_data(_('\nStarting SignalK Server...'))
 			vessel_self=checkVesselSelf()

@@ -14,10 +14,10 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
-import json
 import platform
-import subprocess
 import wx
+import re
+from select_key import selectKey
 
 if platform.machine()[0:3] == 'arm':
 	from w1thermsensor import W1ThermSensor
@@ -26,71 +26,62 @@ else:
 
 
 class addDS18B20(wx.Dialog):
-	def __init__(self, edit, parent):
+	def __init__(self, edit):
 
-		wx.Dialog.__init__(self, None, title=_('Add 1W temperature sensor'), size=(430, 300))
+		if edit == 0: title = _('Add 1W temperature sensor')
+		else: title = _('Edit 1W temperature sensor')
+
+		wx.Dialog.__init__(self, None, title = title, size=(430, 250))
 
 		panel = wx.Panel(self)
 
-		list_tmp = []
+		wx.StaticText(panel, label='Signal K key', pos=(10, 10))
+		self.SKkey = wx.TextCtrl(panel, style=wx.CB_READONLY, size=(300, 30), pos=(10, 35))
 
-		with open(parent.home +'/.config/signalk-server-node/node_modules/signalk-schema/keyswithmetadata.json') as data_file:
-			self.data = json.load(data_file)
+		self.edit_skkey = wx.Button(panel, label=_('Edit'), pos=(320, 32))
+		self.edit_skkey.Bind(wx.EVT_BUTTON, self.onEditSkkey)
 
-		for i in self.data:
-			if 'temperature' in i or 'Temperature' in i:
-				if 'electrical' not in i:
-					ii = i.replace('/vessels/*/','')
-					ii = ii.replace('RegExp','*')
-					ii = ii.replace('/','.')
-					list_tmp.append(ii)
-		list_sk_path = sorted(list_tmp)
-
-		wx.StaticText(panel, label='Signal K', pos=(10, 10))
-		self.SKkey = wx.ComboBox(panel, choices=list_sk_path, style=wx.CB_READONLY, size=(410, 30), pos=(10, 35))
-		self.SKkey.Bind(wx.EVT_COMBOBOX, self.onSelect)
-		self.description = wx.TextCtrl(panel, -1, style=wx.TE_MULTILINE | wx.TE_READONLY, size=(410, 45), pos=(10, 70))
-		self.description.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_INACTIVECAPTION))
-
-		wx.StaticText(panel, label=_('Name'), pos=(10, 125))
-		self.name = wx.TextCtrl(panel, size=(150, 30), pos=(10, 150))
-		wx.StaticText(panel, label=_('allowed characters: 0-9, a-z, A-Z.'), pos=(10, 185))
+		wx.StaticText(panel, label=_('Name'), pos=(10, 75))
+		self.name = wx.TextCtrl(panel, size=(150, 30), pos=(10, 100))
+		wx.StaticText(panel, label=_('allowed characters: 0-9, a-z, A-Z'), pos=(10, 135))
 
 		list_id = []
 		for sensor in W1ThermSensor.get_available_sensors():
 			list_id.append(sensor.id)
-		wx.StaticText(panel, label=_('Sensor ID'), pos=(190, 125))
-		self.id_select = wx.ComboBox(panel, choices=list_id, style=wx.CB_READONLY, size=(150, 32), pos=(190, 150))
+		wx.StaticText(panel, label=_('Sensor ID'), pos=(190, 75))
+		self.id_select = wx.ComboBox(panel, choices=list_id, style=wx.CB_READONLY, size=(150, 32), pos=(190, 100))
 
-		wx.StaticText(panel, label=_('Offset'), pos=(370, 125))
-		self.offset = wx.TextCtrl(panel, size=(50, 30), pos=(370, 150))
+		wx.StaticText(panel, label=_('Offset'), pos=(370, 75))
+		self.offset = wx.TextCtrl(panel, size=(50, 30), pos=(370, 100))
 
 		if edit != 0:
 			self.name.SetValue(edit[1])
 			self.SKkey.SetValue(edit[2])
-			for i in self.data:
-				ii = i.replace('/vessels/*/','')
-				ii = ii.replace('RegExp','*')
-				ii = ii.replace('/','.')
-				if edit[2] == ii:
-					try:
-						self.description.SetValue(self.data[i]['description'])
-					except:
-						self.description.SetValue('')
 			self.id_select.SetValue(edit[3])
 			self.offset.SetValue(edit[4])
 
-		cancelBtn = wx.Button(panel, wx.ID_CANCEL, pos=(115, 220))
-		okBtn = wx.Button(panel, wx.ID_OK, pos=(235, 220))
+		cancelBtn = wx.Button(panel, wx.ID_CANCEL, pos=(115, 175))
+		okBtn = wx.Button(panel, wx.ID_OK, pos=(235, 175))
 
-	def onSelect(self, e):
-		selected = self.SKkey.GetValue()
-		for i in self.data:
-			ii = i.replace('/vessels/*/','')
-			ii = ii.replace('RegExp','*')
-			ii = ii.replace('/','.')
-			if selected == ii:
-				try:
-					self.description.SetValue(self.data[i]['description'])
-				except:
-					self.description.SetValue('')
+	def onEditSkkey(self,e):
+		dlg = selectKey()
+		res = dlg.ShowModal()
+		if res == wx.ID_OK:
+			key = dlg.keys_list.GetValue()
+			if '*' in key:
+				wildcard = dlg.wildcard.GetValue()
+				if wildcard:
+					if not re.match('^[0-9a-zA-Z]+$', wildcard):
+						self.ShowMessage(_('Failed. * must contain only allowed characters.'))
+						dlg.Destroy()
+						return
+					key = key.replace('*',wildcard)
+				else:
+					self.ShowMessage(_('Failed. You have to provide a name for *.'))
+					dlg.Destroy()
+					return
+		dlg.Destroy()
+		self.SKkey.SetValue(key)
+
+	def ShowMessage(self, w_msg):
+		wx.MessageBox(w_msg, 'Info', wx.OK | wx.ICON_INFORMATION)

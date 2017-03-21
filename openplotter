@@ -2215,7 +2215,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		self.list_DS18B20 = wx.ListCtrl(self.p_1w, style=wx.LC_REPORT)
 		self.list_DS18B20.InsertColumn(0, _('Name'), width=100)
-		self.list_DS18B20.InsertColumn(1, _('Signal K'), width=310)
+		self.list_DS18B20.InsertColumn(1, _('Signal K'), width=335)
 		self.list_DS18B20.InsertColumn(2, _('ID'), width=105)
 		self.list_DS18B20.InsertColumn(4, _('Offset'), width=50)
 		self.list_DS18B20.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_DS18B20)
@@ -2246,8 +2246,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def start_1w(self):
 		subprocess.Popen(['python', self.currentpath + '/1w_d.py'])
+		self.ShowStatusBarGREEN(_('1W sensors restarted'))
 
 	def stop_1w(self):
+		self.ShowStatusBarRED(_('1W sensors stopped'))
 		subprocess.call(['pkill', '-f', '1w_d.py'])
 
 	def read_DS18B20(self):
@@ -2260,45 +2262,38 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			temp_list = []
 		for ii in temp_list:
 			self.DS18B20.append(ii)
-			if '.*.' in ii[1]:
-				SKkey2 = ii[1].replace('*', ii[0])
-			else:
-				SKkey2 = ii[1]
-			self.list_DS18B20.Append([ii[0], SKkey2, ii[2], ii[3]])
+			self.list_DS18B20.Append([ii[0], ii[1], ii[2], ii[3]])
+		# TODO add source 1W.name
 
 	def edit_DS18B20(self, e):
-		selected_DS18B20 = e.GetIndex()
-		edit = [selected_DS18B20, self.DS18B20[selected_DS18B20][0], self.DS18B20[selected_DS18B20][1],
-				self.DS18B20[selected_DS18B20][2], self.DS18B20[selected_DS18B20][3]]
+		selected = e.GetIndex()
+		edit = [selected, self.DS18B20[selected][0], self.DS18B20[selected][1],
+				self.DS18B20[selected][2], self.DS18B20[selected][3]]
 		self.edit_add_DS18B20(edit)
 
 	def on_add_DS18B20(self, e):
 		self.edit_add_DS18B20(0)
 
 	def edit_add_DS18B20(self, edit):
-		dlg = addDS18B20(edit, self)
+		dlg = addDS18B20(edit)
 		res = dlg.ShowModal()
 		if res == wx.ID_OK:
 			name = dlg.name.GetValue()
-			name = name.encode('utf8')
 			SKkey = dlg.SKkey.GetValue()
-			SKkey = SKkey.encode('utf8')
 			sensor_id = dlg.id_select.GetValue()
-			sensor_id = sensor_id.encode('utf8')
 			offset = dlg.offset.GetValue()
-			offset = offset.encode('utf8')
-			if not name or not SKkey:
-				self.ShowMessage(_('Failed. Provide name and Signal K values.'))
+			if not SKkey:
+				self.ShowMessage(_('Failed. Provide a Signal K key.'))
+				dlg.Destroy()
+				return
+			if not name:
+				self.ShowMessage(_('Failed. Provide a name.'))
 				dlg.Destroy()
 				return
 			if not re.match('^[0-9a-zA-Z]+$', name):
-				self.ShowMessage(_('Failed. The name must contain only letters and numbers.'))
+				self.ShowMessage(_('Failed. Name must contain only letters and numbers.'))
 				dlg.Destroy()
 				return
-			if '.*.' in SKkey:
-				SKkey2 = SKkey.replace('*', name)
-			else:
-				SKkey2 = SKkey
 			if sensor_id == '':
 				self.ShowMessage(_('Failed. Select sensor ID.'))
 				dlg.Destroy()
@@ -2308,11 +2303,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			except:
 				offset = '0.0'
 			if edit == 0:
-				self.list_DS18B20.Append([name, SKkey2, sensor_id, offset])
+				self.list_DS18B20.Append([name, SKkey, sensor_id, offset])
 				self.DS18B20.append([name, SKkey, sensor_id, offset])
 			else:
 				self.list_DS18B20.SetStringItem(edit[0], 0, name)
-				self.list_DS18B20.SetStringItem(edit[0], 1, SKkey2)
+				self.list_DS18B20.SetStringItem(edit[0], 1, SKkey)
 				self.list_DS18B20.SetStringItem(edit[0], 2, sensor_id)
 				self.list_DS18B20.SetStringItem(edit[0], 3, offset)
 				self.DS18B20[edit[0]][0] = name
@@ -2333,7 +2328,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def apply_changes_DS18B20(self):
 		self.conf.set('1W', 'DS18B20', str(self.DS18B20))
-		self.restart_SK(0)
+		self.stop_1w()
+		self.start_1w()
 
 	####################### USB manager
 	def page_usb(self):

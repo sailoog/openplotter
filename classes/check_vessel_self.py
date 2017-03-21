@@ -30,7 +30,6 @@ class checkVesselSelf:
 		currentpath = paths.currentpath
 		if not self.util_process_exist('signalk-server'):
 			print 'Signal K starting'
-			if file != '1w_d.py': subprocess.call(['pkill', '-f', '1w_d.py'])
 			if file != 'i2c_d.py': subprocess.call(['pkill', '-f', 'i2c_d.py'])
 			if file != 'SK-base_d.py': subprocess.call(['pkill', '-f', 'SK-base_d.py'])
 			if file != 'N2K-server_d.py': subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
@@ -46,10 +45,6 @@ class checkVesselSelf:
 				except:
 					error = True
 
-			if file != '1w_d.py': 
-				time.sleep(1)
-				subprocess.Popen(['python', currentpath + '/1w_d.py'])
-				time.sleep(1)
 			if file != 'i2c_d.py': 
 				subprocess.Popen(['python', currentpath + '/i2c_d.py'])
 				time.sleep(1)	
@@ -60,7 +55,6 @@ class checkVesselSelf:
 				subprocess.Popen(['python', currentpath + '/N2K-server_d.py'])
 				time.sleep(1)		
 
-			subprocess.Popen(['keyword'])
 		try:
 			with open(home + '/.config/openplotter/OP-signalk/openplotter-settings.json') as data_file:
 				data = json.load(data_file)
