@@ -1,5 +1,9 @@
 #!/bin/bash
 echo
+echo "CLOSING OPENCPN..."
+echo
+pkill -9 opencpn
+echo
 echo "UPDATING PACKAGES..."
 echo
 sudo apt-get update

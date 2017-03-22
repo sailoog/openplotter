@@ -1,5 +1,5 @@
 #!/bin/bash
 
 	echo
-	echo "#### dependecies ####"
+	echo "#### TODO openplotter dependecies ####"
 	echo

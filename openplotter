@@ -191,6 +191,13 @@ class MainFrame(wx.Frame):
 		self.opencpn_item2 = self.update.Append(wx.ID_ANY, _('Update OpenCPN plugins'), _('Update OpenCPN plugins to latest stable releases'))
 		self.Bind(wx.EVT_MENU, self.update_opencpn_plugins, self.opencpn_item2)
 		self.update.AppendSeparator()
+		self.system_item1 = self.update.Append(wx.ID_ANY, _('Upgrade Raspbian'), _('Upgrade Raspbian to latest stable release'))
+		self.Bind(wx.EVT_MENU, self.update_raspbian, self.system_item1)
+		self.system_item2 = self.update.Append(wx.ID_ANY, _('Set default OpenPlotter desktop'), _('Run this after a Raspbian upgrade'))
+		self.Bind(wx.EVT_MENU, self.default_desktop, self.system_item2)		
+		self.update.AppendSeparator()
+		self.openplotter_item3 = self.update.Append(wx.ID_ANY, _('Update OpenPlotter'), _('Apply latest changes to OpenPlotter'))
+		self.Bind(wx.EVT_MENU, self.update_openplotter, self.openplotter_item3)
 		self.menubar.Append(self.update, _('Updates'))
 
 		self.helpm = wx.Menu()
@@ -374,6 +381,18 @@ class MainFrame(wx.Frame):
 
 	def update_opencpn_plugins(self, e):
 		subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/update_OpenCPN_plugins.sh'])
+		self.ShowStatusBarBLACK(_('Follow the instructions in the new window'))
+
+	def update_openplotter(self, e):
+		subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/update_OpenPlotter.sh 1'])
+		self.Close()
+
+	def update_raspbian(self, e):
+		subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/update_raspbian.sh'])
+		self.ShowStatusBarBLACK(_('Follow the instructions in the new window'))
+
+	def default_desktop(self, e):
+		subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/default_openplotter_desk.sh'])
 		self.ShowStatusBarBLACK(_('Follow the instructions in the new window'))
 
 	def OnAboutBox(self, e):
