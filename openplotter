@@ -413,9 +413,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		info = wx.AboutDialogInfo()
 		info.SetName('OpenPlotter')
-		info.SetVersion(self.conf.get('GENERAL', 'version'))
+		info.SetVersion(self.conf.get('GENERAL', 'version')+' '+self.conf.get('GENERAL', 'state'))
 		info.SetDescription(description)
-		info.SetCopyright('2016 Sailoog')
+		info.SetCopyright('2017 Sailoog')
 		info.SetWebSite('http://www.sailoog.com')
 		info.SetLicence(licence)
 		info.AddDeveloper(

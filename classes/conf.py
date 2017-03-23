@@ -32,11 +32,27 @@ class Conf:
 			self.data_conf.write(configfile)
 
 	def get(self, section, item):
-		return self.data_conf.get(section, item)
+		result = ''
+		try:
+			result = self.data_conf.get(section, item)
+		except ConfigParser.NoSectionError:
+			self.read()
+			try:
+				self.data_conf.add_section(section)
+			except ConfigParser.DuplicateSectionError: pass
+			self.data_conf.set(section, item, '')
+			self.write()
+		except ConfigParser.NoOptionError:
+			self.set(section, item, '')
+		return result
 
 	def set(self, section, item, value):
 		self.read()
-		self.data_conf.set(section, item, value)
+		try:
+			self.data_conf.set(section, item, value)
+		except ConfigParser.NoSectionError:
+			self.data_conf.add_section(section)
+			self.data_conf.set(section, item, value)
 		self.write()
 
 	def has_option(self, section, item):
