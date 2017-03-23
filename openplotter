@@ -18,6 +18,7 @@
 import ConfigParser
 import json
 import os
+import io
 import pyudev
 import re
 import requests
@@ -384,8 +385,51 @@ class MainFrame(wx.Frame):
 		self.ShowStatusBarBLACK(_('Follow the instructions in the new window'))
 
 	def update_openplotter(self, e):
-		subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/update_OpenPlotter.sh 1'])
-		self.Close()
+		remote_branch = 'v0.9.0'
+		try:
+			r = requests.get('https://raw.githubusercontent.com/sailoog/openplotter/'+remote_branch+'/openplotter.conf')
+		except:
+			self.ShowStatusBarRED(_('Error connecting to Github.'))
+			return
+		try:
+			data_conf = ConfigParser.SafeConfigParser()
+			data_conf.readfp(io.StringIO(r.text))
+			vr = data_conf.get('GENERAL','version')
+			vr_list = vr.split('.')
+			vl = self.conf.get('GENERAL', 'version')
+			vl_list = vl.split('.')
+			remote_xxx = int(vr_list[0])
+			remote_oxx = int(vr_list[1])
+			remote_oox = int(vr_list[2])
+			local_xxx = int(vl_list[0])
+			local_oxx = int(vl_list[1])
+			local_oox = int(vl_list[2])
+		except:
+			self.ShowStatusBarRED(_('Error reading versions.'))
+			return
+		msg = ''
+		if remote_xxx > local_xxx:
+			msg += _('There is an OpenPlotter upgrade, it is recommended to download the new OpenPlotter RPI image.\n\n')
+			msg += _('You can upgrade now but after updating OpenPlotter you have to make a Raspbian upgrade.\n')
+			msg += _('Please make a backup image of your system before updating.\n\n')
+			major_update = '1'
+		elif remote_oxx > local_oxx:
+			msg += _('There is a major OpenPlotter update.\n')
+			msg += _('Please make a backup image of your system before updating.\n\n')
+			major_update = '1'
+		elif remote_oox > local_oox:
+			msg += _('There is a minor OpenPlotter update.\n\n')
+			major_update = '0'
+		else:
+			self.ShowMessage(_('OpenPlotter is up to date.'))
+			return
+		msg += _('Are you sure you want to update from ')+vl+_(' to ')+vr+'?'
+		dlg = wx.MessageDialog(None, msg, _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_EXCLAMATION)
+		if dlg.ShowModal() == wx.ID_YES:
+			subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/update_OpenPlotter.sh', major_update, vr])
+			dlg.Destroy()
+			self.Close()
+		else: dlg.Destroy()
 
 	def update_raspbian(self, e):
 		subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/update_raspbian.sh'])
