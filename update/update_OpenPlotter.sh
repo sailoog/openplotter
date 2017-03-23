@@ -14,10 +14,10 @@ echo "DOWNLOADING NEW OPENPLOTTER CODE..."
 echo
 cd ~/.config
 rm -rf openplotter_tmp
-#### TODO CHANGE TO MASTER ###################################################
+#### TODO change to master ###################################################
 git clone -b v0.9.0 https://github.com/sailoog/openplotter.git openplotter_tmp
-rm -rf openplotter_tmp/.git/
 ##############################################################################
+rm -rf openplotter_tmp/.git/
 
 if [ $1 = 1 ]; then
 	source openplotter_tmp/update/update_dependencies.sh

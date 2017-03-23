@@ -385,6 +385,7 @@ class MainFrame(wx.Frame):
 		self.ShowStatusBarBLACK(_('Follow the instructions in the new window'))
 
 	def update_openplotter(self, e):
+		##### TODO change to master
 		remote_branch = 'v0.9.0'
 		try:
 			r = requests.get('https://raw.githubusercontent.com/sailoog/openplotter/'+remote_branch+'/openplotter.conf')
