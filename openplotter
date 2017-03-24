@@ -197,8 +197,10 @@ class MainFrame(wx.Frame):
 		self.system_item2 = self.update.Append(wx.ID_ANY, _('Set default OpenPlotter desktop'), _('Run this after a Raspbian upgrade'))
 		self.Bind(wx.EVT_MENU, self.default_desktop, self.system_item2)		
 		self.update.AppendSeparator()
-		self.openplotter_item3 = self.update.Append(wx.ID_ANY, _('Update OpenPlotter'), _('Apply latest changes to OpenPlotter'))
-		self.Bind(wx.EVT_MENU, self.update_openplotter, self.openplotter_item3)
+		self.openplotter_item1 = self.update.Append(wx.ID_ANY, _('Update OpenPlotter beta'), _('Apply latest changes on beta version'))
+		self.Bind(wx.EVT_MENU, self.update_openplotter_beta, self.openplotter_item1)
+		self.openplotter_item2 = self.update.Append(wx.ID_ANY, _('Update OpenPlotter stable'), _('Update to the latest stable version'))
+		self.Bind(wx.EVT_MENU, self.update_openplotter_stable, self.openplotter_item2)
 		self.menubar.Append(self.update, _('Updates'))
 
 		self.helpm = wx.Menu()
@@ -378,15 +380,19 @@ class MainFrame(wx.Frame):
 
 	def update_opencpn(self, e):
 		subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/update_OpenCPN.sh'])
-		self.ShowStatusBarBLACK(_('Follow the instructions in the new window'))
+		self.ShowStatusBarBLACK(_('Follow the instructions of the new window'))
 
 	def update_opencpn_plugins(self, e):
 		subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/update_OpenCPN_plugins.sh'])
-		self.ShowStatusBarBLACK(_('Follow the instructions in the new window'))
+		self.ShowStatusBarBLACK(_('Follow the instructions of the new window'))
 
-	def update_openplotter(self, e):
-		##### TODO change to master
-		remote_branch = 'v0.9.0'
+	def update_openplotter_beta(self, e):
+		self.update_openplotter('beta')
+
+	def update_openplotter_stable(self, e):
+		self.update_openplotter('master')
+
+	def update_openplotter(self, remote_branch):
 		try:
 			r = requests.get('https://raw.githubusercontent.com/sailoog/openplotter/'+remote_branch+'/openplotter.conf')
 		except:
@@ -396,8 +402,10 @@ class MainFrame(wx.Frame):
 			data_conf = ConfigParser.SafeConfigParser()
 			data_conf.readfp(io.StringIO(r.text))
 			vr = data_conf.get('GENERAL','version')
+			sr = data_conf.get('GENERAL','state')
 			vr_list = vr.split('.')
 			vl = self.conf.get('GENERAL', 'version')
+			sl = self.conf.get('GENERAL', 'state')
 			vl_list = vl.split('.')
 			remote_xxx = int(vr_list[0])
 			remote_oxx = int(vr_list[1])
@@ -422,23 +430,28 @@ class MainFrame(wx.Frame):
 			msg += _('There is a minor OpenPlotter update.\n\n')
 			major_update = '0'
 		else:
-			self.ShowMessage(_('OpenPlotter is up to date.'))
+			self.ShowMessage('OpenPlotter '+vl+' '+sl+_(' is up to date.'))
 			return
-		msg += _('Are you sure you want to update from ')+vl+_(' to ')+vr+'?'
+		msg += _('Are you sure you want to update from ')+vl+' '+sl+_(' to ')+vr+' '+sr+'?'
 		dlg = wx.MessageDialog(None, msg, _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_EXCLAMATION)
 		if dlg.ShowModal() == wx.ID_YES:
-			subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/update_OpenPlotter.sh', major_update, vr])
+			subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/update_OpenPlotter.sh', major_update, vr, sr])
 			dlg.Destroy()
 			self.Close()
 		else: dlg.Destroy()
 
 	def update_raspbian(self, e):
-		subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/update_raspbian.sh'])
-		self.ShowStatusBarBLACK(_('Follow the instructions in the new window'))
+		msg = _('Please make a backup image of your system before upgrading.\n\n')
+		msg += _('Are you sure you want to upgrade Raspbian?')
+		dlg = wx.MessageDialog(None, msg, _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_EXCLAMATION)
+		if dlg.ShowModal() == wx.ID_YES:
+			subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/update_raspbian.sh'])
+			self.ShowStatusBarBLACK(_('Follow the instructions of the new window'))
+		dlg.Destroy()
 
 	def default_desktop(self, e):
 		subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/default_openplotter_desk.sh'])
-		self.ShowStatusBarBLACK(_('Follow the instructions in the new window'))
+		self.ShowStatusBarBLACK(_('Follow the instructions of the new window'))
 
 	def OnAboutBox(self, e):
 		description = _(

@@ -1,8 +1,11 @@
 #!/bin/bash
 
 echo
-echo "UPDATING RASPBIAN PACKAGES..."
+echo "UPDATING PACKAGES LISTS..."
+echo
+sudo apt-get update
+echo
+echo "UPDATING PACKAGES..."
 echo
 #### TODO openplotter dependecies ####
-sudo apt-get update
 sudo apt-get install crudini

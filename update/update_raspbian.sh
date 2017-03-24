@@ -1,6 +1,6 @@
 #!/bin/bash
 echo
-echo "DOWNLOADING PACKAGES LIST..."
+echo "UPDATING PACKAGES LISTS..."
 echo
 sudo apt-get update
 echo
