@@ -26,11 +26,14 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 echo
-echo "DOWNLOADING SIGNAL K..."
+echo "UPDATING NODEJS..."
 echo
 pkill -f signalk-server
 curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
 sudo apt-get install -y nodejs
+echo
+echo "DOWNLOADING SIGNAL K..."
+echo
 git clone https://github.com/sailoog/signalk-server-node.git signalk-server-node_tmp
 if [ $? -ne 0 ]; then
 	echo
@@ -50,6 +53,7 @@ echo
 echo "DELETING OLD SIGNAL K FILES..."
 echo
 rm -rf $SKDIRDATE
+rm -rf signalk-server-node
 echo
 echo "INSTALLING NEW SIGNAL K FILES..."
 echo
