@@ -18,6 +18,7 @@ fi
 echo
 echo "INSTALLING PYTHON PACKAGES..."
 echo
+sudo easy_install pip
 sudo pip install --upgrade paho-mqtt pyudev pyrtlsdr pynmea2 twython websocket-client spidev requests requests_oauthlib
 if [ $? -ne 0 ]; then
 	echo
