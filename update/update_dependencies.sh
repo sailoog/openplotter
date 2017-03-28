@@ -24,9 +24,37 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 echo
-echo "UPDATING SIGNAL K..."
+echo "DOWNLOADING SIGNAL K..."
 echo
-#### TODO ####
+pkill -f signalk-server
+curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+sudo apt-get install -y nodejs
+git clone https://github.com/sailoog/signalk-server-node.git signalk-server-node_tmp
+if [ $? -ne 0 ]; then
+	echo
+	read -p "#### ERROR. ABORTING, PRESS ENTER TO EXIT ####"
+	exit 1
+fi
+echo
+echo "CREATING SIGNAL K BACKUP..."
+echo
+SKDIRDATE=`date +signalk_bak_%Y_%m_%d:%H:%M:%S`
+cp -a signalk-server-node/ $SKDIRDATE/
+echo
+echo "COMPRESSING SIGNAL K BACKUP INTO HOME..."
+echo
+tar cvjf ~/$SKDIRDATE.tar.bz2 $SKDIRDATE
+echo
+echo "DELETING OLD SIGNAL K FILES..."
+echo
+rm -rf $SKDIRDATE
+echo
+echo "INSTALLING NEW SIGNAL K FILES..."
+echo
+mv signalk-server-node_tmp signalk-server-node
+cd signalk-server-node
+npm install
+cd ~/.config
 echo
 echo "UPDATING NODE-RED, NODE-RED-DASHBOARD AND NODE-RED-FREEBOARD..."
 echo

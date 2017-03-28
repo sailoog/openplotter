@@ -31,12 +31,12 @@ fi
 source openplotter_tmp/update/update_settings.sh
 
 echo
-echo "COMPRESSING BACKUP INTO HOME..."
+echo "COMPRESSING OPENPLOTTER CODE BACKUP INTO HOME..."
 echo
 tar cvjf ~/$DIRDATE.tar.bz2 $DIRDATE
 
 echo
-echo "DELETING FILES..."
+echo "DELETING OLD OPENPLOTTER CODE FILES..."
 echo
 rm -rf openplotter
 rm -rf $DIRDATE
