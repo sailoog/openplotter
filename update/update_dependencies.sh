@@ -31,9 +31,15 @@ echo
 pkill -f signalk-server
 curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
 sudo apt-get install -y nodejs
+if [ $? -ne 0 ]; then
+	echo
+	read -p "#### ERROR. ABORTING, PRESS ENTER TO EXIT ####"
+	exit 1
+fi
 echo
 echo "DOWNLOADING SIGNAL K..."
 echo
+rm -rf signalk-server-node_tmp
 git clone https://github.com/sailoog/signalk-server-node.git signalk-server-node_tmp
 if [ $? -ne 0 ]; then
 	echo
