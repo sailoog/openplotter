@@ -34,7 +34,7 @@ source openplotter_tmp/update/update_settings.sh
 echo
 echo "COMPRESSING OPENPLOTTER CODE BACKUP INTO HOME..."
 echo
-tar cvjf ~/$DIRDATE.tar.bz2 $DIRDATE
+tar cjf ~/$DIRDATE.tar.bz2 $DIRDATE
 
 echo
 echo "DELETING OLD OPENPLOTTER CODE FILES..."

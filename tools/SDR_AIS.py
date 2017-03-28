@@ -222,7 +222,7 @@ class MyFrame(wx.Frame):
 		def vhf_Rx(self, event):
 			self.kill_sdr()
 			self.enable_sdr_controls()
-			subprocess.Popen('/home/pi/.config/gqrx-2.6-rpi3-1/run_gqrx.sh')
+			subprocess.Popen('/home/pi/.config/gqrx/run_gqrx.sh')
 			msg=_('AIS reception disabled. After closing the new window enable AIS reception again.')
 			self.SetStatusText(msg)
 
