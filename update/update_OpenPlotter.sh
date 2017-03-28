@@ -24,6 +24,7 @@ DIRDATE=`date +openplotter_bak_%Y_%m_%d:%H:%M:%S`
 cp -a openplotter/ $DIRDATE/
 cd $DIRDATE
 find . -name "*.pyc" -type f -delete
+cd ~/.config
 
 if [ $1 = 1 ]; then
 	source openplotter_tmp/update/update_dependencies.sh
