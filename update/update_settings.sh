@@ -1,4 +1,5 @@
 #!/bin/bash
+cd ~/.config
 
 echo
 echo "APPLYING SETTINGS..."
@@ -14,3 +15,5 @@ cp -f $DIRDATE/OP-signalk/openplotter-settings.json openplotter_tmp/OP-signalk/
 cp -f $DIRDATE/imu/RTIMULib.ini openplotter_tmp/imu/
 cp -f $DIRDATE/imu/RTIMULib2.ini openplotter_tmp/imu/
 cp -f $DIRDATE/imu/RTIMULib3.ini openplotter_tmp/imu/
+
+cd ~/.config

@@ -63,12 +63,12 @@ else:
 	  data = ((adc[1]&3) << 8) + adc[2]
 	  return data
 
-	def publish_sk(io,channel,current_state):
+	def publish_sk(io,channel,current_state,name):
 		if io=='in':io='input'
 		else: io='output'
 		if current_state: current_state='1'
 		else: current_state='0'
-		SignalK='{"updates":[{"source":{"type": "GPIO","src":"GPIO'+str(channel)+'"},"values":[{"path":"notifications.gpio.'+io+'.gpio'+str(channel)+'","value":'+current_state+'}]}]}\n'
+		SignalK='{"updates":[{"source":"GPIO.'+io+'.'+str(channel)+'","values":[{"path":"sensors.'+name+'","value":'+current_state+'}]}]}\n'
 		sock.sendto(SignalK, ('127.0.0.1', 55558))
 	  
 	conf=Conf(Paths())
@@ -300,11 +300,12 @@ else:
 			c=0
 			for i in gpio_list:
 				channel=int(i[2])
+				name = i[0]
 				current_state = GPIO.input(channel)
 				last_state=gpio_list[c][4]
 				if current_state!=last_state:
 					gpio_list[c][4]=current_state
-					publish_sk(i[1],channel,current_state)
+					publish_sk(i[1],channel,current_state, name)
 				c+=1
 
 		if imu_:	work_imu()	

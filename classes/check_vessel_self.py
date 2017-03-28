@@ -30,7 +30,6 @@ class checkVesselSelf:
 		currentpath = paths.currentpath
 		if not self.util_process_exist('signalk-server'):
 			print 'Signal K starting'
-			if file != 'i2c_d.py': subprocess.call(['pkill', '-f', 'i2c_d.py'])
 			if file != 'SK-base_d.py': subprocess.call(['pkill', '-f', 'SK-base_d.py'])
 			if file != 'N2K-server_d.py': subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
 			time.sleep(2)
@@ -45,9 +44,6 @@ class checkVesselSelf:
 				except:
 					error = True
 
-			if file != 'i2c_d.py': 
-				subprocess.Popen(['python', currentpath + '/i2c_d.py'])
-				time.sleep(1)	
 			if file != 'SK-base_d.py': 
 				subprocess.Popen(['python', currentpath + '/SK-base_d.py'])
 				time.sleep(1)							

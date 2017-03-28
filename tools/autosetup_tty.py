@@ -172,7 +172,7 @@ def on_setup(event):
 	subprocess.call(["pkill", '-f', "signalk-server-node"])
 	subprocess.call(["pkill", '-9', "kplex"])
 	subprocess.call(['pkill', '-f', '1w_d.py'])
-	subprocess.call(['pkill', '-f', 'i2c_d.py'])
+	subprocess.call(['pkill', '-f', 'read_sensors_d.py'])
 	subprocess.call(['pkill', '-f', 'mqtt_d.py'])
 	subprocess.call(['pkill', '-f', 'SK-base_d.py'])
 	subprocess.call(['pkill', '-f', 'N2K-server_d.py'])

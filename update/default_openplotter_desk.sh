@@ -17,6 +17,10 @@ echo "show_documents=0" >> desktop-items-0.conf
 echo "show_trash=0" >> desktop-items-0.conf
 echo "show_mounts=0" >> desktop-items-0.conf
 echo "prefs_app=pipanel" >> desktop-items-0.conf
+
+sudo rm -rf /usr/share/raspi-ui-overrides/applications/magpi.desktop
+sudo rm -rf /usr/share/raspi-ui-overrides/applications/raspi_resources.desktop
+sudo rm -rf /usr/share/raspi-ui-overrides/applications/help.desktop
 echo
 echo "FINISHED, PRESS ENTER TO EXIT."
 read -p "YOU HAVE TO LOGOUT/REBOOT TO ACTIVATE THE NEW SETTINGS."
