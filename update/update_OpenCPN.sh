@@ -4,13 +4,23 @@ echo "CLOSING OPENCPN..."
 echo
 pkill -9 opencpn
 echo
-echo "UPDATING PACKAGES..."
+echo "UPDATING PACKAGE LISTS..."
 echo
-sudo apt-get update
+sudo apt-get -qq update
+if [ $? -ne 0 ]; then
+	echo
+	read -p "#### ERROR. ABORTING, PRESS ENTER TO EXIT ####"
+	exit 1
+fi
 echo
-echo "INSTALLING OPENCPN..."
+echo "UPDATING OPENCPN..."
 echo
-sudo apt-get install opencpn
+sudo apt-get -qq install opencpn
+if [ $? -ne 0 ]; then
+	echo
+	read -p "#### ERROR. ABORTING, PRESS ENTER TO EXIT ####"
+	exit 1
+fi
 echo
 echo "EDITING OPENCPN MENU..."
 echo

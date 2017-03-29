@@ -22,5 +22,5 @@ sudo rm -rf /usr/share/raspi-ui-overrides/applications/magpi.desktop
 sudo rm -rf /usr/share/raspi-ui-overrides/applications/raspi_resources.desktop
 sudo rm -rf /usr/share/raspi-ui-overrides/applications/help.desktop
 echo
-echo "FINISHED, PRESS ENTER TO EXIT."
-read -p "YOU HAVE TO LOGOUT/REBOOT TO ACTIVATE THE NEW SETTINGS."
+read -p "FINISHED, PRESS ENTER TO REBOOT SYSTEM."
+shutdown -r now

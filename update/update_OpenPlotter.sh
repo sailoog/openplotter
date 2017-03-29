@@ -4,7 +4,6 @@ cd ~/.config
 echo
 echo "DOWNLOADING NEW OPENPLOTTER CODE..."
 echo
-
 rm -rf openplotter_tmp
 if [ $3 = "stable" ]; then
 	git clone https://github.com/sailoog/openplotter.git openplotter_tmp
@@ -16,7 +15,6 @@ if [ $? -ne 0 ]; then
 	read -p "#### ERROR. ABORTING, PRESS ENTER TO EXIT ####"
 	exit 1
 fi
-
 echo
 echo "CREATING OPENPLOTTER CODE BACKUP..."
 echo
@@ -25,29 +23,21 @@ cp -a openplotter/ $DIRDATE/
 cd $DIRDATE
 find . -name "*.pyc" -type f -delete
 cd ~/.config
-
 if [ $1 = 1 ]; then
 	source openplotter_tmp/update/update_dependencies.sh
 fi
 source openplotter_tmp/update/update_settings.sh
-
 echo
 echo "COMPRESSING OPENPLOTTER CODE BACKUP INTO HOME..."
 echo
 tar cjf ~/$DIRDATE.tar.bz2 $DIRDATE
-
 echo
 echo "DELETING OLD OPENPLOTTER CODE FILES..."
 echo
 rm -rf openplotter
 rm -rf $DIRDATE
 mv openplotter_tmp openplotter
-
 echo
-echo "RESTARTING OPENPLOTTER..."
-echo
-startup restart
-
-echo
-read -p "FINISHED, PRESS ENTER TO EXIT."
+read -p "FINISHED, PRESS ENTER TO REBOOT SYSTEM."
+shutdown -r now
 
