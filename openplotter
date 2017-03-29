@@ -469,24 +469,9 @@ See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see http://www.gnu.org/licenses/"""
 
-
-		origWD = os.getcwd() # remember our original working directory
-
-		os.chdir(self.currentpath)
-		git_key = ''
-		try:
-			git_key = subprocess.check_output('git rev-parse --short @'.split())
-		except:
-			pass
-		os.chdir(origWD)
-
 		info = wx.AboutDialogInfo()
 		info.SetName('OpenPlotter')
-<<<<<<< HEAD
-		info.SetVersion(self.conf.get('GENERAL', 'version')+'.'+git_key)
-=======
 		info.SetVersion(self.conf.get('GENERAL', 'version')+' '+self.conf.get('GENERAL', 'state'))
->>>>>>> refs/remotes/sailoog/beta
 		info.SetDescription(description)
 		info.SetCopyright('2017 Sailoog')
 		info.SetWebSite('http://www.sailoog.com')
@@ -550,7 +535,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 						ii = device['DEVLINKS']
 						value = ii[ii.rfind('/dev/ttyOP_'):]
 						if value.find('/dev/ttyOP_') >= 0:
-							self.SerDevLs.append(value)
+							self.SerDevLs.append(value.split(' ')[0])
 				except Exception, e:
 					print 'no tty DEVLINKS found', str(e)
 		self.can_usb.Clear()
