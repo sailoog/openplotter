@@ -142,7 +142,7 @@ class MyFrame(wx.Frame):
 					nmea_list=frase_nmea.split()
 					for i in nmea_list:
 						device=i[1:3]
-						sentence=i[3:6]
+						sentence=i[3:6].encode('utf-8')
 						dat=i[6:-2]
 						index=0
 						exist=0

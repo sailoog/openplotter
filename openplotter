@@ -535,7 +535,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 						ii = device['DEVLINKS']
 						value = ii[ii.rfind('/dev/ttyOP_'):]
 						if value.find('/dev/ttyOP_') >= 0:
-							self.SerDevLs.append(value)
+							self.SerDevLs.append(value.split(' ')[0])
 				except Exception, e:
 					print 'no tty DEVLINKS found', str(e)
 		self.can_usb.Clear()

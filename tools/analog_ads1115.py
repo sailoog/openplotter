@@ -78,8 +78,8 @@ else:
 				Erg=''
 				for i in range(0,len(list_signalk1)):
 					Erg += '{"path": "'+list_signalk_path1[i]+'","value":'+list_signalk1[i]+'},'
-					SignalK +=Erg[0:-1]+']}]}\n'
-				sock.sendto(SignalK, ('127.0.0.1', 55557))			
+				SignalK +=Erg[0:-1]+']}]}\n'
+				sock.sendto(SignalK, ('127.0.0.1', 55557))
 		else:
 			index+=1
 			if index>3: index=0
