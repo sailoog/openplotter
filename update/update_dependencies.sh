@@ -77,7 +77,7 @@ echo "INSTALLING NEW SIGNAL K FILES..."
 echo
 mv signalk-server-node_tmp signalk-server-node
 cd signalk-server-node
-npm install --quiet
+npm install
 cd ~/.config
 echo
 echo "UPDATING NODE-RED, NODE-RED-DASHBOARD AND NODE-RED-FREEBOARD..."
