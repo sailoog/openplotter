@@ -14,40 +14,30 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import socket, datetime, sys
-from classes.check_vessel_self import checkVesselSelf
-
-vessel_self=checkVesselSelf()
-mmsi=vessel_self.mmsi
-
+import socket, sys
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 def sendSK(keyword,source):
-	value='{"message": "'+keyword+'"}'
-	path='notifications.keyword.'+source
-	SignalK='{"mmsi":"'+mmsi+'","updates":[{"source":{"type": "notifications","src":"'+source+'"},"values":[{"path":"'+path+'","value":'+value+'}]}]}\n'
-	sock.sendto(SignalK, ('127.0.0.1', 55558))
-
+	try:
+		keyword = keyword.replace('"', "'")
+		source = source.replace('"', "'")
+		path='notifications.keyword'
+		SignalK='{"updates":[{"source":"keyword.'+source+'","values":[{"path":"'+path+'","value":"'+keyword+'"}]}]}\n'
+		sock.sendto(SignalK, ('127.0.0.1', 55558))
+	except Exception,e: print str(e)
+	
 try: 
-	source=sys.argv[1]
+	keyword=sys.argv[1]
 except:
 	keyword='null'
-	source='opencpn'
-	sendSK(keyword,source)
-	source='sms'
-	sendSK(keyword,source)
 	source='undefined'
 	sendSK(keyword,source)
 else:
 	try:
-		keyword=sys.argv[2]
+		source=sys.argv[2]
 	except:
-		keyword=sys.argv[1]
 		source='undefined'
 		sendSK(keyword,source)
 	else:
-		keyword=sys.argv[2]
-		source=sys.argv[1]
-		if source!='opencpn' and source!='sms': source='undefined'
 		sendSK(keyword,source)

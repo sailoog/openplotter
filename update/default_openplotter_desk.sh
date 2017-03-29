@@ -1,7 +1,8 @@
 #!/bin/bash
-
+echo
+echo "APPLYING DEFAULT SETTINGS..."
+echo
 cd ~/.config/pcmanfm/LXDE-pi
-
 echo "[*]" > desktop-items-0.conf
 echo "wallpaper_mode=center" >> desktop-items-0.conf
 echo "wallpaper_common=1" >> desktop-items-0.conf
@@ -17,4 +18,9 @@ echo "show_trash=0" >> desktop-items-0.conf
 echo "show_mounts=0" >> desktop-items-0.conf
 echo "prefs_app=pipanel" >> desktop-items-0.conf
 
-echo "You have to logout/reboot to activate the settings."
+sudo rm -rf /usr/share/raspi-ui-overrides/applications/magpi.desktop
+sudo rm -rf /usr/share/raspi-ui-overrides/applications/raspi_resources.desktop
+sudo rm -rf /usr/share/raspi-ui-overrides/applications/help.desktop
+echo
+read -p "FINISHED, PRESS ENTER TO REBOOT SYSTEM."
+shutdown -r now

@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import socket, time, datetime,platform
+import socket, time, platform
 if platform.machine()[0:3]!='arm':
 	print 'this is not a raspberry pi -> no W1ThermSensor'
 else:
@@ -52,11 +52,9 @@ else:
 					temp=sensors[ib].get_temperature(W1ThermSensor.KELVIN)
 					temp_offset=temp+float(i[3])
 					value=str(temp_offset)
-					if '*' in i[1]: path=i[1].replace('*', i[0],1)
-					else: path=i[1]
-					sensorid=i[2]
-					timestamp=str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z'
-					SignalK='{"updates":[{"source":{"type":"1W","src":"'+sensorid+'"},"values":[{"path":"'+path+'","value":'+value+'}]}]}\n'
+					path=i[1]
+					name=i[0]
+					SignalK='{"updates":[{"source":"1W.'+name+'","values":[{"path":"'+path+'","value":'+value+'}]}]}\n'
 					sock.sendto(SignalK, ('127.0.0.1', 55557))
 				except Exception,e: print str(e)
 				ib=ib+1	

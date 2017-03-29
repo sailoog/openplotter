@@ -1,26 +1,20 @@
-## This is the development branch of OpenPlotter project. If you want to test this version, you have to download the system image from:
+## This is the development branch of OpenPlotter project. We will release a new version soon.
 
-http://www.sailoog.com/en/blog/download-openplotter-rpi-v090alpha-noobs
-
-To apply updates/install and solved issues, start:
-
-'bash update_OP.sh'
-
-(If the file isn't in the home directory you can find it here: https://github.com/sailoog/openplotter/blob/v0.9.0/OP-signalk/update_OP.sh )
 
 ### Known issues
 
-- [x] [SOLVED] SDR AIS decodification doesn't work if network connection is not present.
-- [ ] Node-Red crashes after hours of function.
+...
 
 ### To Do list
 
-- [x] [DONE] Write a GUI for startup script to show startup process, inform of errors and show recommendations (changing pi user, access point and VNC passwords)
-- [x] [DONE] startup can be started from terminal `startup stop` + `startup` is the same as `startup restart` (for debug, warm restart and stop OpenPlotter server processes)
+- [x] Next image will be self-updating. Minor changes (OP code), major changes (OP code + dependencies) and upgrades (minor, major and Raspbian upgrades).
+- [x] Write a GUI for startup script to show startup process, inform of errors and show recommendations (changing pi user, access point and VNC passwords)
+- [x] startup can be started from terminal `startup stop` + `startup` is the same as `startup restart` (for debug, warm restart and stop OpenPlotter server processes)
 - [ ] Build a better default Node-RED flow to feed freeboard and Node-RED Dashboard
 - [ ] Rebuild calculations.
 - [ ] Rebuild the Actions system to implement the new signalk-server-node plugin to create alarm zones for signalk keys.
-- [ ] Rebuild the MQTT system to perform the signalk specification.
+- [x] Rebuild the MQTT system to perform the signalk specification.
+- [x] Rebuild GPIO system.
 - [ ] Set beginners/expert modes.
 - [x] Add local documentation (pdf).
 - [ ] Set Android USB tethering for internet connection (and SMS?).

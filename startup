@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, subprocess, time, ConfigParser, os, threading, sys, platform
+import wx, subprocess, time, os, threading, sys, platform, requests, ConfigParser, io
 from classes.paths import Paths
 from classes.conf import Conf
 from classes.language import Language
@@ -137,62 +137,6 @@ class MyFrame(wx.Frame):
 
 		if not exist:
 
-			boot_ap=0
-			boot_sh=0
-			boot_conf = ConfigParser.SafeConfigParser()
-			try:
-				boot_conf.read('/boot/config.txt')
-				exist=True
-			except:
-				pass
-
-			enable='0'
-
-			if exist:
-				try:
-					enable=boot_conf.get('OPENPLOTTER', 'wifi_enable')
-				except: 
-					boot_conf.set('OPENPLOTTER', 'wifi_enable','0')
-				try:
-					device=boot_conf.get('OPENPLOTTER', 'device')
-					ssid=boot_conf.get('OPENPLOTTER', 'ssid')
-					passw=boot_conf.get('OPENPLOTTER', 'pass')
-					hw_mode = boot_conf.get('OPENPLOTTER', 'hw_mode')
-					channel = boot_conf.get('OPENPLOTTER', 'channel')
-					wpa = boot_conf.get('OPENPLOTTER', 'wpa')
-					boot_ap=1
-				except: boot_ap=0
-				try:
-					share=boot_conf.get('OPENPLOTTER', 'share')
-					boot_sh=1
-				except: boot_sh=0
-				try:
-					bridge = boot_conf.get('OPENPLOTTER', 'bridge')
-					ip = boot_conf.get('OPENPLOTTER', 'ip')
-				except: pass
-			if enable=='1':
-				if not device: device='wlan0'
-				if not ssid: ssid='OpenPlotter'
-				if not passw: passw='12345678'
-				if not hw_mode: hw_mode='g'
-				if not channel: channel='6'
-				if not wpa: wpa='2'
-				if not bridge: bridge='0'
-				if not ip: ip='10.10.10.1'	
-				if self.conf.get('WIFI', 'enable')!=enable:   self.conf.set('WIFI', 'enable', enable)
-				if self.conf.get('WIFI', 'device')!=device:   self.conf.set('WIFI', 'device', device)
-				if self.conf.get('WIFI', 'ssid')!=ssid:       self.conf.set('WIFI', 'ssid', ssid)
-				if self.conf.get('WIFI', 'password')!=passw:  self.conf.set('WIFI', 'password', passw)
-				if self.conf.get('WIFI', 'hw_mode')!=hw_mode: self.conf.set('WIFI', 'hw_mode', hw_mode)
-				if self.conf.get('WIFI', 'channel')!=channel: self.conf.set('WIFI', 'channel', channel)
-				if self.conf.get('WIFI', 'wpa')!=wpa:         self.conf.set('WIFI', 'wpa', wpa)
-				if self.conf.get('WIFI', 'bridge')!=bridge:   self.conf.set('WIFI', 'bridge', bridge)
-				if self.conf.get('WIFI', 'ip')!=ip:           self.conf.set('WIFI', 'ip', ip)
-				
-			if boot_sh==1:
-				if not share: share='0'
-				if self.conf.get('WIFI', 'share')!=share: self.conf.set('WIFI', 'share', share)
-
 			wifi_server=self.conf.get('WIFI', 'enable')
 			wifi_server_pass=self.conf.get('WIFI', 'password')
 
@@ -220,6 +164,9 @@ class MyFrame(wx.Frame):
 			TW_SOG=self.conf.get('CALCULATE', 'tw_sog')
 
 			N2K_output=self.conf.get('N2K', 'output')
+
+			vl = self.conf.get('GENERAL', 'version')
+			sl = self.conf.get('GENERAL', 'state')
 
 			tools_py=[]
 			if self.conf.has_section('TOOLS'):
@@ -288,6 +235,15 @@ class MyFrame(wx.Frame):
 					self.add_warnings_data(_('\n\nSecurity warning: You are using the default WIFI Access Point password.\nPlease change password in OpenPlotter > WiFi AP.'))
 				self.add_logger_data(_(' Done.'))
 
+			subprocess.call(['pkill', '-f', 'mqtt_d.py'])
+			subprocess.Popen(['python', self.currentpath+'/mqtt_d.py'])
+
+			subprocess.call(['pkill', '-f', '1w_d.py'])
+			subprocess.Popen(['python', self.currentpath+'/1w_d.py'])
+
+			subprocess.call(['pkill', '-f', 'read_sensors_d.py'])
+			subprocess.Popen(['python', self.currentpath+'/read_sensors_d.py'], cwd=self.currentpath + '/imu')
+
 			subprocess.call(["pkill", '-f', "signalk-server"])
 			self.add_logger_data(_('\nStarting SignalK Server...'))
 			vessel_self=checkVesselSelf()
@@ -296,8 +252,8 @@ class MyFrame(wx.Frame):
 			self.check_start('SK-base_d.py')
 			self.add_logger_data(_('\nStart 1wire sensor Server (optional)...'))
 			self.check_start('1w_d.py')
-			self.add_logger_data(_('\nStart i2c and spi Server (optional)...'))
-			self.check_start('i2c_d.py')
+			self.add_logger_data(_('\nStart I2C, SPI and GPIO Server (optional)...'))
+			self.check_start('read_sensors_d.py')
 			self.add_logger_data(_('\nStart mqtt Server (optional)...'))
 			self.check_start('mqtt_d.py')
 			self.add_logger_data(_('\nStart N2K send (optional)...'))
@@ -346,6 +302,42 @@ class MyFrame(wx.Frame):
 			self.add_logger_data(_(' Done.'))
 			self.autoclose=time.time() + 60
 
+			self.add_logger_data(_('\nChecking OpenPlotter updates...'))
+			if sl == 'stable': remote_branch = 'master'
+			else: remote_branch = 'beta'
+			try:
+				r = requests.get('https://raw.githubusercontent.com/sailoog/openplotter/'+remote_branch+'/openplotter.conf')
+			except:
+				self.add_logger_data(_(' It was not possible to connect to Github.'))
+			else:
+				try:
+					data_conf = ConfigParser.SafeConfigParser()
+					data_conf.readfp(io.StringIO(r.text))
+					vr = data_conf.get('GENERAL','version')
+					sr = data_conf.get('GENERAL','state')
+					vr_list = vr.split('.')
+					vl_list = vl.split('.')
+					remote_xxx = int(vr_list[0])
+					remote_oxx = int(vr_list[1])
+					remote_oox = int(vr_list[2])
+					local_xxx = int(vl_list[0])
+					local_oxx = int(vl_list[1])
+					local_oox = int(vl_list[2])
+				except:
+					self.add_logger_data(_(' Error reading versions.'))
+				else:
+					if remote_xxx > local_xxx:
+						self.add_logger_data(_(' Done.'))
+						self.add_warnings_data('\n\nThere is an OpenPlotter upgrade from '+vl+' '+sl+_(' to ')+vr+' '+sr+'.')
+					elif remote_oxx > local_oxx:
+						self.add_logger_data(_(' Done.'))
+						self.add_warnings_data('\n\nThere is a major OpenPlotter update from '+vl+' '+sl+_(' to ')+vr+' '+sr+'.')
+					elif remote_oox > local_oox:
+						self.add_logger_data(_(' Done.'))
+						self.add_warnings_data('\n\nThere is a minor OpenPlotter update from '+vl+' '+sl+_(' to ')+vr+' '+sr+'.')
+					else:
+						self.add_logger_data('OpenPlotter '+vl+' '+sl+_(' is up to date.'))
+
 			subprocess.call(['pkill', '-9', 'mpg123'])
 			if play=='1':
 				if sound:
@@ -389,7 +381,7 @@ if len(sys.argv)>1:
 		subprocess.call(['pkill', '-9', 'aisdecoder'])
 		subprocess.call(['pkill', '-9', 'rtl_fm'])
 		subprocess.call(['pkill', '-f', '1w_d.py'])
-		subprocess.call(['pkill', '-f', 'i2c_d.py'])
+		subprocess.call(['pkill', '-f', 'read_sensors_d.py'])
 		subprocess.call(['pkill', '-f', 'mqtt_d.py'])
 		subprocess.call(['pkill', '-f', 'SK-base_d.py'])
 		subprocess.call(['pkill', '-f', 'N2K-server_d.py'])

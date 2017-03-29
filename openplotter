@@ -18,6 +18,7 @@
 import ConfigParser
 import json
 import os
+import io
 import pyudev
 import re
 import requests
@@ -184,6 +185,23 @@ class MainFrame(wx.Frame):
 		self.lang_item6 = self.lang.Append(wx.ID_ANY, _('German'), _('Set German language'), kind=wx.ITEM_CHECK)
 		self.Bind(wx.EVT_MENU, self.lang_de, self.lang_item6)
 		self.menubar.Append(self.lang, _('Language'))
+
+		self.update = wx.Menu()
+		self.opencpn_item1 = self.update.Append(wx.ID_ANY, _('Update OpenCPN'), _('Update OpenCPN to latest stable release'))
+		self.Bind(wx.EVT_MENU, self.update_opencpn, self.opencpn_item1)
+		self.opencpn_item2 = self.update.Append(wx.ID_ANY, _('Update OpenCPN plugins'), _('Update OpenCPN plugins to latest stable releases'))
+		self.Bind(wx.EVT_MENU, self.update_opencpn_plugins, self.opencpn_item2)
+		self.update.AppendSeparator()
+		self.system_item1 = self.update.Append(wx.ID_ANY, _('Upgrade Raspbian'), _('Upgrade Raspbian to latest stable release'))
+		self.Bind(wx.EVT_MENU, self.update_raspbian, self.system_item1)
+		self.system_item2 = self.update.Append(wx.ID_ANY, _('Set default OpenPlotter desktop'), _('Run this after a Raspbian upgrade'))
+		self.Bind(wx.EVT_MENU, self.default_desktop, self.system_item2)		
+		self.update.AppendSeparator()
+		self.openplotter_item1 = self.update.Append(wx.ID_ANY, _('Update OpenPlotter beta'), _('Apply latest changes on beta version'))
+		self.Bind(wx.EVT_MENU, self.update_openplotter_beta, self.openplotter_item1)
+		self.openplotter_item2 = self.update.Append(wx.ID_ANY, _('Update OpenPlotter stable'), _('Update to the latest stable version'))
+		self.Bind(wx.EVT_MENU, self.update_openplotter_stable, self.openplotter_item2)
+		self.menubar.Append(self.update, _('Updates'))
 
 		self.helpm = wx.Menu()
 		self.helpm_item1 = self.helpm.Append(wx.ID_ANY, _('&About'), _('About OpenPlotter'))
@@ -360,6 +378,81 @@ class MainFrame(wx.Frame):
 		self.lang.Check(self.lang_item6.GetId(), True)
 		self.conf.set('GENERAL', 'lang', 'de')
 
+	def update_opencpn(self, e):
+		subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/update_OpenCPN.sh'])
+		self.ShowStatusBarBLACK(_('Follow the instructions of the new window'))
+
+	def update_opencpn_plugins(self, e):
+		subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/update_OpenCPN_plugins.sh'])
+		self.ShowStatusBarBLACK(_('Follow the instructions of the new window'))
+
+	def update_openplotter_beta(self, e):
+		self.update_openplotter('beta')
+
+	def update_openplotter_stable(self, e):
+		self.update_openplotter('master')
+
+	def update_openplotter(self, remote_branch):
+		try:
+			r = requests.get('https://raw.githubusercontent.com/sailoog/openplotter/'+remote_branch+'/openplotter.conf')
+		except:
+			self.ShowStatusBarRED(_('It was not possible to connect to Github.'))
+			return
+		try:
+			data_conf = ConfigParser.SafeConfigParser()
+			data_conf.readfp(io.StringIO(r.text))
+			vr = data_conf.get('GENERAL','version')
+			sr = data_conf.get('GENERAL','state')
+			vr_list = vr.split('.')
+			vl = self.conf.get('GENERAL', 'version')
+			sl = self.conf.get('GENERAL', 'state')
+			vl_list = vl.split('.')
+			remote_xxx = int(vr_list[0])
+			remote_oxx = int(vr_list[1])
+			remote_oox = int(vr_list[2])
+			local_xxx = int(vl_list[0])
+			local_oxx = int(vl_list[1])
+			local_oox = int(vl_list[2])
+		except:
+			self.ShowStatusBarRED(_('Error reading versions.'))
+			return
+		msg = ''
+		if remote_xxx > local_xxx:
+			msg += _('There is an OpenPlotter upgrade, it is recommended to download the new OpenPlotter RPI image.\n\n')
+			msg += _('You can upgrade now but after updating OpenPlotter you have to make a Raspbian upgrade.\n')
+			msg += _('Please make a backup image of your system before updating.\n\n')
+			major_update = '1'
+		elif remote_oxx > local_oxx:
+			msg += _('There is a major OpenPlotter update.\n')
+			msg += _('Please make a backup image of your system before updating.\n\n')
+			major_update = '1'
+		elif remote_oox > local_oox:
+			msg += _('There is a minor OpenPlotter update.\n\n')
+			major_update = '0'
+		else:
+			self.ShowMessage('OpenPlotter '+vl+' '+sl+_(' is up to date.'))
+			return
+		msg += _('Are you sure you want to update from ')+vl+' '+sl+_(' to ')+vr+' '+sr+'?'
+		dlg = wx.MessageDialog(None, msg, _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_EXCLAMATION)
+		if dlg.ShowModal() == wx.ID_YES:
+			subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/update_OpenPlotter.sh', major_update, vr, sr])
+			dlg.Destroy()
+			self.Close()
+		else: dlg.Destroy()
+
+	def update_raspbian(self, e):
+		msg = _('Please make a backup image of your system before upgrading.\n\n')
+		msg += _('Are you sure you want to upgrade Raspbian?')
+		dlg = wx.MessageDialog(None, msg, _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_EXCLAMATION)
+		if dlg.ShowModal() == wx.ID_YES:
+			subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/update_raspbian.sh'])
+			self.ShowStatusBarBLACK(_('Follow the instructions of the new window'))
+		dlg.Destroy()
+
+	def default_desktop(self, e):
+		subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/default_openplotter_desk.sh'])
+		self.ShowStatusBarBLACK(_('Follow the instructions of the new window'))
+
 	def OnAboutBox(self, e):
 		description = _(
 			"OpenPlotter is a DIY, open-source, low-cost, low-consumption, modular and scalable sailing platform to run on ARM boards.")
@@ -389,7 +482,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		info = wx.AboutDialogInfo()
 		info.SetName('OpenPlotter')
+<<<<<<< HEAD
 		info.SetVersion(self.conf.get('GENERAL', 'version')+'.'+git_key)
+=======
+		info.SetVersion(self.conf.get('GENERAL', 'version')+' '+self.conf.get('GENERAL', 'state'))
+>>>>>>> refs/remotes/sailoog/beta
 		info.SetDescription(description)
 		info.SetCopyright('2017 Sailoog')
 		info.SetWebSite('http://www.sailoog.com')
@@ -649,8 +746,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def page_wifi(self):
 		wx.StaticBox(self.p_wifi, size=(370, 315), pos=(10, 10))
+
 		self.wifi_enable = wx.CheckBox(self.p_wifi, label=_('Enable access point'), pos=(20, 25))
-		self.wifi_enable.Bind(wx.EVT_CHECKBOX, self.onwifi_enable)
 
 		self.bridge_enable = wx.CheckBox(self.p_wifi, label=_('Enable bridge to eth0'), pos=(180, 25))
 
@@ -712,13 +809,16 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 									 pos=(20, 246))
 		self.wifi_mode_label = wx.StaticText(self.p_wifi, label=_('Mode'), pos=(160, 255))
 
-		self.wifi_wpa_list = ['None', 'WPA', 'WPA2', _('Both')]
+		self.wifi_wpa_list = [_('none'), 'WPA', 'WPA2', _('Both')]
 		self.wifi_wpa = wx.ComboBox(self.p_wifi, choices=self.wifi_wpa_list, style=wx.CB_READONLY, size=(120, 32),
 									pos=(20, 285))
 		self.wifi_wpa_label = wx.StaticText(self.p_wifi, label=_('WPA'), pos=(160, 290))
 
-		self.wifi_button_default = wx.Button(self.p_wifi, label=_('Defaults'), pos=(275, 280))
+		self.wifi_button_default = wx.Button(self.p_wifi, label=_('Defaults'), pos=(275, 240))
 		self.wifi_button_default.Bind(wx.EVT_BUTTON, self.on_wifi_default)
+
+		self.wifi_button_apply = wx.Button(self.p_wifi, label=_('Apply'), pos=(275, 280))
+		self.wifi_button_apply.Bind(wx.EVT_BUTTON, self.onwifi_enable)
 
 		wx.StaticBox(self.p_wifi, label=_(' Addresses '), size=(290, 315), pos=(385, 10))
 		self.ip_info = wx.TextCtrl(self.p_wifi, -1, style=wx.TE_MULTILINE | wx.TE_READONLY, size=(270, 245),
@@ -743,7 +843,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.share.SetValue(self.conf.get('WIFI', 'share'))
 			if self.conf.get('WIFI', 'hw_mode') == 'b': self.wifi_mode.SetValue('IEEE 802.11b')
 			if self.conf.get('WIFI', 'hw_mode') == 'g': self.wifi_mode.SetValue('IEEE 802.11g')
-			if self.conf.get('WIFI', 'wpa') == '0': self.wifi_wpa.SetValue('None')
+			if self.conf.get('WIFI', 'wpa') == '0': self.wifi_wpa.SetValue(_('none'))
 			if self.conf.get('WIFI', 'wpa') == '1': self.wifi_wpa.SetValue('WPA')
 			if self.conf.get('WIFI', 'wpa') == '2': self.wifi_wpa.SetValue('WPA2')
 			if self.conf.get('WIFI', 'wpa') == '3': self.wifi_wpa.SetValue(_('Both'))
@@ -759,15 +859,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def onwifi_enable(self, e):
 		isChecked = self.wifi_enable.GetValue()
-		if not isChecked:
-			dlg = wx.MessageDialog(None, _(
-				'Are you sure to disable?\nIf you are connected by remote, you may not be able to reconnect again.'),
-								   _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
-			if dlg.ShowModal() != wx.ID_YES:
-				self.wifi_enable.SetValue(True)
-				dlg.Destroy()
-				return
-			dlg.Destroy()
 		wlan = self.wlan.GetValue()
 		ssid = self.ssid.GetValue()
 		share = self.share.GetValue()
@@ -778,15 +869,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		if not wlan or not passw or not ssid or not share:
 			self.ShowStatusBarRED(_('Failed. You must fill in all fields.'))
-			self.enable_disable_wifi(0)
 			return
 		if wlan == share:
 			self.ShowStatusBarRED(_('"Access point device" and "Sharing Internet device" must be different'))
-			self.enable_disable_wifi(0)
 			return
 		if len(ssid) > 32 or len(passw) < 8:
 			self.ShowStatusBarRED(_('Your SSID must have a maximum of 32 characters and your password a minimum of 8.'))
-			self.enable_disable_wifi(0)
 			return
 		channel = self.wifi_channel.GetValue()
 		mode = self.wifi_mode.GetValue()
@@ -796,10 +884,27 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if share == _('none'): share = '0'
 		if mode == 'IEEE 802.11b': mode = 'b'
 		if mode == 'IEEE 802.11g': mode = 'g'
-		if wpa == 'None': wpa = '0'
+		if wpa == _('none'): wpa = '0'
 		if wpa == 'WPA': wpa = '1'
 		if wpa == 'WPA2': wpa = '2'
 		if wpa == _('Both'): wpa = '3'
+		if not isChecked and self.conf.get('WIFI', 'enable') == '1':
+			dlg = wx.MessageDialog(None, _(
+				'Access point will be disabled.\n\nIf you are on a headless system, you will not be able to reconnect again.\n\nAre you sure?'),
+								   _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+			if dlg.ShowModal() != wx.ID_YES:
+				self.enable_disable_wifi(1)
+				dlg.Destroy()
+				return
+			dlg.Destroy()
+		else:
+			dlg = wx.MessageDialog(None, _(
+				'Changes will be applied.\n\nIf something goes wrong and you are on a headless system,\nyou may not be able to reconnect again.\n\nAre you sure?'),
+								   _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+			if dlg.ShowModal() != wx.ID_YES:
+				dlg.Destroy()
+				return
+			dlg.Destroy()
 		self.conf.set('WIFI', 'device', wlan)
 		self.conf.set('WIFI', 'password', passw)
 		self.conf.set('WIFI', 'ssid', ssid)
@@ -826,6 +931,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.ShowStatusBarBLACK('')
 		self.ShowMessage(msg)
 		self.on_show_ip_info('')
+
+	def enable_disable_wifi(self, s):
+		if s == 1:
+			self.wifi_enable.SetValue(True)
+			self.conf.set('WIFI', 'enable', '1')
+		else:
+			self.wifi_enable.SetValue(False)
+			self.conf.set('WIFI', 'enable', '0')
 
 	def on_show_ip_info(self, e):
 		ip_info = subprocess.check_output(['hostname', '-I'])
@@ -955,48 +1068,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.wifi_channel.SetValue('6')
 		self.wifi_mode.SetValue('IEEE 802.11g')
 		self.wifi_wpa.SetValue('WPA2')
-
-	def enable_disable_wifi(self, s):
-		if s == 1:
-			self.wlan.Disable()
-			self.passw.Disable()
-			self.ssid.Disable()
-			self.share.Disable()
-			self.wlan_label.Disable()
-			self.passw_label.Disable()
-			self.ssid_label.Disable()
-			self.share_label.Disable()
-			self.wifi_settings_label.Disable()
-			self.wifi_channel.Disable()
-			self.wifi_channel_label.Disable()
-			self.wifi_mode.Disable()
-			self.wifi_mode_label.Disable()
-			self.wifi_wpa.Disable()
-			self.wifi_wpa_label.Disable()
-			self.wifi_button_default.Disable()
-			self.wifi_enable.SetValue(True)
-			self.bridge_enable.Disable()
-			self.conf.set('WIFI', 'enable', '1')
-		else:
-			self.wlan.Enable()
-			self.passw.Enable()
-			self.ssid.Enable()
-			self.share.Enable()
-			self.wlan_label.Enable()
-			self.passw_label.Enable()
-			self.ssid_label.Enable()
-			self.share_label.Enable()
-			self.wifi_settings_label.Enable()
-			self.wifi_channel.Enable()
-			self.wifi_channel_label.Enable()
-			self.wifi_mode.Enable()
-			self.wifi_mode_label.Enable()
-			self.wifi_wpa.Enable()
-			self.wifi_wpa_label.Enable()
-			self.wifi_button_default.Enable()
-			self.wifi_enable.SetValue(False)
-			self.bridge_enable.Enable()
-			self.conf.set('WIFI', 'enable', '0')
 
 			###########################################	NMEA 0183 kplex
 
@@ -1433,11 +1504,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		apply.Bind(wx.EVT_BUTTON, self.on_i2c_apply)
 
 	def start_sensors(self):
-		subprocess.Popen(['python', self.currentpath + '/i2c_d.py'], cwd=self.currentpath + '/imu')
+		subprocess.Popen(['python', self.currentpath + '/read_sensors_d.py'], cwd=self.currentpath + '/imu')
 
 	def stop_sensors(self):
 		subprocess.call(['pkill', 'RTIMULibDemoGL'])
-		subprocess.call(['pkill', '-f', 'i2c_d.py'])
+		subprocess.call(['pkill', '-f', 'read_sensors_d.py'])
 
 	def read_i2c(self):
 		self.imu_sensor = 'none'
@@ -1718,14 +1789,25 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.conf.read()
 
 	###################################### GPIO
+
+	def start_gpio(self):
+		subprocess.Popen(['python', self.currentpath + '/read_sensors_d.py'])
+		self.ShowStatusBarGREEN(_('GPIO sensors restarted'))
+
+	def stop_gpio(self):
+		self.ShowStatusBarRED(_('GPIO sensors stopped'))
+		subprocess.call(['pkill', '-f', 'read_sensors_d.py'])
+
 	def page_gpio(self):
 		title = wx.StaticText(self.p_gpio, label=_(' Sensors '))
 
 		self.list_gpio = wx.ListCtrl(self.p_gpio, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
-		self.list_gpio.InsertColumn(0, _('Name'), width=345)
-		self.list_gpio.InsertColumn(1, _('I/O'), width=80)
-		self.list_gpio.InsertColumn(2, 'GPIO', width=60)
+		self.list_gpio.InsertColumn(0, _('Name'), width=130)
+		self.list_gpio.InsertColumn(1, _('I/O'), width=60)
+		self.list_gpio.InsertColumn(2, 'GPIO', width=40)
 		self.list_gpio.InsertColumn(3, 'Pull', width=80)
+		self.list_gpio.InsertColumn(4, _('Signal K key'), width=180)
+		self.list_gpio.InsertColumn(5, _('Source'), width=100)
 		self.list_gpio.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_gpio)
 
 		add = wx.Button(self.p_gpio, label=_('add'))
@@ -1767,7 +1849,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				io = _('output')
 			else:
 				io = _('input')
-			self.list_gpio.Append([ii[0], io, ii[2], ii[3]])
+			self.list_gpio.Append([ii[0], io, ii[2], ii[3], 'sensors.'+ii[0],'GPIO.'+ii[1]+'.'+ii[2]])
 
 	def edit_gpio(self, e):
 		selected_gpio = e.GetIndex()
@@ -1793,9 +1875,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		res = dlg.ShowModal()
 		if res == wx.ID_OK:
 			name = dlg.name.GetValue()
-			name = name.encode('utf8')
 			io_selection = dlg.io_select.GetValue()
-			io_selection = io_selection.encode('utf8')
 			if io_selection == _('output'):
 				io = 'out'
 			else:
@@ -1811,9 +1891,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					dlg.Destroy()
 					return
 			gpio_selection = dlg.gpio_select.GetValue()
-			gpio_selection = gpio_selection.encode('utf8')
 			pull_selection = dlg.pull_select.GetValue()
-			pull_selection = pull_selection.encode('utf8')
 			if not name or not io_selection or not gpio_selection or (not pull_selection and io == 'in'):
 				self.ShowMessage(_('Failed. You must fill in all fields.'))
 				dlg.Destroy()
@@ -1823,13 +1901,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				dlg.Destroy()
 				return
 			if edit == 0:
-				self.list_gpio.Append([name, io_selection, gpio_selection, pull_selection])
 				self.gpio.append([name, io, gpio_selection, pull_selection])
 			else:
-				self.list_gpio.SetStringItem(edit[0], 0, name)
-				self.list_gpio.SetStringItem(edit[0], 1, io_selection)
-				self.list_gpio.SetStringItem(edit[0], 2, gpio_selection)
-				self.list_gpio.SetStringItem(edit[0], 3, pull_selection)
 				self.gpio[edit[0]][0] = name
 				self.gpio[edit[0]][1] = io
 				self.gpio[edit[0]][2] = gpio_selection
@@ -1848,7 +1921,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def apply_changes_gpio(self):
 		self.conf.set('GPIO', 'sensors', str(self.gpio))
-		self.restart_SK(0)
+		self.stop_gpio()
+		self.start_gpio()
+		self.read_gpio()
 
 	####################### Accounts
 	def page_account(self):
@@ -2252,9 +2327,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		self.list_DS18B20 = wx.ListCtrl(self.p_1w, style=wx.LC_REPORT)
 		self.list_DS18B20.InsertColumn(0, _('Name'), width=100)
-		self.list_DS18B20.InsertColumn(1, _('Signal K'), width=310)
-		self.list_DS18B20.InsertColumn(2, _('ID'), width=105)
-		self.list_DS18B20.InsertColumn(4, _('Offset'), width=50)
+		self.list_DS18B20.InsertColumn(1, _('ID'), width=105)
+		self.list_DS18B20.InsertColumn(2, _('Offset'), width=50)
+		self.list_DS18B20.InsertColumn(3, _('Signal K key'), width=215)
+		self.list_DS18B20.InsertColumn(4, _('Source'), width=120)
 		self.list_DS18B20.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_DS18B20)
 
 		add = wx.Button(self.p_1w, label=_('add'))
@@ -2283,8 +2359,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def start_1w(self):
 		subprocess.Popen(['python', self.currentpath + '/1w_d.py'])
+		self.ShowStatusBarGREEN(_('1W sensors restarted'))
 
 	def stop_1w(self):
+		self.ShowStatusBarRED(_('1W sensors stopped'))
 		subprocess.call(['pkill', '-f', '1w_d.py'])
 
 	def read_DS18B20(self):
@@ -2297,45 +2375,37 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			temp_list = []
 		for ii in temp_list:
 			self.DS18B20.append(ii)
-			if '.*.' in ii[1]:
-				SKkey2 = ii[1].replace('*', ii[0])
-			else:
-				SKkey2 = ii[1]
-			self.list_DS18B20.Append([ii[0], SKkey2, ii[2], ii[3]])
+			self.list_DS18B20.Append([ii[0], ii[2], ii[3], ii[1],'1W.'+ii[0]])
 
 	def edit_DS18B20(self, e):
-		selected_DS18B20 = e.GetIndex()
-		edit = [selected_DS18B20, self.DS18B20[selected_DS18B20][0], self.DS18B20[selected_DS18B20][1],
-				self.DS18B20[selected_DS18B20][2], self.DS18B20[selected_DS18B20][3]]
+		selected = e.GetIndex()
+		edit = [selected, self.DS18B20[selected][0], self.DS18B20[selected][1],
+				self.DS18B20[selected][2], self.DS18B20[selected][3]]
 		self.edit_add_DS18B20(edit)
 
 	def on_add_DS18B20(self, e):
 		self.edit_add_DS18B20(0)
 
 	def edit_add_DS18B20(self, edit):
-		dlg = addDS18B20(edit, self)
+		dlg = addDS18B20(edit)
 		res = dlg.ShowModal()
 		if res == wx.ID_OK:
 			name = dlg.name.GetValue()
-			name = name.encode('utf8')
 			SKkey = dlg.SKkey.GetValue()
-			SKkey = SKkey.encode('utf8')
 			sensor_id = dlg.id_select.GetValue()
-			sensor_id = sensor_id.encode('utf8')
 			offset = dlg.offset.GetValue()
-			offset = offset.encode('utf8')
-			if not name or not SKkey:
-				self.ShowMessage(_('Failed. Provide name and Signal K values.'))
+			if not SKkey:
+				self.ShowMessage(_('Failed. Provide a Signal K key.'))
+				dlg.Destroy()
+				return
+			if not name:
+				self.ShowMessage(_('Failed. Provide a name.'))
 				dlg.Destroy()
 				return
 			if not re.match('^[0-9a-zA-Z]+$', name):
-				self.ShowMessage(_('Failed. The name must contain only letters and numbers.'))
+				self.ShowMessage(_('Failed. Name must contain only letters and numbers.'))
 				dlg.Destroy()
 				return
-			if '.*.' in SKkey:
-				SKkey2 = SKkey.replace('*', name)
-			else:
-				SKkey2 = SKkey
 			if sensor_id == '':
 				self.ShowMessage(_('Failed. Select sensor ID.'))
 				dlg.Destroy()
@@ -2345,13 +2415,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			except:
 				offset = '0.0'
 			if edit == 0:
-				self.list_DS18B20.Append([name, SKkey2, sensor_id, offset])
 				self.DS18B20.append([name, SKkey, sensor_id, offset])
 			else:
-				self.list_DS18B20.SetStringItem(edit[0], 0, name)
-				self.list_DS18B20.SetStringItem(edit[0], 1, SKkey2)
-				self.list_DS18B20.SetStringItem(edit[0], 2, sensor_id)
-				self.list_DS18B20.SetStringItem(edit[0], 3, offset)
 				self.DS18B20[edit[0]][0] = name
 				self.DS18B20[edit[0]][1] = SKkey
 				self.DS18B20[edit[0]][2] = sensor_id
@@ -2370,7 +2435,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def apply_changes_DS18B20(self):
 		self.conf.set('1W', 'DS18B20', str(self.DS18B20))
-		self.restart_SK(0)
+		self.stop_1w()
+		self.start_1w()
+		self.read_DS18B20()
 
 	####################### USB manager
 	def page_usb(self):
@@ -2561,7 +2628,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def read_n2k(self):
 		self.mmsi.SetValue(self.vessel_self.mmsi)
-		self.set_label_SK()
 		if self.conf.get('N2K', 'enable') == '1':
 			self.n2k_enable.SetValue(True)
 			self.can_usb.Disable()
@@ -2619,7 +2685,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					del data['pipedProviders'][ii]
 				ii += 1
 		self.n2koutputs_label.SetLabel(self.conf.get('N2K', 'pgn_output'))
-		self.set_label_SK()
 		with open(self.home + '/.config/openplotter/OP-signalk/openplotter-settings.json', 'w') as outfile:
 			json.dump(data, outfile)
 		self.restart_SK(0)
@@ -2686,9 +2751,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		apply_changes = wx.Button(self.p_sk, label=_('Apply changes'), pos=(125, 115))
 		apply_changes.Bind(wx.EVT_BUTTON, self.apply_SK)
 
-		wx.StaticBox(self.p_sk, label=_(' Inputs '), size=(430, 140), pos=(250, 10))
-		self.SKinputs_label = wx.StaticText(self.p_sk, label='NMEA 0183: system_output - UDP localhost 55556',
-											pos=(260, 30))
+		wx.StaticBox(self.p_sk, label=_(' Info '), size=(430, 265), pos=(250, 10))
 		try:
 			response = requests.get('http://localhost:3000/signalk')
 		except:
@@ -2697,12 +2760,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		data = response.json()
 		text = _('Version: ')
 		text += data['endpoints']['v1']['version']
-		text += '\n\nhttp: '
+		text += '\n\n'
 		text += data['endpoints']['v1']['signalk-http']
-		text += '\nws: '
+		text += '\n'
 		text += data['endpoints']['v1']['signalk-ws']
-		text += '\nNMEA 0183: TCP localhost 10111'
-		wx.StaticBox(self.p_sk, label=_(' Outputs '), size=(430, 120), pos=(250, 155))
+		text += '\n'
+		text += data['endpoints']['v1']['signalk-tcp']
 		wx.StaticText(self.p_sk, label=text, pos=(260, 175))
 
 		show_SK = wx.Button(self.p_sk, label=_('Show Web Socket'), pos=(250, 285))
@@ -2746,17 +2809,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		with open(self.home + '/.config/openplotter/OP-signalk/openplotter-settings.json', 'w') as outfile:
 			json.dump(data, outfile)
 		self.restart_SK(0)
-
-	def set_label_SK(self):
-		text = 'kplex output: UDP 55556 (NMEA 0183)\n'
-		text += 'OP-sensors: UDP 55557 (I2C-, 1W-, SPI-sensors)\n'
-		text += 'notifications: UDP 55558 (status of GPIO for switches, MQTT,\n'
-		text += '     messages, SMS messages, opencpn alarm messages)\n'
-		text += 'serial: UDP 55559 (any sensor connected to USB/UART)\n'
-		text += 'wifi: UDP 55561 (any sensor connected by wifi, ex. esp8266)\n'
-		if self.conf.get('N2K', 'enable') == '1':
-			text += 'NMEA 2K: CAN-USB-CAN - ' + self.conf.get('N2K', 'can_usb')
-		self.SKinputs_label.SetLabel(text)
 
 	####################### SMS
 	def page_sms(self):
@@ -2944,7 +2996,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		clear.Bind(wx.EVT_BUTTON, self.on_clear_mqtt)
 
 		self.list_topics = wx.ListCtrl(self.p_mqtt, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
-		self.list_topics.InsertColumn(1, _('Topic'), width=565)
+		self.list_topics.InsertColumn(0, _('Topic'), width=145)
+		self.list_topics.InsertColumn(1, _('Type'), width=100)
+		self.list_topics.InsertColumn(2, _('Signal K key'), width=200)
+		self.list_topics.InsertColumn(3, _('Source'), width=145)
 		self.list_topics.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_topic)
 
 		add = wx.Button(self.p_mqtt, label=_('add'))
@@ -3006,8 +3061,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def start_mqtt(self):
 		subprocess.Popen(['python', self.currentpath + '/mqtt_d.py'])
+		self.ShowStatusBarGREEN(_('MQTT restarted'))
 
 	def stop_mqtt(self):
+		self.ShowStatusBarRED(_('MQTT stopped'))
 		subprocess.call(['pkill', '-f', 'mqtt_d.py'])
 
 	def read_mqtt(self):
@@ -3040,7 +3097,20 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			temp_list = []
 		for ii in temp_list:
 			self.topics.append(ii)
-			self.list_topics.Append([ii])
+			topic = ii[0].encode('utf8')
+			if ii[1] == 0: 
+				topic_type = _('General').encode('utf8')
+				skkey = 'notifications.'+topic
+				source = 'mqtt.'+topic
+			if ii[1] == 1: 
+				topic_type = _('Signal K key').encode('utf8')
+				skkey = ii[2]
+				source = 'mqtt.'+topic
+			if ii[1] == 2: 
+				topic_type = _('Signal K delta').encode('utf8')
+				skkey = _('multiple keys').encode('utf8')
+				source = _('multiple sources').encode('utf8')
+			self.list_topics.Append([topic,topic_type,skkey,source])
 
 	def edit_topic(self, e):
 		selected_topic = e.GetIndex()
@@ -3052,34 +3122,65 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def edit_add_topic(self, edit):
 		if self.mqtt_user.IsEnabled():
-			self.ShowStatusBarRED(_('Failed. Apply setting changes.'))
+			self.ShowStatusBarRED(_('Failed. Apply settings change.'))
 			return
 		dlg = addTopic(edit)
 		res = dlg.ShowModal()
 		if res == wx.ID_OK:
 			topic = dlg.topic.GetValue()
-			topic = topic.encode('utf8')
+			topic_type = dlg.type.GetValue()
+			skkey = dlg.skkey.GetValue()
 			if not topic:
-				self.ShowMessage(_('Failed. Write a topic.'))
+				self.ShowMessage(_('Failed. You have to provide a name for the topic.'))
 				dlg.Destroy()
 				return
-			if not re.match('^[0-9a-zA-Z/]+$', topic):
+			if not re.match('^[0-9a-zA-Z]+$', topic):
 				self.ShowMessage(_('Failed. Topics must contain only allowed characters.'))
 				dlg.Destroy()
 				return
 			if edit == 0:
-				self.list_topics.Append([topic])
-				self.topics.append(topic)
+				for i in self.topics:
+					if i[0] == topic:
+						self.ShowMessage(_('Failed. Topic name must be unique.'))
+						dlg.Destroy()
+						return
 			else:
-				self.list_topics.SetStringItem(edit[0], 0, topic)
-				self.topics[edit[0]] = topic
+				for i in self.topics:
+					if i[0] == topic and edit[1][0] != topic:
+						self.ShowMessage(_('Failed. Topic name must be unique.'))
+						dlg.Destroy()
+						return
+			if topic_type == _('General'): 
+				topic_type2 = 0
+				skkey2 = ''
+			elif topic_type == _('Signal K key'): 
+				topic_type2 = 1
+				if not skkey:
+					self.ShowMessage(_('Failed. You have to provide a Signal K key.'))
+					dlg.Destroy()
+					return
+				else:
+					skkey2 = skkey
+			elif topic_type == _('Signal K delta'): 
+				topic_type2 = 2
+				skkey2 = ''
+			else:
+				self.ShowMessage(_('Failed. You have to select a type for the topic.'))
+				dlg.Destroy()
+				return
+			if edit == 0:
+				self.topics.append([topic,topic_type2,skkey2])
+			else:
+				self.topics[edit[0]] = [topic,topic_type2,skkey2]
 			self.conf.set('MQTT', 'topics', str(self.topics))
-			self.restart_SK(0)
+			self.stop_mqtt()
+			self.start_mqtt()
+			self.read_mqtt()
 		dlg.Destroy()
 
 	def delete_topic(self, e):
 		if self.mqtt_user.IsEnabled():
-			self.ShowStatusBarRED(_('Failed. Apply setting changes.'))
+			self.ShowStatusBarRED(_('Failed. Apply settings change.'))
 			return
 		selected_topic = self.list_topics.GetFirstSelected()
 		if selected_topic == -1:
@@ -3088,7 +3189,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		del self.topics[selected_topic]
 		self.list_topics.DeleteItem(selected_topic)
 		self.conf.set('MQTT', 'topics', str(self.topics))
-		self.restart_SK(0)
+		self.stop_mqtt()
+		self.start_mqtt()
+		self.read_mqtt()
 
 	def on_apply_changes_mqtt(self, e):
 		if not self.mqtt_user.IsEnabled():
@@ -3120,9 +3223,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		subprocess.call(['sudo', 'sh', '-c', 'echo "' + username + ':' + passw + '" > /etc/mosquitto/passwd.pw'])
 		subprocess.call(['sudo', 'mosquitto_passwd', '-U', '/etc/mosquitto/passwd.pw'])
 		subprocess.call(['sudo', 'service', 'mosquitto', 'restart'])
-		self.ShowStatusBarGREEN(_('MQTT settings applied and restarted'))
 		self.stop_mqtt()
 		self.start_mqtt()
+		self.read_mqtt()
 
 	def on_clear_mqtt(self, e):
 		dlg = wx.MessageDialog(None, _('Settings and topics will be deleted. Are you sure?'), _('Question'),
@@ -3147,7 +3250,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.conf.set('MQTT', 'username', '')
 		self.conf.set('MQTT', 'password', '')
 		self.conf.set('MQTT', 'topics', '')
-		self.restart_SK(0)
+		self.stop_mqtt()
 
 
 ############################## Main
