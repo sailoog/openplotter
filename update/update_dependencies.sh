@@ -21,7 +21,7 @@ fi
 echo
 echo "INSTALLING DEPENDENCIES..."
 echo
-sudo apt-get -qq install cmake gettext gpsd python-w1thermsensor x11vnc xrdp python-wxgtk3.0 hostapd dnsmasq isc-dhcp-server network-manager network-manager-gnome mpg123 python-gammu gammu mosquitto libusb-1.0-0-dev libfftw3-dev qt5-qmake libqt4-dev libasound2-dev libpulse-dev libtool autoconf automake liboctave-dev python-dev python-matplotlib opencpn bridge-utils crudini
+sudo apt-get -qq install cmake gettext gpsd python-w1thermsensor x11vnc xrdp python-wxgtk3.0 hostapd dnsmasq isc-dhcp-server network-manager network-manager-gnome mpg123 python-gammu gammu mosquitto libusb-1.0-0-dev libfftw3-dev qt5-qmake libqt4-dev libasound2-dev libpulse-dev libtool autoconf automake liboctave-dev python-dev python-matplotlib opencpn bridge-utils crudini libqt5gui5 libqt5core5a libqt5network5 libqt5widgets5 libqt5svg5 libportaudio2
 if [ $? -ne 0 ]; then
 	echo
 	read -p "#### ERROR. ABORTING, PRESS ENTER TO EXIT ####"
@@ -86,15 +86,110 @@ echo
 echo
 echo "COMPILING PACKAGES..."
 echo
-#### TODO ####
+cd ~/.config
+mkdir compiling
+cd compiling
+
+git clone https://github.com/sailoog/librtlsdr.git
+cd librtlsdr/ && mkdir build && cd build
+cmake ../ -DINSTALL_UDEV_RULES=ON
+make -s
+sudo make -s install
+sudo ldconfig
+
+cd ~/.config/compiling
+git clone https://github.com/sailoog/kalibrate-rtl.git
+cd kalibrate-rtl
+./bootstrap && CXXFLAGS='-W -Wall -O3'
+./configure
+make -s
+sudo make -s install
+
+cd ~/.config/compiling
+git clone https://github.com/sailoog/rtl_433.git
+cd rtl_433/
+mkdir build
+cd build
+cmake ../
+make -s
+sudo make -s install
+
+cd ~/.config/compiling
+git clone https://github.com/sailoog/aisdecoder.git
+cd aisdecoder
+cmake -DCMAKE_BUILD_TYPE=release
+make -s
+sudo cp aisdecoder /usr/local/bin
+
+cd ~/.config/compiling
+git clone https://github.com/sailoog/kplex.git
+cd kplex
+make -s
+sudo make -s install
+
+cd ~/.config/compiling
+git clone git://github.com/sailoog/canboat
+cd canboat
+make -s
+sudo make -s install
+
+cd ~/.config/compiling
+git clone https://github.com/sailoog/geomag.git
+cd geomag/geomag
+python setup.py -q build
+sudo python setup.py -q install
+
+cd ~/.config/compiling
+git clone https://github.com/sailoog/PyMata.git
+cd PyMata
+sudo python setup.py -q install
+
+cd ~/.config/compiling
+git clone https://github.com/sailoog/RTIMULib2.git
+cd RTIMULib2/Linux
+mkdir build
+cd build
+cmake ..
+make -j4 -s
+sudo make -s install
+sudo ldconfig
+cd ..
+cd RTIMULibCal
+make -j4 -s
+sudo make -s install
+cd ..
+cd RTIMULibDrive
+make -j4 -s
+sudo make -s install
+cd ..
+cd RTIMULibDrive10
+make -j4 -s
+sudo make -s install
+cd ..
+cd RTIMULibDemo
+qmake
+make -j4 -s
+sudo make -s install
+cd ..
+cd RTIMULibDemoGL
+qmake
+make -j4 -s
+sudo make -s install
+cd ..
+cd python
+python setup.py -q build
+sudo python setup.py -q install
+
+cd ~/.config
+sudo rm -rf ~/.config/compiling/
 echo
 echo "INSTALLING/UPDATING GQRX..."
 echo
-wget https://github.com/csete/gqrx/releases/download/v2.6/gqrx-2.6-rpi3-2.tar.xz
-tar xf gqrx-2.6-rpi3-2.tar.xz
-rm gqrx-2.6-rpi3-2.tar.xz
+wget https://github.com/csete/gqrx/releases/download/v2.6/gqrx-2.6-rpi3-3.tar.xz
+tar xf gqrx-2.6-rpi3-3.tar.xz
+rm gqrx-2.6-rpi3-3.tar.xz
 rm -rf gqrx
-mv gqrx-2.6-rpi3-2 gqrx
+mv gqrx-2.6-rpi3-3 gqrx
 cd gqrx
 ./setup_gqrx.sh
 
