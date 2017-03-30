@@ -223,7 +223,7 @@ class addkplex(wx.Dialog):
 					ii = device['DEVLINKS']
 					value = ii[ii.rfind('/dev/ttyOP_'):]
 					if value.find('/dev/ttyOP_') >= 0:
-						self.SerDevLs.append(value[5:])
+						self.SerDevLs.append(value.split(' ')[0][5:])
 				except:
 					pass
 
