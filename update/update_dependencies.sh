@@ -21,7 +21,7 @@ fi
 echo
 echo "INSTALLING DEPENDENCIES..."
 echo
-sudo apt-get -qq install cmake gettext gpsd python-w1thermsensor x11vnc xrdp python-wxgtk3.0 hostapd dnsmasq isc-dhcp-server network-manager network-manager-gnome mpg123 python-gammu gammu mosquitto libusb-1.0-0-dev libfftw3-dev qt5-qmake libqt4-dev libasound2-dev libpulse-dev libtool autoconf automake liboctave-dev python-dev python-matplotlib opencpn bridge-utils crudini libqt5gui5 libqt5core5a libqt5network5 libqt5widgets5 libqt5svg5 libportaudio2
+sudo apt-get -qq install gettext gpsd python-w1thermsensor x11vnc xrdp python-wxgtk3.0 hostapd dnsmasq isc-dhcp-server network-manager network-manager-gnome mpg123 python-gammu gammu mosquitto libusb-1.0-0-dev libfftw3-dev qt5-qmake libasound2-dev libpulse-dev  autoconf automake liboctave-dev python-dev python-matplotlib opencpn bridge-utils crudini libqt5gui5 libqt5core5a libqt5network5 libqt5widgets5 libqt5svg5 libportaudio2 make gcc xsltproc curl git build-essential libtool libusb-1.0.0-dev librtlsdr-dev rtl-sdr i2c-tools cmake libqt4-dev libproj-dev libnova-dev
 if [ $? -ne 0 ]; then
 	echo
 	read -p "#### ERROR. ABORTING, PRESS ENTER TO EXIT ####"
@@ -31,7 +31,7 @@ echo
 echo "INSTALLING PYTHON PACKAGES..."
 echo
 sudo easy_install pip
-sudo pip install --upgrade --quiet paho-mqtt pyudev pyrtlsdr pynmea2 twython websocket-client spidev requests requests_oauthlib
+sudo pip install --upgrade --quiet paho-mqtt pyudev pyrtlsdr pynmea2 twython websocket-client spidev PyMata requests_oauthlib requests  
 if [ $? -ne 0 ]; then
 	echo
 	read -p "#### ERROR. ABORTING, PRESS ENTER TO EXIT ####"
@@ -90,13 +90,6 @@ cd ~/.config
 mkdir compiling
 cd compiling
 
-git clone https://github.com/sailoog/librtlsdr.git
-cd librtlsdr/ && mkdir build && cd build
-cmake ../ -DINSTALL_UDEV_RULES=ON
-make -s
-sudo make -s install
-sudo ldconfig
-
 cd ~/.config/compiling
 git clone https://github.com/sailoog/kalibrate-rtl.git
 cd kalibrate-rtl
@@ -137,11 +130,6 @@ cd ~/.config/compiling
 git clone https://github.com/sailoog/geomag.git
 cd geomag/geomag
 python setup.py -q build
-sudo python setup.py -q install
-
-cd ~/.config/compiling
-git clone https://github.com/sailoog/PyMata.git
-cd PyMata
 sudo python setup.py -q install
 
 cd ~/.config/compiling
