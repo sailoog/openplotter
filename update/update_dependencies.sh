@@ -21,7 +21,7 @@ fi
 echo
 echo "INSTALLING DEPENDENCIES..."
 echo
-sudo apt-get -qq install gettext gpsd python-w1thermsensor x11vnc xrdp python-wxgtk3.0 hostapd dnsmasq isc-dhcp-server network-manager network-manager-gnome mpg123 python-gammu gammu mosquitto libusb-1.0-0-dev libfftw3-dev qt5-qmake libasound2-dev libpulse-dev  autoconf automake liboctave-dev python-dev python-matplotlib opencpn bridge-utils crudini libqt5gui5 libqt5core5a libqt5network5 libqt5widgets5 libqt5svg5 libportaudio2 make gcc xsltproc curl git build-essential libtool libusb-1.0.0-dev librtlsdr-dev rtl-sdr i2c-tools cmake libqt4-dev libproj-dev libnova-dev
+sudo apt-get -qq install gettext gpsd python-w1thermsensor x11vnc xrdp python-wxgtk3.0 hostapd dnsmasq isc-dhcp-server network-manager network-manager-gnome mpg123 python-gammu gammu mosquitto libusb-1.0-0-dev libfftw3-dev qt5-qmake libasound2-dev libpulse-dev  autoconf automake liboctave-dev python-dev python-matplotlib bridge-utils crudini libqt5gui5 libqt5core5a libqt5network5 libqt5widgets5 libqt5svg5 libportaudio2 make gcc xsltproc curl git build-essential libtool libusb-1.0.0-dev librtlsdr-dev rtl-sdr i2c-tools cmake libqt4-dev libproj-dev libnova-dev
 if [ $? -ne 0 ]; then
 	echo
 	read -p "#### ERROR. ABORTING, PRESS ENTER TO EXIT ####"
@@ -38,19 +38,14 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 echo
-echo "UPDATING NODEJS..."
+echo "UPDATING NODEJS AND NODE-RED..."
 echo
-pkill -f signalk-server
-curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
-sudo apt-get -qq install nodejs
-if [ $? -ne 0 ]; then
-	echo
-	read -p "#### ERROR. ABORTING, PRESS ENTER TO EXIT ####"
-	exit 1
-fi
+update-nodejs-and-nodered
+sudo rm -rf /usr/share/applications/Node-RED.desktop
 echo
 echo "DOWNLOADING SIGNAL K..."
 echo
+pkill -f signalk-server
 rm -rf signalk-server-node_tmp
 git clone https://github.com/sailoog/signalk-server-node.git signalk-server-node_tmp
 if [ $? -ne 0 ]; then
@@ -78,11 +73,6 @@ echo
 mv signalk-server-node_tmp signalk-server-node
 cd signalk-server-node
 npm install
-cd ~/.config
-echo
-echo "UPDATING NODE-RED, NODE-RED-DASHBOARD AND NODE-RED-FREEBOARD..."
-echo
-#### TODO ####
 echo
 echo "COMPILING PACKAGES..."
 echo
