@@ -43,35 +43,11 @@ echo
 update-nodejs-and-nodered
 sudo rm -rf /usr/share/applications/Node-RED.desktop
 echo
-echo "DOWNLOADING SIGNAL K..."
+echo "UPDATING SIGNAL K..."
 echo
-pkill -f signalk-server
-rm -rf signalk-server-node_tmp
-git clone https://github.com/sailoog/signalk-server-node.git signalk-server-node_tmp
-if [ $? -ne 0 ]; then
-	echo
-	read -p "#### ERROR. ABORTING, PRESS ENTER TO EXIT ####"
-	exit 1
-fi
-echo
-echo "CREATING SIGNAL K BACKUP..."
-echo
-SKDIRDATE=`date +signalk_bak_%Y_%m_%d:%H:%M:%S`
-cp -a signalk-server-node/ $SKDIRDATE/
-echo
-echo "COMPRESSING SIGNAL K BACKUP INTO HOME..."
-echo
-tar cjf ~/$SKDIRDATE.tar.bz2 $SKDIRDATE
-echo
-echo "DELETING OLD SIGNAL K FILES..."
-echo
-rm -rf $SKDIRDATE
-rm -rf signalk-server-node
-echo
-echo "INSTALLING NEW SIGNAL K FILES..."
-echo
-mv signalk-server-node_tmp signalk-server-node
-cd signalk-server-node
+cd ~/.config/signalk-server-node
+git pull
+npm update
 npm install
 echo
 echo "COMPILING PACKAGES..."

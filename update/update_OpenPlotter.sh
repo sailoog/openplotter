@@ -23,10 +23,10 @@ cp -a openplotter/ $DIRDATE/
 cd $DIRDATE
 find . -name "*.pyc" -type f -delete
 cd ~/.config
+source openplotter_tmp/update/update_settings.sh
 if [ $1 = 1 ]; then
 	source openplotter_tmp/update/update_dependencies.sh
 fi
-source openplotter_tmp/update/update_settings.sh
 echo
 echo "COMPRESSING OPENPLOTTER CODE BACKUP INTO HOME..."
 echo
