@@ -150,7 +150,7 @@ class MyFrame(wx.Frame):
 			
 	# thread
 	def timer_act(self, event):
-		SignalK = '{"updates": [{"source": {"type": "SIM","src" : "SIM"},"values":[ '
+		SignalK = '{"updates": [{"$source":"OP.simulation","values":[ '
 		Erg=''
 		for i in self.Slider_list:
 			if i[7]:

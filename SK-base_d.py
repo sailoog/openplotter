@@ -724,8 +724,7 @@ class MySK_to_Action_Calc:
 					Erg += '{"path": "environment.wind.angleTrueGround","value":'+str(0.017453293*beta3)+'},'
 					Erg += '{"path": "environment.wind.speedOverGround","value":'+str(speed)+'},'
 	
-				timestamp=str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z'
-				SignalK='{"context": "vessels.'+self.uuid+'","updates":[{"source":{"type": "OP","src":"SK"},"timestamp":"'+timestamp+'","values":['
+				SignalK='{"updates":[{"$source":"OP.calculations","values":['
 				SignalK+=Erg[0:-1]+']}]}\n'		
 				self.sock.sendto(SignalK, ('127.0.0.1', 55557))	
 
