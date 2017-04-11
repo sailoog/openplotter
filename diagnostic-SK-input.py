@@ -319,51 +319,58 @@ class MyFrame(wx.Frame):
 			js_up = json.loads(message)['updates'][0]
 		except:
 			return
-		label = js_up['source']['label']
-
-		srcExist = False
+		label = ''
 		src = ''
-		try:
-			src = js_up['source']['src']
-			srcExist = True
-		except:
-			pass
-		if not srcExist:
-			try:
-				src = js_up['source']['talker']
-			except:
-				src = 'xx'
+		if '$source' in js_up:
+			src = js_up['$source']
+		elif 'source' in js_up:
+			label = js_up['source']['label']
+			src = label
+			if 'type' in js_up['source']: 
+				src +='.'+js_up['source']['type']
+				if js_up['source']['type'] == 'NMEA0183':
+					if 'talker' in js_up['source']: src +='.'+js_up['source']['talker']
+					if 'sentence' in js_up['source']: src +='.'+js_up['source']['sentence']
+				elif js_up['source']['type'] == 'NMEA2000':
+					if 'src' in js_up['source']: src +='.'+js_up['source']['src']
+					if 'pgn' in js_up['source']: src +='.'+js_up['source']['pgn']
+
 		try:
 			timestamp = js_up['timestamp']
 		except:
 			timestamp = '2000-01-01T00:00:00.000Z'
 
 		values_ = js_up['values']
-		srclabel2 = ''
-
 		for values in values_:
 			path = values['path']
 			value = values['value']
-
+			src2 = src
+			timestamp2 = timestamp
 			if type(value) is dict:
-				if 'timestamp' in value: timestamp = value['timestamp']
-				if 'source' in value:
-					try:
-						src2 = value['source']['talker']
-					except:
-						src2 = 'xx'
-					srclabel2 = label + '.' + src2
+				if 'timestamp' in value: timestamp2 = value['timestamp']
+
+				if '$source' in value:
+					src2 = value['$source']
+				elif 'source' in value:
+					src2 = label
+					if 'type' in value['source']: 
+						src2 +='.'+value['source']['type']
+						if value['source']['type'] == 'NMEA0183':
+							if 'talker' in value['source']: src2 +='.'+value['source']['talker']
+							if 'sentence' in value['source']: src2 +='.'+value['source']['sentence']
+						elif value['source']['type'] == 'NMEA2000':
+							if 'src' in value['source']: src2 +='.'+value['source']['src']
+							if 'pgn' in value['source']: src2 +='.'+value['source']['pgn']
 
 				for lvalue in value:
-					if lvalue in ['timestamp', 'source']:
+					if lvalue in ['timestamp', 'source', '$source']:
 						pass
 					else:
 						path2 = path + '.' + lvalue
 						value2 = value[lvalue]
-						self.update_add(value2, path2, srclabel2, timestamp)
+						self.update_add(value2, path2, src2, timestamp2)
 			else:
-				srclabel = label + '.' + src
-				self.update_add(value, path, srclabel, timestamp)
+				self.update_add(value, path, src, timestamp)
 
 	def update_add(self, value, path, src, timestamp):
 		# SRC SignalK Value Unit Interval Status Description timestamp	private_Unit private_Value priv_Faktor priv_Offset
@@ -378,27 +385,28 @@ class MyFrame(wx.Frame):
 		exists = False
 		for i in self.list_SK:
 			if path == i[1]:
-				if src == i[0]:
-					exists = True
-					i[2] = value
-					if type(i[2]) is float:
-						pass
-					else:
-						i[2] = 0.0
-					if i[4] == 0.0:
-						i[4] = self.json_interval(i[7], timestamp)
-					else:
-						i[4] = i[4] * .8 + 0.2 * self.json_interval(i[7], timestamp)
-					i[7] = timestamp
-					self.buffer.append([index, 4, str('%.2f' % i[4])])
-					if not self.private_unit_s:
-						self.buffer.append([index, 2, str('%.3f' % i[2])])
-						self.buffer.append([index, 3, i[3]])
-					else:
-						i[9] = i[2] / i[10] + i[11]
-						self.buffer.append([index, 2, str('%.3f' % i[9])])
-						self.buffer.append([index, 3, i[8]])
-					break
+				exists = True
+				i[0] = src
+				i[2] = value
+				if type(i[2]) is float:
+					pass
+				else:
+					i[2] = 0.0
+				if i[4] == 0.0:
+					i[4] = self.json_interval(i[7], timestamp)
+				else:
+					i[4] = i[4] * .8 + 0.2 * self.json_interval(i[7], timestamp)
+				i[7] = timestamp
+				self.buffer.append([index, 0, i[0]])
+				self.buffer.append([index, 4, str('%.2f' % i[4])])
+				if not self.private_unit_s:
+					self.buffer.append([index, 2, str('%.3f' % i[2])])
+					self.buffer.append([index, 3, i[3]])
+				else:
+					i[9] = i[2] / i[10] + i[11]
+					self.buffer.append([index, 2, str('%.3f' % i[9])])
+					self.buffer.append([index, 3, i[8]])
+				break
 			index += 1
 		if not exists:
 			self.lookup_star(path)
