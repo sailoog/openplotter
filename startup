@@ -265,11 +265,11 @@ class MyFrame(wx.Frame):
 				subprocess.Popen('kplex')
 				self.check_start('kplex')
 
-			subprocess.call(["pkill", '-f', "node-red"])
+			subprocess.call('node-red-stop')
 			if node_red=='1':
 				self.add_logger_data(_('\nStarting Node-RED...'))
 				try: 
-					subprocess.Popen(['node-red-pi', '--max-old-space-size=128'])
+					subprocess.Popen('node-red-start')
 					self.check_start('node-red')
 				except: pass
 
@@ -377,14 +377,13 @@ if len(sys.argv)>1:
 		subprocess.call(['pkill', '-9', 'opencpn'])
 		subprocess.call(['pkill', '-9', 'kplex'])
 		subprocess.call(['pkill', '-f', 'signalk-server'])
-		subprocess.call(['pkill', '-f', 'node-red'])
+		subprocess.call('node-red-stop')
 		subprocess.call(['pkill', '-9', 'aisdecoder'])
 		subprocess.call(['pkill', '-9', 'rtl_fm'])
 		subprocess.call(['pkill', '-f', '1w_d.py'])
 		subprocess.call(['pkill', '-f', 'read_sensors_d.py'])
 		subprocess.call(['pkill', '-f', 'mqtt_d.py'])
 		subprocess.call(['pkill', '-f', 'SK-base_d.py'])
-		subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
 		subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
 		subprocess.call(['pkill', '-f', '/openplotter'])
 		subprocess.call(['killall', 'diagnostic-'])

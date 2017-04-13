@@ -11,7 +11,7 @@ sudo chmod 755 openplotter_tmp/startup
 cp -f $DIRDATE/openplotter.conf openplotter_tmp/
 crudini --set openplotter_tmp/openplotter.conf GENERAL version $2
 crudini --set openplotter_tmp/openplotter.conf GENERAL state $3
-cp -f $DIRDATE/OP-signalk/openplotter-settings.json openplotter_tmp/OP-signalk/
+python openplotter_tmp/update/update_signalk_settings.py $DIRDATE
 cp -f $DIRDATE/imu/RTIMULib.ini openplotter_tmp/imu/
 cp -f $DIRDATE/imu/RTIMULib2.ini openplotter_tmp/imu/
 cp -f $DIRDATE/imu/RTIMULib3.ini openplotter_tmp/imu/

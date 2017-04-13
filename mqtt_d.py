@@ -27,13 +27,13 @@ def on_message(client, userdata, msg):
 					path='notifications.'+msg.topic
 					value = msg.payload
 					value = value.replace('"', "'")
-					SignalK='{"updates":[{"source":"MQTT.'+msg.topic+'","values":[{"path":"'+path+'","value":"'+value+'"}]}]}\n'
+					SignalK='{"updates":[{"$source":"MQTT.'+msg.topic+'","values":[{"path":"'+path+'","value":"'+value+'"}]}]}\n'
 					sock.sendto(SignalK, ('127.0.0.1', 55558))
 				if i[1] == 1: #signal k key
 					path = i[2]
 					value = msg.payload
 					value = value.replace('"', "'")
-					SignalK='{"updates":[{"source":"MQTT.'+msg.topic+'","values":[{"path":"'+path+'","value":"'+value+'"}]}]}\n'			
+					SignalK='{"updates":[{"$source":"MQTT.'+msg.topic+'","values":[{"path":"'+path+'","value":"'+value+'"}]}]}\n'			
 					sock.sendto(SignalK, ('127.0.0.1', 55557))
 				if i[1] == 2: #signal k delta
 					SignalK = msg.payload		

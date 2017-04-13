@@ -38,7 +38,7 @@ while 1:
 		Value = serLine[13:-1]
 		#print Value
 		
-	SignalK = '{"updates": [{"source": {"type": "BAT","src" : "V1"},"values":[{"path": "electrical.batteries.main.voltage","value":'+str(Value)+'}]}]}\n'
+	SignalK = '{"updates": [{"$source":"serial.BAT.V1","values":[{"path": "electrical.batteries.main.voltage","value":'+str(Value)+'}]}]}\n'
 	#print SignalK
 	sock.sendto(SignalK, ('localhost', 55559))
 	time.sleep(0.300)

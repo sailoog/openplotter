@@ -115,7 +115,7 @@ else:
 			finish=False
 			print output
 			output=''
-			SignalK = '{"updates":[{"source": {"type": "433","src" : "'+type_rtl+channel_rtl+'"},"values":[ '
+			SignalK = '{"updates":[{"$source":"RTL433.'+type_rtl+channel_rtl+'","values":[ '
 			Erg=''
 			Erg += '{"path": "'+SK_name[1]+'","value":'+str(humidity_rtl)+'},'
 			Erg += '{"path": "'+SK_name[0]+'","value":'+str(temperature_rtl)+'},'

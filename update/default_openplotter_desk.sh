@@ -17,10 +17,16 @@ echo "show_documents=0" >> desktop-items-0.conf
 echo "show_trash=0" >> desktop-items-0.conf
 echo "show_mounts=0" >> desktop-items-0.conf
 echo "prefs_app=pipanel" >> desktop-items-0.conf
-
+echo
+echo "DELETING UNUSED ICONS..."
+echo
 sudo rm -rf /usr/share/raspi-ui-overrides/applications/magpi.desktop
 sudo rm -rf /usr/share/raspi-ui-overrides/applications/raspi_resources.desktop
 sudo rm -rf /usr/share/raspi-ui-overrides/applications/help.desktop
+echo
+echo "DISABLING SCREENSAVER..."
+echo
+sudo bash -c 'echo -e "\n@xset s 0 0\n@xset s noblank\n@xset s noexpose\n@xset dpms 0 0 0\n" >> /home/pi/.config/lxsession/LXDE-pi/autostart'
 echo
 read -p "FINISHED, PRESS ENTER TO REBOOT SYSTEM."
 shutdown -r now

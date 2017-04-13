@@ -64,20 +64,27 @@ class MySK:
 		self.stop()
 	
 	def on_message(self, ws, message):
-		src = ''
 		js_up = json.loads(message)
 		if 'updates' in js_up:
 			js_up = json.loads(message)['updates'][0]
 		else:
 			return
-		js_source = js_up['source']
-		label = js_source['label']
-		if 'src' in js_source:
-			src = js_source['src']
-		elif 'talker' in js_source:
-			src = js_source['talker']
-		else:
-			src = 'xx'
+
+		label = ''
+		src = ''
+		if '$source' in js_up:
+			src = js_up['$source']
+		elif 'source' in js_up:
+			label = js_up['source']['label']
+			src = label
+			if 'type' in js_up['source']: 
+				src +='.'+js_up['source']['type']
+				if js_up['source']['type'] == 'NMEA0183':
+					if 'talker' in js_up['source']: src +='.'+js_up['source']['talker']
+					if 'sentence' in js_up['source']: src +='.'+js_up['source']['sentence']
+				elif js_up['source']['type'] == 'NMEA2000':
+					if 'src' in js_up['source']: src +='.'+js_up['source']['src']
+					if 'pgn' in js_up['source']: src +='.'+js_up['source']['pgn']
 
 		if 'timestamp' in js_up:
 			timestamp = js_up['timestamp']
@@ -85,33 +92,37 @@ class MySK:
 			timestamp = '2000-01-01T00:00:00.000Z'
 
 		values_ = js_up['values']
-		srclabel2 = ''
-
 		for values in values_:
 			path = values['path']
 			value = values['value']
-
+			src2 = src
+			timestamp2 = timestamp
 			if type(value) is dict:
-				if 'timestamp' in value:
-					timestamp = value['timestamp']
-				if 'source' in value:
-					try:
-						src2 = value['source']['talker']
-					except:
-						src2 = 'xx'
-					srclabel2 = label + '.' + src2
+				if 'timestamp' in value: timestamp2 = value['timestamp']
+
+				if '$source' in value:
+					src2 = value['$source']
+				elif 'source' in value:
+					src2 = label
+					if 'type' in value['source']: 
+						src2 +='.'+value['source']['type']
+						if value['source']['type'] == 'NMEA0183':
+							if 'talker' in value['source']: src2 +='.'+value['source']['talker']
+							if 'sentence' in value['source']: src2 +='.'+value['source']['sentence']
+						elif value['source']['type'] == 'NMEA2000':
+							if 'src' in value['source']: src2 +='.'+value['source']['src']
+							if 'pgn' in value['source']: src2 +='.'+value['source']['pgn']
 
 				for lvalue in value:
-					if lvalue in ['timestamp', 'source']:
+					if lvalue in ['timestamp', 'source', '$source']:
 						pass
 					else:
 						path2 = path + '.' + lvalue
 						value2 = value[lvalue]
-						self.update_add(value2, path2, srclabel2, timestamp)
+						self.update_add(value2, path2, src2, timestamp2)
 			else:
-				srclabel = label + '.' + src
 				path2 = path + '.' + 'value'
-				self.update_add(value, path2, srclabel, timestamp)
+				self.update_add(value, path2, src, timestamp)
 
 	def update_add(self, value, path, src, timestamp):
 		# SRC SignalK Value Unit Interval Status Description timestamp	private_Unit private_Value priv_Faktor priv_Offset		
@@ -724,8 +735,7 @@ class MySK_to_Action_Calc:
 					Erg += '{"path": "environment.wind.angleTrueGround","value":'+str(0.017453293*beta3)+'},'
 					Erg += '{"path": "environment.wind.speedOverGround","value":'+str(speed)+'},'
 	
-				timestamp=str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z'
-				SignalK='{"context": "vessels.'+self.uuid+'","updates":[{"source":{"type": "OP","src":"SK"},"timestamp":"'+timestamp+'","values":['
+				SignalK='{"updates":[{"$source":"OP.calculations","values":['
 				SignalK+=Erg[0:-1]+']}]}\n'		
 				self.sock.sendto(SignalK, ('127.0.0.1', 55557))	
 
