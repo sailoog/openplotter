@@ -1389,6 +1389,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					file.close()
 
 					subprocess.call(["pkill", '-9', "kplex"])
+					while self.util_process_exist('kplex'):
+						time.sleep(0.05)
 					subprocess.Popen(['kplex', '-f', self.home + '/.debugkplex.conf'])
 					time.sleep(0.5)
 					subprocess.call(['pkill', '-f', 'diagnostic-NMEA.py'])

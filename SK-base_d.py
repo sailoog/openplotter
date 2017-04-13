@@ -84,7 +84,7 @@ class MySK:
 					if 'sentence' in js_up['source']: src +='.'+js_up['source']['sentence']
 				elif js_up['source']['type'] == 'NMEA2000':
 					if 'src' in js_up['source']: src +='.'+js_up['source']['src']
-					if 'pgn' in js_up['source']: src +='.'+js_up['source']['pgn']
+					if 'pgn' in js_up['source']: src +='.'+str(js_up['source']['pgn'])
 
 		if 'timestamp' in js_up:
 			timestamp = js_up['timestamp']

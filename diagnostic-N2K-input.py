@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, sys, socket, threading, time, webbrowser,serial
+import wx, sys, socket, threading, time, serial
 from classes.paths import Paths
 from classes.conf import Conf
 from classes.language import Language
