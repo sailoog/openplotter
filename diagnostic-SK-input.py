@@ -352,10 +352,10 @@ class MyFrame(wx.Frame):
 			timestamp = '2000-01-01T00:00:00.000Z'
 
 		values_ = js_up['values']
+		src2 = src
 		for values in values_:
 			path = values['path']
 			value = values['value']
-			src2 = src
 			timestamp2 = timestamp
 			if type(value) is dict:
 				if 'timestamp' in value: timestamp2 = value['timestamp']
@@ -380,7 +380,9 @@ class MyFrame(wx.Frame):
 						path2 = path + '.' + lvalue
 						value2 = value[lvalue]
 						self.update_add(value2, path2, src2, timestamp2)
-			else:
+			else:			
+				if '$source' in values:
+					src = src2+'.'+values['$source']
 				self.update_add(value, path, src, timestamp)
 
 	def update_add(self, value, path, src, timestamp):

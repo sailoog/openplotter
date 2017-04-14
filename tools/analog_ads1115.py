@@ -67,17 +67,20 @@ else:
 
 			list_signalk_path1=[]
 			list_signalk1=[]
+			list_signalk_i1=[]
 
 			for i in a_index:
 				if active[i]:	
 					list_signalk_path1.append(SK_name[i])
 					list_signalk1.append(str(a_value[i]))			
+					list_signalk_i1.append(str(i))			
 
 			if list_signalk1:
-				SignalK = '{"updates": [{"$source": "I2C.ADS1115","values":[ '
+				SignalK = '{"updates": [{"source": {"src" : "ANA"},"values":[ '		
+				#SignalK = '{"updates": [{"$source": "I2C.ADS1115","values":[ '
 				Erg=''
 				for i in range(0,len(list_signalk1)):
-					Erg += '{"path": "'+list_signalk_path1[i]+'","value":'+list_signalk1[i]+'},'
+					Erg += '{"path": "'+list_signalk_path1[i]+'","value":'+list_signalk1[i]+',"$source": "I2C.ADS1115.'+list_signalk_i1[i]+'"},'
 				SignalK +=Erg[0:-1]+']}]}\n'
 				sock.sendto(SignalK, ('127.0.0.1', 55557))
 		else:

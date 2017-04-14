@@ -68,7 +68,8 @@ else:
 		else: io='output'
 		if current_state: current_state='1'
 		else: current_state='0'
-		SignalK='{"updates":[{"$source":"GPIO.'+io+'.'+str(channel)+'","values":[{"path":"sensors.'+name+'","value":'+current_state+'}]}]}\n'
+		SignalK='{"updates":[{"source":{"src":"'+io+'.'+str(channel)+'"},"values":[{"path":"sensors.'+name+'","value":'+current_state+',"$source":"GPIO.'+io+'.'+str(channel)+'"}]}]}\n'
+		#SignalK='{"updates":[{"$source":"GPIO.'+io+'.'+str(channel)+'","values":[{"path":"sensors.'+name+'","value":'+current_state+'}]}]}\n'
 		sock.sendto(SignalK, ('127.0.0.1', 55558))
 	  
 	conf=Conf(Paths())
@@ -221,12 +222,13 @@ else:
 			
 			Erg=''
 			if heading_sk:
-				Erg += '{"path": "navigation.headingMagnetic","value":'+str(0.017453293*MyVar.heading)+'},'
+				Erg += '{"path": "navigation.headingMagnetic","value":'+str(0.017453293*MyVar.heading)+',"$source":"I2C.'+imu.IMUName()+'"},'
 			if heel_sk:
-				Erg += '{"path": "navigation.attitude.roll","value":'+str(0.017453293*MyVar.heel)+'},'
+				Erg += '{"path": "navigation.attitude.roll","value":'+str(0.017453293*MyVar.heel)+',"$source":"I2C.'+imu.IMUName()+'"},'
 			if pitch_sk:
-				Erg += '{"path": "navigation.attitude.pitch","value":'+str(0.017453293*MyVar.pitch)+'},'
-			SignalK='{"updates":[{"$source":"I2C.'+imu.IMUName()+'","values":['
+				Erg += '{"path": "navigation.attitude.pitch","value":'+str(0.017453293*MyVar.pitch)+',"$source":"I2C.'+imu.IMUName()+'"},'
+			SignalK='{"updates":[{"source":{"src":"'+imu.IMUName()+'"},"values":['
+			#SignalK='{"updates":[{"$source":"I2C.'+imu.IMUName()+'","values":['
 			SignalK+=Erg[0:-1]+']}]}\n'		
 			sock.sendto(SignalK, ('127.0.0.1', 55557))	
 
@@ -247,12 +249,12 @@ else:
 
 			Erg=''
 			if pressure_sk:
-				Erg += '{"path": "environment.outside.pressure","value":'+str(MyVar.pressure*100)+'},'
+				Erg += '{"path": "environment.outside.pressure","value":'+str(MyVar.pressure*100)+',"$source":"I2C.'+pressure_val.pressureName()+'"},'
 			if p_temp_sk:
-				Erg += '{"path": "'+p_temp_skt+'","value":'+str(round(MyVar.temperature_p,2)+273.15)+'},'
-			
-			SignalK='{"updates":[{"$source":"I2C.'+pressure_val.pressureName()+'","values":['
-			SignalK+=Erg[0:-1]+']}]}\n'	
+				Erg += '{"path": "'+p_temp_skt+'","value":'+str(round(MyVar.temperature_p,2)+273.15)+',"$source":"I2C.'+pressure_val.pressureName()+'"},'
+			SignalK='{"updates":[{"source":{"src":"'+pressure_val.pressureName()+'"},"values":['
+			#SignalK='{"updates":[{"$source":"I2C.'+pressure_val.pressureName()+'","values":['
+			SignalK+=Erg[0:-1]+']}]}\n'
 			sock.sendto(SignalK, ('127.0.0.1', 55557))
 			
 			if backwards_comp:
@@ -271,11 +273,12 @@ else:
 
 			Erg=''
 			if humidity_sk:
-				Erg += '{"path": "'+humidity_skt+'","value":'+str(MyVar.humidity)+'},'
+				Erg += '{"path": "'+humidity_skt+'","value":'+str(MyVar.humidity)+',"$source":"I2C.'+humidity_val.humidityName()+'"},'
 			if h_temp_sk:
-				Erg += '{"path": "'+h_temp_skt+'","value":'+str(round(MyVar.temperature_h,2)+273.15)+'},'
+				Erg += '{"path": "'+h_temp_skt+'","value":'+str(round(MyVar.temperature_h,2)+273.15)+',"$source":"I2C.'+humidity_val.humidityName()+'"},'
 					
-			SignalK='{"updates":[{"$source":"I2C.'+humidity_val.humidityName()+'","values":['
+			SignalK='{"updates":[{"source":{"src":"'+humidity_val.humidityName()+'"},"values":['
+			#SignalK='{"updates":[{"$source":"I2C.'+humidity_val.humidityName()+'","values":['
 			SignalK+=Erg[0:-1]+']}]}\n'	
 			sock.sendto(SignalK, ('127.0.0.1', 55557))
 
@@ -288,8 +291,9 @@ else:
 					XValue=read_adc(i[1])
 					if i[4]==1:
 						XValue = interpolread(i[1],XValue)
-					Erg ='{"updates":[{"$source":"SPI.MCP3008.'+str(i[1])+'",'
-					Erg +='"values":[{"path": "'+i[2]+'","value":'+str(XValue)+'}]}]}\n'
+					Erg ='{"updates":[{"source":{"src":"MCP3008"},'
+					#Erg ='{"updates":[{"$source":"SPI.MCP3008.'+str(i[1])+'",'
+					Erg +='"values":[{"path": "'+i[2]+'","value":'+str(XValue)+',"$source":"SPI.MCP3008.'+str(i[1])+'"}]}]}\n'
 					SignalK+=Erg
 			sock.sendto(SignalK, ('127.0.0.1', 55557))
 
