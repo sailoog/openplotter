@@ -138,11 +138,10 @@ if os.path.exists('/dev/ttyOP_FIRM') and index == 0:
 		if index > length:
 			index=0
 
-			SignalK = '{"updates": [{"source": {"src" : "ANA"},"values":[ '
-			#SignalK = '{"updates": [{"$source":"serial.ARD.ANA","values":[ '
+			SignalK = '{"updates": [{"$source":"serial.ARD.ANA","values":[ '
 			Erg=''
 			for i in channel_index:
-				Erg += '{"path": "'+SK_name[i]+'","value":'+str(interpolread(i,RawValue[i]))+',"$source":"ANA.ADR.'+str(i)+'"},'
+				Erg += '{"path": "'+SK_name[i]+'","value":'+str(interpolread(i,RawValue[i]))+'},'
 			
 			SignalK +=Erg[0:-1]+']}]}\n'
 			#print SignalK
