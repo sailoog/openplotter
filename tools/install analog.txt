@@ -4,9 +4,10 @@ and different types of arduino/teensy/stm32
 
 First ADS1115
 It can be connected to the i2c bus in the same way you connect for example a pressure sensor.
+You can connect up to 4 ADS1115
 
 The config file (openplotter_analog.conf) is located in the tools folder.
-There are 4 sections ([ADS1115_0],[ADS1115_1],[ADS1115_2],[ADS1115_3])
+There are 16 sections ([ADS1115_0],[ADS1115_1],[ADS1115_2],[ADS1115_3],[ADS1115_4],[ADS1115_5])
 
 [ADS1115_0] active = 1
 gain = 0 

@@ -79,6 +79,7 @@ class MySK:
 			src = label
 			if 'type' in js_up['source']: 
 				src +='.'+js_up['source']['type']
+				
 				if js_up['source']['type'] == 'NMEA0183':
 					if 'talker' in js_up['source']: src +='.'+js_up['source']['talker']
 					if 'sentence' in js_up['source']: src +='.'+js_up['source']['sentence']
@@ -86,16 +87,17 @@ class MySK:
 					if 'src' in js_up['source']: src +='.'+js_up['source']['src']
 					if 'pgn' in js_up['source']: src +='.'+str(js_up['source']['pgn'])
 
-		if 'timestamp' in js_up:
+		try:
 			timestamp = js_up['timestamp']
-		else:
+		except:
 			timestamp = '2000-01-01T00:00:00.000Z'
 
 		values_ = js_up['values']
+		src2 = src
 		for values in values_:
 			path = values['path']
 			value = values['value']
-			src2 = src
+			 
 			timestamp2 = timestamp
 			if type(value) is dict:
 				if 'timestamp' in value: timestamp2 = value['timestamp']
@@ -120,9 +122,10 @@ class MySK:
 						path2 = path + '.' + lvalue
 						value2 = value[lvalue]
 						self.update_add(value2, path2, src2, timestamp2)
-			else:
-				path2 = path + '.' + 'value'
-				self.update_add(value, path2, src, timestamp)
+			else:			
+				if '$source' in values:
+					src = src2+'.'+values['$source']
+				self.update_add(value, path, src, timestamp)
 
 	def update_add(self, value, path, src, timestamp):
 		# SRC SignalK Value Unit Interval Status Description timestamp	private_Unit private_Value priv_Faktor priv_Offset		
