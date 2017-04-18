@@ -54,7 +54,7 @@ else:
 					value=str(temp_offset)
 					path=i[1]
 					name=i[0]
-					SignalK='{"updates":[{"$source":"1W.'+name+'","values":[{"path":"'+path+'","value":'+value+'}]}]}\n'
+					SignalK='{"updates":[{"source":{"src":"1W"},"values":[{"path":"'+path+'","value":'+value+',"$source":"1W.'+str(sensors_list2[ib][2])+'.'+name+'"}]}]}\n'
 					sock.sendto(SignalK, ('127.0.0.1', 55557))
 				except Exception,e: print str(e)
 				ib=ib+1	

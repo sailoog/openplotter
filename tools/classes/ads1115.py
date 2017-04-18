@@ -139,21 +139,23 @@ class Ads1115():
 				
 
 				
-	def read(self,channel):
+	def read(self,allchannel):
 		#channel+=1
+		ADS1115_address = self.ADS1115_address + allchannel // 4
+		channel = allchannel - (allchannel // 4) * 4
 		if channel>3:
 			channel=0
 		#sps=250 -> 32*5 gain=4096 -> 512*1  (channel+4)*4096
 		config = 0x8103 + 32*self.samples[channel] + 512*self.gain[channel] + (channel+4)*4096
 		list = [(config >> 8) & 0xFF, config & 0xFF]
 
-		self.bus.write_i2c_block_data(self.ADS1115_address, 0x01, list)
+		self.bus.write_i2c_block_data(ADS1115_address, 0x01, list)
 		time.sleep(1/(self.samples_s[self.samples[channel]]+0.0001))
-		result = self.bus.read_i2c_block_data(self.ADS1115_address,0x00, 2)
+		result = self.bus.read_i2c_block_data(ADS1115_address,0x00, 2)
 
-		self.bus.write_i2c_block_data(self.ADS1115_address, 0x01, list)
+		self.bus.write_i2c_block_data(ADS1115_address, 0x01, list)
 		time.sleep(1/(self.samples_s[self.samples[channel]]+0.0001))
-		result = self.bus.read_i2c_block_data(self.ADS1115_address,0x00, 2)
+		result = self.bus.read_i2c_block_data(ADS1115_address,0x00, 2)
 
 		#print self.gain[channel],self.gain_mV[self.gain[channel]],self.samples_s[self.samples[channel]]
 		erg=((result[0] << 8) | (result[1]) ) * self.gain_mV[self.gain[channel]] / 32768.0
