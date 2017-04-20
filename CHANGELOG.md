@@ -1,5 +1,11 @@
 v0.11.0
 * New interface for triggers (actions not working properly yet)
+* Fixing bug with NMEA 2000 sources
+* Optimizing Signal k diagnostic
+* Fixing bug with kplex
+* Optimizing startup
+* Adding up to 4 ADS1115
+* Update Signal k node server
 v0.10.2
 * updating new signal k settings file with old signal k settings
 v0.10.1
