@@ -14,49 +14,51 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
-import json
 import wx
-import requests
+import re
 import datetime
-
+from select_key import selectKey
 
 class addTrigger(wx.Dialog):
 	def __init__(self, parent, edit):
 
-		wx.Dialog.__init__(self, None, title=_('Add trigger'), size=(430, 350))
+		if edit == 0: title = _('Add trigger')
+		else: title = _('Edit trigger')
+
+		wx.Dialog.__init__(self, None, title=title, size=(430, 350))
 
 		panel = wx.Panel(self)
 
 		self.parent = parent
 
-		self.always = wx.CheckBox(panel, label = _('Always'))
+		self.always = wx.CheckBox(panel, label = _('Date'))
 		self.always.Bind(wx.EVT_CHECKBOX, self.on_always)
 
-		titl = wx.StaticText(panel, label=_('Signal K trigger'))
+		hline1 = wx.StaticLine(panel)
 
-		self.list_skgroups=[]
-		try:
-			response = requests.get('http://localhost:3000/signalk/v1/api/vessels/self')
-			self.data = response.json()
-		except:self.data=None
-		list_temp=[_('--group')]
-		if self.data:
-			for k,v in self.data.items():
-				if isinstance(v, dict):
-					if k not in list_temp: list_temp.append(k)
-		self.list_skgroups=sorted(list_temp)
+		titl = wx.StaticText(panel, label='Signal K key')
+		self.SKkey = wx.TextCtrl(panel, style=wx.CB_READONLY)
 
-		self.skgroups= wx.ComboBox(panel, choices=self.list_skgroups, style=wx.CB_READONLY)
-		self.skgroups.Bind(wx.EVT_COMBOBOX, self.onSelect_group)
+		self.edit_skkey = wx.Button(panel, label=_('Edit'))
+		self.edit_skkey.Bind(wx.EVT_BUTTON, self.onEditSkkey)
 
-		self.list_signalk=[_('--key')]
-		self.signalk= wx.ComboBox(panel, choices=self.list_signalk, style=wx.CB_READONLY)
-		self.signalk.Bind(wx.EVT_COMBOBOX, self.onSelect_key)
+		self.skvalue = wx.CheckBox(panel, label = _('Value'))
+		self.skvalue.Bind(wx.EVT_CHECKBOX, self.on_skmagnitude)
+
+		self.sktimestamp = wx.CheckBox(panel, label = _('Timestamp'))
+		self.sktimestamp.Bind(wx.EVT_CHECKBOX, self.on_skmagnitude)
+
+		self.sksource = wx.CheckBox(panel, label = _('Source'))
+		self.sksource.Bind(wx.EVT_CHECKBOX, self.on_skmagnitude)
+
+		hline2 = wx.StaticLine(panel)
 
 		self.operators_list = []
 		self.operator_t = wx.StaticText(panel, label=_('operator'))
 		self.operator = wx.ComboBox(panel, choices=self.operators_list, style=wx.CB_READONLY)
 		self.operator.Bind(wx.EVT_COMBOBOX, self.onSelect_operator)
+
+		hline3 = wx.StaticLine(panel)
 
 		self.value_t = wx.StaticText(panel, label=_('value'))
 		self.value = wx.TextCtrl(panel)
@@ -66,6 +68,15 @@ class addTrigger(wx.Dialog):
 		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
 		okBtn = wx.Button(panel, wx.ID_OK)
 
+		hbox2 = wx.BoxSizer(wx.HORIZONTAL)
+		hbox2.Add(self.SKkey, 1, wx.LEFT | wx.EXPAND, 5)
+		hbox2.Add(self.edit_skkey, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 5)
+
+		hbox3 = wx.BoxSizer(wx.HORIZONTAL)
+		hbox3.Add(self.skvalue, 0, wx.LEFT | wx.EXPAND, 5)
+		hbox3.Add(self.sktimestamp, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 5)
+		hbox3.Add(self.sksource, 0, wx.RIGHT | wx.EXPAND, 5)
+
 		hbox = wx.BoxSizer(wx.HORIZONTAL)
 		hbox.Add((0, 0), 1, wx.ALL | wx.EXPAND, 5)
 		hbox.Add(cancelBtn, 0, wx.ALL | wx.EXPAND, 5)
@@ -74,13 +85,15 @@ class addTrigger(wx.Dialog):
 		vbox = wx.BoxSizer(wx.VERTICAL)
 		vbox.AddSpacer(5)
 		vbox.Add(self.always, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 5)
-		vbox.AddSpacer(5)
+		vbox.Add(hline1, 0, wx.ALL | wx.EXPAND, 5)
 		vbox.Add(titl, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 5)
-		vbox.Add(self.skgroups, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 5)
-		vbox.Add(self.signalk, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 5)
+		vbox.Add(hbox2, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 0)
 		vbox.AddSpacer(5)
+		vbox.Add(hbox3, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 0)
+		vbox.Add(hline2, 0, wx.ALL | wx.EXPAND, 5)
 		vbox.Add(self.operator_t, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 5)
 		vbox.Add(self.operator, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 5)
+		vbox.Add(hline3, 0, wx.ALL | wx.EXPAND, 5)
 		vbox.Add(self.value_t, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 5)
 		vbox.Add(self.value, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 5)
 		vbox.Add(self.format_t, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 5)
@@ -91,6 +104,8 @@ class addTrigger(wx.Dialog):
 		self.panel = panel
 
 		if edit != 0:
+			#TODO
+			'''
 			if edit[1] == -1:
 				self.always.SetValue(True)
 				self.on_always(0)
@@ -105,96 +120,86 @@ class addTrigger(wx.Dialog):
 				self.operator.SetValue(self.parent.operators_list[edit[2]])
 				self.value.SetValue(edit[3].encode('utf8'))
 				self.onSelect_operator(0)
+			'''
+			self.skvalue.SetValue(True)
+			self.sktimestamp.SetValue(False)
+			self.sksource.SetValue(False)
+			self.onSelectMagn()
 		else:
-			self.skgroups.SetSelection(0)
-			self.signalk.SetSelection(0)
-			self.operator.Disable()
-			self.value.Disable()
-			self.format_t.Hide()
+			self.skvalue.SetValue(True)
+			self.sktimestamp.SetValue(False)
+			self.sksource.SetValue(False)
+			self.onSelectMagn()
 
 	def on_always(self, e):
 		if self.always.GetValue():
-			self.reset_group_key()
-			self.skgroups.Disable()
-			self.signalk.Disable()
+			self.SKkey.Disable()
+			self.edit_skkey.Disable()
+			self.skvalue.Disable()
+			self.sktimestamp.Disable()
+			self.sksource.Disable()
+			self.operator.Enable()
+			self.value.Enable()
+			self.onSelectMagn()
 		else:
-			self.skgroups.Enable()
-			self.signalk.Enable()
+			self.SKkey.Enable()
+			self.edit_skkey.Enable()
+			self.skvalue.Enable()
+			self.sktimestamp.Enable()
+			self.sksource.Enable()
+			self.onSelectMagn()
 
-	def reset_group_key(self):
-		self.skgroups.SetSelection(0)
-		self.signalk.Clear()
-		self.list_signalk=[_('--key')]
-		self.signalk.AppendItems(self.list_signalk)
-		self.signalk.SetSelection(0)
-		self.reset_operator_value()
+	def on_skmagnitude(self, e):
+		sender = e.GetEventObject()
+		self.skvalue.SetValue(False)
+		self.sktimestamp.SetValue(False)
+		self.sksource.SetValue(False)
+		sender.SetValue(True)
+		self.onSelectMagn()
 
-	def onSelect_group(self, e):
-		group=self.skgroups.GetValue()
-		if '--' in group:
-			self.reset_group_key()
-			return
-		group=group+'.'
-		self.signalk.Clear()
-		self.list_signalk=[_('--key')]
-		self.path = []
-		self.data_keys=[]
-		self.keys(self.data)
-		list_tmp2=sorted(self.data_keys)
-		for i in list_tmp2:
-			if group == i[:len(group)]:
-				self.list_signalk.append(i.replace(group,'',1))
-		self.signalk.AppendItems(self.list_signalk)
-		self.signalk.SetSelection(0)
-		self.reset_operator_value()
-
-	def keys(self,d):
-		for k,v in d.items():
-			if isinstance(v, dict):
-				self.path.append(k)
-				self.keys(v)
-				self.path.pop()
-			else:
-				self.path.append(k)
-				self.data_keys.append(".".join(self.path))
-				self.path.pop()
-
-	def onSelect_key(self, e):
-		key=self.signalk.GetValue()
-		self.reset_operator_value()
-		if '--' in key:
-			return
+	def onSelectMagn(self):
 		self.operator.Enable()
 		self.value.Enable()
 		self.operator.Clear()
-		if '.$source' in key:
-			self.operators_list = [self.parent.operators_list[2], self.parent.operators_list[9]]
-		elif '.timestamp' in key:
+		if self.always.GetValue():
+			self.operators_list = [self.parent.operators_list[2], self.parent.operators_list[3], self.parent.operators_list[4], self.parent.operators_list[5], self.parent.operators_list[6]]
+		elif self.skvalue.GetValue():
+			self.operators_list = [self.parent.operators_list[2], self.parent.operators_list[3], self.parent.operators_list[4], self.parent.operators_list[5], self.parent.operators_list[6], self.parent.operators_list[7]]
+		elif self.sktimestamp.GetValue():
 			self.operators_list = [self.parent.operators_list[0], self.parent.operators_list[1], self.parent.operators_list[2], self.parent.operators_list[3], self.parent.operators_list[4], self.parent.operators_list[5], self.parent.operators_list[6]]
-		elif 'gpio.' in key:
-			self.operators_list = [self.parent.operators_list[7], self.parent.operators_list[8]]
-			self.value.Disable()
-		else:
-			self.operators_list = [self.parent.operators_list[2], self.parent.operators_list[3], self.parent.operators_list[4], self.parent.operators_list[5], self.parent.operators_list[6], self.parent.operators_list[9]]
-		
+		elif self.sksource.GetValue():
+			self.operators_list = [self.parent.operators_list[2], self.parent.operators_list[7]]
 		self.operator.AppendItems(self.operators_list)
-
-	def reset_operator_value(self):
-			self.operator.Disable()
-			self.value.Disable()
-			self.operator.Clear()
-			self.operators_list = ['']
-			self.operator.AppendItems(self.operators_list)
-			self.operator.SetSelection(0)
-			self.value.SetValue('')
-			self.format_t.Hide()
-			self.panel.Layout()
+		self.operator.SetSelection(0)
+		self.onSelect_operator(0)
 
 	def onSelect_operator(self, e):
-		key = self.signalk.GetValue()
 		operator = self.operator.GetValue()
-		if '.timestamp' in key and operator != self.parent.operators_list[0] and operator != self.parent.operators_list[1]:
+		if self.always.GetValue() or (self.sktimestamp.GetValue() and operator != self.parent.operators_list[0] and operator != self.parent.operators_list[1]):
 			self.format_t.Show() 
 		else: 
 			self.format_t.Hide()
 		self.panel.Layout()
+
+	def onEditSkkey(self,e):
+		dlg = selectKey()
+		res = dlg.ShowModal()
+		if res == wx.ID_OK:
+			key = dlg.keys_list.GetValue()
+			if '*' in key:
+				wildcard = dlg.wildcard.GetValue()
+				if wildcard:
+					if not re.match('^[0-9a-zA-Z]+$', wildcard):
+						self.ShowMessage(_('Failed. * must contain only allowed characters.'))
+						dlg.Destroy()
+						return
+					key = key.replace('*',wildcard)
+				else:
+					self.ShowMessage(_('Failed. You have to provide a name for *.'))
+					dlg.Destroy()
+					return
+		dlg.Destroy()
+		self.SKkey.SetValue(key)
+
+	def ShowMessage(self, w_msg):
+		wx.MessageBox(w_msg, 'Info', wx.OK | wx.ICON_INFORMATION)

@@ -121,8 +121,7 @@ class MySK:
 						value2 = value[lvalue]
 						self.update_add(value2, path2, src2, timestamp2)
 			else:
-				path2 = path + '.' + 'value'
-				self.update_add(value, path2, src, timestamp)
+				self.update_add(value, path, src, timestamp)
 
 	def update_add(self, value, path, src, timestamp):
 		# SRC SignalK Value Unit Interval Status Description timestamp	private_Unit private_Value priv_Faktor priv_Offset		
@@ -201,84 +200,84 @@ class MySK_to_N2K:
 				if i == '126992':
 					pass
 				elif i == '127245':
-					self.steering_rudderAngle = self.setlist(['steering.rudderAngle.value', [0, 0, 0, 0]])
+					self.steering_rudderAngle = self.setlist(['steering.rudderAngle', [0, 0, 0, 0]])
 				elif i == '127250':
-					self.navigation_headingMagnetic = self.setlist(['navigation.headingMagnetic.value', [0, 0, 0, 0]])
+					self.navigation_headingMagnetic = self.setlist(['navigation.headingMagnetic', [0, 0, 0, 0]])
 				elif i == '127257':
-					self.navigation_attitude_pitch = self.setlist(['navigation.attitude.pitch.value', [0, 0, 0, 0]])
-					self.navigation_attitude_roll = self.setlist(['navigation.attitude.roll.value', [0, 0, 0, 0]])
-					self.navigation_attitude_yaw = self.setlist(['navigation.attitude.yaw.value', [0, 0, 0, 0]])
+					self.navigation_attitude_pitch = self.setlist(['navigation.attitude.pitch', [0, 0, 0, 0]])
+					self.navigation_attitude_roll = self.setlist(['navigation.attitude.roll', [0, 0, 0, 0]])
+					self.navigation_attitude_yaw = self.setlist(['navigation.attitude.yaw', [0, 0, 0, 0]])
 				elif i == '127488':
-					self.propulsion_port_revolutions = self.setlist(['propulsion.port.revolutions.value', [0, 0, 0, 0]])
+					self.propulsion_port_revolutions = self.setlist(['propulsion.port.revolutions', [0, 0, 0, 0]])
 				elif i == '127488_1':
 					self.propulsion_starboard_revolutions = self.setlist(
-						['propulsion.starboard.revolutions.value', [0, 0, 0, 0]])
+						['propulsion.starboard.revolutions', [0, 0, 0, 0]])
 				elif i == '127489':
-					self.propulsion_port_oilTemperature = self.setlist(['propulsion.port.oilTemperature.value', [0, 0, 0, 0]])
-					self.propulsion_port_temperature = self.setlist(['propulsion.port.temperature.value', [0, 0, 0, 0]])
+					self.propulsion_port_oilTemperature = self.setlist(['propulsion.port.oilTemperature', [0, 0, 0, 0]])
+					self.propulsion_port_temperature = self.setlist(['propulsion.port.temperature', [0, 0, 0, 0]])
 				elif i == '127489_1':
 					self.propulsion_starboard_oilTemperature = self.setlist(
-						['propulsion.starboard.oilTemperature.value', [0, 0, 0, 0]])
+						['propulsion.starboard.oilTemperature', [0, 0, 0, 0]])
 					self.propulsion_starboard_temperature = self.setlist(
-						['propulsion.starboard.temperature.value', [0, 0, 0, 0]])
+						['propulsion.starboard.temperature', [0, 0, 0, 0]])
 				elif i == '127505':
-					self.tank_diesel_capacity = self.setlist(['tanks.fuel.standard.capacity.value', [0, 0, 0, 0]])
-					self.tank_diesel_level = self.setlist(['tanks.fuel.standard.currentLevel.value', [0, 0, 0, 0]])
+					self.tank_diesel_capacity = self.setlist(['tanks.fuel.standard.capacity', [0, 0, 0, 0]])
+					self.tank_diesel_level = self.setlist(['tanks.fuel.standard.currentLevel', [0, 0, 0, 0]])
 				elif i == '127505_1':
-					self.tank_freshwater_capacity = self.setlist(['tanks.liveWell.standard.capacity.value', [0, 0, 0, 0]])
-					self.tank_freshwater_level = self.setlist(['tanks.liveWell.standard.currentLevel.value', [0, 0, 0, 0]])
+					self.tank_freshwater_capacity = self.setlist(['tanks.liveWell.standard.capacity', [0, 0, 0, 0]])
+					self.tank_freshwater_level = self.setlist(['tanks.liveWell.standard.currentLevel', [0, 0, 0, 0]])
 				elif i == '127505_2':
-					self.tank_greywater_capacity = self.setlist(['tanks.wasteWater.standard.capacity.value', [0, 0, 0, 0]])
-					self.tank_greywater_level = self.setlist(['tanks.wasteWater.standard.currentLevel.value', [0, 0, 0, 0]])
+					self.tank_greywater_capacity = self.setlist(['tanks.wasteWater.standard.capacity', [0, 0, 0, 0]])
+					self.tank_greywater_level = self.setlist(['tanks.wasteWater.standard.currentLevel', [0, 0, 0, 0]])
 				elif i == '127505_3':
-					self.tank_holding_capacity = self.setlist(['tanks.blackWater.standard.capacity.value', [0, 0, 0, 0]])
-					self.tank_holding_level = self.setlist(['tanks.blackWater.standard.currentLevel.value', [0, 0, 0, 0]])
+					self.tank_holding_capacity = self.setlist(['tanks.blackWater.standard.capacity', [0, 0, 0, 0]])
+					self.tank_holding_level = self.setlist(['tanks.blackWater.standard.currentLevel', [0, 0, 0, 0]])
 				elif i == '127508':
 					self.DC_Electrical_Properties_dcSource_voltage = self.setlist(
-						['DC Electrical Properties.dcSource.voltage.value', [0, 0, 0, 0]])
+						['DC Electrical Properties.dcSource.voltage', [0, 0, 0, 0]])
 					self.DC_Electrical_Properties_dcSource_current = self.setlist(
-						['DC Electrical Properties.dcSource.current.value', [0, 0, 0, 0]])
+						['DC Electrical Properties.dcSource.current', [0, 0, 0, 0]])
 					self.DC_Electrical_Properties_dcSource_temperature = self.setlist(
-						['DC Electrical Properties.dcSource.temperature.value', [0, 0, 0, 0]])
+						['DC Electrical Properties.dcSource.temperature', [0, 0, 0, 0]])
 				elif i == '128259':
-					self.navigation_speedOverGround = self.setlist(['navigation.speedOverGround.value', [0, 0, 0, 0]])
-					self.navigation_speedThroughWater = self.setlist(['navigation.speedThroughWater.value', [0, 0, 0, 0]])
+					self.navigation_speedOverGround = self.setlist(['navigation.speedOverGround', [0, 0, 0, 0]])
+					self.navigation_speedThroughWater = self.setlist(['navigation.speedThroughWater', [0, 0, 0, 0]])
 				elif i == '128267':
 					self.environment_depth_belowTransducer = self.setlist(
-						['environment.depth.belowTransducer.value', [0, 0, 0, 0]])
+						['environment.depth.belowTransducer', [0, 0, 0, 0]])
 					self.environment_depth_surfaceToTransducer = self.setlist(
-						['environment.depth.surfaceToTransducer.value', [0, 0, 0, 0]])
+						['environment.depth.surfaceToTransducer', [0, 0, 0, 0]])
 				elif i == '128275':
-					self.navigation_log = self.setlist(['navigation.log.value', [0, 0, 0, 0]])
-					self.navigation_logTrip = self.setlist(['navigation.logTrip.value', [0, 0, 0, 0]])
+					self.navigation_log = self.setlist(['navigation.log', [0, 0, 0, 0]])
+					self.navigation_logTrip = self.setlist(['navigation.logTrip', [0, 0, 0, 0]])
 				elif i == '129025':
 					self.navigation_position_latitude = self.setlist(['navigation.position.latitude', [0, 0, 0, 0]])
 					self.navigation_position_longitude = self.setlist(['navigation.position.longitude', [0, 0, 0, 0]])
 				elif i == '129026':
 					self.navigation_courseOverGroundTrue = self.setlist(
-						['navigation.courseOverGroundTrue.value', [0, 0, 0, 0]])
-					self.navigation_speedOverGround = self.setlist(['navigation.speedOverGround.value', [0, 0, 0, 0]])
+						['navigation.courseOverGroundTrue', [0, 0, 0, 0]])
+					self.navigation_speedOverGround = self.setlist(['navigation.speedOverGround', [0, 0, 0, 0]])
 				elif i == '130306_2':
-					self.environment_wind_angleApparent = self.setlist(['environment.wind.angleApparent.value', [0, 0, 0, 0]])
-					self.environment_wind_speedApparent = self.setlist(['environment.wind.speedApparent.value', [0, 0, 0, 0]])
+					self.environment_wind_angleApparent = self.setlist(['environment.wind.angleApparent', [0, 0, 0, 0]])
+					self.environment_wind_speedApparent = self.setlist(['environment.wind.speedApparent', [0, 0, 0, 0]])
 				elif i == '130306_3':
-					self.environment_wind_angleTrueWater = self.setlist(['environment.wind.angleTrueWater.value', [0, 0, 0, 0]])
-					self.environment_wind_speedTrue = self.setlist(['environment.wind.speedTrue.value', [0, 0, 0, 0]])
+					self.environment_wind_angleTrueWater = self.setlist(['environment.wind.angleTrueWater', [0, 0, 0, 0]])
+					self.environment_wind_speedTrue = self.setlist(['environment.wind.speedTrue', [0, 0, 0, 0]])
 				elif i == '130310':
-					self.environment_outside_pressure = self.setlist(['environment.outside.pressure.value', [0, 0, 0, 0]])
+					self.environment_outside_pressure = self.setlist(['environment.outside.pressure', [0, 0, 0, 0]])
 					self.environment_outside_temperature = self.setlist(
-						['environment.outside.temperature.value', [0, 0, 0, 0]])
-					self.environment_water_temperature = self.setlist(['environment.water.temperature.value', [0, 0, 0, 0]])
+						['environment.outside.temperature', [0, 0, 0, 0]])
+					self.environment_water_temperature = self.setlist(['environment.water.temperature', [0, 0, 0, 0]])
 				elif i == '130311':
-					self.environment_outside_pressure = self.setlist(['environment.outside.pressure.value', [0, 0, 0, 0]])
-					self.environment_inside_humidity = self.setlist(['environment.inside.humidity.value', [0, 0, 0, 0]])
-					self.environment_water_temperature = self.setlist(['environment.water.temperature.value', [0, 0, 0, 0]])
+					self.environment_outside_pressure = self.setlist(['environment.outside.pressure', [0, 0, 0, 0]])
+					self.environment_inside_humidity = self.setlist(['environment.inside.humidity', [0, 0, 0, 0]])
+					self.environment_water_temperature = self.setlist(['environment.water.temperature', [0, 0, 0, 0]])
 				elif i == '130316':
 					self.environment_inside_refrigerator_temperature = self.setlist(
-						['environment.inside.refrigerator.temperature.value', [0, 0, 0, 0]])
+						['environment.inside.refrigerator.temperature', [0, 0, 0, 0]])
 				elif i == '130316_1':
 					self.propulsion_port_exhaustTemperature = self.setlist(
-						['propulsion.port.exhaustTemperature.value', [0, 0, 0, 0]])
+						['propulsion.port.exhaustTemperature', [0, 0, 0, 0]])
 
 		self.SK = SK_
 		data = self.SK.conf.get('N2K', 'pgn_generate')
@@ -539,7 +538,7 @@ class MySK_to_NMEA:
 class MySK_to_Action_Calc:
 	def __init__(self, SK_):
 		self.operators_list = [_('was not updated in the last (sec.)'), _('was updated in the last (sec.)'), '=',
-							   '<', '<=', '>', '>=', _('is on'), _('is off'), _('contains')]
+							   '<', '<=', '>', '>=', _('contains')]
 
 		self.tdif = time.time() - time.mktime(datetime.datetime.utcnow().timetuple())
 		self.tdif = round(self.tdif, 0)
@@ -590,14 +589,14 @@ class MySK_to_Action_Calc:
 		return listx					
 					
 	def read_Calc(self):
-		self.environment_wind_angleApparent = self.setlist(['environment.wind.angleApparent.value', [0, 0, 0, 0]])
-		self.environment_wind_speedApparent = self.setlist(['environment.wind.speedApparent.value', [0, 0, 0, 0]])		
+		self.environment_wind_angleApparent = self.setlist(['environment.wind.angleApparent', [0, 0, 0, 0]])
+		self.environment_wind_speedApparent = self.setlist(['environment.wind.speedApparent', [0, 0, 0, 0]])		
 		if self.calcWindTrueWater:
-			self.navigation_speedThroughWater = self.setlist(['navigation.speedThroughWater.value', [0, 0, 0, 0]])
+			self.navigation_speedThroughWater = self.setlist(['navigation.speedThroughWater', [0, 0, 0, 0]])
 		if self.calcWindTrueGround:
-			self.navigation_courseOverGroundTrue = self.setlist(['navigation.courseOverGroundTrue.value', [0, 0, 0, 0]])
-			self.navigation_speedOverGround = self.setlist(['navigation.speedOverGround.value', [0, 0, 0, 0]])
-			self.navigation_headingMagnetic = self.setlist(['navigation.headingMagnetic.value', [0, 0, 0, 0]])
+			self.navigation_courseOverGroundTrue = self.setlist(['navigation.courseOverGroundTrue', [0, 0, 0, 0]])
+			self.navigation_speedOverGround = self.setlist(['navigation.speedOverGround', [0, 0, 0, 0]])
+			self.navigation_headingMagnetic = self.setlist(['navigation.headingMagnetic', [0, 0, 0, 0]])
 							
 	def Action_set(self, item, start):
 		if start:
@@ -666,21 +665,15 @@ class MySK_to_Action_Calc:
 								# greater than or equal to
 								elif operator_ == 6:
 									self.Action_set(item, float(trigger_value) >= data_value)
-								# switch on
-								elif operator_ == 7:
-									self.Action_set(item, float(trigger_value) == 1.0)
-								# switch off
-								elif operator_ == 8:
-									self.Action_set(item, float(trigger_value) == 0.0)
 								# contain (number)
-								if operator_ == 9:
+								if operator_ == 7:
 									self.Action_set(item, data_value in float(trigger_value))
 							else:
 								# equal (string)
 								if operator_ == 2:
 									self.Action_set(item, trigger_value == data_value)
 								# contain (string)
-								elif operator_ == 9:
+								elif operator_ == 7:
 									self.Action_set(item, data_value in trigger_value)
 					except Exception, e:
 						print str(e)
