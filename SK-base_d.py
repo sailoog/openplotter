@@ -84,11 +84,11 @@ class MySK:
 					if 'sentence' in js_up['source']: src +='.'+js_up['source']['sentence']
 				elif js_up['source']['type'] == 'NMEA2000':
 					if 'src' in js_up['source']: src +='.'+js_up['source']['src']
-					if 'pgn' in js_up['source']: src +='.'+js_up['source']['pgn']
+					if 'pgn' in js_up['source']: src +='.'+str(js_up['source']['pgn'])
 
-		if 'timestamp' in js_up:
+		try:
 			timestamp = js_up['timestamp']
-		else:
+		except:
 			timestamp = '2000-01-01T00:00:00.000Z'
 
 		values_ = js_up['values']
@@ -111,7 +111,7 @@ class MySK:
 							if 'sentence' in value['source']: src2 +='.'+value['source']['sentence']
 						elif value['source']['type'] == 'NMEA2000':
 							if 'src' in value['source']: src2 +='.'+value['source']['src']
-							if 'pgn' in value['source']: src2 +='.'+value['source']['pgn']
+							if 'pgn' in value['source']: src2 +='.'+str(value['source']['pgn'])
 
 				for lvalue in value:
 					if lvalue in ['timestamp', 'source', '$source']:

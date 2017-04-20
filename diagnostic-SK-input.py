@@ -22,6 +22,7 @@ import threading
 import os
 import websocket
 import wx
+import time
 
 from classes.conf import Conf
 from classes.language import Language
@@ -53,7 +54,7 @@ class MyFrame(wx.Frame):
 
 		Language(self.conf.get('GENERAL', 'lang'))
 
-		wx.Frame.__init__(self, None, title='diagnostic SignalK input', size=(650, 435))
+		wx.Frame.__init__(self, None, title='diagnostic SignalK input', size=(670, 435))
 		self.Bind(wx.EVT_CLOSE, self.OnClose)
 		panel = wx.Panel(self, wx.ID_ANY)
 
@@ -67,7 +68,7 @@ class MyFrame(wx.Frame):
 		self.SetIcon(self.icon)
 
 		self.list = wx.ListCtrl(panel, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
-		self.list.InsertColumn(0, _('SRC'), width=200)
+		self.list.InsertColumn(0, _('SRC'), width=245)
 		self.list.InsertColumn(1, _('SignalK'), width=300)
 		self.list.InsertColumn(2, _('Value'), wx.LIST_FORMAT_RIGHT, width=100)
 		self.list.InsertColumn(3, _('Unit'), width=45)
@@ -307,18 +308,27 @@ class MyFrame(wx.Frame):
 		subprocess.Popen(['python', self.currentpath + '/unit-private.py'])
 
 	def OnClose(self, e):
+		self.endlive=True
+		qx=0
+		while not self.ende and qx<50:
+			time.sleep(0.1)
+			qx+=1
+		 
 		if self.ws:
 			self.ws.close()
 		self.timer.Stop()
-		if self.ws:
-			self.ws.close()
 		self.Destroy()
 
 	def on_message(self, ws, message):
+		if self.endlive:
+			self.on_close(ws)
+			self.ende=True
+			return
 		try:
 			js_up = json.loads(message)['updates'][0]
 		except:
 			return
+		
 		label = ''
 		src = ''
 		if '$source' in js_up:
@@ -328,12 +338,13 @@ class MyFrame(wx.Frame):
 			src = label
 			if 'type' in js_up['source']: 
 				src +='.'+js_up['source']['type']
+				
 				if js_up['source']['type'] == 'NMEA0183':
 					if 'talker' in js_up['source']: src +='.'+js_up['source']['talker']
 					if 'sentence' in js_up['source']: src +='.'+js_up['source']['sentence']
 				elif js_up['source']['type'] == 'NMEA2000':
 					if 'src' in js_up['source']: src +='.'+js_up['source']['src']
-					if 'pgn' in js_up['source']: src +='.'+js_up['source']['pgn']
+					if 'pgn' in js_up['source']: src +='.'+str(js_up['source']['pgn'])
 
 		try:
 			timestamp = js_up['timestamp']
@@ -428,6 +439,8 @@ class MyFrame(wx.Frame):
 		pass
 
 	def run(self):
+		self.endlive=False
+		self.ende=False
 		self.ws = websocket.WebSocketApp("ws://localhost:3000/signalk/v1/stream?subscribe=self",
 										 on_message=lambda ws, msg: self.on_message(ws, msg),
 										 on_error=lambda ws, err: self.on_error(ws, err),

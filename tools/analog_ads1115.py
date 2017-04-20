@@ -34,11 +34,11 @@ else:
 	conf_analog=Conf_analog()
 	ads1115=Ads1115()
 
-	a_index = [0,1,2,3]
-	a_value =[0.0,0.0,0.0,0.0]
+	a_index = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
+	a_value =[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]
 	index=0
-	active=['0','0','0','0']
-	SK_name=['0','0','0','0']
+	active=['0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0']
+	SK_name=['0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0']
 
 	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
@@ -47,8 +47,11 @@ else:
 	ADS1115='ADS1115_'
 
 	for i in a_index:
-		active[i] = conf_analog.get(ADS1115+str(i), 'active')=='1'
-
+		if (conf_analog.has_section(ADS1115+str(i))):
+			active[i] = conf_analog.get(ADS1115+str(i), 'active')=='1'
+		else:	
+			active[i] = False
+			
 		if active[i]:
 			if 0==conf_analog.has_option(ADS1115+str(i), 'sk_name'):
 				conf_analog.set(ADS1115+str(i), 'sk_name','0')
