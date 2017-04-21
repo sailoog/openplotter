@@ -1,3 +1,7 @@
+v0.11.1
+* Add openplotter debugging to menu
+* Fix bug in CHANGELOG file
+
 v0.11.0
 * New interface for triggers (actions not working properly yet)
 * Fixing bug with NMEA 2000 sources
@@ -6,8 +10,10 @@ v0.11.0
 * Optimizing startup
 * Adding up to 4 ADS1115
 * Update Signal k node server
+
 v0.10.2
 * updating new signal k settings file with old signal k settings
+
 v0.10.1
 * Liner providers deleted from UDP inputs in Signal K settings
 * Deleted unused serial input from Signal K settings

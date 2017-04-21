@@ -17,6 +17,7 @@ echo "show_documents=0" >> desktop-items-0.conf
 echo "show_trash=0" >> desktop-items-0.conf
 echo "show_mounts=0" >> desktop-items-0.conf
 echo "prefs_app=pipanel" >> desktop-items-0.conf
+echo -e '[Desktop Entry]\nName=OpenPlotter debugging\nExec=lxterminal -e openplotter\nIcon=/home/pi/.config/openplotter/openplotter_debug.ico\nStartupNotify=true\nCategories=OpenPlotter\nTerminal=false\nType=Application\nVersion=1.0' > /home/pi/.local/share/applications/openplotter_debug.desktop
 echo
 echo "DELETING UNUSED ICONS..."
 echo
