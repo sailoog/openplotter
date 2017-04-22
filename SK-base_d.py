@@ -580,7 +580,10 @@ class MySK_to_Action_Calc:
 				self.triggers.append(ii)
 				if ii[1] == -1: pass
 				else:
-					SKkey2 = ii[1]
+					splitlist = ii[1].split('.')
+					magnitude = splitlist.pop()
+					ii.append(magnitude)  # 6 magnitude
+					SKkey2 = '.'.join(splitlist)
 					self.SKc.append([SKkey2, [0, 0, 0, 0, 0, 0, 0, 0]])
 					ii[1] = self.SKc[-1]
 
@@ -598,58 +601,91 @@ class MySK_to_Action_Calc:
 			self.navigation_speedOverGround = self.setlist(['navigation.speedOverGround', [0, 0, 0, 0]])
 			self.navigation_headingMagnetic = self.setlist(['navigation.headingMagnetic', [0, 0, 0, 0]])
 							
-	def Action_set(self, item, start):
-		if start:
+	def Action_set(self, item, cond):
+		if cond:
 			now = time.time()
-			itemsafe = False
 			for i in item[4]:
-				if i[3] == 0:
-					if item[5] == False:
-						itemsafe = True
-						try:
-							self.actions.run_action(i[0], i[1])
-							i[4] = now
-						except Exception, e: print str(e)
-					else:
-						item[5] = False		
+				if item[5] == False:
+					try:
+						self.actions.run_action(i[0], i[1])
+						i[4] = now
+					except Exception, e: print str(e)
 				else:
-					if now - i[4] > i[2]:
-						try:
-							self.actions.run_action(i[0], i[1])
-							i[4] = now
-						except Exception, e: print str(e)			
-			item[5] = itemsafe
+					if i[3] == 0: pass
+					else:
+						if now - i[4] > i[2]:
+							try:
+								self.actions.run_action(i[0], i[1])
+								i[4] = now
+							except Exception, e: print str(e)			
+			item[5] = True
+		else: item[5] = False
 
 	def Action_Calc_cycle(self, tick2a):
 		if tick2a > self.cycle10:
 			self.cycle10 += 0.1
 			for index, item in enumerate(self.triggers):
+				error = False
+				now = time.time() - self.tdif
+				operator_ = item[2]
 				if item[1] == -1:
-					self.Action_set(item, True)
+					try:
+						data_value = datetime.datetime.strptime(item[3], '%Y-%m-%dT%H:%M:%S')
+						data_value = time.mktime(data_value.timetuple())
+						data_value = float(data_value)
+					except Exception, e: 
+						print str(e)
+						error = True
+					if not error:
+						# less than or equal to
+						if operator_ == 4:
+							self.Action_set(item, now <= data_value)
+						# greater than or equal to
+						elif operator_ == 6:
+							self.Action_set(item, now >= data_value)
 				else:
-					# trigger = item[1][0]
-					trigger_value = item[1][1][2]
-					now = time.time() - self.tdif
-					operator_ = item[2]
-					data = item[3]
-					if type(item[1][1][7]) is int:
-						trigger_value_timestamp = 0
-					else:
-						trigger_value_timestamp = datetime.datetime.strptime(item[1][1][7][:-5], '%Y-%m-%dT%H:%M:%S')
-						trigger_value_timestamp = time.mktime(trigger_value_timestamp.timetuple())
-					try:
-						data_value = float(data)
-					except:
-						data_value = str(data)
-					try:
-						if trigger_value_timestamp:
+					if item[6] == 'value':
+						try:
+							trigger_value = item[1][1][2]
+							try:
+								data_value = float(item[3])
+							except:
+								data_value = str(item[3])
+						except Exception, e: 
+							print str(e)
+							error = True
+					elif item[6] == 'source':
+						try:
+							trigger_value = item[1][1][0]
+							try:
+								data_value = float(item[3])
+							except:
+								data_value = str(item[3])
+						except Exception, e: 
+							print str(e)
+							error = True
+					elif item[6] == 'timestamp':
+						try:
+							if type(item[1][1][7]) is int:
+								trigger_value = 0
+							else:
+								trigger_value = datetime.datetime.strptime(item[1][1][7][:-5], '%Y-%m-%dT%H:%M:%S')
+								trigger_value = time.mktime(trigger_value.timetuple())
+							data_value = datetime.datetime.strptime(item[3], '%Y-%m-%dT%H:%M:%S')
+							data_value = time.mktime(data_value.timetuple())
+						except Exception, e: 
+							print str(e)
+							error = True
+					if not error:
+						try:
 							if type(data_value) is float:
 								# not present for
 								if operator_ == 0:
-									self.Action_set(item, now - trigger_value_timestamp > data_value)
+									if trigger_value == 0: self.Action_set(item, True)
+									else: self.Action_set(item, now - trigger_value > data_value)
 								# present in the last
 								elif operator_ == 1:
-									self.Action_set(item, now - trigger_value_timestamp < data_value)
+									self.Action_set(item, now - trigger_value < data_value)
 								# equal (number)
 								elif operator_ == 2:
 									self.Action_set(item, float(trigger_value) == data_value)
@@ -667,17 +703,16 @@ class MySK_to_Action_Calc:
 									self.Action_set(item, float(trigger_value) >= data_value)
 								# contain (number)
 								if operator_ == 7:
-									self.Action_set(item, data_value in float(trigger_value))
+									self.Action_set(item, str(data_value) in str(trigger_value))
 							else:
 								# equal (string)
 								if operator_ == 2:
-									self.Action_set(item, trigger_value == data_value)
+									self.Action_set(item, str(trigger_value) == data_value)
 								# contain (string)
 								elif operator_ == 7:
-									self.Action_set(item, data_value in trigger_value)
-					except Exception, e:
-						print str(e)
-					# except: pass
+									self.Action_set(item, data_value in str(trigger_value))
+						except Exception, e: print str(e)
+						#except: pass
 
 			if self.calcWindTrueWater | self.calcWindTrueGround:
 				Erg = ''

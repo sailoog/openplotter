@@ -83,8 +83,7 @@ class addAction(wx.Dialog):
 				if msg == 0:
 					pass
 				else:
-					if field == 1: msg = msg + _(
-						'\n\nYou can add the current value of any magnitude typing its short name between brackets, e.g. [Lat] for Latitude. See available short names in Inspector window.')
+					if field == 1: msg = msg #+ _('\n\nYou can add the current value of any magnitude typing its short name between brackets, e.g. [Lat] for Latitude. See available short names in Inspector window.')
 					wx.MessageBox(msg, 'Info', wx.OK | wx.ICON_INFORMATION)
 
 	def onSelectUnit(self, e):

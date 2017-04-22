@@ -1838,9 +1838,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			# name, io, GPIO, pull
 			if ii[1] == 'out':
 				io = _('output')
+				source = 'output'
 			else:
 				io = _('input')
-			self.list_gpio.Append([ii[0], io, ii[2], ii[3], 'sensors.'+ii[0],'GPIO.'+ii[1]+'.'+ii[2]])
+				source = 'input'
+			self.list_gpio.Append([ii[0], io, ii[2], ii[3], 'sensors.'+ii[0],'GPIO.'+source+'.'+ii[2]])
 
 	def edit_gpio(self, e):
 		selected_gpio = e.GetIndex()
@@ -2020,8 +2022,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		title = wx.StaticText(self.p_action, label=_(' Triggers '))
 
 		self.list_triggers = CheckListCtrl(self.p_action, 100)
-		self.list_triggers.InsertColumn(0, _('trigger'), width=400)
-		self.list_triggers.InsertColumn(1, _('operator'), width=100)
+		self.list_triggers.InsertColumn(0, _('trigger'), width=300)
+		self.list_triggers.InsertColumn(1, _('operator'), width=150)
 		self.list_triggers.InsertColumn(2, _('value'))
 		self.list_triggers.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_print_actions)
 		self.list_triggers.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit_triggers)
@@ -2035,7 +2037,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		self.list_actions = wx.ListCtrl(self.p_action, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
 		self.list_actions.InsertColumn(0, _('action'), width=200)
-		self.list_actions.InsertColumn(1, _('data'), width=220)
+		self.list_actions.InsertColumn(1, _('data'), width=260)
 		self.list_actions.InsertColumn(2, _('repeat'), width=130)
 		self.list_actions.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_actions)
 		self.list_actions.SetMinSize((10, 10))
@@ -2102,8 +2104,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		for ii in temp_list:
 			self.triggers.append(ii)
 			if ii[1] == -1: 
-				sk = _('Always')
-				op = ''
+				sk = _('Date')
+				op = self.operators_list[ii[2]]
 			else: 
 				sk = ii[1]
 				op = self.operators_list[ii[2]]

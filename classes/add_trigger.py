@@ -42,28 +42,28 @@ class addTrigger(wx.Dialog):
 		self.edit_skkey = wx.Button(panel, label=_('Edit'))
 		self.edit_skkey.Bind(wx.EVT_BUTTON, self.onEditSkkey)
 
-		self.skvalue = wx.CheckBox(panel, label = _('Value'))
+		self.skvalue = wx.CheckBox(panel, label = 'value')
 		self.skvalue.Bind(wx.EVT_CHECKBOX, self.on_skmagnitude)
 
-		self.sktimestamp = wx.CheckBox(panel, label = _('Timestamp'))
+		self.sktimestamp = wx.CheckBox(panel, label = 'timestamp')
 		self.sktimestamp.Bind(wx.EVT_CHECKBOX, self.on_skmagnitude)
 
-		self.sksource = wx.CheckBox(panel, label = _('Source'))
+		self.sksource = wx.CheckBox(panel, label = 'source')
 		self.sksource.Bind(wx.EVT_CHECKBOX, self.on_skmagnitude)
 
 		hline2 = wx.StaticLine(panel)
 
 		self.operators_list = []
-		self.operator_t = wx.StaticText(panel, label=_('operator'))
+		self.operator_t = wx.StaticText(panel, label=_('Operator'))
 		self.operator = wx.ComboBox(panel, choices=self.operators_list, style=wx.CB_READONLY)
 		self.operator.Bind(wx.EVT_COMBOBOX, self.onSelect_operator)
 
 		hline3 = wx.StaticLine(panel)
 
-		self.value_t = wx.StaticText(panel, label=_('value'))
+		self.value_t = wx.StaticText(panel, label=_('Value'))
 		self.value = wx.TextCtrl(panel)
 
-		self.format_t = wx.StaticText(panel, label=_('Format: ')+str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f') )[0:23]+'Z')
+		self.format_t = wx.StaticText(panel, label=_('format: ')+str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S')))
 
 		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
 		okBtn = wx.Button(panel, wx.ID_OK)
@@ -104,27 +104,22 @@ class addTrigger(wx.Dialog):
 		self.panel = panel
 
 		if edit != 0:
-			#TODO
-			'''
 			if edit[1] == -1:
 				self.always.SetValue(True)
 				self.on_always(0)
+				self.operator.SetValue(self.parent.operators_list[edit[2]])
+				self.value.SetValue(edit[3].encode('utf8'))
 			else:
 				sk = edit[1].split('.')
-				group = sk[0]
-				self.skgroups.SetValue(group)
-				self.onSelect_group(0)
-				key = edit[1].replace(group+'.', '')
-				self.signalk.SetValue(key)
-				self.onSelect_key(0)
+				magnitude = sk.pop()
+				self.SKkey.SetValue('.'.join(sk))
+				if magnitude == 'value': self.skvalue.SetValue(True)
+				elif magnitude == 'timestamp': self.sktimestamp.SetValue(True)
+				elif magnitude == 'source': self.sksource.SetValue(True)
+				self.onSelectMagn()
 				self.operator.SetValue(self.parent.operators_list[edit[2]])
 				self.value.SetValue(edit[3].encode('utf8'))
 				self.onSelect_operator(0)
-			'''
-			self.skvalue.SetValue(True)
-			self.sktimestamp.SetValue(False)
-			self.sksource.SetValue(False)
-			self.onSelectMagn()
 		else:
 			self.skvalue.SetValue(True)
 			self.sktimestamp.SetValue(False)
@@ -162,7 +157,7 @@ class addTrigger(wx.Dialog):
 		self.value.Enable()
 		self.operator.Clear()
 		if self.always.GetValue():
-			self.operators_list = [self.parent.operators_list[2], self.parent.operators_list[3], self.parent.operators_list[4], self.parent.operators_list[5], self.parent.operators_list[6]]
+			self.operators_list = [self.parent.operators_list[4], self.parent.operators_list[6]]
 		elif self.skvalue.GetValue():
 			self.operators_list = [self.parent.operators_list[2], self.parent.operators_list[3], self.parent.operators_list[4], self.parent.operators_list[5], self.parent.operators_list[6], self.parent.operators_list[7]]
 		elif self.sktimestamp.GetValue():

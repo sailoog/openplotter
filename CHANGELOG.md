@@ -1,5 +1,11 @@
+v0.11.2
+* Fix 1W
+* Fix NMEA 0183 generator
+* Fix ADS1115
+* Fix Actions. Some actions need still to be revised but triggers are working right. Stop and start all actions needs revision too
+
 v0.11.1
-* Add openplotter debugging to menu
+* Add openplotter debugging to menu. To see the neu item go to: Updates - Set default openplotter desktop
 * Fix bug in CHANGELOG file
 
 v0.11.0
