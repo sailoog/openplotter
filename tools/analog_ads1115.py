@@ -36,6 +36,7 @@ else:
 
 	a_index = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
 	a_value =[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]
+	a_index_max=15
 	index=0
 	active=['0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0']
 	SK_name=['0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0']
@@ -85,6 +86,6 @@ else:
 				sock.sendto(SignalK, ('127.0.0.1', 55557))
 		else:
 			index+=1
-			if index>3: index=0
-
-			a_value[index]=ads1115.read(index)
+			if index>a_index_max: index=0
+			if active[index]:
+				a_value[index]=ads1115.read(index)

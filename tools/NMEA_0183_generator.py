@@ -69,9 +69,9 @@ class MyFrame(wx.Frame):
 
 
 		def start_d(self):
-			subprocess.call(['pkill', '-f', 'NMEA_0183_generator_d.py'])
-			subprocess.Popen(['python',self.paths.op_path+'/tools/NMEA_0183_generator_d.py'])
-
+			subprocess.call(['pkill', '-f', 'SK-base_d.py'])
+			subprocess.Popen(['python',self.paths.op_path+'/SK-base_d.py'])
+			
 
 		def read_sentences(self):
 			self.sentences=[]
