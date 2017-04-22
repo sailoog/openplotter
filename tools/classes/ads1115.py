@@ -47,19 +47,19 @@ class Ads1115():
 
 		conf_analog=Conf_analog()
 		self.bus = smbus.SMBus(1)
-		a_index = [0,1,2,3]
-		self.active = [0,0,0,0]
-		self.gain = [0,0,0,0]
-		self.samples = [0,0,0,0]
-		self.ohmmeter = [0,0,0,0]
-		self.fixed_resistor = [0,0,0,0]
-		self.high_voltage = [0,0,0,0]
-		self.voltage_divider = [0,0,0,0]
-		self.upper_resistance = [0,0,0,0]
-		self.lower_resistance = [0,0,0,0]
-		self.adjust = [0,0,0,0]
-		self.adjust_point_b = [0,0,0,0]
-		self.adjust_point = [0,0,0,0]
+		a_index = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
+		self.active = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+		self.gain = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+		self.samples = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+		self.ohmmeter = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+		self.fixed_resistor = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+		self.high_voltage = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+		self.voltage_divider = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+		self.upper_resistance = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+		self.lower_resistance = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+		self.adjust = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+		self.adjust_point_b = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+		self.adjust_point = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 
 		ADS1115='ADS1115_'
 		for i in a_index:
@@ -158,21 +158,21 @@ class Ads1115():
 		result = self.bus.read_i2c_block_data(ADS1115_address,0x00, 2)
 
 		#print self.gain[channel],self.gain_mV[self.gain[channel]],self.samples_s[self.samples[channel]]
-		erg=((result[0] << 8) | (result[1]) ) * self.gain_mV[self.gain[channel]] / 32768.0
+		erg=((result[0] << 8) | (result[1]) ) * self.gain_mV[self.gain[allchannel]] / 32768.0
 		
-		if self.ohmmeter[channel]:
-			mV_dif = erg/self.high_voltage[channel]
-			erg = mV_dif*self.fixed_resistor[channel]/(1-mV_dif)
+		if self.ohmmeter[allchannel]:
+			mV_dif = erg/self.high_voltage[allchannel]
+			erg = mV_dif*self.fixed_resistor[allchannel]/(1-mV_dif)
 		
-		if self.voltage_divider[channel]:
-			erg = erg*(self.upper_resistance[channel]+self.lower_resistance[channel])/self.lower_resistance[channel]
+		if self.voltage_divider[allchannel]:
+			erg = erg*(self.upper_resistance[allchannel]+self.lower_resistance[allchannel])/self.lower_resistance[allchannel]
 		
-		erg += self.adjust[channel]
+		erg += self.adjust[allchannel]
 		
-		if self.adjust_point_b[channel]:
+		if self.adjust_point_b[allchannel]:
 			lin = -999999
-			for index,item in enumerate(self.adjust_point[channel]):
-				if index==0:
+			for index_,item in enumerate(self.adjust_point[allchannel]):
+				if index_==0:
 					if erg <= item[0]:
 						lin = item[1]
 						#print 'under range'
