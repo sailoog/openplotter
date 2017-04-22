@@ -163,9 +163,12 @@ class addNMEA_0183(wx.Dialog):
 				self.keys(v)
 				self.path.pop()
 			else:
-				self.path.append(k)
-				self.data_keys.append(".".join(self.path))
-				self.path.pop()
+				if k != 'value':
+					self.path.append(k)
+					self.data_keys.append(".".join(self.path))
+					self.path.pop()
+				else:
+					self.data_keys.append(".".join(self.path))
 
 	def onSelect_rate(self,e):
 		tmp=self.rate.GetValue()

@@ -64,6 +64,7 @@ class addDS18B20(wx.Dialog):
 		okBtn = wx.Button(panel, wx.ID_OK, pos=(235, 175))
 
 	def onEditSkkey(self,e):
+		key=''
 		dlg = selectKey()
 		res = dlg.ShowModal()
 		if res == wx.ID_OK:
@@ -81,7 +82,8 @@ class addDS18B20(wx.Dialog):
 					dlg.Destroy()
 					return
 		dlg.Destroy()
-		self.SKkey.SetValue(key)
+		if key != '':
+			self.SKkey.SetValue(key)
 
 	def ShowMessage(self, w_msg):
 		wx.MessageBox(w_msg, 'Info', wx.OK | wx.ICON_INFORMATION)
