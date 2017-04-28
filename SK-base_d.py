@@ -15,21 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import datetime
-import json
-import logging
-import operator
-import signal
-import socket
-import sys
-import threading
-import time
-import websocket
-import math
-
+import datetime,json,operator,signal,socket,sys,threading,time,websocket,math,re
 from classes.N2K_send import N2K_send
 from classes.actions import Actions
-from classes.check_vessel_self import checkVesselSelf
 from classes.conf import Conf
 from classes.language import Language
 from classes.paths import Paths
@@ -37,7 +25,6 @@ from classes.paths import Paths
 
 class MySK:
 	def __init__(self):
-		logging.basicConfig()
 		self.list_SK = []
 		self.static_list = [[]]
 		self.sortCol = 0
@@ -78,7 +65,6 @@ class MySK:
 			label = js_up['source']['label']
 			src = label
 			if 'type' in js_up['source']: 
-				src +='.'+js_up['source']['type']
 				if js_up['source']['type'] == 'NMEA0183':
 					if 'talker' in js_up['source']: src +='.'+js_up['source']['talker']
 					if 'sentence' in js_up['source']: src +='.'+js_up['source']['sentence']
@@ -105,7 +91,6 @@ class MySK:
 				elif 'source' in value:
 					src2 = label
 					if 'type' in value['source']: 
-						src2 +='.'+value['source']['type']
 						if value['source']['type'] == 'NMEA0183':
 							if 'talker' in value['source']: src2 +='.'+value['source']['talker']
 							if 'sentence' in value['source']: src2 +='.'+value['source']['sentence']
@@ -555,8 +540,6 @@ class MySK_to_Action_Calc:
 		self.calcWindTrueGround = self.SK.conf.get('CALCULATE', 'tw_sog')=='1'
 		if self.calcWindTrueWater | self.calcWindTrueGround:
 			self.read_Calc()
-			vessel_self=checkVesselSelf()
-			self.uuid=vessel_self.uuid
 			self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 	def read_Action(self):
@@ -577,6 +560,14 @@ class MySK_to_Action_Calc:
 					if iii[3] == 4: iii[2] = ((iii[2] * 24) * 60) * 60
 					if iii[3] != 0: iii.append(time.time())  # 4 last run
 					else: iii.append('')
+					var_list=re.findall(r'\<(.*?)\>',iii[1])
+					for iiii in var_list:
+						exist = False
+						for iiiii in self.SKc:
+							if iiiii[0] == iiii:
+								exist = True
+								break
+						if not exist: self.SKc.append([iiii, ['', '', '', '', '', '', '', '']])
 				self.triggers.append(ii)
 				if ii[1] == -1: pass
 				else:
@@ -584,7 +575,7 @@ class MySK_to_Action_Calc:
 					magnitude = splitlist.pop()
 					ii.append(magnitude)  # 6 magnitude
 					SKkey2 = '.'.join(splitlist)
-					self.SKc.append([SKkey2, [0, 0, 0, 0, 0, 0, 0, 0]])
+					self.SKc.append([SKkey2, ['', '', '', '', '', '', '', '']])
 					ii[1] = self.SKc[-1]
 
 	def setlist(self, listx):
@@ -607,7 +598,7 @@ class MySK_to_Action_Calc:
 			for i in item[4]:
 				if item[5] == False:
 					try:
-						self.actions.run_action(i[0], i[1])
+						self.actions.run_action(i[0], self.getSKValues(i[1]))
 						i[4] = now
 					except Exception, e: print str(e)
 				else:
@@ -615,11 +606,20 @@ class MySK_to_Action_Calc:
 					else:
 						if now - i[4] > i[2]:
 							try:
-								self.actions.run_action(i[0], i[1])
+								self.actions.run_action(i[0], self.getSKValues(i[1]))
 								i[4] = now
 							except Exception, e: print str(e)			
 			item[5] = True
 		else: item[5] = False
+
+	def getSKValues(self, data):
+		var_list=re.findall(r'\<(.*?)\>',data)
+		for i in var_list:
+			for ii in self.SKc:
+				if i==ii[0]: 
+					data=data.replace('<'+i+'>', str(ii[1][2]))
+					break
+		return data
 
 	def Action_Calc_cycle(self, tick2a):
 		if tick2a > self.cycle10:
@@ -679,31 +679,35 @@ class MySK_to_Action_Calc:
 					if not error:
 						try:
 							if type(data_value) is float:
+								try:
+									trigger_value_float = float(trigger_value)
+								except Exception, e: pass
+								else:
+									# equal (number)
+									if operator_ == 2:
+										self.Action_set(item, trigger_value_float == data_value)
+									# less than
+									elif operator_ == 3:
+										self.Action_set(item, trigger_value_float < data_value)
+									# less than or equal to
+									elif operator_ == 4:
+										self.Action_set(item, trigger_value_float <= data_value)
+									# greater than
+									elif operator_ == 5:
+										self.Action_set(item, trigger_value_float > data_value)
+									# greater than or equal to
+									elif operator_ == 6:
+										self.Action_set(item, trigger_value_float >= data_value)
+								# contain (number)
+								if operator_ == 7:
+									self.Action_set(item, str(data_value) in str(trigger_value))
 								# not present for
-								if operator_ == 0:
+								elif operator_ == 0:
 									if trigger_value == 0: self.Action_set(item, True)
 									else: self.Action_set(item, now - trigger_value > data_value)
 								# present in the last
 								elif operator_ == 1:
 									self.Action_set(item, now - trigger_value < data_value)
-								# equal (number)
-								elif operator_ == 2:
-									self.Action_set(item, float(trigger_value) == data_value)
-								# less than
-								elif operator_ == 3:
-									self.Action_set(item, float(trigger_value) < data_value)
-								# less than or equal to
-								elif operator_ == 4:
-									self.Action_set(item, float(trigger_value) <= data_value)
-								# greater than
-								elif operator_ == 5:
-									self.Action_set(item, float(trigger_value) > data_value)
-								# greater than or equal to
-								elif operator_ == 6:
-									self.Action_set(item, float(trigger_value) >= data_value)
-								# contain (number)
-								if operator_ == 7:
-									self.Action_set(item, str(data_value) in str(trigger_value))
 							else:
 								# equal (string)
 								if operator_ == 2:
@@ -763,7 +767,7 @@ class MySK_to_Action_Calc:
 					Erg += '{"path": "environment.wind.angleTrueGround","value":'+str(0.017453293*beta3)+'},'
 					Erg += '{"path": "environment.wind.speedOverGround","value":'+str(speed)+'},'
 	
-				SignalK='{"updates":[{"$source":"OP.calculations","values":['
+				SignalK='{"updates":[{"$source":"OPcalculations","values":['
 				SignalK+=Erg[0:-1]+']}]}\n'		
 				self.sock.sendto(SignalK, ('127.0.0.1', 55557))	
 

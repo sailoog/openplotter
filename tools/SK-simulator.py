@@ -150,14 +150,14 @@ class MyFrame(wx.Frame):
 			
 	# thread
 	def timer_act(self, event):
-		SignalK = '{"updates": [{"$source":"OP.simulation","values":[ '
+		SignalK = '{"updates": [{"$source":"OPsimulation","values":[ '
 		Erg=''
 		for i in self.Slider_list:
 			if i[7]:
 				Erg += '{"path": "'+i[1]+'","value":'+str(self.Slider_v[i[0]].GetValue()*i[5]+i[6])+'},'
 		if Erg!='':
 			SignalK +=Erg[0:-1]+']}]}\n'
-			self.sock.sendto(SignalK, ('127.0.0.1', 55561))
+			self.sock.sendto(SignalK, ('127.0.0.1', 55557))
 	# end thread
 
 	def OnClose(self, event):

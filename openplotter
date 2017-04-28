@@ -1993,7 +1993,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.apiSecret.Enable()
 			self.accessToken.Enable()
 			self.accessTokenSecret.Enable()
-		self.restart_SK(0)
 
 	def on_gmail_enable(self, e):
 		if not self.Gmail_account.GetValue() or not self.Gmail_password.GetValue() or not self.Recipient.GetValue():
@@ -2015,7 +2014,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.Gmail_account.Enable()
 			self.Gmail_password.Enable()
 			self.Recipient.Enable()
-		self.restart_SK(0)
 
 	####################### Actions
 	def page_action(self):

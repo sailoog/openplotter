@@ -1,3 +1,13 @@
+v0.11.3
+* New interface for actions. Parsing signal k values on actions data.
+* Fix Twwitter and Gmail actions
+* Fix SMS actions
+* Fix sounds actions
+* Fix messages actions
+* Fix wait, reset, shutdown, startup stop, startup restart actions
+* Rename signal k settings labels
+* optimize signal k restart
+
 v0.11.2
 * Fix 1W
 * Fix NMEA 0183 generator

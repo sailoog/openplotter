@@ -68,7 +68,7 @@ else:
 		else: io='output'
 		if current_state: current_state='1'
 		else: current_state='0'
-		SignalK='{"updates":[{"$source":"GPIO.'+io+'.'+str(channel)+'","values":[{"path":"sensors.'+name+'","value":'+current_state+'}]}]}\n'
+		SignalK='{"updates":[{"$source":"OPnotifications.GPIO.'+io+'.'+str(channel)+'","values":[{"path":"sensors.'+name+'","value":'+current_state+'}]}]}\n'
 		sock.sendto(SignalK, ('127.0.0.1', 55558))
 	  
 	conf=Conf(Paths())
@@ -226,7 +226,7 @@ else:
 				Erg += '{"path": "navigation.attitude.roll","value":'+str(0.017453293*MyVar.heel)+'},'
 			if pitch_sk:
 				Erg += '{"path": "navigation.attitude.pitch","value":'+str(0.017453293*MyVar.pitch)+'},'
-			SignalK='{"updates":[{"$source":"I2C.'+imu.IMUName()+'","values":['
+			SignalK='{"updates":[{"$source":"OPsensors.I2C.'+imu.IMUName()+'","values":['
 			SignalK+=Erg[0:-1]+']}]}\n'		
 			sock.sendto(SignalK, ('127.0.0.1', 55557))	
 
@@ -251,7 +251,7 @@ else:
 			if p_temp_sk:
 				Erg += '{"path": "'+p_temp_skt+'","value":'+str(round(MyVar.temperature_p,2)+273.15)+'},'
 			
-			SignalK='{"updates":[{"$source":"I2C.'+pressure_val.pressureName()+'","values":['
+			SignalK='{"updates":[{"$source":"OPsensors.I2C.'+pressure_val.pressureName()+'","values":['
 			SignalK+=Erg[0:-1]+']}]}\n'	
 			sock.sendto(SignalK, ('127.0.0.1', 55557))
 			
@@ -275,7 +275,7 @@ else:
 			if h_temp_sk:
 				Erg += '{"path": "'+h_temp_skt+'","value":'+str(round(MyVar.temperature_h,2)+273.15)+'},'
 					
-			SignalK='{"updates":[{"$source":"I2C.'+humidity_val.humidityName()+'","values":['
+			SignalK='{"updates":[{"$source":"OPsensors.I2C.'+humidity_val.humidityName()+'","values":['
 			SignalK+=Erg[0:-1]+']}]}\n'	
 			sock.sendto(SignalK, ('127.0.0.1', 55557))
 
@@ -288,7 +288,7 @@ else:
 					XValue=read_adc(i[1])
 					if i[4]==1:
 						XValue = interpolread(i[1],XValue)
-					Erg ='{"updates":[{"$source":"SPI.MCP3008.'+str(i[1])+'",'
+					Erg ='{"updates":[{"$source":"OPsensors.SPI.MCP3008.'+str(i[1])+'",'
 					Erg +='"values":[{"path": "'+i[2]+'","value":'+str(XValue)+'}]}]}\n'
 					SignalK+=Erg
 			sock.sendto(SignalK, ('127.0.0.1', 55557))

@@ -18,7 +18,7 @@ while 1:
 	tt = time.time()
 	Value = tt - math.trunc(tt / 60) * 60
 
-	SignalK = '{"updates": [{"$source":"serial.BAT.ABC","values":[{"path": "electrical.batteries.main.voltage","value":'+str(Value)+'}]}]}\n'
+	SignalK = '{"updates": [{"$source":"OPserial.BAT.ABC","values":[{"path": "electrical.batteries.main.voltage","value":'+str(Value)+'}]}]}\n'
 	#print SignalK
 	sock.sendto(SignalK, ('localhost', 55559))
 	time.sleep(1.000)
