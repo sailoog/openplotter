@@ -336,9 +336,7 @@ class MyFrame(wx.Frame):
 		elif 'source' in js_up:
 			label = js_up['source']['label']
 			src = label
-			if 'type' in js_up['source']: 
-				src +='.'+js_up['source']['type']
-				
+			if 'type' in js_up['source']: 			
 				if js_up['source']['type'] == 'NMEA0183':
 					if 'talker' in js_up['source']: src +='.'+js_up['source']['talker']
 					if 'sentence' in js_up['source']: src +='.'+js_up['source']['sentence']
@@ -365,7 +363,6 @@ class MyFrame(wx.Frame):
 				elif 'source' in value:
 					src2 = label
 					if 'type' in value['source']: 
-						src2 +='.'+value['source']['type']
 						if value['source']['type'] == 'NMEA0183':
 							if 'talker' in value['source']: src2 +='.'+value['source']['talker']
 							if 'sentence' in value['source']: src2 +='.'+value['source']['sentence']

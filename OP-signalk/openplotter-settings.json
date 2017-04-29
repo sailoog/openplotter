@@ -25,7 +25,7 @@
           ]
         }
       ],
-      "id": "kplexOutput"
+      "id": "OPkplex"
     },
     {
       "pipeElements": [
@@ -39,7 +39,7 @@
           "type": "providers/from_json"
         }
       ],
-      "id": "OP_sensors"
+      "id": "OPsensors"
     },
     {
       "pipeElements": [
@@ -53,7 +53,7 @@
           "type": "providers/from_json"
         }
       ],
-      "id": "notifications"
+      "id": "OPnotifications"
     },
     {
       "pipeElements": [
@@ -67,7 +67,7 @@
           "type": "providers/from_json"
         }
       ],
-      "id": "serial"
+      "id": "OPserial"
     },
     {
       "pipeElements": [
@@ -81,7 +81,7 @@
           "type": "providers/from_json"
         }
       ],
-      "id": "wifi"
+      "id": "OPwifi"
     }
   ],
   "interfaces": {

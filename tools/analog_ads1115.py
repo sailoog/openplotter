@@ -78,7 +78,7 @@ else:
 					list_signalk1.append(str(a_value[i]))			
 
 			if list_signalk1:
-				SignalK = '{"updates": [{"$source": "I2C.ADS1115","values":[ '
+				SignalK = '{"updates": [{"$source": "OPsensors.I2C.ADS1115","values":[ '
 				Erg=''
 				for i in range(0,len(list_signalk1)):
 					Erg += '{"path": "'+list_signalk_path1[i]+'","value":'+list_signalk1[i]+'},'

@@ -26,13 +26,11 @@ class checkVesselSelf:
 	def __init__(self):
 		paths = Paths()
 		home = paths.home
-		file = paths.file
 		currentpath = paths.currentpath
 		if not self.util_process_exist('signalk-server'):
 			print 'Signal K starting'
-			if file != 'SK-base_d.py': subprocess.call(['pkill', '-f', 'SK-base_d.py'])
-			if file != 'N2K-server_d.py': subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
-			time.sleep(2)
+			subprocess.call(['pkill', '-f', 'SK-base_d.py'])
+			time.sleep(1)
 			subprocess.Popen(['bin/signalk-server','-s','../openplotter/OP-signalk/openplotter-settings.json'],cwd=home + '/.config/signalk-server-node')							 
 			starttime = time.time()
 			error = True
@@ -43,14 +41,8 @@ class checkVesselSelf:
 					response = requests.get('http://localhost:3000/signalk/v1/api/vessels/self')
 				except:
 					error = True
-
-			if file != 'SK-base_d.py': 
-				subprocess.Popen(['python', currentpath + '/SK-base_d.py'])
-				time.sleep(1)							
-			if file != 'N2K-server_d.py': 
-				subprocess.Popen(['python', currentpath + '/N2K-server_d.py'])
-				time.sleep(1)		
-
+			subprocess.Popen(['python', currentpath + '/SK-base_d.py'])
+			time.sleep(1)									
 		try:
 			with open(home + '/.config/openplotter/OP-signalk/openplotter-settings.json') as data_file:
 				data = json.load(data_file)
@@ -59,9 +51,6 @@ class checkVesselSelf:
 			print "Error: Can't open file " + home + "/.config/openplotter/OP-signalk/openplotter-settings.json"
 
 		raw_uuid = data['vessel']['uuid']
-		#response = requests.get('http://localhost:3000/signalk/v1/api/vessels/self')
-		#data = response.json()
-		#self.mmsi = data['mmsi']
 		self.mmsi = raw_uuid.split(':')[-1]
 		self.uuid = 'urn:mrn:imo:mmsi:'+self.mmsi
 

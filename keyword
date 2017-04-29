@@ -23,7 +23,7 @@ def sendSK(keyword,source):
 		keyword = keyword.replace('"', "'")
 		source = source.replace('"', "'")
 		path='notifications.keyword'
-		SignalK='{"updates":[{"$source":"keyword.'+source+'","values":[{"path":"'+path+'","value":"'+keyword+'"}]}]}\n'
+		SignalK='{"updates":[{"$source":"OPnotifications.keyword.'+source+'","values":[{"path":"'+path+'","value":"'+keyword+'"}]}]}\n'
 		sock.sendto(SignalK, ('127.0.0.1', 55558))
 	except Exception,e: print str(e)
 	
