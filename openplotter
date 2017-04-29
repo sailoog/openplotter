@@ -925,30 +925,40 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.wifi_enable.SetValue(False)
 			self.conf.set('WIFI', 'enable', '0')
 
+	def on_show_ip_info_txt(self,port,ips,ip_hostname):
+		out=''
+		if port != '':
+			port=':'+port
+		for ip in ips:
+			if ip[0:7]=='169.254':
+				if not (ip_hostname + '.local'+port in out):
+					out += ip_hostname + '.local'+port+' (169.254...)\n'
+			else:
+				out += ip + port+'\n'
+		return out		
+			
 	def on_show_ip_info(self, e):
+		ip_hostname = subprocess.check_output(['hostname'])[:-1]
 		ip_info = subprocess.check_output(['hostname', '-I'])
 		out = _(' Multiplexed NMEA 0183:\n')
-		ips = ip_info.split()
-		for ip in ips:
-			out += ip + ':55556\n'
+		ips = ip_info.split()		
+		out += self.on_show_ip_info_txt('55556',ips,ip_hostname)
 		out += _('\n VNC remote desktop:\n')
-		for ip in ips:
-			out += ip + ':5900\n'
+		out += self.on_show_ip_info_txt('5900',ips,ip_hostname)
 		out += _('\n RDP remote desktop:\n')
-		for ip in ips:
-			out += ip + '\n'
+		out += self.on_show_ip_info_txt('',ips,ip_hostname)
+		out += _('\n node-red:\n')
+		out += self.on_show_ip_info_txt('1880',ips,ip_hostname)
 		out += _('\n MQTT local broker:\n')
-		for ip in ips:
-			out += ip + ':1883\n'
+		out += self.on_show_ip_info_txt('1883',ips,ip_hostname)
 		out += _('\n Signal K panel:\n')
-		for ip in ips:
-			out += ip + ':3000/instrumentpanel\n'
+		out += self.on_show_ip_info_txt('3000/instrumentpanel',ips,ip_hostname)
 		out += _('\n Signal K gauge:\n')
-		for ip in ips:
-			out += ip + ':3000/sailgauge\n'
+		out += self.on_show_ip_info_txt('3000/sailgauge',ips,ip_hostname)
+		out += _('\n kplex plotter out NMEA 0183:\n')
+		out += self.on_show_ip_info_txt('10109',ips,ip_hostname)
 		out += _('\n Signal K NMEA 0183:\n')
-		for ip in ips:
-			out += ip + ':10111\n'
+		out += self.on_show_ip_info_txt('10111',ips,ip_hostname)
 		self.ip_info.SetValue(out)
 
 	def on_check_net(self, e):
