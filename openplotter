@@ -733,6 +733,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		wx.StaticBox(self.p_wifi, size=(370, 315), pos=(10, 10))
 
 		self.wifi_enable = wx.CheckBox(self.p_wifi, label=_('Enable access point'), pos=(20, 25))
+		self.wifi_enable.Bind(wx.EVT_CHECKBOX, self.onwifi_enable)
 
 		self.bridge_enable = wx.CheckBox(self.p_wifi, label=_('Enable bridge to eth0'), pos=(180, 25))
 
@@ -803,7 +804,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.wifi_button_default.Bind(wx.EVT_BUTTON, self.on_wifi_default)
 
 		self.wifi_button_apply = wx.Button(self.p_wifi, label=_('Apply'), pos=(275, 280))
-		self.wifi_button_apply.Bind(wx.EVT_BUTTON, self.onwifi_enable)
+		self.wifi_button_apply.Bind(wx.EVT_BUTTON, self.onwifi_apply)
 
 		wx.StaticBox(self.p_wifi, label=_(' Addresses '), size=(290, 315), pos=(385, 10))
 		self.ip_info = wx.TextCtrl(self.p_wifi, -1, style=wx.TE_MULTILINE | wx.TE_READONLY, size=(270, 245),
@@ -843,6 +844,50 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.on_show_ip_info('')
 
 	def onwifi_enable(self, e):
+		if self.wifi_enable.GetValue():
+			self.wifi_active(True)
+		else:
+			self.wifi_active(False)
+	
+	def wifi_active(self, status):
+		if status:
+			self.bridge_enable.Enable()
+			self.wlan_label.Enable()
+			self.wlan.Enable()
+			self.share_label.Enable()
+			self.share.Enable()
+			self.wifi_settings_label.Enable()
+			self.ssid.Enable()
+			self.ssid_label.Enable()
+			self.passw.Enable()
+			self.passw_label.Enable()
+			self.wifi_channel.Enable()
+			self.wifi_channel_label.Enable()
+			self.wifi_mode.Enable()
+			self.wifi_mode_label.Enable()
+			self.wifi_wpa.Enable()
+			self.wifi_wpa_label.Enable()
+			self.wifi_button_default.Enable()		
+		else:
+			self.bridge_enable.Disable()
+			self.wlan_label.Disable()
+			self.wlan.Disable()
+			self.share_label.Disable()
+			self.share.Disable()
+			self.wifi_settings_label.Disable()
+			self.ssid.Disable()
+			self.ssid_label.Disable()
+			self.passw.Disable()
+			self.passw_label.Disable()
+			self.wifi_channel.Disable()
+			self.wifi_channel_label.Disable()
+			self.wifi_mode.Disable()
+			self.wifi_mode_label.Disable()
+			self.wifi_wpa.Disable()
+			self.wifi_wpa_label.Disable()
+			self.wifi_button_default.Disable()
+		
+	def onwifi_apply(self, e):
 		isChecked = self.wifi_enable.GetValue()
 		wlan = self.wlan.GetValue()
 		ssid = self.ssid.GetValue()
@@ -920,9 +965,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def enable_disable_wifi(self, s):
 		if s == 1:
 			self.wifi_enable.SetValue(True)
+			self.wifi_active(True)
 			self.conf.set('WIFI', 'enable', '1')
 		else:
 			self.wifi_enable.SetValue(False)
+			self.wifi_active(False)
 			self.conf.set('WIFI', 'enable', '0')
 
 	def on_show_ip_info_txt(self,port,ips,ip_hostname):
@@ -942,7 +989,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		ip_info = subprocess.check_output(['hostname', '-I'])
 		out = _(' Multiplexed NMEA 0183:\n')
 		ips = ip_info.split()		
-		out += self.on_show_ip_info_txt('55556',ips,ip_hostname)
+		out += self.on_show_ip_info_txt('10109',ips,ip_hostname)
 		out += _('\n VNC remote desktop:\n')
 		out += self.on_show_ip_info_txt('5900',ips,ip_hostname)
 		out += _('\n RDP remote desktop:\n')
@@ -955,8 +1002,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		out += self.on_show_ip_info_txt('3000/instrumentpanel',ips,ip_hostname)
 		out += _('\n Signal K gauge:\n')
 		out += self.on_show_ip_info_txt('3000/sailgauge',ips,ip_hostname)
-		out += _('\n kplex plotter out NMEA 0183:\n')
-		out += self.on_show_ip_info_txt('10109',ips,ip_hostname)
 		out += _('\n Signal K NMEA 0183:\n')
 		out += self.on_show_ip_info_txt('10111',ips,ip_hostname)
 		self.ip_info.SetValue(out)
