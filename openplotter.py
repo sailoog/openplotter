@@ -248,7 +248,7 @@ class MainFrame(wx.Frame):
 		self.wifi_mode = wx.ComboBox(self.page3, choices=self.wifi_mode_list, style=wx.CB_READONLY, size=(120, 32), pos=(20, 246))
 		self.wifi_mode_label=wx.StaticText(self.page3, label=_('Mode'), pos=(160, 255))
 
-		self.wifi_wpa_list=['WPA','WPA2', _('Both')]
+		self.wifi_wpa_list=['None', 'WPA','WPA2', _('Both')]
 		self.wifi_wpa = wx.ComboBox(self.page3, choices=self.wifi_wpa_list, style=wx.CB_READONLY, size=(120, 32), pos=(20, 285))
 		self.wifi_wpa_label=wx.StaticText(self.page3, label=_('WPA'), pos=(160, 290))
 
@@ -1091,6 +1091,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			else: self.share.SetValue(self.conf.get('WIFI', 'share'))
 			if self.conf.get('WIFI', 'hw_mode')=='b': self.wifi_mode.SetValue('IEEE 802.11b')
 			if self.conf.get('WIFI', 'hw_mode')=='g': self.wifi_mode.SetValue('IEEE 802.11g')
+			if self.conf.get('WIFI', 'wpa')=='0': self.wifi_wpa.SetValue('None')
 			if self.conf.get('WIFI', 'wpa')=='1': self.wifi_wpa.SetValue('WPA')
 			if self.conf.get('WIFI', 'wpa')=='2': self.wifi_wpa.SetValue('WPA2')
 			if self.conf.get('WIFI', 'wpa')=='3': self.wifi_wpa.SetValue(_('Both'))
@@ -1134,6 +1135,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if share==_('none'):share='0'
 		if mode=='IEEE 802.11b':mode='b'
 		if mode=='IEEE 802.11g':mode='g'
+		if wpa=='None':wpa='0'
 		if wpa=='WPA':wpa='1'
 		if wpa=='WPA2':wpa='2'
 		if wpa==_('Both'):wpa='3'
