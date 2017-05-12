@@ -301,10 +301,10 @@ if analog_:
 		
 #init GPIO
 rate_gpio=0.1
+gpio_=False
 try:
 	gpio_list=eval(conf.get('GPIO', 'sensors'))
 except: gpio_list=[]
-gpio_=False
 if gpio_list:
 	gpio_=True
 	GPIO.setmode(GPIO.BCM)

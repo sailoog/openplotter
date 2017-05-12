@@ -1,3 +1,7 @@
+v0.11.5
+* Fix GPIO output actions
+* WIFI AP interface improvement
+
 v0.11.4
 * New interface for I2C
 * Fix I2C
