@@ -1,3 +1,12 @@
+v0.11.5
+* Fix GPIO output actions
+* WIFI AP interface improvement
+
+v0.11.4
+* New interface for I2C
+* Fix I2C
+* Add support for BME280 sensors (press, temp, hum)
+
 v0.11.3
 * New interface for actions. Parsing signal k values on actions data.
 * Fix Twwitter and Gmail actions

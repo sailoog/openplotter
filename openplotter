@@ -33,6 +33,8 @@ from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 from classes.actions import Actions
 from classes.add_DS18B20 import addDS18B20
 from classes.add_MCP import addMCP
+from classes.add_i2c import addI2c
+from classes.edit_i2c import editI2c
 from classes.add_USBinst import addUSBinst
 from classes.add_action import addAction
 from classes.add_gpio import addGPIO
@@ -101,12 +103,12 @@ class MainFrame(wx.Frame):
 		self.nb.AddPage(self.p_sk, _('Signal K'))
 		self.nb.AddPage(self.p_wifi, _('WiFi AP'))
 		self.nb.AddPage(self.p_action, _('Actions'))
-		self.nb.AddPage(self.p_gpio, _('GPIO sensors'))
-		self.nb.AddPage(self.p_i2c, _('I2C sensors'))
-		self.nb.AddPage(self.p_1w, _('1W sensors'))
-		self.nb.AddPage(self.p_spi, _('SPI sensors'))
-		self.nb.AddPage(self.p_account, _('Accounts'))
+		self.nb.AddPage(self.p_gpio, _('GPIO'))
+		self.nb.AddPage(self.p_i2c, _('I2C'))
+		self.nb.AddPage(self.p_1w, _('1W'))
+		self.nb.AddPage(self.p_spi, _('SPI'))
 		self.nb.AddPage(self.p_mqtt, _('MQTT'))
+		self.nb.AddPage(self.p_account, _('Accounts'))
 		self.nb.AddPage(self.p_sms, _('SMS'))
 		self.nb.AddPage(self.p_startup, _('Startup'))
 		sizer = wx.BoxSizer()
@@ -1126,7 +1128,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.list_kplex.InsertColumn(8, _('Filtering'), width=80)
 		self.list_kplex.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_kplex)
 
-		diagnostic = wx.Button(self.p_kplex, label=_('diagnostic'))
+		diagnostic = wx.Button(self.p_kplex, label=_('Diagnostic'))
 		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_kplex)
 
 		add = wx.Button(self.p_kplex, label=_('add'))
@@ -1162,9 +1164,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		vbox = wx.BoxSizer(wx.VERTICAL)
 		vbox.Add(title, 0, wx.ALL | wx.EXPAND, 5)
 		vbox.Add(hlistbox, 1, wx.ALL | wx.EXPAND, 0)
-		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 0)
+		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 5)
 		vbox.AddSpacer(5)
-		vbox.Add(hboxb, 0, wx.ALL | wx.EXPAND, 0)
+		vbox.Add(hboxb, 0, wx.ALL | wx.EXPAND, 5)
 
 		self.p_kplex.SetSizer(vbox)
 
@@ -1461,250 +1463,307 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 						###################################### I2C sensors
 
 	def page_i2c(self):
-		z0 = 20
-		z1 = 45
-		z2 = 75
-		z3 = 105
-		z4 = 145
-		z5 = 175
-		z6 = 215
-		z7 = 245
-		z8 = 290
-		s1 = 20
-		s2 = 130
-		s3 = 560
-		s4 = 300
-		s5 = 500
-		s6 = 220
+		self.i2c_sensors_def = []
+		self.i2c_sensors_def.append(['InvenSense MPU-9150','rtimulib.imu.2.',[_('heading'),_('heel'),_('pitch')]])
+		self.i2c_sensors_def.append(['STM L3GD20H + LSM303D','rtimulib.imu.3.',[_('heading'),_('heel'),_('pitch')]])
+		self.i2c_sensors_def.append(['STM L3GD20 + LSM303DLHC','rtimulib.imu.4.',[_('heading'),_('heel'),_('pitch')]])
+		self.i2c_sensors_def.append(['STM LSM9DS0','rtimulib.imu.5.',[_('heading'),_('heel'),_('pitch')]])
+		self.i2c_sensors_def.append(['STM LSM9DS1','rtimulib.imu.6.',[_('heading'),_('heel'),_('pitch')]])
+		self.i2c_sensors_def.append(['InvenSense MPU-9250','rtimulib.imu.7.',[_('heading'),_('heel'),_('pitch')]])
+		self.i2c_sensors_def.append(['STM L3GD20H + LSM303DLHC','rtimulib.imu.8.',[_('heading'),_('heel'),_('pitch')]])
+		self.i2c_sensors_def.append(['Bosch BMX055','rtimulib.imu.9.',[_('heading'),_('heel'),_('pitch')]])
+		self.i2c_sensors_def.append(['Bosch BNX055','rtimulib.imu.10.',[_('heading'),_('heel'),_('pitch')]])
+		self.i2c_sensors_def.append(['BMP180','rtimulib.press.2.',[_('pressure'),_('temperature')]])
+		self.i2c_sensors_def.append(['LPS25H','rtimulib.press.3.',[_('pressure'),_('temperature')]])
+		self.i2c_sensors_def.append(['MS5611','rtimulib.press.4.',[_('pressure'),_('temperature')]])
+		self.i2c_sensors_def.append(['MS5637','rtimulib.press.5.',[_('pressure'),_('temperature')]])
+		self.i2c_sensors_def.append(['HTS221','rtimulib.hum.2.',[_('humidity'),_('temperature')]])
+		self.i2c_sensors_def.append(['HTU21D','rtimulib.hum.3.',[_('humidity'),_('temperature')]])
+		self.i2c_sensors_def.append(['BME280','0x76',[_('pressure'),_('temperature'),_('humidity')]])
 
-		self.list_sk_path_temp = ['environment.inside.temperature', 'environment.outside.temperature']
-		self.list_sk_path_hum = ['environment.inside.humidity', 'environment.outside.humidity']
+		title = wx.StaticText(self.p_i2c, label=_(' Sensors '))
 
-		z = z0
-		wx.StaticBox(self.p_i2c, label=_(' Settings '), size=(675, 325), pos=(5, 5))
-		wx.StaticText(self.p_i2c, label=_('Sensors'), pos=(s2, z))
-		wx.StaticText(self.p_i2c, label=_('Signal K'), pos=(s4, z))
-		wx.StaticText(self.p_i2c, label=_('Offset'), pos=(s5, z))
-		wx.StaticText(self.p_i2c, label=_('Rate (sec)'), pos=(s6, z))
-		self.rate_list = ['0.1', '0.25', '0.5', '0.75', '1', '5', '30', '60', '300']
-		z = z1
-		self.heading_label = wx.StaticText(self.p_i2c, label=_('Heading'), pos=(s1, z))
-		self.heading_sensor = wx.StaticText(self.p_i2c, pos=(s2, z))
-		self.button_calibrate_imu = wx.Button(self.p_i2c, label=_('Calibrate'), pos=(s3, z))
-		self.button_calibrate_imu.Bind(wx.EVT_BUTTON, self.on_i2c_calibrate_imu)
-		wx.StaticText(self.p_i2c, label=_('navigation.headingMagnetic'), pos=(s4, z))
-		self.heading_offset = wx.TextCtrl(self.p_i2c, size=(45, 20), pos=(s5, z))
+		self.list_i2c = wx.ListCtrl(self.p_i2c, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
+		self.list_i2c.InsertColumn(0, ' ', width=15)
+		self.list_i2c.InsertColumn(1, _('Name'), width=150)
+		self.list_i2c.InsertColumn(2, _('Address'), width=55)
+		self.list_i2c.InsertColumn(3, _('Magnitude'), width=90)
+		self.list_i2c.InsertColumn(4, _('Signal K key'), width=190)
+		self.list_i2c.InsertColumn(5, _('Rate'), width=40)
+		self.list_i2c.InsertColumn(6, _('Offset'), width=50)
+		self.list_i2c.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_i2c)
 
-		z = z2
-		self.heel_label = wx.StaticText(self.p_i2c, label=_('Heel'), pos=(s1, z))
-		self.heel_sensor = wx.StaticText(self.p_i2c, pos=(s2, z))
-		wx.StaticText(self.p_i2c, label=_('navigation.attitude.roll'), pos=(s4, z))
-		self.heel_offset = wx.TextCtrl(self.p_i2c, size=(45, 20), pos=(s5, z))
-		self.rate_imu = wx.ComboBox(self.p_i2c, choices=self.rate_list, style=wx.CB_READONLY, size=(60, 25),
-									pos=(s6, z - 5))
-		z = z3
-		self.pitch_label = wx.StaticText(self.p_i2c, label=_('Pitch'), pos=(s1, z))
-		self.pitch_sensor = wx.StaticText(self.p_i2c, pos=(s2, z))
-		button_reset_imu = wx.Button(self.p_i2c, label=_('Reset'), pos=(s3, z - 20))
-		button_reset_imu.Bind(wx.EVT_BUTTON, self.on_reset_imu)
-		wx.StaticText(self.p_i2c, label=_('navigation.attitude.pitch'), pos=(s4, z))
-		self.pitch_offset = wx.TextCtrl(self.p_i2c, size=(45, 20), pos=(s5, z))
-		z = z4
-		self.pressure_label = wx.StaticText(self.p_i2c, label=_('Pressure'), pos=(s1, z))
-		self.pressure_sensor = wx.StaticText(self.p_i2c, pos=(s2, z))
-		button_reset_pressure = wx.Button(self.p_i2c, label=_('Reset'), pos=(s3, z + 5))
-		button_reset_pressure.Bind(wx.EVT_BUTTON, self.on_reset_press)
-		wx.StaticText(self.p_i2c, label=_('environment.outside.pressure'), pos=(s4, z))
-		self.pressure_offset = wx.TextCtrl(self.p_i2c, size=(45, 20), pos=(s5, z))
-		self.rate_press = wx.ComboBox(self.p_i2c, choices=self.rate_list, style=wx.CB_READONLY, size=(60, 25),
-									  pos=(s6, z + 10))
-		z = z5
-		self.p_temp_label = wx.StaticText(self.p_i2c, label=_('Temperature'), pos=(s1, z))
-		self.p_temp_sensor = wx.StaticText(self.p_i2c, pos=(s2, z))
-		self.p_temp_skt = wx.ComboBox(self.p_i2c, choices=self.list_sk_path_temp, style=wx.CB_READONLY, size=(180, 25),
-									  pos=(s4, z - 3))
-		self.p_temp_offset = wx.TextCtrl(self.p_i2c, size=(45, 20), pos=(s5, z))
-		z = z6
-		self.humidity_label = wx.StaticText(self.p_i2c, label=_('Humidity'), pos=(s1, z))
-		self.humidity_sensor = wx.StaticText(self.p_i2c, pos=(s2, z))
-		button_reset_humidity = wx.Button(self.p_i2c, label=_('Reset'), pos=(s3, z + 5))
-		button_reset_humidity.Bind(wx.EVT_BUTTON, self.on_reset_hum)
-		self.humidity_skt = wx.ComboBox(self.p_i2c, choices=self.list_sk_path_hum, style=wx.CB_READONLY, size=(180, 25),
-										pos=(s4, z - 3))
-		self.humidity_offset = wx.TextCtrl(self.p_i2c, size=(45, 20), pos=(s5, z))
-		self.rate_hum = wx.ComboBox(self.p_i2c, choices=self.rate_list, style=wx.CB_READONLY, size=(60, 25),
-									pos=(s6, z + 10))
-		z = z7
-		self.h_temp_label = wx.StaticText(self.p_i2c, label=_('Temperature'), pos=(s1, z))
-		self.h_temp_sensor = wx.StaticText(self.p_i2c, pos=(s2, z))
-		self.h_temp_skt = wx.ComboBox(self.p_i2c, choices=self.list_sk_path_temp, style=wx.CB_READONLY, size=(180, 25),
-									  pos=(s4, z - 3))
-		self.h_temp_offset = wx.TextCtrl(self.p_i2c, size=(45, 20), pos=(s5, z))
-		z = z8
-		diagnostic = wx.Button(self.p_i2c, label=_('SK Diagnostic'), pos=(s1, z))
+		add = wx.Button(self.p_i2c, label=_('add'))
+		add.Bind(wx.EVT_BUTTON, self.on_add_i2c)
+
+		delete = wx.Button(self.p_i2c, label=_('delete'))
+		delete.Bind(wx.EVT_BUTTON, self.on_delete_i2c)
+
+		diagnostic = wx.Button(self.p_i2c, label=_('SK Diagnostic'))
 		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
 
-		cancel = wx.Button(self.p_i2c, label=_('cancel'), pos=(480, z))
-		cancel.Bind(wx.EVT_BUTTON, self.on_i2c_cancel)
-		apply = wx.Button(self.p_i2c, label=_('apply'), pos=(580, z))
-		apply.Bind(wx.EVT_BUTTON, self.on_i2c_apply)
+		reset_i2c = wx.Button(self.p_i2c, label=_('Restart'))
+		reset_i2c.Bind(wx.EVT_BUTTON, self.reset_sensors)
+
+		self.recalibrate = wx.Button(self.p_i2c, label=_('Recalibrate IMU'))
+		self.recalibrate.Bind(wx.EVT_BUTTON, self.on_recalibrate)
+
+		self.calibration_graph = wx.Button(self.p_i2c, label=_('Graphical IMU calibration'))
+		self.calibration_graph.Bind(wx.EVT_BUTTON, self.on_calibration_graph)
+
+		self.calibration_text = wx.Button(self.p_i2c, label=_('Text IMU calibration'))
+		self.calibration_text.Bind(wx.EVT_BUTTON, self.on_calibration_text)
+
+		hlistbox_but = wx.BoxSizer(wx.VERTICAL)
+		hlistbox_but.Add(add, 0, wx.ALL, 5)
+		hlistbox_but.Add(delete, 0, wx.ALL, 5)
+
+		hlistbox = wx.BoxSizer(wx.HORIZONTAL)
+		hlistbox.Add(self.list_i2c, 1, wx.ALL | wx.EXPAND, 5)
+		hlistbox.Add(hlistbox_but, 0, wx.RIGHT | wx.LEFT, 0)
+
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(diagnostic, 0, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add(reset_i2c, 0, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add((0, 0), 1, wx.RIGHT | wx.EXPAND, 5)
+		hbox.Add(self.recalibrate, 0, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add(self.calibration_graph, 0, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add(self.calibration_text, 0, wx.RIGHT | wx.LEFT, 5)
+
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		vbox.Add(title, 0, wx.ALL | wx.EXPAND, 5)
+		vbox.Add(hlistbox, 1, wx.ALL | wx.EXPAND, 0)
+		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 5)
+
+		self.p_i2c.SetSizer(vbox)
+
+	def edit_i2c(self, e):
+		selected = self.list_i2c.GetFirstSelected()
+		name = self.list_i2c.GetItem(selected, 1)
+		name = name.GetText()
+		index = self.list_i2c.GetItem(selected, 0)
+		index = index.GetText()
+		magn = self.list_i2c.GetItem(selected, 3)
+		magn = magn.GetText()
+		sk = self.list_i2c.GetItem(selected, 4)
+		sk = sk.GetText()
+		rate = self.list_i2c.GetItem(selected, 5)
+		rate = rate.GetText()
+		offset = self.list_i2c.GetItem(selected, 6)
+		offset = offset.GetText()
+
+		dlg = editI2c(name,magn,sk,rate,offset)
+		res = dlg.ShowModal()
+		if res == wx.ID_OK:
+			sk = dlg.SKkey.GetValue()
+			rate = dlg.rate.GetValue()
+			offset = dlg.offset.GetValue()
+			if not offset: offset = 0.0
+			c = 0
+			for i in self.i2c_sensors:
+				if i[0] == name:
+					self.i2c_sensors[c][2][int(index)][0] = sk
+					self.i2c_sensors[c][2][int(index)][1] = float(rate)
+					self.i2c_sensors[c][2][int(index)][2] = float(offset)
+				c = c + 1
+			self.apply_changes_i2c()
+		dlg.Destroy()
+
+	def on_add_i2c(self, e):
+		dlg = addI2c(self)
+		res = dlg.ShowModal()
+		if res == wx.ID_OK:
+			name = dlg.sensor_select.GetValue()
+			if not name:
+				self.ShowMessage(_('Failed. You must select a sensor.'))
+				dlg.Destroy()
+				return
+			address = dlg.address.GetValue()
+			if not address:
+				self.ShowMessage(_('Failed. You must provide an address.'))
+				dlg.Destroy()
+				return
+			new_sensor = []
+			for item in self.i2c_sensors_def:
+				if name == item[0]:
+					new_sensor.append(name)
+					if 'rtimulib' in item[1]:
+						new_sensor.append(item[1]+address)
+					else:
+						new_sensor.append(address)
+					new_sensor.append([])	
+					for ii in item[2]:
+						new_sensor[2].append(['', 1.0, 0.0])
+			if new_sensor:
+				if 'rtimulib' in new_sensor[1]:
+					temp_list = new_sensor[1].split('.')
+					try:
+						with open(self.currentpath +'/imu/RTIMULib.ini', "r") as infile:
+							data = ''
+							if temp_list[1] == 'imu':
+								for line in infile:
+									if 'IMUType=' in line:
+										data += 'IMUType='+temp_list[2]+'\n'
+									elif 'I2CSlaveAddress=' in line:
+										data += 'I2CSlaveAddress='+str(int(temp_list[3], 0))+'\n'
+									else:
+										data += line
+							if temp_list[1] == 'press':
+								for line in infile:
+									if 'PressureType=' in line:
+										data += 'PressureType='+temp_list[2]+'\n'
+									elif 'I2CPressureAddress=' in line:
+										data += 'I2CPressureAddress='+str(int(temp_list[3], 0))+'\n'
+									else:
+										data += line
+							if temp_list[1] == 'hum':
+								for line in infile:
+									if 'HumidityType=' in line:
+										data += 'HumidityType='+temp_list[2]+'\n'
+									elif 'I2CHumidityAddress=' in line:
+										data += 'I2CHumidityAddress='+str(int(temp_list[3], 0))+'\n'
+									else:
+										data += line
+						with open(self.currentpath +'/imu/RTIMULib.ini', "w") as outfile:
+							outfile.write(data) 
+					except Exception, e: 
+						print "RTIMU setting failed: "+str(e)
+						dlg.Destroy()
+						return
+				exist = False
+				c = 0
+				for i in self.i2c_sensors:
+					if i[0] == new_sensor[0]: 
+						self.i2c_sensors[c] = new_sensor
+						exist = True
+						break
+					c = c + 1
+				if exist == False and 'rtimulib' in new_sensor[1]:
+					tmp = new_sensor[1].split('.')
+					c = 0
+					for iii in self.i2c_sensors:
+						if 'rtimulib' in iii[1]:
+							tmp2 = iii[1].split('.')
+							if tmp[1] == tmp2[1]:
+								self.i2c_sensors[c] = new_sensor
+								exist = True
+								break
+						c = c + 1
+				if exist == False: self.i2c_sensors.append(new_sensor)
+				self.apply_changes_i2c()
+		dlg.Destroy()
+
+	def apply_changes_i2c(self):
+		self.conf.set('I2C', 'sensors', str(self.i2c_sensors))
+		self.stop_sensors()
+		self.read_i2c()
+		self.start_sensors()
+
+	def on_delete_i2c(self, e):
+		selected = self.list_i2c.GetFirstSelected()
+		if selected == -1:
+			self.ShowStatusBarBLACK(_('Select an item to delete.'))
+			return
+		name = self.list_i2c.GetItem(selected, 1)
+		name = name.GetText()
+		c = 0
+		for i in self.i2c_sensors:
+			if i[0] == name: 
+				del self.i2c_sensors[c]
+				break
+			c = c + 1
+		self.apply_changes_i2c()
 
 	def start_sensors(self):
+		subprocess.call(['pkill', 'RTIMULibDemoGL'])
 		subprocess.Popen(['python', self.currentpath + '/read_sensors_d.py'], cwd=self.currentpath + '/imu')
+		self.ShowStatusBarGREEN(_('Sensors restarted'))
 
 	def stop_sensors(self):
-		subprocess.call(['pkill', 'RTIMULibDemoGL'])
+		self.ShowStatusBarRED(_('Sensors stopped'))
 		subprocess.call(['pkill', '-f', 'read_sensors_d.py'])
+		
+	def reset_sensors(self, e):
+		self.stop_sensors()
+		self.read_i2c()
+		self.read_gpio()
+		self.start_sensors()
 
 	def read_i2c(self):
-		self.imu_sensor = 'none'
-		self.press_sensor = 'none'
-		self.hum_sensor = 'none'
-		self.check_sensors()
-
-		self.rate_imu.SetValue(self.conf.get('I2C', 'rate_imu'))
-		self.rate_press.SetValue(self.conf.get('I2C', 'rate_press'))
-		self.rate_hum.SetValue(self.conf.get('I2C', 'rate_hum'))
-
-		self.p_temp_skt.SetValue(self.conf.get('I2C', 'p_temp_skt'))
-		self.h_temp_skt.SetValue(self.conf.get('I2C', 'h_temp_skt'))
-		self.humidity_skt.SetValue(self.conf.get('I2C', 'hum_skt'))
-
-		self.heading_offset.SetValue(self.conf.get('OFFSET', 'heading'))
-		self.heel_offset.SetValue(self.conf.get('OFFSET', 'heel'))
-		self.pitch_offset.SetValue(self.conf.get('OFFSET', 'pitch'))
-		self.pressure_offset.SetValue(self.conf.get('OFFSET', 'pressure'))
-		self.p_temp_offset.SetValue(self.conf.get('OFFSET', 'temperature_p'))
-		self.humidity_offset.SetValue(self.conf.get('OFFSET', 'humidity'))
-		self.h_temp_offset.SetValue(self.conf.get('OFFSET', 'temperature_h'))
-
-	def check_sensors(self):
-		detected = subprocess.check_output(['python', self.currentpath + '/imu/check_sensors.py'], cwd=self.currentpath + '/imu')
-		l_detected = detected.split('\n')
-		self.imu_sensor = l_detected[0]
-		self.calibrated = l_detected[1]
-		self.press_sensor = l_detected[2]
-		self.hum_sensor = l_detected[3]
-
-		if 'none' in self.imu_sensor:
-			self.heading_label.Disable()
-			self.heel_label.Disable()
-			self.pitch_label.Disable()
-			self.button_calibrate_imu.Disable()
-			self.heading_sensor.SetLabel('')
-			self.heel_sensor.SetLabel('')
-			self.pitch_sensor.SetLabel('')
-			self.conf.set('I2C', 'sk_hdg', '0')
-			self.conf.set('I2C', 'sk_heel', '0')
-			self.conf.set('I2C', 'sk_pitch', '0')
-		else:
-			self.heading_label.Enable()
-			self.heel_label.Enable()
-			self.pitch_label.Enable()
-			if self.calibrated == '1':
-				self.button_calibrate_imu.Disable()
-			else:
-				self.button_calibrate_imu.Enable()
-			self.heading_sensor.SetLabel(self.imu_sensor)
-			self.heel_sensor.SetLabel(self.imu_sensor)
-			self.pitch_sensor.SetLabel(self.imu_sensor)
-			self.conf.set('I2C', 'sk_hdg', '1')
-			self.conf.set('I2C', 'sk_heel', '1')
-			self.conf.set('I2C', 'sk_pitch', '1')
-
-		if 'none' in self.press_sensor:
-			self.pressure_label.Disable()
-			self.p_temp_label.Disable()
-			self.pressure_sensor.SetLabel('')
-			self.p_temp_sensor.SetLabel('')
-			self.conf.set('I2C', 'sk_press', '0')
-			self.conf.set('I2C', 'sk_temp_p', '0')
-		else:
-			self.pressure_label.Enable()
-			self.p_temp_label.Enable()
-			self.pressure_sensor.SetLabel(self.press_sensor)
-			self.p_temp_sensor.SetLabel(self.press_sensor)
-			self.conf.set('I2C', 'sk_press', '1')
-			self.conf.set('I2C', 'sk_temp_p', '1')
-
-		if 'none' in self.hum_sensor:
-			self.humidity_label.Disable()
-			self.h_temp_label.Disable()
-			self.humidity_sensor.SetLabel('')
-			self.h_temp_sensor.SetLabel('')
-			self.conf.set('I2C', 'sk_hum', '0')
-			self.conf.set('I2C', 'sk_temp_h', '0')
-		else:
-			self.humidity_label.Enable()
-			self.h_temp_label.Enable()
-			self.humidity_sensor.SetLabel(self.hum_sensor)
-			self.h_temp_sensor.SetLabel(self.hum_sensor)
-			self.conf.set('I2C', 'sk_hum', '1')
-			self.conf.set('I2C', 'sk_temp_h', '1')
-
-	def on_i2c_apply(self, e):
-		self.conf.set('I2C', 'rate_imu', str(self.rate_imu.GetValue()))
-		self.conf.set('I2C', 'rate_press', str(self.rate_press.GetValue()))
-		self.conf.set('I2C', 'rate_hum', str(self.rate_hum.GetValue()))
-
-		self.conf.set('I2C', 'p_temp_skt', str(self.p_temp_skt.GetValue()))
-		self.conf.set('I2C', 'h_temp_skt', str(self.h_temp_skt.GetValue()))
-		self.conf.set('I2C', 'hum_skt', str(self.humidity_skt.GetValue()))
-
+		rtimulib = subprocess.check_output(['python', self.currentpath + '/imu/check_sensors.py', '0', 'RTIMULib'], cwd=self.currentpath + '/imu')
+		self.i2c_sensors = []
+		self.list_i2c.DeleteAllItems()
+		data = self.conf.get('I2C', 'sensors')
 		try:
-			self.conf.set('OFFSET', 'heading', str(float(self.heading_offset.GetValue())))
-			self.conf.set('OFFSET', 'heel', str(float(self.heel_offset.GetValue())))
-			self.conf.set('OFFSET', 'pitch', str(float(self.pitch_offset.GetValue())))
-			self.conf.set('OFFSET', 'pressure', str(float(self.pressure_offset.GetValue())))
-			self.conf.set('OFFSET', 'temperature_p', str(float(self.p_temp_offset.GetValue())))
-			self.conf.set('OFFSET', 'humidity', str(float(self.humidity_offset.GetValue())))
-			self.conf.set('OFFSET', 'temperature_h', str(float(self.h_temp_offset.GetValue())))
+			self.i2c_sensors = eval(data)
 		except:
-			self.ShowStatusBarRED(_("An offset is not a number"))
-			self.read_i2c()
+			self.i2c_sensors = []
+		imu_exist = False
+		for i in self.i2c_sensors:
+			name = i[0]
+			for ii in self.i2c_sensors_def:
+				if name == ii[0]: 
+					magn_list = ii[2]
+					break
+			address = i[1]
+			if 'rtimulib' in address:
+				tmp = address.split('.')
+				address = tmp[3]
+				if tmp[1] == 'imu': imu_exist = True
+			c = 0
+			for iii in i[2]:
+				self.list_i2c.Append([str(c), name, address, magn_list[c], iii[0], str(iii[1]), str(iii[2])])
+				c = c + 1
+		if imu_exist == False:
+			self.recalibrate.Disable()
+			self.calibration_graph.Disable()
+			self.calibration_text.Disable()
+		else:
+			self.recalibrate.Enable()
+			try:
+				temp_list = eval(rtimulib)
+			except:
+				temp_list = []
+			if temp_list:
+				if temp_list[0][2] == 1:
+					self.calibration_graph.Disable()
+					self.calibration_text.Disable()
+				else:
+					self.calibration_graph.Enable()
+					self.calibration_text.Enable()
 
-		self.restart_SK(0)
+	def on_recalibrate(self, e):
+		self.calibration_graph.Enable()
+		self.calibration_text.Enable()
+		try:
+			with open(self.currentpath +'/imu/RTIMULib.ini', "r") as infile:
+				data = ''
+				for line in infile:
+					if 'CompassCalValid=' in line:
+						data += 'CompassCalValid=false\n'
+					elif 'compassCalEllipsoidValid=' in line:
+						data += 'compassCalEllipsoidValid=false\n'
+					elif 'AccelCalValid=' in line:
+						data += 'AccelCalValid=false\n'
+					else:
+						data += line
+			with open(self.currentpath +'/imu/RTIMULib.ini', "w") as outfile:
+				outfile.write(data)
+			msg = _('IMU calibration data deleted, now you can calibrate it again.')
+			self.ShowMessage(msg)
+		except Exception, e: print "RTIMU recalibration failed: "+str(e)
 
-	def on_i2c_cancel(self, e):
-		self.read_i2c()
-
-	def on_i2c_calibrate_imu(self, e):
+	def on_calibration_graph(self, e):
 		self.stop_sensors()
 		subprocess.Popen('RTIMULibDemoGL', cwd=self.currentpath + '/imu')
-		msg = _('After calibrating, click apply.')
+		msg = _('After calibrating, click Restart.')
 		self.ShowMessage(msg)
 
-	def on_reset_imu(self, e):
-		try:
-			os.remove(self.currentpath + '/imu/RTIMULib.ini')
-		except Exception, e:
-			print str(e)
-		self.button_calibrate_imu.Enable()
-		self.heading_sensor.SetLabel('')
-		self.heel_sensor.SetLabel('')
-		self.pitch_sensor.SetLabel('')
-		self.check_sensors()
-		self.restart_SK(0)
-
-	def on_reset_press(self, e):
-		try:
-			os.remove(self.currentpath + '/imu/RTIMULib2.ini')
-		except Exception, e:
-			print str(e)
-		self.pressure_sensor.SetLabel('')
-		self.p_temp_sensor.SetLabel('')
-		self.check_sensors()
-		self.restart_SK(0)
-
-	def on_reset_hum(self, e):
-		try:
-			os.remove(self.currentpath + '/imu/RTIMULib3.ini')
-		except Exception, e:
-			print str(e)
-		self.humidity_sensor.SetLabel('')
-		self.h_temp_sensor.SetLabel('')
-		self.check_sensors()
-		self.restart_SK(0)
+	def on_calibration_text(self, e):
+		self.stop_sensors()
+		subprocess.Popen(['lxterminal', '-e', 'RTIMULibCal'], cwd=self.currentpath + '/imu')
+		msg = _('After calibrating, click Restart.')
+		self.ShowMessage(msg)
 
 	###################################### SPI
 	def page_spi(self):
@@ -1718,7 +1777,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.list_MCP.InsertColumn(4, _('convert'), width=55)
 		self.list_MCP.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit_MCP)
 
-		restart = wx.Button(self.p_spi, label=_('restart'))
+		diagnostic = wx.Button(self.p_spi, label=_('SK Diagnostic'))
+		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
+
+		restart = wx.Button(self.p_spi, label=_('Restart'))
 		restart.Bind(wx.EVT_BUTTON, self.on_restart_MCP)
 
 		value_setting = wx.Button(self.p_spi, label=_('value setting'))
@@ -1728,13 +1790,15 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		hlistbox.Add(self.list_MCP, 1, wx.ALL | wx.EXPAND, 5)
 
 		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(diagnostic, 0, wx.RIGHT | wx.LEFT, 5)
 		hbox.Add(restart, 0, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add((0, 0), 1, wx.RIGHT | wx.EXPAND, 5)
 		hbox.Add(value_setting, 0, wx.RIGHT | wx.LEFT, 5)
 
 		vbox = wx.BoxSizer(wx.VERTICAL)
 		vbox.Add(title, 0, wx.ALL | wx.EXPAND, 5)
 		vbox.Add(hlistbox, 1, wx.ALL | wx.EXPAND, 0)
-		vbox.Add(hbox, 0, wx.ALL, 0)
+		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 5)
 
 		self.p_spi.SetSizer(vbox)
 
@@ -1755,7 +1819,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.list_MCP.Append([str(ii[0]), str(ii[1]), SKkey2, ii[3], ii[4]])
 
 	def on_restart_MCP(self, e):
-		self.restart_SK(0)
+		self.stop_sensors()
+		self.start_sensors()
 
 	def on_value_setting(self, e):
 		edit = self.list_MCP.GetFirstSelected()
@@ -1836,14 +1901,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	###################################### GPIO
 
-	def start_gpio(self):
-		subprocess.Popen(['python', self.currentpath + '/read_sensors_d.py'])
-		self.ShowStatusBarGREEN(_('GPIO sensors restarted'))
-
-	def stop_gpio(self):
-		self.ShowStatusBarRED(_('GPIO sensors stopped'))
-		subprocess.call(['pkill', '-f', 'read_sensors_d.py'])
-
 	def page_gpio(self):
 		title = wx.StaticText(self.p_gpio, label=_(' Sensors '))
 
@@ -1865,6 +1922,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		diagnostic = wx.Button(self.p_gpio, label=_('SK Diagnostic'))
 		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
 
+		reset_gpio = wx.Button(self.p_gpio, label=_('Restart'))
+		reset_gpio.Bind(wx.EVT_BUTTON, self.reset_sensors)
+
 		hlistbox_but = wx.BoxSizer(wx.VERTICAL)
 		hlistbox_but.Add(add, 0, wx.ALL, 5)
 		hlistbox_but.Add(delete, 0, wx.ALL, 5)
@@ -1873,10 +1933,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		hlistbox.Add(self.list_gpio, 1, wx.ALL | wx.EXPAND, 5)
 		hlistbox.Add(hlistbox_but, 0, wx.RIGHT | wx.LEFT, 0)
 
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(diagnostic, 0, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add(reset_gpio, 0, wx.RIGHT | wx.LEFT, 5)
+
 		vbox = wx.BoxSizer(wx.VERTICAL)
 		vbox.Add(title, 0, wx.ALL | wx.EXPAND, 5)
 		vbox.Add(hlistbox, 1, wx.ALL | wx.EXPAND, 0)
-		vbox.Add(diagnostic, 0, wx.RIGHT | wx.LEFT, 5)
+		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 5)
 
 		self.p_gpio.SetSizer(vbox)
 
@@ -1969,8 +2033,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def apply_changes_gpio(self):
 		self.conf.set('GPIO', 'sensors', str(self.gpio))
-		self.stop_gpio()
-		self.start_gpio()
+		self.stop_sensors()
+		self.start_sensors()
 		self.read_gpio()
 
 	####################### Accounts
@@ -2139,7 +2203,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		vbox.Add(title, 0, wx.ALL | wx.EXPAND, 5)
 		vbox.Add(hlistbox, 1, wx.ALL | wx.EXPAND, 0)
 		vbox.Add(hlistboxb, 1, wx.ALL | wx.EXPAND, 0)
-		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 0)
+		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 5)
 
 		self.p_action.SetSizer(vbox)
 
@@ -2384,6 +2448,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		diagnostic = wx.Button(self.p_1w, label=_('SK Diagnostic'))
 		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
 
+		reset_1w = wx.Button(self.p_1w, label=_('Restart'))
+		reset_1w.Bind(wx.EVT_BUTTON, self.on_reset_1w)
+
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(diagnostic, 0, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add(reset_1w, 0, wx.RIGHT | wx.LEFT, 5)
+
 		hlistbox_but = wx.BoxSizer(wx.VERTICAL)
 		hlistbox_but.Add(add, 0, wx.ALL, 5)
 		hlistbox_but.Add(delete, 0, wx.ALL, 5)
@@ -2395,7 +2466,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		vbox = wx.BoxSizer(wx.VERTICAL)
 		vbox.Add(title, 0, wx.ALL | wx.EXPAND, 5)
 		vbox.Add(hlistbox, 1, wx.ALL | wx.EXPAND, 0)
-		vbox.Add(diagnostic, 0, wx.RIGHT | wx.LEFT, 5)
+		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 5)
 
 		self.p_1w.SetSizer(vbox)
 
@@ -2406,6 +2477,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def stop_1w(self):
 		self.ShowStatusBarRED(_('1W sensors stopped'))
 		subprocess.call(['pkill', '-f', '1w_d.py'])
+	
+	def on_reset_1w(self, e):
+		self.stop_1w()
+		self.read_DS18B20()
+		self.start_1w()
 
 	def read_DS18B20(self):
 		self.DS18B20 = []
@@ -2510,7 +2586,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		vbox = wx.BoxSizer(wx.VERTICAL)
 		vbox.Add(title, 0, wx.ALL | wx.EXPAND, 5)
 		vbox.Add(hlistbox, 1, wx.ALL | wx.EXPAND, 0)
-		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 0)
+		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 5)
 
 		self.p_usb.SetSizer(vbox)
 
@@ -3053,6 +3129,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		diagnostic = wx.Button(self.p_mqtt, label=_('SK Diagnostic'))
 		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
 
+		reset_mqtt = wx.Button(self.p_mqtt, label=_('Restart'))
+		reset_mqtt.Bind(wx.EVT_BUTTON, self.on_reset_mqtt)
+
 		vboxc1 = wx.BoxSizer(wx.VERTICAL)
 		vboxc1.Add(self.mqtt_broker_t, 0, wx.RIGHT | wx.LEFT, 5)
 		vboxc1.Add(self.mqtt_broker, 0, wx.RIGHT | wx.LEFT, 5)
@@ -3091,15 +3170,17 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		hbox = wx.BoxSizer(wx.HORIZONTAL)
 		hbox.Add(diagnostic, 0, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add(reset_mqtt, 0, wx.RIGHT | wx.LEFT, 5)
 
 		vbox = wx.BoxSizer(wx.VERTICAL)
 		vbox.Add(title, 0, wx.ALL | wx.EXPAND, 5)
 		vbox.Add(hinputbox, 0, wx.ALL | wx.EXPAND, 0)
 		vbox.AddSpacer(5)
 		vbox.Add(hlistbox, 1, wx.ALL | wx.EXPAND, 0)
-		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 0)
+		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 5)
 
 		self.p_mqtt.SetSizer(vbox)
+
 
 	def start_mqtt(self):
 		subprocess.Popen(['python', self.currentpath + '/mqtt_d.py'])
@@ -3108,6 +3189,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def stop_mqtt(self):
 		self.ShowStatusBarRED(_('MQTT stopped'))
 		subprocess.call(['pkill', '-f', 'mqtt_d.py'])
+
+	def on_reset_mqtt(self, e):
+		self.stop_mqtt()
+		self.read_mqtt()
+		self.start_mqtt()
 
 	def read_mqtt(self):
 		broker = self.conf.get('MQTT', 'broker')

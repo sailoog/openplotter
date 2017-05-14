@@ -59,27 +59,23 @@ class Actions:
 		self.options.append([_('close all messages'), 0, 0, 'ACT18'])
 		#self.options.append([_('start all actions'), 0, 0, 'ACT19'])
 		#self.options.append([_('stop all actions'), _('This action will stop all the triggers except the trigger which has an action "start all actions" defined.'),0, 'ACT20'])
-		'''
+		
 		#init GPIO
-		GPIO.setmode(GPIO.BCM)
-		GPIO.setwarnings(False)
+		try:
+			x=self.conf.get('GPIO', 'sensors')
+			if x: self.out_list=eval(x)
+			else: self.out_list=[]
+			if self.out_list:
+				GPIO.setmode(GPIO.BCM)
+				GPIO.setwarnings(False)
+				for i in self.out_list:
+					if i[1]=='out':
+						GPIO.setup(int(i[2]), GPIO.OUT)
+						self.options.append(['GPIO '+i[0]+_(': High'),_('ATTENTION! if you set this GPIO output to "High" and there is not a resistor or a circuit connected to the selected GPIO pin, YOU CAN DAMAGE YOUR BOARD.'),0,'H'+i[2]])
+						self.options.append(['GPIO '+i[0]+_(': Low'),0,0,'L'+i[2]])
+		except Exception,e: print 'ERROR setting GPIO actions: '+str(e)
 
-		x=self.conf.get('GPIO', 'sensors')
-		if x: self.out_list=eval(x)
-		else: self.out_list=[]
-		for i in self.out_list:
-			#try:
-			if i[1]=='out':
-				GPIO.setup(int(i[2]), GPIO.OUT)
-				self.options.append([i[0]+_(': High'),_('ATTENTION! if you set this output to "High" and there is not a resistor or a circuit connected to the selected GPIO pin, YOU CAN DAMAGE YOUR BOARD.'),0,'H'+i[2]])
-				self.options.append([i[0]+_(': Low'),0,0,'L'+i[2]])
-			else:
-				pull_up_down=GPIO.PUD_DOWN
-				if i[3]=='up': pull_up_down=GPIO.PUD_UP
-				GPIO.setup(int(i[2]), GPIO.IN, pull_up_down)
-
-			#except Exception,e: print str(e)
-
+		'''
 		# mqtt
 		x = self.conf.get('MQTT', 'topics')
 		if x:

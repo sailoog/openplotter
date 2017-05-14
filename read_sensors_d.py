@@ -15,302 +15,339 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import socket, time, pynmea2, math, csv, datetime, subprocess, platform, threading
-
-class MyVar:
-	heading_m=0.0
-	heading=0.0
-	heel=0.0
-	pitch=0.0
-	pressure=0.0
-	temperature_p=0.0
-	humidity=0.0
-	temperature_h=0.0
-
+import socket, time, math, datetime, platform, threading
+from classes.paths import Paths
+from classes.conf import Conf
+from classes.bme280 import Bme280
 
 if platform.machine()[0:3]!='arm':
-	print 'this is not a raspberry pi -> no i2c and spi'
+	print 'This is not a Raspberry Pi -> no GPIO, I2C and SPI'
 else:
-	from classes.paths import Paths
-	from classes.conf import Conf
 	import RPi.GPIO as GPIO
 	import spidev,RTIMU
 
-	def interpolread(idx,erg):
-		lin = -999999
-		for index,item in enumerate(adjust_point[idx]):
-			if index==0:
-				if erg <= item[0]:
-					lin = item[1]
-					#print 'under range'
-					return lin
-				save = item
-			else:					
-				if erg <= item[0]:
-					a = (item[1]-save[1])/(item[0]-save[0])
-					b = item[1]-a*item[0]
-					lin = a*erg +b
-					return lin
-				save = item
-				
-		if lin == -999999:
-			#print 'over range'
-			lin = save[1]
-		return lin
+def interpolread(idx,erg):
+	lin = -999999
+	for index,item in enumerate(adjust_point[idx]):
+		if index==0:
+			if erg <= item[0]:
+				lin = item[1]
+				#print 'under range'
+				return lin
+			save = item
+		else:					
+			if erg <= item[0]:
+				a = (item[1]-save[1])/(item[0]-save[0])
+				b = item[1]-a*item[0]
+				lin = a*erg +b
+				return lin
+			save = item
 			
-	def read_adc(channel):
-	  adc = spi.xfer2([1,(8+channel)<<4,0])
-	  data = ((adc[1]&3) << 8) + adc[2]
-	  return data
+	if lin == -999999:
+		#print 'over range'
+		lin = save[1]
+	return lin
+		
+def read_adc(channel):
+	adc = spi.xfer2([1,(8+channel)<<4,0])
+	data = ((adc[1]&3) << 8) + adc[2]
+	return data
 
-	def publish_sk(io,channel,current_state,name):
-		if io=='in':io='input'
-		else: io='output'
-		if current_state: current_state='1'
-		else: current_state='0'
-		SignalK='{"updates":[{"$source":"OPnotifications.GPIO.'+io+'.'+str(channel)+'","values":[{"path":"sensors.'+name+'","value":'+current_state+'}]}]}\n'
-		sock.sendto(SignalK, ('127.0.0.1', 55558))
-	  
-	conf=Conf(Paths())
-	
-	#init SPI MCP
-	MCP=[]
-	adjust_point=[]
+# read heading, heel, pitch, pressure, humidity, temperature and GENERATE
+def work_imu():
+	timesleep = 0.1
+	SETTINGS_FILE = "RTIMULib"
+	s = RTIMU.Settings(SETTINGS_FILE)
+	if imu_:
+		imu = RTIMU.RTIMU(s)
+		imu.IMUInit()
+		imu.setSlerpPower(0.02)
+		imu.setGyroEnable(True)
+		imu.setAccelEnable(True)
+		imu.setCompassEnable(True)
+		poll_interval = imu.IMUGetPollInterval()
+		timesleep = poll_interval*1.0/1000.0
+		imuName = imu_[0]
+		imuName = imuName.replace(' ', '')
+		headingSK = imu_[2][0][0]
+		headingRate = imu_[2][0][1]
+		headingOffset = imu_[2][0][2]
+		heelSK = imu_[2][1][0]
+		heelRate = imu_[2][1][1]
+		heelOffset = imu_[2][1][2]
+		pitchSK = imu_[2][2][0]
+		pitchRate = imu_[2][2][1]
+		pitchOffset = imu_[2][2][2]
+	if imu_press:
+		pressure = RTIMU.RTPressure(s)
+		pressure.pressureInit()
+		pressName = imu_press[0]
+		pressName = pressName.replace(' ', '')
+		pressSK = imu_press[2][0][0]
+		pressRate = imu_press[2][0][1]
+		pressOffset = imu_press[2][0][2]
+		temp_pressSK = imu_press[2][1][0]
+		temp_pressRate = imu_press[2][1][1]
+		temp_pressOffset = imu_press[2][1][2]
+	if imu_hum:
+		humidity = RTIMU.RTHumidity(s)
+		humidity.humidityInit()
+		humName = imu_hum[0]
+		humName = humName.replace(' ', '')
+		humSK = imu_hum[2][0][0]
+		humRate = imu_hum[2][0][1]
+		humOffset = imu_hum[2][0][2]
+		temp_humSK = imu_hum[2][1][0]
+		temp_humRate = imu_hum[2][1][1]
+		temp_humOffset = imu_hum[2][1][2]
+
+	tick1 = time.time()
+	tick2 = tick1
+	tick3 = tick1
+	tick4 = tick1
+	tick5 = tick1
+	tick6 = tick1
+	tick7 = tick1
+	try:
+		while 1:
+			time.sleep(timesleep)
+			tick0 = time.time()
+
+			if imu_:
+				Erg=''
+				if imu.IMURead():
+					data = imu.getIMUData()
+					fusionPose = data["fusionPose"]
+					if headingSK:
+						heading=math.degrees(fusionPose[2])
+						if heading<0: heading=360+heading
+						elif heading>360: heading=-360+heading
+						if tick0 - tick1 > headingRate:
+							Erg += '{"path": "'+headingSK+'","value":'+str((heading*0.017453293)+headingOffset)+'},'
+							tick1 = tick0
+					if heelSK:
+						heel=math.degrees(fusionPose[0])
+						if tick0 - tick2 > heelRate:
+							Erg += '{"path": "'+heelSK+'","value":'+str((heel*0.017453293)+heelOffset)+'},'
+							tick2 = tick0
+					if pitchSK:
+						pitch=math.degrees(fusionPose[1])
+						if tick0 - tick3 > pitchRate:
+							Erg += '{"path": "'+pitchSK+'","value":'+str((pitch*0.017453293)+pitchOffset)+'},'
+							tick3 = tick0
+				if Erg:		
+					SignalK='{"updates":[{"$source":"OPsensors.I2C.'+imuName+'","values":['
+					SignalK+=Erg[0:-1]+']}]}\n'		
+					sock.sendto(SignalK, ('127.0.0.1', 55557))
+
+			if imu_press:
+				Erg=''
+				read=pressure.pressureRead()
+				if read:
+					if pressSK:
+						if (read[0]): 
+							pressureValue = read[1]
+							if tick0 - tick4 > pressRate:
+								Erg += '{"path": "'+pressSK+'","value":'+str((pressureValue*100)+pressOffset)+'},'
+								tick4 = tick0
+					if temp_pressSK:
+						if (read[2]): 
+							temp_pressValue = read[3]
+							if tick0 - tick5 > temp_pressRate:
+								Erg += '{"path": "'+temp_pressSK+'","value":'+str((temp_pressValue+273.15)+temp_pressOffset)+'},'
+								tick5 = tick0
+				if Erg:		
+					SignalK='{"updates":[{"$source":"OPsensors.I2C.'+pressName+'","values":['
+					SignalK+=Erg[0:-1]+']}]}\n'		
+					sock.sendto(SignalK, ('127.0.0.1', 55557))
+
+			if imu_hum:
+				Erg=''
+				read=humidity.humidityRead()
+				if read:
+					if humSK:
+						if (read[0]): 
+							humidityValue = read[1]
+							if tick0 - tick6 > humRate:
+								Erg += '{"path": "'+humSK+'","value":'+str(humidityValue+humOffset)+'},'
+								tick6 = tick0
+					if temp_humSK:
+						if (read[2]): 
+							temp_humValue = read[3]
+							if tick0 - tick7 > temp_humRate:
+								Erg += '{"path": "'+temp_humSK+'","value":'+str((temp_humValue+273.15)+temp_humOffset)+'},'
+								tick7 = tick0
+				if Erg:		
+					SignalK='{"updates":[{"$source":"OPsensors.I2C.'+humName+'","values":['
+					SignalK+=Erg[0:-1]+']}]}\n'		
+					sock.sendto(SignalK, ('127.0.0.1', 55557))
+	except Exception, e: print "RTIMULib reading failed: "+str(e)	
+
+# read bme280 and send SK
+def work_bme280():
+	name = bme280[0]
+	address = bme280[1]
+	pressureSK = bme280[2][0][0]
+	pressureRate = bme280[2][0][1]
+	pressureOffset = bme280[2][0][2]
+	temperatureSK = bme280[2][1][0]
+	temperatureRate = bme280[2][1][1]
+	temperatureOffset = bme280[2][1][2]
+	humiditySK = bme280[2][2][0]
+	humidityRate = bme280[2][2][1]
+	humidityOffset = bme280[2][2][2]
+	bme = Bme280(address)
+	tick1 = time.time()
+	tick2 = tick1
+	tick3 = tick1
+	try:
+		while 1:
+			time.sleep(0.1)
+			temperature,pressure,humidity = bme.readBME280All()
+			tick0 = time.time()
+			Erg=''
+			if pressureSK:
+				if tick0 - tick1 > pressureRate:
+					Erg += '{"path": "'+pressureSK+'","value":'+str(pressureOffset+(pressure*100))+'},'
+					tick1 = tick0
+			if temperatureSK:
+				if tick0 - tick2 > temperatureRate:
+					Erg += '{"path": "'+temperatureSK+'","value":'+str(temperatureOffset+(temperature+273.15))+'},'
+					tick2 = tick0
+			if humiditySK:
+				if tick0 - tick3 > humidityRate:
+					Erg += '{"path": "'+humiditySK+'","value":'+str(humidityOffset+(humidity))+'},'
+					tick3 = tick0
+			if Erg:		
+				SignalK='{"updates":[{"$source":"OPsensors.I2C.'+name+'","values":['
+				SignalK+=Erg[0:-1]+']}]}\n'		
+				sock.sendto(SignalK, ('127.0.0.1', 55557))
+	except Exception, e: print "BME280 reading failed: "+str(e)
+
+# read SPI adc and GENERATE
+def work_analog():
+	threading.Timer(rate_ana, work_analog).start()
 	SignalK=''
+	for i in MCP:
+		if i[0]==1:
+			XValue=read_adc(i[1])
+			if i[4]==1:
+				XValue = interpolread(i[1],XValue)
+			Erg ='{"updates":[{"$source":"OPsensors.SPI.MCP3008.'+str(i[1])+'",'
+			Erg +='"values":[{"path": "'+i[2]+'","value":'+str(XValue)+'}]}]}\n'
+			SignalK+=Erg
+	sock.sendto(SignalK, ('127.0.0.1', 55557))
 
-	data=conf.get('SPI', 'mcp')
-	try:
-		temp_list=eval(data)
-	except:temp_list=[]
-	
-	analog_=False
-	for ii in temp_list:
-		if '.*.' in ii[2]: ii[2]=ii[2].replace('*', ii[3])
-		MCP.append(ii)	
-		if ii[0]==1:analog_=True	
-		if ii[0]==1 and ii[4]==1:
-			if not conf.has_option('SPI', 'value_'+str(ii[1])):
-				temp_list=[[0,0],[1023,1023]]
-				conf.set('SPI', 'value_'+str(ii[1]), str(temp_list))
-				conf.read()
-			
-			data=conf.get('SPI', 'value_'+str(ii[1]))
-			try:
-				temp_list=eval(data)
-			except:temp_list = []
-				
-			adjust_point.append(temp_list)
-		else:
-			adjust_point.append([])
+# read gpio and GENERATE
+def work_gpio():
+	threading.Timer(rate_gpio, work_gpio).start()
+	c=0
+	for i in gpio_list:
+		channel=int(i[2])
+		name = i[0]
+		current_state = GPIO.input(channel)
+		last_state=gpio_list[c][4]
+		if current_state!=last_state:
+			gpio_list[c][4]=current_state
+			publish_sk(i[1],channel,current_state, name)
+		c+=1
 
-	if analog_:
+def publish_sk(io,channel,current_state,name):
+	if io=='in':io='input'
+	else: io='output'
+	if current_state: current_state='1'
+	else: current_state='0'
+	SignalK='{"updates":[{"$source":"OPnotifications.GPIO.'+io+'.'+str(channel)+'","values":[{"path":"sensors.'+name+'","value":'+current_state+'}]}]}\n'
+	sock.sendto(SignalK, ('127.0.0.1', 55558))
+
+conf = Conf(Paths())
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+#init SPI MCP
+rate_ana=0.1
+MCP=[]
+adjust_point=[]
+SignalK=''
+data=conf.get('SPI', 'mcp')
+try:
+	temp_list=eval(data)
+except:temp_list=[]
+analog_=False
+for ii in temp_list:
+	if '.*.' in ii[2]: ii[2]=ii[2].replace('*', ii[3])
+	MCP.append(ii)	
+	if ii[0]==1:analog_=True	
+	if ii[0]==1 and ii[4]==1:
+		if not conf.has_option('SPI', 'value_'+str(ii[1])):
+			temp_list=[[0,0],[1023,1023]]
+			conf.set('SPI', 'value_'+str(ii[1]), str(temp_list))
+			conf.read()
+		
+		data=conf.get('SPI', 'value_'+str(ii[1]))
 		try:
-			spi = spidev.SpiDev()
-			spi.open(0,0)
-		except:
-			analog_=False
-			print 'spi is disabled in raspberry-pi-configuration device tab'
+			temp_list=eval(data)
+		except:temp_list = []
 			
-	#init GPIO
-	try:
-		gpio_list=eval(conf.get('GPIO', 'sensors'))
-	except: gpio_list=[]
-
-	gpio_=False
-	if gpio_list:
-		gpio_=True
-		GPIO.setmode(GPIO.BCM)
-		GPIO.setwarnings(False)
-		c=0
-		for i in gpio_list:
-			channel=int(i[2])
-			if i[1]=='out':
-				GPIO.setup(channel, GPIO.OUT)
-				GPIO.output(channel, 0)
-			if i[1]=='in':
-				pull_up_down=GPIO.PUD_DOWN
-				if i[3]=='up': pull_up_down=GPIO.PUD_UP
-				GPIO.setup(channel, GPIO.IN, pull_up_down)
-			gpio_list[c].append('')
-			c=c+1
-
-	heading_sk=conf.get('I2C', 'sk_hdg')=='1'
-	heel_sk=conf.get('I2C', 'sk_heel')=='1'
-	pitch_sk=conf.get('I2C', 'sk_pitch')=='1'
-	pressure_sk=conf.get('I2C', 'sk_press')=='1'
-	p_temp_sk=conf.get('I2C', 'sk_temp_p')=='1'
-	humidity_sk=conf.get('I2C', 'sk_hum')=='1'
-	h_temp_sk=conf.get('I2C', 'sk_temp_h')=='1'
-	if conf.has_option('CALCULATE', 'oldnmeav08'):
-		backwards_comp=conf.get('CALCULATE', 'oldnmeav08')=='1'
+		adjust_point.append(temp_list)
 	else:
-	    backwards_comp = False
-	
-	imu_=False
-	bmp_=False
-	hum_=False
-	if heading_sk or heel_sk or pitch_sk: imu_=True
-	if pressure_sk or p_temp_sk: bmp_=True
-	if humidity_sk or h_temp_sk: hum_=True
-
-	if imu_ or bmp_ or hum_ or analog_ or gpio_:
+		adjust_point.append([])
+if analog_:
+	try:
+		spi = spidev.SpiDev()
+		spi.open(0,0)
+	except:
+		analog_=False
+		print 'spi is disabled in raspberry-pi-configuration device tab'
 		
-		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+#init GPIO
+rate_gpio=0.1
+gpio_=False
+try:
+	gpio_list=eval(conf.get('GPIO', 'sensors'))
+except: gpio_list=[]
+if gpio_list:
+	gpio_=True
+	GPIO.setmode(GPIO.BCM)
+	GPIO.setwarnings(False)
+	c=0
+	for i in gpio_list:
+		channel=int(i[2])
+		if i[1]=='out':
+			GPIO.setup(channel, GPIO.OUT)
+			GPIO.output(channel, 0)
+		if i[1]=='in':
+			pull_up_down=GPIO.PUD_DOWN
+			if i[3]=='up': pull_up_down=GPIO.PUD_UP
+			GPIO.setup(channel, GPIO.IN, pull_up_down)
+		gpio_list[c].append('')
+		c=c+1
 
-		poll_interval = 1
+#init I2C
+bme280 = False
+imu_ = False
+imu_press = False
+imu_hum = False
+try:
+	i2c_sensors=eval(conf.get('I2C', 'sensors'))
+except: i2c_sensors=[]
 
-		try:
-			heading_offset=float(conf.get('OFFSET', 'heading'))
-			heel_offset=float(conf.get('OFFSET', 'heel'))
-			pitch_offset=float(conf.get('OFFSET', 'pitch'))
-			pressure_offset=float(conf.get('OFFSET', 'pressure'))
-			p_temp_offset=float(conf.get('OFFSET', 'temperature_p'))
-			humidity_offset=float(conf.get('OFFSET', 'humidity'))
-			h_temp_offset=float(conf.get('OFFSET', 'temperature_h'))
-		except:
-			heading_offset=heel_offset=pitch_offset=pressure_offset=p_temp_offset=humidity_offset=h_temp_offset=0.0
-			print 'Bad format in offset value' 
+if i2c_sensors:
+	for i in i2c_sensors:
+		if i[0] == 'BME280': bme280 = i
+		elif 'rtimulib' in i[1]:
+			temp_list = i[1].split('.')
+			if temp_list[1] == 'imu': imu_ = i
+			elif temp_list[1] == 'press': imu_press = i
+			elif temp_list[1] == 'hum': imu_hum = i
 
-		p_temp_skt=conf.get('I2C', 'p_temp_skt')
-		if not p_temp_skt: p_temp_skt='environment.outside.temperature'
-		h_temp_skt=conf.get('I2C', 'h_temp_skt')
-		if not h_temp_skt: h_temp_skt='environment.inside.temperature'
-		humidity_skt=conf.get('I2C', 'hum_skt')
-		if not humidity_skt: humidity_skt='environment.inside.humidity'
+# launch threads
+if analog_: work_analog()
+if gpio_: work_gpio()
+if bme280:
+	thread_bme280=threading.Thread(target=work_bme280)	
+	thread_bme280.start()
+if imu_ or imu_press or imu_hum:
+	thread_imu=threading.Thread(target=work_imu)	
+	thread_imu.start()
 
-		rate_imu=float(conf.get('I2C', 'rate_imu'))
-		rate_bmp=float(conf.get('I2C', 'rate_press'))
-		rate_hum=float(conf.get('I2C', 'rate_hum'))
-		rate_ana=rate_imu
-		rate_gpio=0.1
-		
-		if heading_sk or heel_sk or pitch_sk:
-			SETTINGS_FILE = "RTIMULib"
-			s = RTIMU.Settings(SETTINGS_FILE)
-			imu = RTIMU.RTIMU(s)
-			imu.IMUInit()
-			imu.setSlerpPower(0.02)
-			imu.setGyroEnable(True)
-			imu.setAccelEnable(True)
-			imu.setCompassEnable(True)
-			poll_interval = imu.IMUGetPollInterval()
-
-		if pressure_sk:
-			SETTINGS_FILE2 = "RTIMULib2"
-			s2 = RTIMU.Settings(SETTINGS_FILE2)
-			pressure_val = RTIMU.RTPressure(s2)
-			pressure_val.pressureInit()
-			#print pressure_val.pressureRead()
-
-		if humidity_sk:
-			SETTINGS_FILE3 = "RTIMULib3"
-			s3 = RTIMU.Settings(SETTINGS_FILE3)
-			humidity_val = RTIMU.RTHumidity(s3)
-			humidity_val.humidityInit()
-
-		def work_imu():
-			threading.Timer(rate_imu, work_imu).start()
-			if imu.IMURead():
-				data = imu.getIMUData()
-				fusionPose = data["fusionPose"]
-				MyVar.heading=math.degrees(fusionPose[2])+heading_offset
-				MyVar.heel=math.degrees(fusionPose[0])+heel_offset
-				MyVar.pitch=math.degrees(fusionPose[1])+pitch_offset
-				if MyVar.heading<0: MyVar.heading=360+MyVar.heading
-				elif MyVar.heading>360: MyVar.heading=-360+MyVar.heading
-			
-			Erg=''
-			if heading_sk:
-				Erg += '{"path": "navigation.headingMagnetic","value":'+str(0.017453293*MyVar.heading)+'},'
-			if heel_sk:
-				Erg += '{"path": "navigation.attitude.roll","value":'+str(0.017453293*MyVar.heel)+'},'
-			if pitch_sk:
-				Erg += '{"path": "navigation.attitude.pitch","value":'+str(0.017453293*MyVar.pitch)+'},'
-			SignalK='{"updates":[{"$source":"OPsensors.I2C.'+imu.IMUName()+'","values":['
-			SignalK+=Erg[0:-1]+']}]}\n'		
-			sock.sendto(SignalK, ('127.0.0.1', 55557))	
-
-			if backwards_comp:
-				hdg = pynmea2.HDG('OS', 'HDG', (str(MyVar.heading),'','','',''))
-				sock.sendto(str(hdg)+"\r\n", ('127.0.0.1', 10110))
-
-				xdr = pynmea2.XDR('OS', 'XDR', ('A', str(MyVar.heel), 'D','I2CX', 'A', str(MyVar.pitch), 'D','I2CY'))
-				sock.sendto(str(xdr)+"\r\n", ('127.0.0.1', 10110))
-										
-			# read Pressure and GENERATE
-		def work_bmp():
-			threading.Timer(rate_bmp, work_bmp).start()
-			read=pressure_val.pressureRead()
-			if read:
-				if (read[0]): MyVar.pressure=read[1]+pressure_offset
-				if (read[2]): MyVar.temperature_p=read[3]+p_temp_offset
-
-			Erg=''
-			if pressure_sk:
-				Erg += '{"path": "environment.outside.pressure","value":'+str(MyVar.pressure*100)+'},'
-			if p_temp_sk:
-				Erg += '{"path": "'+p_temp_skt+'","value":'+str(round(MyVar.temperature_p,2)+273.15)+'},'
-			
-			SignalK='{"updates":[{"$source":"OPsensors.I2C.'+pressure_val.pressureName()+'","values":['
-			SignalK+=Erg[0:-1]+']}]}\n'	
-			sock.sendto(SignalK, ('127.0.0.1', 55557))
-			
-			if backwards_comp:
-				xdr = pynmea2.XDR('OS', 'XDR', ('P', str(round(MyVar.pressure/1000,4)), 'B','I2CP', 'C', str(round(MyVar.temperature_p,2)), 'C','I2CT'))
-				
-				#sock.sendto(str("$OCAAM,,,,,*6D\r\n"), ('127.0.0.1', 10110))			
-				sock.sendto(str(xdr)+"\r\n", ('127.0.0.1', 10110))			
-
-			# read Humidity and GENERATE
-		def work_hum():
-			threading.Timer(rate_hum, work_hum).start()
-			read=humidity_val.humidityRead()
-			if read:
-				if (read[0]): MyVar.humidity=read[1]+humidity_offset
-				if (read[2]): MyVar.temperature_h=read[3]+h_temp_offset
-
-			Erg=''
-			if humidity_sk:
-				Erg += '{"path": "'+humidity_skt+'","value":'+str(MyVar.humidity)+'},'
-			if h_temp_sk:
-				Erg += '{"path": "'+h_temp_skt+'","value":'+str(round(MyVar.temperature_h,2)+273.15)+'},'
-					
-			SignalK='{"updates":[{"$source":"OPsensors.I2C.'+humidity_val.humidityName()+'","values":['
-			SignalK+=Erg[0:-1]+']}]}\n'	
-			sock.sendto(SignalK, ('127.0.0.1', 55557))
-
-			# read SPI adc and GENERATE
-		def work_analog():
-			threading.Timer(rate_ana, work_analog).start()
-			SignalK=''
-			for i in MCP:
-				if i[0]==1:
-					XValue=read_adc(i[1])
-					if i[4]==1:
-						XValue = interpolread(i[1],XValue)
-					Erg ='{"updates":[{"$source":"OPsensors.SPI.MCP3008.'+str(i[1])+'",'
-					Erg +='"values":[{"path": "'+i[2]+'","value":'+str(XValue)+'}]}]}\n'
-					SignalK+=Erg
-			sock.sendto(SignalK, ('127.0.0.1', 55557))
-
-			# read gpio and GENERATE
-		def work_gpio():
-			threading.Timer(rate_gpio, work_gpio).start()
-			c=0
-			for i in gpio_list:
-				channel=int(i[2])
-				name = i[0]
-				current_state = GPIO.input(channel)
-				last_state=gpio_list[c][4]
-				if current_state!=last_state:
-					gpio_list[c][4]=current_state
-					publish_sk(i[1],channel,current_state, name)
-				c+=1
-
-		if imu_:	work_imu()	
-		if bmp_:	work_bmp()
-		if hum_:	work_hum()
-		if analog_:	work_analog()
-		if gpio_:	work_gpio()
-			
 		
