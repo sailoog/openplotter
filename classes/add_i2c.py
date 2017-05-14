@@ -14,7 +14,12 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
-import wx, smbus, subprocess
+import platform
+import wx, subprocess
+
+if platform.machine()[0:3] == 'arm':
+	import smbus
+
 
 class addI2c(wx.Dialog):
 	def __init__(self, parent):
@@ -102,18 +107,19 @@ class addI2c(wx.Dialog):
 		dlg.Destroy()
 
 	def detection(self, act):
-		self.list_detected.DeleteAllItems()
-		#RTIMULIB sensors
-		rtimulib = subprocess.check_output(['python', self.currentpath + '/imu/check_sensors.py', act, 'detected_RTIMULib'], cwd=self.currentpath + '/imu')
-		self.printRtimulibResults(rtimulib)
-		#others
-		bus = smbus.SMBus(1)
-		for addr in range(3, 178):
-			try:
-				bus.write_quick(addr)
-				addr = hex(addr)
-				if addr == '0x76': self.list_detected.Append(['BME280', addr])
-			except IOError: pass
+		if platform.machine()[0:3] == 'arm':		
+			self.list_detected.DeleteAllItems()
+			#RTIMULIB sensors
+			rtimulib = subprocess.check_output(['python', self.currentpath + '/imu/check_sensors.py', act, 'detected_RTIMULib'], cwd=self.currentpath + '/imu')
+			self.printRtimulibResults(rtimulib)
+			#others
+			bus = smbus.SMBus(1)
+			for addr in range(3, 178):
+				try:
+					bus.write_quick(addr)
+					addr = hex(addr)
+					if addr == '0x76': self.list_detected.Append(['BME280', addr])
+				except IOError: pass
 
 	def printRtimulibResults(self,rtimulib):
 		try:

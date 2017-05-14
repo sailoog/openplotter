@@ -18,13 +18,13 @@
 import socket, time, math, datetime, platform, threading
 from classes.paths import Paths
 from classes.conf import Conf
-from classes.bme280 import Bme280
 
 if platform.machine()[0:3]!='arm':
 	print 'This is not a Raspberry Pi -> no GPIO, I2C and SPI'
 else:
 	import RPi.GPIO as GPIO
 	import spidev,RTIMU
+	from classes.bme280 import Bme280
 
 def interpolread(idx,erg):
 	lin = -999999
@@ -227,17 +227,21 @@ def work_bme280():
 # read SPI adc and GENERATE
 def work_analog():
 	threading.Timer(rate_ana, work_analog).start()
-	SignalK=''
+	SignalK='{"updates":[{"$source":"OPsensors.SPI.MCP3008","values":[ '
+	Erg=''
+	send=False
 	for i in MCP:
 		if i[0]==1:
+			send=True
 			XValue=read_adc(i[1])
 			if i[4]==1:
 				XValue = interpolread(i[1],XValue)
-			Erg ='{"updates":[{"$source":"OPsensors.SPI.MCP3008.'+str(i[1])+'",'
-			Erg +='"values":[{"path": "'+i[2]+'","value":'+str(XValue)+'}]}]}\n'
-			SignalK+=Erg
-	sock.sendto(SignalK, ('127.0.0.1', 55557))
+			Erg +='{"path": "'+i[2]+'","value":'+str(XValue)+'},'
 
+	if send:
+		SignalK +=Erg[0:-1]+']}]}\n'
+		sock.sendto(SignalK, ('127.0.0.1', 55557))	
+	
 # read gpio and GENERATE
 def work_gpio():
 	threading.Timer(rate_gpio, work_gpio).start()
