@@ -69,33 +69,26 @@ class Actions:
 				GPIO.setmode(GPIO.BCM)
 				GPIO.setwarnings(False)
 				for i in self.out_list:
-					if i[1]=='out':
+					if i[1] == 'out':
 						GPIO.setup(int(i[2]), GPIO.OUT)
 						self.options.append(['GPIO '+i[0]+_(': High'),_('ATTENTION! if you set this GPIO output to "High" and there is not a resistor or a circuit connected to the selected GPIO pin, YOU CAN DAMAGE YOUR BOARD.'),0,'H'+i[2]])
 						self.options.append(['GPIO '+i[0]+_(': Low'),0,0,'L'+i[2]])
 		except Exception,e: print 'ERROR setting GPIO actions: '+str(e)
 
-		'''
-		# mqtt
-		x = self.conf.get('MQTT', 'topics')
-		if x:
-			self.mqtt_list = eval(x)
-		else:
-			self.mqtt_list = []
-		for i in self.mqtt_list:
-			try:
-				self.options.append([_('Publish on topic ') + i[1], 0, 1, i[2]])
-			except Exception, e:
-				print str(e)
-		'''
+		#init MQTT
+		try:
+			x = self.conf.get('MQTT', 'topics')
+			if x: self.mqtt_list = eval(x)
+			else: self.mqtt_list = []
+			if self.mqtt_list:
+				for i in self.mqtt_list:
+					if i[1] == 0:
+						self.options.append([_('Publish on topic: ') + i[0], 0, 1, 'MQTT'+i[0]])
+		except Exception,e: print 'ERROR setting MQTT actions: '+str(e)
 
 	def getOptionsListIndex(self, data):
 		for index, item in enumerate(self.options):
 			if item[3] == data: return index
-
-	def getmqttlistIndex(self, data):
-		for index, item in enumerate(self.mqtt_list):
-			if item[2] == data: return index
 
 	def run_action(self, option, text):
 		conf = self.conf
@@ -188,7 +181,7 @@ class Actions:
 				sm.SendSMS(message)
 			except Exception, e: print str(e)
 		elif option[:4] == 'MQTT':
-			topic = self.mqtt_list[self.getmqttlistIndex(option)][1]
+			topic = option[4:]
 			payload = text
 			auth = {'username': conf.get('MQTT', 'username'), 'password': conf.get('MQTT', 'password')}
 			publish.single(topic, payload=payload, hostname='127.0.0.1', port='1883', auth=auth)

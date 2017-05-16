@@ -3229,13 +3229,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			if ii[1] == 0: 
 				topic_type = _('General').encode('utf8')
 				skkey = 'notifications.'+topic
-				source = 'mqtt.'+topic
+				source = 'MQTT.'+topic
 			if ii[1] == 1: 
-				topic_type = _('Signal K key').encode('utf8')
+				topic_type = _('Signal K key input').encode('utf8')
 				skkey = ii[2]
-				source = 'mqtt.'+topic
+				source = 'MQTT.'+topic
 			if ii[1] == 2: 
-				topic_type = _('Signal K delta').encode('utf8')
+				topic_type = _('Signal K delta input').encode('utf8')
 				skkey = _('multiple keys').encode('utf8')
 				source = _('multiple sources').encode('utf8')
 			self.list_topics.Append([topic,topic_type,skkey,source])
@@ -3281,7 +3281,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			if topic_type == _('General'): 
 				topic_type2 = 0
 				skkey2 = ''
-			elif topic_type == _('Signal K key'): 
+			elif topic_type == _('Signal K key input'): 
 				topic_type2 = 1
 				if not skkey:
 					self.ShowMessage(_('Failed. You have to provide a Signal K key.'))
@@ -3289,7 +3289,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					return
 				else:
 					skkey2 = skkey
-			elif topic_type == _('Signal K delta'): 
+			elif topic_type == _('Signal K delta input'): 
 				topic_type2 = 2
 				skkey2 = ''
 			else:

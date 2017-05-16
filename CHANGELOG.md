@@ -1,3 +1,7 @@
+v0.11.6
+* Fix general MQTT topics actions
+* Fix SPI
+
 v0.11.5
 * Fix GPIO output actions
 * WIFI AP interface improvement

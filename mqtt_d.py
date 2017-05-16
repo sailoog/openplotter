@@ -29,13 +29,13 @@ def on_message(client, userdata, msg):
 					value = value.replace('"', "'")
 					SignalK='{"updates":[{"$source":"OPnotifications.MQTT.'+msg.topic+'","values":[{"path":"'+path+'","value":"'+value+'"}]}]}\n'
 					sock.sendto(SignalK, ('127.0.0.1', 55558))
-				if i[1] == 1: #signal k key
+				if i[1] == 1: #signal k key input
 					path = i[2]
 					value = msg.payload
 					value = value.replace('"', "'")
 					SignalK='{"updates":[{"$source":"OPsensors.MQTT.'+msg.topic+'","values":[{"path":"'+path+'","value":"'+value+'"}]}]}\n'			
 					sock.sendto(SignalK, ('127.0.0.1', 55557))
-				if i[1] == 2: #signal k delta
+				if i[1] == 2: #signal k delta input
 					SignalK = msg.payload		
 					sock.sendto(SignalK, ('127.0.0.1', 55557))
 	except Exception,e: print str(e)

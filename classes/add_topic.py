@@ -32,7 +32,7 @@ class addTopic(wx.Dialog):
 		wx.StaticText(panel, label=_('allowed characters: 0-9, a-z, A-Z'), pos=(150, 10))
 		self.topic = wx.TextCtrl(panel, size=(410, 30), pos=(10, 30))
 
-		list_type = [_('General'), _('Signal K key'), _('Signal K delta')]
+		list_type = [_('General'), _('Signal K key input'), _('Signal K delta input')]
 		wx.StaticText(panel, label=_('Type'), pos=(10, 70))
 		self.type = wx.ComboBox(panel, choices=list_type, style=wx.CB_READONLY, size=(200, 32), pos=(10, 90))
 		self.type.Bind(wx.EVT_COMBOBOX, self.onSelect_type)
@@ -52,13 +52,13 @@ class addTopic(wx.Dialog):
 			if edit[1][1] == 0: 
 				self.type.SetValue(_('General'))
 			elif edit[1][1] == 1:
-				self.type.SetValue(_('Signal K key'))
+				self.type.SetValue(_('Signal K key input'))
 				self.skkey.SetValue(edit[1][2])
 				self.skkeylabel.Enable()
 				self.skkey.Enable()
 				self.edit_skkey.Enable()
 			elif edit[1][1] == 2:
-				self.type.SetValue(_('Signal K delta'))
+				self.type.SetValue(_('Signal K delta input'))
 
 		cancelBtn = wx.Button(panel, wx.ID_CANCEL, pos=(120, 210))
 		okBtn = wx.Button(panel, wx.ID_OK, pos=(230, 210))
