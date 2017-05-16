@@ -226,6 +226,7 @@ class addkplex(wx.Dialog):
 						self.SerDevLs.append(value.split(' ')[0][5:])
 				except:
 					pass
+		self.SerDevLs.sort()
 
 	def ifilter_del(self, event):
 		self.ifilter_sentences.SetValue(_('nothing'))
