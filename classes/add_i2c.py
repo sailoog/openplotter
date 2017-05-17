@@ -43,6 +43,9 @@ class addI2c(wx.Dialog):
 		self.reset = wx.Button(panel, label=_('Reset'))
 		self.reset.Bind(wx.EVT_BUTTON, self.onReset)
 
+		self.check_addresses = wx.Button(panel, label=_('Addresses'))
+		self.check_addresses.Bind(wx.EVT_BUTTON, self.onCheckAddresses)
+
 		hline1 = wx.StaticLine(panel)
 
 		label_add = wx.StaticText(panel, label=_('add/update sensor'))
@@ -60,6 +63,7 @@ class addI2c(wx.Dialog):
 
 		vbox1 = wx.BoxSizer(wx.VERTICAL)
 		vbox1.Add(self.reset, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 5)
+		vbox1.Add(self.check_addresses, 0, wx.RIGHT | wx.LEFT | wx.UP | wx.EXPAND, 5)
 		vbox1.Add((0, 0), 1, wx.ALL | wx.EXPAND, 5)
 
 		hbox2 = wx.BoxSizer(wx.HORIZONTAL)
@@ -105,6 +109,14 @@ class addI2c(wx.Dialog):
 		if dlg.ShowModal() == wx.ID_YES:
 			self.detection('1')
 		dlg.Destroy()
+
+	def onCheckAddresses(self, e):
+		addresses = ''
+		try:
+			addresses = subprocess.check_output(['i2cdetect', '-y', '1'])
+		except: 
+			addresses = subprocess.check_output(['i2cdetect', '-y', '2'])
+		wx.MessageBox(addresses, _('Detected I2C addresses'), wx.OK | wx.ICON_INFORMATION)
 
 	def detection(self, act):
 		if platform.machine()[0:3] == 'arm':		

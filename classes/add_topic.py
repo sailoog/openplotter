@@ -84,7 +84,7 @@ class addTopic(wx.Dialog):
 		self.skkey.SetValue(key)
 
 	def onSelect_type(self,e):
-		if self.type.GetValue() == _('Signal K key'):
+		if self.type.GetValue() == _('Signal K key input'):
 			self.skkeylabel.Enable()
 			self.skkey.Enable()
 			self.edit_skkey.Enable()
