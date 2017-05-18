@@ -87,9 +87,10 @@ def readfile(file):
 def autoDetect(file):
 	SETTINGS_FILE = file
 	s = RTIMU.Settings(SETTINGS_FILE)
-	imu = RTIMU.RTIMU(s)
 	pressure = RTIMU.RTPressure(s)
 	humidity = RTIMU.RTHumidity(s)
+	imu = RTIMU.RTIMU(s)
+	pressure = RTIMU.RTPressure(s)
 
 if platform.machine()[0:3] == 'arm':
 	import RTIMU
