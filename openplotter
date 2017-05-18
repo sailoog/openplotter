@@ -540,6 +540,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 							self.SerDevLs.append(value.split(' ')[0])
 				except Exception, e:
 					print 'no tty DEVLINKS found', str(e)
+		self.SerDevLs.sort()
 		self.can_usb.Clear()
 		self.sms_dev.Clear()
 		self.can_usb.AppendItems(self.SerDevLs)
@@ -1562,7 +1563,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			c = 0
 			for i in self.i2c_sensors:
 				if i[0] == name:
-					self.i2c_sensors[c][2][int(index)][0] = sk
+					self.i2c_sensors[c][2][int(index)][0] = sk.encode('utf8')
 					self.i2c_sensors[c][2][int(index)][1] = float(rate)
 					self.i2c_sensors[c][2][int(index)][2] = float(offset)
 				c = c + 1
@@ -1586,11 +1587,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			new_sensor = []
 			for item in self.i2c_sensors_def:
 				if name == item[0]:
-					new_sensor.append(name)
+					new_sensor.append(name.encode('utf8'))
 					if 'rtimulib' in item[1]:
-						new_sensor.append(item[1]+address)
+						new_sensor.append((item[1]+address).encode('utf8'))
 					else:
-						new_sensor.append(address)
+						new_sensor.append(address.encode('utf8'))
 					new_sensor.append([])	
 					for ii in item[2]:
 						new_sensor[2].append(['', 1.0, 0.0])
@@ -2013,12 +2014,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				dlg.Destroy()
 				return
 			if edit == 0:
-				self.gpio.append([name, io, gpio_selection, pull_selection])
+				self.gpio.append([name.encode('utf8'), io, gpio_selection.encode('utf8'), pull_selection.encode('utf8')])
 			else:
-				self.gpio[edit[0]][0] = name
+				self.gpio[edit[0]][0] = name.encode('utf8')
 				self.gpio[edit[0]][1] = io
-				self.gpio[edit[0]][2] = gpio_selection
-				self.gpio[edit[0]][3] = pull_selection
+				self.gpio[edit[0]][2] = gpio_selection.encode('utf8')
+				self.gpio[edit[0]][3] = pull_selection.encode('utf8')
 			self.apply_changes_gpio()
 		dlg.Destroy()
 
@@ -2243,8 +2244,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			time_units = self.actions.time_units[i[3]]
 			repeat2 = repeat + ' ' + time_units
 			self.list_actions.Append(
-				[self.actions.options[self.actions.getOptionsListIndex(i[0])][0].decode('utf8'), i[1].decode('utf8'),
-				 repeat2.decode('utf8')])
+				[self.actions.options[self.actions.getOptionsListIndex(i[0])][0], i[1], repeat2])
 
 	def on_edit_triggers(self, e):
 		t = e.GetIndex()
@@ -2289,7 +2289,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					self.ShowMessage(_('Failed. Select value, timestamp or source.'))
 					dlg.Destroy()
 					return
-				SKkey0 = dlg.SKkey.GetValue()
+				SKkey0 = dlg.SKkey.GetValue().encode('utf8')
 				if SKkey0: 
 					SKkey0 = SKkey0+'.'+magnitude
 					SKkey = SKkey0
@@ -2298,7 +2298,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					dlg.Destroy()
 					return
 			if edit == 0:
-				self.list_triggers.Append([SKkey0, operator0, value.decode('utf8')])
+				self.list_triggers.Append([SKkey0, operator0, value])
 				tmp = [1, SKkey, operator, value, []]
 				self.triggers.append(tmp)
 				total = self.list_triggers.GetItemCount()
@@ -2309,7 +2309,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			else:
 				self.list_triggers.SetStringItem(edit[0], 0, SKkey0)
 				self.list_triggers.SetStringItem(edit[0], 1, operator0)
-				self.list_triggers.SetStringItem(edit[0], 2, value.decode('utf8'))
+				self.list_triggers.SetStringItem(edit[0], 2, value)
 				self.triggers[edit[0]][1] = SKkey
 				self.triggers[edit[0]][2] = operator
 				self.triggers[edit[0]][3] = value
@@ -2354,8 +2354,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				dlg.Destroy()
 				return
 			action = self.actions.options[action_selection][0]
-			data0 = dlg.data.GetValue()
-			data = data0.encode('utf8')
+			data = dlg.data.GetValue().encode('utf8')
 			time_units_selection = dlg.repeat_unit.GetCurrentSelection()
 			time_units = self.actions.time_units[time_units_selection]
 			if repeat == 0.0:
@@ -2363,18 +2362,18 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			else:
 				repeat2 = str(repeat) + ' ' + time_units
 			if edit == 0:
-				self.list_actions.Append([action.decode('utf8'), data.decode('utf8'), repeat2.decode('utf8')])
+				self.list_actions.Append([action, data, repeat2])
 				tmp = []
-				tmp.append(self.actions.options[action_selection][3])
+				tmp.append(self.actions.options[action_selection][3].encode('utf8'))
 				tmp.append(data)
 				tmp.append(repeat)
 				tmp.append(time_units_selection)
 				self.triggers[selected_trigger_position][4].append(tmp)
 			else:
-				self.list_actions.SetStringItem(edit[0], 0, action.decode('utf8'))
-				self.list_actions.SetStringItem(edit[0], 1, data.decode('utf8'))
-				self.list_actions.SetStringItem(edit[0], 2, repeat2.decode('utf8'))
-				self.triggers[selected_trigger_position][4][edit[0]][0] = self.actions.options[action_selection][3]
+				self.list_actions.SetStringItem(edit[0], 0, action)
+				self.list_actions.SetStringItem(edit[0], 1, data)
+				self.list_actions.SetStringItem(edit[0], 2, repeat2)
+				self.triggers[selected_trigger_position][4][edit[0]][0] = self.actions.options[action_selection][3].encode('utf8')
 				self.triggers[selected_trigger_position][4][edit[0]][1] = data
 				self.triggers[selected_trigger_position][4][edit[0]][2] = repeat
 				self.triggers[selected_trigger_position][4][edit[0]][3] = time_units_selection
