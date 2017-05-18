@@ -1,3 +1,13 @@
+v0.11.7
+* Add Set Signal K key value action
+* Improve error messages in actions
+* Add check I2C addresses button
+* Fix add MQTT interface error
+
+v0.11.6
+* Fix general MQTT topics actions
+* Fix SPI
+
 v0.11.5
 * Fix GPIO output actions
 * WIFI AP interface improvement

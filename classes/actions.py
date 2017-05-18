@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
-import gammu, platform, subprocess, time, json, requests
+import gammu, platform, subprocess, time, json, requests, socket, re
 
 import paho.mqtt.publish as publish
 
@@ -36,6 +36,7 @@ class Actions:
 		self.currentpath = SK.currentpath
 		self.time_units = [_('no repeat'), _('seconds'), _('minutes'), _('hours'), _('days')]
 		self.options = []
+		self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		# ATENTION. If order changes, edit "run_action()" and ctrl_actions.py
 		# 0 name, 1 message, 2 field data, 3 unique ID
 		self.options.append([_('wait'), _('Enter seconds to wait in field "data".'), 1, 'ACT1'])
@@ -59,7 +60,7 @@ class Actions:
 		self.options.append([_('close all messages'), 0, 0, 'ACT18'])
 		#self.options.append([_('start all actions'), 0, 0, 'ACT19'])
 		#self.options.append([_('stop all actions'), _('This action will stop all the triggers except the trigger which has an action "start all actions" defined.'),0, 'ACT20'])
-		
+
 		#init GPIO
 		try:
 			x=self.conf.get('GPIO', 'sensors')
@@ -69,33 +70,28 @@ class Actions:
 				GPIO.setmode(GPIO.BCM)
 				GPIO.setwarnings(False)
 				for i in self.out_list:
-					if i[1]=='out':
+					if i[1] == 'out':
 						GPIO.setup(int(i[2]), GPIO.OUT)
 						self.options.append(['GPIO '+i[0]+_(': High'),_('ATTENTION! if you set this GPIO output to "High" and there is not a resistor or a circuit connected to the selected GPIO pin, YOU CAN DAMAGE YOUR BOARD.'),0,'H'+i[2]])
 						self.options.append(['GPIO '+i[0]+_(': Low'),0,0,'L'+i[2]])
 		except Exception,e: print 'ERROR setting GPIO actions: '+str(e)
 
-		'''
-		# mqtt
-		x = self.conf.get('MQTT', 'topics')
-		if x:
-			self.mqtt_list = eval(x)
-		else:
-			self.mqtt_list = []
-		for i in self.mqtt_list:
-			try:
-				self.options.append([_('Publish on topic ') + i[1], 0, 1, i[2]])
-			except Exception, e:
-				print str(e)
-		'''
+		#init MQTT
+		try:
+			x = self.conf.get('MQTT', 'topics')
+			if x: self.mqtt_list = eval(x)
+			else: self.mqtt_list = []
+			if self.mqtt_list:
+				for i in self.mqtt_list:
+					if i[1] == 0:
+						self.options.append([_('Publish on topic: ') + i[0], 0, 1, 'MQTT'+i[0]])
+		except Exception,e: print 'ERROR setting MQTT actions: '+str(e)
+
+		self.options.append([_('Set Signal K key value'), 'Write pairs of lines: Signal K key (first line) and a value (second line). Leave a blank line between pairs.', 1, 'ACT22'])
 
 	def getOptionsListIndex(self, data):
 		for index, item in enumerate(self.options):
 			if item[3] == data: return index
-
-	def getmqttlistIndex(self, data):
-		for index, item in enumerate(self.mqtt_list):
-			if item[2] == data: return index
 
 	def run_action(self, option, text):
 		conf = self.conf
@@ -109,14 +105,13 @@ class Actions:
 			try:
 				wait = float(text)
 				time.sleep(wait)
-			except:
-				print 'Wait action needs a number'
+			except Exception,e: print 'ERROR wait action: '+str(e)
 		elif option == 'ACT2':
 			if text:
 				try:
 					text = text.split(' ')
 					subprocess.Popen(text)
-				except Exception, e: print str(e)
+				except Exception,e: print 'ERROR command action: '+str(e)
 		elif option == 'ACT3':
 			subprocess.Popen(['sudo', 'reboot'])
 		elif option == 'ACT4':
@@ -149,7 +144,7 @@ class Actions:
 			try:
 				msg = TwitterBot(apiKey, apiSecret, accessToken, accessTokenSecret)
 				msg.send(tweetStr)
-			except Exception, e: print str(e)
+			except Exception,e: print 'ERROR Twitter action: '+str(e)
 		elif option == 'ACT14':
 			subject = text
 			body = ''
@@ -162,7 +157,7 @@ class Actions:
 			try:
 				msg = GmailBot(GMAIL_USERNAME, GMAIL_PASSWORD, recipient)
 				msg.send(subject, body)
-			except Exception, e: print str(e)
+			except Exception,e: print 'ERROR gmail action: '+str(e)
 		elif option == 'ACT15':
 			subprocess.Popen(['mpg123', '-q', text])
 		elif option == 'ACT16':
@@ -186,11 +181,26 @@ class Actions:
 					'Number': conf.get('SMS', 'phone'),
 				}
 				sm.SendSMS(message)
-			except Exception, e: print str(e)
+			except Exception,e: print 'ERROR SMS action: '+str(e)
+		elif option == 'ACT22':
+			pairs_list = text.split('\n\n')
+			Erg=''
+			if pairs_list:
+				for i in pairs_list:
+					try:
+						pairs = i.split('\n')
+						skkey = pairs[0].strip('\n')
+						value = pairs[1].strip('\n')
+						if re.match('^[0-9a-zA-Z\.]+$', skkey) and value:
+							Erg += '{"path": "'+skkey+'","value":"'+str(value)+'"},'
+					except Exception,e: print 'ERROR parsing Signal K key action: '+str(e)
+				if Erg:		
+					SignalK='{"updates":[{"$source":"OPactions","values":['
+					SignalK+=Erg[0:-1]+']}]}\n'		
+					self.sock.sendto(SignalK, ('127.0.0.1', 55557))
 		elif option[:4] == 'MQTT':
-			topic = self.mqtt_list[self.getmqttlistIndex(option)][1]
+			topic = option[4:]
 			payload = text
 			auth = {'username': conf.get('MQTT', 'username'), 'password': conf.get('MQTT', 'password')}
 			publish.single(topic, payload=payload, hostname='127.0.0.1', port='1883', auth=auth)
-			publish.single(topic, payload=payload, hostname=conf.get('MQTT', 'broker'), port=conf.get('MQTT', 'port'),
-						   auth=auth)
+			publish.single(topic, payload=payload, hostname=conf.get('MQTT', 'broker'), port=conf.get('MQTT', 'port'), auth=auth)
