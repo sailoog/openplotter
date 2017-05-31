@@ -1,3 +1,8 @@
+v0.11.8
+* I2C sensors detection workaround
+* Cosmetic changes
+* fix N2K output on startup issue
+
 v0.11.7
 * Add Set Signal K key value action
 * Improve error messages in actions
