@@ -99,7 +99,7 @@ class MainFrame(wx.Frame):
 		self.p_startup = wx.Panel(self.nb)
 		self.nb.AddPage(self.p_usb, _('USB manager'))
 		self.nb.AddPage(self.p_kplex, _('NMEA 0183'))
-		self.nb.AddPage(self.p_n2k, _('NMEA 2K'))
+		self.nb.AddPage(self.p_n2k, _('N2K'))
 		self.nb.AddPage(self.p_sk, _('Signal K'))
 		self.nb.AddPage(self.p_wifi, _('WiFi AP'))
 		self.nb.AddPage(self.p_action, _('Actions'))
@@ -2715,7 +2715,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def page_n2k(self):
 		wx.StaticBox(self.p_n2k, label=_(' Settings '), size=(230, 265), pos=(10, 10))
 		i = 35
-		self.CANUSB_label = wx.StaticText(self.p_n2k, label=_('CAN-USB-CAN device'), pos=(20, i))
+		self.CANUSB_label = wx.StaticText(self.p_n2k, label=_('CAN-USB device'), pos=(20, i))
 		self.SerDevLs = []
 		i += 20
 		self.can_usb = wx.ComboBox(self.p_n2k, choices=self.SerDevLs, style=wx.CB_READONLY, size=(140, 32), pos=(20, i))

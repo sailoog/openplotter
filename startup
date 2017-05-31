@@ -223,7 +223,7 @@ class MyFrame(wx.Frame):
 				if len(opencpn_commands)==1: subprocess.Popen('opencpn')
 				self.check_start('opencpn')
 
-			if wifi_server=='1':
+			if wifi_server == '1':
 				self.add_logger_data(_('\nStarting WIFI Access Point...'))
 				process = subprocess.Popen(['sudo', 'python', self.currentpath+'/wifi_server.py', '1'])
 			else:
@@ -231,7 +231,7 @@ class MyFrame(wx.Frame):
 				process = subprocess.Popen(['sudo', 'python', self.currentpath+'/wifi_server.py', '0'])
 			process.wait()
 			self.add_logger_data(_(' Done.'))
-			if wifi_server=='1':
+			if wifi_server == '1':
 				self.add_logger_data(_('\nchecking WIFI Access Point password...'))
 				if wifi_server_pass=='12345678':
 					self.add_warnings_data(_('\n\nSecurity warning: You are using the default WIFI Access Point password.\nPlease change password in OpenPlotter > WiFi AP.'))
@@ -249,6 +249,12 @@ class MyFrame(wx.Frame):
 			subprocess.call(["pkill", '-f', "signalk-server"])
 			self.add_logger_data(_('\nStarting SignalK Server...'))
 			vessel_self=checkVesselSelf()
+
+			subprocess.call(['pkill', '-f', 'diagnostic-N2K-output.py'])
+			subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
+			if N2K_output == '1':
+				subprocess.Popen(['python', self.currentpath+'/N2K-server_d.py'])
+
 			self.check_start('signalk-server')
 			self.add_logger_data(_('\nStart event SK to NMEA and action Server...'))
 			self.check_start('SK-base_d.py')
