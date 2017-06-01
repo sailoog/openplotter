@@ -1599,7 +1599,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				if 'rtimulib' in new_sensor[1]:
 					temp_list = new_sensor[1].split('.')
 					try:
-						with open(self.currentpath +'/imu/RTIMULib.ini', "r") as infile:
+						with open(self.currentpath +'/imu/settings/RTIMULib.ini', "r") as infile:
 							data = ''
 							if temp_list[1] == 'imu':
 								for line in infile:
@@ -1607,6 +1607,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 										data += 'IMUType='+temp_list[2]+'\n'
 									elif 'I2CSlaveAddress=' in line:
 										data += 'I2CSlaveAddress='+str(int(temp_list[3], 0))+'\n'
+									elif 'BusIsI2C=' in line:
+										data += 'BusIsI2C=true'+'\n'
 									else:
 										data += line
 							if temp_list[1] == 'press':
@@ -1615,6 +1617,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 										data += 'PressureType='+temp_list[2]+'\n'
 									elif 'I2CPressureAddress=' in line:
 										data += 'I2CPressureAddress='+str(int(temp_list[3], 0))+'\n'
+									elif 'BusIsI2C=' in line:
+										data += 'BusIsI2C=true'+'\n'
 									else:
 										data += line
 							if temp_list[1] == 'hum':
@@ -1623,9 +1627,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 										data += 'HumidityType='+temp_list[2]+'\n'
 									elif 'I2CHumidityAddress=' in line:
 										data += 'I2CHumidityAddress='+str(int(temp_list[3], 0))+'\n'
+									elif 'BusIsI2C=' in line:
+										data += 'BusIsI2C=true'+'\n'
 									else:
 										data += line
-						with open(self.currentpath +'/imu/RTIMULib.ini', "w") as outfile:
+						with open(self.currentpath +'/imu/settings/RTIMULib.ini', "w") as outfile:
 							outfile.write(data) 
 					except Exception, e: 
 						print "RTIMU setting failed: "+str(e)
@@ -1677,7 +1683,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def start_sensors(self):
 		subprocess.call(['pkill', 'RTIMULibDemoGL'])
-		subprocess.Popen(['python', self.currentpath + '/read_sensors_d.py'], cwd=self.currentpath + '/imu')
+		subprocess.Popen(['python', self.currentpath + '/read_sensors_d.py'], cwd=self.currentpath + '/imu/settings')
 		self.ShowStatusBarGREEN(_('Sensors restarted'))
 
 	def stop_sensors(self):
@@ -1691,7 +1697,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.start_sensors()
 
 	def read_i2c(self):
-		rtimulib = subprocess.check_output(['python', self.currentpath + '/imu/check_sensors.py', '0', 'RTIMULib'], cwd=self.currentpath + '/imu')
+		rtimulib = subprocess.check_output(['python', self.currentpath + '/imu/settings/check_sensors.py', '0', 'RTIMULib'], cwd=self.currentpath + '/imu/settings')
 		self.i2c_sensors = []
 		self.list_i2c.DeleteAllItems()
 		data = self.conf.get('I2C', 'sensors')
@@ -1737,7 +1743,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.calibration_graph.Enable()
 		self.calibration_text.Enable()
 		try:
-			with open(self.currentpath +'/imu/RTIMULib.ini', "r") as infile:
+			with open(self.currentpath +'/imu/settings/RTIMULib.ini', "r") as infile:
 				data = ''
 				for line in infile:
 					if 'CompassCalValid=' in line:
@@ -1748,7 +1754,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 						data += 'AccelCalValid=false\n'
 					else:
 						data += line
-			with open(self.currentpath +'/imu/RTIMULib.ini', "w") as outfile:
+			with open(self.currentpath +'/imu/settings/RTIMULib.ini', "w") as outfile:
 				outfile.write(data)
 			msg = _('IMU calibration data deleted, now you can calibrate it again.')
 			self.ShowMessage(msg)
@@ -1756,13 +1762,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def on_calibration_graph(self, e):
 		self.stop_sensors()
-		subprocess.Popen('RTIMULibDemoGL', cwd=self.currentpath + '/imu')
+		subprocess.Popen('RTIMULibDemoGL', cwd=self.currentpath + '/imu/settings')
 		msg = _('After calibrating, click Restart.')
 		self.ShowMessage(msg)
 
 	def on_calibration_text(self, e):
 		self.stop_sensors()
-		subprocess.Popen(['lxterminal', '-e', 'RTIMULibCal'], cwd=self.currentpath + '/imu')
+		subprocess.Popen(['lxterminal', '-e', 'RTIMULibCal'], cwd=self.currentpath + '/imu/settings')
 		msg = _('After calibrating, click Restart.')
 		self.ShowMessage(msg)
 

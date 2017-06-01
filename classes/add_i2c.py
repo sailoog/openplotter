@@ -122,7 +122,7 @@ class addI2c(wx.Dialog):
 		if platform.machine()[0:3] == 'arm':		
 			self.list_detected.DeleteAllItems()
 			#RTIMULIB sensors
-			rtimulib = subprocess.check_output(['python', self.currentpath + '/imu/check_sensors.py', act, 'detected_RTIMULib'], cwd=self.currentpath + '/imu')
+			rtimulib = subprocess.check_output(['python', self.currentpath + '/imu/settings/check_sensors.py', act, 'detected_RTIMULib'], cwd=self.currentpath + '/imu/settings')
 			self.printRtimulibResults(rtimulib)
 			#others
 			bus = smbus.SMBus(1)

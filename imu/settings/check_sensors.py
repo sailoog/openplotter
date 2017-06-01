@@ -19,7 +19,7 @@ import platform, sys, os
 
 def resetfile(file):
 	try:
-		os.remove(self.currentpath + '/imu/'+file+'.ini')
+		os.remove(file+'.ini')
 	except: pass
 
 def readfile(file):
@@ -90,7 +90,6 @@ def autoDetect(file):
 	pressure = RTIMU.RTPressure(s)
 	humidity = RTIMU.RTHumidity(s)
 	imu = RTIMU.RTIMU(s)
-	pressure = RTIMU.RTPressure(s)
 
 if platform.machine()[0:3] == 'arm':
 	import RTIMU
