@@ -1,3 +1,7 @@
+v0.11.9
+* Fix I2C sensors detection
+* Fix IMU ellipsoid calibration
+
 v0.11.8
 * I2C sensors detection workaround
 * Cosmetic changes

@@ -14,5 +14,6 @@ crudini --set openplotter_tmp/openplotter.conf GENERAL state $3
 python openplotter_tmp/update/update_signalk_settings.py $DIRDATE
 cp -f $DIRDATE/imu/RTIMULib.ini openplotter_tmp/imu/settings/
 cp -f $DIRDATE/imu/settings/RTIMULib.ini openplotter_tmp/imu/settings/
+echo "Errors copying RTIMULib.ini are expected, do not worry."
 
 cd ~/.config

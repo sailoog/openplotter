@@ -1726,20 +1726,22 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.calibration_graph.Disable()
 			self.calibration_text.Disable()
 		else:
-			self.recalibrate.Enable()
 			try:
 				temp_list = eval(rtimulib)
 			except:
 				temp_list = []
 			if temp_list:
 				if temp_list[0][2] == 1:
+					self.recalibrate.Enable()
 					self.calibration_graph.Disable()
 					self.calibration_text.Disable()
 				else:
+					self.recalibrate.Disable()
 					self.calibration_graph.Enable()
 					self.calibration_text.Enable()
 
 	def on_recalibrate(self, e):
+		self.recalibrate.Disable()
 		self.calibration_graph.Enable()
 		self.calibration_text.Enable()
 		try:
