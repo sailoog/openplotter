@@ -16,18 +16,28 @@
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
 import socket, pynmea2, subprocess
+from classes.paths import Paths
+from classes.conf import Conf
+from classes.language import Language
+
 
 fecha=''
 hora=''
 foundtime = False
+
+paths = Paths()
+conf = Conf(paths)
+language = conf.get('GENERAL', 'lang')
+Language(language)
+
 
 try:
 	sock_in = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	sock_in.settimeout(10)
 	sock_in.connect(('127.0.0.1', 10109))
 except socket.error, error_msg:
-	print 'Failed to connect with localhost:10109.'
-	print 'Error: '+ str(error_msg[0])
+	print _('Failed to connect with localhost:10109.')
+	print _('Error: ')+ str(error_msg[0])
 else:
 	cont = 0
 	while foundtime == False:
@@ -36,8 +46,8 @@ else:
 			frase_nmea = sock_in.recv(1024)
 		except socket.error, error_msg:
 			try:
-				print 'Failed to connect with localhost:10109.'
-				print 'Error: '+ str(error_msg[0])
+				print _('Failed to connect with localhost:10109.')
+				print _('Error: ')+ str(error_msg[0])
 				sys.stdout.flush()
 			except: pass
 			break
@@ -62,6 +72,6 @@ else:
 	if fecha and hora:
 		subprocess.call([ 'date', '--set', fecha.strftime('%Y-%m-%d'), '--utc'])
 		subprocess.call([ 'date', '--set', hora.strftime('%H:%M:%S'), '--utc'])
-		print 'Date and time retrieved from NMEA data successfully.'
+		print _('Date and time retrieved from NMEA data successfully.')
 	else:
-		print 'Unable to retrieve date or time from NMEA data.'
+		print _('Unable to retrieve date or time from NMEA data.')

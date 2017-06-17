@@ -66,27 +66,27 @@ elif len(sys.argv) > 1:
 			wififile.write(data)
 			wififile.close()
 
-	data = 'interface=' + wlan + '\n'
-	if bridge == '1' and wifi_server == '1':    data += 'bridge=br0\n'
-	data += 'hw_mode=' + hw_mode + '\n'
-	data += 'channel=' + channel + '\n'
-	data += 'ieee80211n=1\n'
-	data += 'wmm_enabled=1\n'
-	data += 'ssid=' + ssid + '\n'
-	data += 'auth_algs=1\n'
-	data += 'wpa=' + wpa + '\n'
-	data += 'wpa_key_mgmt=WPA-PSK\n'
-	data += 'rsn_pairwise=CCMP\n'
-	data += 'wpa_passphrase=' + passw + '\n'
+		data = 'interface=' + wlan + '\n'
+		if bridge == '1' and wifi_server == '1':    data += 'bridge=br0\n'
+		data += 'hw_mode=' + hw_mode + '\n'
+		data += 'channel=' + channel + '\n'
+		data += 'ieee80211n=1\n'
+		data += 'wmm_enabled=1\n'
+		data += 'ssid=' + ssid + '\n'
+		data += 'auth_algs=1\n'
+		data += 'wpa=' + wpa + '\n'
+		data += 'wpa_key_mgmt=WPA-PSK\n'
+		data += 'rsn_pairwise=CCMP\n'
+		data += 'wpa_passphrase=' + passw + '\n'
 
-	wififile = open('/etc/hostapd/hostapd.conf', 'r', 2000)
-	bak = wififile.read()
-	wififile.close()
-	if bak != data:
-		change = True
-		wififile = open('/etc/hostapd/hostapd.conf', 'w')
-		wififile.write(data)
+		wififile = open('/etc/hostapd/hostapd.conf', 'r', 2000)
+		bak = wififile.read()
 		wififile.close()
+		if bak != data:
+			change = True
+			wififile = open('/etc/hostapd/hostapd.conf', 'w')
+			wififile.write(data)
+			wififile.close()
 
 	lan = wlan
 	if bridge == '1': lan = 'br0'

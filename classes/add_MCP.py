@@ -45,7 +45,7 @@ class addMCP(wx.Dialog):
 
 		self.asterix_t = wx.StaticText(panel, label=_('*'))
 		self.asterix = wx.TextCtrl(panel, size=(150, -1))
-		self.asterix_t2 = wx.StaticText(panel, label=_('allowed characters: 0-9, a-z, A-Z.'))
+		self.asterix_t2 = wx.StaticText(panel, label=_('allowed characters: 0-9, a-z, A-Z'))
 
 		self.aktiv = wx.CheckBox(panel, label=_('aktiv'))
 		self.convert = wx.CheckBox(panel, label=_('convert'))

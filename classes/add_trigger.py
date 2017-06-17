@@ -36,7 +36,7 @@ class addTrigger(wx.Dialog):
 
 		hline1 = wx.StaticLine(panel)
 
-		titl = wx.StaticText(panel, label='Signal K key')
+		titl = wx.StaticText(panel, label=_('Signal K key'))
 		self.SKkey = wx.TextCtrl(panel, style=wx.CB_READONLY)
 
 		self.edit_skkey = wx.Button(panel, label=_('Edit'))
