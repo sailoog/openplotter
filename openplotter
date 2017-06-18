@@ -1773,7 +1773,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.list_MCP = wx.ListCtrl(self.p_spi, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
 		self.list_MCP.InsertColumn(0, _('aktiv'), width=40)
 		self.list_MCP.InsertColumn(1, _('channel'), width=65)
-		self.list_MCP.InsertColumn(2, _('SK name'), width=310)
+		self.list_MCP.InsertColumn(2, _('Signal K key'), width=310)
 		self.list_MCP.InsertColumn(3, _('*'), width=120)
 		self.list_MCP.InsertColumn(4, _('convert'), width=55)
 		self.list_MCP.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit_MCP)
