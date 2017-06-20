@@ -98,16 +98,16 @@ class MainFrame(wx.Frame):
 		self.p_sms = wx.Panel(self.nb)
 		self.p_startup = wx.Panel(self.nb)
 		self.nb.AddPage(self.p_usb, _('USB manager'))
-		self.nb.AddPage(self.p_kplex, _('NMEA 0183'))
-		self.nb.AddPage(self.p_n2k, _('N2K'))
-		self.nb.AddPage(self.p_sk, _('Signal K'))
+		self.nb.AddPage(self.p_kplex, 'NMEA 0183')
+		self.nb.AddPage(self.p_n2k, 'N2K')
+		self.nb.AddPage(self.p_sk, 'Signal K')
 		self.nb.AddPage(self.p_wifi, _('WiFi AP'))
 		self.nb.AddPage(self.p_action, _('Actions'))
 		self.nb.AddPage(self.p_gpio, _('GPIO'))
 		self.nb.AddPage(self.p_i2c, _('I2C'))
-		self.nb.AddPage(self.p_1w, _('1W'))
-		self.nb.AddPage(self.p_spi, _('SPI'))
-		self.nb.AddPage(self.p_mqtt, _('MQTT'))
+		self.nb.AddPage(self.p_1w, '1W')
+		self.nb.AddPage(self.p_spi, 'SPI')
+		self.nb.AddPage(self.p_mqtt, 'MQTT')
 		self.nb.AddPage(self.p_account, _('Accounts'))
 		self.nb.AddPage(self.p_sms, _('SMS'))
 		self.nb.AddPage(self.p_startup, _('Startup'))
@@ -287,21 +287,12 @@ class MainFrame(wx.Frame):
 		self.SetStatusText(_('Set time zone in the new window'))
 
 	def time_gps(self, event):
-		self.ShowStatusBarBLACK(_('Waiting for NMEA time data in localhost:55556 ...'))
+		self.ShowStatusBarBLACK(_('Waiting for NMEA time...'))
 		time_gps_result = subprocess.check_output(['sudo', 'python', self.currentpath + '/time_gps.py'])
 		msg = ''
 		re = time_gps_result.splitlines()
 		for current in re:
-			if 'Failed to connect with localhost:55556.' in current: msg += _(
-				'Failed to connect with localhost:55556.\n')
-			if 'Error: ' in current: msg += current + '\n'
-			if 'Unable to retrieve date or time from NMEA data.' in current: msg += _(
-				'Unable to retrieve date or time from NMEA data.\n')
-			if 'UTC' in current:
-				if not '00:00:00' in current: msg += current + '\n'
-			if 'Date and time retrieved from NMEA data successfully.' in current: msg += _(
-				'Date and time retrieved from NMEA data successfully.')
-
+			msg+=current+'  '
 		self.ShowStatusBarBLACK('')
 		self.ShowMessage(msg)
 
@@ -571,11 +562,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		wx.StaticBox(self.p_startup, size=(330, 50), pos=(10, 10))
 		wx.StaticText(self.p_startup, label=_('Delay (seconds)'), pos=(20, 30))
 		self.delay = wx.TextCtrl(self.p_startup, -1, size=(55, 32), pos=(170, 23))
-		button_ok_delay = wx.Button(self.p_startup, label=_('Ok'), size=(70, 32), pos=(250, 23))
+		button_ok_delay = wx.Button(self.p_startup, label=_('OK'), size=(70, 32), pos=(250, 23))
 		button_ok_delay.Bind(wx.EVT_BUTTON, self.on_ok_delay)
 
 		wx.StaticBox(self.p_startup, size=(330, 230), pos=(10, 65))
-		self.startup_opencpn = wx.CheckBox(self.p_startup, label=_('OpenCPN'), pos=(20, 80))
+		self.startup_opencpn = wx.CheckBox(self.p_startup, label='OpenCPN', pos=(20, 80))
 		self.startup_opencpn.Bind(wx.EVT_CHECKBOX, self.startup)
 		self.startup_opencpn_nopengl = wx.CheckBox(self.p_startup, label=_('no OpenGL'), pos=(40, 105))
 		self.startup_opencpn_nopengl.Bind(wx.EVT_CHECKBOX, self.startup)
@@ -597,7 +588,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.startup_play_sound = wx.CheckBox(self.p_startup, label=_('Play sound'), pos=(360, 80))
 		self.startup_play_sound.Bind(wx.EVT_CHECKBOX, self.startup)
 		self.startup_path_sound = wx.TextCtrl(self.p_startup, -1, size=(200, 32), pos=(360, 110))
-		self.button_select_sound = wx.Button(self.p_startup, label=_('Select'), pos=(570, 110))
+		self.button_select_sound = wx.Button(self.p_startup, label=_('File'), pos=(570, 110))
 		self.button_select_sound.Bind(wx.EVT_BUTTON, self.on_select_sound)
 
 		self.op_maximize = wx.CheckBox(self.p_startup, label=_('Maximize OpenPlotter'), pos=(360, 150))
@@ -1465,22 +1456,23 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def page_i2c(self):
 		self.i2c_sensors_def = []
-		self.i2c_sensors_def.append(['InvenSense MPU-9150','rtimulib.imu.2.',[_('heading'),_('heel'),_('pitch')]])
-		self.i2c_sensors_def.append(['STM L3GD20H + LSM303D','rtimulib.imu.3.',[_('heading'),_('heel'),_('pitch')]])
-		self.i2c_sensors_def.append(['STM L3GD20 + LSM303DLHC','rtimulib.imu.4.',[_('heading'),_('heel'),_('pitch')]])
-		self.i2c_sensors_def.append(['STM LSM9DS0','rtimulib.imu.5.',[_('heading'),_('heel'),_('pitch')]])
-		self.i2c_sensors_def.append(['STM LSM9DS1','rtimulib.imu.6.',[_('heading'),_('heel'),_('pitch')]])
-		self.i2c_sensors_def.append(['InvenSense MPU-9250','rtimulib.imu.7.',[_('heading'),_('heel'),_('pitch')]])
-		self.i2c_sensors_def.append(['STM L3GD20H + LSM303DLHC','rtimulib.imu.8.',[_('heading'),_('heel'),_('pitch')]])
-		self.i2c_sensors_def.append(['Bosch BMX055','rtimulib.imu.9.',[_('heading'),_('heel'),_('pitch')]])
-		self.i2c_sensors_def.append(['Bosch BNX055','rtimulib.imu.10.',[_('heading'),_('heel'),_('pitch')]])
-		self.i2c_sensors_def.append(['BMP180','rtimulib.press.2.',[_('pressure'),_('temperature')]])
-		self.i2c_sensors_def.append(['LPS25H','rtimulib.press.3.',[_('pressure'),_('temperature')]])
-		self.i2c_sensors_def.append(['MS5611','rtimulib.press.4.',[_('pressure'),_('temperature')]])
-		self.i2c_sensors_def.append(['MS5637','rtimulib.press.5.',[_('pressure'),_('temperature')]])
-		self.i2c_sensors_def.append(['HTS221','rtimulib.hum.2.',[_('humidity'),_('temperature')]])
-		self.i2c_sensors_def.append(['HTU21D','rtimulib.hum.3.',[_('humidity'),_('temperature')]])
-		self.i2c_sensors_def.append(['BME280','0x76',[_('pressure'),_('temperature'),_('humidity')]])
+		self.i2c_sensors_def.append(['InvenSense MPU-9150','rtimulib.imu.2.',['heading','heel','pitch']])
+		self.i2c_sensors_def.append(['InvenSense MPU-9250','rtimulib.imu.7.',['heading','heel','pitch']])
+		self.i2c_sensors_def.append(['InvenSense MPU-9255','rtimulib.imu.11.',['heading','heel','pitch']])
+		self.i2c_sensors_def.append(['STM L3GD20 + LSM303DLHC','rtimulib.imu.4.',['heading','heel','pitch']])
+		self.i2c_sensors_def.append(['STM L3GD20H + LSM303D','rtimulib.imu.3.',['heading','heel','pitch']])
+		self.i2c_sensors_def.append(['STM L3GD20H + LSM303DLHC','rtimulib.imu.8.',['heading','heel','pitch']])
+		self.i2c_sensors_def.append(['STM LSM9DS0','rtimulib.imu.5.',['heading','heel','pitch']])
+		self.i2c_sensors_def.append(['STM LSM9DS1','rtimulib.imu.6.',['heading','heel','pitch']])
+		self.i2c_sensors_def.append(['Bosch BMX055','rtimulib.imu.9.',['heading','heel','pitch']])
+		self.i2c_sensors_def.append(['Bosch BNX055','rtimulib.imu.10.',['heading','heel','pitch']])
+		self.i2c_sensors_def.append(['BMP180','rtimulib.press.2.',['pressure','temperature']])
+		self.i2c_sensors_def.append(['LPS25H','rtimulib.press.3.',['pressure','temperature']])
+		self.i2c_sensors_def.append(['MS5611','rtimulib.press.4.',['pressure','temperature']])
+		self.i2c_sensors_def.append(['MS5637','rtimulib.press.5.',['pressure','temperature']])
+		self.i2c_sensors_def.append(['HTS221','rtimulib.hum.2.',['humidity','temperature']])
+		self.i2c_sensors_def.append(['HTU21D','rtimulib.hum.3.',['humidity','temperature']])
+		self.i2c_sensors_def.append(['BME280','0x76',['pressure','temperature','humidity']])
 
 		title = wx.StaticText(self.p_i2c, label=_(' Sensors '))
 
@@ -1781,7 +1773,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.list_MCP = wx.ListCtrl(self.p_spi, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
 		self.list_MCP.InsertColumn(0, _('aktiv'), width=40)
 		self.list_MCP.InsertColumn(1, _('channel'), width=65)
-		self.list_MCP.InsertColumn(2, _('SK name'), width=310)
+		self.list_MCP.InsertColumn(2, _('Signal K key'), width=310)
 		self.list_MCP.InsertColumn(3, _('*'), width=120)
 		self.list_MCP.InsertColumn(4, _('convert'), width=55)
 		self.list_MCP.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit_MCP)
@@ -2520,7 +2512,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			sensor_id = dlg.id_select.GetValue()
 			offset = dlg.offset.GetValue()
 			if not SKkey:
-				self.ShowMessage(_('Failed. Provide a Signal K key.'))
+				self.ShowMessage(_('Failed. Select a Signal K key.'))
 				dlg.Destroy()
 				return
 			if not name:
@@ -2941,7 +2933,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.sms_enable = wx.CheckBox(self.p_sms, label=_('Enable settings'), pos=(20, 30))
 		self.sms_enable.Bind(wx.EVT_CHECKBOX, self.onsms_enable)
 
-		self.sms_dev_label = wx.StaticText(self.p_sms, label='Serial port', pos=(20, 60))
+		self.sms_dev_label = wx.StaticText(self.p_sms, label=_('Serial port'), pos=(20, 60))
 		self.sms_dev = wx.ComboBox(self.p_sms, choices=self.SerDevLs, style=wx.CB_READONLY, size=(150, 32),
 								   pos=(20, 80))
 		sms_con_list = ['at', 'at19200', 'at115200', 'blueat', 'bluephonet', 'bluefbus', 'blueobex', 'bluerfgnapbus',
@@ -2953,7 +2945,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.sms_bt_label = wx.StaticText(self.p_sms, label=_('Bluetooth address'), pos=(180, 60))
 		self.sms_bt = wx.TextCtrl(self.p_sms, -1, size=(150, 32), pos=(180, 80))
 
-		self.sms_con_label = wx.StaticText(self.p_sms, label='Connection', pos=(20, 120))
+		self.sms_con_label = wx.StaticText(self.p_sms, label=_('Connection'), pos=(20, 120))
 		self.sms_con = wx.ComboBox(self.p_sms, choices=sms_con_list, style=wx.CB_READONLY, size=(150, 32),
 								   pos=(20, 140))
 

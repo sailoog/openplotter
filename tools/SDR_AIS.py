@@ -73,7 +73,7 @@ class MyFrame(wx.Frame):
 
 			wx.StaticBox(self, label=_(' Radio '), size=(260, 120), pos=(420, 185))
 
-			self.button_vhf_Rx =wx.Button(self, label=_('Gqrx'), pos=(430, 210))
+			self.button_vhf_Rx =wx.Button(self, label='Gqrx', pos=(430, 210))
 			self.Bind(wx.EVT_BUTTON, self.vhf_Rx, self.button_vhf_Rx)
 
 			self.CreateStatusBar()

@@ -27,7 +27,7 @@ class addGPIO(wx.Dialog):
 		wx.StaticText(panel, label=_('Name'), pos=(10, 10))
 		self.name = wx.TextCtrl(panel, size=(310, 30), pos=(10, 35))
 
-		wx.StaticText(panel, label=_('allowed characters: 0-9, a-z, A-Z.'), pos=(10, 70))
+		wx.StaticText(panel, label=_('allowed characters: 0-9, a-z, A-Z'), pos=(10, 70))
 
 		list_io = [_('input'), _('output')]
 		wx.StaticText(panel, label=_('I/O'), pos=(10, 100))

@@ -35,7 +35,7 @@ class addDS18B20(wx.Dialog):
 
 		panel = wx.Panel(self)
 
-		wx.StaticText(panel, label='Signal K key', pos=(10, 10))
+		wx.StaticText(panel, label=_('Signal K key'), pos=(10, 10))
 		self.SKkey = wx.TextCtrl(panel, style=wx.CB_READONLY, size=(300, 30), pos=(10, 35))
 
 		self.edit_skkey = wx.Button(panel, label=_('Edit'), pos=(320, 32))

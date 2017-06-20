@@ -51,15 +51,15 @@ class MyFrame(wx.Frame):
 		self.SetIcon(self.icon)
 
 		self.list = wx.ListCtrl(panel, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
-		self.list.InsertColumn(0, _('SignalK'), width=400)
-		self.list.InsertColumn(1, _('SK_Unit'), width=80)
+		self.list.InsertColumn(0, 'SignalK', width=400)
+		self.list.InsertColumn(1, _('SK Unit'), width=80)
 		self.list.InsertColumn(2, _('Unit'), width=80)
 		self.list.InsertColumn(3, _('Description'), width=500)
 
-		self.sort_UnitSK = wx.Button(panel, label=_('Unit SK'))
+		self.sort_UnitSK = wx.Button(panel, label=_('Sort SK Unit'))
 		self.sort_UnitSK.Bind(wx.EVT_BUTTON, self.on_sort_UnitSK)
 
-		self.sort_Unit = wx.Button(panel, label=_('Unit'))
+		self.sort_Unit = wx.Button(panel, label=_('Sort Unit'))
 		self.Bind(wx.EVT_BUTTON, self.on_sort_Unit, self.sort_Unit)
 
 		self.sort_SK = wx.Button(panel, label=_('Sort SK'))

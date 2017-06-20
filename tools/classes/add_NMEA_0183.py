@@ -50,7 +50,8 @@ class addNMEA_0183(wx.Dialog):
  		self.button_nmea_info =wx.Button(panel, label=_('NMEA info'), pos=(250, 33))
 		self.Bind(wx.EVT_BUTTON, self.nmea_info, self.button_nmea_info)
 
-		cancelBtn = wx.Button(panel, wx.ID_CANCEL, pos=(465, 33))
+		cancelBtn = wx.Button(panel, label=_('cancel'), pos=(465, 33))
+		cancelBtn.Bind(wx.EVT_BUTTON, self.on_cancel)
 		okBtn = wx.Button(panel, wx.ID_OK, pos=(575, 33))
 
 		self.list_fields = wx.ListCtrl(panel, style=wx.LC_REPORT, size=(650, 170), pos=(10, 70))
@@ -346,3 +347,6 @@ class addNMEA_0183(wx.Dialog):
 		self.value_type.Disable()
 		self.button_add_value.Disable()
 		self.button_del_value.Disable()
+
+	def on_cancel(self, event):
+		self.Close()
