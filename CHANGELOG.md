@@ -1,3 +1,11 @@
+v0.11.10
+* Add tool for INA21
+* Add USB tethering Android fixed IP
+* Update language sources
+* Fix hotspot
+* Add show calibration comparation tool
+* Fix magnetic variation calculation
+
 v0.11.9
 * Fix I2C sensors detection
 * Fix IMU ellipsoid calibration
