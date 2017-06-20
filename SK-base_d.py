@@ -15,7 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import datetime,json,operator,signal,socket,sys,threading,time,websocket,math,re
+import datetime,json,operator,signal,socket,sys,threading,time,websocket,math,re,geomag
+from dateutil import tz
 from classes.N2K_send import N2K_send
 from classes.actions import Actions
 from classes.conf import Conf
@@ -525,8 +526,6 @@ class MySK_to_Action_Calc:
 		self.operators_list = [_('was not updated in the last (sec.)'), _('was updated in the last (sec.)'), '=',
 							   '<', '<=', '>', '>=', _('contains')]
 
-		self.tdif = time.time() - time.mktime(datetime.datetime.utcnow().timetuple())
-		self.tdif = round(self.tdif, 0)
 		self.triggers = []
 		self.actions = Actions(SK)
 
@@ -535,12 +534,7 @@ class MySK_to_Action_Calc:
 
 		self.cycle10 = time.time() + 0.01
 		self.read_Action()
-		
-		self.calcWindTrueWater = self.SK.conf.get('CALCULATE', 'tw_stw')=='1'
-		self.calcWindTrueGround = self.SK.conf.get('CALCULATE', 'tw_sog')=='1'
-		if self.calcWindTrueWater | self.calcWindTrueGround:
-			self.read_Calc()
-			self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		self.read_Calc()
 
 	def read_Action(self):
 		self.SK.static_list.append([])
@@ -583,14 +577,29 @@ class MySK_to_Action_Calc:
 		return listx					
 					
 	def read_Calc(self):
-		self.environment_wind_angleApparent = self.setlist(['environment.wind.angleApparent', [0, 0, 0, 0]])
-		self.environment_wind_speedApparent = self.setlist(['environment.wind.speedApparent', [0, 0, 0, 0]])		
-		if self.calcWindTrueWater:
-			self.navigation_speedThroughWater = self.setlist(['navigation.speedThroughWater', [0, 0, 0, 0]])
-		if self.calcWindTrueGround:
-			self.navigation_courseOverGroundTrue = self.setlist(['navigation.courseOverGroundTrue', [0, 0, 0, 0]])
-			self.navigation_speedOverGround = self.setlist(['navigation.speedOverGround', [0, 0, 0, 0]])
-			self.navigation_headingMagnetic = self.setlist(['navigation.headingMagnetic', [0, 0, 0, 0]])
+		tick = time.time()
+		self.calcMagneticVariation = self.SK.conf.get('CALCULATE', 'mag_var')=='1'
+		self.calcWindTrueWater = self.SK.conf.get('CALCULATE', 'tw_stw')=='1'
+		self.calcWindTrueGround = self.SK.conf.get('CALCULATE', 'tw_sog')=='1'
+
+		if self.calcWindTrueWater | self.calcWindTrueGround | self.calcMagneticVariation:
+			self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+		if self.calcMagneticVariation:
+			self.navigation_position_latitude = self.setlist(['navigation.position.latitude', [0, 0, 0, 0, 0, 0, 0, 0]])
+			self.navigation_position_longitude = self.setlist(['navigation.position.longitude', [0, 0, 0, 0, 0, 0, 0, 0]])
+			self.mag_var_rate = float(self.SK.conf.get('CALCULATE', 'mag_var_rate'))
+			self.mag_var_rate_tick = tick
+			self.mag_var_accuracy = float(self.SK.conf.get('CALCULATE', 'mag_var_accuracy'))
+
+		#self.environment_wind_angleApparent = self.setlist(['environment.wind.angleApparent', [0, 0, 0, 0]])
+		#self.environment_wind_speedApparent = self.setlist(['environment.wind.speedApparent', [0, 0, 0, 0]])		
+		#if self.calcWindTrueWater:
+		#	self.navigation_speedThroughWater = self.setlist(['navigation.speedThroughWater', [0, 0, 0, 0]])
+		#if self.calcWindTrueGround:
+		#	self.navigation_courseOverGroundTrue = self.setlist(['navigation.courseOverGroundTrue', [0, 0, 0, 0]])
+		#	self.navigation_speedOverGround = self.setlist(['navigation.speedOverGround', [0, 0, 0, 0]])
+		#	self.navigation_headingMagnetic = self.setlist(['navigation.headingMagnetic', [0, 0, 0, 0]])
 							
 	def Action_set(self, item, cond):
 		if cond:
@@ -622,155 +631,179 @@ class MySK_to_Action_Calc:
 		return data
 
 	def Action_Calc_cycle(self, tick2a):
-		if tick2a > self.cycle10:
-			self.cycle10 += 0.1
-			for index, item in enumerate(self.triggers):
-				error = False
-				now = time.time() - self.tdif
-				operator_ = item[2]
-				if item[1] == -1:
+		now = tick2a
+		for index, item in enumerate(self.triggers):
+			error = False
+			operator_ = item[2]
+			if item[1] == -1:
+				try:
+					data_value = datetime.datetime.strptime(item[3], '%Y-%m-%dT%H:%M:%S')
+					data_value = time.mktime(data_value.timetuple())
+					data_value = float(data_value)
+				except Exception, e: 
+					print str(e)
+					error = True
+				if not error:
+					# less than or equal to
+					if operator_ == 4:
+						self.Action_set(item, now <= data_value)
+					# greater than or equal to
+					elif operator_ == 6:
+						self.Action_set(item, now >= data_value)
+			else:
+				if item[6] == 'value':
 					try:
-						data_value = datetime.datetime.strptime(item[3], '%Y-%m-%dT%H:%M:%S')
-						data_value = time.mktime(data_value.timetuple())
-						data_value = float(data_value)
+						trigger_value = item[1][1][2]
+						try:
+							data_value = float(item[3])
+						except:
+							data_value = str(item[3])
 					except Exception, e: 
 						print str(e)
 						error = True
-					if not error:
-						# less than or equal to
-						if operator_ == 4:
-							self.Action_set(item, now <= data_value)
-						# greater than or equal to
-						elif operator_ == 6:
-							self.Action_set(item, now >= data_value)
-				else:
-					if item[6] == 'value':
+				elif item[6] == 'source':
+					try:
+						trigger_value = item[1][1][0]
 						try:
-							trigger_value = item[1][1][2]
+							data_value = float(item[3])
+						except:
+							data_value = str(item[3])
+					except Exception, e: 
+						print str(e)
+						error = True
+				elif item[6] == 'timestamp':
+					try:
+						if type(item[1][1][7]) is int:
+							trigger_value = 0
+						else:
+							trigger_value = datetime.datetime.strptime(item[1][1][7][:-5], '%Y-%m-%dT%H:%M:%S')
+							trigger_value = time.mktime(trigger_value.timetuple())
+						data_value = datetime.datetime.strptime(item[3], '%Y-%m-%dT%H:%M:%S')
+						data_value = time.mktime(data_value.timetuple())
+					except Exception, e: 
+						print str(e)
+						error = True
+				if not error:
+					try:
+						if type(data_value) is float:
 							try:
-								data_value = float(item[3])
-							except:
-								data_value = str(item[3])
-						except Exception, e: 
-							print str(e)
-							error = True
-					elif item[6] == 'source':
-						try:
-							trigger_value = item[1][1][0]
-							try:
-								data_value = float(item[3])
-							except:
-								data_value = str(item[3])
-						except Exception, e: 
-							print str(e)
-							error = True
-					elif item[6] == 'timestamp':
-						try:
-							if type(item[1][1][7]) is int:
-								trigger_value = 0
+								trigger_value_float = float(trigger_value)
+							except Exception, e: pass
 							else:
-								trigger_value = datetime.datetime.strptime(item[1][1][7][:-5], '%Y-%m-%dT%H:%M:%S')
-								trigger_value = time.mktime(trigger_value.timetuple())
-							data_value = datetime.datetime.strptime(item[3], '%Y-%m-%dT%H:%M:%S')
-							data_value = time.mktime(data_value.timetuple())
-						except Exception, e: 
-							print str(e)
-							error = True
-					if not error:
-						try:
-							if type(data_value) is float:
-								try:
-									trigger_value_float = float(trigger_value)
-								except Exception, e: pass
-								else:
-									# equal (number)
-									if operator_ == 2:
-										self.Action_set(item, trigger_value_float == data_value)
-									# less than
-									elif operator_ == 3:
-										self.Action_set(item, trigger_value_float < data_value)
-									# less than or equal to
-									elif operator_ == 4:
-										self.Action_set(item, trigger_value_float <= data_value)
-									# greater than
-									elif operator_ == 5:
-										self.Action_set(item, trigger_value_float > data_value)
-									# greater than or equal to
-									elif operator_ == 6:
-										self.Action_set(item, trigger_value_float >= data_value)
-								# contain (number)
-								if operator_ == 7:
-									self.Action_set(item, str(data_value) in str(trigger_value))
-								# not present for
-								elif operator_ == 0:
-									if trigger_value == 0: self.Action_set(item, True)
-									else: self.Action_set(item, now - trigger_value > data_value)
-								# present in the last
-								elif operator_ == 1:
-									self.Action_set(item, now - trigger_value < data_value)
-							else:
-								# equal (string)
+								# equal (number)
 								if operator_ == 2:
-									self.Action_set(item, str(trigger_value) == data_value)
-								# contain (string)
-								elif operator_ == 7:
-									self.Action_set(item, data_value in str(trigger_value))
-						except Exception, e: print str(e)
-						#except: pass
+									self.Action_set(item, trigger_value_float == data_value)
+								# less than
+								elif operator_ == 3:
+									self.Action_set(item, trigger_value_float < data_value)
+								# less than or equal to
+								elif operator_ == 4:
+									self.Action_set(item, trigger_value_float <= data_value)
+								# greater than
+								elif operator_ == 5:
+									self.Action_set(item, trigger_value_float > data_value)
+								# greater than or equal to
+								elif operator_ == 6:
+									self.Action_set(item, trigger_value_float >= data_value)
+							# contain (number)
+							if operator_ == 7:
+								self.Action_set(item, str(data_value) in str(trigger_value))
+							# not present for
+							elif operator_ == 0:
+								if trigger_value == 0: self.Action_set(item, True)
+								else: self.Action_set(item, now - trigger_value > data_value)
+							# present in the last
+							elif operator_ == 1:
+								self.Action_set(item, now - trigger_value < data_value)
+						else:
+							# equal (string)
+							if operator_ == 2:
+								self.Action_set(item, str(trigger_value) == data_value)
+							# contain (string)
+							elif operator_ == 7:
+								self.Action_set(item, data_value in str(trigger_value))
+					except Exception, e: print str(e)
+					#except: pass
+		
+		Erg = ''
 
-			if self.calcWindTrueWater | self.calcWindTrueGround:
-				Erg = ''
-				if self.calcWindTrueWater:
-					x = self.environment_wind_speedApparent[1][2] * math.sin(self.environment_wind_angleApparent[1][2])
-					y1 = self.environment_wind_speedApparent[1][2] * math.cos(self.environment_wind_angleApparent[1][2])
-					y2 = y1 - self.navigation_speedThroughWater[1][2]
-
-					speed = math.sqrt(x**2+y2**2)
-					if y2 != 0:
-						beta2 = math.degrees(math.atan(x/y2))
-						if y2 < 0:
-							if self.environment_wind_angleApparent[1][2]>=0:
-								beta2 += 180
-							else:
-								beta2 -= 180
+		if self.calcMagneticVariation:
+			lat = self.navigation_position_latitude[1][2]
+			lon = self.navigation_position_longitude[1][2]
+			timestamp = self.navigation_position_latitude[1][7]
+			if lat and lon and timestamp:
+				timestamp = datetime.datetime.strptime(timestamp, '%Y-%m-%dT%H:%M:%S.%fZ')
+				timestamp = timestamp.replace(tzinfo=tz.tzutc())
+				timestamp = timestamp.astimezone(tz.tzlocal())
+				timestamp_local = time.mktime(timestamp.timetuple())
+				
+				if now - self.mag_var_rate_tick > self.mag_var_rate:
+					date = datetime.date.today()
+					var=float(geomag.declination(lat, lon, 0, date))
+					self.mag_var_rate_tick = now
+					if now - timestamp_local < self.mag_var_accuracy:
+						Erg += '{"path": "navigation.magneticVariation","value":'+str((var*0.017453293))+'},'
 					else:
-						if self.environment_wind_angleApparent[1][2]>0:
-							beta2 = 90
-						else:
-							beta2 = -90
-					Erg += '{"path": "environment.wind.angleTrueWater","value":'+str(0.017453293*beta2)+'},'
-					Erg += '{"path": "environment.wind.speedTrue","value":'+str(speed)+'},'
+						Erg += '{"path": "navigation.magneticVariation","value": null},'
 
-				if self.calcWindTrueGround:
-					beta1 = self.environment_wind_angleApparent[1][2] + self.navigation_headingMagnetic[1][2]
-					x1 = self.environment_wind_speedApparent[1][2] * math.sin(beta1)
-					y1 = self.environment_wind_speedApparent[1][2] * math.cos(beta1)
-					x2 = self.navigation_speedOverGround[1][2] * math.sin(self.navigation_courseOverGroundTrue[1][2])
-					y2 = self.navigation_speedOverGround[1][2] * math.cos(self.navigation_courseOverGroundTrue[1][2])
-					x3 = x1 - x2
-					y3 = y1 - y2
-					
-					speed = math.sqrt(x3**2+y3**2)
-					if y3 != 0:
-						beta3 = math.degrees(math.atan(x3/y3))
-						if y3 > 0:
-							if x3 < 0:
-								beta3 += 360
+		if Erg:
+			SignalK='{"updates":[{"$source":"OPcalculations","values":['
+			SignalK+=Erg[0:-1]+']}]}\n'		
+			self.sock.sendto(SignalK, ('127.0.0.1', 55557))	
+		'''
+		if self.calcWindTrueWater | self.calcWindTrueGround:
+			Erg = ''
+			if self.calcWindTrueWater:
+				x = self.environment_wind_speedApparent[1][2] * math.sin(self.environment_wind_angleApparent[1][2])
+				y1 = self.environment_wind_speedApparent[1][2] * math.cos(self.environment_wind_angleApparent[1][2])
+				y2 = y1 - self.navigation_speedThroughWater[1][2]
+
+				speed = math.sqrt(x**2+y2**2)
+				if y2 != 0:
+					beta2 = math.degrees(math.atan(x/y2))
+					if y2 < 0:
+						if self.environment_wind_angleApparent[1][2]>=0:
+							beta2 += 180
 						else:
-							beta3 += 180
+							beta2 -= 180
+				else:
+					if self.environment_wind_angleApparent[1][2]>0:
+						beta2 = 90
 					else:
-						if x3 > 0:
-							beta3 = 90
-						else:
-							beta3 = 270
+						beta2 = -90
+				Erg += '{"path": "environment.wind.angleTrueWater","value":'+str(0.017453293*beta2)+'},'
+				Erg += '{"path": "environment.wind.speedTrue","value":'+str(speed)+'},'
 
-					Erg += '{"path": "environment.wind.angleTrueGround","value":'+str(0.017453293*beta3)+'},'
-					Erg += '{"path": "environment.wind.speedOverGround","value":'+str(speed)+'},'
-	
-				SignalK='{"updates":[{"$source":"OPcalculations","values":['
-				SignalK+=Erg[0:-1]+']}]}\n'		
-				self.sock.sendto(SignalK, ('127.0.0.1', 55557))	
+			if self.calcWindTrueGround:
+				beta1 = self.environment_wind_angleApparent[1][2] + self.navigation_headingMagnetic[1][2]
+				x1 = self.environment_wind_speedApparent[1][2] * math.sin(beta1)
+				y1 = self.environment_wind_speedApparent[1][2] * math.cos(beta1)
+				x2 = self.navigation_speedOverGround[1][2] * math.sin(self.navigation_courseOverGroundTrue[1][2])
+				y2 = self.navigation_speedOverGround[1][2] * math.cos(self.navigation_courseOverGroundTrue[1][2])
+				x3 = x1 - x2
+				y3 = y1 - y2
+				
+				speed = math.sqrt(x3**2+y3**2)
+				if y3 != 0:
+					beta3 = math.degrees(math.atan(x3/y3))
+					if y3 > 0:
+						if x3 < 0:
+							beta3 += 360
+					else:
+						beta3 += 180
+				else:
+					if x3 > 0:
+						beta3 = 90
+					else:
+						beta3 = 270
 
+				Erg += '{"path": "environment.wind.angleTrueGround","value":'+str(0.017453293*beta3)+'},'
+				Erg += '{"path": "environment.wind.speedOverGround","value":'+str(speed)+'},'
+
+			SignalK='{"updates":[{"$source":"OPcalculations","values":['
+			SignalK+=Erg[0:-1]+']}]}\n'		
+			self.sock.sendto(SignalK, ('127.0.0.1', 55557))	
+		'''
 
 def signal_handler(signal_, frame):
 	print 'You pressed Ctrl+C!'
@@ -792,8 +825,9 @@ aktiv_Action = False
 if not SKN2K.PGN_list: aktiv_N2K = False
 if not SKNMEA.nmea_list: aktiv_NMEA = False
 if SKAction.triggers: aktiv_Action = True
-if SKAction.calcWindTrueWater: aktiv_Action = True
-if SKAction.calcWindTrueGround: aktiv_Action = True
+if SKAction.calcMagneticVariation: aktiv_Action = True
+#if SKAction.calcWindTrueWater: aktiv_Action = True
+#if SKAction.calcWindTrueGround: aktiv_Action = True
 
 stop = 0
 run_ = True

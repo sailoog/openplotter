@@ -30,123 +30,213 @@ class MyFrame(wx.Frame):
 
 			Language(self.conf.get('GENERAL','lang'))
 
-			wx.Frame.__init__(self, None, title=_('Calculate'), size=(690,320))
+			title = _('Calculate')
+
+			wx.Frame.__init__(self, None, title=title, size=(690,370))
 			
 			self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 			
 			self.icon = wx.Icon(self.paths.op_path+'/openplotter.ico', wx.BITMAP_TYPE_ICO)
 			self.SetIcon(self.icon)
-	
-			'''
-			wx.StaticBox(self, size=(330, 50), pos=(10, 10))
-			wx.StaticText(self, label=_('Rate (sec)'), pos=(20, 30))
-			self.rate_list = ['0.1', '0.25', '0.5', '0.75', '1', '1.5', '2']
-			self.rate2= wx.ComboBox(self, choices=self.rate_list, style=wx.CB_READONLY, size=(80, 32), pos=(150, 23))
-			self.button_ok_rate2 =wx.Button(self, label=_('Ok'),size=(70, 32), pos=(250, 23))
-			self.Bind(wx.EVT_BUTTON, self.ok_rate2, self.button_ok_rate2)
 
-			wx.StaticBox(self, size=(330, 50), pos=(350, 10))
-			wx.StaticText(self, label=_('Accuracy (sec)'), pos=(360, 30))
-			self.accuracy= wx.ComboBox(self, choices=self.rate_list, style=wx.CB_READONLY, size=(80, 32), pos=(500, 23))
-			self.button_ok_accuracy =wx.Button(self, label=_('Ok'),size=(70, 32), pos=(600, 23))
-			self.Bind(wx.EVT_BUTTON, self.ok_accuracy, self.button_ok_accuracy)
+			rate_list = ['0.1', '0.25', '0.5', '0.75', '1', '1.5', '2', '5', '30', '60', '300']
 
-			wx.StaticBox(self, size=(330, 65), pos=(10, 65))
-			self.mag_var = wx.CheckBox(self, label=_('Magnetic variation'), pos=(20, 80))
-			self.mag_var.Bind(wx.EVT_CHECKBOX, self.nmea_mag_var)
-			wx.StaticText(self, label=_('Generated NMEA: $OCHDG'), pos=(20, 105))
+			panel = wx.Panel(self)
 
-			wx.StaticBox(self, size=(330, 65), pos=(10, 130))
-			self.heading_t = wx.CheckBox(self, label=_('True heading'), pos=(20, 145))
-			self.heading_t.Bind(wx.EVT_CHECKBOX, self.nmea_hdt)
-			wx.StaticText(self, label=_('Generated NMEA: $OCHDT'), pos=(20, 170))
+			mg_box = wx.StaticBox(panel, -1, _(' Magnetic variation '))
+			self.mag_var = wx.CheckBox(panel, -1, label=_('Enable'))
+			mg_requires = wx.StaticText(panel, label=_('Requires: position, date.'))
+			mg_accu_label = wx.StaticText(panel, label=_('Accuracy (sec)'))
+			self.mg_accu= wx.ComboBox(panel, choices=rate_list, style=wx.CB_READONLY)
+			mg_rate_label = wx.StaticText(panel, label=_('Rate (sec)'))
+			self.mg_rate= wx.ComboBox(panel, choices=rate_list, style=wx.CB_READONLY)
 
-			wx.StaticBox(self, size=(330, 65), pos=(10, 195))
-			self.rot = wx.CheckBox(self, label=_('Rate of turn'), pos=(20, 210))
-			self.rot.Bind(wx.EVT_CHECKBOX, self.nmea_rot)
-			wx.StaticText(self, label=_('Generated NMEA: $OCROT'), pos=(20, 235))
-			'''
+			rt_box = wx.StaticBox(panel, -1, _(' Rate of turn '))
+			self.rate_turn = wx.CheckBox(panel, -1, label=_('Enable'))
+			rt_requires = wx.StaticText(panel, label=_('Requires: magnetic heading.'))
+			rt_accu_label = wx.StaticText(panel, label=_('Accuracy (sec)'))
+			self.rt_accu= wx.ComboBox(panel, choices=rate_list, style=wx.CB_READONLY)
+			rt_rate_label = wx.StaticText(panel, label=_('Rate (sec)'))
+			self.rt_rate= wx.ComboBox(panel, choices=rate_list, style=wx.CB_READONLY)
 
-			wx.StaticBox(self, size=(330, 50), pos=(350, 10))
-			self.back = wx.CheckBox(self, label=_('NMEA for imu and pressure (compatibility v0.8)'), pos=(360, 30))
-			self.back.Bind(wx.EVT_CHECKBOX, self.on_back)
+			th_box = wx.StaticBox(panel, -1, _(' True heading '))
+			self.heading_t = wx.CheckBox(panel, -1, label=_('Enable'))
+			th_requires = wx.StaticText(panel, label=_('Requires: magnetic heading, variation.'))
+			th_accu_label = wx.StaticText(panel, label=_('Accuracy (sec)'))
+			self.th_accu= wx.ComboBox(panel, choices=rate_list, style=wx.CB_READONLY)
+			th_rate_label = wx.StaticText(panel, label=_('Rate (sec)'))
+			self.th_rate= wx.ComboBox(panel, choices=rate_list, style=wx.CB_READONLY)
 
-			wx.StaticBox(self, label=_(' True wind '), size=(330, 90), pos=(350, 65))
-			self.TW_STW = wx.CheckBox(self, label=_('boat referenced (use speed log)'), pos=(360, 80))
-			self.TW_STW.Bind(wx.EVT_CHECKBOX, self.on_TW_STW)
-			self.TW_SOG = wx.CheckBox(self, label=_('referenced to North (Use GPS)'), pos=(360, 105))
-			self.TW_SOG.Bind(wx.EVT_CHECKBOX, self.on_TW_SOG)
-			wx.StaticText(self, label=_('Generate SK sentence'), pos=(360, 130))
+			tw_box = wx.StaticBox(panel, -1, _(' True wind speed and direction '))
+			self.true_wind = wx.CheckBox(panel, -1, label=_('Use Speed Through Water'))
+			self.true_wind.Bind(wx.EVT_CHECKBOX, self.on_select_tw)
+			tw_requires = wx.StaticText(panel, label=_('Requires: STW, AWS, AWA.'))
+			self.true_wind2 = wx.CheckBox(panel, -1, label=_('Use Speed Over Ground'))
+			self.true_wind2.Bind(wx.EVT_CHECKBOX, self.on_select_tw)
+			tw_requires2 = wx.StaticText(panel, label=_('Requires: SOG, COG, HDT, AWS, AWA.'))
+			tw_accu_label = wx.StaticText(panel, label=_('Accuracy (sec)'))
+			self.tw_accu= wx.ComboBox(panel, choices=rate_list, style=wx.CB_READONLY)
+			tw_rate_label = wx.StaticText(panel, label=_('Rate (sec)'))
+			self.tw_rate= wx.ComboBox(panel, choices=rate_list, style=wx.CB_READONLY)
 
-			self.CreateStatusBar()
+
+			button_cancel =wx.Button(panel, label=_('Cancel'))
+			self.Bind(wx.EVT_BUTTON, self.on_cancel, button_cancel)
+
+			button_ok =wx.Button(panel, label=_('OK'))
+			self.Bind(wx.EVT_BUTTON, self.on_ok, button_ok)
+
+			self.heading_t.Disable()
+			self.rate_turn.Disable()
+			self.true_wind.Disable()
+			self.true_wind2.Disable()
+
+			mg_boxSizer = wx.StaticBoxSizer(mg_box, wx.VERTICAL)
+			mg_boxSizer.Add(self.mag_var, 0, wx.ALL | wx.EXPAND, 5)
+			mg_boxSizer.Add(mg_requires, 0, wx.LEFT | wx.EXPAND, 5)
+			mg_h = wx.BoxSizer(wx.HORIZONTAL)
+			mg_h.Add(mg_rate_label, 0, wx.UP | wx.EXPAND, 10)
+			mg_h.Add(self.mg_rate, 0, wx.ALL | wx.EXPAND, 5)
+			mg_h.Add(mg_accu_label, 0, wx.UP | wx.EXPAND, 10)
+			mg_h.Add(self.mg_accu, 0, wx.ALL | wx.EXPAND, 5)
+			mg_boxSizer.Add(mg_h, 0, wx.ALL | wx.EXPAND, 5)
+
+			rt_boxSizer = wx.StaticBoxSizer(rt_box, wx.VERTICAL)
+			rt_boxSizer.Add(self.rate_turn, 0, wx.ALL | wx.EXPAND, 5)
+			rt_boxSizer.Add(rt_requires, 0, wx.LEFT | wx.EXPAND, 5)
+			rt_h = wx.BoxSizer(wx.HORIZONTAL)
+			rt_h.Add(rt_rate_label, 0, wx.UP | wx.EXPAND, 10)
+			rt_h.Add(self.rt_rate, 0, wx.ALL | wx.EXPAND, 5)
+			rt_h.Add(rt_accu_label, 0, wx.UP | wx.EXPAND, 10)
+			rt_h.Add(self.rt_accu, 0, wx.ALL | wx.EXPAND, 5)
+			rt_boxSizer.Add(rt_h, 0, wx.ALL | wx.EXPAND, 5)
+
+			th_boxSizer = wx.StaticBoxSizer(th_box, wx.VERTICAL)
+			th_boxSizer.Add(self.heading_t, 0, wx.ALL | wx.EXPAND, 5)
+			th_boxSizer.Add(th_requires, 0, wx.LEFT | wx.EXPAND, 5)
+			th_h = wx.BoxSizer(wx.HORIZONTAL)
+			th_h.Add(th_rate_label, 0, wx.UP | wx.EXPAND, 10)
+			th_h.Add(self.th_rate, 0, wx.ALL | wx.EXPAND, 5)
+			th_h.Add(th_accu_label, 0, wx.UP | wx.EXPAND, 10)
+			th_h.Add(self.th_accu, 0, wx.ALL | wx.EXPAND, 5)
+			th_boxSizer.Add(th_h, 0, wx.ALL | wx.EXPAND, 5)
+
+			tw_boxSizer = wx.StaticBoxSizer(tw_box, wx.VERTICAL)
+			tw_boxSizer.Add(self.true_wind, 0, wx.ALL | wx.EXPAND, 5)
+			tw_boxSizer.Add(tw_requires, 0, wx.LEFT | wx.EXPAND, 5)
+			tw_boxSizer.Add(self.true_wind2, 0, wx.ALL | wx.EXPAND, 5)
+			tw_boxSizer.Add(tw_requires2, 0, wx.LEFT | wx.EXPAND, 5)
+			tw_h = wx.BoxSizer(wx.HORIZONTAL)
+			tw_h.Add(tw_rate_label, 0, wx.UP | wx.EXPAND, 10)
+			tw_h.Add(self.tw_rate, 0, wx.ALL | wx.EXPAND, 5)
+			tw_h.Add(tw_accu_label, 0, wx.UP | wx.EXPAND, 10)
+			tw_h.Add(self.tw_accu, 0, wx.ALL | wx.EXPAND, 5)
+			tw_boxSizer.Add(tw_h, 0, wx.ALL | wx.EXPAND, 5)
+
+			vbox = wx.BoxSizer(wx.VERTICAL)
+			vbox.Add(mg_boxSizer, 0, wx.ALL | wx.EXPAND, 5)
+			vbox.Add(tw_boxSizer, 0, wx.ALL | wx.EXPAND, 5)
+
+			vbox2 = wx.BoxSizer(wx.VERTICAL)
+			vbox2.Add(th_boxSizer, 0, wx.ALL | wx.EXPAND, 5)
+			vbox2.Add(rt_boxSizer, 0, wx.ALL | wx.EXPAND, 5)
+
+			hbox = wx.BoxSizer(wx.HORIZONTAL)
+			hbox.Add(vbox, 0, wx.ALL | wx.EXPAND, 0)
+			hbox.Add(vbox2, 0, wx.ALL | wx.EXPAND, 0)
+
+			hbox2 = wx.BoxSizer(wx.HORIZONTAL)
+			hbox2.Add((0,0), 1, wx.ALL | wx.EXPAND, 0)
+			hbox2.Add(button_cancel, 0, wx.ALL | wx.EXPAND, 10)
+			hbox2.Add(button_ok, 0, wx.ALL | wx.EXPAND, 10)
+
+			vbox3 = wx.BoxSizer(wx.VERTICAL)
+			vbox3.Add(hbox, 0, wx.ALL | wx.EXPAND, 0)
+			vbox3.Add(hbox2, 0, wx.ALL | wx.EXPAND, 0)
+
+			panel.SetSizer(vbox3)
 
 			self.Centre()
 
-			self.Show(True)
+			if self.conf.get('CALCULATE', 'mag_var')=='1': self.mag_var.SetValue(True)
+			self.mg_rate.SetValue(self.conf.get('CALCULATE', 'mag_var_rate'))
+			self.mg_accu.SetValue(self.conf.get('CALCULATE', 'mag_var_accuracy'))
 
-			#self.rate2.SetValue(self.conf.get('CALCULATE', 'nmea_rate_cal'))
-			#self.accuracy.SetValue(self.conf.get('CALCULATE', 'cal_accuracy'))
-			#if self.conf.get('CALCULATE', 'nmea_mag_var')=='1': self.mag_var.SetValue(True)
-			#if self.conf.get('CALCULATE', 'nmea_hdt')=='1': self.heading_t.SetValue(True)
-			#if self.conf.get('CALCULATE', 'nmea_rot')=='1': self.rot.SetValue(True)
-			if self.conf.get('CALCULATE', 'tw_stw')=='1': self.TW_STW.SetValue(True)
-			if self.conf.get('CALCULATE', 'tw_sog')=='1': self.TW_SOG.SetValue(True)
-			if self.conf.has_option('CALCULATE', 'oldnmeav08'):
-				if self.conf.get('CALCULATE', 'oldnmeav08')=='1': self.back.SetValue(True)
+			if self.conf.get('CALCULATE', 'hdt')=='1': self.heading_t.SetValue(True)
+			self.th_rate.SetValue(self.conf.get('CALCULATE', 'hdt_rate'))
+			self.th_accu.SetValue(self.conf.get('CALCULATE', 'hdt_accuracy'))
 
-		def start_calculate(self):
-			#subprocess.call(['pkill', '-f', 'calculate_d.py'])
-			#if self.mag_var.GetValue() or self.heading_t.GetValue() or self.rot.GetValue() or self.TW_STW.GetValue() or self.TW_SOG.GetValue():
-			#	subprocess.Popen(['python', self.paths.currentpath+'/calculate_d.py'])
-			pass
+			if self.conf.get('CALCULATE', 'rot')=='1': self.rate_turn.SetValue(True)
+			self.rt_rate.SetValue(self.conf.get('CALCULATE', 'rot_rate'))
+			self.rt_accu.SetValue(self.conf.get('CALCULATE', 'rot_accuracy'))
 
-		def ok_rate2(self, e):
-			rate=self.rate2.GetValue()
-			self.conf.set('CALCULATE', 'nmea_rate_cal', rate)
-			self.start_calculate()
-			self.ShowMessage(_('Generation rate set to ')+rate+_(' seconds'))
+			if self.conf.get('CALCULATE', 'tw_stw')=='1': self.true_wind.SetValue(True)
+			if self.conf.get('CALCULATE', 'tw_sog')=='1': self.true_wind2.SetValue(True)
+			self.tw_rate.SetValue(self.conf.get('CALCULATE', 'tw_rate'))
+			self.tw_accu.SetValue(self.conf.get('CALCULATE', 'tw_accuracy'))
 
-		def ok_accuracy(self,e):
-			accuracy=self.accuracy.GetValue()
-			self.conf.set('CALCULATE', 'cal_accuracy', accuracy)
-			self.start_calculate()
-			self.ShowMessage(_('Calculation accuracy set to ')+accuracy+_(' seconds'))
+		def on_ok(self, e):
+			if self.mag_var.GetValue():
+				if self.mg_rate.GetValue() and self.mg_accu.GetValue():
+					self.conf.set('CALCULATE', 'mag_var', '1')
+					self.conf.set('CALCULATE', 'mag_var_rate', self.mg_rate.GetValue())
+					self.conf.set('CALCULATE', 'mag_var_accuracy', self.mg_accu.GetValue())
+				else:
+					self.ShowMessage(_('You have to provide rate and accuracy values for magnetic variation'))
+					return
+			else: self.conf.set('CALCULATE', 'mag_var', '0')
 
-		def nmea_mag_var(self, e):
+			if self.heading_t.GetValue():
+				if self.th_rate.GetValue() and self.th_accu.GetValue():
+					self.conf.set('CALCULATE', 'hdt', '1')
+					self.conf.set('CALCULATE', 'hdt_rate', self.th_rate.GetValue())
+					self.conf.set('CALCULATE', 'hdt_accuracy', self.th_accu.GetValue())
+				else:
+					self.ShowMessage(_('You have to provide rate and accuracy values for true heading'))
+					return
+			else: self.conf.set('CALCULATE', 'hdt', '0')
+
+			if self.rate_turn.GetValue():
+				if self.rt_rate.GetValue() and self.rt_accu.GetValue():
+					self.conf.set('CALCULATE', 'rot', '1')
+					self.conf.set('CALCULATE', 'rot_rate', self.rt_rate.GetValue())
+					self.conf.set('CALCULATE', 'rot_accuracy', self.rt_accu.GetValue())
+				else:
+					self.ShowMessage(_('You have to provide rate and accuracy values for rate of turn'))
+					return
+			else: self.conf.set('CALCULATE', 'rot', '0')
+
+			if self.true_wind.GetValue() or self.true_wind2.GetValue():
+				if self.tw_rate.GetValue() and self.tw_accu.GetValue():
+					if self.true_wind.GetValue(): self.conf.set('CALCULATE', 'tw_stw', '1')
+					else: self.conf.set('CALCULATE', 'tw_stw', '0')
+					if self.true_wind2.GetValue(): self.conf.set('CALCULATE', 'tw_sog', '1')
+					else: self.conf.set('CALCULATE', 'tw_sog', '0')
+					self.conf.set('CALCULATE', 'tw_rate', self.tw_rate.GetValue())
+					self.conf.set('CALCULATE', 'tw_accuracy', self.tw_accu.GetValue())
+				else:
+					self.ShowMessage(_('You have to provide rate and accuracy values for true wind speed and direction'))
+					return
+			else:
+				self.conf.set('CALCULATE', 'tw_stw', '0')
+				self.conf.set('CALCULATE', 'tw_sog', '0')
+
+			subprocess.call(['pkill', '-f', 'SK-base_d.py'])
+			subprocess.Popen(['python', self.paths.op_path + '/SK-base_d.py'])
+			self.Close()
+
+		def on_cancel(self, e):
+			self.Close()
+
+		def ShowMessage(self, w_msg):
+			wx.MessageBox(w_msg, 'Info', wx.OK | wx.ICON_INFORMATION)
+
+		def on_select_tw(self,e):
 			sender = e.GetEventObject()
-			if sender.GetValue(): self.conf.set('CALCULATE', 'nmea_mag_var', '1')
-			else: self.conf.set('CALCULATE', 'nmea_mag_var', '0')
-			self.start_calculate()
-
-		def nmea_hdt(self, e):
-			sender = e.GetEventObject()
-			if sender.GetValue(): self.conf.set('CALCULATE', 'nmea_hdt', '1')
-			else: self.conf.set('CALCULATE', 'nmea_hdt', '0')
-			self.start_calculate()
-
-		def nmea_rot(self, e):
-			sender = e.GetEventObject()
-			if sender.GetValue(): self.conf.set('CALCULATE', 'nmea_rot', '1')
-			else: self.conf.set('CALCULATE', 'nmea_rot', '0')
-			self.start_calculate()
-
-		def	on_TW_STW(self, e):
-			sender = e.GetEventObject()
-			state=sender.GetValue()
-			if state: self.conf.set('CALCULATE', 'tw_stw', '1')
-			else:     self.conf.set('CALCULATE', 'tw_stw', '0')
-
-		def	on_TW_SOG(self, e):
-			sender = e.GetEventObject()
-			state=sender.GetValue()
-			if state: self.conf.set('CALCULATE', 'tw_sog', '1')
-			else:     self.conf.set('CALCULATE', 'tw_sog', '0')
-
-		def	on_back(self, e):
-			sender = e.GetEventObject()
-			state=sender.GetValue()
-			if state: self.conf.set('CALCULATE', 'oldnmeav08', '1')
-			else:     self.conf.set('CALCULATE', 'oldnmeav08', '0')
+			if sender.GetValue():
+				self.true_wind2.SetValue(False)
+				self.true_wind.SetValue(False)
+				sender.SetValue(True)
 
 app = wx.App()
 MyFrame().Show()
