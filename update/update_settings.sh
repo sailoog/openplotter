@@ -15,5 +15,6 @@ python openplotter_tmp/update/update_signalk_settings.py $DIRDATE
 cp -f $DIRDATE/imu/RTIMULib.ini openplotter_tmp/imu/settings/
 cp -f $DIRDATE/imu/settings/RTIMULib.ini openplotter_tmp/imu/settings/
 echo "Errors copying RTIMULib.ini are expected, do not worry."
-
+rm -rf openplotter_tmp/imu/RTEllipsoidFit/
+cp -ar $DIRDATE/imu/RTEllipsoidFit/ openplotter_tmp/imu
 cd ~/.config
