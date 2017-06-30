@@ -58,6 +58,7 @@ class addNMEA_0183(wx.Dialog):
 		self.list_fields.InsertColumn(0, _('Field'), width=290)
 		self.list_fields.InsertColumn(1, _('Value'), width=580)
 		self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.onSelect_field, self.list_fields)
+		self.list_fields.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.onEdit_fields)
 
 		self.list_value_type=[_('--Select type'),_('Expression'),'Signal K value',_('Number'),_('String')]
 		self.value_type= wx.ComboBox(panel, choices=self.list_value_type, style=wx.CB_READONLY, size=(180, 30), pos=(10, 250))
@@ -98,6 +99,7 @@ class addNMEA_0183(wx.Dialog):
  		self.button_del_value =wx.Button(panel, label=_('Delete value'), pos=(560, 330))
 		self.Bind(wx.EVT_BUTTON, self.del_value, self.button_del_value)
 
+		self.list_fiel = []
 		if edit == 0:
 			self.rate.SetValue('1')
 			self.nmea=['',[],float(self.rate.GetValue())]
@@ -109,6 +111,7 @@ class addNMEA_0183(wx.Dialog):
 			for index,item in enumerate(self.sentences):
 				if edit[1][0] in item: sent=index
 			for index, item in enumerate(self.fields[sent]):
+				self.list_fiel.append([index,item[0],self.nmea[1][index]])
 				self.list_fields.InsertStringItem(index,item[0])
 				self.list_fields.SetStringItem(index,1,str(self.nmea[1][index]))
 
@@ -118,11 +121,76 @@ class addNMEA_0183(wx.Dialog):
 
 		self.Centre()
 
-	def onSelect_vessel (self,e):
+	def is_number(self, s):
+		try:
+			float(s)
+			return True
+		except ValueError:
+			return False		
+		
+	def onEdit_fields(self,e):
+		selected_field=self.list_fields.GetFirstSelected()
+		#print self.list_fiel[selected_field]
+		if type(self.list_fiel[selected_field][2]) is list:
+			if (self.list_fiel[selected_field][2][2] == '+') == True and self.list_fiel[selected_field][2][3] == 0:
+				self.check_value_type_(self.list_value_type[2])
+				self.skvessels.SetValue(self.list_vessels[1])
+				self.onSelect_vessel_(self.list_vessels[1])
+				sk = self.list_fiel[selected_field][2][0]
+				sk0 = sk.split('.')[0]
+				skr = sk[len(sk0)+1:]
+				self.skgroups.SetValue(sk0)
+				self.onSelect_group_(sk0)
+				self.signalk.SetValue(skr)
+				format = self.list_formats[0]
+				formats = self.list_fiel[selected_field][2][1]
+				for value_ in self.list_formats:
+					if formats in value_:
+						format = value_
+						break						
+				self.formats.SetValue(format)
+			else:
+				self.check_value_type_(self.list_value_type[1])
+				self.skvessels.SetValue(self.list_vessels[1])
+				self.onSelect_vessel_(self.list_vessels[1])
+				sk = self.list_fiel[selected_field][2][0]
+				sk0 = sk.split('.')[0]
+				skr = sk[len(sk0)+1:]
+				self.skgroups.SetValue(sk0)
+				self.onSelect_group_(sk0)
+				self.signalk.SetValue(skr)
+				opera = self.list_operators[0]
+				for value_ in self.list_operators:
+					if self.list_fiel[selected_field][2][2] in value_:
+						opera = value_
+						break						
+				self.operator.SetValue(opera)
+				format = self.list_formats[0]
+				formats = self.list_fiel[selected_field][2][1]
+				for value_ in self.list_formats:
+					if formats in value_:
+						format = value_
+						break						
+				self.formats.SetValue(format)
+				self.string_number.SetValue(str(self.list_fiel[selected_field][2][3]))
+		else:
+			if self.is_number(self.list_fiel[selected_field][2]):
+				self.check_value_type_(self.list_value_type[3])
+				self.string_number.SetValue(self.list_fiel[selected_field][2])
+			else:
+				if len(self.list_fiel[selected_field][2])>0:
+					self.check_value_type_(self.list_value_type[4])
+					self.string_number.SetValue(self.list_fiel[selected_field][2])
+			
+
+	def onSelect_vessel(self,e):
 		vessel=self.skvessels.GetValue()
 		if '--' in vessel:
 			self.reset_group_key()
 			return
+		self.onSelect_vessel_(vessel)
+
+	def onSelect_vessel_(self,vessel):
 		self.list_skgroups=[]
 		try:
 			response = requests.get('http://localhost:3000/signalk/v1/api/vessels/'+vessel)
@@ -144,6 +212,9 @@ class addNMEA_0183(wx.Dialog):
 		if '--' in vessel or '--' in group:
 			self.reset_group_key()
 			return
+		self.onSelect_group_(group)
+		
+	def onSelect_group_(self, group):
 		group=group+'.'
 		self.signalk.Clear()
 		self.list_signalk=[_('--key')]
@@ -234,8 +305,7 @@ class addNMEA_0183(wx.Dialog):
 			#txt='['+vessel+'.'+group+'.'+key+']'+operator+str_num+'='+formats2
 			#if '.value' in key: key=key[:-6]
 			txt=[(group+'.'+key).encode('utf8'),formats2.encode('utf8'),operator.encode('utf8'),float(str_num)]
-			
-			self.list_fields.SetStringItem(selected_field,1,_(txt[1]))
+			self.list_fields.SetStringItem(selected_field,1,str(txt))
 			self.nmea[1][selected_field]=txt
 		#signal k
 		if selected_type==self.list_value_type[2]:
@@ -246,7 +316,7 @@ class addNMEA_0183(wx.Dialog):
 			#txt='[\''+group+'.'+key+'\',\''+formats2+'\']'
 			#if '.value' in key: key=key[:-6]
 			txt=[(group+'.'+key).encode('utf8'),formats2.encode('utf8'),'+',0.0]
-			self.list_fields.SetStringItem(selected_field,1,_(txt[1]))
+			self.list_fields.SetStringItem(selected_field,1,str(txt))
 			self.nmea[1][selected_field]=txt
 		#number
 		if selected_type==self.list_value_type[3]:
@@ -282,6 +352,10 @@ class addNMEA_0183(wx.Dialog):
 	def check_value_type(self, e):
 		self.reset_fields()
 		selected=self.value_type.GetValue()
+		self.check_value_type_(selected)
+
+	def check_value_type_(self, selected):
+		self.value_type.SetValue(selected)
 		#none
 		if not selected or selected==self.list_value_type[0]:
 			self.skvessels.Disable()
