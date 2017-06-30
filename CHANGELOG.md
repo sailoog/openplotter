@@ -1,3 +1,7 @@
+v0.11.11
+* Remove unused packages when updating
+* Keep imu calibration data after updating
+
 v0.11.10
 * Add tool for INA21
 * Add USB tethering Android fixed IP

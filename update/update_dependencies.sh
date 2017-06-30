@@ -1,6 +1,11 @@
 #!/bin/bash
 cd ~/.config
 echo
+echo "REMOVING UNUSED PACKAGES..."
+echo
+sudo apt-get -qq remove --purge librtimulib-dev librtimulib-utils librtimulib7 python-rtimulib python3-rtimulib
+sudo apt-get -qq autoremove
+echo
 echo "UPDATING PACKAGE LISTS..."
 echo
 sudo apt-get -qq update
