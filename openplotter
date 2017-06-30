@@ -1458,7 +1458,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.i2c_sensors_def = []
 		self.i2c_sensors_def.append(['InvenSense MPU-9150','rtimulib.imu.2.',['heading','heel','pitch']])
 		self.i2c_sensors_def.append(['InvenSense MPU-9250','rtimulib.imu.7.',['heading','heel','pitch']])
-		self.i2c_sensors_def.append(['InvenSense MPU-9255','rtimulib.imu.11.',['heading','heel','pitch']])
+		#self.i2c_sensors_def.append(['InvenSense MPU-9255','rtimulib.imu.11.',['heading','heel','pitch']])
 		self.i2c_sensors_def.append(['STM L3GD20 + LSM303DLHC','rtimulib.imu.4.',['heading','heel','pitch']])
 		self.i2c_sensors_def.append(['STM L3GD20H + LSM303D','rtimulib.imu.3.',['heading','heel','pitch']])
 		self.i2c_sensors_def.append(['STM L3GD20H + LSM303DLHC','rtimulib.imu.8.',['heading','heel','pitch']])
@@ -1498,13 +1498,16 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		reset_i2c = wx.Button(self.p_i2c, label=_('Restart'))
 		reset_i2c.Bind(wx.EVT_BUTTON, self.reset_sensors)
 
-		self.recalibrate = wx.Button(self.p_i2c, label=_('Recalibrate IMU'))
+		self.recalibrate = wx.Button(self.p_i2c, label=_('Recalibrate'))
 		self.recalibrate.Bind(wx.EVT_BUTTON, self.on_recalibrate)
 
-		self.calibration_graph = wx.Button(self.p_i2c, label=_('Graphical IMU calibration'))
+		self.show_calibration = wx.Button(self.p_i2c, label=_('Show calibration'))
+		self.show_calibration.Bind(wx.EVT_BUTTON, self.on_show_calibration)
+
+		self.calibration_graph = wx.Button(self.p_i2c, label=_('Graphical calibration'))
 		self.calibration_graph.Bind(wx.EVT_BUTTON, self.on_calibration_graph)
 
-		self.calibration_text = wx.Button(self.p_i2c, label=_('Text IMU calibration'))
+		self.calibration_text = wx.Button(self.p_i2c, label=_('Text calibration'))
 		self.calibration_text.Bind(wx.EVT_BUTTON, self.on_calibration_text)
 
 		hlistbox_but = wx.BoxSizer(wx.VERTICAL)
@@ -1520,6 +1523,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		hbox.Add(reset_i2c, 0, wx.RIGHT | wx.LEFT, 5)
 		hbox.Add((0, 0), 1, wx.RIGHT | wx.EXPAND, 5)
 		hbox.Add(self.recalibrate, 0, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add(self.show_calibration, 0, wx.RIGHT | wx.LEFT, 5)
 		hbox.Add(self.calibration_graph, 0, wx.RIGHT | wx.LEFT, 5)
 		hbox.Add(self.calibration_text, 0, wx.RIGHT | wx.LEFT, 5)
 
@@ -1714,9 +1718,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.list_i2c.Append([str(c), name, address, magn_list[c], iii[0], str(iii[1]), str(iii[2])])
 				c = c + 1
 		if imu_exist == False:
-			self.recalibrate.Disable()
-			self.calibration_graph.Disable()
-			self.calibration_text.Disable()
+			self.recalibrate.Hide()
+			self.show_calibration.Hide()
+			self.calibration_graph.Hide()
+			self.calibration_text.Hide()
 		else:
 			try:
 				temp_list = eval(rtimulib)
@@ -1724,18 +1729,21 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				temp_list = []
 			if temp_list:
 				if temp_list[0][2] == 1:
-					self.recalibrate.Enable()
-					self.calibration_graph.Disable()
-					self.calibration_text.Disable()
+					self.recalibrate.Show()
+					self.show_calibration.Show()
+					self.calibration_graph.Hide()
+					self.calibration_text.Hide()
 				else:
-					self.recalibrate.Disable()
-					self.calibration_graph.Enable()
-					self.calibration_text.Enable()
+					self.recalibrate.Hide()
+					self.show_calibration.Hide()
+					self.calibration_graph.Show()
+					self.calibration_text.Show()
 
 	def on_recalibrate(self, e):
-		self.recalibrate.Disable()
-		self.calibration_graph.Enable()
-		self.calibration_text.Enable()
+		self.recalibrate.Hide()
+		self.show_calibration.Hide()
+		self.calibration_graph.Show()
+		self.calibration_text.Show()
 		try:
 			with open(self.currentpath +'/imu/settings/RTIMULib.ini', "r") as infile:
 				data = ''
@@ -1753,6 +1761,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			msg = _('IMU calibration data deleted, now you can calibrate it again.')
 			self.ShowMessage(msg)
 		except Exception, e: print "RTIMU recalibration failed: "+str(e)
+
+	def on_show_calibration(self, e):
+		subprocess.Popen(['lxterminal', '-e', 'octave', '--persist', 'mag_cal.m'], cwd=self.currentpath + '/imu/RTEllipsoidFit')
 
 	def on_calibration_graph(self, e):
 		self.stop_sensors()
