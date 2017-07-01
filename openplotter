@@ -1458,7 +1458,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.i2c_sensors_def = []
 		self.i2c_sensors_def.append(['InvenSense MPU-9150','rtimulib.imu.2.',['heading','heel','pitch']])
 		self.i2c_sensors_def.append(['InvenSense MPU-9250','rtimulib.imu.7.',['heading','heel','pitch']])
-		#self.i2c_sensors_def.append(['InvenSense MPU-9255','rtimulib.imu.11.',['heading','heel','pitch']])
+		self.i2c_sensors_def.append(['InvenSense MPU-9255','rtimulib.imu.11.',['heading','heel','pitch']])
 		self.i2c_sensors_def.append(['STM L3GD20 + LSM303DLHC','rtimulib.imu.4.',['heading','heel','pitch']])
 		self.i2c_sensors_def.append(['STM L3GD20H + LSM303D','rtimulib.imu.3.',['heading','heel','pitch']])
 		self.i2c_sensors_def.append(['STM L3GD20H + LSM303DLHC','rtimulib.imu.8.',['heading','heel','pitch']])
@@ -1718,10 +1718,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.list_i2c.Append([str(c), name, address, magn_list[c], iii[0], str(iii[1]), str(iii[2])])
 				c = c + 1
 		if imu_exist == False:
-			self.recalibrate.Hide()
-			self.show_calibration.Hide()
-			self.calibration_graph.Hide()
-			self.calibration_text.Hide()
+			self.recalibrate.Disable()
+			self.show_calibration.Disable()
+			self.calibration_graph.Disable()
+			self.calibration_text.Disable()
 		else:
 			try:
 				temp_list = eval(rtimulib)
@@ -1729,21 +1729,21 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				temp_list = []
 			if temp_list:
 				if temp_list[0][2] == 1:
-					self.recalibrate.Show()
-					self.show_calibration.Show()
-					self.calibration_graph.Hide()
-					self.calibration_text.Hide()
+					self.recalibrate.Enable()
+					self.show_calibration.Enable()
+					self.calibration_graph.Disable()
+					self.calibration_text.Disable()
 				else:
-					self.recalibrate.Hide()
-					self.show_calibration.Hide()
-					self.calibration_graph.Show()
-					self.calibration_text.Show()
+					self.recalibrate.Disable()
+					self.show_calibration.Disable()
+					self.calibration_graph.Enable()
+					self.calibration_text.Enable()
 
 	def on_recalibrate(self, e):
-		self.recalibrate.Hide()
-		self.show_calibration.Hide()
-		self.calibration_graph.Show()
-		self.calibration_text.Show()
+		self.recalibrate.Disable()
+		self.show_calibration.Disable()
+		self.calibration_graph.Enable()
+		self.calibration_text.Enable()
 		try:
 			with open(self.currentpath +'/imu/settings/RTIMULib.ini', "r") as infile:
 				data = ''

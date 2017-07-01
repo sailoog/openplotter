@@ -579,10 +579,12 @@ class MySK_to_Action_Calc:
 	def read_Calc(self):
 		tick = time.time()
 		self.calcMagneticVariation = self.SK.conf.get('CALCULATE', 'mag_var')=='1'
+		self.calcTrueHeading = self.SK.conf.get('CALCULATE', 'hdt')=='1'
+		self.calcRateTurn = self.SK.conf.get('CALCULATE', 'rot')=='1'
 		self.calcWindTrueWater = self.SK.conf.get('CALCULATE', 'tw_stw')=='1'
 		self.calcWindTrueGround = self.SK.conf.get('CALCULATE', 'tw_sog')=='1'
 
-		if self.calcWindTrueWater | self.calcWindTrueGround | self.calcMagneticVariation:
+		if self.calcWindTrueWater | self.calcTrueHeading | self.calcRateTurn | self.calcWindTrueGround | self.calcMagneticVariation:
 			self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 		if self.calcMagneticVariation:
@@ -591,6 +593,21 @@ class MySK_to_Action_Calc:
 			self.mag_var_rate = float(self.SK.conf.get('CALCULATE', 'mag_var_rate'))
 			self.mag_var_rate_tick = tick
 			self.mag_var_accuracy = float(self.SK.conf.get('CALCULATE', 'mag_var_accuracy'))
+
+		if self.calcTrueHeading:
+			self.navigation_headingMagnetic = self.setlist(['navigation.headingMagnetic', [0, 0, 0, 0, 0, 0, 0, 0]])
+			self.navigation_magneticVariation = self.setlist(['navigation.magneticVariation', [0, 0, 0, 0, 0, 0, 0, 0]])
+			self.hdt_rate = float(self.SK.conf.get('CALCULATE', 'hdt_rate'))
+			self.hdt_rate_tick = tick
+			self.hdt_accuracy = float(self.SK.conf.get('CALCULATE', 'hdt_accuracy'))
+
+		if self.calcRateTurn:
+			self.navigation_headingMagnetic = self.setlist(['navigation.headingMagnetic', [0, 0, 0, 0, 0, 0, 0, 0]])
+			self.rot_rate = float(self.SK.conf.get('CALCULATE', 'rot_rate'))
+			self.rot_rate_tick = tick
+			self.rot_accuracy = float(self.SK.conf.get('CALCULATE', 'rot_accuracy'))
+			self.last_heading = ''
+			self.heading_time = ''
 
 		#self.environment_wind_angleApparent = self.setlist(['environment.wind.angleApparent', [0, 0, 0, 0]])
 		#self.environment_wind_speedApparent = self.setlist(['environment.wind.speedApparent', [0, 0, 0, 0]])		
@@ -736,7 +753,6 @@ class MySK_to_Action_Calc:
 				timestamp = timestamp.replace(tzinfo=tz.tzutc())
 				timestamp = timestamp.astimezone(tz.tzlocal())
 				timestamp_local = time.mktime(timestamp.timetuple())
-				
 				if now - self.mag_var_rate_tick > self.mag_var_rate:
 					date = datetime.date.today()
 					var=float(geomag.declination(lat, lon, 0, date))
@@ -745,6 +761,47 @@ class MySK_to_Action_Calc:
 						Erg += '{"path": "navigation.magneticVariation","value":'+str((var*0.017453293))+'},'
 					else:
 						Erg += '{"path": "navigation.magneticVariation","value": null},'
+
+		if self.calcTrueHeading:
+			heading_m = self.navigation_headingMagnetic[1][2]
+			var = self.navigation_magneticVariation[1][2]
+			timestamp = self.navigation_headingMagnetic[1][7]
+			if heading_m and var and timestamp:
+				timestamp = datetime.datetime.strptime(timestamp, '%Y-%m-%dT%H:%M:%S.%fZ')
+				timestamp = timestamp.replace(tzinfo=tz.tzutc())
+				timestamp = timestamp.astimezone(tz.tzlocal())
+				timestamp_local = time.mktime(timestamp.timetuple())
+				if now - self.hdt_rate_tick > self.hdt_rate:
+					heading_t = float(heading_m)+float(var)
+					self.hdt_rate_tick = now
+					if now - timestamp_local < self.hdt_accuracy:
+						Erg += '{"path": "navigation.headingTrue","value":'+str(heading_t)+'},'
+					else:
+						Erg += '{"path": "navigation.headingTrue","value": null},'
+
+		if self.calcRateTurn:
+			heading_m = self.navigation_headingMagnetic[1][2]
+			timestamp = self.navigation_headingMagnetic[1][7]
+			if heading_m and timestamp:
+				timestamp = datetime.datetime.strptime(timestamp, '%Y-%m-%dT%H:%M:%S.%fZ')
+				timestamp = timestamp.replace(tzinfo=tz.tzutc())
+				timestamp = timestamp.astimezone(tz.tzlocal())
+				timestamp_local = time.mktime(timestamp.timetuple())
+				if now - self.rot_rate_tick > self.rot_rate:
+					if not self.last_heading:
+						self.last_heading = float(heading_m)
+						self.heading_time = time.time()					
+					else:
+						heading_change = float(heading_m)-self.last_heading
+						last_heading_time = self.heading_time
+						self.heading_time = time.time()
+						self.last_heading = float(heading_m)
+						rot = heading_change/((self.heading_time - last_heading_time)/60)	
+						self.rot_rate_tick = now
+						if now - timestamp_local < self.rot_accuracy:
+							Erg += '{"path": "navigation.rateOfTurn","value":'+str(rot)+'},'
+						else:
+							Erg += '{"path": "navigation.rateOfTurn","value": null},'
 
 		if Erg:
 			SignalK='{"updates":[{"$source":"OPcalculations","values":['
@@ -826,6 +883,8 @@ if not SKN2K.PGN_list: aktiv_N2K = False
 if not SKNMEA.nmea_list: aktiv_NMEA = False
 if SKAction.triggers: aktiv_Action = True
 if SKAction.calcMagneticVariation: aktiv_Action = True
+if SKAction.calcTrueHeading: aktiv_Action = True
+if SKAction.calcRateTurn: aktiv_Action = True
 #if SKAction.calcWindTrueWater: aktiv_Action = True
 #if SKAction.calcWindTrueGround: aktiv_Action = True
 
