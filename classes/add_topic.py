@@ -64,7 +64,8 @@ class addTopic(wx.Dialog):
 		okBtn = wx.Button(panel, wx.ID_OK, pos=(230, 210))
 
 	def onEditSkkey(self,e):
-		dlg = selectKey()
+		key = self.SKkey.GetValue()
+		dlg = selectKey(key)
 		res = dlg.ShowModal()
 		if res == wx.ID_OK:
 			key = dlg.keys_list.GetValue()

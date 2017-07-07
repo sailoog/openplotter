@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 import wx
+import re
+
 from select_key import selectKey
 
 class editI2c(wx.Dialog):
@@ -88,7 +90,9 @@ class editI2c(wx.Dialog):
 		self.SKkey.SetValue('')
 
 	def onEditSkkey(self,e):
-		dlg = selectKey()
+		key = self.SKkey.GetValue()
+		dlg = selectKey(key)
+		
 		res = dlg.ShowModal()
 		if res == wx.ID_OK:
 			key = dlg.keys_list.GetValue()

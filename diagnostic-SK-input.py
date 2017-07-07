@@ -288,16 +288,25 @@ class MyFrame(wx.Frame):
 		for i in self.list_SK:
 			if type(i[2]) is float:
 				pass
+			elif type(i[2]) is str:
+				pass
 			else:
 				i[2] = 0.0
 			self.list.InsertStringItem(index, str(i[0]))
 			self.list.SetStringItem(index, 1, str(i[1]))
+			
 			if not self.private_unit_s:
-				self.buffer.append([index, 2, str('%.3f' % i[2])])
+				if type(i[2]) is str:
+					self.buffer.append([index, 2, i[2]])
+				else:
+					self.buffer.append([index, 2, str('%.3f' % i[2])])
 				self.buffer.append([index, 3, i[3]])
 			else:
-				i[9] = i[2] / i[10] + i[11]
-				self.buffer.append([index, 2, str('%.3f' % i[9])])
+				if type(i[2]) is str:
+					self.buffer.append([index, 2, i[2]])				
+				else:
+					i[9] = i[2] / i[10] + i[11]
+					self.buffer.append([index, 2, str('%.3f' % i[9])])
 				self.buffer.append([index, 3, i[8]])
 			self.list.SetStringItem(index, 4, str('%.1f' % i[4]))
 			self.list.SetStringItem(index, 5, str(i[5]))
@@ -336,7 +345,7 @@ class MyFrame(wx.Frame):
 		elif 'source' in js_up:
 			label = js_up['source']['label']
 			src = label
-			if 'type' in js_up['source']: 			
+			if 'type' in js_up['source']: 
 				if js_up['source']['type'] == 'NMEA0183':
 					if 'talker' in js_up['source']: src +='.'+js_up['source']['talker']
 					if 'sentence' in js_up['source']: src +='.'+js_up['source']['sentence']
@@ -368,12 +377,19 @@ class MyFrame(wx.Frame):
 							if 'sentence' in value['source']: src2 +='.'+value['source']['sentence']
 						elif value['source']['type'] == 'NMEA2000':
 							if 'src' in value['source']: src2 +='.'+value['source']['src']
-							if 'pgn' in value['source']: src2 +='.'+value['source']['pgn']
+							if 'pgn' in value['source']: src2 +='.'+str(value['source']['pgn'])
 
 				for lvalue in value:
-					if lvalue in ['timestamp', 'source', '$source']:
-						pass
-					else:
+					result = True
+					if lvalue in ['source', '$source']:
+						result = False
+					elif lvalue == 'timestamp':
+						if 'position' in path and 'RMC' in src2:
+							path2 = 'navigation.datetime'
+							value2 = timestamp2
+							self.update_add(value2, path2, src2, timestamp2)
+						result = False
+					if result:
 						path2 = path + '.' + lvalue
 						value2 = value[lvalue]
 						self.update_add(value2, path2, src2, timestamp2)
@@ -383,23 +399,20 @@ class MyFrame(wx.Frame):
 	def update_add(self, value, path, src, timestamp):
 		# SRC SignalK Value Unit Interval Status Description timestamp	private_Unit private_Value priv_Faktor priv_Offset
 		#  0    1      2     3      4        5        6          7           8             9           10          11
-		if type(value) is list: value=value[0]
+		if type(value) is list: value = value[0]
 
 		if type(value) is float: pass
+		elif type(value) is unicode: value = str(value)
 		elif type(value) is int: value = float(value)
 		else: value=0.0
 
 		index = 0
 		exists = False
 		for i in self.list_SK:
-			if path == i[1]:
+			if path == i[1] and i[0] == src:
 				exists = True
 				i[0] = src
 				i[2] = value
-				if type(i[2]) is float:
-					pass
-				else:
-					i[2] = 0.0
 				if i[4] == 0.0:
 					i[4] = self.json_interval(i[7], timestamp)
 				else:
@@ -407,6 +420,14 @@ class MyFrame(wx.Frame):
 				i[7] = timestamp
 				self.buffer.append([index, 0, i[0]])
 				self.buffer.append([index, 4, str('%.2f' % i[4])])
+				if type(i[2]) is str:
+					self.buffer.append([index, 2, i[2]])
+					self.buffer.append([index, 3, i[3]])
+					break
+				elif type(i[2]) is float:
+					pass
+				else:
+					i[2] = 0.0
 				if not self.private_unit_s:
 					self.buffer.append([index, 2, str('%.3f' % i[2])])
 					self.buffer.append([index, 3, i[3]])

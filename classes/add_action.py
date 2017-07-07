@@ -140,7 +140,8 @@ class addAction(wx.Dialog):
 			self.repeat.Enable()
 
 	def onEditSkkey(self,e):
-		dlg = selectKey()
+		
+		dlg = selectKey('')
 		res = dlg.ShowModal()
 		if res == wx.ID_OK:
 			key = dlg.keys_list.GetValue()
