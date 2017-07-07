@@ -1,3 +1,12 @@
+v0.12.0
+* Update dependencies
+* Update Raspbian packages
+* Switch to repository Nick-Currawong/RTIMULib2
+* Add IMU InvenSense MPU-9255
+* Fix IMU calibration buttons
+* Add Heading True calculation
+* Add Rate of Turn calculation
+
 v0.11.11
 * Remove unused packages when updating
 * Keep imu calibration data after updating

@@ -65,6 +65,7 @@ def readfile(file):
 		elif IMUType == '8': result[0][0] = 'STM L3GD20H + LSM303DLHC'
 		elif IMUType == '9': result[0][0] = 'Bosch BMX055'
 		elif IMUType == '10': result[0][0] = 'Bosch BNX055'
+		elif IMUType == '11': result[0][0] = 'InvenSense MPU-9255'
 		if I2CSlaveAddress == '0': pass
 		else: result[0][1] = hex(int(I2CSlaveAddress))
 		if CompassCalValid == 'true' and compassCalEllipsoidValid == 'true' and AccelCalValid == 'true' : result[0][2] = 1

@@ -79,15 +79,12 @@ class MyFrame(wx.Frame):
 			tw_rate_label = wx.StaticText(panel, label=_('Rate (sec)'))
 			self.tw_rate= wx.ComboBox(panel, choices=rate_list, style=wx.CB_READONLY)
 
-
 			button_cancel =wx.Button(panel, label=_('Cancel'))
 			self.Bind(wx.EVT_BUTTON, self.on_cancel, button_cancel)
 
 			button_ok =wx.Button(panel, label=_('OK'))
 			self.Bind(wx.EVT_BUTTON, self.on_ok, button_ok)
 
-			self.heading_t.Disable()
-			self.rate_turn.Disable()
 			self.true_wind.Disable()
 			self.true_wind2.Disable()
 
