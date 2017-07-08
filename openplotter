@@ -31,7 +31,14 @@ import wx.lib.scrolledpanel
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 
 from classes.actions import Actions
-from classes.add_DS18B20 import addDS18B20
+try:
+	from classes.add_DS18B20 import addDS18B20
+except:
+	print '1-Wire must be enabled in "Raspberry Pi Configuration->Interfaces->1-Wire"'
+	app = wx.App(False)
+	wx.Frame( None, title="OpenPlotter", size=(710, 460))
+	wx.MessageBox('1-Wire must be enabled in "Raspberry Pi Configuration->Interfaces->1-Wire"', 'Warning', wx.OK | wx.ICON_WARNING)
+	exit()
 from classes.add_MCP import addMCP
 from classes.add_i2c import addI2c
 from classes.edit_i2c import editI2c
@@ -518,6 +525,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def SerialCheck(self):
 		self.SerDevLs = []
+		self.SerDevLsCheck = []
 		self.context = pyudev.Context()
 		for device in self.context.list_devices(subsystem='tty'):
 			i = device['DEVNAME']
@@ -531,11 +539,40 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 							self.SerDevLs.append(value.split(' ')[0])
 				except Exception, e:
 					print 'no tty DEVLINKS found', str(e)
+
+				try:
+					serial = device['ID_SERIAL_SHORT']
+				except:
+					serial = ''
+				try:
+					vendor_db = device['ID_VENDOR_ID']
+				except:
+					vendor_db = ''
+				try:
+					model_db = device['ID_MODEL_ID']
+				except:
+					model_db = ''
+				self.SerDevLsCheck.append(serial + ' ' + vendor_db + ' ' + model_db)
+	
 		self.SerDevLs.sort()
+		self.SerDevLsCheck.sort()
 		self.can_usb.Clear()
 		self.sms_dev.Clear()
 		self.can_usb.AppendItems(self.SerDevLs)
 		self.sms_dev.AppendItems(self.SerDevLs)
+		
+		bak = ''
+		for i in self.SerDevLsCheck:
+			if i == bak:
+				data = self.conf.get('UDEV', 'USBinst')
+				try:
+					temp_list = eval(data)
+				except:
+					temp_list = []
+				for ii in temp_list:
+					if bak == ii[3] + ' ' + ii[1] + ' ' + ii[2] and ii[5] == 'dev':
+						self.ShowMessage(_('Error: USB-Port with vendor product number: "'+ ii[1] + ' ' + ii[2] + ' ' + ii[3] + '" must be set to "Remember port"'))
+			bak = i
 
 	def Changingpage(self, e):
 		self.ShowStatusBarBLACK('')
