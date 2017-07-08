@@ -50,6 +50,7 @@ from classes.add_tool10 import addTool10
 from classes.add_topic import addTopic
 from classes.add_trigger import addTrigger
 from classes.add_value_setting import addvaluesetting
+from classes.add_deviation_setting import adddeviationsetting
 from classes.check_vessel_self import checkVesselSelf
 from classes.conf import Conf
 from classes.language import Language
@@ -1528,6 +1529,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		delete = wx.Button(self.p_i2c, label=_('delete'))
 		delete.Bind(wx.EVT_BUTTON, self.on_delete_i2c)
+		
+		deviation = wx.Button(self.p_i2c, label=_('deviation'))
+		deviation.Bind(wx.EVT_BUTTON, self.on_imu_deviation_table)
 
 		diagnostic = wx.Button(self.p_i2c, label=_('SK Diagnostic'))
 		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
@@ -1550,6 +1554,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		hlistbox_but = wx.BoxSizer(wx.VERTICAL)
 		hlistbox_but.Add(add, 0, wx.ALL, 5)
 		hlistbox_but.Add(delete, 0, wx.ALL, 5)
+		hlistbox_but.Add(deviation, 0, wx.ALL, 5)
 
 		hlistbox = wx.BoxSizer(wx.HORIZONTAL)
 		hlistbox.Add(self.list_i2c, 1, wx.ALL | wx.EXPAND, 5)
@@ -1714,6 +1719,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			c = c + 1
 		self.apply_changes_i2c()
 
+	def on_imu_deviation_table(self, e):
+		dlg = adddeviationsetting(self)
+		dlg.ShowModal()
+	
 	def start_sensors(self):
 		subprocess.call(['pkill', 'RTIMULibDemoGL'])
 		subprocess.Popen(['python', self.currentpath + '/read_sensors_d.py'], cwd=self.currentpath + '/imu/settings')

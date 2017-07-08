@@ -119,11 +119,14 @@ def work_imu():
 					data = imu.getIMUData()
 					fusionPose = data["fusionPose"]
 					if headingSK:
-						heading=math.degrees(fusionPose[2])
+						heading=math.degrees(fusionPose[2])+headingOffset * 57.2957795
 						if heading<0: heading=360+heading
 						elif heading>360: heading=-360+heading
+						ix = int(heading / 10)
+						heading = deviation_table[ix][1]+(deviation_table[ix+1][1]-deviation_table[ix][1])*0.1*(heading-deviation_table[ix][0])
+						
 						if tick0 - tick1 > headingRate:
-							Erg += '{"path": "'+headingSK+'","value":'+str((heading*0.017453293)+headingOffset)+'},'
+							Erg += '{"path": "'+headingSK+'","value":'+str(heading*0.017453293)+'},'
 							tick1 = tick0
 					if heelSK:
 						heel=math.degrees(fusionPose[0])
@@ -343,6 +346,23 @@ if i2c_sensors:
 			if temp_list[1] == 'imu': imu_ = i
 			elif temp_list[1] == 'press': imu_press = i
 			elif temp_list[1] == 'hum': imu_hum = i
+			
+if imu_:
+	if not conf.has_option('I2C', 'deviation'):
+		temp_list = []
+		for i in range(37):
+			temp_list.append([i*10,i*10])
+	
+		conf.set('I2C', 'deviation', str(temp_list))
+		conf.read()
+		
+	data=conf.get('I2C', 'deviation')
+	try:
+		temp_list=eval(data)
+	except:temp_list = []
+		
+	deviation_table.append(temp_list)
+	
 
 # launch threads
 if analog_: work_analog()
