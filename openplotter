@@ -1493,32 +1493,32 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def page_i2c(self):
 		self.i2c_sensors_def = []
-		self.i2c_sensors_def.append(['InvenSense MPU-9150','rtimulib.imu.2.',['heading','heel','pitch']])
-		self.i2c_sensors_def.append(['InvenSense MPU-9250','rtimulib.imu.7.',['heading','heel','pitch']])
-		self.i2c_sensors_def.append(['InvenSense MPU-9255','rtimulib.imu.11.',['heading','heel','pitch']])
-		self.i2c_sensors_def.append(['STM L3GD20 + LSM303DLHC','rtimulib.imu.4.',['heading','heel','pitch']])
-		self.i2c_sensors_def.append(['STM L3GD20H + LSM303D','rtimulib.imu.3.',['heading','heel','pitch']])
-		self.i2c_sensors_def.append(['STM L3GD20H + LSM303DLHC','rtimulib.imu.8.',['heading','heel','pitch']])
-		self.i2c_sensors_def.append(['STM LSM9DS0','rtimulib.imu.5.',['heading','heel','pitch']])
-		self.i2c_sensors_def.append(['STM LSM9DS1','rtimulib.imu.6.',['heading','heel','pitch']])
-		self.i2c_sensors_def.append(['Bosch BMX055','rtimulib.imu.9.',['heading','heel','pitch']])
-		self.i2c_sensors_def.append(['Bosch BNX055','rtimulib.imu.10.',['heading','heel','pitch']])
-		self.i2c_sensors_def.append(['BMP180','rtimulib.press.2.',['pressure','temperature']])
-		self.i2c_sensors_def.append(['LPS25H','rtimulib.press.3.',['pressure','temperature']])
-		self.i2c_sensors_def.append(['MS5611','rtimulib.press.4.',['pressure','temperature']])
-		self.i2c_sensors_def.append(['MS5637','rtimulib.press.5.',['pressure','temperature']])
-		self.i2c_sensors_def.append(['HTS221','rtimulib.hum.2.',['humidity','temperature']])
-		self.i2c_sensors_def.append(['HTU21D','rtimulib.hum.3.',['humidity','temperature']])
-		self.i2c_sensors_def.append(['BME280','0x76',['pressure','temperature','humidity']])
+		self.i2c_sensors_def.append(['InvenSense MPU-9150','rtimulib.imu.2.',['heading','heel','pitch'],['navigation.headingMagnetic','navigation.attitude.roll','navigation.attitude.pitch']])
+		self.i2c_sensors_def.append(['InvenSense MPU-9250','rtimulib.imu.7.',['heading','heel','pitch'],['navigation.headingMagnetic','navigation.attitude.roll','navigation.attitude.pitch']])
+		self.i2c_sensors_def.append(['InvenSense MPU-9255','rtimulib.imu.11.',['heading','heel','pitch'],['navigation.headingMagnetic','navigation.attitude.roll','navigation.attitude.pitch']])
+		self.i2c_sensors_def.append(['STM L3GD20 + LSM303DLHC','rtimulib.imu.4.',['heading','heel','pitch'],['navigation.headingMagnetic','navigation.attitude.roll','navigation.attitude.pitch']])
+		self.i2c_sensors_def.append(['STM L3GD20H + LSM303D','rtimulib.imu.3.',['heading','heel','pitch'],['navigation.headingMagnetic','navigation.attitude.roll','navigation.attitude.pitch']])
+		self.i2c_sensors_def.append(['STM L3GD20H + LSM303DLHC','rtimulib.imu.8.',['heading','heel','pitch'],['navigation.headingMagnetic','navigation.attitude.roll','navigation.attitude.pitch']])
+		self.i2c_sensors_def.append(['STM LSM9DS0','rtimulib.imu.5.',['heading','heel','pitch'],['navigation.headingMagnetic','navigation.attitude.roll','navigation.attitude.pitch']])
+		self.i2c_sensors_def.append(['STM LSM9DS1','rtimulib.imu.6.',['heading','heel','pitch'],['navigation.headingMagnetic','navigation.attitude.roll','navigation.attitude.pitch']])
+		self.i2c_sensors_def.append(['Bosch BMX055','rtimulib.imu.9.',['heading','heel','pitch'],['navigation.headingMagnetic','navigation.attitude.roll','navigation.attitude.pitch']])
+		self.i2c_sensors_def.append(['Bosch BNX055','rtimulib.imu.10.',['heading','heel','pitch'],['navigation.headingMagnetic','navigation.attitude.roll','navigation.attitude.pitch']])
+		self.i2c_sensors_def.append(['BMP180','rtimulib.press.2.',['pressure','temperature'],['environment.outside.pressure','']])
+		self.i2c_sensors_def.append(['LPS25H','rtimulib.press.3.',['pressure','temperature'],['environment.outside.pressure','']])
+		self.i2c_sensors_def.append(['MS5611','rtimulib.press.4.',['pressure','temperature'],['environment.outside.pressure','']])
+		self.i2c_sensors_def.append(['MS5637','rtimulib.press.5.',['pressure','temperature'],['environment.outside.pressure','']])
+		self.i2c_sensors_def.append(['HTS221','rtimulib.hum.2.',['humidity','temperature'],['environment.inside.humidity','']])
+		self.i2c_sensors_def.append(['HTU21D','rtimulib.hum.3.',['humidity','temperature'],['environment.inside.humidity','']])
+		self.i2c_sensors_def.append(['BME280','0x76',['pressure','temperature','humidity'],['environment.outside.pressure','environment.inside.humidity','']])
 
 		title = wx.StaticText(self.p_i2c, label=_(' Sensors '))
 
 		self.list_i2c = wx.ListCtrl(self.p_i2c, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
 		self.list_i2c.InsertColumn(0, ' ', width=15)
 		self.list_i2c.InsertColumn(1, _('Name'), width=150)
-		self.list_i2c.InsertColumn(2, _('Address'), width=55)
+		self.list_i2c.InsertColumn(2, _('Address'), width=45)
 		self.list_i2c.InsertColumn(3, _('Magnitude'), width=90)
-		self.list_i2c.InsertColumn(4, _('Signal K key'), width=190)
+		self.list_i2c.InsertColumn(4, _('Signal K key'), width=200)
 		self.list_i2c.InsertColumn(5, _('Rate'), width=40)
 		self.list_i2c.InsertColumn(6, _('Offset'), width=50)
 		self.list_i2c.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_i2c)
@@ -1626,8 +1626,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					else:
 						new_sensor.append(address.encode('utf8'))
 					new_sensor.append([])	
-					for ii in item[2]:
-						new_sensor[2].append(['', 1.0, 0.0])
+					for ii in item[3]:
+						new_sensor[2].append([ii, 1.0, 0.0])
 			if new_sensor:
 				if 'rtimulib' in new_sensor[1]:
 					temp_list = new_sensor[1].split('.')
