@@ -435,12 +435,10 @@ class MySK_to_NMEA:
 		self.SKb = self.SK.static_list[-1]
 
 		for i in self.nmea_list:
-			# print 'self.nmea_list',i
 			for ii in i:
 				if type(ii) is list:
 					for iii in ii:
 						if type(iii) is list:
-							# print 'iii ',iii[0]
 							self.SKb.append([iii[0], [0, 0, 0, 0]])
 							iii.append(self.SKb[-1])
 
@@ -454,9 +452,7 @@ class MySK_to_NMEA:
 	def nmea_make(self, index):
 		NMEA_string = str(self.nmea_list[index][0])
 
-		# print self.nmea_list[index][1]
 		for i in self.nmea_list[index][1]:
-			#print 'i ',i
 			if type(i) is str:
 				NMEA_string += ',' + i
 			elif type(i) is list:
@@ -476,6 +472,14 @@ class MySK_to_NMEA:
 				value_str = ''
 				if i[1] == 'x.x':
 					value_str = str(round(value, 1))
+				elif i[1] == 'x.x|deg':
+					value_str = str(round(value*57.2957795, 1))
+				elif i[1] == 'x.x|kn':
+					value_str = str(round(value*1.94384, 1))
+				elif i[1] == 'x.x|C':
+					value_str = str(round(value-273.15, 1))
+				elif i[1] == 'x.x|F':
+					value_str = str(round(value*1.8 -459.67, 1))
 				elif i[1] == 'x.xx':
 					value_str = str(round(value, 2))
 				elif i[1] == 'x.xxx':
