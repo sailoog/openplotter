@@ -18,33 +18,30 @@ import wx
 import subprocess
 
 
-class addvaluesetting(wx.Dialog):
-	def __init__(self, edit, parent):
+class adddeviationsetting(wx.Dialog):
+	def __init__(self, parent):
 		self.parent = parent
 		self.conf = parent.conf
-		self.edit = edit
 		self.listsave = []
 
-		wx.Dialog.__init__(self, None, title=_('convert analog value to expected value of input ') + str(edit),
+		wx.Dialog.__init__(self, None, title=_('correct raw magnetic value with deviation table'),
 						   size=(460, 350))
 
 		panel = wx.Panel(self)
 
 		self.list = wx.ListCtrl(panel, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
-		self.list.InsertColumn(0, _('adc value'), width=80)
-		self.list.InsertColumn(1, _('value in unit'), width=100)
+		self.list.InsertColumn(0, _('raw value'), width=80)
+		self.list.InsertColumn(1, _('real value'), width=100)
+		self.list.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit)
 
-		rawvalue_t = wx.StaticText(panel, label=_('raw adc value'))
+		rawvalue_t = wx.StaticText(panel, label=_('raw imu value'))
 		self.rawvalue = wx.TextCtrl(panel, size=(150, 30))
 
-		unitvalue_t = wx.StaticText(panel, label=_('value in required unit'))
+		unitvalue_t = wx.StaticText(panel, label=_('real magnetic heading value'))
 		self.unitvalue = wx.TextCtrl(panel, size=(150, 30))
-
-		add = wx.Button(panel, label=_('add'))
-		add.Bind(wx.EVT_BUTTON, self.on_add)
-
-		delete = wx.Button(panel, label=_('delete'))
-		delete.Bind(wx.EVT_BUTTON, self.on_delete)
+		
+		change = wx.Button(panel, label=_('change'))
+		change.Bind(wx.EVT_BUTTON, self.on_change)	
 
 		close = wx.Button(panel, label=_('Close'))
 		close.Bind(wx.EVT_BUTTON, self.on_close)
@@ -58,14 +55,15 @@ class addvaluesetting(wx.Dialog):
 		vb1.AddSpacer(10)
 		vb1.Add(unitvalue_t, 0, wx.ALL | wx.EXPAND, 5)
 		vb1.Add(self.unitvalue, 0, wx.ALL | wx.EXPAND, 5)
+		vb1.AddSpacer(10)
+		vb1.Add(change, 0, wx.ALL | wx.EXPAND, 5)
+		
 
 		hlistbox = wx.BoxSizer(wx.HORIZONTAL)
 		hlistbox.Add(self.list, 1, wx.ALL | wx.EXPAND, 5)
 		hlistbox.Add(vb1, 0, wx.ALL | wx.EXPAND, 5)
 
 		hbox = wx.BoxSizer(wx.HORIZONTAL)
-		hbox.Add(add, 0, wx.ALL | wx.EXPAND, 5)
-		hbox.Add(delete, 0, wx.ALL | wx.EXPAND, 5)
 		hbox.Add((0, 0), 1, wx.ALL | wx.EXPAND, 5)
 		hbox.Add(close, 0, wx.ALL | wx.EXPAND, 5)
 		hbox.Add(graph, 0, wx.ALL | wx.EXPAND, 5)
@@ -78,6 +76,7 @@ class addvaluesetting(wx.Dialog):
 		vbox.Add(hbox, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 5)
 
 		panel.SetSizer(vbox)
+		self.rawvalue.Disable()
 
 		self.read_list()
 
@@ -88,35 +87,47 @@ class addvaluesetting(wx.Dialog):
 			pass
 
 		self.listsave = []
+		
 
-		if not self.conf.has_option('SPI', 'value_' + str(self.edit)):
-			temp_list = [[0, 0], [1023, 1023]]
-			self.conf.set('SPI', 'value_' + str(self.edit), str(temp_list))
+		if not self.conf.has_option('I2C', 'deviation'):
+			temp_list = []
+			for i in range(37):
+				temp_list.append([i*10,i*10])
+			
+			self.conf.set('I2C', 'deviation', str(temp_list))
 			self.conf.read()
 
-		data = self.conf.get('SPI', 'value_' + str(self.edit))
+		data = self.conf.get('I2C', 'deviation')
 		try:
-			temp_list = eval(data)
+			self.edit = eval(data)
 		except:
-			temp_list = []
-		for ii in temp_list:
+			self.edit = []
+		for ii in self.edit:
 			self.list.Append([str(int(ii[0])), str(ii[1])])
 			self.listsave.append(ii)
 
-	def on_delete(self, e):
-		selected = self.list.GetFirstSelected()
-		if selected == -1:
-			self.parent.ShowMessage(_('nothing selected'))
+	def on_edit(self, e):
+		self.selected = self.list.GetFirstSelected()
+		if self.selected < 1 or self.selected >35:
+			return
+		
+		self.rawvalue.SetValue(str(self.edit[self.selected][0]))
+		self.unitvalue.SetValue(str(self.edit[self.selected][1]))
+
+	def on_change(self, e):
+		if self.selected < 1 or self.selected >35:
 			return
 
-		temp_list = []
-		index = 0
-		for i in self.listsave:
-			if not index == selected:
-				temp_list.append(i)
-			index += 1
+		u = self.unitvalue.GetValue()
+		try:
+			u = float(u)
+		except:
+			self.parent.ShowMessage(_('value isn\'t a number'))
+			return
 
-		self.conf.set('SPI', 'value_' + str(self.edit), str(temp_list))
+		self.edit[self.selected][1] = u		
+
+		self.conf.set('I2C', 'deviation', str(self.edit))
 		self.read_list()
 
 	def on_add(self, e):
@@ -138,11 +149,11 @@ class addvaluesetting(wx.Dialog):
 		for i in sorted(self.listsave, key=lambda item: (item[0])):
 			temp_list.append(i)
 
-		self.conf.set('SPI', 'value_' + str(self.edit), str(temp_list))
+		self.conf.set('I2C', 'deviation', str(temp_list))
 		self.read_list()
 
 	def on_graph(self, e):
-   		subprocess.Popen(['python', self.parent.currentpath+'/show_raw_adc_convert.py', str(self.edit)])
+   		subprocess.Popen(['python', self.parent.currentpath+'/show_deviation_table.py', str(self.edit)])
 
 	def on_close(self, e):
 		self.Destroy()

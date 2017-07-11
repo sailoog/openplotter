@@ -31,7 +31,14 @@ import wx.lib.scrolledpanel
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 
 from classes.actions import Actions
-from classes.add_DS18B20 import addDS18B20
+try:
+	from classes.add_DS18B20 import addDS18B20
+except:
+	print '1-Wire must be enabled in "Raspberry Pi Configuration->Interfaces->1-Wire"'
+	app = wx.App(False)
+	wx.Frame( None, title="OpenPlotter", size=(710, 460))
+	wx.MessageBox('1-Wire must be enabled in "Raspberry Pi Configuration->Interfaces->1-Wire"', 'Warning', wx.OK | wx.ICON_WARNING)
+	exit()
 from classes.add_MCP import addMCP
 from classes.add_i2c import addI2c
 from classes.edit_i2c import editI2c
@@ -43,6 +50,7 @@ from classes.add_tool10 import addTool10
 from classes.add_topic import addTopic
 from classes.add_trigger import addTrigger
 from classes.add_value_setting import addvaluesetting
+from classes.add_deviation_setting import adddeviationsetting
 from classes.check_vessel_self import checkVesselSelf
 from classes.conf import Conf
 from classes.language import Language
@@ -518,6 +526,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def SerialCheck(self):
 		self.SerDevLs = []
+		self.SerDevLsCheck = []
 		self.context = pyudev.Context()
 		for device in self.context.list_devices(subsystem='tty'):
 			i = device['DEVNAME']
@@ -531,11 +540,40 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 							self.SerDevLs.append(value.split(' ')[0])
 				except Exception, e:
 					print 'no tty DEVLINKS found', str(e)
+
+				try:
+					serial = device['ID_SERIAL_SHORT']
+				except:
+					serial = ''
+				try:
+					vendor_db = device['ID_VENDOR_ID']
+				except:
+					vendor_db = ''
+				try:
+					model_db = device['ID_MODEL_ID']
+				except:
+					model_db = ''
+				self.SerDevLsCheck.append(serial + ' ' + vendor_db + ' ' + model_db)
+	
 		self.SerDevLs.sort()
+		self.SerDevLsCheck.sort()
 		self.can_usb.Clear()
 		self.sms_dev.Clear()
 		self.can_usb.AppendItems(self.SerDevLs)
 		self.sms_dev.AppendItems(self.SerDevLs)
+		
+		bak = ''
+		for i in self.SerDevLsCheck:
+			if i == bak:
+				data = self.conf.get('UDEV', 'USBinst')
+				try:
+					temp_list = eval(data)
+				except:
+					temp_list = []
+				for ii in temp_list:
+					if bak == ii[3] + ' ' + ii[1] + ' ' + ii[2] and ii[5] == 'dev':
+						self.ShowMessage(_('Error: USB-Port with vendor product number: "'+ ii[1] + ' ' + ii[2] + ' ' + ii[3] + '" must be set to "Remember port"'))
+			bak = i
 
 	def Changingpage(self, e):
 		self.ShowStatusBarBLACK('')
@@ -1456,32 +1494,32 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def page_i2c(self):
 		self.i2c_sensors_def = []
-		self.i2c_sensors_def.append(['InvenSense MPU-9150','rtimulib.imu.2.',['heading','heel','pitch']])
-		self.i2c_sensors_def.append(['InvenSense MPU-9250','rtimulib.imu.7.',['heading','heel','pitch']])
-		self.i2c_sensors_def.append(['InvenSense MPU-9255','rtimulib.imu.11.',['heading','heel','pitch']])
-		self.i2c_sensors_def.append(['STM L3GD20 + LSM303DLHC','rtimulib.imu.4.',['heading','heel','pitch']])
-		self.i2c_sensors_def.append(['STM L3GD20H + LSM303D','rtimulib.imu.3.',['heading','heel','pitch']])
-		self.i2c_sensors_def.append(['STM L3GD20H + LSM303DLHC','rtimulib.imu.8.',['heading','heel','pitch']])
-		self.i2c_sensors_def.append(['STM LSM9DS0','rtimulib.imu.5.',['heading','heel','pitch']])
-		self.i2c_sensors_def.append(['STM LSM9DS1','rtimulib.imu.6.',['heading','heel','pitch']])
-		self.i2c_sensors_def.append(['Bosch BMX055','rtimulib.imu.9.',['heading','heel','pitch']])
-		self.i2c_sensors_def.append(['Bosch BNX055','rtimulib.imu.10.',['heading','heel','pitch']])
-		self.i2c_sensors_def.append(['BMP180','rtimulib.press.2.',['pressure','temperature']])
-		self.i2c_sensors_def.append(['LPS25H','rtimulib.press.3.',['pressure','temperature']])
-		self.i2c_sensors_def.append(['MS5611','rtimulib.press.4.',['pressure','temperature']])
-		self.i2c_sensors_def.append(['MS5637','rtimulib.press.5.',['pressure','temperature']])
-		self.i2c_sensors_def.append(['HTS221','rtimulib.hum.2.',['humidity','temperature']])
-		self.i2c_sensors_def.append(['HTU21D','rtimulib.hum.3.',['humidity','temperature']])
-		self.i2c_sensors_def.append(['BME280','0x76',['pressure','temperature','humidity']])
+		self.i2c_sensors_def.append(['InvenSense MPU-9150','rtimulib.imu.2.',['heading','heel','pitch'],['navigation.headingMagnetic','navigation.attitude.roll','navigation.attitude.pitch']])
+		self.i2c_sensors_def.append(['InvenSense MPU-9250','rtimulib.imu.7.',['heading','heel','pitch'],['navigation.headingMagnetic','navigation.attitude.roll','navigation.attitude.pitch']])
+		self.i2c_sensors_def.append(['InvenSense MPU-9255','rtimulib.imu.11.',['heading','heel','pitch'],['navigation.headingMagnetic','navigation.attitude.roll','navigation.attitude.pitch']])
+		self.i2c_sensors_def.append(['STM L3GD20 + LSM303DLHC','rtimulib.imu.4.',['heading','heel','pitch'],['navigation.headingMagnetic','navigation.attitude.roll','navigation.attitude.pitch']])
+		self.i2c_sensors_def.append(['STM L3GD20H + LSM303D','rtimulib.imu.3.',['heading','heel','pitch'],['navigation.headingMagnetic','navigation.attitude.roll','navigation.attitude.pitch']])
+		self.i2c_sensors_def.append(['STM L3GD20H + LSM303DLHC','rtimulib.imu.8.',['heading','heel','pitch'],['navigation.headingMagnetic','navigation.attitude.roll','navigation.attitude.pitch']])
+		self.i2c_sensors_def.append(['STM LSM9DS0','rtimulib.imu.5.',['heading','heel','pitch'],['navigation.headingMagnetic','navigation.attitude.roll','navigation.attitude.pitch']])
+		self.i2c_sensors_def.append(['STM LSM9DS1','rtimulib.imu.6.',['heading','heel','pitch'],['navigation.headingMagnetic','navigation.attitude.roll','navigation.attitude.pitch']])
+		self.i2c_sensors_def.append(['Bosch BMX055','rtimulib.imu.9.',['heading','heel','pitch'],['navigation.headingMagnetic','navigation.attitude.roll','navigation.attitude.pitch']])
+		self.i2c_sensors_def.append(['Bosch BNX055','rtimulib.imu.10.',['heading','heel','pitch'],['navigation.headingMagnetic','navigation.attitude.roll','navigation.attitude.pitch']])
+		self.i2c_sensors_def.append(['BMP180','rtimulib.press.2.',['pressure','temperature'],['environment.outside.pressure','']])
+		self.i2c_sensors_def.append(['LPS25H','rtimulib.press.3.',['pressure','temperature'],['environment.outside.pressure','']])
+		self.i2c_sensors_def.append(['MS5611','rtimulib.press.4.',['pressure','temperature'],['environment.outside.pressure','']])
+		self.i2c_sensors_def.append(['MS5637','rtimulib.press.5.',['pressure','temperature'],['environment.outside.pressure','']])
+		self.i2c_sensors_def.append(['HTS221','rtimulib.hum.2.',['humidity','temperature'],['environment.inside.humidity','']])
+		self.i2c_sensors_def.append(['HTU21D','rtimulib.hum.3.',['humidity','temperature'],['environment.inside.humidity','']])
+		self.i2c_sensors_def.append(['BME280','0x76',['pressure','temperature','humidity'],['environment.outside.pressure','environment.inside.humidity','']])
 
 		title = wx.StaticText(self.p_i2c, label=_(' Sensors '))
 
 		self.list_i2c = wx.ListCtrl(self.p_i2c, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
 		self.list_i2c.InsertColumn(0, ' ', width=15)
 		self.list_i2c.InsertColumn(1, _('Name'), width=150)
-		self.list_i2c.InsertColumn(2, _('Address'), width=55)
+		self.list_i2c.InsertColumn(2, _('Address'), width=45)
 		self.list_i2c.InsertColumn(3, _('Magnitude'), width=90)
-		self.list_i2c.InsertColumn(4, _('Signal K key'), width=190)
+		self.list_i2c.InsertColumn(4, _('Signal K key'), width=200)
 		self.list_i2c.InsertColumn(5, _('Rate'), width=40)
 		self.list_i2c.InsertColumn(6, _('Offset'), width=50)
 		self.list_i2c.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_i2c)
@@ -1491,6 +1529,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		delete = wx.Button(self.p_i2c, label=_('delete'))
 		delete.Bind(wx.EVT_BUTTON, self.on_delete_i2c)
+		
+		deviation = wx.Button(self.p_i2c, label=_('deviation'))
+		deviation.Bind(wx.EVT_BUTTON, self.on_imu_deviation_table)
 
 		diagnostic = wx.Button(self.p_i2c, label=_('SK Diagnostic'))
 		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
@@ -1513,6 +1554,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		hlistbox_but = wx.BoxSizer(wx.VERTICAL)
 		hlistbox_but.Add(add, 0, wx.ALL, 5)
 		hlistbox_but.Add(delete, 0, wx.ALL, 5)
+		hlistbox_but.Add(deviation, 0, wx.ALL, 5)
 
 		hlistbox = wx.BoxSizer(wx.HORIZONTAL)
 		hlistbox.Add(self.list_i2c, 1, wx.ALL | wx.EXPAND, 5)
@@ -1589,8 +1631,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					else:
 						new_sensor.append(address.encode('utf8'))
 					new_sensor.append([])	
-					for ii in item[2]:
-						new_sensor[2].append(['', 1.0, 0.0])
+					for ii in item[3]:
+						new_sensor[2].append([ii, 1.0, 0.0])
 			if new_sensor:
 				if 'rtimulib' in new_sensor[1]:
 					temp_list = new_sensor[1].split('.')
@@ -1677,6 +1719,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			c = c + 1
 		self.apply_changes_i2c()
 
+	def on_imu_deviation_table(self, e):
+		dlg = adddeviationsetting(self)
+		dlg.ShowModal()
+	
 	def start_sensors(self):
 		subprocess.call(['pkill', 'RTIMULibDemoGL'])
 		subprocess.Popen(['python', self.currentpath + '/read_sensors_d.py'], cwd=self.currentpath + '/imu/settings')

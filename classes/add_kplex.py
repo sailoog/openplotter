@@ -52,6 +52,7 @@ class addkplex(wx.Dialog):
 											   pos=(225, 55))
 		if self.SerDevLs: self.kplex_device_select.SetValue(self.SerDevLs[0])
 		self.bauds = ['4800', '9600', '19200', '38400', '57600', '115200']
+		#self.bauds = ['4800', '9600', '19200', '38400', '57600', '115200', '230400', '460800']
 		self.kplex_ser_T2 = wx.StaticText(panel, label=_('Bauds'), pos=(375, 35))
 		self.kplex_baud_select = wx.ComboBox(panel, choices=self.bauds, style=wx.CB_READONLY, size=(90, 32),
 											 pos=(370, 55))

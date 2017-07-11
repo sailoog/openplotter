@@ -19,8 +19,14 @@ from getkeys import GetKeys
 
 
 class selectKey(wx.Dialog):
-	def __init__(self):
+	def __init__(self, SKkey):
 		wx.Dialog.__init__(self, None, title=_('Select Signal K key'), size=(430, 370))
+		
+		group = _('ungrouped')
+		if len(SKkey)>0:
+			SKkeySP = SKkey.split('.')
+			group = SKkeySP[0]
+			
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 		panel = wx.Panel(self)
 
@@ -34,7 +40,7 @@ class selectKey(wx.Dialog):
 		self.groups_list.Bind(wx.EVT_COMBOBOX, self.onSelect_group)
 		self.group_description = wx.TextCtrl(panel, -1, style=wx.TE_MULTILINE | wx.TE_READONLY, size=(410, 50), pos=(10, 65))
 		self.group_description.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_INACTIVECAPTION))
-		self.groups_list.SetValue(_('ungrouped'))
+		self.groups_list.SetValue(group)
 
 		self.list_sk_keys = []
 		wx.StaticText(panel, label=_('Keys'), pos=(10, 125))
@@ -49,9 +55,35 @@ class selectKey(wx.Dialog):
 		
 		cancelBtn = wx.Button(panel, wx.ID_CANCEL, pos=(120, 300))
 		okBtn = wx.Button(panel, wx.ID_OK, pos=(230, 300))
-
+		
 		self.onSelect_group(0)
 
+		if len(SKkey)>0:
+			keylist=[]
+			keylist.append(SKkey)
+			index = 0
+			for keystar in SKkeySP:
+				if index != 0:
+					SKkeySP[index]='*'
+					newkey=''
+					
+					for keystar2 in SKkeySP:
+						newkey+=keystar2+'.'
+					keylist.append(newkey[:-1])
+					SKkeySP = SKkey.split('.')
+				index+=1
+			
+			for keystar3 in self.list_sk_keys:
+				if keystar3 in keylist:
+					key = keystar3
+					self.keys_list.SetValue(key)
+					
+			if '*' in key:
+				keylist = key.split('.')
+				for i in range(len(SKkeySP)):
+					if keylist[i] == '*':
+						self.wildcard.SetValue(SKkeySP[i])
+		
 	def onSelect_group(self,e):
 		selected = self.groups_list.GetValue()
 		self.keys_list.Clear()

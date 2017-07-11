@@ -53,11 +53,12 @@ class MySK:
 	
 	def on_message(self, ws, message):
 		js_up = json.loads(message)
-		if 'updates' in js_up:
+		 
+		try:
 			js_up = json.loads(message)['updates'][0]
-		else:
+		except:
 			return
-
+		
 		label = ''
 		src = ''
 		if '$source' in js_up:
@@ -100,9 +101,14 @@ class MySK:
 							if 'pgn' in value['source']: src2 +='.'+str(value['source']['pgn'])
 
 				for lvalue in value:
-					if lvalue in ['timestamp', 'source', '$source']:
-						pass
-					else:
+					result = True
+					if lvalue in ['source', '$source']:
+						result = False
+					elif lvalue == 'timestamp':
+						if 'position' in path and 'RMC' in src2:
+							self.update_add(timestamp2, 'navigation.datetime', src2, timestamp2)
+						result = False
+					if result:
 						path2 = path + '.' + lvalue
 						value2 = value[lvalue]
 						self.update_add(value2, path2, src2, timestamp2)
@@ -110,32 +116,26 @@ class MySK:
 				self.update_add(value, path, src, timestamp)
 
 	def update_add(self, value, path, src, timestamp):
-		# SRC SignalK Value Unit Interval Status Description timestamp	private_Unit private_Value priv_Faktor priv_Offset		
-		#  0    1      2     3      4        5        6          7           8             9           10          11			
-
+		# SRC SignalK Value Unit Interval Status Description timestamp	private_Unit private_Value priv_Faktor priv_Offset
+		#  0    1      2     3      4        5        6          7           8             9           10          11
 		if type(value) is list: value = value[0]
 
-		if type(value) is float:
-			pass
-		elif type(value) is int:
-			value = float(value)
-		#else:
-			#value = 0.0
+		if type(value) is float: pass
+		elif type(value) is unicode: value = str(value)
+		elif type(value) is int: value = float(value)		
+		else: value=0.0
 
 		index = 0
 		exists = False
 		for i in self.list_SK:
-			if path == i[1]:
-				if src == i[0]:
-					exists = True
-					#if i[2] != value:
-					#	if i[0] == 'wifi.SIM':
-					#		print value, i[2], i[0]
-					i[2] = value
-					i[7] = timestamp
-					#break
+			if path == i[1] and i[0] == src:
+				exists = True
+				i[2] = value
+				i[7] = timestamp
+				break
 			index += 1
 		if not exists:
+						 
 			self.list_SK.append([src, path, value, '', 0.0, 1, '', timestamp, '', 1, 0])
 
 			for il in self.static_list:
@@ -435,12 +435,10 @@ class MySK_to_NMEA:
 		self.SKb = self.SK.static_list[-1]
 
 		for i in self.nmea_list:
-			# print 'self.nmea_list',i
 			for ii in i:
 				if type(ii) is list:
 					for iii in ii:
 						if type(iii) is list:
-							# print 'iii ',iii[0]
 							self.SKb.append([iii[0], [0, 0, 0, 0]])
 							iii.append(self.SKb[-1])
 
@@ -454,9 +452,7 @@ class MySK_to_NMEA:
 	def nmea_make(self, index):
 		NMEA_string = str(self.nmea_list[index][0])
 
-		# print self.nmea_list[index][1]
 		for i in self.nmea_list[index][1]:
-			#print 'i ',i
 			if type(i) is str:
 				NMEA_string += ',' + i
 			elif type(i) is list:
@@ -476,6 +472,14 @@ class MySK_to_NMEA:
 				value_str = ''
 				if i[1] == 'x.x':
 					value_str = str(round(value, 1))
+				elif i[1] == 'x.x|deg':
+					value_str = str(round(value*57.2957795, 1))
+				elif i[1] == 'x.x|kn':
+					value_str = str(round(value*1.94384, 1))
+				elif i[1] == 'x.x|C':
+					value_str = str(round(value-273.15, 1))
+				elif i[1] == 'x.x|F':
+					value_str = str(round(value*1.8 -459.67, 1))
 				elif i[1] == 'x.xx':
 					value_str = str(round(value, 2))
 				elif i[1] == 'x.xxx':
