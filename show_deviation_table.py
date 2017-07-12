@@ -22,15 +22,15 @@ from classes.language import Language
 from classes.paths import Paths
 
 conf = Conf(Paths())
-data = conf.get('I2C', 'deviation')
+data = conf.get('COMPASS', 'deviation')
 listsave = []
 try:
     listsave = eval(data)
 except:
     listsave = []
 plt.plot(*zip(*listsave))
-plt.suptitle('show deviation table as curve', fontsize=12)
-plt.xlabel('row magnetic imu direction value', fontsize=12)
-plt.ylabel('real direction', fontsize=12)
+plt.suptitle('Show deviation table as curve', fontsize=12)
+plt.xlabel('Compass Heading', fontsize=12)
+plt.ylabel('Magnetic Heading', fontsize=12)
 plt.show()
 

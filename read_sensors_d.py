@@ -348,15 +348,13 @@ if i2c_sensors:
 			elif temp_list[1] == 'hum': imu_hum = i
 			
 if imu_:
-	if not conf.has_option('I2C', 'deviation'):
+	data = self.conf.get('COMPASS', 'deviation')
+	if not data:
 		temp_list = []
 		for i in range(37):
 			temp_list.append([i*10,i*10])
-	
-		conf.set('I2C', 'deviation', str(temp_list))
-		conf.read()
-		
-	data=conf.get('I2C', 'deviation')
+		self.conf.set('COMPASS', 'deviation', str(temp_list))
+		data = self.conf.get('COMPASS', 'deviation')
 	try:
 		temp_list=eval(data)
 	except:temp_list = []

@@ -24,24 +24,30 @@ class adddeviationsetting(wx.Dialog):
 		self.conf = parent.conf
 		self.listsave = []
 
-		wx.Dialog.__init__(self, None, title=_('correct raw magnetic value with deviation table'),
-						   size=(460, 350))
+		wx.Dialog.__init__(self, None, title=_('Deviation Table'),
+						   size=(460, 390))
 
 		panel = wx.Panel(self)
 
 		self.list = wx.ListCtrl(panel, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
-		self.list.InsertColumn(0, _('raw value'), width=80)
-		self.list.InsertColumn(1, _('real value'), width=100)
+		self.list.InsertColumn(0, _('Compass'), width=80)
+		self.list.InsertColumn(1, _('Magnetic Heading'), width=135)
 		self.list.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit)
 
-		rawvalue_t = wx.StaticText(panel, label=_('raw imu value'))
+		variation_t = wx.StaticText(panel, label=_('Magnetic Variation'))
+		self.variation = wx.TextCtrl(panel)
+
+		self.fix = wx.Button(panel, label=_('Fix'))
+		self.fix.Bind(wx.EVT_BUTTON, self.on_fix)
+
+		rawvalue_t = wx.StaticText(panel, label=_('Compass Heading'))
 		self.rawvalue = wx.TextCtrl(panel, size=(150, 30))
 
-		unitvalue_t = wx.StaticText(panel, label=_('real magnetic heading value'))
+		unitvalue_t = wx.StaticText(panel, label=_('Observed True Heading'))
 		self.unitvalue = wx.TextCtrl(panel, size=(150, 30))
 		
-		change = wx.Button(panel, label=_('change'))
-		change.Bind(wx.EVT_BUTTON, self.on_change)	
+		self.change = wx.Button(panel, label=_('change'))
+		self.change.Bind(wx.EVT_BUTTON, self.on_change)	
 
 		close = wx.Button(panel, label=_('Close'))
 		close.Bind(wx.EVT_BUTTON, self.on_close)
@@ -49,14 +55,20 @@ class adddeviationsetting(wx.Dialog):
 		graph = wx.Button(panel, label=_('graph'))
 		graph.Bind(wx.EVT_BUTTON, self.on_graph)
 
+		hvar = wx.BoxSizer(wx.HORIZONTAL)
+		hvar.Add(self.variation, 0, wx.ALL | wx.EXPAND, 5)
+		hvar.Add(self.fix, 0, wx.ALL | wx.EXPAND, 5)
+
 		vb1 = wx.BoxSizer(wx.VERTICAL)
+		vb1.Add(variation_t, 0, wx.ALL | wx.EXPAND, 5)
+		vb1.Add(hvar, 0, wx.ALL | wx.EXPAND, 0)
+		vb1.AddSpacer(10)
 		vb1.Add(rawvalue_t, 0, wx.ALL | wx.EXPAND, 5)
 		vb1.Add(self.rawvalue, 0, wx.ALL | wx.EXPAND, 5)
-		vb1.AddSpacer(10)
 		vb1.Add(unitvalue_t, 0, wx.ALL | wx.EXPAND, 5)
 		vb1.Add(self.unitvalue, 0, wx.ALL | wx.EXPAND, 5)
 		vb1.AddSpacer(10)
-		vb1.Add(change, 0, wx.ALL | wx.EXPAND, 5)
+		vb1.Add(self.change, 0, wx.ALL | wx.EXPAND, 5)
 		
 
 		hlistbox = wx.BoxSizer(wx.HORIZONTAL)
@@ -85,19 +97,14 @@ class adddeviationsetting(wx.Dialog):
 			self.list.DeleteAllItems()
 		except:
 			pass
-
 		self.listsave = []
-		
-
-		if not self.conf.has_option('I2C', 'deviation'):
+		data = self.conf.get('COMPASS', 'deviation')
+		if not data:
 			temp_list = []
 			for i in range(37):
 				temp_list.append([i*10,i*10])
-			
-			self.conf.set('I2C', 'deviation', str(temp_list))
-			self.conf.read()
-
-		data = self.conf.get('I2C', 'deviation')
+			self.conf.set('COMPASS', 'deviation', str(temp_list))
+			data = self.conf.get('COMPASS', 'deviation')
 		try:
 			self.edit = eval(data)
 		except:
@@ -106,54 +113,82 @@ class adddeviationsetting(wx.Dialog):
 			self.list.Append([str(int(ii[0])), str(ii[1])])
 			self.listsave.append(ii)
 
+		self.rawvalue.SetValue('')
+		self.unitvalue.SetValue('')
+
+		var = self.conf.get('COMPASS', 'variation')
+		self.variation.SetValue(var)
+		if not var:
+			self.fixed = False
+			self.unitvalue.Disable()
+			self.change.Disable()
+			self.variation.Enable()
+			self.fix.SetLabel(_('Fix'))
+		else:
+			self.fixed = True
+			self.unitvalue.Enable()
+			self.change.Enable()
+			self.variation.Disable()
+			self.fix.SetLabel(_('Set'))
+
 	def on_edit(self, e):
+		if not self.fixed: return
 		self.selected = self.list.GetFirstSelected()
 		if self.selected < 1 or self.selected >35:
 			return
 		
 		self.rawvalue.SetValue(str(self.edit[self.selected][0]))
-		self.unitvalue.SetValue(str(self.edit[self.selected][1]))
+		var = float(self.variation.GetValue())
+		self.unitvalue.SetValue(str(self.edit[self.selected][1] - var))
 
 	def on_change(self, e):
 		if self.selected < 1 or self.selected >35:
 			return
 
 		u = self.unitvalue.GetValue()
+		var = float(self.variation.GetValue())
 		try:
 			u = float(u)
 		except:
-			self.parent.ShowMessage(_('value isn\'t a number'))
+			self.ShowMessage(_('This value is not a number.'))
 			return
 
-		self.edit[self.selected][1] = u		
+		self.edit[self.selected][1] = u	+ var 	
 
-		self.conf.set('I2C', 'deviation', str(self.edit))
+		self.conf.set('COMPASS', 'deviation', str(self.edit))
 		self.read_list()
 
-	def on_add(self, e):
-		r = self.rawvalue.GetValue()
-		u = self.unitvalue.GetValue()
-		try:
-			r = float(r)
-			u = float(u)
-			if r != float(int(r)):
-				self.parent.ShowMessage(_('adc value must be a number without dec point'))
+	def on_fix(self, e):
+		if self.fixed:
+			self.fixed = False
+			self.unitvalue.Disable()
+			self.change.Disable()
+			self.variation.Enable()
+			self.fix.SetLabel(_('Fix'))
+		else:
+			self.ShowMessage(_('Deviation table will be calculated with this variation. If you change this value you will have to define the complete table again.'))
+			try:
+				var = float(self.variation.GetValue())
+			except:
+				self.ShowMessage(_('This value is not a number.'))
 				return
-		except:
-			self.parent.ShowMessage(_('value isn\'t a number'))
-			return
-
-		self.listsave.append([r, u])
-
-		temp_list = []
-		for i in sorted(self.listsave, key=lambda item: (item[0])):
-			temp_list.append(i)
-
-		self.conf.set('I2C', 'deviation', str(temp_list))
-		self.read_list()
+			self.fixed = True
+			self.unitvalue.Enable()
+			self.change.Enable()
+			self.variation.Disable()
+			self.fix.SetLabel(_('Set'))
+			self.conf.set('COMPASS', 'variation', str(var))
+			temp_list = []
+			for i in range(37):
+				temp_list.append([i*10,i*10])
+			self.conf.set('COMPASS', 'deviation', str(temp_list))
+			self.read_list()
 
 	def on_graph(self, e):
    		subprocess.Popen(['python', self.parent.currentpath+'/show_deviation_table.py', str(self.edit)])
 
 	def on_close(self, e):
 		self.Destroy()
+
+	def ShowMessage(self, w_msg):
+		wx.MessageBox(w_msg, 'Info', wx.OK | wx.ICON_WARNING)

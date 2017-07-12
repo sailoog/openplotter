@@ -146,6 +146,9 @@ class MainFrame(wx.Frame):
 		self.sdr_ais_item1 = self.settings.Append(wx.ID_ANY, _('SDR receiver'),
 												  _('Set an SDR receiver in the new window'))
 		self.Bind(wx.EVT_MENU, self.open_sdr_ais, self.sdr_ais_item1)
+		self.deviation_table = self.settings.Append(wx.ID_ANY, _('Deviation Table'),
+													_('Create a deviation table for your boat'))
+		self.Bind(wx.EVT_MENU, self.on_imu_deviation_table, self.deviation_table)
 		self.calculate_item1 = self.settings.Append(wx.ID_ANY, _('Calculate'),
 													_('Calculate new data from current values'))
 		self.Bind(wx.EVT_MENU, self.open_calculate, self.calculate_item1)
@@ -311,6 +314,11 @@ class MainFrame(wx.Frame):
 	def open_sdr_ais(self, event):
 		subprocess.call(['pkill', '-f', 'SDR_AIS.py'])
 		subprocess.Popen(['python', self.currentpath + '/tools/SDR_AIS.py'])
+
+	def on_imu_deviation_table(self, e):
+		dlg = adddeviationsetting(self)
+		dlg.ShowModal()
+		dlg.Destroy()
 
 	def open_calculate(self, event):
 		subprocess.call(['pkill', '-f', 'calculate.py'])
@@ -1022,6 +1030,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		out = _(' Multiplexed NMEA 0183:\n')
 		ips = ip_info.split()		
 		out += self.on_show_ip_info_txt('10109',ips,ip_hostname)
+		out += _('\n Signal K Server:\n')
+		out += self.on_show_ip_info_txt('3000',ips,ip_hostname)
 		out += _('\n VNC remote desktop:\n')
 		out += self.on_show_ip_info_txt('5900',ips,ip_hostname)
 		out += _('\n RDP remote desktop:\n')
@@ -1030,12 +1040,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		out += self.on_show_ip_info_txt('1880',ips,ip_hostname)
 		out += _('\n MQTT local broker:\n')
 		out += self.on_show_ip_info_txt('1883',ips,ip_hostname)
-		out += _('\n Signal K panel:\n')
-		out += self.on_show_ip_info_txt('3000/instrumentpanel',ips,ip_hostname)
-		out += _('\n Signal K gauge:\n')
-		out += self.on_show_ip_info_txt('3000/sailgauge',ips,ip_hostname)
-		out += _('\n Signal K NMEA 0183:\n')
-		out += self.on_show_ip_info_txt('10111',ips,ip_hostname)
 		self.ip_info.SetValue(out)
 
 	def on_check_net(self, e):
@@ -1718,10 +1722,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				break
 			c = c + 1
 		self.apply_changes_i2c()
-
-	def on_imu_deviation_table(self, e):
-		dlg = adddeviationsetting(self)
-		dlg.ShowModal()
 	
 	def start_sensors(self):
 		subprocess.call(['pkill', 'RTIMULibDemoGL'])
@@ -2932,15 +2932,19 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.restart_SK(0x0000)
 		response = requests.get('http://localhost:3000/signalk')
 		data = response.json()
-		text = _('Version: ')
-		text += data['endpoints']['v1']['version']
+		text = _('Version: ')+data['endpoints']['v1']['version']
 		text += '\n\n'
-		text += data['endpoints']['v1']['signalk-http']
-		text += '\n'
-		text += data['endpoints']['v1']['signalk-ws']
-		text += '\n'
-		text += data['endpoints']['v1']['signalk-tcp']
-		wx.StaticText(self.p_sk, label=text, pos=(260, 175))
+		text += _('Signal K settings and tools:')+'\n'+'http://localhost:3000'
+		text += '\n\n'
+		text += _('REST full format output:')+'\n'+data['endpoints']['v1']['signalk-http']
+		text += '\n\n'
+		text += _('Websocket delta format output:')+'\n'+data['endpoints']['v1']['signalk-ws']
+		text += '\n\n'
+		text += _('TCP delta format output:')+'\n'+data['endpoints']['v1']['signalk-tcp']
+		text += '\n\n'
+		text += _('TCP NMEA 0183 format output:')+'\n'+'tcp://localhost:10110'
+		
+		wx.StaticText(self.p_sk, label=text, pos=(260, 30))
 
 		show_SK = wx.Button(self.p_sk, label=_('Show Web Socket'), pos=(250, 285))
 		show_SK.Bind(wx.EVT_BUTTON, self.show_SK)
