@@ -26,6 +26,7 @@ class adddeviationsetting(wx.Dialog):
 
 		wx.Dialog.__init__(self, None, title=_('Deviation Table'),
 						   size=(460, 390))
+		self.Bind(wx.EVT_CLOSE, self.on_close)
 
 		panel = wx.Panel(self)
 
@@ -92,6 +93,10 @@ class adddeviationsetting(wx.Dialog):
 
 		self.read_list()
 
+		subprocess.call(['pkill', '-f', 'read_sensors_d.py'])
+		self.conf.set('COMPASS', 'editing_dev', '1')
+		subprocess.Popen(['python', self.parent.currentpath+'/read_sensors_d.py'], cwd=self.parent.currentpath + '/imu/settings')
+
 	def read_list(self):
 		try:
 			self.list.DeleteAllItems()
@@ -139,24 +144,23 @@ class adddeviationsetting(wx.Dialog):
 		
 		self.rawvalue.SetValue(str(self.edit[self.selected][0]))
 		var = float(self.variation.GetValue())
-		self.unitvalue.SetValue(str(self.edit[self.selected][1] - var))
+		self.unitvalue.SetValue(str(self.edit[self.selected][1] + var))
 
 	def on_change(self, e):
 		if self.selected < 1 or self.selected >35:
 			return
-
 		u = self.unitvalue.GetValue()
-		var = float(self.variation.GetValue())
-		try:
-			u = float(u)
-		except:
-			self.ShowMessage(_('This value is not a number.'))
-			return
-
-		self.edit[self.selected][1] = u	+ var 	
-
-		self.conf.set('COMPASS', 'deviation', str(self.edit))
-		self.read_list()
+		r = self.rawvalue.GetValue()
+		if u and r:
+			var = float(self.variation.GetValue())
+			try:
+				u = float(u)
+			except:
+				self.ShowMessage(_('This value is not a number.'))
+				return
+			self.edit[self.selected][1] = u	- var 	
+			self.conf.set('COMPASS', 'deviation', str(self.edit))
+			self.read_list()
 
 	def on_fix(self, e):
 		if self.fixed:
@@ -188,6 +192,9 @@ class adddeviationsetting(wx.Dialog):
    		subprocess.Popen(['python', self.parent.currentpath+'/show_deviation_table.py', str(self.edit)])
 
 	def on_close(self, e):
+		subprocess.call(['pkill', '-f', 'read_sensors_d.py'])
+		self.conf.set('COMPASS', 'editing_dev', '0')
+		subprocess.Popen(['python', self.parent.currentpath+'/read_sensors_d.py'], cwd=self.parent.currentpath + '/imu/settings')
 		self.Destroy()
 
 	def ShowMessage(self, w_msg):
