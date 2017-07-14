@@ -22,15 +22,24 @@ from classes.language import Language
 from classes.paths import Paths
 
 conf = Conf(Paths())
+Language(conf.get('GENERAL', 'lang'))
+
 data = conf.get('COMPASS', 'deviation')
 listsave = []
 try:
-    listsave = eval(data)
+	listsave = eval(data)
 except:
-    listsave = []
-plt.plot(*zip(*listsave))
-plt.suptitle('Show deviation table as curve', fontsize=12)
-plt.xlabel('Compass Heading', fontsize=12)
-plt.ylabel('Magnetic Heading', fontsize=12)
+	listsave = []
+
+x=[]
+y=[]
+for ii in listsave:
+	x.append(ii[1] - ii[0])
+	y.append(ii[0])
+
+plt.plot(x,y)
+plt.suptitle(_('Show deviation table as curve'), fontsize=12)
+plt.xlabel(_('Deviation'), fontsize=12)
+plt.ylabel(_('Compass Heading'), fontsize=12)
 plt.show()
 

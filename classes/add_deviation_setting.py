@@ -22,17 +22,17 @@ class adddeviationsetting(wx.Dialog):
 	def __init__(self, parent):
 		self.parent = parent
 		self.conf = parent.conf
-		self.listsave = []
 
 		wx.Dialog.__init__(self, None, title=_('Deviation Table'),
-						   size=(460, 390))
+						   size=(460, 450))
 		self.Bind(wx.EVT_CLOSE, self.on_close)
 
 		panel = wx.Panel(self)
 
 		self.list = wx.ListCtrl(panel, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
-		self.list.InsertColumn(0, _('Compass'), width=80)
-		self.list.InsertColumn(1, _('Magnetic Heading'), width=135)
+		self.list.InsertColumn(0, _('CH'), width=65)
+		self.list.InsertColumn(1, _('MH'), width=65)
+		self.list.InsertColumn(2, _('deviation'), width=90)
 		self.list.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit)
 
 		variation_t = wx.StaticText(panel, label=_('Magnetic Variation'))
@@ -44,11 +44,17 @@ class adddeviationsetting(wx.Dialog):
 		rawvalue_t = wx.StaticText(panel, label=_('Compass Heading'))
 		self.rawvalue = wx.TextCtrl(panel, size=(150, 30))
 
-		unitvalue_t = wx.StaticText(panel, label=_('Observed True Heading'))
+		mag_head_t = wx.StaticText(panel, label=_('Magnetic Heading'))
+		self.mag_head = wx.TextCtrl(panel, size=(150, 30))
+
+		unitvalue_t = wx.StaticText(panel, label=_('True Heading'))
 		self.unitvalue = wx.TextCtrl(panel, size=(150, 30))
 		
 		self.change = wx.Button(panel, label=_('change'))
 		self.change.Bind(wx.EVT_BUTTON, self.on_change)	
+
+		reset = wx.Button(panel, label=_('Reset'))
+		reset.Bind(wx.EVT_BUTTON, self.on_reset)
 
 		close = wx.Button(panel, label=_('Close'))
 		close.Bind(wx.EVT_BUTTON, self.on_close)
@@ -61,11 +67,12 @@ class adddeviationsetting(wx.Dialog):
 		hvar.Add(self.fix, 0, wx.ALL | wx.EXPAND, 5)
 
 		vb1 = wx.BoxSizer(wx.VERTICAL)
-		vb1.Add(variation_t, 0, wx.ALL | wx.EXPAND, 5)
-		vb1.Add(hvar, 0, wx.ALL | wx.EXPAND, 0)
-		vb1.AddSpacer(10)
 		vb1.Add(rawvalue_t, 0, wx.ALL | wx.EXPAND, 5)
 		vb1.Add(self.rawvalue, 0, wx.ALL | wx.EXPAND, 5)
+		vb1.Add(mag_head_t, 0, wx.ALL | wx.EXPAND, 5)
+		vb1.Add(self.mag_head, 0, wx.ALL | wx.EXPAND, 5)
+		vb1.Add(variation_t, 0, wx.ALL | wx.EXPAND, 5)
+		vb1.Add(hvar, 0, wx.ALL | wx.EXPAND, 0)
 		vb1.Add(unitvalue_t, 0, wx.ALL | wx.EXPAND, 5)
 		vb1.Add(self.unitvalue, 0, wx.ALL | wx.EXPAND, 5)
 		vb1.AddSpacer(10)
@@ -78,8 +85,9 @@ class adddeviationsetting(wx.Dialog):
 
 		hbox = wx.BoxSizer(wx.HORIZONTAL)
 		hbox.Add((0, 0), 1, wx.ALL | wx.EXPAND, 5)
-		hbox.Add(close, 0, wx.ALL | wx.EXPAND, 5)
+		hbox.Add(reset, 0, wx.ALL | wx.EXPAND, 5)
 		hbox.Add(graph, 0, wx.ALL | wx.EXPAND, 5)
+		hbox.Add(close, 0, wx.ALL | wx.EXPAND, 5)
 
 		vbox = wx.BoxSizer(wx.VERTICAL)
 		vbox.AddSpacer(5)
@@ -90,6 +98,7 @@ class adddeviationsetting(wx.Dialog):
 
 		panel.SetSizer(vbox)
 		self.rawvalue.Disable()
+		self.mag_head.Disable()
 
 		self.read_list()
 
@@ -102,7 +111,6 @@ class adddeviationsetting(wx.Dialog):
 			self.list.DeleteAllItems()
 		except:
 			pass
-		self.listsave = []
 		data = self.conf.get('COMPASS', 'deviation')
 		if not data:
 			temp_list = []
@@ -115,11 +123,12 @@ class adddeviationsetting(wx.Dialog):
 		except:
 			self.edit = []
 		for ii in self.edit:
-			self.list.Append([str(int(ii[0])), str(ii[1])])
-			self.listsave.append(ii)
+			iii = ii[1] - ii[0]
+			self.list.Append([str(ii[0]), str(ii[1]), str(iii)])
 
 		self.rawvalue.SetValue('')
 		self.unitvalue.SetValue('')
+		self.mag_head.SetValue('')
 
 		var = self.conf.get('COMPASS', 'variation')
 		self.variation.SetValue(var)
@@ -143,6 +152,7 @@ class adddeviationsetting(wx.Dialog):
 			return
 		
 		self.rawvalue.SetValue(str(self.edit[self.selected][0]))
+		self.mag_head.SetValue(str(self.edit[self.selected][1]))
 		var = float(self.variation.GetValue())
 		self.unitvalue.SetValue(str(self.edit[self.selected][1] + var))
 
@@ -169,8 +179,8 @@ class adddeviationsetting(wx.Dialog):
 			self.change.Disable()
 			self.variation.Enable()
 			self.fix.SetLabel(_('Fix'))
-		else:
 			self.ShowMessage(_('Deviation table will be calculated with this variation. If you change this value you will have to define the complete table again.'))
+		else:
 			try:
 				var = float(self.variation.GetValue())
 			except:
@@ -187,6 +197,10 @@ class adddeviationsetting(wx.Dialog):
 				temp_list.append([i*10,i*10])
 			self.conf.set('COMPASS', 'deviation', str(temp_list))
 			self.read_list()
+
+	def on_reset(self, e):
+		self.conf.set('COMPASS', 'deviation', '')
+		self.read_list()
 
 	def on_graph(self, e):
    		subprocess.Popen(['python', self.parent.currentpath+'/show_deviation_table.py', str(self.edit)])
