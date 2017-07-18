@@ -1,3 +1,14 @@
+v0.13.0
+* Update dependencies
+* Update Raspbian packages
+* Switch source code to openplotter organization repository
+* Restore SK keys when editing
+* Add pop up when 1W is disabled
+* Add deg, knots, °C, F conversion on NMEA 0183 generator
+* Add default SK keys to I2C sensors
+* Add deviation table
+* Add deviation table to true heading calculation
+
 v0.12.0
 * Update dependencies
 * Update Raspbian packages
