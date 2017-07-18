@@ -4,11 +4,15 @@ cd ~/.config
 echo
 echo "DOWNLOADING NEW OPENPLOTTER CODE..."
 echo
+repository=$4
+if [ -z $repository ]; then
+	repository="openplotter"
+fi
 rm -rf openplotter_tmp
 if [ $3 = "stable" ]; then
-	git clone https://github.com/sailoog/openplotter.git openplotter_tmp
+	git clone https://github.com/$repository/openplotter.git openplotter_tmp
 else
-	git clone -b beta https://github.com/sailoog/openplotter.git openplotter_tmp
+	git clone -b beta https://github.com/$repository/openplotter.git openplotter_tmp
 fi
 if [ $? -ne 0 ]; then
 	echo

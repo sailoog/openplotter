@@ -1,9 +1,13 @@
 #!/bin/bash
 cd ~/.config
+repository=$4
+if [ -z $repository ]; then
+	repository="openplotter"
+fi
 echo
 echo "REMOVING UNUSED PACKAGES..."
 echo
-sudo apt-get -qq remove --purge librtimulib-dev librtimulib-utils librtimulib7 python-rtimulib python3-rtimulib
+sudo apt-get -qq remove --purge librtimulib-dev librtimulib-utils librtimulib7 python-rtimulib python3-rtimulib realvnc*
 sudo apt-get -qq autoremove
 echo
 echo "UPDATING PACKAGE LISTS..."
@@ -62,7 +66,7 @@ mkdir compiling
 cd compiling
 
 cd ~/.config/compiling
-git clone https://github.com/sailoog/kalibrate-rtl.git
+git clone https://github.com/$repository/kalibrate-rtl.git
 cd kalibrate-rtl
 ./bootstrap && CXXFLAGS='-W -Wall -O3'
 ./configure
@@ -70,7 +74,7 @@ make -s
 sudo make -s install
 
 cd ~/.config/compiling
-git clone https://github.com/sailoog/rtl_433.git
+git clone https://github.com/$repository/rtl_433.git
 cd rtl_433/
 mkdir build
 cd build
@@ -79,32 +83,32 @@ make -s
 sudo make -s install
 
 cd ~/.config/compiling
-git clone https://github.com/sailoog/aisdecoder.git
+git clone https://github.com/$repository/aisdecoder.git
 cd aisdecoder
 cmake -DCMAKE_BUILD_TYPE=release
 make -s
 sudo cp aisdecoder /usr/local/bin
 
 cd ~/.config/compiling
-git clone https://github.com/sailoog/kplex.git
+git clone https://github.com/$repository/kplex.git
 cd kplex
 make -s
 sudo make -s install
 
 cd ~/.config/compiling
-git clone git://github.com/sailoog/canboat
+git clone git://github.com/$repository/canboat
 cd canboat
 make -s
 sudo make -s install
 
 cd ~/.config/compiling
-git clone https://github.com/sailoog/geomag.git
+git clone https://github.com/$repository/geomag.git
 cd geomag/geomag
 python setup.py -q build
 sudo python setup.py -q install
 
 cd ~/.config/compiling
-git clone https://github.com/sailoog/RTIMULib2.git
+git clone https://github.com/$repository/RTIMULib2.git
 cd RTIMULib2/Linux
 mkdir build
 cd build

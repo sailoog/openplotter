@@ -402,8 +402,10 @@ class MainFrame(wx.Frame):
 		self.update_openplotter('master')
 
 	def update_openplotter(self, remote_branch):
+		repository = self.conf.get('GENERAL', 'repository')
+		if not repository: repository = 'openplotter'
 		try:
-			r = requests.get('https://raw.githubusercontent.com/sailoog/openplotter/'+remote_branch+'/openplotter.conf')
+			r = requests.get('https://raw.githubusercontent.com/'+repository+'/openplotter/'+remote_branch+'/openplotter.conf')
 		except:
 			self.ShowStatusBarRED(_('It was not possible to connect to Github.'))
 			return
@@ -444,7 +446,7 @@ class MainFrame(wx.Frame):
 		msg += _('Are you sure you want to update from ')+vl+' '+sl+_(' to ')+vr+' '+sr+'?'
 		dlg = wx.MessageDialog(None, msg, _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_EXCLAMATION)
 		if dlg.ShowModal() == wx.ID_YES:
-			subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/update_OpenPlotter.sh', major_update, vr, sr])
+			subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/update_OpenPlotter.sh', major_update, vr, sr, repository])
 			dlg.Destroy()
 			self.Close()
 		else: dlg.Destroy()
