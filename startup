@@ -156,12 +156,6 @@ class MyFrame(wx.Frame):
 			gain=self.conf.get('AIS-SDR', 'gain')
 			ppm=self.conf.get('AIS-SDR', 'ppm')
 			channel=self.conf.get('AIS-SDR', 'channel')
-				
-			nmea_mag_var=self.conf.get('CALCULATE', 'nmea_mag_var')
-			nmea_hdt=self.conf.get('CALCULATE', 'nmea_hdt')
-			nmea_rot=self.conf.get('CALCULATE', 'nmea_rot')
-			TW_STW=self.conf.get('CALCULATE', 'tw_stw')
-			TW_SOG=self.conf.get('CALCULATE', 'tw_sog')
 
 			N2K_output=self.conf.get('N2K', 'output')
 

@@ -584,11 +584,12 @@ class MySK_to_Action_Calc:
 		tick = time.time()
 		self.calcMagneticVariation = self.SK.conf.get('CALCULATE', 'mag_var')=='1'
 		self.calcTrueHeading = self.SK.conf.get('CALCULATE', 'hdt')=='1'
+		self.calcTrueHeading_dev = self.SK.conf.get('CALCULATE', 'hdt_dev')=='1'
 		self.calcRateTurn = self.SK.conf.get('CALCULATE', 'rot')=='1'
 		self.calcWindTrueWater = self.SK.conf.get('CALCULATE', 'tw_stw')=='1'
 		self.calcWindTrueGround = self.SK.conf.get('CALCULATE', 'tw_sog')=='1'
 
-		if self.calcWindTrueWater | self.calcTrueHeading | self.calcRateTurn | self.calcWindTrueGround | self.calcMagneticVariation:
+		if self.calcWindTrueWater or self.calcTrueHeading or self.calcTrueHeading_dev or self.calcRateTurn or self.calcWindTrueGround or self.calcMagneticVariation:
 			self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 		if self.calcMagneticVariation:
@@ -598,12 +599,23 @@ class MySK_to_Action_Calc:
 			self.mag_var_rate_tick = tick
 			self.mag_var_accuracy = float(self.SK.conf.get('CALCULATE', 'mag_var_accuracy'))
 
-		if self.calcTrueHeading:
+		if self.calcTrueHeading or self.calcTrueHeading_dev:
 			self.navigation_headingMagnetic = self.setlist(['navigation.headingMagnetic', [0, 0, 0, 0, 0, 0, 0, 0]])
 			self.navigation_magneticVariation = self.setlist(['navigation.magneticVariation', [0, 0, 0, 0, 0, 0, 0, 0]])
 			self.hdt_rate = float(self.SK.conf.get('CALCULATE', 'hdt_rate'))
 			self.hdt_rate_tick = tick
 			self.hdt_accuracy = float(self.SK.conf.get('CALCULATE', 'hdt_accuracy'))
+			if self.calcTrueHeading_dev:
+				self.deviation_table = []
+				data = self.SK.conf.get('COMPASS', 'deviation')
+				if not data:
+					temp_list = []
+					for i in range(37):
+						temp_list.append([i*10,i*10])
+					self.SK.conf.set('COMPASS', 'deviation', str(temp_list))
+					data = self.SK.conf.get('COMPASS', 'deviation')
+				try: self.deviation_table=eval(data)
+				except: self.deviation_table = []
 
 		if self.calcRateTurn:
 			self.navigation_headingMagnetic = self.setlist(['navigation.headingMagnetic', [0, 0, 0, 0, 0, 0, 0, 0]])
@@ -783,6 +795,28 @@ class MySK_to_Action_Calc:
 					else:
 						Erg += '{"path": "navigation.headingTrue","value": null},'
 
+		if self.calcTrueHeading_dev:
+			heading_m = float(self.navigation_headingMagnetic[1][2])*57.2957795
+			var = float(self.navigation_magneticVariation[1][2])*57.2957795
+			timestamp = self.navigation_headingMagnetic[1][7]
+			if heading_m and var and timestamp:
+				timestamp = datetime.datetime.strptime(timestamp, '%Y-%m-%dT%H:%M:%S.%fZ')
+				timestamp = timestamp.replace(tzinfo=tz.tzutc())
+				timestamp = timestamp.astimezone(tz.tzlocal())
+				timestamp_local = time.mktime(timestamp.timetuple())
+				if now - self.hdt_rate_tick > self.hdt_rate:
+					if self.deviation_table:
+						ix = int(heading_m / 10)
+						heading_m = self.deviation_table[ix][1]+(self.deviation_table[ix+1][1]-self.deviation_table[ix][1])*0.1*(heading_m-self.deviation_table[ix][0])
+					if heading_m<0: heading_m=360+heading_m
+					elif heading_m>360: heading_m=-360+heading_m
+					heading_t = heading_m+var
+					self.hdt_rate_tick = now
+					if now - timestamp_local < self.hdt_accuracy:
+						Erg += '{"path": "navigation.headingTrue","value":'+str(heading_t*0.017453293)+'},'
+					else:
+						Erg += '{"path": "navigation.headingTrue","value": null},'
+
 		if self.calcRateTurn:
 			heading_m = self.navigation_headingMagnetic[1][2]
 			timestamp = self.navigation_headingMagnetic[1][7]
@@ -888,20 +922,16 @@ if not SKNMEA.nmea_list: aktiv_NMEA = False
 if SKAction.triggers: aktiv_Action = True
 if SKAction.calcMagneticVariation: aktiv_Action = True
 if SKAction.calcTrueHeading: aktiv_Action = True
+if SKAction.calcTrueHeading_dev: aktiv_Action = True
 if SKAction.calcRateTurn: aktiv_Action = True
 #if SKAction.calcWindTrueWater: aktiv_Action = True
 #if SKAction.calcWindTrueGround: aktiv_Action = True
 
 stop = 0
-run_ = True
-while run_:
-
-	time.sleep(0.02)
-	tick2 = time.time()
-	if aktiv_N2K: SKN2K.N2K_cycle(tick2)
-	if aktiv_NMEA: SKNMEA.NMEA_cycle(tick2)
-	if aktiv_Action: SKAction.Action_Calc_cycle(tick2)
-	#if stop > 5000:
-	#	SK.stop()
-	# run_=False
-	#stop += 1
+if aktiv_N2K or aktiv_NMEA or aktiv_Action:
+	while 1:
+		time.sleep(0.02)
+		tick2 = time.time()
+		if aktiv_N2K: SKN2K.N2K_cycle(tick2)
+		if aktiv_NMEA: SKNMEA.NMEA_cycle(tick2)
+		if aktiv_Action: SKAction.Action_Calc_cycle(tick2)

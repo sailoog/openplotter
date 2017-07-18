@@ -102,10 +102,6 @@ class adddeviationsetting(wx.Dialog):
 
 		self.read_list()
 
-		subprocess.call(['pkill', '-f', 'read_sensors_d.py'])
-		self.conf.set('COMPASS', 'editing_dev', '1')
-		subprocess.Popen(['python', self.parent.currentpath+'/read_sensors_d.py'], cwd=self.parent.currentpath + '/imu/settings')
-
 	def read_list(self):
 		try:
 			self.list.DeleteAllItems()
@@ -207,7 +203,8 @@ class adddeviationsetting(wx.Dialog):
 
 	def on_close(self, e):
 		subprocess.call(['pkill', '-f', 'read_sensors_d.py'])
-		self.conf.set('COMPASS', 'editing_dev', '0')
+		subprocess.call(['pkill', '-f', 'SK-base_d.py'])
+		subprocess.Popen(['python', self.parent.currentpath+'/SK-base_d.py'])
 		subprocess.Popen(['python', self.parent.currentpath+'/read_sensors_d.py'], cwd=self.parent.currentpath + '/imu/settings')
 		self.Destroy()
 

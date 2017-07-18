@@ -32,7 +32,7 @@ class MyFrame(wx.Frame):
 
 			title = _('Calculate')
 
-			wx.Frame.__init__(self, None, title=title, size=(690,370))
+			wx.Frame.__init__(self, None, title=title, size=(690,400))
 			
 			self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 			
@@ -60,8 +60,12 @@ class MyFrame(wx.Frame):
 			self.rt_rate= wx.ComboBox(panel, choices=rate_list, style=wx.CB_READONLY)
 
 			th_box = wx.StaticBox(panel, -1, _(' True heading '))
-			self.heading_t = wx.CheckBox(panel, -1, label=_('Enable'))
+			self.heading_t = wx.CheckBox(panel, -1, label=_('Deviation is included'))
+			self.heading_t.Bind(wx.EVT_CHECKBOX, self.on_select_th)
 			th_requires = wx.StaticText(panel, label=_('Requires: magnetic heading, variation.'))
+			self.add_deviation = wx.CheckBox(panel, -1, label=_('Add deviation table'))
+			self.add_deviation.Bind(wx.EVT_CHECKBOX, self.on_select_th)
+			th_requires2 = wx.StaticText(panel, label=_('Requires: magnetic heading, variation, deviation.'))
 			th_accu_label = wx.StaticText(panel, label=_('Accuracy (sec)'))
 			self.th_accu= wx.ComboBox(panel, choices=rate_list, style=wx.CB_READONLY)
 			th_rate_label = wx.StaticText(panel, label=_('Rate (sec)'))
@@ -111,6 +115,8 @@ class MyFrame(wx.Frame):
 			th_boxSizer = wx.StaticBoxSizer(th_box, wx.VERTICAL)
 			th_boxSizer.Add(self.heading_t, 0, wx.ALL | wx.EXPAND, 5)
 			th_boxSizer.Add(th_requires, 0, wx.LEFT | wx.EXPAND, 5)
+			th_boxSizer.Add(self.add_deviation, 0, wx.ALL | wx.EXPAND, 5)
+			th_boxSizer.Add(th_requires2, 0, wx.LEFT | wx.EXPAND, 5)
 			th_h = wx.BoxSizer(wx.HORIZONTAL)
 			th_h.Add(th_rate_label, 0, wx.UP | wx.EXPAND, 10)
 			th_h.Add(self.th_rate, 0, wx.ALL | wx.EXPAND, 5)
@@ -160,6 +166,7 @@ class MyFrame(wx.Frame):
 			self.mg_accu.SetValue(self.conf.get('CALCULATE', 'mag_var_accuracy'))
 
 			if self.conf.get('CALCULATE', 'hdt')=='1': self.heading_t.SetValue(True)
+			if self.conf.get('CALCULATE', 'hdt_dev')=='1': self.add_deviation.SetValue(True)
 			self.th_rate.SetValue(self.conf.get('CALCULATE', 'hdt_rate'))
 			self.th_accu.SetValue(self.conf.get('CALCULATE', 'hdt_accuracy'))
 
@@ -183,15 +190,20 @@ class MyFrame(wx.Frame):
 					return
 			else: self.conf.set('CALCULATE', 'mag_var', '0')
 
-			if self.heading_t.GetValue():
+			if self.heading_t.GetValue() or self.add_deviation.GetValue():
 				if self.th_rate.GetValue() and self.th_accu.GetValue():
-					self.conf.set('CALCULATE', 'hdt', '1')
+					if self.heading_t.GetValue(): self.conf.set('CALCULATE', 'hdt', '1')
+					else: self.conf.set('CALCULATE', 'hdt', '0')
+					if self.add_deviation.GetValue(): self.conf.set('CALCULATE', 'hdt_dev', '1')
+					else: self.conf.set('CALCULATE', 'hdt_dev', '0')
 					self.conf.set('CALCULATE', 'hdt_rate', self.th_rate.GetValue())
 					self.conf.set('CALCULATE', 'hdt_accuracy', self.th_accu.GetValue())
 				else:
 					self.ShowMessage(_('You have to provide rate and accuracy values for true heading'))
 					return
-			else: self.conf.set('CALCULATE', 'hdt', '0')
+			else: 
+				self.conf.set('CALCULATE', 'hdt', '0')
+				self.conf.set('CALCULATE', 'hdt_dev', '0')
 
 			if self.rate_turn.GetValue():
 				if self.rt_rate.GetValue() and self.rt_accu.GetValue():
@@ -233,6 +245,13 @@ class MyFrame(wx.Frame):
 			if sender.GetValue():
 				self.true_wind2.SetValue(False)
 				self.true_wind.SetValue(False)
+				sender.SetValue(True)
+
+		def on_select_th(self,e):
+			sender = e.GetEventObject()
+			if sender.GetValue():
+				self.heading_t.SetValue(False)
+				self.add_deviation.SetValue(False)
 				sender.SetValue(True)
 
 app = wx.App()

@@ -120,7 +120,7 @@ def work_imu():
 					fusionPose = data["fusionPose"]
 					if headingSK:
 						heading=math.degrees(fusionPose[2])+headingOffset * 57.2957795
-						if editing_dev != '1':
+						if deviation_table:
 							ix = int(heading / 10)
 							heading = deviation_table[ix][1]+(deviation_table[ix+1][1]-deviation_table[ix][1])*0.1*(heading-deviation_table[ix][0])
 						if heading<0: heading=360+heading
@@ -359,7 +359,6 @@ if imu_:
 	try:
 		deviation_table=eval(data)
 	except:deviation_table = []
-	editing_dev = conf.get('COMPASS', 'editing_dev')
 
 # launch threads
 if analog_: work_analog()
