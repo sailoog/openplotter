@@ -161,6 +161,8 @@ class MyFrame(wx.Frame):
 
 			vl = self.conf.get('GENERAL', 'version')
 			sl = self.conf.get('GENERAL', 'state')
+			repository = self.conf.get('GENERAL', 'repository')
+			if not repository: repository = 'openplotter'
 
 			tools_py=[]
 			if self.conf.has_section('TOOLS'):
@@ -309,7 +311,7 @@ class MyFrame(wx.Frame):
 			if sl == 'stable': remote_branch = 'master'
 			else: remote_branch = 'beta'
 			try:
-				r = requests.get('https://raw.githubusercontent.com/sailoog/openplotter/'+remote_branch+'/openplotter.conf')
+				r = requests.get('https://raw.githubusercontent.com/'+repository+'/openplotter/'+remote_branch+'/openplotter.conf')
 			except:
 				self.add_logger_data(_(' It was not possible to connect to Github.'))
 			else:
