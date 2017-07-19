@@ -162,7 +162,9 @@ class MyFrame(wx.Frame):
 			vl = self.conf.get('GENERAL', 'version')
 			sl = self.conf.get('GENERAL', 'state')
 			repository = self.conf.get('GENERAL', 'repository')
-			if not repository: repository = 'openplotter'
+			if not repository: 
+				repository = 'openplotter'
+				self.conf.set('GENERAL', 'repository', repository)
 
 			tools_py=[]
 			if self.conf.has_section('TOOLS'):
