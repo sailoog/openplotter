@@ -403,7 +403,9 @@ class MainFrame(wx.Frame):
 
 	def update_openplotter(self, remote_branch):
 		repository = self.conf.get('GENERAL', 'repository')
-		if not repository: repository = 'openplotter'
+		if not repository:
+			repository = 'openplotter'
+			self.conf.set('GENERAL', 'repository', repository)
 		try:
 			r = requests.get('https://raw.githubusercontent.com/'+repository+'/openplotter/'+remote_branch+'/openplotter.conf')
 		except:

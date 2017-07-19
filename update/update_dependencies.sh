@@ -7,7 +7,7 @@ fi
 echo
 echo "REMOVING UNUSED PACKAGES..."
 echo
-sudo apt-get -qq remove --purge librtimulib-dev librtimulib-utils librtimulib7 python-rtimulib python3-rtimulib realvnc*
+sudo apt-get -qq remove --purge librtimulib-dev librtimulib-utils librtimulib7 python-rtimulib python3-rtimulib realvnc* xrdp
 sudo apt-get -qq autoremove
 echo
 echo "UPDATING PACKAGE LISTS..."
