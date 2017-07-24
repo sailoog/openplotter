@@ -18,6 +18,7 @@
 import socket, time, math, datetime, platform, threading
 from classes.paths import Paths
 from classes.conf import Conf
+from pypilot.boatimu import *
 
 if platform.machine()[0:3]!='arm':
 	print 'This is not a Raspberry Pi -> no GPIO, I2C and SPI'
@@ -53,31 +54,26 @@ def read_adc(channel):
 	data = ((adc[1]&3) << 8) + adc[2]
 	return data
 
-# read heading, heel, pitch, pressure, humidity, temperature and GENERATE
-def work_imu():
+# read heading, heel, pitch and GENERATE
+def work_compass():
+	server = SignalKPipeServer()
+	boatimu = BoatIMU(server)
+
+	while True:
+		t0 = time.time()
+		data = boatimu.IMURead()
+		if data:
+			print 'pitch', data['pitch'], 'roll', data['roll'], 'heading', data['heading']
+		server.HandleRequests()
+		dt = time.time() - t0
+		if dt > .1:
+			time.sleep(dt);
+
+# read pressure, humidity, temperature and GENERATE
+def work_imu_press_hum():
 	timesleep = 0.1
 	SETTINGS_FILE = "RTIMULib"
 	s = RTIMU.Settings(SETTINGS_FILE)
-	if imu_:
-		imu = RTIMU.RTIMU(s)
-		imu.IMUInit()
-		imu.setSlerpPower(0.02)
-		imu.setGyroEnable(True)
-		imu.setAccelEnable(True)
-		imu.setCompassEnable(True)
-		poll_interval = imu.IMUGetPollInterval()
-		timesleep = poll_interval*1.0/1000.0
-		imuName = imu_[0]
-		imuName = imuName.replace(' ', '')
-		headingSK = imu_[2][0][0]
-		headingRate = imu_[2][0][1]
-		headingOffset = imu_[2][0][2]
-		heelSK = imu_[2][1][0]
-		heelRate = imu_[2][1][1]
-		heelOffset = imu_[2][1][2]
-		pitchSK = imu_[2][2][0]
-		pitchRate = imu_[2][2][1]
-		pitchOffset = imu_[2][2][2]
 	if imu_press:
 		pressure = RTIMU.RTPressure(s)
 		pressure.pressureInit()
@@ -112,7 +108,7 @@ def work_imu():
 		while 1:
 			time.sleep(timesleep)
 			tick0 = time.time()
-
+			'''
 			if imu_:
 				Erg=''
 				if imu.IMURead():
@@ -142,7 +138,7 @@ def work_imu():
 					SignalK='{"updates":[{"$source":"OPsensors.I2C.'+imuName+'","values":['
 					SignalK+=Erg[0:-1]+']}]}\n'		
 					sock.sendto(SignalK, ('127.0.0.1', 55557))
-
+			'''
 			if imu_press:
 				Erg=''
 				read=pressure.pressureRead()
@@ -331,7 +327,6 @@ if gpio_list:
 
 #init I2C
 bme280 = False
-imu_ = False
 imu_press = False
 imu_hum = False
 try:
@@ -343,11 +338,13 @@ if i2c_sensors:
 		if i[0] == 'BME280': bme280 = i
 		elif 'rtimulib' in i[1]:
 			temp_list = i[1].split('.')
-			if temp_list[1] == 'imu': imu_ = i
-			elif temp_list[1] == 'press': imu_press = i
+			if temp_list[1] == 'press': imu_press = i
 			elif temp_list[1] == 'hum': imu_hum = i
-			
-if imu_:
+
+#init compass
+compass = conf.get('COMPASS', 'enable')
+
+if compass == '1':
 	deviation_table = []
 	data = conf.get('COMPASS', 'deviation')
 	if not data:
@@ -366,8 +363,11 @@ if gpio_: work_gpio()
 if bme280:
 	thread_bme280=threading.Thread(target=work_bme280)	
 	thread_bme280.start()
-if imu_ or imu_press or imu_hum:
-	thread_imu=threading.Thread(target=work_imu)	
-	thread_imu.start()
+if imu_press or imu_hum:
+	thread_imu_press_hum = threading.Thread(target=work_imu_press_hum)	
+	thread_imu_press_hum.start()
+if compass == '1':
+	thread_compass=threading.Thread(target=work_compass)	
+	thread_compass.start()
 
 		
