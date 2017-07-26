@@ -265,6 +265,7 @@ class MainFrame(wx.Frame):
 		self.read_mqtt()
 		self.read_MCP()
 		self.read_i2c()
+		self.read_compass()
 		self.read_n2k()
 		self.read_triggers()
 		#self.when_closed(0x001)
@@ -1156,28 +1157,105 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def page_compass(self):
 		imu_box = wx.StaticBox(self.p_compass, label=_(' IMU '))
-		self.compass_enable = wx.CheckBox(self.p_compass, label=_('Enable'))
-		self.compass_enable.Bind(wx.EVT_CHECKBOX, self.on_compass_enable)
 
-		autopilot_box = wx.StaticBox(self.p_compass, label=_(' Autopilot '))
+		self.rate_list = ['0.1', '0.25', '0.5', '0.75', '1', '1.5', '2', '5', '30', '60', '300']
+
+		compass_rate_label = wx.StaticText(self.p_compass, label=_('Rate (secons)'))
+		self.compass_rate= wx.ComboBox(self.p_compass, choices=self.rate_list, style=wx.CB_READONLY)
+		self.compass_rate.Bind(wx.EVT_COMBOBOX, self.on_select_compass_rate)
+
+		self.compass_h = wx.CheckBox(self.p_compass, label=_('Compas heading (navigation.headingCompass)'))
+		self.compass_h.Bind(wx.EVT_CHECKBOX, self.on_compass_enable)
+
+		self.magnetic_h = wx.CheckBox(self.p_compass, label=_('Magnetic heading (navigation.headingMagnetic)'))
+		self.magnetic_h.Bind(wx.EVT_CHECKBOX, self.on_compass_enable)
+
+		self.heel = wx.CheckBox(self.p_compass, label=_('Heel (navigation.attitude.roll)'))
+		self.heel.Bind(wx.EVT_CHECKBOX, self.on_compass_enable)
+
+		self.pitch = wx.CheckBox(self.p_compass, label=_('Pitch (navigation.attitude.pitch)'))
+		self.pitch.Bind(wx.EVT_CHECKBOX, self.on_compass_enable)
+
+		calibration = wx.Button(self.p_compass, label=_('calibration'))
+		calibration.Bind(wx.EVT_BUTTON, self.on_calibration)
+
+		scope = wx.Button(self.p_compass, label=_('scope'))
+		scope.Bind(wx.EVT_BUTTON, self.on_scope)
+
+		deviation = wx.Button(self.p_compass, label=_('deviation table'))
+		deviation.Bind(wx.EVT_BUTTON, self.on_imu_deviation_table)
+
+		#autopilot_box = wx.StaticBox(self.p_compass, label=_(' Autopilot '))
+
+		diagnostic = wx.Button(self.p_compass, label=_('SK Diagnostic'))
+		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
+
+		reset = wx.Button(self.p_compass, label=_('Restart'))
+		reset.Bind(wx.EVT_BUTTON, self.reset_sensors)
+
+		hbox3 = wx.BoxSizer(wx.HORIZONTAL)
+		hbox3.Add(diagnostic, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 5)
+		hbox3.Add(reset, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 5)
+
+		hbox2 = wx.BoxSizer(wx.HORIZONTAL)
+		hbox2.Add(compass_rate_label, 0, wx.ALL | wx.EXPAND, 5)
+		hbox2.Add(self.compass_rate, 0, wx.ALL | wx.EXPAND, 5)
+
+		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
+		hbox1.Add(calibration, 0, wx.ALL | wx.EXPAND, 5)
+		hbox1.Add(scope, 0, wx.ALL | wx.EXPAND, 5)
+		hbox1.Add(deviation, 0, wx.ALL | wx.EXPAND, 5)
 
 		vbox1 = wx.StaticBoxSizer(imu_box, wx.VERTICAL)
-		vbox1.Add(self.compass_enable, 0, wx.ALL | wx.EXPAND, 5)
+		vbox1.Add(hbox2, 0, wx.ALL | wx.EXPAND, 5)
+		vbox1.Add(self.compass_h, 0, wx.ALL | wx.EXPAND, 5)
+		vbox1.Add(self.magnetic_h, 0, wx.ALL | wx.EXPAND, 5)
+		vbox1.Add(self.heel, 0, wx.ALL | wx.EXPAND, 5)
+		vbox1.Add(self.pitch, 0, wx.ALL | wx.EXPAND, 5)
+		vbox1.Add(hbox1, 0, wx.ALL | wx.EXPAND, 5)
 
-		vbox2 = wx.StaticBoxSizer(autopilot_box, wx.VERTICAL)
+		#vbox2 = wx.StaticBoxSizer(autopilot_box, wx.VERTICAL)
 
 		hbox = wx.BoxSizer(wx.HORIZONTAL)
 		hbox.Add(vbox1, 1, wx.ALL | wx.EXPAND, 5)
-		hbox.Add(vbox2, 1, wx.ALL | wx.EXPAND, 5)
+		#hbox.Add(vbox2, 1, wx.ALL | wx.EXPAND, 5)
 
-		self.p_compass.SetSizer(hbox)
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		vbox.Add(hbox, 1, wx.ALL | wx.EXPAND, 0)
+		vbox.Add(hbox3, 0, wx.ALL | wx.EXPAND, 5)
+
+		self.p_compass.SetSizer(vbox)
+
+	def read_compass(self):
+		pass
 
 	def on_compass_enable(self, e):
-		subprocess.call(['pkill', '-f', 'read_sensors_d.py'])
-		if self.compass_enable.GetValue(): self.conf.set('COMPASS', 'enable', '1')
-		else: self.conf.set('COMPASS', 'enable', '0')
-		subprocess.Popen(['python', self.currentpath + '/read_sensors_d.py'])
+		self.stop_sensors()
+		if self.compass_h.GetValue(): self.conf.set('COMPASS', 'compass_h', '1')
+		else: self.conf.set('COMPASS', 'compass_h', '0')
+		if self.magnetic_h.GetValue(): self.conf.set('COMPASS', 'magnetic_h', '1')
+		else: self.conf.set('COMPASS', 'magnetic_h', '0')
+		if self.heel.GetValue(): self.conf.set('COMPASS', 'heel', '1')
+		else: self.conf.set('COMPASS', 'heel', '0')
+		if self.pitch.GetValue(): self.conf.set('COMPASS', 'pitch', '1')
+		else: self.conf.set('COMPASS', 'pitch', '0')
+		self.start_sensors()
 
+	def on_calibration(self, e):
+		subprocess.call(['pkill', '-f', 'pypilot_calibration'])
+		subprocess.call(['pkill', '-f', 'signalk_scope_wx'])
+		subprocess.Popen('pypilot_calibration', cwd=self.home + '/.pypilot')
+
+	def on_scope(self, e):
+		subprocess.call(['pkill', '-f', 'pypilot_calibration'])
+		subprocess.call(['pkill', '-f', 'signalk_scope_wx'])
+		subprocess.Popen('signalk_scope_wx')
+
+	def on_select_compass_rate(self, e):
+		self.stop_sensors()
+		self.conf.set('COMPASS', 'rate', self.compass_rate.GetValue())
+		self.start_sensors()
+		
 			###########################################	NMEA 0183 kplex
 
 	def page_kplex(self):
@@ -1566,9 +1644,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		delete = wx.Button(self.p_i2c, label=_('delete'))
 		delete.Bind(wx.EVT_BUTTON, self.on_delete_i2c)
-		
-		deviation = wx.Button(self.p_i2c, label=_('deviation'))
-		deviation.Bind(wx.EVT_BUTTON, self.on_imu_deviation_table)
 
 		diagnostic = wx.Button(self.p_i2c, label=_('SK Diagnostic'))
 		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
@@ -1591,7 +1666,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		hlistbox_but = wx.BoxSizer(wx.VERTICAL)
 		hlistbox_but.Add(add, 0, wx.ALL, 5)
 		hlistbox_but.Add(delete, 0, wx.ALL, 5)
-		hlistbox_but.Add(deviation, 0, wx.ALL, 5)
 
 		hlistbox = wx.BoxSizer(wx.HORIZONTAL)
 		hlistbox.Add(self.list_i2c, 1, wx.ALL | wx.EXPAND, 5)
@@ -1755,20 +1829,22 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				break
 			c = c + 1
 		self.apply_changes_i2c()
-	
+
 	def start_sensors(self):
-		subprocess.call(['pkill', 'RTIMULibDemoGL'])
-		subprocess.Popen(['python', self.currentpath + '/read_sensors_d.py'], cwd=self.currentpath + '/imu/settings')
+		subprocess.Popen(['python', self.currentpath + '/read_sensors_d.py'], cwd=self.home + '/.pypilot')
 		self.ShowStatusBarGREEN(_('Sensors restarted'))
 
 	def stop_sensors(self):
 		self.ShowStatusBarRED(_('Sensors stopped'))
+		subprocess.call(['pkill', '-f', 'pypilot_calibration'])
+		subprocess.call(['pkill', '-f', 'signalk_scope_wx'])
 		subprocess.call(['pkill', '-f', 'read_sensors_d.py'])
 		
 	def reset_sensors(self, e):
 		self.stop_sensors()
 		self.read_i2c()
 		self.read_gpio()
+		self.read_compass()
 		self.start_sensors()
 
 	def read_i2c(self):

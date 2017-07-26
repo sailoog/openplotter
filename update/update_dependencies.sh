@@ -142,6 +142,8 @@ cp -f ui/Vagabond.mtl /home/pi/.pypilot/
 cp -f ui/Vagabond.obj /home/pi/.pypilot/
 cp -f ui/compass.png /home/pi/.pypilot/
 
+# TODO add pypilot signalk conf
+
 sudo sed -i '103 i \\tself.shininess = min(128, self.shininess)' /usr/local/lib/python2.7/dist-packages/pywavefront/material.py
 
 cd ~/.config/

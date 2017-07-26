@@ -56,14 +56,49 @@ def read_adc(channel):
 
 # read heading, heel, pitch and GENERATE
 def work_compass():
+	SETTINGS_FILE = "RTIMULib"
+	s = RTIMU.Settings(SETTINGS_FILE)
+	imu = RTIMU.RTIMU(s)
+	imuName = imu.IMUName()
+	del imu
+	del s
 	server = SignalKPipeServer()
 	boatimu = BoatIMU(server)
-
+	try:
+		compass_rate = float(conf.get('COMPASS', 'rate'))
+	except:
+		compass_rate = 1
+		conf.set('COMPASS', 'rate', '1')
+	tick1 = time.time()
 	while True:
 		t0 = time.time()
 		data = boatimu.IMURead()
 		if data:
-			print 'pitch', data['pitch'], 'roll', data['roll'], 'heading', data['heading']
+			#print 'pitch', data['pitch'], 'roll', data['roll'], 'heading', data['heading']
+			Erg=''
+			if compassSK == '1':
+				heading = data['heading']
+				Erg += '{"path": "navigation.headingCompass","value":'+str(heading*0.017453293)+'},'
+			if headingSK == '1':
+				heading = data['heading']
+				if deviation_table:
+					ix = int(heading / 10)
+					heading = deviation_table[ix][1]+(deviation_table[ix+1][1]-deviation_table[ix][1])*0.1*(heading-deviation_table[ix][0])
+				if heading<0: heading=360+heading
+				elif heading>360: heading=-360+heading
+				Erg += '{"path": "navigation.headingMagnetic","value":'+str(heading*0.017453293)+'},'
+			if heelSK == '1':
+				heel = data['roll']
+				Erg += '{"path": "navigation.attitude.roll","value":'+str(heel*0.017453293)+'},'
+			if pitchSK == '1':
+				pitch = data['pitch']
+				Erg += '{"path": "navigation.attitude.pitch","value":'+str(pitch*0.017453293)+'},'
+			if Erg:
+				if t0 - tick1 > compass_rate:
+					tick1 = t0	
+					SignalK='{"updates":[{"$source":"OPsensors.I2C.'+imuName+'","values":['
+					SignalK+=Erg[0:-1]+']}]}\n'		
+					sock.sendto(SignalK, ('127.0.0.1', 55557))
 		server.HandleRequests()
 		dt = time.time() - t0
 		if dt > .1:
@@ -98,8 +133,6 @@ def work_imu_press_hum():
 		temp_humOffset = imu_hum[2][1][2]
 
 	tick1 = time.time()
-	tick2 = tick1
-	tick3 = tick1
 	tick4 = tick1
 	tick5 = tick1
 	tick6 = tick1
@@ -108,37 +141,6 @@ def work_imu_press_hum():
 		while 1:
 			time.sleep(timesleep)
 			tick0 = time.time()
-			'''
-			if imu_:
-				Erg=''
-				if imu.IMURead():
-					data = imu.getIMUData()
-					fusionPose = data["fusionPose"]
-					if headingSK:
-						heading=math.degrees(fusionPose[2])+headingOffset * 57.2957795
-						if deviation_table:
-							ix = int(heading / 10)
-							heading = deviation_table[ix][1]+(deviation_table[ix+1][1]-deviation_table[ix][1])*0.1*(heading-deviation_table[ix][0])
-						if heading<0: heading=360+heading
-						elif heading>360: heading=-360+heading
-						if tick0 - tick1 > headingRate:
-							Erg += '{"path": "'+headingSK+'","value":'+str(heading*0.017453293)+'},'
-							tick1 = tick0
-					if heelSK:
-						heel=math.degrees(fusionPose[0])
-						if tick0 - tick2 > heelRate:
-							Erg += '{"path": "'+heelSK+'","value":'+str((heel*0.017453293)+heelOffset)+'},'
-							tick2 = tick0
-					if pitchSK:
-						pitch=math.degrees(fusionPose[1])
-						if tick0 - tick3 > pitchRate:
-							Erg += '{"path": "'+pitchSK+'","value":'+str((pitch*0.017453293)+pitchOffset)+'},'
-							tick3 = tick0
-				if Erg:		
-					SignalK='{"updates":[{"$source":"OPsensors.I2C.'+imuName+'","values":['
-					SignalK+=Erg[0:-1]+']}]}\n'		
-					sock.sendto(SignalK, ('127.0.0.1', 55557))
-			'''
 			if imu_press:
 				Erg=''
 				read=pressure.pressureRead()
@@ -159,7 +161,6 @@ def work_imu_press_hum():
 					SignalK='{"updates":[{"$source":"OPsensors.I2C.'+pressName+'","values":['
 					SignalK+=Erg[0:-1]+']}]}\n'		
 					sock.sendto(SignalK, ('127.0.0.1', 55557))
-
 			if imu_hum:
 				Erg=''
 				read=humidity.humidityRead()
@@ -342,9 +343,14 @@ if i2c_sensors:
 			elif temp_list[1] == 'hum': imu_hum = i
 
 #init compass
-compass = conf.get('COMPASS', 'enable')
+compass = False
+compassSK = conf.get('COMPASS', 'compass_h')
+headingSK = conf.get('COMPASS', 'magnetic_h')
+heelSK = conf.get('COMPASS', 'heel')
+pitchSK = conf.get('COMPASS', 'pitch')
 
-if compass == '1':
+if compassSK == '1' or headingSK == '1' or heelSK == '1' or pitchSK == '1':
+	compass = True
 	deviation_table = []
 	data = conf.get('COMPASS', 'deviation')
 	if not data:
@@ -366,7 +372,7 @@ if bme280:
 if imu_press or imu_hum:
 	thread_imu_press_hum = threading.Thread(target=work_imu_press_hum)	
 	thread_imu_press_hum.start()
-if compass == '1':
+if compass:
 	thread_compass=threading.Thread(target=work_compass)	
 	thread_compass.start()
 
