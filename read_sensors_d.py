@@ -54,7 +54,7 @@ def read_adc(channel):
 	data = ((adc[1]&3) << 8) + adc[2]
 	return data
 
-# read heading, heel, pitch and GENERATE
+# read heading, heel, pitch and GENERATE SK
 def work_compass():
 	SETTINGS_FILE = "RTIMULib"
 	s = RTIMU.Settings(SETTINGS_FILE)
@@ -70,44 +70,46 @@ def work_compass():
 		compass_rate = 1
 		conf.set('COMPASS', 'rate', '1')
 	tick1 = time.time()
-	while True:
-		t0 = time.time()
-		data = boatimu.IMURead()
-		if data:
-			#print 'pitch', data['pitch'], 'roll', data['roll'], 'heading', data['heading']
-			Erg=''
-			if compassSK == '1':
-				heading = data['heading']
-				Erg += '{"path": "navigation.headingCompass","value":'+str(heading*0.017453293)+'},'
-			if headingSK == '1':
-				heading = data['heading']
-				if deviation_table:
-					ix = int(heading / 10)
-					heading = deviation_table[ix][1]+(deviation_table[ix+1][1]-deviation_table[ix][1])*0.1*(heading-deviation_table[ix][0])
-				if heading<0: heading=360+heading
-				elif heading>360: heading=-360+heading
-				Erg += '{"path": "navigation.headingMagnetic","value":'+str(heading*0.017453293)+'},'
-			if heelSK == '1':
-				heel = data['roll']
-				Erg += '{"path": "navigation.attitude.roll","value":'+str(heel*0.017453293)+'},'
-			if pitchSK == '1':
-				pitch = data['pitch']
-				Erg += '{"path": "navigation.attitude.pitch","value":'+str(pitch*0.017453293)+'},'
-			if Erg:
-				if t0 - tick1 > compass_rate:
-					tick1 = t0	
-					SignalK='{"updates":[{"$source":"OPsensors.I2C.'+imuName+'","values":['
-					SignalK+=Erg[0:-1]+']}]}\n'		
-					sock.sendto(SignalK, ('127.0.0.1', 55557))
-		server.HandleRequests()
-		dt = time.time() - t0
-		if dt > .1:
-			time.sleep(dt);
+	try:
+		while True:
+			t0 = time.time()
+			data = boatimu.IMURead()
+			if data:
+				#print 'pitch', data['pitch'], 'roll', data['roll'], 'heading', data['heading']
+				Erg=''
+				if compassSK == '1':
+					heading = data['heading']
+					Erg += '{"path": "navigation.headingCompass","value":'+str(heading*0.017453293)+'},'
+				if headingSK == '1':
+					heading = data['heading']
+					if deviation_table:
+						ix = int(heading / 10)
+						heading = deviation_table[ix][1]+(deviation_table[ix+1][1]-deviation_table[ix][1])*0.1*(heading-deviation_table[ix][0])
+					if heading<0: heading=360+heading
+					elif heading>360: heading=-360+heading
+					Erg += '{"path": "navigation.headingMagnetic","value":'+str(heading*0.017453293)+'},'
+				if heelSK == '1':
+					heel = data['roll']
+					Erg += '{"path": "navigation.attitude.roll","value":'+str(heel*0.017453293)+'},'
+				if pitchSK == '1':
+					pitch = data['pitch']
+					Erg += '{"path": "navigation.attitude.pitch","value":'+str(pitch*0.017453293)+'},'
+				if Erg:
+					if t0 - tick1 > compass_rate:
+						tick1 = t0	
+						SignalK='{"updates":[{"$source":"OPsensors.I2C.'+imuName+'","values":['
+						SignalK+=Erg[0:-1]+']}]}\n'		
+						sock.sendto(SignalK, ('127.0.0.1', 55557))
+			server.HandleRequests()
+			dt = time.time() - t0
+			if dt > .1:
+				time.sleep(dt);
+	except Exception, e: print "RTIMULib (IMU) reading failed: "+str(e)
 
-# read pressure, humidity, temperature and GENERATE
+# read pressure, humidity, temperature and GENERATE SK
 def work_imu_press_hum():
 	timesleep = 0.1
-	SETTINGS_FILE = "RTIMULib"
+	SETTINGS_FILE = "RTIMULib2"
 	s = RTIMU.Settings(SETTINGS_FILE)
 	if imu_press:
 		pressure = RTIMU.RTPressure(s)
@@ -181,7 +183,7 @@ def work_imu_press_hum():
 					SignalK='{"updates":[{"$source":"OPsensors.I2C.'+humName+'","values":['
 					SignalK+=Erg[0:-1]+']}]}\n'		
 					sock.sendto(SignalK, ('127.0.0.1', 55557))
-	except Exception, e: print "RTIMULib reading failed: "+str(e)	
+	except Exception, e: print "RTIMULib2 (pressure, humidity) reading failed: "+str(e)	
 
 # read bme280 and send SK
 def work_bme280():
@@ -224,7 +226,7 @@ def work_bme280():
 				sock.sendto(SignalK, ('127.0.0.1', 55557))
 	except Exception, e: print "BME280 reading failed: "+str(e)
 
-# read SPI adc and GENERATE
+# read SPI adc and GENERATE SK
 def work_analog():
 	threading.Timer(rate_ana, work_analog).start()
 	SignalK='{"updates":[{"$source":"OPsensors.SPI.MCP3008","values":[ '
@@ -242,7 +244,7 @@ def work_analog():
 		SignalK +=Erg[0:-1]+']}]}\n'
 		sock.sendto(SignalK, ('127.0.0.1', 55557))	
 	
-# read gpio and GENERATE
+# read gpio and GENERATE SK
 def work_gpio():
 	threading.Timer(rate_gpio, work_gpio).start()
 	c=0

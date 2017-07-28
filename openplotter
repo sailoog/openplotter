@@ -1160,6 +1160,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		self.rate_list = ['0.1', '0.25', '0.5', '0.75', '1', '1.5', '2', '5', '30', '60', '300']
 
+		detected_label = wx.StaticText(self.p_compass, label=_('Detected IMU:'))
+		self.detected = wx.StaticText(self.p_compass, label=_('None'))
+
 		compass_rate_label = wx.StaticText(self.p_compass, label=_('Rate (secons)'))
 		self.compass_rate= wx.ComboBox(self.p_compass, choices=self.rate_list, style=wx.CB_READONLY)
 		self.compass_rate.Bind(wx.EVT_COMBOBOX, self.on_select_compass_rate)
@@ -1176,14 +1179,17 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.pitch = wx.CheckBox(self.p_compass, label=_('Pitch (navigation.attitude.pitch)'))
 		self.pitch.Bind(wx.EVT_CHECKBOX, self.on_compass_enable)
 
-		calibration = wx.Button(self.p_compass, label=_('calibration'))
-		calibration.Bind(wx.EVT_BUTTON, self.on_calibration)
+		self.calibration = wx.Button(self.p_compass, label=_('Calibration'))
+		self.calibration.Bind(wx.EVT_BUTTON, self.on_calibration)
 
-		scope = wx.Button(self.p_compass, label=_('scope'))
-		scope.Bind(wx.EVT_BUTTON, self.on_scope)
+		self.scope = wx.Button(self.p_compass, label=_('Scope'))
+		self.scope.Bind(wx.EVT_BUTTON, self.on_scope)
 
-		deviation = wx.Button(self.p_compass, label=_('deviation table'))
+		deviation = wx.Button(self.p_compass, label=_('Deviation table'))
 		deviation.Bind(wx.EVT_BUTTON, self.on_imu_deviation_table)
+
+		compass_reset = wx.Button(self.p_compass, label=_('Reset'))
+		compass_reset.Bind(wx.EVT_BUTTON, self.on_compass_reset)
 
 		#autopilot_box = wx.StaticBox(self.p_compass, label=_(' Autopilot '))
 
@@ -1193,21 +1199,27 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		reset = wx.Button(self.p_compass, label=_('Restart'))
 		reset.Bind(wx.EVT_BUTTON, self.reset_sensors)
 
+		hbox4 = wx.BoxSizer(wx.HORIZONTAL)
+		hbox4.Add(detected_label, 0, wx.ALL| wx.EXPAND, 5)
+		hbox4.Add(self.detected, 0, wx.ALL | wx.RIGHT | wx.EXPAND, 5)
+
 		hbox3 = wx.BoxSizer(wx.HORIZONTAL)
 		hbox3.Add(diagnostic, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 5)
 		hbox3.Add(reset, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 5)
 
 		hbox2 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox2.Add(compass_rate_label, 0, wx.ALL | wx.EXPAND, 5)
+		hbox2.Add(compass_rate_label, 0, wx.UP | wx.EXPAND, 10)
 		hbox2.Add(self.compass_rate, 0, wx.ALL | wx.EXPAND, 5)
 
 		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox1.Add(calibration, 0, wx.ALL | wx.EXPAND, 5)
-		hbox1.Add(scope, 0, wx.ALL | wx.EXPAND, 5)
+		hbox1.Add(self.calibration, 0, wx.ALL | wx.EXPAND, 5)
+		hbox1.Add(self.scope, 0, wx.ALL | wx.EXPAND, 5)
 		hbox1.Add(deviation, 0, wx.ALL | wx.EXPAND, 5)
+		hbox1.Add(compass_reset, 0, wx.ALL | wx.EXPAND, 5)
 
 		vbox1 = wx.StaticBoxSizer(imu_box, wx.VERTICAL)
-		vbox1.Add(hbox2, 0, wx.ALL | wx.EXPAND, 5)
+		vbox1.Add(hbox4, 0, wx.ALL | wx.EXPAND, 5)
+		vbox1.Add(hbox2, 0, wx.LEFT | wx.EXPAND, 10)
 		vbox1.Add(self.compass_h, 0, wx.ALL | wx.EXPAND, 5)
 		vbox1.Add(self.magnetic_h, 0, wx.ALL | wx.EXPAND, 5)
 		vbox1.Add(self.heel, 0, wx.ALL | wx.EXPAND, 5)
@@ -1227,7 +1239,45 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.p_compass.SetSizer(vbox)
 
 	def read_compass(self):
-		pass
+		detected_imu = subprocess.check_output(['python', self.currentpath + '/check_rtimulib.py'], cwd=self.home + '/.pypilot')
+		if 'Error:' in detected_imu: self.detected.SetLabel(_('Error'))
+		else:
+			l_detected = detected_imu.split('\n')
+			for line in l_detected:
+				if 'result:' in line:
+					line2 = line.split(':')
+					imu_data = eval(line2[1]) 
+					imu_name = imu_data[0][0]
+					self.detected.SetLabel(imu_name)
+		self.compass_rate.SetValue(self.conf.get('COMPASS', 'rate'))
+		if self.conf.get('COMPASS', 'compass_h') == '1': self.compass_h.SetValue(True)
+		if self.conf.get('COMPASS', 'magnetic_h') == '1': self.magnetic_h.SetValue(True)
+		if self.conf.get('COMPASS', 'heel') == '1': self.heel.SetValue(True)
+		if self.conf.get('COMPASS', 'pitch') == '1': self.pitch.SetValue(True)
+		if self.compass_h.GetValue() or self.magnetic_h.GetValue() or self.heel.GetValue() or self.pitch.GetValue():
+			self.calibration.Enable()
+			self.scope.Enable()
+		else:
+			self.calibration.Disable()
+			self.scope.Disable()
+
+	def on_compass_reset(self, e):
+		dlg = wx.MessageDialog(None, _(
+			'Compass settings will be deleted.\n\nYou will have to calibrate and set deviation table again.\n\nAre you sure?'),
+							   _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+		if dlg.ShowModal() == wx.ID_YES:
+			try:
+				os.remove(self.home + '/.pypilot/RTIMULib.ini')
+				os.remove(self.home + '/.pypilot/pypilot.conf')
+			except: pass
+			temp_list = []
+			for i in range(37):
+				temp_list.append([i*10,i*10])
+			self.conf.set('COMPASS', 'deviation', str(temp_list))
+			self.conf.set('COMPASS', 'variation', '')
+			self.reset_sensors(0)
+		dlg.Destroy()
+
 
 	def on_compass_enable(self, e):
 		self.stop_sensors()
@@ -1239,6 +1289,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		else: self.conf.set('COMPASS', 'heel', '0')
 		if self.pitch.GetValue(): self.conf.set('COMPASS', 'pitch', '1')
 		else: self.conf.set('COMPASS', 'pitch', '0')
+		self.read_compass()
 		self.start_sensors()
 
 	def on_calibration(self, e):
