@@ -1238,17 +1238,23 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		self.p_compass.SetSizer(vbox)
 
-	def read_compass(self):
+	def check_i2c(self):
 		detected_imu = subprocess.check_output(['python', self.currentpath + '/check_rtimulib.py'], cwd=self.home + '/.pypilot')
-		if 'Error:' in detected_imu: self.detected.SetLabel(_('Error'))
+		if 'Error:' in detected_imu: return
 		else:
 			l_detected = detected_imu.split('\n')
 			for line in l_detected:
-				if 'result:' in line:
+				if 'result:' in line: 
 					line2 = line.split(':')
-					imu_data = eval(line2[1]) 
-					imu_name = imu_data[0][0]
-					self.detected.SetLabel(imu_name)
+					return line2[1]
+
+	def read_compass(self):
+		check_imu = self.check_i2c()
+		if not check_imu: self.detected.SetLabel(_('Error'))
+		else:
+			imu_data = eval(check_imu) 
+			imu_name = imu_data[0][0]
+			self.detected.SetLabel(imu_name)
 		self.compass_rate.SetValue(self.conf.get('COMPASS', 'rate'))
 		if self.conf.get('COMPASS', 'compass_h') == '1': self.compass_h.SetValue(True)
 		if self.conf.get('COMPASS', 'magnetic_h') == '1': self.magnetic_h.SetValue(True)
@@ -1277,7 +1283,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.conf.set('COMPASS', 'variation', '')
 			self.reset_sensors(0)
 		dlg.Destroy()
-
 
 	def on_compass_enable(self, e):
 		self.stop_sensors()
@@ -1660,23 +1665,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def page_i2c(self):
 		self.i2c_sensors_def = []
-		self.i2c_sensors_def.append(['InvenSense MPU-9150','rtimulib.imu.2.',['heading','heel','pitch'],['navigation.headingMagnetic','navigation.attitude.roll','navigation.attitude.pitch']])
-		self.i2c_sensors_def.append(['InvenSense MPU-9250','rtimulib.imu.7.',['heading','heel','pitch'],['navigation.headingMagnetic','navigation.attitude.roll','navigation.attitude.pitch']])
-		self.i2c_sensors_def.append(['InvenSense MPU-9255','rtimulib.imu.11.',['heading','heel','pitch'],['navigation.headingMagnetic','navigation.attitude.roll','navigation.attitude.pitch']])
-		self.i2c_sensors_def.append(['STM L3GD20 + LSM303DLHC','rtimulib.imu.4.',['heading','heel','pitch'],['navigation.headingMagnetic','navigation.attitude.roll','navigation.attitude.pitch']])
-		self.i2c_sensors_def.append(['STM L3GD20H + LSM303D','rtimulib.imu.3.',['heading','heel','pitch'],['navigation.headingMagnetic','navigation.attitude.roll','navigation.attitude.pitch']])
-		self.i2c_sensors_def.append(['STM L3GD20H + LSM303DLHC','rtimulib.imu.8.',['heading','heel','pitch'],['navigation.headingMagnetic','navigation.attitude.roll','navigation.attitude.pitch']])
-		self.i2c_sensors_def.append(['STM LSM9DS0','rtimulib.imu.5.',['heading','heel','pitch'],['navigation.headingMagnetic','navigation.attitude.roll','navigation.attitude.pitch']])
-		self.i2c_sensors_def.append(['STM LSM9DS1','rtimulib.imu.6.',['heading','heel','pitch'],['navigation.headingMagnetic','navigation.attitude.roll','navigation.attitude.pitch']])
-		self.i2c_sensors_def.append(['Bosch BMX055','rtimulib.imu.9.',['heading','heel','pitch'],['navigation.headingMagnetic','navigation.attitude.roll','navigation.attitude.pitch']])
-		self.i2c_sensors_def.append(['Bosch BNX055','rtimulib.imu.10.',['heading','heel','pitch'],['navigation.headingMagnetic','navigation.attitude.roll','navigation.attitude.pitch']])
 		self.i2c_sensors_def.append(['BMP180','rtimulib.press.2.',['pressure','temperature'],['environment.outside.pressure','']])
 		self.i2c_sensors_def.append(['LPS25H','rtimulib.press.3.',['pressure','temperature'],['environment.outside.pressure','']])
 		self.i2c_sensors_def.append(['MS5611','rtimulib.press.4.',['pressure','temperature'],['environment.outside.pressure','']])
 		self.i2c_sensors_def.append(['MS5637','rtimulib.press.5.',['pressure','temperature'],['environment.outside.pressure','']])
 		self.i2c_sensors_def.append(['HTS221','rtimulib.hum.2.',['humidity','temperature'],['environment.inside.humidity','']])
 		self.i2c_sensors_def.append(['HTU21D','rtimulib.hum.3.',['humidity','temperature'],['environment.inside.humidity','']])
-		self.i2c_sensors_def.append(['BME280','0x76',['pressure','temperature','humidity'],['environment.outside.pressure','environment.inside.humidity','']])
+		self.i2c_sensors_def.append(['BME280','0x76',['pressure','temperature','humidity'],['environment.outside.pressure','','environment.inside.humidity']])
 
 		title = wx.StaticText(self.p_i2c, label=_(' Sensors '))
 
@@ -1702,18 +1697,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		reset_i2c = wx.Button(self.p_i2c, label=_('Restart'))
 		reset_i2c.Bind(wx.EVT_BUTTON, self.reset_sensors)
 
-		self.recalibrate = wx.Button(self.p_i2c, label=_('Recalibrate'))
-		self.recalibrate.Bind(wx.EVT_BUTTON, self.on_recalibrate)
-
-		self.show_calibration = wx.Button(self.p_i2c, label=_('Show calibration'))
-		self.show_calibration.Bind(wx.EVT_BUTTON, self.on_show_calibration)
-
-		self.calibration_graph = wx.Button(self.p_i2c, label=_('Graphical calibration'))
-		self.calibration_graph.Bind(wx.EVT_BUTTON, self.on_calibration_graph)
-
-		self.calibration_text = wx.Button(self.p_i2c, label=_('Text calibration'))
-		self.calibration_text.Bind(wx.EVT_BUTTON, self.on_calibration_text)
-
 		hlistbox_but = wx.BoxSizer(wx.VERTICAL)
 		hlistbox_but.Add(add, 0, wx.ALL, 5)
 		hlistbox_but.Add(delete, 0, wx.ALL, 5)
@@ -1725,11 +1708,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		hbox = wx.BoxSizer(wx.HORIZONTAL)
 		hbox.Add(diagnostic, 0, wx.RIGHT | wx.LEFT, 5)
 		hbox.Add(reset_i2c, 0, wx.RIGHT | wx.LEFT, 5)
-		hbox.Add((0, 0), 1, wx.RIGHT | wx.EXPAND, 5)
-		hbox.Add(self.recalibrate, 0, wx.RIGHT | wx.LEFT, 5)
-		hbox.Add(self.show_calibration, 0, wx.RIGHT | wx.LEFT, 5)
-		hbox.Add(self.calibration_graph, 0, wx.RIGHT | wx.LEFT, 5)
-		hbox.Add(self.calibration_text, 0, wx.RIGHT | wx.LEFT, 5)
 
 		vbox = wx.BoxSizer(wx.VERTICAL)
 		vbox.Add(title, 0, wx.ALL | wx.EXPAND, 5)
@@ -1801,16 +1779,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					try:
 						with open(self.currentpath +'/imu/settings/RTIMULib.ini', "r") as infile:
 							data = ''
-							if temp_list[1] == 'imu':
-								for line in infile:
-									if 'IMUType=' in line:
-										data += 'IMUType='+temp_list[2]+'\n'
-									elif 'I2CSlaveAddress=' in line:
-										data += 'I2CSlaveAddress='+str(int(temp_list[3], 0))+'\n'
-									elif 'BusIsI2C=' in line:
-										data += 'BusIsI2C=true'+'\n'
-									else:
-										data += line
 							if temp_list[1] == 'press':
 								for line in infile:
 									if 'PressureType=' in line:
@@ -1899,7 +1867,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.start_sensors()
 
 	def read_i2c(self):
-		rtimulib = subprocess.check_output(['python', self.currentpath + '/imu/settings/check_sensors.py', '0', 'RTIMULib'], cwd=self.currentpath + '/imu/settings')
 		self.i2c_sensors = []
 		self.list_i2c.DeleteAllItems()
 		data = self.conf.get('I2C', 'sensors')
@@ -1907,7 +1874,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.i2c_sensors = eval(data)
 		except:
 			self.i2c_sensors = []
-		imu_exist = False
 		for i in self.i2c_sensors:
 			name = i[0]
 			for ii in self.i2c_sensors_def:
@@ -1918,70 +1884,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			if 'rtimulib' in address:
 				tmp = address.split('.')
 				address = tmp[3]
-				if tmp[1] == 'imu': imu_exist = True
 			c = 0
 			for iii in i[2]:
 				self.list_i2c.Append([str(c), name, address, magn_list[c], iii[0], str(iii[1]), str(iii[2])])
 				c = c + 1
-		if imu_exist == False:
-			self.recalibrate.Disable()
-			self.show_calibration.Disable()
-			self.calibration_graph.Disable()
-			self.calibration_text.Disable()
-		else:
-			try:
-				temp_list = eval(rtimulib)
-			except:
-				temp_list = []
-			if temp_list:
-				if temp_list[0][2] == 1:
-					self.recalibrate.Enable()
-					self.show_calibration.Enable()
-					self.calibration_graph.Disable()
-					self.calibration_text.Disable()
-				else:
-					self.recalibrate.Disable()
-					self.show_calibration.Disable()
-					self.calibration_graph.Enable()
-					self.calibration_text.Enable()
-
-	def on_recalibrate(self, e):
-		self.recalibrate.Disable()
-		self.show_calibration.Disable()
-		self.calibration_graph.Enable()
-		self.calibration_text.Enable()
-		try:
-			with open(self.currentpath +'/imu/settings/RTIMULib.ini', "r") as infile:
-				data = ''
-				for line in infile:
-					if 'CompassCalValid=' in line:
-						data += 'CompassCalValid=false\n'
-					elif 'compassCalEllipsoidValid=' in line:
-						data += 'compassCalEllipsoidValid=false\n'
-					elif 'AccelCalValid=' in line:
-						data += 'AccelCalValid=false\n'
-					else:
-						data += line
-			with open(self.currentpath +'/imu/settings/RTIMULib.ini', "w") as outfile:
-				outfile.write(data)
-			msg = _('IMU calibration data deleted, now you can calibrate it again.')
-			self.ShowMessage(msg)
-		except Exception, e: print "RTIMU recalibration failed: "+str(e)
-
-	def on_show_calibration(self, e):
-		subprocess.Popen(['lxterminal', '-e', 'octave', '--persist', 'mag_cal.m'], cwd=self.currentpath + '/imu/RTEllipsoidFit')
-
-	def on_calibration_graph(self, e):
-		self.stop_sensors()
-		subprocess.Popen('RTIMULibDemoGL', cwd=self.currentpath + '/imu/settings')
-		msg = _('After calibrating, click Restart.')
-		self.ShowMessage(msg)
-
-	def on_calibration_text(self, e):
-		self.stop_sensors()
-		subprocess.Popen(['lxterminal', '-e', 'RTIMULibCal'], cwd=self.currentpath + '/imu/settings')
-		msg = _('After calibrating, click Restart.')
-		self.ShowMessage(msg)
 
 	###################################### SPI
 	def page_spi(self):

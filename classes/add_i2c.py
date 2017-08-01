@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 import platform
-import wx, subprocess
+import wx, subprocess, os
 
 if platform.machine()[0:3] == 'arm':
 	import smbus
@@ -32,7 +32,7 @@ class addI2c(wx.Dialog):
 		self.conf = parent.conf
 		self.home = parent.paths.home
 		self.currentpath = parent.currentpath
-
+		self.parent = parent
 		label_detected = wx.StaticText(panel, label=_('detected'))
 
 		self.list_detected = wx.ListCtrl(panel, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
@@ -92,14 +92,14 @@ class addI2c(wx.Dialog):
 		panel.SetSizer(vbox)
 		self.panel = panel
 
-		self.detection('0')
+		self.detection()
 
 	def onSelectDetected(self, e):
 		selectedDetected = self.list_detected.GetFirstSelected()
 		name = self.list_detected.GetItem(selectedDetected, 0)
 		address = self.list_detected.GetItem(selectedDetected, 1)
-		self.sensor_select.SetValue(name.GetText()) 
-		self.address.SetValue(address.GetText())
+		self.sensor_select.SetValue(name.GetText())
+		if name.GetText() in self.list_sensors: self.address.SetValue(address.GetText())
 
 	def onSelectSensor(self, e):
 		self.address.SetValue('')
@@ -107,7 +107,10 @@ class addI2c(wx.Dialog):
 	def onReset(self, e):
 		dlg = wx.MessageDialog(None, _('If your sensors are not detected right, try resetting system or forcing name and address.\n\nDo you want to try auto detection again?'),_('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 		if dlg.ShowModal() == wx.ID_YES:
-			self.detection('1')
+			try:
+				os.remove(self.home + '/.pypilot/RTIMULib2.ini')
+			except: pass
+			self.detection()
 		dlg.Destroy()
 
 	def onCheckAddresses(self, e):
@@ -118,11 +121,11 @@ class addI2c(wx.Dialog):
 			addresses = subprocess.check_output(['i2cdetect', '-y', '2'])
 		wx.MessageBox(addresses, _('Detected I2C addresses'), wx.OK | wx.ICON_INFORMATION)
 
-	def detection(self, act):
+	def detection(self):
 		if platform.machine()[0:3] == 'arm':		
 			self.list_detected.DeleteAllItems()
 			#RTIMULIB sensors
-			rtimulib = subprocess.check_output(['python', self.currentpath + '/imu/settings/check_sensors.py', act, 'detected_RTIMULib'], cwd=self.currentpath + '/imu/settings')
+			rtimulib = self.parent.check_i2c()
 			self.printRtimulibResults(rtimulib)
 			#others
 			bus = smbus.SMBus(1)

@@ -205,7 +205,7 @@ class adddeviationsetting(wx.Dialog):
 		subprocess.call(['pkill', '-f', 'read_sensors_d.py'])
 		subprocess.call(['pkill', '-f', 'SK-base_d.py'])
 		subprocess.Popen(['python', self.parent.currentpath+'/SK-base_d.py'])
-		subprocess.Popen(['python', self.parent.currentpath+'/read_sensors_d.py'], cwd=self.parent.currentpath + '/imu/settings')
+		subprocess.Popen(['python', self.parent.currentpath+'/read_sensors_d.py'], cwd=self.parent.home + '/.pypilot')
 		self.Destroy()
 
 	def ShowMessage(self, w_msg):
