@@ -1,3 +1,6 @@
+v0.14.0
+* New IMU management, add Compass tab
+
 v0.13.1
 * Remove real VNC server and reinstall xrdp
 

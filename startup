@@ -28,6 +28,7 @@ class MyFrame(wx.Frame):
 		paths=Paths()
 		self.conf=Conf(paths)
 		Language(self.conf.get('GENERAL','lang'))
+		self.home = paths.home
 		self.currentpath=paths.currentpath
 
 		self.ttimer=100
@@ -241,9 +242,6 @@ class MyFrame(wx.Frame):
 			subprocess.call(['pkill', '-f', '1w_d.py'])
 			subprocess.Popen(['python', self.currentpath+'/1w_d.py'])
 
-			subprocess.call(['pkill', '-f', 'read_sensors_d.py'])
-			subprocess.Popen(['python', self.currentpath+'/read_sensors_d.py'], cwd=self.currentpath + '/imu/settings')
-
 			subprocess.call(["pkill", '-f', "signalk-server"])
 			self.add_logger_data(_('\nStarting SignalK Server...'))
 			vessel_self=checkVesselSelf()
@@ -258,8 +256,6 @@ class MyFrame(wx.Frame):
 			self.check_start('SK-base_d.py')
 			self.add_logger_data(_('\nStart 1wire sensor Server (optional)...'))
 			self.check_start('1w_d.py')
-			self.add_logger_data(_('\nStart I2C, SPI and GPIO Server (optional)...'))
-			self.check_start('read_sensors_d.py')
 			self.add_logger_data(_('\nStart mqtt Server (optional)...'))
 			self.check_start('mqtt_d.py')
 			self.add_logger_data(_('\nStart N2K send (optional)...'))
@@ -279,6 +275,12 @@ class MyFrame(wx.Frame):
 					subprocess.Popen('node-red-start')
 					self.check_start('node-red')
 				except: pass
+
+			subprocess.call(['pkill', '-f', 'read_sensors_d.py'])
+			subprocess.Popen(['python', self.currentpath+'/read_sensors_d.py'], cwd=self.home + '/.pypilot')
+
+			self.add_logger_data(_('\nStart I2C, SPI and GPIO Server (optional)...'))
+			self.check_start('read_sensors_d.py')
 
 			if gps_time=='1':
 				self.add_logger_data(_('\nGetting system time from NMEA 0183...'))

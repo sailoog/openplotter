@@ -2,7 +2,7 @@
 
 # This file is part of Openplotter.
 # Copyright (C) 2015 by sailoog <https://github.com/sailoog/openplotter>
-#
+# 					  e-sailing <https://github.com/e-sailing/openplotter>
 # Openplotter is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 2 of the License, or
@@ -15,17 +15,20 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import platform, sys, os
+import platform
 
-def resetfile(file):
-	try:
-		os.remove(file+'.ini')
-	except: pass
+if platform.machine()[0:3]!='arm': print 'Error: This is not a Raspberry Pi -> no GPIO, I2C and SPI'
+else: import RTIMU
 
-def readfile(file):
-	#result = [imu name, imu address, imu calibration],[press name, press address],[hum name, hum address]
-	result = [['', '', 0], ['', ''], ['', '']]
-	with open(file+'.ini', "r") as infile:
+try:
+
+	SETTINGS_FILE = "RTIMULib"
+	s = RTIMU.Settings(SETTINGS_FILE)
+	imu = RTIMU.RTIMU(s)
+
+	result = [[0,0], [0,0], [0,0]]
+
+	with open(SETTINGS_FILE+'.ini', "r") as infile:
 		for line in infile:
 			if 'IMUType=' in line:
 				tmp = line.split("=")
@@ -33,27 +36,6 @@ def readfile(file):
 			if 'I2CSlaveAddress=' in line:
 				tmp = line.split("=")
 				I2CSlaveAddress = tmp[1].strip()
-			if 'CompassCalValid=' in line:
-				tmp = line.split("=")
-				CompassCalValid = tmp[1].strip()
-			if 'compassCalEllipsoidValid=' in line:
-				tmp = line.split("=")
-				compassCalEllipsoidValid = tmp[1].strip()
-			if 'AccelCalValid=' in line:
-				tmp = line.split("=")
-				AccelCalValid = tmp[1].strip()
-			if 'PressureType=' in line:
-				tmp = line.split("=")
-				PressureType = tmp[1].strip()
-			if 'I2CPressureAddress=' in line:
-				tmp = line.split("=")
-				I2CPressureAddress = tmp[1].strip()
-			if 'HumidityType=' in line:
-				tmp = line.split("=")
-				HumidityType = tmp[1].strip()
-			if 'I2CHumidityAddress=' in line:
-				tmp = line.split("=")
-				I2CHumidityAddress = tmp[1].strip()
 		if IMUType == '0': pass
 		elif IMUType == '1': pass
 		elif IMUType == '2': result[0][0] = 'InvenSense MPU-9150'
@@ -68,7 +50,26 @@ def readfile(file):
 		elif IMUType == '11': result[0][0] = 'InvenSense MPU-9255'
 		if I2CSlaveAddress == '0': pass
 		else: result[0][1] = hex(int(I2CSlaveAddress))
-		if CompassCalValid == 'true' and compassCalEllipsoidValid == 'true' and AccelCalValid == 'true' : result[0][2] = 1
+	
+	SETTINGS_FILE2 = "RTIMULib2"
+	s2 = RTIMU.Settings(SETTINGS_FILE2)
+	pressure = RTIMU.RTPressure(s2)
+	humidity = RTIMU.RTHumidity(s2)
+
+	with open(SETTINGS_FILE2+'.ini', "r") as infile:
+		for line in infile:
+			if 'PressureType=' in line:
+				tmp = line.split("=")
+				PressureType = tmp[1].strip()
+			if 'I2CPressureAddress=' in line:
+				tmp = line.split("=")
+				I2CPressureAddress = tmp[1].strip()
+			if 'HumidityType=' in line:
+				tmp = line.split("=")
+				HumidityType = tmp[1].strip()
+			if 'I2CHumidityAddress=' in line:
+				tmp = line.split("=")
+				I2CHumidityAddress = tmp[1].strip()
 		if PressureType == '0': pass
 		elif PressureType == '1': pass
 		elif PressureType == '2': result[1][0] = 'BMP180'
@@ -83,29 +84,7 @@ def readfile(file):
 		elif HumidityType == '3': result[2][0] = 'HTU21D'
 		if I2CHumidityAddress == '0': pass
 		else: result[2][1] = hex(int(I2CHumidityAddress))
-	print result
 
-def autoDetect(file):
-	SETTINGS_FILE = file
-	s = RTIMU.Settings(SETTINGS_FILE)
-	pressure = RTIMU.RTPressure(s)
-	humidity = RTIMU.RTHumidity(s)
-	imu = RTIMU.RTIMU(s)
+	print 'result:'+str(result)
 
-if platform.machine()[0:3] == 'arm':
-	import RTIMU
-
-	reset = sys.argv[1]
-	file = sys.argv[2]
-
-	if reset == '1':
-		try:
-			resetfile(file)
-			autoDetect(file)
-			readfile(file)
-		except Exception, e: print "RTIMU reset failed: "+str(e)
-	else:
-		try:
-			autoDetect(file)
-			readfile(file)
-		except Exception, e: print "RTIMU detection failed"+str(e)
+except Exception, e: print "Error: "+str(e)
