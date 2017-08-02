@@ -146,8 +146,13 @@ cd ~/.config/
 sudo rm -rf ~/.config/compiling/
 
 echo '{"host": "localhost"}' > /home/pi/.pypilot/signalk.conf
-# TODO check if line already exist
-sudo sed -i '103 i \\tself.shininess = min(128, self.shininess)' /usr/local/lib/python2.7/dist-packages/pywavefront/material.py
+
+if grep -Fxq "self.shininess = min(128, self.shininess)" /usr/local/lib/python2.7/dist-packages/pywavefront/material.py
+then
+	# do not modify
+else
+	sudo sed -i '103 i \\tself.shininess = min(128, self.shininess)' /usr/local/lib/python2.7/dist-packages/pywavefront/material.py
+fi
 
 echo
 echo "INSTALLING/UPDATING GQRX..."
