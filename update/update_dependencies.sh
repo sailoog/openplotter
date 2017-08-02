@@ -55,6 +55,7 @@ echo
 echo "UPDATING SIGNAL K..."
 echo
 cd ~/.config/signalk-server-node
+git remote set-url origin https://github.com/$repository/signalk-server-node.git
 git pull
 npm update
 npm install
@@ -147,9 +148,9 @@ sudo rm -rf ~/.config/compiling/
 
 echo '{"host": "localhost"}' > /home/pi/.pypilot/signalk.conf
 
-if grep -Fxq "self.shininess = min(128, self.shininess)" /usr/local/lib/python2.7/dist-packages/pywavefront/material.py
+if grep -Fq "self.shininess = min(128, self.shininess)" /usr/local/lib/python2.7/dist-packages/pywavefront/material.py
 then
-	# do not modify
+	true
 else
 	sudo sed -i '103 i \\tself.shininess = min(128, self.shininess)' /usr/local/lib/python2.7/dist-packages/pywavefront/material.py
 fi
