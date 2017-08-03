@@ -77,16 +77,8 @@ def work_compass():
 			if data:
 				#print 'pitch', data['pitch'], 'roll', data['roll'], 'heading', data['heading']
 				Erg=''
-				if compassSK == '1':
-					heading = data['heading']
-					Erg += '{"path": "navigation.headingCompass","value":'+str(heading*0.017453293)+'},'
 				if headingSK == '1':
 					heading = data['heading']
-					if deviation_table:
-						ix = int(heading / 10)
-						heading = deviation_table[ix][1]+(deviation_table[ix+1][1]-deviation_table[ix][1])*0.1*(heading-deviation_table[ix][0])
-					if heading<0: heading=360+heading
-					elif heading>360: heading=-360+heading
 					Erg += '{"path": "navigation.headingMagnetic","value":'+str(heading*0.017453293)+'},'
 				if heelSK == '1':
 					heel = data['roll']
@@ -346,24 +338,11 @@ if i2c_sensors:
 
 #init compass
 compass = False
-compassSK = conf.get('COMPASS', 'compass_h')
 headingSK = conf.get('COMPASS', 'magnetic_h')
 heelSK = conf.get('COMPASS', 'heel')
 pitchSK = conf.get('COMPASS', 'pitch')
+if headingSK == '1' or heelSK == '1' or pitchSK == '1': compass = True
 
-if compassSK == '1' or headingSK == '1' or heelSK == '1' or pitchSK == '1':
-	compass = True
-	deviation_table = []
-	data = conf.get('COMPASS', 'deviation')
-	if not data:
-		temp_list = []
-		for i in range(37):
-			temp_list.append([i*10,i*10])
-		conf.set('COMPASS', 'deviation', str(temp_list))
-		data = conf.get('COMPASS', 'deviation')
-	try:
-		deviation_table=eval(data)
-	except:deviation_table = []
 
 # launch threads
 if analog_: work_analog()

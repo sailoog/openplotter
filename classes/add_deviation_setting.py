@@ -202,10 +202,8 @@ class adddeviationsetting(wx.Dialog):
    		subprocess.Popen(['python', self.parent.currentpath+'/show_deviation_table.py', str(self.edit)])
 
 	def on_close(self, e):
-		subprocess.call(['pkill', '-f', 'read_sensors_d.py'])
 		subprocess.call(['pkill', '-f', 'SK-base_d.py'])
 		subprocess.Popen(['python', self.parent.currentpath+'/SK-base_d.py'])
-		subprocess.Popen(['python', self.parent.currentpath+'/read_sensors_d.py'], cwd=self.parent.home + '/.pypilot')
 		self.Destroy()
 
 	def ShowMessage(self, w_msg):

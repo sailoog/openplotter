@@ -1,3 +1,6 @@
+v0.14.1
+* Remove deviation table from Compass tab
+
 v0.14.0
 * New IMU management, add Compass tab
 

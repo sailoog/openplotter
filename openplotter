@@ -150,7 +150,7 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_MENU, self.open_sdr_ais, self.sdr_ais_item1)
 		self.deviation_table = self.settings.Append(wx.ID_ANY, _('Deviation Table'),
 													_('Create a deviation table for your boat'))
-		self.Bind(wx.EVT_MENU, self.on_imu_deviation_table, self.deviation_table)
+		self.Bind(wx.EVT_MENU, self.on_deviation_table, self.deviation_table)
 		self.calculate_item1 = self.settings.Append(wx.ID_ANY, _('Calculate'),
 													_('Calculate new data from current values'))
 		self.Bind(wx.EVT_MENU, self.open_calculate, self.calculate_item1)
@@ -319,7 +319,7 @@ class MainFrame(wx.Frame):
 		subprocess.call(['pkill', '-f', 'SDR_AIS.py'])
 		subprocess.Popen(['python', self.currentpath + '/tools/SDR_AIS.py'])
 
-	def on_imu_deviation_table(self, e):
+	def on_deviation_table(self, e):
 		dlg = adddeviationsetting(self)
 		dlg.ShowModal()
 		dlg.Destroy()
@@ -1167,9 +1167,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.compass_rate= wx.ComboBox(self.p_compass, choices=self.rate_list, style=wx.CB_READONLY)
 		self.compass_rate.Bind(wx.EVT_COMBOBOX, self.on_select_compass_rate)
 
-		self.compass_h = wx.CheckBox(self.p_compass, label=_('Compas heading (navigation.headingCompass)'))
-		self.compass_h.Bind(wx.EVT_CHECKBOX, self.on_compass_enable)
-
 		self.magnetic_h = wx.CheckBox(self.p_compass, label=_('Magnetic heading (navigation.headingMagnetic)'))
 		self.magnetic_h.Bind(wx.EVT_CHECKBOX, self.on_compass_enable)
 
@@ -1184,9 +1181,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		self.scope = wx.Button(self.p_compass, label=_('Scope'))
 		self.scope.Bind(wx.EVT_BUTTON, self.on_scope)
-
-		deviation = wx.Button(self.p_compass, label=_('Deviation table'))
-		deviation.Bind(wx.EVT_BUTTON, self.on_imu_deviation_table)
 
 		compass_reset = wx.Button(self.p_compass, label=_('Reset'))
 		compass_reset.Bind(wx.EVT_BUTTON, self.on_compass_reset)
@@ -1214,13 +1208,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
 		hbox1.Add(self.calibration, 0, wx.ALL | wx.EXPAND, 5)
 		hbox1.Add(self.scope, 0, wx.ALL | wx.EXPAND, 5)
-		hbox1.Add(deviation, 0, wx.ALL | wx.EXPAND, 5)
 		hbox1.Add(compass_reset, 0, wx.ALL | wx.EXPAND, 5)
 
 		vbox1 = wx.StaticBoxSizer(imu_box, wx.VERTICAL)
 		vbox1.Add(hbox4, 0, wx.ALL | wx.EXPAND, 5)
 		vbox1.Add(hbox2, 0, wx.LEFT | wx.EXPAND, 10)
-		vbox1.Add(self.compass_h, 0, wx.ALL | wx.EXPAND, 5)
 		vbox1.Add(self.magnetic_h, 0, wx.ALL | wx.EXPAND, 5)
 		vbox1.Add(self.heel, 0, wx.ALL | wx.EXPAND, 5)
 		vbox1.Add(self.pitch, 0, wx.ALL | wx.EXPAND, 5)
@@ -1256,11 +1248,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			imu_name = imu_data[0][0]
 			self.detected.SetLabel(imu_name)
 		self.compass_rate.SetValue(self.conf.get('COMPASS', 'rate'))
-		if self.conf.get('COMPASS', 'compass_h') == '1': self.compass_h.SetValue(True)
 		if self.conf.get('COMPASS', 'magnetic_h') == '1': self.magnetic_h.SetValue(True)
 		if self.conf.get('COMPASS', 'heel') == '1': self.heel.SetValue(True)
 		if self.conf.get('COMPASS', 'pitch') == '1': self.pitch.SetValue(True)
-		if self.compass_h.GetValue() or self.magnetic_h.GetValue() or self.heel.GetValue() or self.pitch.GetValue():
+		if self.magnetic_h.GetValue() or self.heel.GetValue() or self.pitch.GetValue():
 			self.calibration.Enable()
 			self.scope.Enable()
 		else:
@@ -1269,25 +1260,18 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def on_compass_reset(self, e):
 		dlg = wx.MessageDialog(None, _(
-			'Compass settings will be deleted.\n\nYou will have to calibrate and set deviation table again.\n\nAre you sure?'),
+			'Compass settings will be deleted.\n\nYou will have to calibrate again.\n\nAre you sure?'),
 							   _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 		if dlg.ShowModal() == wx.ID_YES:
 			try:
 				os.remove(self.home + '/.pypilot/RTIMULib.ini')
 				os.remove(self.home + '/.pypilot/pypilot.conf')
 			except: pass
-			temp_list = []
-			for i in range(37):
-				temp_list.append([i*10,i*10])
-			self.conf.set('COMPASS', 'deviation', str(temp_list))
-			self.conf.set('COMPASS', 'variation', '')
 			self.reset_sensors(0)
 		dlg.Destroy()
 
 	def on_compass_enable(self, e):
 		self.stop_sensors()
-		if self.compass_h.GetValue(): self.conf.set('COMPASS', 'compass_h', '1')
-		else: self.conf.set('COMPASS', 'compass_h', '0')
 		if self.magnetic_h.GetValue(): self.conf.set('COMPASS', 'magnetic_h', '1')
 		else: self.conf.set('COMPASS', 'magnetic_h', '0')
 		if self.heel.GetValue(): self.conf.set('COMPASS', 'heel', '1')
