@@ -26,7 +26,7 @@ try:
 	s = RTIMU.Settings(SETTINGS_FILE)
 	imu = RTIMU.RTIMU(s)
 
-	result = [[0,0], [0,0], [0,0]]
+	result = [['',''], ['',''], ['','']]
 
 	with open(SETTINGS_FILE+'.ini', "r") as infile:
 		for line in infile:
