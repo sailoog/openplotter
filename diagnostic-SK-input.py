@@ -182,9 +182,9 @@ class MyFrame(wx.Frame):
 				if skip == 0:
 					st += '.*'
 				else:
-					if i in ['propulsion', 'inventory']:
+					if i in ['propulsion', 'sensors']:
 						skip = 1
-					elif i == 'resources':
+					elif i in ['electrical', 'registrations','tanks']:
 						skip = 2
 					st += '.' + i
 			index += 1
@@ -263,6 +263,9 @@ class MyFrame(wx.Frame):
 					self.SK_Faktor_priv = 86400
 				elif self.SK_unit_priv == 'y':
 					self.SK_Faktor_priv = 31536000
+			elif self.SK_unit == 'ratio':
+				if self.SK_unit_priv == '%':
+					self.SK_Faktor_priv = 0.01
 		else:
 			self.SK_Faktor_priv = 1
 			self.SK_Offset_priv = 0

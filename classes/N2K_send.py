@@ -282,7 +282,7 @@ class N2K_send:
 		self.set_header(length, lPGN)
 
 		self.set_data16(2, int(WaterTemp * 100), WaterTemp)
-		self.set_data16(4, int(Humidity * 250), Humidity)
+		self.set_data16(4, int(Humidity * 25000), Humidity)
 		self.set_data16(6, int(Pressure / 100), Pressure)
 		self.send_UDP()
 

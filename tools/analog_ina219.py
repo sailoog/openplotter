@@ -39,7 +39,16 @@ else:
 	rate_analog = 1
 
 	tick_analog=time.time()
+	ina = INA219(SHUNT_OHMS,1.0,0x41)
+	ina.configure()
 
+	try:
+		inaV = ina.voltage()
+		inaA = ina.current()/1000
+		inaW = inaV*inaA
+	except DeviceRangeError as e:
+		print e
+	
 	while True:
 		tick2=time.time()
 		time.sleep(poll_interval*1.0/1000.0)
@@ -51,13 +60,9 @@ else:
 			list_signalk_path1=[]
 			list_signalk1=[]
 
-
-			ina = INA219(SHUNT_OHMS,1.0,0x41)
-			ina.configure()
-
 			try:
-				inaV = ina.voltage()
-				inaA = ina.current()/1000
+				inaV = inaV*0.8 +ina.voltage()*0.2
+				inaA = inaA*0.8 +ina.current()/1000*0.2
 				inaW = inaV*inaA
 			except DeviceRangeError as e:
 				print e

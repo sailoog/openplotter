@@ -158,7 +158,7 @@ class Bme280:
 		elif humidity < 0:
 			humidity = 0
 
-		return temperature/100.0,pressure/100.0,humidity
+		return temperature/100.0,pressure/100.0,humidity/100.0
 '''
 def main():
 	bme = Bme280()

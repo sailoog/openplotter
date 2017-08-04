@@ -78,7 +78,8 @@ class MyFrame(wx.Frame):
 						'm3/s', 'm3/s l/h', 'm3/s gal/h',
 						'Pa', 'Pa hPa', 'Pa Bar',
 						'rad', 'rad deg',
-						's', 's h', 's d', 's y'
+						's', 's h', 's d', 's y',
+						'ratio', 'ratio %'
 						]
 		self.select_Unit_t = wx.StaticText(panel, label=_('convert'))
 		self.select_Unit = wx.ComboBox(panel, choices=list_convert, style=wx.CB_READONLY, size=(150, 32))
