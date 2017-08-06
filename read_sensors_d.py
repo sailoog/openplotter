@@ -163,7 +163,7 @@ def work_imu_press_hum():
 						if (read[0]): 
 							humidityValue = read[1]
 							if tick0 - tick6 > humRate:
-								Erg += '{"path": "'+humSK+'","value":'+str(humidityValue+humOffset)+'},'
+								Erg += '{"path": "'+humSK+'","value":'+str(humidityValue/100+humOffset)+'},'
 								tick6 = tick0
 					if temp_humSK:
 						if (read[2]): 
