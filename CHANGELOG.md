@@ -1,3 +1,6 @@
+v0.14.4
+* Make updates standalone
+
 v0.14.3
 * Fix error afdding I2C sensors
 * Fix SignalK percent to ratio (0-100 -> 0-1) 
