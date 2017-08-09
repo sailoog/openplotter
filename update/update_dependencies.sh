@@ -1,5 +1,9 @@
 #!/bin/bash
 cd ~/.config
+repository=$4
+if [ -z $repository ]; then
+	repository="openplotter"
+fi
 echo
 echo "REMOVING UNUSED PACKAGES..."
 echo
