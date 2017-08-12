@@ -1761,7 +1761,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				if 'rtimulib' in new_sensor[1]:
 					temp_list = new_sensor[1].split('.')
 					try:
-						with open(self.currentpath +'/imu/settings/RTIMULib.ini', "r") as infile:
+						with open(self.home + '/.pypilot/RTIMULib2.ini', "r") as infile:
 							data = ''
 							if temp_list[1] == 'press':
 								for line in infile:
@@ -1783,7 +1783,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 										data += 'BusIsI2C=true'+'\n'
 									else:
 										data += line
-						with open(self.currentpath +'/imu/settings/RTIMULib.ini', "w") as outfile:
+						with open(self.home + '/.pypilot/RTIMULib2.ini', "w") as outfile:
 							outfile.write(data) 
 					except Exception, e: 
 						print "RTIMU setting failed: "+str(e)

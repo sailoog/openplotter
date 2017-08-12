@@ -1,3 +1,13 @@
+v0.14.4
+* Make updates standalone
+
+v0.14.3
+* Fix error afdding I2C sensors
+* Fix SignalK percent to ratio (0-100 -> 0-1) 
+
+v0.14.2
+* Fix error when IMU is not defined
+
 v0.14.1
 * Remove deviation table from Compass tab
 

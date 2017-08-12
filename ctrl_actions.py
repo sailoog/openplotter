@@ -42,15 +42,15 @@ except:triggers=[]
 if action=='0':
 	i=0
 	for ii in triggers:
-		templist=ii[5]
+		templist=ii[4]
 		start=0
 		for iii in templist:
-			if iii[0]=='ACT20': 
+			if iii[0]==start_all_actions: 
 				start=1
 		triggers[i][0]=start
 		i=i+1
 	conf.set('ACTIONS', 'triggers', str(triggers))
-	subprocess.call(['pkill', '-f', 'SK_base_d.py'])
+	subprocess.call(['pkill', '-f', 'SK-base_d.py'])
 	subprocess.Popen(['pkill', '-9', 'mpg123'])
 	subprocess.Popen(['python', currentpath + '/SK-base_d.py'])
 
@@ -61,7 +61,7 @@ if action=='1':
 		triggers[i][0]=1
 		i=i+1
 	conf.set('ACTIONS', 'triggers', str(triggers))
-	subprocess.call(['pkill', '-f', 'SK_base_d.py'])
+	subprocess.call(['pkill', '-f', 'SK-base_d.py'])
 	subprocess.Popen(['python', currentpath + '/SK-base_d.py'])
 
 app = wx.App()
