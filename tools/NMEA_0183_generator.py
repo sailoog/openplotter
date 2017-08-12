@@ -52,6 +52,9 @@ class MyFrame(wx.Frame):
 			self.delete_nmea_button =wx.Button(self, label=_('delete'), pos=(585, 65))
 			self.Bind(wx.EVT_BUTTON, self.delete_nmea, self.delete_nmea_button)
 
+			self.compat_nmea_button =wx.Button(self, label=_('opencpn\ndefault'), pos=(585, 189))
+			self.Bind(wx.EVT_BUTTON, self.compat_nmea, self.compat_nmea_button)
+
 			self.diagnostic_nmea_button=wx.Button(self, label=_('NMEA Diagnostic'), pos=(10, 250))
 			self.Bind(wx.EVT_BUTTON, self.kplex_diagnostic, self.diagnostic_nmea_button)
 
@@ -139,7 +142,14 @@ class MyFrame(wx.Frame):
 			self.conf.set('NMEA0183', 'sentences', str(self.sentences))
 			self.start_d()
 
-
+		def compat_nmea(self,e):		
+			if self.list_nmea.GetColumnCount()>3:
+				self.SetStatusText(_('This function is only allowed when the list is empty.'))
+				return
+			self.conf.set('NMEA0183', 'sentences', "[['HDG', [['navigation.headingMagnetic', 'x.x|deg', '+', 0.0], '', '', '', ''], 0.5], ['XDR', ['A', ['navigation.attitude.roll', 'x.x|deg', '+', 0.0], 'D', 'ROLL'], 1.0], ['XDR', ['A', ['navigation.attitude.pitch', 'x.x|deg', '+', 0.0], 'D', 'PTCH'], 1.0], ['XDR', ['P', ['environment.outside.pressure', 'x.xxxx', '/', 100000.0], 'B', 'Barometer'], 5.0], ['XDR', ['C', ['environment.outside.temperature', 'x.x|C', '+', 0.0], 'C', 'ENV_OUTAIR_T'], 5.0], ['MTW', [['environment.water.temperature', 'x.x|C', '+', 0.0], 'C'], 5.0]]")
+			self.start_d()
+			self.read_sentences()
+			
 		def kplex_diagnostic(self,e):
 			wx.MessageBox('use diagnostic on NMEA0183\nselect system\npush diagnostic', 'Info', wx.OK | wx.ICON_INFORMATION)
 
