@@ -109,7 +109,9 @@ class addNMEA_0183(wx.Dialog):
 
 		else:
 			self.button_rmc_examp.Disable()
-			self.rate.SetValue(str(edit[1][2]))
+			for rateI in self.rate_list:
+				if float(rateI) == edit[1][2]:		
+					self.rate.SetValue(rateI)
 			self.sentence.SetValue('$--'+edit[1][0])
 			self.nmea=edit[1]
 			for index,item in enumerate(self.sentences):
@@ -134,57 +136,57 @@ class addNMEA_0183(wx.Dialog):
 		
 	def onEdit_fields(self,e):
 		selected_field=self.list_fields.GetFirstSelected()
-		#print self.list_fiel[selected_field]
-		if type(self.list_fiel[selected_field][2]) is list:
-			if (self.list_fiel[selected_field][2][2] == '+') == True and self.list_fiel[selected_field][2][3] == 0:
-				self.check_value_type_(self.list_value_type[2])
-				self.skvessels.SetValue(self.list_vessels[1])
-				self.onSelect_vessel_(self.list_vessels[1])
-				sk = self.list_fiel[selected_field][2][0]
-				sk0 = sk.split('.')[0]
-				skr = sk[len(sk0)+1:]
-				self.skgroups.SetValue(sk0)
-				self.onSelect_group_(sk0)
-				self.signalk.SetValue(skr)
-				format = self.list_formats[0]
-				formats = self.list_fiel[selected_field][2][1]
-				for value_ in self.list_formats:
-					if formats in value_:
-						format = value_
-						break						
-				self.formats.SetValue(format)
+		if len(self.list_fiel) != 0:
+			if type(self.list_fiel[selected_field][2]) is list:
+				if (self.list_fiel[selected_field][2][2] == '+') == True and self.list_fiel[selected_field][2][3] == 0:
+					self.check_value_type_(self.list_value_type[2])
+					self.skvessels.SetValue(self.list_vessels[1])
+					self.onSelect_vessel_(self.list_vessels[1])
+					sk = self.list_fiel[selected_field][2][0]
+					sk0 = sk.split('.')[0]
+					skr = sk[len(sk0)+1:]
+					self.skgroups.SetValue(sk0)
+					self.onSelect_group_(sk0)
+					self.signalk.SetValue(skr)
+					format = self.list_formats[0]
+					formats = self.list_fiel[selected_field][2][1]
+					for value_ in self.list_formats:
+						if formats in value_:
+							format = value_
+							break						
+					self.formats.SetValue(format)
+				else:
+					self.check_value_type_(self.list_value_type[1])
+					self.skvessels.SetValue(self.list_vessels[1])
+					self.onSelect_vessel_(self.list_vessels[1])
+					sk = self.list_fiel[selected_field][2][0]
+					sk0 = sk.split('.')[0]
+					skr = sk[len(sk0)+1:]
+					self.skgroups.SetValue(sk0)
+					self.onSelect_group_(sk0)
+					self.signalk.SetValue(skr)
+					opera = self.list_operators[0]
+					for value_ in self.list_operators:
+						if self.list_fiel[selected_field][2][2] in value_:
+							opera = value_
+							break						
+					self.operator.SetValue(opera)
+					format = self.list_formats[0]
+					formats = self.list_fiel[selected_field][2][1]
+					for value_ in self.list_formats:
+						if formats in value_:
+							format = value_
+							break						
+					self.formats.SetValue(format)
+					self.string_number.SetValue(str(self.list_fiel[selected_field][2][3]))
 			else:
-				self.check_value_type_(self.list_value_type[1])
-				self.skvessels.SetValue(self.list_vessels[1])
-				self.onSelect_vessel_(self.list_vessels[1])
-				sk = self.list_fiel[selected_field][2][0]
-				sk0 = sk.split('.')[0]
-				skr = sk[len(sk0)+1:]
-				self.skgroups.SetValue(sk0)
-				self.onSelect_group_(sk0)
-				self.signalk.SetValue(skr)
-				opera = self.list_operators[0]
-				for value_ in self.list_operators:
-					if self.list_fiel[selected_field][2][2] in value_:
-						opera = value_
-						break						
-				self.operator.SetValue(opera)
-				format = self.list_formats[0]
-				formats = self.list_fiel[selected_field][2][1]
-				for value_ in self.list_formats:
-					if formats in value_:
-						format = value_
-						break						
-				self.formats.SetValue(format)
-				self.string_number.SetValue(str(self.list_fiel[selected_field][2][3]))
-		else:
-			if self.is_number(self.list_fiel[selected_field][2]):
-				self.check_value_type_(self.list_value_type[3])
-				self.string_number.SetValue(self.list_fiel[selected_field][2])
-			else:
-				if len(self.list_fiel[selected_field][2])>0:
-					self.check_value_type_(self.list_value_type[4])
+				if self.is_number(self.list_fiel[selected_field][2]):
+					self.check_value_type_(self.list_value_type[3])
 					self.string_number.SetValue(self.list_fiel[selected_field][2])
+				else:
+					if len(self.list_fiel[selected_field][2])>0:
+						self.check_value_type_(self.list_value_type[4])
+						self.string_number.SetValue(self.list_fiel[selected_field][2])
 			
 
 	def onSelect_vessel(self,e):
@@ -277,7 +279,7 @@ class addNMEA_0183(wx.Dialog):
 		operator=self.operator.GetValue()
 		str_num=self.string_number.GetValue()
 		if selected_type == _('String'):
-			if not re.match('^[0-9a-zA-Z/]+$', str_num) and len(str_num) > 0 :
+			if not re.match('^[0-9a-zA-Z/_]+$', str_num) and len(str_num) > 0 :
 				self.list_fields.SetStringItem(selected_field,1,_('Failed. String must contain only allowed characters.'))
 				str_num=''
 				self.string_number.SetValue('')
