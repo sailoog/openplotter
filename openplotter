@@ -207,8 +207,6 @@ class MainFrame(wx.Frame):
 		self.opencpn_item2 = self.update.Append(wx.ID_ANY, _('Update OpenCPN plugins'), _('Update OpenCPN plugins to latest stable releases'))
 		self.Bind(wx.EVT_MENU, self.update_opencpn_plugins, self.opencpn_item2)
 		self.update.AppendSeparator()
-		self.system_item1 = self.update.Append(wx.ID_ANY, _('Upgrade Raspbian'), _('Upgrade Raspbian to latest stable release'))
-		self.Bind(wx.EVT_MENU, self.update_raspbian, self.system_item1)
 		self.system_item2 = self.update.Append(wx.ID_ANY, _('Set default OpenPlotter desktop'), _('Run this after a Raspbian upgrade'))
 		self.Bind(wx.EVT_MENU, self.default_desktop, self.system_item2)		
 		self.update.AppendSeparator()
@@ -456,15 +454,6 @@ class MainFrame(wx.Frame):
 			dlg.Destroy()
 			self.Close()
 		else: dlg.Destroy()
-
-	def update_raspbian(self, e):
-		msg = _('Please make a backup image of your system before upgrading.\n\n')
-		msg += _('Are you sure you want to upgrade Raspbian?')
-		dlg = wx.MessageDialog(None, msg, _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_EXCLAMATION)
-		if dlg.ShowModal() == wx.ID_YES:
-			subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/update_raspbian.sh'])
-			self.ShowStatusBarBLACK(_('Follow the instructions of the new window'))
-		dlg.Destroy()
 
 	def default_desktop(self, e):
 		subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/default_openplotter_desk.sh'])
@@ -2867,7 +2856,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.conf.set('N2K', 'can_usb', self.can_usb.GetValue())
 
 	def on_n2k_enable(self, e):
-		with open(self.home + '/.config/openplotter/OP-signalk/openplotter-settings.json') as data_file:
+		with open(self.home+'/.openplotter/openplotter-settings.json') as data_file:
 			data = json.load(data_file)
 		isChecked = self.n2k_enable.GetValue()
 		if isChecked:
@@ -2909,7 +2898,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					del data['pipedProviders'][ii]
 				ii += 1
 		self.n2koutputs_label.SetLabel(self.conf.get('N2K', 'pgn_output'))
-		with open(self.home + '/.config/openplotter/OP-signalk/openplotter-settings.json', 'w') as outfile:
+		with open(self.home+'/.openplotter/openplotter-settings.json', 'w') as outfile:
 			json.dump(data, outfile)
 		self.restart_SK(0)
 
@@ -3031,10 +3020,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if mmsi == '':
 			self.ShowStatusBarRED(_('You have to provide a MMSI.'))
 			return
-		with open(self.home + '/.config/openplotter/OP-signalk/openplotter-settings.json') as data_file:
+		with open(self.home+'/.openplotter/openplotter-settings.json') as data_file:
 			data = json.load(data_file)
 		data['vessel']['uuid'] = uuid
-		with open(self.home + '/.config/openplotter/OP-signalk/openplotter-settings.json', 'w') as outfile:
+		with open(self.home+'/.openplotter/openplotter-settings.json', 'w') as outfile:
 			json.dump(data, outfile)
 		self.restart_SK(0)
 

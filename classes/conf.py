@@ -25,10 +25,10 @@ class Conf:
 		self.read()
 
 	def read(self):
-		self.data_conf.read(self.paths.currentpath + '/openplotter.conf')
+		self.data_conf.read(self.paths.home + '/.openplotter/openplotter.conf')
 
 	def write(self):
-		with open(self.paths.currentpath + '/openplotter.conf', 'wb') as configfile:
+		with open(self.paths.home + '/.openplotter/openplotter.conf', 'wb') as configfile:
 			self.data_conf.write(configfile)
 
 	def get(self, section, item):

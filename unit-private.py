@@ -113,8 +113,8 @@ class MyFrame(wx.Frame):
 			data = json.load(data_file)
 
 		self.data_SK_unit_private = []
-		if os.path.isfile(self.paths.home + '/.config/openplotter/classes/private_unit.json'):
-			with open(self.paths.home + '/.config/openplotter/classes/private_unit.json') as data_file:
+		if os.path.isfile(self.paths.home+'/.openplotter/private_unit.json'):
+			with open(self.paths.home+'/.openplotter/private_unit.json') as data_file:
 				self.data_SK_unit_private = json.load(data_file)
 
 		for i in data:
@@ -194,11 +194,11 @@ class MyFrame(wx.Frame):
 			for i in self.list_SK:
 				if i[2] != '':
 					self.data_SK_unit_private.append([i[0], i[1], i[2]])
-			with open(self.paths.home + '/.config/openplotter/classes/private_unit.json', 'w') as data_file:
+			with open(self.paths.home+'/.openplotter/private_unit.json', 'w') as data_file:
 				json.dump(self.data_SK_unit_private, data_file)
 
 			self.data_SK_unit_private = []
-			with open(self.paths.home + '/.config/openplotter/classes/private_unit.json') as data_file:
+			with open(self.paths.home+'/.openplotter/private_unit.json') as data_file:
 				self.data_SK_unit_private = json.load(data_file)
 			self.read()
 			self.sorting()

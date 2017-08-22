@@ -26,8 +26,8 @@ home=paths.home
 
 if len(sys.argv)>1:
 	if sys.argv[1]=='settings':
-		print toolspath+'openplotter_analog.conf'
-		subprocess.Popen(['leafpad',toolspath+'/openplotter_analog.conf'])
+		print home+'/.openplotter/openplotter_analog.conf'
+		subprocess.Popen(['leafpad',home+'/.openplotter/openplotter_analog.conf'])
 	exit
 else:
 
