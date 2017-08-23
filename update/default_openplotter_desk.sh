@@ -21,6 +21,7 @@ echo -e '[Desktop Entry]\nName=OpenPlotter debugging\nExec=lxterminal -e openplo
 echo
 echo "DELETING UNUSED ICONS..."
 echo
+sudo bash -c 'echo -e "[Desktop Entry]\nName=OpenCPN\nComment=Open source chart plotter / navigator\nExec=opencpn\nIcon=opencpn\nStartupNotify=true\nCategories=OpenPlotter\nTerminal=false\nType=Application\nVersion=1.0" > /usr/share/applications/opencpn.desktop'
 sudo rm -rf /usr/share/raspi-ui-overrides/applications/magpi.desktop
 sudo rm -rf /usr/share/raspi-ui-overrides/applications/raspi_resources.desktop
 sudo rm -rf /usr/share/raspi-ui-overrides/applications/help.desktop

@@ -5,6 +5,7 @@ echo
 echo "DOWNLOADING NEW OPENPLOTTER CODE..."
 echo
 major=$1
+version=$2
 status=$3
 repository=$4
 if [ -z $major ]; then

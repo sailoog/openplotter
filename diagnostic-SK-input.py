@@ -151,8 +151,8 @@ class MyFrame(wx.Frame):
 			data = json.load(data_file)
 
 		data_sk_unit_private = []
-		if os.path.isfile(self.home + '/.config/openplotter/classes/private_unit.json'):
-			with open(self.home + '/.config/openplotter/classes/private_unit.json') as data_file:
+		if os.path.isfile(self.home+'/.openplotter/private_unit.json'):
+			with open(self.home+'/.openplotter/private_unit.json') as data_file:
 				data_sk_unit_private = json.load(data_file)
 
 		for i in data:

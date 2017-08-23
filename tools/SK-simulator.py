@@ -112,15 +112,15 @@ class MyFrame(wx.Frame):
 		
 	def read_conf(self):
 		self.data_conf = ConfigParser.SafeConfigParser()
-		self.data_conf.read(self.paths.tool_path+'/SK-simulator.conf')
+		self.data_conf.read(self.paths.home+'/.openplotter/SK-simulator.conf')
 		if not self.data_conf.has_section('main'):
 			value=[0,'navigation.courseOverGroundTrue',0,0,360,self.deg2rad,0]
-			cfgfile = open(self.paths.tool_path+'/SK-simulator.conf','w')
+			cfgfile = open(self.paths.home+'/.openplotter/SK-simulator.conf','w')
 			self.data_conf.add_section('main')
 			self.data_conf.set('main','item_0', str(value))
 			self.data_conf.write(cfgfile)
 			
-			self.data_conf.read(self.paths.tool_path+'/SK-simulator.conf')			
+			self.data_conf.read(self.paths.home+'/.openplotter/SK-simulator.conf')			
 			
 		self.Slider_list=[]
 		for i in range(40):
@@ -167,7 +167,7 @@ class MyFrame(wx.Frame):
 if len(sys.argv)>1:
 	if sys.argv[1]=='settings':
 		paths=Paths()
-		subprocess.Popen(['leafpad',paths.tool_path+'/SK-simulator.conf'])
+		subprocess.Popen(['leafpad',paths.home+'/.openplotter/SK-simulator.conf'])
 else:
 	app = wx.App()
 	MyFrame().Show()

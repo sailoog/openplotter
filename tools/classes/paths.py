@@ -21,6 +21,8 @@ class Paths:
 	def __init__(self):
 
 		self.home = os.path.expanduser('~')
+		if 'root' in self.home:
+			self.home = '/home/pi'
 		self.currentpath = os.path.dirname(os.path.realpath(__file__))
 		tool_path = os.path.join(self.currentpath, '..')
 		op_path = os.path.join(self.currentpath, '../..')
