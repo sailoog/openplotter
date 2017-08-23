@@ -21,6 +21,8 @@ class Paths:
 	def __init__(self):
 
 		self.home = os.path.expanduser('~')
+		if 'root' in self.home:
+			self.home = '/home/pi'
 		self.path_to_file = sys.argv[0]
 		self.file = os.path.basename(self.path_to_file)
 		self.pathname = os.path.dirname(self.path_to_file)
