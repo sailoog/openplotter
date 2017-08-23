@@ -22,7 +22,7 @@ from select_key import selectKey
 class editI2c(wx.Dialog):
 	def __init__(self,name,magn,sk,rate,offset):
 
-		title = _('Edit')+' '+name+' - '+magn
+		title = _('Edit')+(' '+name+' - '+magn).encode('utf-8')
 
 		wx.Dialog.__init__(self, None, title=title, size=(450, 250))
 
