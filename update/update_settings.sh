@@ -21,7 +21,7 @@ newstate=$(crudini --get openplotter_tmp/openplotter.conf GENERAL state)
 crudini --set ~/.openplotter/openplotter.conf GENERAL version $newversion
 crudini --set ~/.openplotter/openplotter.conf GENERAL state $newstate
 
-if [ ! -f ~/.openplotter/openplotter-settings.json]; then
+if [ ! -f ~/.openplotter/openplotter-settings.json ]; then
 	cp -f $DIRDATE/OP-signalk/openplotter-settings.json ~/.openplotter/
 fi
 if [ ! -f ~/.openplotter/private_unit.json ]; then
