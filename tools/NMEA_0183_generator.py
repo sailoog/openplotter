@@ -102,6 +102,7 @@ class MyFrame(wx.Frame):
 			self.edit_add_nmea(0)
 
 		def edit_add_nmea(self,edit):
+			self.SetStatusText('')
 			dlg = addNMEA_0183(edit)
 			res = dlg.ShowModal()
 			if res == wx.ID_OK:
@@ -133,6 +134,7 @@ class MyFrame(wx.Frame):
 			dlg.Destroy()
 
 		def delete_nmea(self,e):
+			self.SetStatusText('')
 			selected_sentence=self.list_nmea.GetFirstSelected()
 			if selected_sentence==-1: 
 				self.SetStatusText('Select a sentence to delete.')
@@ -142,8 +144,8 @@ class MyFrame(wx.Frame):
 			self.conf.set('NMEA0183', 'sentences', str(self.sentences))
 			self.start_d()
 
-		def compat_nmea(self,e):		
-			if self.list_nmea.GetColumnCount()>3:
+		def compat_nmea(self,e):
+			if self.list_nmea.GetItemCount()>0:
 				self.SetStatusText(_('This function is only allowed when the list is empty.'))
 				return
 			self.conf.set('NMEA0183', 'sentences', "[['HDG', [['navigation.headingMagnetic', 'x.x|deg', '+', 0.0], '', '', '', ''], 0.5], ['XDR', ['A', ['navigation.attitude.roll', 'x.x|deg', '+', 0.0], 'D', 'ROLL'], 1.0], ['XDR', ['A', ['navigation.attitude.pitch', 'x.x|deg', '+', 0.0], 'D', 'PTCH'], 1.0], ['XDR', ['P', ['environment.outside.pressure', 'x.xxxx', '/', 100000.0], 'B', 'Barometer'], 5.0], ['XDR', ['C', ['environment.outside.temperature', 'x.x|C', '+', 0.0], 'C', 'ENV_OUTAIR_T'], 5.0], ['MTW', [['environment.water.temperature', 'x.x|C', '+', 0.0], 'C'], 5.0]]")

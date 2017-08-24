@@ -375,7 +375,7 @@ class addNMEA_0183(wx.Dialog):
 	def check_value_type_(self, selected):
 		self.value_type.SetValue(selected)
 		#none
-		if not selected or selected==self.list_value_type[0]:
+		if not selected or selected.encode('utf-8')==self.list_value_type[0]:
 			self.skvessels.Disable()
 			self.skgroups.Disable()
 			self.signalk.Disable()
