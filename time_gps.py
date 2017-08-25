@@ -26,9 +26,8 @@ hora=''
 foundtime = False
 
 paths = Paths()
-conf = Conf(paths)
-language = conf.get('GENERAL', 'lang')
-Language(language)
+conf = Conf()
+Language(conf)
 
 
 try:

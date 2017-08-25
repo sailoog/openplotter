@@ -29,7 +29,7 @@ class MyFrame(wx.Frame):
 
 			self.conf=Conf()
 
-			Language(self.conf.get('GENERAL','lang'))
+			Language(self.conf)
 
 			wx.Frame.__init__(self, None, title=_('NMEA 0183 generator'), size=(690,350))
 			

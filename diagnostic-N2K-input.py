@@ -28,7 +28,7 @@ class MyFrame(wx.Frame):
 		paths = Paths()
 		self.home=paths.home
 		self.currentpath=paths.currentpath
-		self.conf=Conf(paths)
+		self.conf = Conf()
 		
 		try:
 			self.ser = serial.Serial(self.conf.get('N2K', 'can_usb'), 115200, timeout=0.5)
@@ -36,7 +36,7 @@ class MyFrame(wx.Frame):
 			print 'failed to start N2K input diagnostic on '+self.conf.get('N2K', 'can_usb')
 			sys.exit(0)
 					
-		Language(self.conf.get('GENERAL','lang'))
+		Language(self.conf)
 
 		list_N2K_txt=[]
 		self.list_N2K=[]

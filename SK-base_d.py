@@ -33,9 +33,9 @@ class MySK:
 		paths = Paths()
 		self.home = paths.home
 		self.currentpath = Paths().currentpath
-		self.conf = Conf(paths)
+		self.conf = Conf()
 
-		Language(self.conf.get('GENERAL', 'lang'))
+		Language(self.conf)
 
 		self.data = []
 

@@ -23,7 +23,7 @@ else:
 	from classes.paths import Paths
 	from classes.conf import Conf	
 	
-	conf=Conf(Paths())
+	conf = Conf()
 
 	try:
 		sensors_list=eval(conf.get('1W', 'DS18B20'))

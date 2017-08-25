@@ -22,7 +22,7 @@ from classes.language import Language
 
 class MyFrame(wx.Frame):
 	def __init__(self):
-		self.conf=Conf()
+		self.conf = Conf()
 		self.paths=Paths()
 
 		self.tick=0
@@ -34,7 +34,7 @@ class MyFrame(wx.Frame):
 		self.HSlider=[]
 		self.Slider_list=[]
 		
-		Language(self.conf.get('GENERAL','lang'))
+		Language(self.conf)
 		
 		wx.Frame.__init__(self, None, title="SK-Simulator", size=(650,435))
 		self.Bind(wx.EVT_CLOSE, self.OnClose)

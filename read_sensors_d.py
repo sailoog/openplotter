@@ -258,7 +258,7 @@ def publish_sk(io,channel,current_state,name):
 	SignalK='{"updates":[{"$source":"OPnotifications.GPIO.'+io+'.'+str(channel)+'","values":[{"path":"sensors.'+name+'","value":'+current_state+'}]}]}\n'
 	sock.sendto(SignalK, ('127.0.0.1', 55558))
 
-conf = Conf(Paths())
+conf = Conf()
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 #init SPI MCP

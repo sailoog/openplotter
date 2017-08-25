@@ -26,8 +26,8 @@ class MyFrame(wx.Frame):
 		self.ttimer=100
 		
 		paths=Paths()
-		self.conf=Conf(paths)
-		Language(self.conf.get('GENERAL','lang'))
+		self.conf = Conf()
+		Language(self.conf)
 		self.currentpath=paths.currentpath
 
 		self.list_iter=[]

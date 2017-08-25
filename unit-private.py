@@ -33,9 +33,8 @@ class MyFrame(wx.Frame):
 		self.SK_unit = ''
 		self.SK_description = ''
 		self.paths = Paths()
-		self.conf = Conf(self.paths)
-		self.language = self.conf.get('GENERAL', 'lang')
-		Language(self.language)
+		self.conf = Conf()
+		Language(self.conf)
 
 		logging.basicConfig()
 		self.buffer = []

@@ -13,6 +13,12 @@ if [ ! -d ~/.openplotter ]; then
 	mkdir ~/.openplotter
 fi
 
+if [ ! -d ~/.openplotter/tools ]; then
+	mkdir ~/.openplotter/tools
+fi
+
+cp -f openplotter_tmp/tools/demo_tool.py ~/.openplotter/tools/
+
 if [ ! -f ~/.openplotter/openplotter.conf ]; then
 	cp -f $DIRDATE/openplotter.conf ~/.openplotter/
 fi

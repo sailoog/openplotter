@@ -399,7 +399,7 @@ class MyForm(wx.Frame):
 		self.serial = 0
 
 		self.conf = Conf()
-		Language(self.conf.get('GENERAL', 'lang'))
+		Language(self.conf)
 		wx.Frame.__init__(self, None, wx.ID_ANY, _('tty auto setup'), size=(720, 350))
 
 		# Add a panel so it looks the correct on all platforms

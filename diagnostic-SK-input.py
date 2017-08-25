@@ -50,9 +50,9 @@ class MyFrame(wx.Frame):
 		paths = Paths()
 		self.home = paths.home
 		self.currentpath = paths.currentpath
-		self.conf = Conf(paths)
+		self.conf = Conf()
 
-		Language(self.conf.get('GENERAL', 'lang'))
+		Language(self.conf)
 
 		wx.Frame.__init__(self, None, title='diagnostic SignalK input', size=(670, 435))
 		self.Bind(wx.EVT_CLOSE, self.OnClose)

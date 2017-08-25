@@ -17,7 +17,6 @@
 
 import wx, subprocess, time, os, threading, sys, platform, requests, ConfigParser, io
 from shutil import copyfile
-from classes.paths import Paths
 from classes.conf import Conf
 from classes.language import Language
 from classes.check_vessel_self import checkVesselSelf
@@ -26,32 +25,40 @@ class MyFrame(wx.Frame):
 		
 	def __init__(self):
 
-		paths=Paths()
-		self.home = paths.home
-		self.currentpath=paths.currentpath
+		self.home = os.path.expanduser('~')
+		if 'root' in self.home:
+			self.home = '/home/'+os.path.expanduser(os.environ["SUDO_USER"])
+
+		self.currentpath = os.path.dirname(os.path.realpath(__file__))
 
 		conf_file_path = self.home+'/.openplotter/openplotter.conf'
 		conf_file_directory = os.path.dirname(conf_file_path)
 		if not os.path.exists(conf_file_directory):
 			os.makedirs(conf_file_directory)
 		if not os.path.isfile(conf_file_path):
-			copyfile(self.home+'/.config/openplotter/openplotter.conf', conf_file_path)
+			copyfile(self.currentpath+'/openplotter.conf', conf_file_path)
 		sk_file_path = self.home+'/.openplotter/openplotter-settings.json'
 		if not os.path.isfile(sk_file_path):
-			copyfile(self.home+'/.config/openplotter/OP-signalk/openplotter-settings.json', sk_file_path)
+			copyfile(self.currentpath+'/OP-signalk/openplotter-settings.json', sk_file_path)
 		private_unit_file_path = self.home+'/.openplotter/private_unit.json'
 		if not os.path.isfile(private_unit_file_path):
-			copyfile(self.home+'/.config/openplotter/classes/private_unit.json', private_unit_file_path)
+			copyfile(self.currentpath+'/classes/private_unit.json', private_unit_file_path)
 		sk_simulator_file_path = self.home+'/.openplotter/SK-simulator.conf'
 		if not os.path.isfile(sk_simulator_file_path):
-			copyfile(self.home+'/.config/openplotter/tools/SK-simulator.conf', sk_simulator_file_path)
+			copyfile(self.currentpath+'/tools/SK-simulator.conf', sk_simulator_file_path)
 		analog_file_path = self.home+'/.openplotter/openplotter_analog.conf'
 		if not os.path.isfile(analog_file_path):
-			copyfile(self.home+'/.config/openplotter/tools/openplotter_analog.conf', analog_file_path)
+			copyfile(self.currentpath+'/tools/openplotter_analog.conf', analog_file_path)
 
-		self.conf=Conf(paths)
-		Language(self.conf.get('GENERAL','lang'))
+		if not os.path.exists(conf_file_directory+'/tools'):
+			os.makedirs(conf_file_directory+'/tools')
+		demo_tool_file_path = self.home+'/.openplotter/tools/demo_tool.py'
+		if not os.path.isfile(demo_tool_file_path):
+			copyfile(self.currentpath+'/tools/demo_tool.py', demo_tool_file_path)
 
+		self.conf = Conf()
+
+		Language(self.conf)
 
 		self.ttimer=100
 		self.logger_data=''
@@ -228,7 +235,7 @@ class MyFrame(wx.Frame):
 				self.check_start('x11vnc')
 				self.add_logger_data(_('\nChecking VNC password...'))
 				if vnc_pass=='1':
-					try: out = subprocess.check_output(['cat', '/home/pi/.vnc/passwd'])
+					try: out = subprocess.check_output(['cat', self.home+'/.vnc/passwd'])
 					except: self.add_warnings_data(_('\n\nSecurity warning: You have not set a password for VNC.\nPlease set a password in OpenPlotter > Startup.'))
 				else: 
 					self.add_warnings_data(_('\n\nSecurity warning: You have not set a password for VNC.\nPlease set a password in OpenPlotter > Startup.'))

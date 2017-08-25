@@ -32,8 +32,8 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 class MyFrame(wx.Frame):
 	def __init__(self):
 		self.paths=Paths()
-		self.conf=Conf()
-		Language(self.conf.get('GENERAL','lang'))
+		self.conf = Conf()
+		Language(self.conf)
 
 
 		

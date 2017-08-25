@@ -25,7 +25,7 @@ from classes.paths import Paths
 paths = Paths()
 home = paths.home
 currentpath = paths.currentpath
-conf = Conf(paths)
+conf = Conf()
 activ = False
 activ = conf.get('N2K', 'output') == '1'
 if not activ:

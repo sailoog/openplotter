@@ -31,12 +31,12 @@ class MyFrame(wx.Frame):
 		#self.Check127489_pos=100
 		#self.Check127505_pos=100
 		#self.Check130316_pos=100
-		self.conf=Conf(paths)
+		self.conf = Conf()
 		self.N2K=N2K_send()
 		self.tick=0
 		self.list_SK=[]
 
-		Language(self.conf.get('GENERAL','lang'))
+		Language(self.conf)
 
 		wx.Frame.__init__(self, None, title="N2K-from-SK", size=(650,435))
 		self.Bind(wx.EVT_CLOSE, self.OnClose)

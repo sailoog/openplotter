@@ -31,7 +31,7 @@ if not os.path.isfile('/etc/hostapd/hostapd.conf'):
 elif len(sys.argv) > 1:
 	paths = Paths()
 	currentpath = paths.currentpath
-	conf = Conf(paths)
+	conf = Conf()
 	change = False
 
 	wifi_server = sys.argv[1]

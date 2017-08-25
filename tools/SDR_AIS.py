@@ -26,9 +26,9 @@ class MyFrame(wx.Frame):
 
 			self.paths=Paths()
 
-			self.conf=Conf()
+			self.conf = Conf()
 
-			Language(self.conf.get('GENERAL','lang'))
+			Language(self.conf)
 
 			wx.Frame.__init__(self, None, title=_('SDR receiver'), size=(690,370))
 			

@@ -18,12 +18,11 @@ import matplotlib.pyplot as plt
 import sys
 
 from classes.conf import Conf
-from classes.language import Language
 from classes.paths import Paths
 
 edit = sys.argv[1]
 
-conf = Conf(Paths())
+conf = Conf()
 data = conf.get('SPI', 'value_' + str(edit))
 listsave = []
 try:

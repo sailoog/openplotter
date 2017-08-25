@@ -26,9 +26,9 @@ class MyFrame(wx.Frame):
 
 			self.paths=Paths()
 
-			self.conf=Conf()
+			self.conf = Conf()
 
-			Language(self.conf.get('GENERAL','lang'))
+			Language(self.conf)
 
 			title = _('Calculate')
 

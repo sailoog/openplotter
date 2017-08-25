@@ -15,22 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import ConfigParser
-import json
-import os
-import io
-import pyudev
-import re
-import requests
-import subprocess
-import sys
-import time
-import webbrowser
-import wx
-import wx.lib.scrolledpanel
+import ConfigParser, json, os, io, pyudev, re, requests, subprocess, sys, time, webbrowser, wx, wx.lib.scrolledpanel
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
-
-from classes.actions import Actions
 try:
 	from classes.add_DS18B20 import addDS18B20
 except:
@@ -39,6 +25,7 @@ except:
 	wx.Frame( None, title="OpenPlotter", size=(710, 460))
 	wx.MessageBox('1-Wire must be enabled in "Raspberry Pi Configuration->Interfaces->1-Wire"', 'Warning', wx.OK | wx.ICON_WARNING)
 	exit()
+from classes.actions import Actions
 from classes.add_MCP import addMCP
 from classes.add_i2c import addI2c
 from classes.edit_i2c import editI2c
@@ -54,8 +41,6 @@ from classes.add_deviation_setting import adddeviationsetting
 from classes.check_vessel_self import checkVesselSelf
 from classes.conf import Conf
 from classes.language import Language
-from classes.paths import Paths
-
 
 class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 	def __init__(self, parent, height):
@@ -73,9 +58,10 @@ class CheckListCtrl2(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 
 class MainFrame(wx.Frame):
 	def __init__(self):
-		self.paths = Paths()
-		self.home = self.paths.home
-		self.currentpath = self.paths.currentpath
+		self.conf = conf
+		self.home = conf.home
+		self.conf_folder = conf.conf_folder
+		self.currentpath = currentpath
 
 		wx.Frame.__init__(self, None, title="OpenPlotter", size=(710, 460))
 		if self.util_process_exist('startup.py'):
@@ -83,10 +69,9 @@ class MainFrame(wx.Frame):
 			sys.exit(0)
 		self.Bind(wx.EVT_CLOSE, self.when_closed)
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
-		self.conf = Conf(self.paths)
 		self.language = self.conf.get('GENERAL', 'lang')
 		self.vessel_self = checkVesselSelf()
-		Language(self.language)
+		Language(self.conf)
 		self.p = wx.lib.scrolledpanel.ScrolledPanel(self, -1, style=wx.TAB_TRAVERSAL | wx.SUNKEN_BORDER)
 		self.p.SetAutoLayout(1)
 		self.p.SetupScrolling()
@@ -341,14 +326,21 @@ class MainFrame(wx.Frame):
 		res = dlg.ButtonNr
 		dlg.Destroy()
 		if res != 4:
-			if os.path.isfile(self.currentpath + '/tools/' + self.tools_py[menuId][2]):
+			if os.path.isfile(self.conf_folder + '/tools/' + self.tools_py[menuId][2]):
 				subprocess.call(['pkill', '-9', '-f', self.tools_py[menuId][2]])					
 				if res == 2:
-					subprocess.Popen(['python', self.currentpath + '/tools/' + self.tools_py[menuId][2]])
+					subprocess.Popen(['python', self.conf_folder + '/tools/' + self.tools_py[menuId][2]])
 				elif res == 1:
-					subprocess.Popen(['python', self.currentpath + '/tools/' + self.tools_py[menuId][2], 'settings'])
+					subprocess.Popen(['python', self.conf_folder + '/tools/' + self.tools_py[menuId][2], 'settings'])
 			else:
-				print 'file not found: ', self.tools_py[menuId][2]
+				if os.path.isfile(self.currentpath + '/tools/' + self.tools_py[menuId][2]):
+					subprocess.call(['pkill', '-9', '-f', self.tools_py[menuId][2]])					
+					if res == 2:
+						subprocess.Popen(['python', self.currentpath + '/tools/' + self.tools_py[menuId][2]])
+					elif res == 1:
+						subprocess.Popen(['python', self.currentpath + '/tools/' + self.tools_py[menuId][2], 'settings'])
+				else:
+					print 'file not found: ', self.tools_py[menuId][2]
 
 	def clear_lang(self):
 		self.lang.Check(self.lang_item1.GetId(), False)
@@ -3482,12 +3474,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 ############################## Main
 if __name__ == "__main__":
+	conf = Conf()
+	currentpath = conf.home+conf.get('GENERAL', 'op_folder')+'/openplotter'
 	app = wx.App()
-
-	bitmap = wx.Bitmap(Paths().home + '/.config/openplotter/openplotter.ico', wx.BITMAP_TYPE_ICO)
-	splash = wx.SplashScreen(bitmap, wx.SPLASH_CENTRE_ON_SCREEN | wx.SPLASH_TIMEOUT, 500, None,
-							 style=wx.SIMPLE_BORDER | wx.STAY_ON_TOP)
+	bitmap = wx.Bitmap(currentpath+'/openplotter.ico', wx.BITMAP_TYPE_ICO)
+	splash = wx.SplashScreen(bitmap, wx.SPLASH_CENTRE_ON_SCREEN | wx.SPLASH_TIMEOUT, 500, None, style=wx.SIMPLE_BORDER | wx.STAY_ON_TOP)
 	wx.Yield()
-
 	MainFrame().Show()
 	app.MainLoop()

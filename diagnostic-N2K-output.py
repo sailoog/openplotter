@@ -34,9 +34,9 @@ class MyFrame(wx.Frame):
 		paths = Paths()
 		self.home=paths.home
 		self.currentpath=paths.currentpath
-		self.conf=Conf(paths)
+		self.conf = Conf()
 		
-		Language(self.conf.get('GENERAL','lang'))
+		Language(self.conf)
 		print self.conf.get('GENERAL','lang')
 
 		list_N2K_txt=[]

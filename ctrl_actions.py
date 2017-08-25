@@ -28,9 +28,9 @@ start_all_actions='ACT19'
 paths=Paths()
 currentpath=paths.currentpath
 
-conf=Conf(paths)
+conf = Conf()
 
-Language(conf.get('GENERAL','lang'))
+Language(conf)
 
 triggers=[]
 data=conf.get('ACTIONS', 'triggers')

@@ -15,21 +15,23 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 import gettext
-from paths import Paths
 
 class Language:
 
-	def __init__(self, language):
+	def __init__(self, conf):
 
-		paths=Paths()
+		home = conf.home
+		op_folder = conf.get('GENERAL', 'op_folder')+'/openplotter'
+		locale_folder = home+op_folder+'/locale'
+		language = conf.get('GENERAL', 'lang')
 
-		gettext.install('openplotter', paths.currentpath+'/locale', unicode=False)
-		presLan_en = gettext.translation('openplotter', paths.currentpath+'/locale', languages=['en'])
-		presLan_ca = gettext.translation('openplotter', paths.currentpath+'/locale', languages=['ca'])
-		presLan_es = gettext.translation('openplotter', paths.currentpath+'/locale', languages=['es'])
-		presLan_fr = gettext.translation('openplotter', paths.currentpath+'/locale', languages=['fr'])
-		presLan_nl = gettext.translation('openplotter', paths.currentpath+'/locale', languages=['nl'])
-		presLan_de = gettext.translation('openplotter', paths.currentpath+'/locale', languages=['de'])
+		gettext.install('openplotter', locale_folder, unicode=False)
+		presLan_en = gettext.translation('openplotter', locale_folder, languages=['en'])
+		presLan_ca = gettext.translation('openplotter', locale_folder, languages=['ca'])
+		presLan_es = gettext.translation('openplotter', locale_folder, languages=['es'])
+		presLan_fr = gettext.translation('openplotter', locale_folder, languages=['fr'])
+		presLan_nl = gettext.translation('openplotter', locale_folder, languages=['nl'])
+		presLan_de = gettext.translation('openplotter', locale_folder, languages=['de'])
 
 		if language=='en':presLan_en.install()
 		if language=='ca':presLan_ca.install()

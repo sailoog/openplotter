@@ -21,8 +21,8 @@ from classes.conf import Conf
 from classes.language import Language
 from classes.paths import Paths
 
-conf = Conf(Paths())
-Language(conf.get('GENERAL', 'lang'))
+conf = Conf()
+Language(conf)
 
 data = conf.get('COMPASS', 'deviation')
 listsave = []

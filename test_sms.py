@@ -35,9 +35,9 @@ class MainFrame(wx.Frame):
 			paths=Paths()
 			self.currentpath=paths.currentpath
 
-			self.conf=Conf(paths)
+			self.conf = Conf()
 
-			Language(self.conf.get('GENERAL','lang'))
+			Language(self.conf)
 
 			wx.Frame.__init__(self, None, title=_('Test SMS'), size=(500,260))
 
