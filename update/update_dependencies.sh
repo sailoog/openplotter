@@ -55,7 +55,7 @@ echo
 echo "INSTALLING PYTHON PACKAGES..."
 echo
 sudo easy_install pip
-sudo pip install --upgrade paho-mqtt pyudev pyrtlsdr pynmea2 twython websocket-client spidev PyMata requests_oauthlib requests pyglet pywavefront
+sudo pip install --upgrade paho-mqtt pyudev pyrtlsdr pynmea2 twython websocket-client spidev PyMata requests_oauthlib requests pyglet pywavefront ujson
 if [ $? -ne 0 ]; then
 	echo
 	read -p "#### ERROR. ABORTING, PRESS ENTER TO EXIT ####"
