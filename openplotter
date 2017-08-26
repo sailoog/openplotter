@@ -425,8 +425,8 @@ class MainFrame(wx.Frame):
 			return
 		msg = ''
 		if remote_xxx > local_xxx:
-			msg += _('There is an OpenPlotter upgrade, it is recommended to download the new OpenPlotter RPI image.\n\n')
-			msg += _('You can upgrade now but after updating OpenPlotter you have to make a Raspbian upgrade.\n')
+			msg += _('There is an OpenPlotter upgrade, it is recommended to download the new OpenPlotter RPI image.\n')
+			msg += _('You can try to upgrade this image now but some things may not work as expected.\n')
 			msg += _('Please make a backup image of your system before updating.\n\n')
 			major_update = '1'
 		elif remote_oxx > local_oxx:
@@ -437,12 +437,17 @@ class MainFrame(wx.Frame):
 			msg += _('There is a minor OpenPlotter update.\n\n')
 			major_update = '0'
 		else:
-			self.ShowMessage('OpenPlotter '+vl+' '+sl+_(' is up to date.'))
-			return
+			if remote_branch == 'master':
+				self.ShowMessage('OpenPlotter '+vl+' '+sl+_(' is up to date.')) 
+				return
+			else:
+				msg += 'OpenPlotter '+vl+' '+sl+_(' is up to date.\n')
+				msg += _('You do not need to update but if you think something was wrong in your last update, you can force a major update.\n\n')
+				major_update = '1'
 		msg += _('Are you sure you want to update from ')+vl+' '+sl+_(' to ')+vr+' '+sr+'?'
 		dlg = wx.MessageDialog(None, msg, _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_EXCLAMATION)
 		if dlg.ShowModal() == wx.ID_YES:
-			subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/update_OpenPlotter.sh', major_update, vr, sr, repository])
+			subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/update_OpenPlotter.sh', major_update, vr, sr, repository, self.conf.get('GENERAL', 'op_folder')])
 			dlg.Destroy()
 			self.Close()
 		else: dlg.Destroy()
