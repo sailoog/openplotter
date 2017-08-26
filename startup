@@ -25,18 +25,33 @@ class MyFrame(wx.Frame):
 		
 	def __init__(self):
 
-		self.home = os.path.expanduser('~')
-		if 'root' in self.home:
-			self.home = '/home/'+os.path.expanduser(os.environ["SUDO_USER"])
+		try:
+			self.conf = Conf()
+			self.home = self.conf.home
+			op_folder = self.conf.get('GENERAL', 'op_folder')
+			if not op_folder: 
+				op_folder = '/.config'
+				self.conf.set('GENERAL', 'op_folder', op_folder)
+			self.currentpath = self.home+op_folder+'/openplotter'
+		except:
+			self.home = os.path.expanduser('~')
+			if 'root' in self.home:
+				self.home = '/home/'+os.path.expanduser(os.environ["SUDO_USER"]) 
+			self.currentpath = os.path.dirname(os.path.realpath(__file__))
+			conf_file_path = self.home+'/.openplotter/openplotter.conf'
+			conf_file_directory = os.path.dirname(conf_file_path)
+			if not os.path.exists(conf_file_directory):
+				os.makedirs(conf_file_directory)
+			if not os.path.isfile(conf_file_path):
+				copyfile(self.currentpath+'/openplotter.conf', conf_file_path)
+			self.conf = Conf()
+			self.home = self.conf.home
+			op_folder = self.conf.get('GENERAL', 'op_folder')
+			if not op_folder: 
+				op_folder = '/.config'
+				self.conf.set('GENERAL', 'op_folder', op_folder)
+			self.currentpath = self.home+op_folder+'/openplotter'
 
-		self.currentpath = os.path.dirname(os.path.realpath(__file__))
-
-		conf_file_path = self.home+'/.openplotter/openplotter.conf'
-		conf_file_directory = os.path.dirname(conf_file_path)
-		if not os.path.exists(conf_file_directory):
-			os.makedirs(conf_file_directory)
-		if not os.path.isfile(conf_file_path):
-			copyfile(self.currentpath+'/openplotter.conf', conf_file_path)
 		sk_file_path = self.home+'/.openplotter/openplotter-settings.json'
 		if not os.path.isfile(sk_file_path):
 			copyfile(self.currentpath+'/OP-signalk/openplotter-settings.json', sk_file_path)
@@ -50,13 +65,11 @@ class MyFrame(wx.Frame):
 		if not os.path.isfile(analog_file_path):
 			copyfile(self.currentpath+'/tools/openplotter_analog.conf', analog_file_path)
 
-		if not os.path.exists(conf_file_directory+'/tools'):
-			os.makedirs(conf_file_directory+'/tools')
+		if not os.path.exists(self.home+'/.openplotter/tools'):
+			os.makedirs(self.home+'/.openplotter/tools')
 		demo_tool_file_path = self.home+'/.openplotter/tools/demo_tool.py'
 		if not os.path.isfile(demo_tool_file_path):
 			copyfile(self.currentpath+'/tools/demo_tool.py', demo_tool_file_path)
-
-		self.conf = Conf()
 
 		Language(self.conf)
 
