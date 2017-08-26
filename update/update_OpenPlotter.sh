@@ -1,13 +1,9 @@
 #!/bin/bash
-cd ~/.config
-
-echo
-echo "DOWNLOADING NEW OPENPLOTTER CODE..."
-echo
 major=$1
 version=$2
 status=$3
 repository=$4
+op_folder=$(crudini --get ~/.openplotter/openplotter.conf GENERAL op_folder)
 if [ -z $major ]; then
 	major=1
 fi
@@ -17,6 +13,15 @@ fi
 if [ -z $repository ]; then
 	repository="openplotter"
 fi
+if [ -z $op_folder ]; then
+	op_folder="/.config"
+fi
+
+cd ~$op_folder
+
+echo
+echo "DOWNLOADING NEW OPENPLOTTER CODE..."
+echo
 rm -rf openplotter_tmp
 if [ $status = "stable" ]; then
 	git clone https://github.com/$repository/openplotter.git openplotter_tmp
@@ -35,7 +40,9 @@ DIRDATE=`date +openplotter_bak_%Y_%m_%d:%H:%M:%S`
 cp -a openplotter/ $DIRDATE/
 cd $DIRDATE
 find . -name "*.pyc" -type f -delete
-cd ~/.config
+
+cd ~$op_folder
+
 source openplotter_tmp/update/update_settings.sh
 if [ $major = 1 ]; then
 	source openplotter_tmp/update/update_dependencies.sh

@@ -447,7 +447,7 @@ class MainFrame(wx.Frame):
 		msg += _('Are you sure you want to update from ')+vl+' '+sl+_(' to ')+vr+' '+sr+'?'
 		dlg = wx.MessageDialog(None, msg, _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_EXCLAMATION)
 		if dlg.ShowModal() == wx.ID_YES:
-			subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/update_OpenPlotter.sh', major_update, vr, sr, repository, self.conf.get('GENERAL', 'op_folder')])
+			subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/update_OpenPlotter.sh', major_update, vr, sr, repository])
 			dlg.Destroy()
 			self.Close()
 		else: dlg.Destroy()

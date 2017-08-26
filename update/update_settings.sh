@@ -1,5 +1,10 @@
 #!/bin/bash
-cd ~/.config
+op_folder=$(crudini --get ~/.openplotter/openplotter.conf GENERAL op_folder)
+if [ -z $op_folder ]; then
+	op_folder="/.config"
+fi
+
+cd ~$op_folder
 
 echo
 echo "APPLYING SETTINGS..."
