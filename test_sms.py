@@ -17,11 +17,8 @@
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
 import wx, sys, subprocess, gammu
-from classes.paths import Paths
 from classes.conf import Conf
 from classes.language import Language
-
-
 
 class MainFrame(wx.Frame):
 		
@@ -32,10 +29,9 @@ class MainFrame(wx.Frame):
 			self.text_sms=unicode(self.text_sms,'utf-8')
 			self.phone=sys.argv[3]
 
-			paths=Paths()
-			self.currentpath=paths.currentpath
-
 			self.conf = Conf()
+			self.home = self.conf.home
+			self.currentpath = self.home+self.conf.get('GENERAL', 'op_folder')+'/openplotter'
 
 			Language(self.conf)
 

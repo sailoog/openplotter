@@ -19,14 +19,13 @@ import requests
 import subprocess
 import time
 import json
-from paths import Paths
-
 
 class checkVesselSelf:
-	def __init__(self):
-		paths = Paths()
-		home = paths.home
-		currentpath = paths.currentpath
+	def __init__(self, conf):
+
+		home = conf.home
+		currentpath = home+conf.get('GENERAL', 'op_folder')+'/openplotter'
+
 		if not self.util_process_exist('signalk-server'):
 			print 'Signal K starting'
 			subprocess.call(['pkill', '-f', 'SK-base_d.py'])

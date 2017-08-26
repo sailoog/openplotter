@@ -16,7 +16,6 @@
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
 import wx, subprocess
-from classes.paths import Paths
 from classes.op_conf import Conf
 from classes.language import Language
 
@@ -24,9 +23,9 @@ class MyFrame(wx.Frame):
 		
 		def __init__(self):
 
-			self.paths=Paths()
-
 			self.conf = Conf()
+			self.home = self.conf.home
+			self.currentpath = self.home+self.conf.get('GENERAL', 'op_folder')+'/openplotter'
 
 			Language(self.conf)
 
@@ -36,7 +35,7 @@ class MyFrame(wx.Frame):
 			
 			self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 			
-			self.icon = wx.Icon(self.paths.op_path+'/openplotter.ico', wx.BITMAP_TYPE_ICO)
+			self.icon = wx.Icon(self.currentpath+'/openplotter.ico', wx.BITMAP_TYPE_ICO)
 			self.SetIcon(self.icon)
 
 			rate_list = ['0.1', '0.25', '0.5', '0.75', '1', '1.5', '2', '5', '30', '60', '300']
@@ -234,7 +233,7 @@ class MyFrame(wx.Frame):
 				self.conf.set('CALCULATE', 'tw_sog', '0')
 
 			subprocess.call(['pkill', '-f', 'SK-base_d.py'])
-			subprocess.Popen(['python', self.paths.op_path + '/SK-base_d.py'])
+			subprocess.Popen(['python', self.currentpath + '/SK-base_d.py'])
 			self.Close()
 
 		def on_cancel(self, e):

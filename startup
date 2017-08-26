@@ -273,7 +273,7 @@ class MyFrame(wx.Frame):
 
 			subprocess.call(["pkill", '-f', "signalk-server"])
 			self.add_logger_data(_('\nStarting SignalK Server...'))
-			vessel_self=checkVesselSelf()
+			vessel_self=checkVesselSelf(self.conf)
 
 			subprocess.call(['pkill', '-f', 'diagnostic-N2K-output.py'])
 			subprocess.call(['pkill', '-f', 'N2K-server_d.py'])

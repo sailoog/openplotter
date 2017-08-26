@@ -16,7 +16,6 @@
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
 import wx, threading, time, websocket, logging, json
-from classes.paths import Paths
 from classes.conf import Conf
 from classes.language import Language
 from classes.N2K_send import N2K_send
@@ -25,13 +24,13 @@ class MyFrame(wx.Frame):
 		
 	def __init__(self):
 		logging.basicConfig()
-		paths=Paths()
-		self.currentpath=paths.currentpath
+		self.conf = Conf()
+		self.home = self.conf.home
+		self.currentpath = self.home+self.conf.get('GENERAL', 'op_folder')+'/openplotter'
 		#self.Check127488_pos=100
 		#self.Check127489_pos=100
 		#self.Check127505_pos=100
 		#self.Check130316_pos=100
-		self.conf = Conf()
 		self.N2K=N2K_send()
 		self.tick=0
 		self.list_SK=[]

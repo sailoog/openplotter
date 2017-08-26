@@ -16,14 +16,14 @@
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
 import wx, sys, socket, threading, time, webbrowser, json, datetime, ConfigParser, subprocess
-from classes.paths import Paths
 from classes.op_conf import Conf
 from classes.language import Language
 
 class MyFrame(wx.Frame):
 	def __init__(self):
-		self.conf = Conf()
-		self.paths=Paths()
+		self.conf = conf
+		self.home = home
+		self.currentpath = self.home+self.conf.get('GENERAL', 'op_folder')+'/openplotter'
 
 		self.tick=0
 		self.deg2rad=0.0174533
@@ -41,14 +41,13 @@ class MyFrame(wx.Frame):
 		self.panel = wx.Panel(self)
 		self.vbox = wx.BoxSizer(wx.VERTICAL)
 
-		
 		self.ttimer=500
 		self.timer = wx.Timer(self)
 		self.Bind(wx.EVT_TIMER, self.timer_act, self.timer)		
 		
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 		
-		self.icon = wx.Icon(self.paths.op_path+'/openplotter.ico', wx.BITMAP_TYPE_ICO)
+		self.icon = wx.Icon(self.currentpath+'/openplotter.ico', wx.BITMAP_TYPE_ICO)
 		self.SetIcon(self.icon)
 
 		self.read_conf()
@@ -112,15 +111,15 @@ class MyFrame(wx.Frame):
 		
 	def read_conf(self):
 		self.data_conf = ConfigParser.SafeConfigParser()
-		self.data_conf.read(self.paths.home+'/.openplotter/SK-simulator.conf')
+		self.data_conf.read(self.home+'/.openplotter/SK-simulator.conf')
 		if not self.data_conf.has_section('main'):
 			value=[0,'navigation.courseOverGroundTrue',0,0,360,self.deg2rad,0]
-			cfgfile = open(self.paths.home+'/.openplotter/SK-simulator.conf','w')
+			cfgfile = open(self.home+'/.openplotter/SK-simulator.conf','w')
 			self.data_conf.add_section('main')
 			self.data_conf.set('main','item_0', str(value))
 			self.data_conf.write(cfgfile)
 			
-			self.data_conf.read(self.paths.home+'/.openplotter/SK-simulator.conf')			
+			self.data_conf.read(self.home+'/.openplotter/SK-simulator.conf')			
 			
 		self.Slider_list=[]
 		for i in range(40):
@@ -163,11 +162,13 @@ class MyFrame(wx.Frame):
 	def OnClose(self, event):
 		self.timer.Stop()
 		self.Destroy()
-	
+
+conf = Conf()
+home = conf.home
+
 if len(sys.argv)>1:
 	if sys.argv[1]=='settings':
-		paths=Paths()
-		subprocess.Popen(['leafpad',paths.home+'/.openplotter/SK-simulator.conf'])
+		subprocess.Popen(['leafpad', home+'/.openplotter/SK-simulator.conf'])
 else:
 	app = wx.App()
 	MyFrame().Show()

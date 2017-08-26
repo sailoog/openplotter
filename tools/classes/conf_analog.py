@@ -14,20 +14,22 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
-import ConfigParser
-from paths import Paths
+import ConfigParser, os
 
 class Conf_analog:
 	def __init__(self):
-		self.paths=Paths()
+		self.home = os.path.expanduser('~')
+		if 'root' in self.home:
+			self.home = '/home/'+os.path.expanduser(os.environ["SUDO_USER"])
+		self.conf_folder = self.home+'/.openplotter'
 		self.data_conf = ConfigParser.SafeConfigParser()
 		self.read()
 
 	def read(self):
-		self.data_conf.read(self.paths.home+'/.openplotter/openplotter_analog.conf')
+		self.data_conf.read(self.conf_folder+'/openplotter_analog.conf')
 
 	def write(self):
-		with open(self.paths.home+'/.openplotter/openplotter_analog.conf', 'wb') as configfile:
+		with open(self.conf_folder+'/openplotter_analog.conf', 'wb') as configfile:
 			self.data_conf.write(configfile)
 
 	def get(self,section,item):

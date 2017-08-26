@@ -17,11 +17,8 @@
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
 import wx, sys, subprocess
-from classes.paths import Paths
 from classes.op_conf import Conf
 from classes.language import Language
-
-
 
 class MainFrame(wx.Frame):
 		
@@ -29,9 +26,9 @@ class MainFrame(wx.Frame):
 
 			self.option=sys.argv[1]
 
-			self.paths=Paths()
-
-			self.conf=Conf()
+			self.conf = Conf()
+			self.home = self.conf.home
+			self.currentpath = self.home+self.conf.get('GENERAL', 'op_folder')+'/openplotter'
 
 			Language(self.conf)
 
@@ -39,7 +36,7 @@ class MainFrame(wx.Frame):
 
 			self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 			
-			self.icon = wx.Icon(self.paths.op_path+'/openplotter.ico', wx.BITMAP_TYPE_ICO)
+			self.icon = wx.Icon(self.currentpath+'/openplotter.ico', wx.BITMAP_TYPE_ICO)
 			self.SetIcon(self.icon)
 
 			self.CreateStatusBar()

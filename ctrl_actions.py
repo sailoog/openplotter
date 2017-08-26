@@ -17,7 +17,6 @@
 
 import sys, subprocess, wx
 from classes.conf import Conf
-from classes.paths import Paths
 from classes.language import Language
 
 action=sys.argv[1]
@@ -25,10 +24,8 @@ action=sys.argv[1]
 #see actions.py
 start_all_actions='ACT19'
 
-paths=Paths()
-currentpath=paths.currentpath
-
 conf = Conf()
+currentpath = conf.home+conf.get('GENERAL', 'op_folder')+'/openplotter'
 
 Language(conf)
 

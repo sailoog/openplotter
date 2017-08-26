@@ -20,7 +20,6 @@ if platform.machine()[0:3]!='arm':
 	print 'this is not a raspberry pi -> no W1ThermSensor'
 else:
 	from w1thermsensor import W1ThermSensor
-	from classes.paths import Paths
 	from classes.conf import Conf	
 	
 	conf = Conf()

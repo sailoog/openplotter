@@ -16,7 +16,6 @@
 
 import paho.mqtt.client as paho
 import socket
-from classes.paths import Paths
 from classes.conf import Conf
 
 def on_message(client, userdata, msg):

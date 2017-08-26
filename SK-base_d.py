@@ -21,8 +21,6 @@ from classes.N2K_send import N2K_send
 from classes.actions import Actions
 from classes.conf import Conf
 from classes.language import Language
-from classes.paths import Paths
-
 
 class MySK:
 	def __init__(self):
@@ -30,11 +28,10 @@ class MySK:
 		self.static_list = [[]]
 		self.sortCol = 0
 
-		paths = Paths()
-		self.home = paths.home
-		self.currentpath = Paths().currentpath
 		self.conf = Conf()
-
+		self.home = self.conf.home
+		self.currentpath = self.home+self.conf.get('GENERAL', 'op_folder')+'/openplotter'
+		
 		Language(self.conf)
 
 		self.data = []

@@ -14,11 +14,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
-import signal, sys, time, socket, datetime,json,subprocess, serial
-
+import signal, sys, time
 from PyMata.pymata import PyMata
-from classes.conf_analog import Conf_analog
-from classes.paths import Paths
 
 def signal_handler(sig, frame):
 	print('You pressed Ctrl+C!!!!')

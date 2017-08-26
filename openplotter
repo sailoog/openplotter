@@ -70,7 +70,7 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_CLOSE, self.when_closed)
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 		self.language = self.conf.get('GENERAL', 'lang')
-		self.vessel_self = checkVesselSelf()
+		self.vessel_self = checkVesselSelf(self.conf)
 		Language(self.conf)
 		self.p = wx.lib.scrolledpanel.ScrolledPanel(self, -1, style=wx.TAB_TRAVERSAL | wx.SUNKEN_BORDER)
 		self.p.SetAutoLayout(1)
@@ -2999,7 +2999,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		while self.util_process_exist("signalk-server"):
 			time.sleep(0.01)
 		# restarting sk server and providers
-		self.vessel_self = checkVesselSelf()
+		self.vessel_self = checkVesselSelf(self.conf)
 		self.ShowStatusBarGREEN(_('Signal K server restarted'))
 
 	def on_diagnostic_SK(self, e):

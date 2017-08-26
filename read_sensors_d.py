@@ -16,7 +16,6 @@
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
 import socket, time, math, datetime, platform, threading
-from classes.paths import Paths
 from classes.conf import Conf
 from pypilot.boatimu import *
 

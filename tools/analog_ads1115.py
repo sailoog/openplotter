@@ -15,14 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import socket, time, RTIMU, math, csv, datetime, subprocess, sys
-from classes.paths import Paths
+import socket, time, datetime, subprocess, sys
 from classes.ads1115 import Ads1115
 from classes.conf_analog import Conf_analog
 
-paths=Paths()
-toolspath=paths.op_path + '/tools'
-home=paths.home
+conf_analog=Conf_analog()
+home = conf_analog.home
 
 if len(sys.argv)>1:
 	if sys.argv[1]=='settings':
@@ -30,8 +28,6 @@ if len(sys.argv)>1:
 		subprocess.Popen(['leafpad',home+'/.openplotter/openplotter_analog.conf'])
 	exit
 else:
-
-	conf_analog=Conf_analog()
 	ads1115=Ads1115()
 
 	a_index = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]

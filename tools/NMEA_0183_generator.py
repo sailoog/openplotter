@@ -17,7 +17,6 @@
 
 import wx, subprocess
 from classes.add_NMEA_0183 import addNMEA_0183
-from classes.paths import Paths
 from classes.op_conf import Conf
 from classes.language import Language
 
@@ -25,9 +24,9 @@ class MyFrame(wx.Frame):
 		
 		def __init__(self):
 
-			self.paths=Paths()
-
-			self.conf=Conf()
+			self.conf = Conf()
+			self.home = self.conf.home
+			self.currentpath = self.home+self.conf.get('GENERAL', 'op_folder')+'/openplotter'
 
 			Language(self.conf)
 
@@ -35,7 +34,7 @@ class MyFrame(wx.Frame):
 			
 			self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 			
-			self.icon = wx.Icon(self.paths.op_path+'/openplotter.ico', wx.BITMAP_TYPE_ICO)
+			self.icon = wx.Icon(self.currentpath+'/openplotter.ico', wx.BITMAP_TYPE_ICO)
 			self.SetIcon(self.icon)
 
 			wx.StaticBox(self, label=_(' NMEA 0183 '), size=(670, 230), pos=(10, 10))
@@ -73,7 +72,7 @@ class MyFrame(wx.Frame):
 
 		def start_d(self):
 			subprocess.call(['pkill', '-f', 'SK-base_d.py'])
-			subprocess.Popen(['python',self.paths.op_path+'/SK-base_d.py'])
+			subprocess.Popen(['python',self.currentpath+'/SK-base_d.py'])
 			
 
 		def read_sentences(self):
@@ -103,7 +102,7 @@ class MyFrame(wx.Frame):
 
 		def edit_add_nmea(self,edit):
 			self.SetStatusText('')
-			dlg = addNMEA_0183(edit)
+			dlg = addNMEA_0183(edit, self.conf)
 			res = dlg.ShowModal()
 			if res == wx.ID_OK:
 				nmea=dlg.nmea
@@ -157,7 +156,7 @@ class MyFrame(wx.Frame):
 
 		def sk_diagnostic(self,e):
 			subprocess.call(['pkill', '-f', 'diagnostic-SK-input.py'])
-			subprocess.Popen(['python',self.paths.op_path+'/diagnostic-SK-input.py'])
+			subprocess.Popen(['python',self.currentpath+'/diagnostic-SK-input.py'])
 
 app = wx.App()
 MyFrame().Show()

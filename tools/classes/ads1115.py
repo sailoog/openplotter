@@ -20,8 +20,6 @@ from classes.conf_analog import Conf_analog
 
 class Ads1115():
 
-	
-
 	def __init__(self):
 		self.ADS1115_address = 0x48
 
