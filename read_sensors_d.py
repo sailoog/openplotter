@@ -92,8 +92,8 @@ def work_compass():
 						SignalK+=Erg[0:-1]+']}]}\n'		
 						sock.sendto(SignalK, ('127.0.0.1', 55557))
 			server.HandleRequests()
-			dt = time.time() - t0
-			if dt > .1:
+			dt = .1 - (time.time() - t0)
+			if dt > 0:
 				time.sleep(dt);
 	except Exception, e: print "RTIMULib (IMU) reading failed: "+str(e)
 
