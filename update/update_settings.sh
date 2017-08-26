@@ -4,7 +4,7 @@ if [ -z $op_folder ]; then
 	op_folder="/.config"
 fi
 
-cd ~$op_folder
+cd $HOME$op_folder
 
 echo
 echo "APPLYING SETTINGS..."
