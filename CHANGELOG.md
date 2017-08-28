@@ -1,3 +1,10 @@
+v0.15.0
+* Fix compass performance
+* add ujson package
+* update tools README
+* Fix issue with actions and I2C
+* Fix issue with signal k keys in MQTT
+
 v0.14.5
 * Fix updates from 0.10.0
 * Fix start/stop all actions
