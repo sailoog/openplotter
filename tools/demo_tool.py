@@ -15,31 +15,38 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, sys, os, re, subprocess, socket
+import wx, sys, os, ConfigParser, re, subprocess, socket
 
-# If you have changed the default OpenPlotter installation folder, you have to edit this:
-op_installation_folder = '/.config'
-
-# If you are using a config file for this script, edit this. If the file does not exist it will be created in ~/.openplotter.
-conf_file = 'demo_tool.conf'
-
+##########################################################################
+# You can access to all OpenPlotter classes
 home = os.path.expanduser('~')
 if 'root' in home:
 	home = '/home/'+os.path.expanduser(os.environ["SUDO_USER"])
-
-# You can access to all OpenPlotter classes
+data_conf = ConfigParser.SafeConfigParser()
+data_conf.read(home+'/.openplotter/openplotter.conf')
+op_installation_folder = data_conf.get('GENERAL', 'op_folder')
 op_folder = home+op_installation_folder+'/openplotter'
 sys.path.append(op_folder)
+##########################################################################
+
 from classes.conf import Conf, Conf2
 from classes.select_key import selectKey
 from classes.language import Language
 
-# This will open the config file with the text editor when the button settings is pressed and the argument "settings" is passed.
+##########################################################################
+# If you are using a config file for your tool, edit "conf_file" variable.
+# If the file does not exist it will be created in ~/.openplotter.
+# If you do not need a config file remove this block.
+conf_file = 'demo_tool.conf'
+
+# This will open the config file with the text editor when the button 
+# settings is pressed and the argument "settings" is passed.
 conf2 = Conf2(conf_file)
 if len(sys.argv)>1:
 	if sys.argv[1]=='settings':
 		subprocess.Popen(['leafpad',home+'/.openplotter/'+conf_file])
 	exit()
+##########################################################################
 
 class MyFrame(wx.Frame):
 		
