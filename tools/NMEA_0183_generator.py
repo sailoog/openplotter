@@ -15,10 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, subprocess
-from classes.add_NMEA_0183 import addNMEA_0183
-from classes.op_conf import Conf
-from classes.language import Language
+import wx, os, sys, subprocess
+
+op_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')
+sys.path.append(op_folder+'/classes')
+from conf import Conf
+from language import Language
+from add_NMEA_0183 import addNMEA_0183
 
 class MyFrame(wx.Frame):
 		

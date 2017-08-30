@@ -15,9 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, sys, socket, threading, time, webbrowser, json, datetime, ConfigParser, subprocess
-from classes.op_conf import Conf
-from classes.language import Language
+import wx, os, sys, socket, time, ConfigParser, subprocess
+
+op_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')
+sys.path.append(op_folder+'/classes')
+from conf import Conf
+from language import Language
 
 class MyFrame(wx.Frame):
 	def __init__(self):

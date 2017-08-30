@@ -16,7 +16,7 @@
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
 import smbus, time
-from classes.conf_analog import Conf_analog
+from conf_analog import Conf_analog
 
 class Ads1115():
 

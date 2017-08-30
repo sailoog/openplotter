@@ -14,14 +14,12 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
-import sys
-import wx
-import subprocess
-import pyudev
-import serial
-import time
-from classes.language import Language
-from classes.op_conf import Conf
+import sys, os, wx, subprocess, pyudev, serial, time
+
+op_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')
+sys.path.append(op_folder+'/classes')
+from conf import Conf
+from language import Language
 
 class AutoDetect:
 	def __init__(self):

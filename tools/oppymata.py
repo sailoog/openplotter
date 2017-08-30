@@ -16,8 +16,12 @@
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 import signal, sys, time, socket, datetime, subprocess, os
 from PyMata.pymata import PyMata
-from classes.op_conf import Conf
-from classes.conf_analog import Conf_analog
+
+op_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')
+sys.path.append(op_folder+'/classes')
+from conf import Conf
+from language import Language
+from conf_analog import Conf_analog
 
 # Control-C signal handler to suppress exceptions if user presses Control C
 # This is totally optional.

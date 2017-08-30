@@ -14,9 +14,12 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
-import signal, sys, time, socket, subprocess
+import signal, sys, os, time, socket, subprocess
 import shlex
-from classes.conf_analog import Conf_analog
+
+op_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')
+sys.path.append(op_folder+'/classes')
+from conf_analog import Conf_analog
 
 sen_frequenz = '433967780'
 sen_type = '03'
