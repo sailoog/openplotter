@@ -2947,21 +2947,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	###################################### Signal K
 	def page_sk(self):
-		wx.StaticBox(self.p_sk, label=_(' Settings '), size=(230, 265), pos=(10, 10))
-
-		self.mmsi = wx.TextCtrl(self.p_sk, -1, size=(110, 32), pos=(20, 65))
-		self.mmsi_label = wx.StaticText(self.p_sk, label='MMSI', pos=(140, 70))
-
-		self.button_restartSK = wx.Button(self.p_sk, label=_('Restart'), pos=(20, 115))
-		self.button_restartSK.Bind(wx.EVT_BUTTON, self.restart_SK)
-
-		diagnostic = wx.Button(self.p_sk, label=_('Diagnostic'), pos=(20, 165))
-		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
-
-		apply_changes = wx.Button(self.p_sk, label=_('Apply changes'), pos=(125, 115))
+		sk_settings_box = wx.StaticBox(self.p_sk, label=_(' Settings '))
+		mmsi_label = wx.StaticText(self.p_sk, label='MMSI')
+		self.mmsi = wx.TextCtrl(self.p_sk, -1)
+		apply_changes = wx.Button(self.p_sk, label=_('Apply changes'))
 		apply_changes.Bind(wx.EVT_BUTTON, self.apply_SK)
 
-		wx.StaticBox(self.p_sk, label=_(' Info '), size=(430, 265), pos=(250, 10))
+		sk_info_box = wx.StaticBox(self.p_sk, label=_(' Info '))
 		try:
 			response = requests.get('http://localhost:3000/signalk')
 		except:
@@ -2979,18 +2971,40 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		text += _('TCP delta format output:')+'\n'+data['endpoints']['v1']['signalk-tcp']
 		text += '\n\n'
 		text += _('TCP NMEA 0183 format output:')+'\n'+'tcp://localhost:10110'
-		
-		wx.StaticText(self.p_sk, label=text, pos=(260, 30))
+		sk_info_text = wx.StaticText(self.p_sk, label=text)
 
-		show_SK = wx.Button(self.p_sk, label=_('Show Web Socket'), pos=(250, 285))
-		show_SK.Bind(wx.EVT_BUTTON, self.show_SK)
+		diagnostic = wx.Button(self.p_sk, label=_('SK Diagnostic'))
+		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
 
-		tools_SK = wx.Button(self.p_sk, label=_('Show Signal K tools'), pos=(420, 285))
+		button_restartSK = wx.Button(self.p_sk, label=_('Restart'))
+		button_restartSK.Bind(wx.EVT_BUTTON, self.restart_SK)
+
+		tools_SK = wx.Button(self.p_sk, label=_('Signal K tools'))
 		tools_SK.Bind(wx.EVT_BUTTON, self.show_tools_SK)
 
-	def show_SK(self, e):
-		url = 'http://localhost:3000/examples/consumer-example.html'
-		webbrowser.open(url, new=2)
+		v_boxSizer1 = wx.StaticBoxSizer(sk_settings_box, wx.VERTICAL)
+		v_boxSizer1.Add(mmsi_label, 0, wx.ALL | wx.EXPAND, 5)
+		v_boxSizer1.Add(self.mmsi, 0, wx.ALL | wx.EXPAND, 5)
+		v_boxSizer1.Add((0,0), 1, wx.ALL | wx.EXPAND, 5)
+		v_boxSizer1.Add(apply_changes, 0, wx.ALL, 5)
+
+		v_boxSizer2 = wx.StaticBoxSizer(sk_info_box, wx.VERTICAL)
+		v_boxSizer2.Add(sk_info_text, 0, wx.ALL | wx.EXPAND, 5)
+
+		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
+		hbox1.Add(v_boxSizer1, 1, wx.ALL | wx.EXPAND, 5)
+		hbox1.Add(v_boxSizer2, 1, wx.ALL | wx.EXPAND, 5)
+
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(diagnostic, 0, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add(button_restartSK, 0, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add(tools_SK, 0, wx.RIGHT | wx.LEFT, 5)
+
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		vbox.Add(hbox1, 1, wx.ALL | wx.EXPAND, 5)
+		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 5)
+
+		self.p_sk.SetSizer(vbox)
 
 	def show_tools_SK(self, e):
 		url = 'http://localhost:3000'
