@@ -348,7 +348,10 @@ class MyFrame(wx.Frame):
 			for i in tools_py:
 				if i[3]=='1':
 					subprocess.call(['pkill', '-9', tools_py[index][2]])
-					subprocess.Popen(['python',self.currentpath+'/tools/'+tools_py[index][2]])	
+					if os.path.isfile(self.home+'/.openplotter/tools/'+tools_py[index][2]):
+						subprocess.Popen(['python',self.home+'/.openplotter/tools/'+tools_py[index][2]])
+					else:
+						subprocess.Popen(['python',self.currentpath+'/tools/'+tools_py[index][2]])	
 				index+=1
 			self.add_logger_data(_(' Done.'))
 			self.autoclose=time.time() + 60
