@@ -1,3 +1,12 @@
+v0.15.1
+* Update demo tool
+* Optimize classes for tools
+* Clean signal k tab interface
+* Add Italian language
+* Fix standalone tools startup
+* Update languages
+* Set development to beta
+
 v0.15.0
 * Fix compass performance
 * add ujson package
