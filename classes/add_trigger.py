@@ -108,7 +108,7 @@ class addTrigger(wx.Dialog):
 				self.always.SetValue(True)
 				self.on_always(0)
 				self.operator.SetValue(self.parent.operators_list[edit[2]])
-				self.value.SetValue(edit[3].encode('utf8'))
+				self.value.SetValue(edit[3].decode('utf8'))
 			else:
 				sk = edit[1].split('.')
 				magnitude = sk.pop()
@@ -118,7 +118,7 @@ class addTrigger(wx.Dialog):
 				elif magnitude == 'source': self.sksource.SetValue(True)
 				self.onSelectMagn()
 				self.operator.SetValue(self.parent.operators_list[edit[2]])
-				self.value.SetValue(edit[3].encode('utf8'))
+				self.value.SetValue(edit[3].decode('utf8'))
 				self.onSelect_operator(0)
 		else:
 			self.skvalue.SetValue(True)
