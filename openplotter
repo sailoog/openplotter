@@ -194,13 +194,11 @@ class MainFrame(wx.Frame):
 		self.opencpn_item2 = self.update.Append(wx.ID_ANY, _('Update OpenCPN plugins'), _('Update OpenCPN plugins to latest stable releases'))
 		self.Bind(wx.EVT_MENU, self.update_opencpn_plugins, self.opencpn_item2)
 		self.update.AppendSeparator()
-		self.system_item2 = self.update.Append(wx.ID_ANY, _('Set default OpenPlotter desktop'), _('Run this after a Raspbian upgrade'))
+		self.system_item2 = self.update.Append(wx.ID_ANY, _('Set default OpenPlotter desktop'), _('Run this after a major update'))
 		self.Bind(wx.EVT_MENU, self.default_desktop, self.system_item2)		
 		self.update.AppendSeparator()
-		self.openplotter_item1 = self.update.Append(wx.ID_ANY, _('Update OpenPlotter beta'), _('Apply latest changes on beta version'))
-		self.Bind(wx.EVT_MENU, self.update_openplotter_beta, self.openplotter_item1)
-		self.openplotter_item2 = self.update.Append(wx.ID_ANY, _('Update OpenPlotter stable'), _('Update to the latest stable version'))
-		self.Bind(wx.EVT_MENU, self.update_openplotter_stable, self.openplotter_item2)
+		self.openplotter_item1 = self.update.Append(wx.ID_ANY, _('Update OpenPlotter'), _('Apply latest changes'))
+		self.Bind(wx.EVT_MENU, self.update_openplotter, self.openplotter_item1)
 		self.menubar.Append(self.update, _('Updates'))
 
 		self.helpm = wx.Menu()
@@ -398,46 +396,64 @@ class MainFrame(wx.Frame):
 		subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/update_OpenCPN_plugins.sh'])
 		self.ShowStatusBarBLACK(_('Follow the instructions of the new window'))
 
-	def update_openplotter_beta(self, e):
-		self.update_openplotter('beta')
-
-	def update_openplotter_stable(self, e):
-		self.update_openplotter('master')
-
-	def update_openplotter(self, remote_branch):
+	def update_openplotter(self, e):
 		repository = self.conf.get('GENERAL', 'repository')
+		vl = self.conf.get('GENERAL', 'version')
+		sl = self.conf.get('GENERAL', 'state')
+		vl_list = vl.split('.')
+		local_xxx = int(vl_list[0])
+		local_oxx = int(vl_list[1])
+		local_oox = int(vl_list[2])
 		if not repository:
 			repository = 'openplotter'
 			self.conf.set('GENERAL', 'repository', repository)
 		try:
-			r = requests.get('https://raw.githubusercontent.com/'+repository+'/openplotter/'+remote_branch+'/openplotter.conf')
+			r_master = requests.get('https://raw.githubusercontent.com/'+repository+'/openplotter/master/openplotter.conf')
+			r_beta = requests.get('https://raw.githubusercontent.com/'+repository+'/openplotter/beta/openplotter.conf')
 		except:
 			self.ShowStatusBarRED(_('It was not possible to connect to Github.'))
 			return
 		try:
 			data_conf = ConfigParser.SafeConfigParser()
-			data_conf.readfp(io.StringIO(r.text))
+			data_conf.readfp(io.StringIO(r_master.text))
 			vr = data_conf.get('GENERAL','version')
 			sr = data_conf.get('GENERAL','state')
 			vr_list = vr.split('.')
-			vl = self.conf.get('GENERAL', 'version')
-			sl = self.conf.get('GENERAL', 'state')
-			vl_list = vl.split('.')
 			remote_xxx = int(vr_list[0])
 			remote_oxx = int(vr_list[1])
 			remote_oox = int(vr_list[2])
-			local_xxx = int(vl_list[0])
-			local_oxx = int(vl_list[1])
-			local_oox = int(vl_list[2])
 		except:
 			self.ShowStatusBarRED(_('Error reading versions.'))
 			return
-		msg = ''
+
+		check_beta = True
 		if remote_xxx > local_xxx:
-			msg += _('There is an OpenPlotter upgrade, it is recommended to download the new OpenPlotter RPI image.\n')
-			msg += _('You can try to upgrade this image now but some things may not work as expected.\n')
-			msg += _('Please make a backup image of your system before updating.\n\n')
-			major_update = '1'
+			check_beta = False
+		elif remote_oxx > local_oxx:
+			check_beta = False
+		elif remote_oox > local_oox:
+			check_beta = False
+		if check_beta:
+			try:
+				data_conf = ConfigParser.SafeConfigParser()
+				data_conf.readfp(io.StringIO(r_beta.text))
+				vr = data_conf.get('GENERAL','version')
+				sr = data_conf.get('GENERAL','state')
+				vr_list = vr.split('.')
+				remote_xxx = int(vr_list[0])
+				remote_oxx = int(vr_list[1])
+				remote_oox = int(vr_list[2])
+			except:
+				self.ShowStatusBarRED(_('Error reading versions.'))
+				return
+
+		msg = ''
+		if sl == 'stable' and sr != 'stable':
+			msg += _('You are running a stable version. If you update to a non stable version you will have to keep updating until a stable stage is reached again.\n\n')
+		if remote_xxx > local_xxx:
+			msg += _('There is a Raspbian upgrade, it is recommended to download the new OpenPlotter RPI image: v'+str(remote_xxx)+'.x.x '+sr+'.\n')
+			self.ShowMessage(msg)
+			return
 		elif remote_oxx > local_oxx:
 			msg += _('There is a major OpenPlotter update.\n')
 			msg += _('Please make a backup image of your system before updating.\n\n')
@@ -446,14 +462,11 @@ class MainFrame(wx.Frame):
 			msg += _('There is a minor OpenPlotter update.\n\n')
 			major_update = '0'
 		else:
-			if remote_branch == 'master':
-				self.ShowMessage('OpenPlotter '+vl+' '+sl+_(' is up to date.')) 
-				return
-			else:
-				msg += 'OpenPlotter '+vl+' '+sl+_(' is up to date.\n')
-				msg += _('You do not need to update but if you think something was wrong in your last update, you can force a major update.\n\n')
-				major_update = '1'
-		msg += _('Are you sure you want to update from ')+vl+' '+sl+_(' to ')+vr+' '+sr+'?'
+			msg += 'OpenPlotter '+vl+' '+sl+_(' is up to date.\n')
+			msg += _('You do not need to update but if you think something was wrong in your last update, you can force a major update.\n\n')
+			sr = sl
+			major_update = '1'
+		msg += _('Are you sure you want to update: ')+vl+' '+sl+' --> '+vr+' '+sr+'?'
 		dlg = wx.MessageDialog(None, msg, _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_EXCLAMATION)
 		if dlg.ShowModal() == wx.ID_YES:
 			subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/update_OpenPlotter.sh', major_update, vr, sr, repository])

@@ -382,21 +382,21 @@ class MyFrame(wx.Frame):
 				else:
 					if remote_xxx > local_xxx:
 						self.add_logger_data(_(' Done.'))
-						self.add_warnings_data('\n\nThere is an OpenPlotter upgrade from '+vl+' '+sl+_(' to ')+vr+' '+sr+'.')
-						self.add_warnings_data('\nSee CHANGELOG:')
+						self.add_warnings_data(_('\n\nThere is a Raspbian upgrade, it is recommended to download\nthe new OpenPlotter RPI image: v')+str(remote_xxx)+'.x.x '+sr+'.')
+						self.add_warnings_data(_('\nSee CHANGELOG:'))
 						self.add_warnings_data('\nhttps://raw.githubusercontent.com/'+repository+'/openplotter/'+remote_branch+'/CHANGELOG.md\n')
 					elif remote_oxx > local_oxx:
 						self.add_logger_data(_(' Done.'))
-						self.add_warnings_data('\n\nThere is a major OpenPlotter update from '+vl+' '+sl+_(' to ')+vr+' '+sr+'.')
-						self.add_warnings_data('\nSee CHANGELOG:')
+						self.add_warnings_data(_('\n\nThere is a major OpenPlotter update: ')+vl+' '+sl+' --> '+vr+' '+sr+'.')
+						self.add_warnings_data(_('\nSee CHANGELOG:'))
 						self.add_warnings_data('\nhttps://raw.githubusercontent.com/'+repository+'/openplotter/'+remote_branch+'/CHANGELOG.md\n')
 					elif remote_oox > local_oox:
 						self.add_logger_data(_(' Done.'))
-						self.add_warnings_data('\n\nThere is a minor OpenPlotter update from '+vl+' '+sl+_(' to ')+vr+' '+sr+'.')
-						self.add_warnings_data('\nSee CHANGELOG:')
+						self.add_warnings_data(_('\n\nThere is a minor OpenPlotter update: ')+vl+' '+sl+' --> '+vr+' '+sr+'.')
+						self.add_warnings_data(_('\nSee CHANGELOG:'))
 						self.add_warnings_data('\nhttps://raw.githubusercontent.com/'+repository+'/openplotter/'+remote_branch+'/CHANGELOG.md\n')
 					else:
-						self.add_logger_data('OpenPlotter '+vl+' '+sl+_(' is up to date.'))
+						self.add_logger_data(' OpenPlotter '+vl+' '+sl+_(' is up to date.'))
 
 			subprocess.call(['pkill', '-9', 'mpg123'])
 			if play=='1':
