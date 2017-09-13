@@ -158,19 +158,23 @@ class addTrigger(wx.Dialog):
 		self.operator.Clear()
 		if self.always.GetValue():
 			self.operators_list = [self.parent.operators_list[4], self.parent.operators_list[6]]
+			self.operators_ref = [4,6]
 		elif self.skvalue.GetValue():
 			self.operators_list = [self.parent.operators_list[2], self.parent.operators_list[3], self.parent.operators_list[4], self.parent.operators_list[5], self.parent.operators_list[6], self.parent.operators_list[7]]
+			self.operators_ref = [2,3,4,5,6,7]
 		elif self.sktimestamp.GetValue():
 			self.operators_list = [self.parent.operators_list[0], self.parent.operators_list[1], self.parent.operators_list[2], self.parent.operators_list[3], self.parent.operators_list[4], self.parent.operators_list[5], self.parent.operators_list[6]]
+			self.operators_ref = [0,1,2,3,4,5,6]
 		elif self.sksource.GetValue():
 			self.operators_list = [self.parent.operators_list[2], self.parent.operators_list[7]]
+			self.operators_ref = [2,7]
 		self.operator.AppendItems(self.operators_list)
 		self.operator.SetSelection(0)
 		self.onSelect_operator(0)
 
 	def onSelect_operator(self, e):
-		operator = self.operator.GetValue()
-		if self.always.GetValue() or (self.sktimestamp.GetValue() and operator != self.parent.operators_list[0] and operator != self.parent.operators_list[1]):
+		operator = self.operator.GetSelection()
+		if self.always.GetValue() or (self.sktimestamp.GetValue() and operator != 0 and operator != 1):
 			self.format_t.Show() 
 		else: 
 			self.format_t.Hide()

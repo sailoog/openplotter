@@ -2342,7 +2342,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			else: 
 				sk = ii[1]
 				op = self.operators_list[ii[2]]
-			self.list_triggers.Append([sk, op, ii[3].decode('utf8')])
+			self.list_triggers.Append([sk, op.decode('utf8'), ii[3].decode('utf8')])
 			if ii[0] == 1:
 				last = self.list_triggers.GetItemCount() - 1
 				self.list_triggers.CheckItem(last)
@@ -2376,16 +2376,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		dlg = addTrigger(self, edit)
 		res = dlg.ShowModal()
 		if res == wx.ID_OK:
-			operator0 = dlg.operator.GetValue()
-			if operator0:
-				c = 0
-				for i in self.operators_list:
-					if operator0 == i: operator = c
-					c = c + 1
-			else:
-				self.ShowMessage(_('Failed. Select operator.'))
-				dlg.Destroy()
-				return
+			operators_ref = dlg.operators_ref
+			operator = operators_ref[dlg.operator.GetSelection()]
+			operator0 = self.operators_list[operator]
 			value = dlg.value.GetValue()
 			if value:
 				value = value.encode('utf8')
@@ -2413,7 +2406,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					dlg.Destroy()
 					return
 			if edit == 0:
-				self.list_triggers.Append([SKkey0, operator0, value.decode('utf8')])
+				self.list_triggers.Append([SKkey0, operator0.decode('utf8'), value.decode('utf8')])
 				tmp = [1, SKkey, operator, value, []]
 				self.triggers.append(tmp)
 				total = self.list_triggers.GetItemCount()
@@ -2486,7 +2479,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.triggers[selected_trigger_position][4].append(tmp)
 			else:
 				self.list_actions.SetStringItem(edit[0], 0, action)
-				self.list_actions.SetStringItem(edit[0], 1, data)
+				self.list_actions.SetStringItem(edit[0], 1, data.decode('utf8'))
 				self.list_actions.SetStringItem(edit[0], 2, repeat2)
 				self.triggers[selected_trigger_position][4][edit[0]][0] = self.actions.options[action_selection][3].encode('utf8')
 				self.triggers[selected_trigger_position][4][edit[0]][1] = data
