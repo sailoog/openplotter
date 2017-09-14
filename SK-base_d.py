@@ -703,13 +703,16 @@ class MySK_to_Action_Calc:
 						error = True
 				elif item[6] == 'timestamp':
 					try:
-						if type(item[1][1][7]) is int:
-							trigger_value = 0
-						else:
+						if item[1][1][7]:
 							trigger_value = datetime.datetime.strptime(item[1][1][7][:-5], '%Y-%m-%dT%H:%M:%S')
 							trigger_value = time.mktime(trigger_value.timetuple())
-						data_value = datetime.datetime.strptime(item[3], '%Y-%m-%dT%H:%M:%S')
-						data_value = time.mktime(data_value.timetuple())
+						else:
+							trigger_value = 0
+						try:
+							data_value = float(item[3])
+						except:
+							data_value = datetime.datetime.strptime(item[3], '%Y-%m-%dT%H:%M:%S')
+							data_value = time.mktime(data_value.timetuple())
 					except Exception, e: 
 						print str(e)
 						error = True
