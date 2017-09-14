@@ -2470,7 +2470,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			else:
 				repeat2 = str(repeat) + ' ' + time_units
 			if edit == 0:
-				self.list_actions.Append([action, data.decode('utf8'), repeat2])
+				self.list_actions.Append([action.decode('utf8'), data.decode('utf8'), repeat2])
 				tmp = []
 				tmp.append(self.actions.options[action_selection][3].encode('utf8'))
 				tmp.append(data)
@@ -2478,7 +2478,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				tmp.append(time_units_selection)
 				self.triggers[selected_trigger_position][4].append(tmp)
 			else:
-				self.list_actions.SetStringItem(edit[0], 0, action)
+				self.list_actions.SetStringItem(edit[0], 0, action.decode('utf8'))
 				self.list_actions.SetStringItem(edit[0], 1, data.decode('utf8'))
 				self.list_actions.SetStringItem(edit[0], 2, repeat2)
 				self.triggers[selected_trigger_position][4][edit[0]][0] = self.actions.options[action_selection][3].encode('utf8')
