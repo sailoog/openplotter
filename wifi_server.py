@@ -21,17 +21,15 @@ import sys
 import time
 import fileinput
 import string 
-
 from classes.conf import Conf
-from classes.paths import Paths
 
 if not os.path.isfile('/etc/hostapd/hostapd.conf'):
 #if os.path.isfile('/etc/hostapd/hostapd.conf'):
 	print 'no hostapd installed'
 elif len(sys.argv) > 1:
-	paths = Paths()
-	currentpath = paths.currentpath
-	conf = Conf(paths)
+
+	conf = Conf()
+
 	change = False
 
 	wifi_server = sys.argv[1]

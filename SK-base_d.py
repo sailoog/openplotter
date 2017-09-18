@@ -21,8 +21,6 @@ from classes.N2K_send import N2K_send
 from classes.actions import Actions
 from classes.conf import Conf
 from classes.language import Language
-from classes.paths import Paths
-
 
 class MySK:
 	def __init__(self):
@@ -30,12 +28,11 @@ class MySK:
 		self.static_list = [[]]
 		self.sortCol = 0
 
-		paths = Paths()
-		self.home = paths.home
-		self.currentpath = Paths().currentpath
-		self.conf = Conf(paths)
-
-		Language(self.conf.get('GENERAL', 'lang'))
+		self.conf = Conf()
+		self.home = self.conf.home
+		self.currentpath = self.home+self.conf.get('GENERAL', 'op_folder')+'/openplotter'
+		
+		Language(self.conf)
 
 		self.data = []
 
@@ -706,13 +703,16 @@ class MySK_to_Action_Calc:
 						error = True
 				elif item[6] == 'timestamp':
 					try:
-						if type(item[1][1][7]) is int:
-							trigger_value = 0
-						else:
+						if item[1][1][7]:
 							trigger_value = datetime.datetime.strptime(item[1][1][7][:-5], '%Y-%m-%dT%H:%M:%S')
 							trigger_value = time.mktime(trigger_value.timetuple())
-						data_value = datetime.datetime.strptime(item[3], '%Y-%m-%dT%H:%M:%S')
-						data_value = time.mktime(data_value.timetuple())
+						else:
+							trigger_value = 0
+						try:
+							data_value = float(item[3])
+						except:
+							data_value = datetime.datetime.strptime(item[3], '%Y-%m-%dT%H:%M:%S')
+							data_value = time.mktime(data_value.timetuple())
 					except Exception, e: 
 						print str(e)
 						error = True

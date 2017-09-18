@@ -15,12 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 import json
-from classes.paths import Paths
+from conf import Conf
 
 class GetKeys:
 	def __init__(self):
-		paths = Paths()
-		home = paths.home
+		conf = Conf()
+		home = conf.home
 		keys = []
 		with open(home +'/.config/signalk-server-node/node_modules/signalk-schema/keyswithmetadata.json') as data_file:
 			data = json.load(data_file)

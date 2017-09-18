@@ -30,7 +30,7 @@ class addI2c(wx.Dialog):
 
 		panel = wx.Panel(self)
 		self.conf = parent.conf
-		self.home = parent.paths.home
+		self.home = parent.home
 		self.currentpath = parent.currentpath
 		self.parent = parent
 		label_detected = wx.StaticText(panel, label=_('detected'))

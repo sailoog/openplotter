@@ -15,15 +15,16 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 import wx, pynmea2, inspect, webbrowser, json, subprocess, requests, re
-from classes.paths import Paths
 
 class addNMEA_0183(wx.Dialog):
 
-	def __init__(self,edit):
+	def __init__(self,edit,conf):
+
+		self.conf = conf
+		self.home = self.conf.home
+		self.currentpath = self.home+self.conf.get('GENERAL', 'op_folder')+'/openplotter'
 
 		wx.Dialog.__init__(self, None, title=_('add NMEA 0183 sentence'), size=(670,410))
-
-		self.paths=Paths()
 
 		panel = wx.Panel(self)
 
@@ -352,7 +353,7 @@ class addNMEA_0183(wx.Dialog):
 		self.nmea[1][selected_field]=''
 
 	def nmea_info(self, e):
-		url = self.paths.op_path+'/docs/NMEA.html'
+		url = self.currentpath+'/docs/NMEA.html'
 		webbrowser.open(url,new=2)
 		
 	def rmc_examp(self, e):

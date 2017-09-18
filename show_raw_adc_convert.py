@@ -16,14 +16,13 @@
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 import matplotlib.pyplot as plt
 import sys
-
 from classes.conf import Conf
 from classes.language import Language
-from classes.paths import Paths
 
 edit = sys.argv[1]
 
-conf = Conf(Paths())
+conf = Conf()
+Language(conf)
 data = conf.get('SPI', 'value_' + str(edit))
 listsave = []
 try:
@@ -34,9 +33,9 @@ for ii in temp_list:
     listsave.append(ii)
 plt.plot(*zip(*listsave))
 plt.suptitle(
-    'settings to convert raw adc values (unlinear and/or no factor and/or no offset)\n to useable values  for input ' + str(
+    _('settings to convert raw adc values (unlinear and/or no factor and/or no offset)\n to useable values  for input ') + str(
         edit), fontsize=12)
-plt.xlabel('row adc value', fontsize=12)
-plt.ylabel('value in unit', fontsize=12)
+plt.xlabel(_('row adc value'), fontsize=12)
+plt.ylabel(_('value in unit'), fontsize=12)
 plt.show()
 

@@ -1,5 +1,10 @@
 #!/bin/bash
-cd ~/.config
+op_folder=$(crudini --get ~/.openplotter/openplotter.conf GENERAL op_folder)
+if [ -z $op_folder ]; then
+	op_folder="/.config"
+fi
+
+cd $HOME$op_folder
 
 echo
 echo "APPLYING SETTINGS..."
@@ -12,6 +17,12 @@ chmod 755 openplotter_tmp/startup
 if [ ! -d ~/.openplotter ]; then
 	mkdir ~/.openplotter
 fi
+
+if [ ! -d ~/.openplotter/tools ]; then
+	mkdir ~/.openplotter/tools
+fi
+
+cp -f openplotter_tmp/tools/demo_tool.py ~/.openplotter/tools/
 
 if [ ! -f ~/.openplotter/openplotter.conf ]; then
 	cp -f $DIRDATE/openplotter.conf ~/.openplotter/

@@ -20,7 +20,6 @@ import paho.mqtt.publish as publish
 
 from classes.gmailbot import GmailBot
 from classes.twitterbot import TwitterBot
-from check_vessel_self import checkVesselSelf
 
 if platform.machine()[0:3] == 'arm':
 	import RPi.GPIO as GPIO

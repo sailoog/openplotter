@@ -15,18 +15,19 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import socket, time, math, csv, datetime, subprocess, sys
-from classes.paths import Paths
-from classes.ads1115 import Ads1115
-from classes.conf_analog import Conf_analog
+import socket, time, math, csv, datetime, subprocess, sys, os
 
+op_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')
+sys.path.append(op_folder+'/classes')
+from ads1115 import Ads1115
+from conf_analog import Conf_analog
 from ina219 import INA219
 from ina219 import DeviceRangeError
 
 SHUNT_OHMS = 0.1
 
-paths=Paths()
-home=paths.home
+conf_analog=Conf_analog()
+home = conf_analog.home
 
 if len(sys.argv)>1:
 	if sys.argv[1]=='settings':

@@ -20,7 +20,6 @@ import logging
 import wx
 import subprocess
 import os
-from classes.paths import Paths
 from classes.conf import Conf
 from classes.language import Language
 
@@ -32,10 +31,12 @@ class MyFrame(wx.Frame):
 		self.data_SK_unit_private = []
 		self.SK_unit = ''
 		self.SK_description = ''
-		self.paths = Paths()
-		self.conf = Conf(self.paths)
-		self.language = self.conf.get('GENERAL', 'lang')
-		Language(self.language)
+
+		self.conf = Conf()
+		self.home = self.conf.home
+		self.currentpath = self.home+self.conf.get('GENERAL', 'op_folder')+'/openplotter'
+
+		Language(self.conf)
 
 		logging.basicConfig()
 		self.buffer = []
@@ -47,7 +48,7 @@ class MyFrame(wx.Frame):
 
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 
-		self.icon = wx.Icon(self.paths.currentpath + '/openplotter.ico', wx.BITMAP_TYPE_ICO)
+		self.icon = wx.Icon(self.currentpath + '/openplotter.ico', wx.BITMAP_TYPE_ICO)
 		self.SetIcon(self.icon)
 
 		self.list = wx.ListCtrl(panel, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
@@ -109,12 +110,12 @@ class MyFrame(wx.Frame):
 	def read(self):
 		self.list_SK = []
 
-		with open(self.paths.home+'/.config/signalk-server-node/node_modules/signalk-schema/keyswithmetadata.json') as data_file:
+		with open(self.home+'/.config/signalk-server-node/node_modules/signalk-schema/keyswithmetadata.json') as data_file:
 			data = json.load(data_file)
 
 		self.data_SK_unit_private = []
-		if os.path.isfile(self.paths.home+'/.openplotter/private_unit.json'):
-			with open(self.paths.home+'/.openplotter/private_unit.json') as data_file:
+		if os.path.isfile(self.home+'/.openplotter/private_unit.json'):
+			with open(self.home+'/.openplotter/private_unit.json') as data_file:
 				self.data_SK_unit_private = json.load(data_file)
 
 		for i in data:
@@ -194,11 +195,11 @@ class MyFrame(wx.Frame):
 			for i in self.list_SK:
 				if i[2] != '':
 					self.data_SK_unit_private.append([i[0], i[1], i[2]])
-			with open(self.paths.home+'/.openplotter/private_unit.json', 'w') as data_file:
+			with open(self.home+'/.openplotter/private_unit.json', 'w') as data_file:
 				json.dump(self.data_SK_unit_private, data_file)
 
 			self.data_SK_unit_private = []
-			with open(self.paths.home+'/.openplotter/private_unit.json') as data_file:
+			with open(self.home+'/.openplotter/private_unit.json') as data_file:
 				self.data_SK_unit_private = json.load(data_file)
 			self.read()
 			self.sorting()

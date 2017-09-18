@@ -1,9 +1,15 @@
 #!/bin/bash
-cd ~/.config
 repository=$4
+op_folder=$(crudini --get ~/.openplotter/openplotter.conf GENERAL op_folder)
 if [ -z $repository ]; then
 	repository="openplotter"
 fi
+if [ -z $op_folder ]; then
+	op_folder="/.config"
+fi
+
+cd $HOME$op_folder
+
 echo
 echo "REMOVING UNUSED PACKAGES..."
 echo
@@ -49,7 +55,7 @@ echo
 echo "INSTALLING PYTHON PACKAGES..."
 echo
 sudo easy_install pip
-sudo pip install --upgrade paho-mqtt pyudev pyrtlsdr pynmea2 twython websocket-client spidev PyMata requests_oauthlib requests pyglet pywavefront
+sudo pip install --upgrade paho-mqtt pyudev pyrtlsdr pynmea2 twython websocket-client spidev PyMata requests_oauthlib requests pyglet pywavefront ujson
 if [ $? -ne 0 ]; then
 	echo
 	read -p "#### ERROR. ABORTING, PRESS ENTER TO EXIT ####"
@@ -71,10 +77,10 @@ npm install
 echo
 echo "COMPILING PACKAGES..."
 echo
-cd ~/.config
+cd $HOME$op_folder
 mkdir compiling
 
-cd ~/.config/compiling
+cd $HOME$op_folder/compiling
 git clone https://github.com/$repository/kalibrate-rtl.git
 cd kalibrate-rtl
 ./bootstrap && CXXFLAGS='-W -Wall -O3'
@@ -82,7 +88,7 @@ cd kalibrate-rtl
 make
 sudo make install
 
-cd ~/.config/compiling
+cd $HOME$op_folder/compiling
 git clone https://github.com/$repository/rtl_433.git
 cd rtl_433/
 mkdir build
@@ -91,32 +97,32 @@ cmake ../
 make
 sudo make install
 
-cd ~/.config/compiling
+cd $HOME$op_folder/compiling
 git clone https://github.com/$repository/aisdecoder.git
 cd aisdecoder
 cmake -DCMAKE_BUILD_TYPE=release
 make
 sudo cp aisdecoder /usr/local/bin
 
-cd ~/.config/compiling
+cd $HOME$op_folder/compiling
 git clone https://github.com/$repository/kplex.git
 cd kplex
 make
 sudo make install
 
-cd ~/.config/compiling
+cd $HOME$op_folder/compiling
 git clone git://github.com/$repository/canboat
 cd canboat
 make
 sudo make install
 
-cd ~/.config/compiling
+cd $HOME$op_folder/compiling
 git clone https://github.com/$repository/geomag.git
 cd geomag/geomag
 python setup.py build
 sudo python setup.py install
 
-cd ~/.config/compiling
+cd $HOME$op_folder/compiling
 git clone https://github.com/$repository/RTIMULib2.git
 cd RTIMULib2/Linux
 mkdir build
@@ -138,13 +144,13 @@ cd python
 python setup.py build
 sudo python setup.py install
 
-cd ~/.config/compiling
+cd $HOME$op_folder/compiling
 git clone https://github.com/$repository/pypilot
 cd pypilot
 python setup.py build
 sudo python setup.py install
 
-cd ~/.config/compiling
+cd $HOME$op_folder/compiling
 git clone https://github.com/$repository/pypilot_data.git
 if [ ! -d ~/.pypilot ]; then
 	mkdir ~/.pypilot
@@ -154,8 +160,8 @@ cp -f ui/Vagabond.mtl ~/.pypilot/
 cp -f ui/Vagabond.obj ~/.pypilot/
 cp -f ui/compass.png ~/.pypilot/
 
-cd ~/.config/
-sudo rm -rf ~/.config/compiling/
+cd $HOME$op_folder
+sudo rm -rf $HOME$op_folder/compiling/
 
 echo '{"host": "localhost"}' > ~/.pypilot/signalk.conf
 
@@ -178,4 +184,4 @@ mv gqrx-2.6-rpi3-3 gqrx
 cd gqrx
 ./setup_gqrx.sh
 
-cd ~/.config
+cd $HOME$op_folder

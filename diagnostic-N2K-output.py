@@ -16,7 +16,6 @@
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
 import wx, sys, socket, threading, time
-from classes.paths import Paths
 from classes.conf import Conf
 from classes.language import Language
 
@@ -31,17 +30,16 @@ class MyFrame(wx.Frame):
 		self.e_udp_sock.settimeout(1)
 
 		self.ttimer=20
-		paths = Paths()
-		self.home=paths.home
-		self.currentpath=paths.currentpath
-		self.conf=Conf(paths)
+		self.conf = Conf()
+		self.home = self.conf.home
+		self.currentpath = self.home+self.conf.get('GENERAL', 'op_folder')+'/openplotter'
 		
-		Language(self.conf.get('GENERAL','lang'))
+		Language(self.conf)
 		print self.conf.get('GENERAL','lang')
 
 		list_N2K_txt=[]
 		self.list_N2K=[]
-		with open(self.home+'/.config/openplotter/classes/N2K_PGN.csv') as f:
+		with open(self.currentpath+'/classes/N2K_PGN.csv') as f:
 			list_N2K_txt = [x.strip('\n\r').split(',') for x in f.readlines()]
 		
 		for ii in list_N2K_txt:

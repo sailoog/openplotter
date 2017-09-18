@@ -14,14 +14,13 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
-import json
-import platform
-import subprocess
-import wx
-from classes.paths import Paths
-from classes.op_conf import Conf
-from classes.language import Language
+import wx, os, sys
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
+
+op_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')
+sys.path.append(op_folder+'/classes')
+from conf import Conf
+from language import Language
 
 class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 	def __init__(self, parent, height):
@@ -31,18 +30,17 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 
 class MyFrame(wx.Frame):
 	def __init__(self):
-		self.paths=Paths()
-		self.conf=Conf()
-		Language(self.conf.get('GENERAL','lang'))
-
-
+		self.conf = Conf()
+		self.home = self.conf.home
+		self.currentpath = self.home+self.conf.get('GENERAL', 'op_folder')+'/openplotter'
+		Language(self.conf)
 		
 		wx.Frame.__init__(self, None, title=_('Generate N2K from Signal K'), size=(630, 300))
 		self.Bind(wx.EVT_CLOSE, self.when_closed)
 		#self.SetAutoLayout(1)
 		#self.SetupScrolling()
 
-		self.icon = wx.Icon(self.paths.op_path + '/openplotter.ico', wx.BITMAP_TYPE_ICO)
+		self.icon = wx.Icon(self.currentpath + '/openplotter.ico', wx.BITMAP_TYPE_ICO)
 		self.SetIcon(self.icon)
 		
 		self.panel = wx.Panel(self)

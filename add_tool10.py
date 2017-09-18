@@ -20,7 +20,7 @@ class addTool10(wx.Dialog):
 
 	def __init__(self):
 
-		wx.Dialog.__init__(self, None, title=_('Add individual name to serial port'), size=(130,230))
+		wx.Dialog.__init__(self, None, title=_('Standalone tool'), size=(130,230))
 
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 		

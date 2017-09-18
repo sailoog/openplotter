@@ -16,20 +16,15 @@
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
 import socket, pynmea2, subprocess
-from classes.paths import Paths
 from classes.conf import Conf
 from classes.language import Language
-
 
 fecha=''
 hora=''
 foundtime = False
 
-paths = Paths()
-conf = Conf(paths)
-language = conf.get('GENERAL', 'lang')
-Language(language)
-
+conf = Conf()
+Language(conf)
 
 try:
 	sock_in = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

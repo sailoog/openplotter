@@ -16,7 +16,6 @@
 
 import paho.mqtt.client as paho
 import socket
-from classes.paths import Paths
 from classes.conf import Conf
 
 def on_message(client, userdata, msg):
@@ -46,7 +45,7 @@ def on_connect(client, userdata, flags, rc):
 			client.subscribe(i[0], qos=0)
 	except Exception,e: print str(e)
 
-conf=Conf(Paths())
+conf = Conf()
 
 x=conf.get('MQTT', 'topics')
 if x: topics_list=eval(x)

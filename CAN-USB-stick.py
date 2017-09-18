@@ -17,8 +17,6 @@
 
 import wx, socket, threading, time, webbrowser, serial, codecs, datetime, sys
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
-
-from classes.paths import Paths
 from classes.conf import Conf
 from classes.language import Language
 
@@ -28,21 +26,20 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		CheckListCtrlMixin.__init__(self)
 		ListCtrlAutoWidthMixin.__init__(self)
 
-
 class MyFrame(wx.Frame):
 		
 		def __init__(self):
 			self.ttimer=40
-			self.home=Paths().home
-			self.currentpath=Paths().currentpath
-			self.conf=Conf(Paths())
+			self.conf = Conf()
+			self.home = self.conf.home
+			self.currentpath = self.home+self.conf.get('GENERAL', 'op_folder')+'/openplotter'
 			
 			try:
 				self.ser = serial.Serial(self.conf.get('N2K', 'can_usb'), 115200, timeout=0.5)
 			except:
 				print 'failed to start N2K output setting on '+self.conf.get('N2K', 'can_usb')
 				sys.exit(0)
-			Language(self.conf.get('GENERAL','lang'))
+			Language(self.conf)
 
 			Buf_ = (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
 			self.Buffer = bytearray(Buf_)
@@ -280,7 +277,7 @@ class MyFrame(wx.Frame):
 					self.list_N2K.DeleteItem(self.list_N2K.GetItemCount()-1)
 				
 				self.list_N2K_txt=[]
-				with open(self.home+'/.config/openplotter/classes/N2K_PGN.csv') as f:
+				with open(self.currentpath+'/classes/N2K_PGN.csv') as f:
 					self.list_N2K_txt = [x.strip('\n\r').split(',') for x in f.readlines()]
 				
 				for ii in self.list_N2K_txt:

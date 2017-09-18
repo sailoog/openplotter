@@ -15,22 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import ConfigParser
-import json
-import os
-import io
-import pyudev
-import re
-import requests
-import subprocess
-import sys
-import time
-import webbrowser
-import wx
-import wx.lib.scrolledpanel
+import ConfigParser, json, os, io, pyudev, re, requests, subprocess, sys, time, webbrowser, wx, wx.lib.scrolledpanel
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
-
-from classes.actions import Actions
 try:
 	from classes.add_DS18B20 import addDS18B20
 except:
@@ -39,6 +25,7 @@ except:
 	wx.Frame( None, title="OpenPlotter", size=(710, 460))
 	wx.MessageBox('1-Wire must be enabled in "Raspberry Pi Configuration->Interfaces->1-Wire"', 'Warning', wx.OK | wx.ICON_WARNING)
 	exit()
+from classes.actions import Actions
 from classes.add_MCP import addMCP
 from classes.add_i2c import addI2c
 from classes.edit_i2c import editI2c
@@ -54,8 +41,6 @@ from classes.add_deviation_setting import adddeviationsetting
 from classes.check_vessel_self import checkVesselSelf
 from classes.conf import Conf
 from classes.language import Language
-from classes.paths import Paths
-
 
 class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 	def __init__(self, parent, height):
@@ -73,9 +58,10 @@ class CheckListCtrl2(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 
 class MainFrame(wx.Frame):
 	def __init__(self):
-		self.paths = Paths()
-		self.home = self.paths.home
-		self.currentpath = self.paths.currentpath
+		self.conf = conf
+		self.home = conf.home
+		self.conf_folder = conf.conf_folder
+		self.currentpath = currentpath
 
 		wx.Frame.__init__(self, None, title="OpenPlotter", size=(710, 460))
 		if self.util_process_exist('startup.py'):
@@ -83,10 +69,9 @@ class MainFrame(wx.Frame):
 			sys.exit(0)
 		self.Bind(wx.EVT_CLOSE, self.when_closed)
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
-		self.conf = Conf(self.paths)
 		self.language = self.conf.get('GENERAL', 'lang')
-		self.vessel_self = checkVesselSelf()
-		Language(self.language)
+		self.vessel_self = checkVesselSelf(self.conf)
+		Language(self.conf)
 		self.p = wx.lib.scrolledpanel.ScrolledPanel(self, -1, style=wx.TAB_TRAVERSAL | wx.SUNKEN_BORDER)
 		self.p.SetAutoLayout(1)
 		self.p.SetupScrolling()
@@ -199,6 +184,8 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_MENU, self.lang_nl, self.lang_item5)
 		self.lang_item6 = self.lang.Append(wx.ID_ANY, _('German'), _('Set German language'), kind=wx.ITEM_CHECK)
 		self.Bind(wx.EVT_MENU, self.lang_de, self.lang_item6)
+		self.lang_item7 = self.lang.Append(wx.ID_ANY, _('Italiano'), _('Set Italian language'), kind=wx.ITEM_CHECK)
+		self.Bind(wx.EVT_MENU, self.lang_it, self.lang_item7)
 		self.menubar.Append(self.lang, _('Language'))
 
 		self.update = wx.Menu()
@@ -207,13 +194,11 @@ class MainFrame(wx.Frame):
 		self.opencpn_item2 = self.update.Append(wx.ID_ANY, _('Update OpenCPN plugins'), _('Update OpenCPN plugins to latest stable releases'))
 		self.Bind(wx.EVT_MENU, self.update_opencpn_plugins, self.opencpn_item2)
 		self.update.AppendSeparator()
-		self.system_item2 = self.update.Append(wx.ID_ANY, _('Set default OpenPlotter desktop'), _('Run this after a Raspbian upgrade'))
+		self.system_item2 = self.update.Append(wx.ID_ANY, _('Set default OpenPlotter desktop'), _('Run this after a major update'))
 		self.Bind(wx.EVT_MENU, self.default_desktop, self.system_item2)		
 		self.update.AppendSeparator()
-		self.openplotter_item1 = self.update.Append(wx.ID_ANY, _('Update OpenPlotter beta'), _('Apply latest changes on beta version'))
-		self.Bind(wx.EVT_MENU, self.update_openplotter_beta, self.openplotter_item1)
-		self.openplotter_item2 = self.update.Append(wx.ID_ANY, _('Update OpenPlotter stable'), _('Update to the latest stable version'))
-		self.Bind(wx.EVT_MENU, self.update_openplotter_stable, self.openplotter_item2)
+		self.openplotter_item1 = self.update.Append(wx.ID_ANY, _('Update OpenPlotter'), _('Apply latest changes'))
+		self.Bind(wx.EVT_MENU, self.update_openplotter, self.openplotter_item1)
 		self.menubar.Append(self.update, _('Updates'))
 
 		self.helpm = wx.Menu()
@@ -277,6 +262,7 @@ class MainFrame(wx.Frame):
 		if self.language == 'fr': self.lang.Check(self.lang_item4.GetId(), True)
 		if self.language == 'nl': self.lang.Check(self.lang_item5.GetId(), True)
 		if self.language == 'de': self.lang.Check(self.lang_item6.GetId(), True)
+		if self.language == 'it': self.lang.Check(self.lang_item7.GetId(), True)
 
 	def ShowMessage(self, w_msg):
 		wx.MessageBox(w_msg, 'Info', wx.OK | wx.ICON_INFORMATION)
@@ -341,14 +327,21 @@ class MainFrame(wx.Frame):
 		res = dlg.ButtonNr
 		dlg.Destroy()
 		if res != 4:
-			if os.path.isfile(self.currentpath + '/tools/' + self.tools_py[menuId][2]):
+			if os.path.isfile(self.conf_folder + '/tools/' + self.tools_py[menuId][2]):
 				subprocess.call(['pkill', '-9', '-f', self.tools_py[menuId][2]])					
 				if res == 2:
-					subprocess.Popen(['python', self.currentpath + '/tools/' + self.tools_py[menuId][2]])
+					subprocess.Popen(['python', self.conf_folder + '/tools/' + self.tools_py[menuId][2]])
 				elif res == 1:
-					subprocess.Popen(['python', self.currentpath + '/tools/' + self.tools_py[menuId][2], 'settings'])
+					subprocess.Popen(['python', self.conf_folder + '/tools/' + self.tools_py[menuId][2], 'settings'])
 			else:
-				print 'file not found: ', self.tools_py[menuId][2]
+				if os.path.isfile(self.currentpath + '/tools/' + self.tools_py[menuId][2]):
+					subprocess.call(['pkill', '-9', '-f', self.tools_py[menuId][2]])					
+					if res == 2:
+						subprocess.Popen(['python', self.currentpath + '/tools/' + self.tools_py[menuId][2]])
+					elif res == 1:
+						subprocess.Popen(['python', self.currentpath + '/tools/' + self.tools_py[menuId][2], 'settings'])
+				else:
+					print 'file not found: ', self.tools_py[menuId][2]
 
 	def clear_lang(self):
 		self.lang.Check(self.lang_item1.GetId(), False)
@@ -357,6 +350,7 @@ class MainFrame(wx.Frame):
 		self.lang.Check(self.lang_item4.GetId(), False)
 		self.lang.Check(self.lang_item5.GetId(), False)
 		self.lang.Check(self.lang_item6.GetId(), False)
+		self.lang.Check(self.lang_item7.GetId(), False)
 		self.ShowMessage(_('The selected language will be enabled when you restart'))
 
 	def lang_en(self, e):
@@ -389,6 +383,11 @@ class MainFrame(wx.Frame):
 		self.lang.Check(self.lang_item6.GetId(), True)
 		self.conf.set('GENERAL', 'lang', 'de')
 
+	def lang_it(self, e):
+		self.clear_lang()
+		self.lang.Check(self.lang_item7.GetId(), True)
+		self.conf.set('GENERAL', 'lang', 'it')
+
 	def update_opencpn(self, e):
 		subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/update_OpenCPN.sh'])
 		self.ShowStatusBarBLACK(_('Follow the instructions of the new window'))
@@ -397,46 +396,64 @@ class MainFrame(wx.Frame):
 		subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/update_OpenCPN_plugins.sh'])
 		self.ShowStatusBarBLACK(_('Follow the instructions of the new window'))
 
-	def update_openplotter_beta(self, e):
-		self.update_openplotter('beta')
-
-	def update_openplotter_stable(self, e):
-		self.update_openplotter('master')
-
-	def update_openplotter(self, remote_branch):
+	def update_openplotter(self, e):
 		repository = self.conf.get('GENERAL', 'repository')
+		vl = self.conf.get('GENERAL', 'version')
+		sl = self.conf.get('GENERAL', 'state')
+		vl_list = vl.split('.')
+		local_xxx = int(vl_list[0])
+		local_oxx = int(vl_list[1])
+		local_oox = int(vl_list[2])
 		if not repository:
 			repository = 'openplotter'
 			self.conf.set('GENERAL', 'repository', repository)
 		try:
-			r = requests.get('https://raw.githubusercontent.com/'+repository+'/openplotter/'+remote_branch+'/openplotter.conf')
+			r_master = requests.get('https://raw.githubusercontent.com/'+repository+'/openplotter/master/openplotter.conf')
+			r_beta = requests.get('https://raw.githubusercontent.com/'+repository+'/openplotter/beta/openplotter.conf')
 		except:
 			self.ShowStatusBarRED(_('It was not possible to connect to Github.'))
 			return
 		try:
 			data_conf = ConfigParser.SafeConfigParser()
-			data_conf.readfp(io.StringIO(r.text))
+			data_conf.readfp(io.StringIO(r_master.text))
 			vr = data_conf.get('GENERAL','version')
 			sr = data_conf.get('GENERAL','state')
 			vr_list = vr.split('.')
-			vl = self.conf.get('GENERAL', 'version')
-			sl = self.conf.get('GENERAL', 'state')
-			vl_list = vl.split('.')
 			remote_xxx = int(vr_list[0])
 			remote_oxx = int(vr_list[1])
 			remote_oox = int(vr_list[2])
-			local_xxx = int(vl_list[0])
-			local_oxx = int(vl_list[1])
-			local_oox = int(vl_list[2])
 		except:
 			self.ShowStatusBarRED(_('Error reading versions.'))
 			return
-		msg = ''
+
+		check_beta = True
 		if remote_xxx > local_xxx:
-			msg += _('There is an OpenPlotter upgrade, it is recommended to download the new OpenPlotter RPI image.\n\n')
-			msg += _('You can upgrade now but after updating OpenPlotter you have to make a Raspbian upgrade.\n')
-			msg += _('Please make a backup image of your system before updating.\n\n')
-			major_update = '1'
+			check_beta = False
+		elif remote_oxx > local_oxx:
+			check_beta = False
+		elif remote_oox > local_oox:
+			check_beta = False
+		if check_beta:
+			try:
+				data_conf = ConfigParser.SafeConfigParser()
+				data_conf.readfp(io.StringIO(r_beta.text))
+				vr = data_conf.get('GENERAL','version')
+				sr = data_conf.get('GENERAL','state')
+				vr_list = vr.split('.')
+				remote_xxx = int(vr_list[0])
+				remote_oxx = int(vr_list[1])
+				remote_oox = int(vr_list[2])
+			except:
+				self.ShowStatusBarRED(_('Error reading versions.'))
+				return
+
+		msg = ''
+		if sl == 'stable' and sr != 'stable':
+			msg += _('You are running a stable version. If you update to a non stable version you will have to keep updating until a stable stage is reached again.\n\n')
+		if remote_xxx > local_xxx:
+			msg += _('There is a Raspbian upgrade, it is recommended to download the new OpenPlotter RPI image: v'+str(remote_xxx)+'.x.x '+sr+'.\n')
+			self.ShowMessage(msg)
+			return
 		elif remote_oxx > local_oxx:
 			msg += _('There is a major OpenPlotter update.\n')
 			msg += _('Please make a backup image of your system before updating.\n\n')
@@ -445,9 +462,11 @@ class MainFrame(wx.Frame):
 			msg += _('There is a minor OpenPlotter update.\n\n')
 			major_update = '0'
 		else:
-			self.ShowMessage('OpenPlotter '+vl+' '+sl+_(' is up to date.'))
-			return
-		msg += _('Are you sure you want to update from ')+vl+' '+sl+_(' to ')+vr+' '+sr+'?'
+			msg += 'OpenPlotter '+vl+' '+sl+_(' is up to date.\n')
+			msg += _('You do not need to update but if you think something was wrong in your last update, you can force a major update.\n\n')
+			sr = sl
+			major_update = '1'
+		msg += _('Are you sure you want to update: ')+vl+' '+sl+' --> '+vr+' '+sr+'?'
 		dlg = wx.MessageDialog(None, msg, _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_EXCLAMATION)
 		if dlg.ShowModal() == wx.ID_YES:
 			subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/update_OpenPlotter.sh', major_update, vr, sr, repository])
@@ -2323,7 +2342,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			else: 
 				sk = ii[1]
 				op = self.operators_list[ii[2]]
-			self.list_triggers.Append([sk, op, ii[3]])
+			self.list_triggers.Append([sk, op.decode('utf8'), ii[3].decode('utf8')])
 			if ii[0] == 1:
 				last = self.list_triggers.GetItemCount() - 1
 				self.list_triggers.CheckItem(last)
@@ -2340,7 +2359,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			time_units = self.actions.time_units[i[3]]
 			repeat2 = repeat + ' ' + time_units
 			self.list_actions.Append(
-				[self.actions.options[self.actions.getOptionsListIndex(i[0])][0], i[1], repeat2])
+				[self.actions.options[self.actions.getOptionsListIndex(i[0])][0].decode('utf8'), i[1].decode('utf8'), repeat2])
 
 	def on_edit_triggers(self, e):
 		t = e.GetIndex()
@@ -2357,16 +2376,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		dlg = addTrigger(self, edit)
 		res = dlg.ShowModal()
 		if res == wx.ID_OK:
-			operator0 = dlg.operator.GetValue()
-			if operator0:
-				c = 0
-				for i in self.operators_list:
-					if operator0 == i: operator = c
-					c = c + 1
-			else:
-				self.ShowMessage(_('Failed. Select operator.'))
-				dlg.Destroy()
-				return
+			operators_ref = dlg.operators_ref
+			operator = operators_ref[dlg.operator.GetSelection()]
+			operator0 = self.operators_list[operator]
 			value = dlg.value.GetValue()
 			if value:
 				value = value.encode('utf8')
@@ -2394,7 +2406,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					dlg.Destroy()
 					return
 			if edit == 0:
-				self.list_triggers.Append([SKkey0, operator0, value])
+				self.list_triggers.Append([SKkey0, operator0.decode('utf8'), value.decode('utf8')])
 				tmp = [1, SKkey, operator, value, []]
 				self.triggers.append(tmp)
 				total = self.list_triggers.GetItemCount()
@@ -2458,7 +2470,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			else:
 				repeat2 = str(repeat) + ' ' + time_units
 			if edit == 0:
-				self.list_actions.Append([action, data, repeat2])
+				self.list_actions.Append([action.decode('utf8'), data.decode('utf8'), repeat2])
 				tmp = []
 				tmp.append(self.actions.options[action_selection][3].encode('utf8'))
 				tmp.append(data)
@@ -2466,8 +2478,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				tmp.append(time_units_selection)
 				self.triggers[selected_trigger_position][4].append(tmp)
 			else:
-				self.list_actions.SetStringItem(edit[0], 0, action)
-				self.list_actions.SetStringItem(edit[0], 1, data)
+				self.list_actions.SetStringItem(edit[0], 0, action.decode('utf8'))
+				self.list_actions.SetStringItem(edit[0], 1, data.decode('utf8'))
 				self.list_actions.SetStringItem(edit[0], 2, repeat2)
 				self.triggers[selected_trigger_position][4][edit[0]][0] = self.actions.options[action_selection][3].encode('utf8')
 				self.triggers[selected_trigger_position][4][edit[0]][1] = data
@@ -2950,21 +2962,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	###################################### Signal K
 	def page_sk(self):
-		wx.StaticBox(self.p_sk, label=_(' Settings '), size=(230, 265), pos=(10, 10))
-
-		self.mmsi = wx.TextCtrl(self.p_sk, -1, size=(110, 32), pos=(20, 65))
-		self.mmsi_label = wx.StaticText(self.p_sk, label='MMSI', pos=(140, 70))
-
-		self.button_restartSK = wx.Button(self.p_sk, label=_('Restart'), pos=(20, 115))
-		self.button_restartSK.Bind(wx.EVT_BUTTON, self.restart_SK)
-
-		diagnostic = wx.Button(self.p_sk, label=_('Diagnostic'), pos=(20, 165))
-		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
-
-		apply_changes = wx.Button(self.p_sk, label=_('Apply changes'), pos=(125, 115))
+		sk_settings_box = wx.StaticBox(self.p_sk, label=_(' Settings '))
+		mmsi_label = wx.StaticText(self.p_sk, label='MMSI')
+		self.mmsi = wx.TextCtrl(self.p_sk, -1)
+		apply_changes = wx.Button(self.p_sk, label=_('Apply changes'))
 		apply_changes.Bind(wx.EVT_BUTTON, self.apply_SK)
 
-		wx.StaticBox(self.p_sk, label=_(' Info '), size=(430, 265), pos=(250, 10))
+		sk_info_box = wx.StaticBox(self.p_sk, label=_(' Info '))
 		try:
 			response = requests.get('http://localhost:3000/signalk')
 		except:
@@ -2982,18 +2986,40 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		text += _('TCP delta format output:')+'\n'+data['endpoints']['v1']['signalk-tcp']
 		text += '\n\n'
 		text += _('TCP NMEA 0183 format output:')+'\n'+'tcp://localhost:10110'
-		
-		wx.StaticText(self.p_sk, label=text, pos=(260, 30))
+		sk_info_text = wx.StaticText(self.p_sk, label=text)
 
-		show_SK = wx.Button(self.p_sk, label=_('Show Web Socket'), pos=(250, 285))
-		show_SK.Bind(wx.EVT_BUTTON, self.show_SK)
+		diagnostic = wx.Button(self.p_sk, label=_('SK Diagnostic'))
+		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
 
-		tools_SK = wx.Button(self.p_sk, label=_('Show Signal K tools'), pos=(420, 285))
+		button_restartSK = wx.Button(self.p_sk, label=_('Restart'))
+		button_restartSK.Bind(wx.EVT_BUTTON, self.restart_SK)
+
+		tools_SK = wx.Button(self.p_sk, label=_('Signal K tools'))
 		tools_SK.Bind(wx.EVT_BUTTON, self.show_tools_SK)
 
-	def show_SK(self, e):
-		url = 'http://localhost:3000/examples/consumer-example.html'
-		webbrowser.open(url, new=2)
+		v_boxSizer1 = wx.StaticBoxSizer(sk_settings_box, wx.VERTICAL)
+		v_boxSizer1.Add(mmsi_label, 0, wx.ALL | wx.EXPAND, 5)
+		v_boxSizer1.Add(self.mmsi, 0, wx.ALL | wx.EXPAND, 5)
+		v_boxSizer1.Add((0,0), 1, wx.ALL | wx.EXPAND, 5)
+		v_boxSizer1.Add(apply_changes, 0, wx.ALL, 5)
+
+		v_boxSizer2 = wx.StaticBoxSizer(sk_info_box, wx.VERTICAL)
+		v_boxSizer2.Add(sk_info_text, 0, wx.ALL | wx.EXPAND, 5)
+
+		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
+		hbox1.Add(v_boxSizer1, 1, wx.ALL | wx.EXPAND, 5)
+		hbox1.Add(v_boxSizer2, 1, wx.ALL | wx.EXPAND, 5)
+
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(diagnostic, 0, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add(button_restartSK, 0, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add(tools_SK, 0, wx.RIGHT | wx.LEFT, 5)
+
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		vbox.Add(hbox1, 1, wx.ALL | wx.EXPAND, 5)
+		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 5)
+
+		self.p_sk.SetSizer(vbox)
 
 	def show_tools_SK(self, e):
 		url = 'http://localhost:3000'
@@ -3007,7 +3033,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		while self.util_process_exist("signalk-server"):
 			time.sleep(0.01)
 		# restarting sk server and providers
-		self.vessel_self = checkVesselSelf()
+		self.vessel_self = checkVesselSelf(self.conf)
 		self.ShowStatusBarGREEN(_('Signal K server restarted'))
 
 	def on_diagnostic_SK(self, e):
@@ -3482,12 +3508,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 ############################## Main
 if __name__ == "__main__":
+	conf = Conf()
+	currentpath = conf.home+conf.get('GENERAL', 'op_folder')+'/openplotter'
 	app = wx.App()
-
-	bitmap = wx.Bitmap(Paths().home + '/.config/openplotter/openplotter.ico', wx.BITMAP_TYPE_ICO)
-	splash = wx.SplashScreen(bitmap, wx.SPLASH_CENTRE_ON_SCREEN | wx.SPLASH_TIMEOUT, 500, None,
-							 style=wx.SIMPLE_BORDER | wx.STAY_ON_TOP)
+	bitmap = wx.Bitmap(currentpath+'/openplotter.ico', wx.BITMAP_TYPE_ICO)
+	splash = wx.SplashScreen(bitmap, wx.SPLASH_CENTRE_ON_SCREEN | wx.SPLASH_TIMEOUT, 500, None, style=wx.SIMPLE_BORDER | wx.STAY_ON_TOP)
 	wx.Yield()
-
 	MainFrame().Show()
 	app.MainLoop()

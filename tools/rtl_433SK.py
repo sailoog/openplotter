@@ -14,12 +14,12 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
-import signal, sys, time, socket, subprocess
+import signal, sys, os, time, socket, subprocess
 import shlex
 
-
-from classes.conf_analog import Conf_analog
-from classes.paths import Paths
+op_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')
+sys.path.append(op_folder+'/classes')
+from conf_analog import Conf_analog
 
 sen_frequenz = '433967780'
 sen_type = '03'
@@ -63,18 +63,14 @@ def interpolread(idx,erg):
 def init():	
 	signal.signal(signal.SIGINT, signal_handler)
 
-	conf_analog=Conf_analog()
+	conf_analog = Conf_analog()
 
 	SK_name.append(sen_temp_SK);
 	SK_name.append(sen_humi_SK);
 
-paths=Paths()
-toolspath=paths.op_path + '/tools'
-
 if len(sys.argv)>1:
 	if sys.argv[1]=='settings':
 		print 'No config file or gui! Changes must be made in the python file'
-		#subprocess.Popen(['leafpad',toolspath+'/xxxx.conf'])
 	exit
 else:
 	index=0

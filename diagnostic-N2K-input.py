@@ -16,7 +16,6 @@
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
 import wx, sys, socket, threading, time, serial
-from classes.paths import Paths
 from classes.conf import Conf
 from classes.language import Language
 
@@ -24,11 +23,10 @@ class MyFrame(wx.Frame):
 		
 	def __init__(self):
 		self.ttimer=40
-		
-		paths = Paths()
-		self.home=paths.home
-		self.currentpath=paths.currentpath
-		self.conf=Conf(paths)
+
+		self.conf = Conf()
+		self.home = self.conf.home
+		self.currentpath = self.home+self.conf.get('GENERAL', 'op_folder')+'/openplotter'
 		
 		try:
 			self.ser = serial.Serial(self.conf.get('N2K', 'can_usb'), 115200, timeout=0.5)
@@ -36,11 +34,11 @@ class MyFrame(wx.Frame):
 			print 'failed to start N2K input diagnostic on '+self.conf.get('N2K', 'can_usb')
 			sys.exit(0)
 					
-		Language(self.conf.get('GENERAL','lang'))
+		Language(self.conf)
 
 		list_N2K_txt=[]
 		self.list_N2K=[]
-		with open(self.home+'/.config/openplotter/classes/N2K_PGN.csv') as f:
+		with open(self.currentpath+'/classes/N2K_PGN.csv') as f:
 			list_N2K_txt = [x.strip('\n\r').split(',') for x in f.readlines()]
 		
 		for ii in list_N2K_txt:

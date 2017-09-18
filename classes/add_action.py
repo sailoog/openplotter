@@ -29,7 +29,7 @@ class addAction(wx.Dialog):
 		self.conf = parent.conf
 		self.actions_options = actions_options
 
-		self.home = parent.paths.home
+		self.home = parent.home
 		self.currentpath = parent.currentpath
 
 		list_actions = []

@@ -1,3 +1,32 @@
+v0.15.1
+* Update demo tool
+* Optimize classes for tools
+* Clean signal k tab interface
+* Add Italian language
+* Fix standalone tools startup
+* Update languages
+* Set development to beta
+
+v0.15.0
+* Fix compass performance
+* add ujson package
+* update tools README
+* Fix issue with actions and I2C
+* Fix issue with signal k keys in MQTT
+
+v0.14.5
+* Fix updates from 0.10.0
+* Fix start/stop all actions
+* Add OpenCPN default sentences to NMEA 0183 generator
+* Put config files into ~/.openplotter
+* Put custom tools into ~/.openplotter/tools
+* Create a demo custom tool
+* Remove upgrade raspbianfrom menu update
+* Fix some language issues
+* Optimize conf file management
+* Optimize paths and make them relative to an option in conf file
+* Force update if OP is upto date
+
 v0.14.4
 * Make updates standalone
 

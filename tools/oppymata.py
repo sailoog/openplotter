@@ -15,11 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 import signal, sys, time, socket, datetime, subprocess, os
-
 from PyMata.pymata import PyMata
-from classes.conf_analog import Conf_analog
-from classes.paths import Paths
 
+op_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')
+sys.path.append(op_folder+'/classes')
+from conf import Conf
+from language import Language
+from conf_analog import Conf_analog
 
 # Control-C signal handler to suppress exceptions if user presses Control C
 # This is totally optional.
@@ -57,7 +59,7 @@ def interpolread(idx,erg):
 def init():	
 	signal.signal(signal.SIGINT, signal_handler)
 
-	conf_analog=Conf_analog()
+	conf_analog = Conf_analog()
 
 	FIRMATA='FIRMATA_'
 
@@ -90,14 +92,15 @@ def init():
 				else: adjust_point[index]=[]
 			index+=1
 
-paths=Paths()
-toolspath=paths.op_path + '/tools'
+conf = Conf()
+home = conf.home
+currentpath = home+conf.get('GENERAL', 'op_folder')+'/openplotter'
 
 if len(sys.argv)>1:
 	index=1
 	if sys.argv[1]=='settings':
-		print paths.home+'/.openplotter/openplotter_analog.conf'
-		subprocess.Popen(['leafpad',paths.home+'/.openplotter/openplotter_analog.conf'])
+		print home+'/.openplotter/openplotter_analog.conf'
+		subprocess.Popen(['leafpad',home+'/.openplotter/openplotter_analog.conf'])
 	exit
 else:
 	RawValue=[]
@@ -110,12 +113,12 @@ else:
 	SignalK=''
 
 if os.path.exists('/dev/ttyOP_FIRM') and index == 0:
-	output = subprocess.check_output(['python', toolspath+'/op_pymata_check.py'])
+	output = subprocess.check_output(['python', currentpath+'/tools/op_pymata_check.py'])
 	if 'Total Number' in output:
 		pass
 	else:
 		print 'some errors so second try'
-		output = subprocess.check_output(['python', toolspath+'/op_pymata_check.py'])
+		output = subprocess.check_output(['python', currentpath+'/tools/op_pymata_check.py'])
 		if 'Total Number' in output:
 			pass
 		else:

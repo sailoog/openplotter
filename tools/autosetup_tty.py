@@ -14,17 +14,12 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
-import sys
-import wx
-import subprocess
-from classes.language import Language
-from classes.op_conf import Conf
+import sys, os, wx, subprocess, pyudev, serial, time
 
-import pyudev
-import serial
-import time
-from classes.paths import Paths
-
+op_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')
+sys.path.append(op_folder+'/classes')
+from conf import Conf
+from language import Language
 
 class AutoDetect:
 	def __init__(self):
@@ -166,8 +161,8 @@ def on_setup(event):
 	tty_list = []
 	index = 0
 
-	paths = Paths()
 	conf = Conf()
+	home = conf.home
 	
 	subprocess.call(["pkill", '-f', "signalk-server-node"])
 	subprocess.call(["pkill", '-9', "kplex"])
@@ -359,7 +354,7 @@ def on_setup(event):
 	print
 	print 'add new devices to kplex (not activated and no filter)'
 
-	f1 = open(paths.home + '/.kplex.conf', 'r')
+	f1 = open(home + '/.kplex.conf', 'r')
 	data = f1.readlines()
 	f1.close()
 
@@ -389,7 +384,7 @@ def on_setup(event):
 			newdata += dataa
 		newdata += item
 
-	f1 = open(paths.home + '/.kplex.conf', 'w')
+	f1 = open(home + '/.kplex.conf', 'w')
 	f1.write(newdata)
 	f1.close()
 
@@ -399,7 +394,7 @@ class MyForm(wx.Frame):
 		self.serial = 0
 
 		self.conf = Conf()
-		Language(self.conf.get('GENERAL', 'lang'))
+		Language(self.conf)
 		wx.Frame.__init__(self, None, wx.ID_ANY, _('tty auto setup'), size=(720, 350))
 
 		# Add a panel so it looks the correct on all platforms
@@ -459,7 +454,6 @@ class MyForm(wx.Frame):
 			self.conf.set('TOOLS', 'py', str(self.tool_list))
 
 	def on_close(self, event):
-		#subprocess.Popen(['python', Paths().op_path + '/startup.py'])
 		self.Close()
 
 

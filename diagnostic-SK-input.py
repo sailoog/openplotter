@@ -26,8 +26,6 @@ import time
 
 from classes.conf import Conf
 from classes.language import Language
-from classes.paths import Paths
-
 
 class MyFrame(wx.Frame):
 	def __init__(self):
@@ -47,12 +45,11 @@ class MyFrame(wx.Frame):
 		self.list_SK_unit = []
 		self.sortCol = 0
 
-		paths = Paths()
-		self.home = paths.home
-		self.currentpath = paths.currentpath
-		self.conf = Conf(paths)
+		self.conf = Conf()
+		self.home = self.conf.home
+		self.currentpath = self.home+self.conf.get('GENERAL', 'op_folder')+'/openplotter'
 
-		Language(self.conf.get('GENERAL', 'lang'))
+		Language(self.conf)
 
 		wx.Frame.__init__(self, None, title='diagnostic SignalK input', size=(670, 435))
 		self.Bind(wx.EVT_CLOSE, self.OnClose)

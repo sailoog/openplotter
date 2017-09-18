@@ -15,26 +15,28 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, subprocess
-from classes.paths import Paths
-from classes.op_conf import Conf
-from classes.language import Language
+import wx, os, sys, subprocess
+
+op_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')
+sys.path.append(op_folder+'/classes')
+from conf import Conf
+from language import Language
 
 class MyFrame(wx.Frame):
 		
 		def __init__(self):
 
-			self.paths=Paths()
+			self.conf = Conf()
+			self.home = self.conf.home
+			self.currentpath = self.home+self.conf.get('GENERAL', 'op_folder')+'/openplotter'
 
-			self.conf=Conf()
-
-			Language(self.conf.get('GENERAL','lang'))
+			Language(self.conf)
 
 			wx.Frame.__init__(self, None, title=_('SDR receiver'), size=(690,370))
 			
 			self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 			
-			self.icon = wx.Icon(self.paths.op_path+'/openplotter.ico', wx.BITMAP_TYPE_ICO)
+			self.icon = wx.Icon(self.currentpath+'/openplotter.ico', wx.BITMAP_TYPE_ICO)
 			self.SetIcon(self.icon)
 
 			wx.StaticBox(self, label='', size=(400, 170), pos=(10, 10))
@@ -182,7 +184,7 @@ class MyFrame(wx.Frame):
 				ppm=ppm.replace(',', '.')
 			channel='a'
 			if self.ais_frequencies2.GetValue(): channel='b'
-			w_open=subprocess.Popen(['python', self.paths.tool_path+'/SDR_AIS_waterfall.py', gain, ppm, channel])
+			w_open=subprocess.Popen(['python', self.currentpath+'/tools/SDR_AIS_waterfall.py', gain, ppm, channel])
 			msg=_('AIS reception disabled. After closing the new window enable AIS reception again.')
 			self.SetStatusText(msg)
 
@@ -202,7 +204,7 @@ class MyFrame(wx.Frame):
 			self.conf.set('AIS-SDR', 'gain', gain)
 			self.conf.set('AIS-SDR', 'ppm', ppm)
 			self.conf.set('AIS-SDR', 'band', band)
-			subprocess.Popen(['python',self.paths.tool_path+'/SDR_AIS_fine_cal.py', 'b'])
+			subprocess.Popen(['python',self.currentpath+'/tools/SDR_AIS_fine_cal.py', 'b'])
 			msg=_('AIS reception disabled. After closing the new window enable AIS reception again.')
 			self.SetStatusText(msg)
 			
@@ -215,14 +217,14 @@ class MyFrame(wx.Frame):
 			self.conf.set('AIS-SDR', 'gain', gain)
 			self.conf.set('AIS-SDR', 'ppm', ppm)
 			self.conf.set('AIS-SDR', 'gsm_channel', channel)
-			if channel: subprocess.Popen(['python',self.paths.tool_path+'/SDR_AIS_fine_cal.py', 'c'])
+			if channel: subprocess.Popen(['python',self.currentpath+'/tools/SDR_AIS_fine_cal.py', 'c'])
 			msg=_('AIS reception disabled. After closing the new window enable AIS reception again.')
 			self.SetStatusText(msg)
 
 		def vhf_Rx(self, event):
 			self.kill_sdr()
 			self.enable_sdr_controls()
-			subprocess.Popen('/home/pi/.config/gqrx/run_gqrx.sh')
+			subprocess.Popen(self.home+'/.config/gqrx/run_gqrx.sh')
 			msg=_('AIS reception disabled. After closing the new window enable AIS reception again.')
 			self.SetStatusText(msg)
 

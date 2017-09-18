@@ -16,7 +16,6 @@
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
 import wx, sys, socket, threading, time, webbrowser
-from classes.paths import Paths
 from classes.conf import Conf
 from classes.language import Language
 
@@ -25,10 +24,11 @@ class MyFrame(wx.Frame):
 	def __init__(self):
 		self.ttimer=100
 		
-		paths=Paths()
-		self.conf=Conf(paths)
-		Language(self.conf.get('GENERAL','lang'))
-		self.currentpath=paths.currentpath
+		self.conf = Conf()
+		self.home = self.conf.home
+		self.currentpath = self.home+self.conf.get('GENERAL', 'op_folder')+'/openplotter'
+
+		Language(self.conf)
 
 		self.list_iter=[]
 
