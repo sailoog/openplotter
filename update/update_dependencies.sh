@@ -69,12 +69,15 @@ sudo rm -rf /usr/share/applications/Node-RED.desktop
 echo
 echo "UPDATING SIGNAL K..."
 echo
-cd ~/.config/signalk-server-node
-git remote set-url origin https://github.com/$repository/signalk-server-node.git
-git pull
-npm update
+cd $HOME$op_folder
+rm -rf signalk-server-node_tmp
+git clone https://github.com/$repository/signalk-server-node.git signalk-server-node_tmp
+cd ~/.config/signalk-server-node_tmp
 npm install
 npm install mdns
+cd $HOME$op_folder
+rm -rf signalk-server-node
+mv signalk-server-node_tmp signalk-server-node
 echo
 echo "COMPILING PACKAGES..."
 echo
