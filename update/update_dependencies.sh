@@ -45,7 +45,7 @@ fi
 echo
 echo "INSTALLING DEPENDENCIES..."
 echo
-sudo apt-get -y install gettext gpsd python-w1thermsensor x11vnc xrdp python-wxgtk3.0 hostapd dnsmasq isc-dhcp-server network-manager network-manager-gnome mpg123 python-gammu gammu mosquitto libusb-1.0-0-dev libfftw3-dev qt5-qmake libasound2-dev libpulse-dev  autoconf automake python-dev python-matplotlib bridge-utils crudini libqt5gui5 libqt5core5a libqt5network5 libqt5widgets5 libqt5svg5 libportaudio2 make gcc xsltproc curl git build-essential libtool libusb-1.0.0-dev librtlsdr-dev rtl-sdr i2c-tools cmake libqt4-dev libproj-dev libnova-dev swig python-numpy python-scipy python-serial python-gps python-PIL python-opengl python-pillow python-flask
+sudo apt-get -y install gettext gpsd python-w1thermsensor x11vnc xrdp python-wxgtk3.0 hostapd dnsmasq isc-dhcp-server network-manager network-manager-gnome mpg123 python-gammu gammu mosquitto libusb-1.0-0-dev libfftw3-dev qt5-qmake libasound2-dev libpulse-dev  autoconf automake python-dev python-matplotlib bridge-utils crudini libqt5gui5 libqt5core5a libqt5network5 libqt5widgets5 libqt5svg5 libportaudio2 make gcc xsltproc curl git build-essential libtool libusb-1.0.0-dev librtlsdr-dev rtl-sdr i2c-tools cmake libqt4-dev libproj-dev libnova-dev swig python-numpy python-scipy python-serial python-gps python-PIL python-opengl python-pillow python-flask libnss-mdns avahi-utils libavahi-compat-libdnssd-dev
 if [ $? -ne 0 ]; then
 	echo
 	read -p "#### ERROR. ABORTING, PRESS ENTER TO EXIT ####"
@@ -74,6 +74,7 @@ git remote set-url origin https://github.com/$repository/signalk-server-node.git
 git pull
 npm update
 npm install
+npm install mdns
 echo
 echo "COMPILING PACKAGES..."
 echo
