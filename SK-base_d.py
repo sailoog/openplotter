@@ -744,7 +744,7 @@ class MySK_to_Action_Calc:
 							# not present for
 							elif operator_ == 0:
 								if trigger_value == 0: self.Action_set(item, True)
-								else: self.Action_set(item, now - trigger_value > data_value)
+								else: self.Action_set(item, now - trigger_value +timedif > data_value)
 							# present in the last
 							elif operator_ == 1:
 								self.Action_set(item, now - trigger_value < data_value)
@@ -914,6 +914,7 @@ SKAction = MySK_to_Action_Calc(SK)
 SK.daemon = True
 SK.start()
 
+timedif = (datetime.datetime.utcnow() - datetime.datetime.now()).total_seconds()
 aktiv_N2K = True
 aktiv_NMEA = True
 aktiv_Action = False
@@ -929,6 +930,11 @@ if SKAction.calcRateTurn: aktiv_Action = True
 
 stop = 0
 if aktiv_N2K or aktiv_NMEA or aktiv_Action:
+	for iii in range(200):
+		time.sleep(0.02)
+		tick2 = time.time()
+		if aktiv_N2K: SKN2K.N2K_cycle(tick2)
+		if aktiv_NMEA: SKNMEA.NMEA_cycle(tick2)
 	while 1:
 		time.sleep(0.02)
 		tick2 = time.time()
