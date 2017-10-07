@@ -110,7 +110,7 @@ class MyFrame(wx.Frame):
 	def read(self):
 		self.list_SK = []
 
-		with open(self.home+'/.config/signalk-server-node/node_modules/signalk-schema/keyswithmetadata.json') as data_file:
+		with open(self.home+'/.config/signalk-server-node/node_modules/@signalk/signalk-schema/src/keyswithmetadata.json') as data_file:
 			data = json.load(data_file)
 
 		self.data_SK_unit_private = []
