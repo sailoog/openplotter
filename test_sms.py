@@ -58,7 +58,7 @@ class MainFrame(wx.Frame):
 				self.text.SetLabel(_('Press start to check the settings and connect to the GSM device'))
 
 			if self.option=='t':
-				self.text.SetLabel(_('Press start to send the text "')+self.text_sms+_('"\nto the number "')+self.phone+'"')
+				self.text.SetLabel(_('Press start to send the text "').decode('utf8')+self.text_sms+_('"\nto the number "').decode('utf8')+self.phone+'"')
 
 			self.Centre()
 
@@ -87,7 +87,7 @@ class MainFrame(wx.Frame):
 						'Number': self.phone,
 					}
 					sm.SendSMS(message)
-					output+='\nSMS "'+self.text_sms+_('" sent succesfully to ')+self.phone
+					output+='\nSMS "'+self.text_sms+_('" sent succesfully to ').decode('utf8')+self.phone
 				except Exception,e: output= str(e)
 
 			self.output.SetValue(output)

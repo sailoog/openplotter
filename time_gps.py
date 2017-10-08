@@ -32,7 +32,7 @@ try:
 	sock_in.connect(('127.0.0.1', 10109))
 except socket.error, error_msg:
 	print _('Failed to connect with localhost:10109.')
-	print _('Error: ')+ str(error_msg[0])
+	print _('Error: ').decode('utf8')+ str(error_msg[0])
 else:
 	cont = 0
 	while foundtime == False:
@@ -42,7 +42,7 @@ else:
 		except socket.error, error_msg:
 			try:
 				print _('Failed to connect with localhost:10109.')
-				print _('Error: ')+ str(error_msg[0])
+				print _('Error: ').decode('utf8')+ str(error_msg[0])
 				sys.stdout.flush()
 			except: pass
 			break

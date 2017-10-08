@@ -83,7 +83,7 @@ class Actions:
 			if self.mqtt_list:
 				for i in self.mqtt_list:
 					if i[1] == 0:
-						self.options.append([_('Publish on topic: ') + i[0], 0, 1, 'MQTT'+i[0]])
+						self.options.append([_('Publish on topic: ').decode('utf8') + i[0], 0, 1, 'MQTT'+i[0]])
 		except Exception,e: print 'ERROR setting MQTT actions: '+str(e)
 
 		self.options.append([_('Set Signal K key value'), 'Write pairs of lines: Signal K key (first line) and a value (second line). Leave a blank line between pairs.', 1, 'ACT22'])

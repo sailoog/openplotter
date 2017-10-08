@@ -63,7 +63,7 @@ class addTrigger(wx.Dialog):
 		self.value_t = wx.StaticText(panel, label=_('Value'))
 		self.value = wx.TextCtrl(panel)
 
-		self.format_t = wx.StaticText(panel, label=_('format: ')+str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S')))
+		self.format_t = wx.StaticText(panel, label=_('format: ').decode('utf8')+str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S')))
 
 		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
 		okBtn = wx.Button(panel, wx.ID_OK)

@@ -33,7 +33,7 @@ for ii in temp_list:
     listsave.append(ii)
 plt.plot(*zip(*listsave))
 plt.suptitle(
-    _('settings to convert raw adc values (unlinear and/or no factor and/or no offset)\n to useable values  for input ') + str(
+    _('settings to convert raw adc values (unlinear and/or no factor and/or no offset)\n to useable values  for input ').decode('utf8') + str(
         edit), fontsize=12)
 plt.xlabel(_('row adc value'), fontsize=12)
 plt.ylabel(_('value in unit'), fontsize=12)

@@ -105,9 +105,9 @@ class MyFrame(wx.Frame):
 			self.s2 = socket.socket()
 			self.s2.connect(("localhost", port))
 			self.s2.settimeout(5)
-			self.status= _('connected to:')+str(port)
+			self.status= _('connected to:').decode('utf8')+str(port)
 		except socket.error, error_msg:
-			self.status= _('Failed to connect with localhost:10113. Error: ')+ str(error_msg[0])+_(', trying to reconnect...')
+			self.status= _('Failed to connect with localhost:10113. Error: ').decode('utf8')+ str(error_msg[0])+_(', trying to reconnect...')
 			self.s2=''
 			time.sleep(7)
 		else: self.status=''

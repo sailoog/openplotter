@@ -33,6 +33,8 @@ class Language:
 		presLan_nl = gettext.translation('openplotter', locale_folder, languages=['nl'])
 		presLan_de = gettext.translation('openplotter', locale_folder, languages=['de'])
 		presLan_it = gettext.translation('openplotter', locale_folder, languages=['it'])
+		presLan_eu = gettext.translation('openplotter', locale_folder, languages=['eu'])
+		presLan_gl = gettext.translation('openplotter', locale_folder, languages=['gl'])
 
 		if language=='en':presLan_en.install()
 		if language=='ca':presLan_ca.install()
@@ -41,3 +43,5 @@ class Language:
 		if language=='nl':presLan_nl.install()
 		if language=='de':presLan_de.install()
 		if language=='it':presLan_it.install()
+		if language=='eu':presLan_eu.install()
+		if language=='gl':presLan_gl.install()
