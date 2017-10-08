@@ -80,7 +80,7 @@ def work_compass():
 					heading = data['heading']
 					Erg += '{"path": "navigation.headingMagnetic","value":'+str(heading*0.017453293)+'},'
 				if heelSK == '1':
-					heel = data['roll']
+					heel = data['heel']
 					Erg += '{"path": "navigation.attitude.roll","value":'+str(heel*0.017453293)+'},'
 				if pitchSK == '1':
 					pitch = data['pitch']
