@@ -1,3 +1,14 @@
+v0.16.0
+* Update languages
+* Add Basque and Galician languages
+* Fix issues with specials characters
+* Change update system
+* Fix issue with multilanguage actions and operators
+* Fix timestamp issue in actions
+* Include Avahi and Mdns
+* Update signal k keyswithmetadata.json file
+* Fix heel value issue
+
 v0.15.1
 * Update demo tool
 * Optimize classes for tools

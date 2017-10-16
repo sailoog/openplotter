@@ -23,12 +23,12 @@ class addMCP(wx.Dialog):
 		self.conf = parent.conf
 		self.edit = edit
 
-		wx.Dialog.__init__(self, None, title=_('Edit MCP analog input ') + str(edit[2]), size=(430, 350))
+		wx.Dialog.__init__(self, None, title=_('Edit MCP analog input ').decode('utf8') + str(edit[2]), size=(430, 350))
 
 		panel = wx.Panel(self)
 
 		list_tmp = []
-		with open(parent.home +'/.config/signalk-server-node/node_modules/signalk-schema/keyswithmetadata.json') as data_file:
+		with open(parent.home +'/.config/signalk-server-node/node_modules/@signalk/signalk-schema/src/keyswithmetadata.json') as data_file:
 			self.data = json.load(data_file)
 		for i in self.data:
 			ii = i.replace('/vessels/*/','')
@@ -151,7 +151,7 @@ class addMCP(wx.Dialog):
 					wx.MessageBox(_('maximum raw value in setting table < 1023'), 'info', wx.OK | wx.ICON_INFORMATION)
 					convert = 0
 			else:
-				wx.MessageBox(_('no option value_' + str(self.edit[2]) + ' in openplotter.conf'), 'info',
+				wx.MessageBox(_('no option value ').decode('utf8') + str(self.edit[2]) + _(' in openplotter.conf').decode('utf8'), 'info',
 							  wx.OK | wx.ICON_INFORMATION)
 				convert = 0
 

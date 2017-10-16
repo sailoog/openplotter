@@ -72,7 +72,7 @@ class MyFrame(wx.Frame):
 
 			# Getting info from OpenPlotter configuration file. When reading from demo tool conf file or OpenPlotter conf file, if section or option do not exist, they will be created with no value.
 			op_data_box = wx.StaticBox(panel, -1, _(' OpenPlotter config data '))
-			version = _('OpenPlotter version: ')+self.conf.get('GENERAL', 'version')+' '+ self.conf.get('GENERAL', 'state')
+			version = _('OpenPlotter version: ').decode('utf8')+self.conf.get('GENERAL', 'version')+' '+ self.conf.get('GENERAL', 'state')
 			text1 = wx.StaticText(panel, label = version)
 
 			sk_key_box = wx.StaticBox(panel, -1, _(' Working with Signal K '))

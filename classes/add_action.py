@@ -116,7 +116,7 @@ class addAction(wx.Dialog):
 			if msg == 'OpenFileDialog':
 				dlg = wx.FileDialog(self, message=_('Choose a file'), defaultDir=self.currentpath + '/sounds',
 									defaultFile='',
-									wildcard=_('Audio files') + ' (*.mp3)|*.mp3|' + _('All files') + ' (*.*)|*.*',
+									wildcard=_('Audio files').decode('utf8') + ' (*.mp3)|*.mp3|' + _('All files').decode('utf8') + ' (*.*)|*.*',
 									style=wx.OPEN | wx.CHANGE_DIR)
 				if dlg.ShowModal() == wx.ID_OK:
 					file_path = dlg.GetPath()

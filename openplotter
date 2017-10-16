@@ -172,20 +172,24 @@ class MainFrame(wx.Frame):
 		self.menubar.Append(self.settings, _('Tools'))
 
 		self.lang = wx.Menu()
-		self.lang_item1 = self.lang.Append(wx.ID_ANY, _('English'), _('Set English language'), kind=wx.ITEM_CHECK)
-		self.Bind(wx.EVT_MENU, self.lang_en, self.lang_item1)
+		self.lang_item8 = self.lang.Append(wx.ID_ANY, _('Basque'), _('Set Basque language'), kind=wx.ITEM_CHECK)
+		self.Bind(wx.EVT_MENU, self.lang_eu, self.lang_item8)
 		self.lang_item2 = self.lang.Append(wx.ID_ANY, _('Catalan'), _('Set Catalan language'), kind=wx.ITEM_CHECK)
 		self.Bind(wx.EVT_MENU, self.lang_ca, self.lang_item2)
-		self.lang_item3 = self.lang.Append(wx.ID_ANY, _('Spanish'), _('Set Spanish language'), kind=wx.ITEM_CHECK)
-		self.Bind(wx.EVT_MENU, self.lang_es, self.lang_item3)
+		self.lang_item5 = self.lang.Append(wx.ID_ANY, _('Dutch'), _('Set Dutch language'), kind=wx.ITEM_CHECK)
+		self.Bind(wx.EVT_MENU, self.lang_nl, self.lang_item5)		
+		self.lang_item1 = self.lang.Append(wx.ID_ANY, _('English'), _('Set English language'), kind=wx.ITEM_CHECK)
+		self.Bind(wx.EVT_MENU, self.lang_en, self.lang_item1)
 		self.lang_item4 = self.lang.Append(wx.ID_ANY, _('French'), _('Set French language'), kind=wx.ITEM_CHECK)
 		self.Bind(wx.EVT_MENU, self.lang_fr, self.lang_item4)
-		self.lang_item5 = self.lang.Append(wx.ID_ANY, _('Dutch'), _('Set Dutch language'), kind=wx.ITEM_CHECK)
-		self.Bind(wx.EVT_MENU, self.lang_nl, self.lang_item5)
+		self.lang_item9 = self.lang.Append(wx.ID_ANY, _('Galician'), _('Set Galician language'), kind=wx.ITEM_CHECK)
+		self.Bind(wx.EVT_MENU, self.lang_gl, self.lang_item9)
 		self.lang_item6 = self.lang.Append(wx.ID_ANY, _('German'), _('Set German language'), kind=wx.ITEM_CHECK)
 		self.Bind(wx.EVT_MENU, self.lang_de, self.lang_item6)
 		self.lang_item7 = self.lang.Append(wx.ID_ANY, _('Italiano'), _('Set Italian language'), kind=wx.ITEM_CHECK)
 		self.Bind(wx.EVT_MENU, self.lang_it, self.lang_item7)
+		self.lang_item3 = self.lang.Append(wx.ID_ANY, _('Spanish'), _('Set Spanish language'), kind=wx.ITEM_CHECK)
+		self.Bind(wx.EVT_MENU, self.lang_es, self.lang_item3)
 		self.menubar.Append(self.lang, _('Language'))
 
 		self.update = wx.Menu()
@@ -263,6 +267,8 @@ class MainFrame(wx.Frame):
 		if self.language == 'nl': self.lang.Check(self.lang_item5.GetId(), True)
 		if self.language == 'de': self.lang.Check(self.lang_item6.GetId(), True)
 		if self.language == 'it': self.lang.Check(self.lang_item7.GetId(), True)
+		if self.language == 'eu': self.lang.Check(self.lang_item8.GetId(), True)
+		if self.language == 'gl': self.lang.Check(self.lang_item9.GetId(), True)
 
 	def ShowMessage(self, w_msg):
 		wx.MessageBox(w_msg, 'Info', wx.OK | wx.ICON_INFORMATION)
@@ -351,6 +357,8 @@ class MainFrame(wx.Frame):
 		self.lang.Check(self.lang_item5.GetId(), False)
 		self.lang.Check(self.lang_item6.GetId(), False)
 		self.lang.Check(self.lang_item7.GetId(), False)
+		self.lang.Check(self.lang_item8.GetId(), False)
+		self.lang.Check(self.lang_item9.GetId(), False)
 		self.ShowMessage(_('The selected language will be enabled when you restart'))
 
 	def lang_en(self, e):
@@ -387,6 +395,16 @@ class MainFrame(wx.Frame):
 		self.clear_lang()
 		self.lang.Check(self.lang_item7.GetId(), True)
 		self.conf.set('GENERAL', 'lang', 'it')
+
+	def lang_eu(self, e):
+		self.clear_lang()
+		self.lang.Check(self.lang_item8.GetId(), True)
+		self.conf.set('GENERAL', 'lang', 'eu')
+
+	def lang_gl(self, e):
+		self.clear_lang()
+		self.lang.Check(self.lang_item9.GetId(), True)
+		self.conf.set('GENERAL', 'lang', 'gl')
 
 	def update_opencpn(self, e):
 		subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/update_OpenCPN.sh'])
@@ -449,24 +467,24 @@ class MainFrame(wx.Frame):
 
 		msg = ''
 		if sl == 'stable' and sr != 'stable':
-			msg += _('You are running a stable version. If you update to a non stable version you will have to keep updating until a stable stage is reached again.\n\n')
+			msg += _('You are running a stable version. If you update to a non stable version you will have to keep updating until a stable stage is reached again.\n\n').decode('utf8')
 		if remote_xxx > local_xxx:
-			msg += _('There is a Raspbian upgrade, it is recommended to download the new OpenPlotter RPI image: v'+str(remote_xxx)+'.x.x '+sr+'.\n')
+			msg += _('There is a Raspbian upgrade, it is recommended to download the new OpenPlotter RPI image: v').decode('utf8')+str(remote_xxx)+'.x.x '+sr+'.\n'
 			self.ShowMessage(msg)
 			return
 		elif remote_oxx > local_oxx:
-			msg += _('There is a major OpenPlotter update.\n')
-			msg += _('Please make a backup image of your system before updating.\n\n')
+			msg += _('There is a major OpenPlotter update.\n').decode('utf8')
+			msg += _('Please make a backup image of your system before updating.\n\n').decode('utf8')
 			major_update = '1'
 		elif remote_oox > local_oox:
-			msg += _('There is a minor OpenPlotter update.\n\n')
+			msg += _('There is a minor OpenPlotter update.\n\n').decode('utf8')
 			major_update = '0'
 		else:
-			msg += 'OpenPlotter '+vl+' '+sl+_(' is up to date.\n')
-			msg += _('You do not need to update but if you think something was wrong in your last update, you can force a major update.\n\n')
+			msg += 'OpenPlotter '+vl+' '+sl+_(' is up to date.\n').decode('utf8')
+			msg += _('You do not need to update but if you think something was wrong in your last update, you can force a major update.\n\n').decode('utf8')
 			sr = sl
 			major_update = '1'
-		msg += _('Are you sure you want to update: ')+vl+' '+sl+' --> '+vr+' '+sr+'?'
+		msg += _('Are you sure you want to update: ').decode('utf8')+vl+' '+sl+' --> '+vr+' '+sr+'?'
 		dlg = wx.MessageDialog(None, msg, _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_EXCLAMATION)
 		if dlg.ShowModal() == wx.ID_YES:
 			subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/update_OpenPlotter.sh', major_update, vr, sr, repository])
@@ -545,8 +563,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 						else:
 							if 'ID_MODEL_FROM_DATABASE' in device:    imfd = device['ID_MODEL_FROM_DATABASE']
 							if 'ID_VENDOR_FROM_DATABASE' in device:    ivfd = device['ID_VENDOR_FROM_DATABASE']
-							self.ShowMessage(_('Warning: You have connected the "') + ivfd + ', ' + imfd + _(
-								'" to the usb port which is reserved for another device'))
+							self.ShowMessage(_('Warning: You have connected the "').decode('utf8') + ivfd + ', ' + imfd + _(
+								'" to the usb port which is reserved for another device').decode('utf8'))
 
 	def SerialCheck(self):
 		self.SerDevLs = []
@@ -689,7 +707,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def on_select_sound(self, e):
 		dlg = wx.FileDialog(self, message=_('Choose a file'), defaultDir=self.currentpath + '/sounds', defaultFile='',
-							wildcard=_('Audio files') + ' (*.mp3)|*.mp3|' + _('All files') + ' (*.*)|*.*',
+							wildcard=_('Audio files').decode('utf8') + ' (*.mp3)|*.mp3|' + _('All files').decode('utf8') + ' (*.*)|*.*',
 							style=wx.OPEN | wx.CHANGE_DIR)
 		if dlg.ShowModal() == wx.ID_OK:
 			file_path = dlg.GetPath()
@@ -705,7 +723,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		else:
 			if delay != '0': delay = delay.lstrip('0')
 			self.conf.set('STARTUP', 'delay', delay)
-			self.ShowStatusBarBLACK(_('Startup delay set to ') + delay + _(' seconds'))
+			self.ShowStatusBarBLACK(_('Startup delay set to ').decode('utf8') + delay + _(' seconds').decode('utf8'))
 
 	def startup(self, e):
 		sender = e.GetEventObject()
@@ -2975,17 +2993,17 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.restart_SK(0x0000)
 		response = requests.get('http://localhost:3000/signalk')
 		data = response.json()
-		text = _('Version: ')+data['endpoints']['v1']['version']
+		text = _('Version: ').decode('utf8')+data['endpoints']['v1']['version']
 		text += '\n\n'
-		text += _('Signal K settings and tools:')+'\n'+'http://localhost:3000'
+		text += _('Signal K settings and tools:').decode('utf8')+'\n'+'http://localhost:3000'
 		text += '\n\n'
-		text += _('REST full format output:')+'\n'+data['endpoints']['v1']['signalk-http']
+		text += _('REST full format output:').decode('utf8')+'\n'+data['endpoints']['v1']['signalk-http']
 		text += '\n\n'
-		text += _('Websocket delta format output:')+'\n'+data['endpoints']['v1']['signalk-ws']
+		text += _('Websocket delta format output:').decode('utf8')+'\n'+data['endpoints']['v1']['signalk-ws']
 		text += '\n\n'
-		text += _('TCP delta format output:')+'\n'+data['endpoints']['v1']['signalk-tcp']
+		text += _('TCP delta format output:').decode('utf8')+'\n'+data['endpoints']['v1']['signalk-tcp']
 		text += '\n\n'
-		text += _('TCP NMEA 0183 format output:')+'\n'+'tcp://localhost:10110'
+		text += _('TCP NMEA 0183 format output:').decode('utf8')+'\n'+'tcp://localhost:10110'
 		sk_info_text = wx.StaticText(self.p_sk, label=text)
 
 		diagnostic = wx.Button(self.p_sk, label=_('SK Diagnostic'))

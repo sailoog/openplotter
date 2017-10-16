@@ -25,7 +25,7 @@ class addvaluesetting(wx.Dialog):
 		self.edit = edit
 		self.listsave = []
 
-		wx.Dialog.__init__(self, None, title=_('convert analog value to expected value of input ') + str(edit),
+		wx.Dialog.__init__(self, None, title=_('convert analog value to expected value of input ').decode('utf8') + str(edit),
 						   size=(460, 350))
 
 		panel = wx.Panel(self)

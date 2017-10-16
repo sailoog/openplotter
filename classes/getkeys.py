@@ -22,7 +22,7 @@ class GetKeys:
 		conf = Conf()
 		home = conf.home
 		keys = []
-		with open(home +'/.config/signalk-server-node/node_modules/signalk-schema/keyswithmetadata.json') as data_file:
+		with open(home +'/.config/signalk-server-node/node_modules/@signalk/signalk-schema/src/keyswithmetadata.json') as data_file:
 			data = json.load(data_file)
 		for i in data:
 			if '/vessels/*/' in i:

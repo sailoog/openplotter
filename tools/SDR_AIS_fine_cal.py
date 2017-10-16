@@ -50,8 +50,8 @@ class MainFrame(wx.Frame):
 			self.ppm=self.conf.get('AIS-SDR', 'ppm')
 			self.channel=self.conf.get('AIS-SDR', 'gsm_channel')
 
-			wx.StaticText(self, label=_('gain: ')+self.gain, pos=(10, 70))
-			wx.StaticText(self, label=_('ppm: ')+self.ppm, pos=(100, 70))
+			wx.StaticText(self, label=_('gain: ').decode('utf8')+self.gain, pos=(10, 70))
+			wx.StaticText(self, label=_('ppm: ').decode('utf8')+self.ppm, pos=(100, 70))
 
 			self.output = wx.TextCtrl(self, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_DONTWRAP, size=(480,110), pos=(10,90))
 			
@@ -63,7 +63,7 @@ class MainFrame(wx.Frame):
 			
 			if self.option=='c': 
 				self.text.SetLabel(_('Press Calculate and wait for the system to calculate the ppm value with\nthe selected channel. Put the obtained value in "Correction (ppm)" field\nand enable SDR-AISreception. Estimated time: 1 min.'))
-				wx.StaticText(self, label=_('channel: ')+self.channel, pos=(200, 70))
+				wx.StaticText(self, label=_('channel: ').decode('utf8')+self.channel, pos=(200, 70))
 			if self.option=='b':
 				self.text.SetLabel(_('Press Calculate and wait for the system to check the band. Write down\nthe strongest channel (power). If you do not find any channel try another\nband. Estimated time: 5 min.'))
 
