@@ -110,8 +110,13 @@ class MyFrame(wx.Frame):
 	def read(self):
 		self.list_SK = []
 
-		with open(self.home+'/.config/signalk-server-node/node_modules/@signalk/signalk-schema/src/keyswithmetadata.json') as data_file:
-			data = json.load(data_file)
+		try:
+			with open(self.home+'/.config/signalk-server-node/node_modules/@signalk/signalk-schema/dist/keyswithmetadata.json') as data_file:
+				data = json.load(data_file)
+		except:
+			#old signalk
+			with open(self.home+'/.config/signalk-server-node/node_modules/@signalk/signalk-schema/src/keyswithmetadata.json') as data_file:
+				data = json.load(data_file)
 
 		self.data_SK_unit_private = []
 		if os.path.isfile(self.home+'/.openplotter/private_unit.json'):
