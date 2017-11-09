@@ -2991,7 +2991,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			response = requests.get('http://localhost:3000/signalk')
 		except:
 			self.restart_SK(0x0000)
-		response = requests.get('http://localhost:3000/signalk')
+		try:	
+			response = requests.get('http://localhost:3000/signalk')
+		except:
+			wx.MessageBox("SignalK doesn't work! Openplotter will exit because it wasn't able to start SignalK", 'Error', wx.OK | wx.ICON_ERROR)
+			self.close()
 		data = response.json()
 		text = _('Version: ').decode('utf8')+data['endpoints']['v1']['version']
 		text += '\n\n'

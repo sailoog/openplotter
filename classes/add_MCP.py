@@ -28,8 +28,14 @@ class addMCP(wx.Dialog):
 		panel = wx.Panel(self)
 
 		list_tmp = []
-		with open(parent.home +'/.config/signalk-server-node/node_modules/@signalk/signalk-schema/src/keyswithmetadata.json') as data_file:
-			self.data = json.load(data_file)
+		
+		try:
+			with open(self.home+'/.config/signalk-server-node/node_modules/@signalk/signalk-schema/dist/keyswithmetadata.json') as data_file:
+				data = json.load(data_file)
+		except:
+			#old signalk
+			with open(self.home+'/.config/signalk-server-node/node_modules/@signalk/signalk-schema/src/keyswithmetadata.json') as data_file:
+				data = json.load(data_file)
 		for i in self.data:
 			ii = i.replace('/vessels/*/','')
 			ii = ii.replace('RegExp','*')

@@ -775,8 +775,8 @@ class MySK_to_Action_Calc:
 					self.mag_var_rate_tick = now
 					if now - timestamp_local < self.mag_var_accuracy:
 						Erg += '{"path": "navigation.magneticVariation","value":'+str((var*0.017453293))+'},'
-					else:
-						Erg += '{"path": "navigation.magneticVariation","value": null},'
+					#else:
+					#	Erg += '{"path": "navigation.magneticVariation","value": null},'
 
 		if self.calcTrueHeading:
 			heading_m = self.navigation_headingMagnetic[1][2]
@@ -792,14 +792,16 @@ class MySK_to_Action_Calc:
 					self.hdt_rate_tick = now
 					if now - timestamp_local < self.hdt_accuracy:
 						Erg += '{"path": "navigation.headingTrue","value":'+str(heading_t)+'},'
-					else:
-						Erg += '{"path": "navigation.headingTrue","value": null},'
+					#else:
+					#	Erg += '{"path": "navigation.headingTrue","value": null},'
 
 		if self.calcTrueHeading_dev:
 			heading_m = float(self.navigation_headingMagnetic[1][2])*57.2957795
 			var = float(self.navigation_magneticVariation[1][2])*57.2957795
+			#vartime = self.navigation_magneticVariation[1][7]
 			timestamp = self.navigation_headingMagnetic[1][7]
-			if heading_m and var and timestamp:
+			#if heading_m and vartime and timestamp:
+			if heading_m and timestamp:
 				timestamp = datetime.datetime.strptime(timestamp, '%Y-%m-%dT%H:%M:%S.%fZ')
 				timestamp = timestamp.replace(tzinfo=tz.tzutc())
 				timestamp = timestamp.astimezone(tz.tzlocal())
@@ -808,14 +810,12 @@ class MySK_to_Action_Calc:
 					if self.deviation_table:
 						ix = int(heading_m / 10)
 						heading_m = self.deviation_table[ix][1]+(self.deviation_table[ix+1][1]-self.deviation_table[ix][1])*0.1*(heading_m-self.deviation_table[ix][0])
-					if heading_m<0: heading_m=360+heading_m
-					elif heading_m>360: heading_m=-360+heading_m
-					heading_t = heading_m+var
+					heading_t = (heading_m+var+720) % 360
 					self.hdt_rate_tick = now
 					if now - timestamp_local < self.hdt_accuracy:
 						Erg += '{"path": "navigation.headingTrue","value":'+str(heading_t*0.017453293)+'},'
-					else:
-						Erg += '{"path": "navigation.headingTrue","value": null},'
+					#else:
+					#	Erg += '{"path": "navigation.headingTrue","value": null},'
 
 		if self.calcRateTurn:
 			heading_m = self.navigation_headingMagnetic[1][2]
@@ -838,8 +838,8 @@ class MySK_to_Action_Calc:
 						self.rot_rate_tick = now
 						if now - timestamp_local < self.rot_accuracy:
 							Erg += '{"path": "navigation.rateOfTurn","value":'+str(rot)+'},'
-						else:
-							Erg += '{"path": "navigation.rateOfTurn","value": null},'
+						#else:
+						#	Erg += '{"path": "navigation.rateOfTurn","value": null},'
 
 		if Erg:
 			SignalK='{"updates":[{"$source":"OPcalculations","values":['

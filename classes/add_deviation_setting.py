@@ -99,6 +99,7 @@ class adddeviationsetting(wx.Dialog):
 		panel.SetSizer(vbox)
 		self.rawvalue.Disable()
 		self.mag_head.Disable()
+		self.selected = self.list.GetFirstSelected()
 
 		self.read_list()
 
