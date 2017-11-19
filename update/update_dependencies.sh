@@ -64,6 +64,7 @@ fi
 echo
 echo "UPDATING NODEJS AND NODE-RED..."
 echo
+rm -rf $HOME/.node-red/node_modules/node-red-contrib-freeboard
 update-nodejs-and-nodered
 sudo rm -rf /usr/share/applications/Node-RED.desktop
 echo
