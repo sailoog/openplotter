@@ -2586,7 +2586,7 @@ msgid ""
 "Checking pi password..."
 msgstr ""
 "\n"
-"PIren pasahitza egiaztatzen..."
+"Verificación de la contraseña del usuario \"pi\" ..."
 
 #: startup:236
 msgid ""
