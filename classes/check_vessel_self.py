@@ -24,13 +24,14 @@ class checkVesselSelf:
 	def __init__(self, conf):
 
 		home = conf.home
-		currentpath = home+conf.get('GENERAL', 'op_folder')+'/openplotter'
+		op_folder = conf.get('GENERAL', 'op_folder')
+		currentpath = home+op_folder+'/openplotter'
 
 		if not self.util_process_exist('signalk-server'):
 			print 'Signal K starting'
 			subprocess.call(['pkill', '-f', 'SK-base_d.py'])
 			time.sleep(1)
-			subprocess.Popen(['bin/signalk-server','-s','../../.openplotter/openplotter-settings.json'],cwd=home + '/.config/signalk-server-node')							 
+			subprocess.Popen(['bin/signalk-server','-c',home+'/.openplotter','-s','openplotter-settings.json'],cwd=home+op_folder+'/signalk-server-node')
 			starttime = time.time()
 			error = True
 			while starttime + 10 > time.time() and error:
