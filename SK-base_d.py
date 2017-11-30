@@ -622,14 +622,16 @@ class MySK_to_Action_Calc:
 			self.last_heading = ''
 			self.heading_time = ''
 
-		#self.environment_wind_angleApparent = self.setlist(['environment.wind.angleApparent', [0, 0, 0, 0]])
-		#self.environment_wind_speedApparent = self.setlist(['environment.wind.speedApparent', [0, 0, 0, 0]])		
-		#if self.calcWindTrueWater:
-		#	self.navigation_speedThroughWater = self.setlist(['navigation.speedThroughWater', [0, 0, 0, 0]])
-		#if self.calcWindTrueGround:
-		#	self.navigation_courseOverGroundTrue = self.setlist(['navigation.courseOverGroundTrue', [0, 0, 0, 0]])
-		#	self.navigation_speedOverGround = self.setlist(['navigation.speedOverGround', [0, 0, 0, 0]])
-		#	self.navigation_headingMagnetic = self.setlist(['navigation.headingMagnetic', [0, 0, 0, 0]])
+		if self.calcWindTrueWater:
+			self.navigation_speedThroughWater = self.setlist(['navigation.speedThroughWater', [0, 0, 0, 0]])
+			self.environment_wind_angleApparent = self.setlist(['environment.wind.angleApparent', [0, 0, 0, 0]])
+			self.environment_wind_speedApparent = self.setlist(['environment.wind.speedApparent', [0, 0, 0, 0]])		
+		if self.calcWindTrueGround:
+			self.environment_wind_angleApparent = self.setlist(['environment.wind.angleApparent', [0, 0, 0, 0]])
+			self.environment_wind_speedApparent = self.setlist(['environment.wind.speedApparent', [0, 0, 0, 0]])		
+			self.navigation_courseOverGroundTrue = self.setlist(['navigation.courseOverGroundTrue', [0, 0, 0, 0]])
+			self.navigation_speedOverGround = self.setlist(['navigation.speedOverGround', [0, 0, 0, 0]])
+			self.navigation_headingMagnetic = self.setlist(['navigation.headingMagnetic', [0, 0, 0, 0]])
 							
 	def Action_set(self, item, cond):
 		if cond:
@@ -845,7 +847,7 @@ class MySK_to_Action_Calc:
 			SignalK='{"updates":[{"$source":"OPcalculations","values":['
 			SignalK+=Erg[0:-1]+']}]}\n'		
 			self.sock.sendto(SignalK, ('127.0.0.1', 55557))	
-		'''
+		
 		if self.calcWindTrueWater | self.calcWindTrueGround:
 			Erg = ''
 			if self.calcWindTrueWater:
@@ -868,7 +870,7 @@ class MySK_to_Action_Calc:
 						beta2 = -90
 				Erg += '{"path": "environment.wind.angleTrueWater","value":'+str(0.017453293*beta2)+'},'
 				Erg += '{"path": "environment.wind.speedTrue","value":'+str(speed)+'},'
-
+				
 			if self.calcWindTrueGround:
 				beta1 = self.environment_wind_angleApparent[1][2] + self.navigation_headingMagnetic[1][2]
 				x1 = self.environment_wind_speedApparent[1][2] * math.sin(beta1)
@@ -894,11 +896,10 @@ class MySK_to_Action_Calc:
 
 				Erg += '{"path": "environment.wind.angleTrueGround","value":'+str(0.017453293*beta3)+'},'
 				Erg += '{"path": "environment.wind.speedOverGround","value":'+str(speed)+'},'
-
+			
 			SignalK='{"updates":[{"$source":"OPcalculations","values":['
 			SignalK+=Erg[0:-1]+']}]}\n'		
 			self.sock.sendto(SignalK, ('127.0.0.1', 55557))	
-		'''
 
 def signal_handler(signal_, frame):
 	print 'You pressed Ctrl+C!'

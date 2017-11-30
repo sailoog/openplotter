@@ -76,10 +76,10 @@ class MyFrame(wx.Frame):
 			tw_box = wx.StaticBox(panel, -1, _(' True wind speed and direction '))
 			self.true_wind = wx.CheckBox(panel, -1, label=_('Use Speed Through Water'))
 			self.true_wind.Bind(wx.EVT_CHECKBOX, self.on_select_tw)
-			tw_requires = wx.StaticText(panel, label=_('Requires: STW, AWS, AWA.'))
+			tw_requires = wx.StaticText(panel, label=_('Requires: SignalK STW, AWS, AWA.'))
 			self.true_wind2 = wx.CheckBox(panel, -1, label=_('Use Speed Over Ground'))
-			self.true_wind2.Bind(wx.EVT_CHECKBOX, self.on_select_tw)
-			tw_requires2 = wx.StaticText(panel, label=_('Requires: SOG, COG, HDT, AWS, AWA.'))
+			self.true_wind2.Bind(wx.EVT_CHECKBOX, self.on_select_tg)
+			tw_requires2 = wx.StaticText(panel, label=_('Requires: SignalK SOG, COG, HDT, AWS, AWA.'))
 			tw_accu_label = wx.StaticText(panel, label=_('Accuracy (sec)'))
 			self.tw_accu= wx.ComboBox(panel, choices=rate_list, style=wx.CB_READONLY)
 			tw_rate_label = wx.StaticText(panel, label=_('Rate (sec)'))
@@ -91,8 +91,8 @@ class MyFrame(wx.Frame):
 			button_ok =wx.Button(panel, label=_('OK'))
 			self.Bind(wx.EVT_BUTTON, self.on_ok, button_ok)
 
-			self.true_wind.Disable()
-			self.true_wind2.Disable()
+			#self.true_wind.Disable()
+			#self.true_wind2.Disable()
 
 			mg_boxSizer = wx.StaticBoxSizer(mg_box, wx.VERTICAL)
 			mg_boxSizer.Add(self.mag_var, 0, wx.ALL | wx.EXPAND, 5)
@@ -249,9 +249,22 @@ class MyFrame(wx.Frame):
 			sender = e.GetEventObject()
 			if sender.GetValue():
 				self.true_wind2.SetValue(False)
-				self.true_wind.SetValue(False)
+				self.true_wind.SetValue(True)				
 				sender.SetValue(True)
+			else:
+				self.true_wind.SetValue(False)	
+				sender.SetValue(False)			
 
+		def on_select_tg(self,e):
+			sender = e.GetEventObject()
+			if sender.GetValue():
+				self.true_wind.SetValue(False)
+				self.true_wind2.SetValue(True)				
+				sender.SetValue(True)
+			else:
+				self.true_wind2.SetValue(False)	
+				sender.SetValue(False)			
+				
 		def on_select_th(self,e):
 			sender = e.GetEventObject()
 			if sender.GetValue():
