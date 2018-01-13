@@ -18,6 +18,7 @@
 import socket, time, math, datetime, platform, threading
 from classes.conf import Conf
 from pypilot.boatimu import *
+from pypilot.basic_autopilot import *
 
 if platform.machine()[0:3]!='arm':
 	print 'This is not a Raspberry Pi -> no GPIO, I2C and SPI'
@@ -55,19 +56,32 @@ def read_adc(channel):
 
 # read heading, heel, pitch and GENERATE SK
 def work_compass():
+
+        #init compass
+        mode = conf.get('PYPILOT', 'mode')
+        if mode == 'disable':
+                return
+        
+        headingSK = conf.get('PYPILOT', 'translate_magnetic_h')
+        attitudeSK = conf.get('PYPILOT', 'translate_attitude')
+        windSK = conf.get('PYPILOT', 'translate_wind')
+        
 	SETTINGS_FILE = "RTIMULib"
 	s = RTIMU.Settings(SETTINGS_FILE)
 	imu = RTIMU.RTIMU(s)
 	imuName = imu.IMUName()
 	del imu
 	del s
-	server = SignalKPipeServer()
-	boatimu = BoatIMU(server)
+        if mode == 'boatimu':
+                server = SignalKPipeServer()
+                boatimu = BoatIMU(server)
+        elif mode == 'basic autopilot':
+                ap = BasicAutopilot()
 	try:
-		compass_rate = float(conf.get('COMPASS', 'rate'))
+		translation_rate = float(conf.get('PYPILOT', 'translation_rate'))
 	except:
-		compass_rate = 1
-		conf.set('COMPASS', 'rate', '1')
+		translation_rate = 1
+		conf.set('PYPILOT', 'translation_rate', '1')
 	tick1 = time.time()
 	try:
 		while True:
@@ -79,14 +93,17 @@ def work_compass():
 				if headingSK == '1':
 					heading = data['heading']
 					Erg += '{"path": "navigation.headingMagnetic","value":'+str(heading*0.017453293)+'},'
-				if heelSK == '1':
+				if attitudeSK == '1':
 					heel = data['heel']
 					Erg += '{"path": "navigation.attitude.roll","value":'+str(heel*0.017453293)+'},'
-				if pitchSK == '1':
 					pitch = data['pitch']
 					Erg += '{"path": "navigation.attitude.pitch","value":'+str(pitch*0.017453293)+'},'
+                                if windSK == '1' and ap:
+                                        wind = ap.nmea.values['wind']
+					Erg += '{"path": "environment.wind.direction","value":'+str(wind['direction'].value*0.017453293)+'},'
+                                        Erg += '{"path": "environment.wind.speed","value":'+str(wind['speed'])+'},'                                                                                
 				if Erg:
-					if t0 - tick1 > compass_rate:
+					if t0 - tick1 > translation_rate:
 						tick1 = t0	
 						SignalK='{"updates":[{"$source":"OPsensors.I2C.'+imuName+'","values":['
 						SignalK+=Erg[0:-1]+']}]}\n'		
@@ -335,13 +352,6 @@ if i2c_sensors:
 			if temp_list[1] == 'press': imu_press = i
 			elif temp_list[1] == 'hum': imu_hum = i
 
-#init compass
-compass = False
-headingSK = conf.get('COMPASS', 'magnetic_h')
-heelSK = conf.get('COMPASS', 'heel')
-pitchSK = conf.get('COMPASS', 'pitch')
-if headingSK == '1' or heelSK == '1' or pitchSK == '1': compass = True
-
 
 # launch threads
 if analog_: work_analog()
@@ -352,8 +362,8 @@ if bme280:
 if imu_press or imu_hum:
 	thread_imu_press_hum = threading.Thread(target=work_imu_press_hum)	
 	thread_imu_press_hum.start()
-if compass:
-	thread_compass=threading.Thread(target=work_compass)	
-	thread_compass.start()
+
+thread_compass=threading.Thread(target=work_compass)	
+thread_compass.start()
 
 		

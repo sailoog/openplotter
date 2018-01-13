@@ -81,7 +81,7 @@ class MainFrame(wx.Frame):
 		self.p_n2k = wx.Panel(self.nb)
 		self.p_sk = wx.Panel(self.nb)
 		self.p_wifi = wx.Panel(self.nb)
-		self.p_compass = wx.Panel(self.nb)
+		self.p_pypilot = wx.Panel(self.nb)
 		self.p_action = wx.Panel(self.nb)
 		self.p_gpio = wx.Panel(self.nb)
 		self.p_i2c = wx.Panel(self.nb)
@@ -96,7 +96,7 @@ class MainFrame(wx.Frame):
 		self.nb.AddPage(self.p_n2k, 'N2K')
 		self.nb.AddPage(self.p_sk, 'Signal K')
 		self.nb.AddPage(self.p_wifi, _('WiFi AP'))
-		self.nb.AddPage(self.p_compass, _('Compass'))
+		self.nb.AddPage(self.p_pypilot, _('pypilot (IMU)'))
 		self.nb.AddPage(self.p_action, _('Actions'))
 		self.nb.AddPage(self.p_gpio, _('GPIO'))
 		self.nb.AddPage(self.p_i2c, _('I2C'))
@@ -1182,79 +1182,112 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				########################################### Compass
 
 	def page_compass(self):
-		imu_box = wx.StaticBox(self.p_compass, label=_(' IMU '))
+		pypilot_mode_label = wx.StaticText(self.p_pypilot, label=_('pypilot Mode:'))
+		self.pypilot_mode = wx.Choice(self.p_pypilot, choices=[_('disabled'), _('imu only'), _('basic autopilot')], style=wx.CB_READONLY)
+                                                
+		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
+		hbox1.Add(pypilot_mode_label, 0, wx.ALL| wx.EXPAND, 5)
+		hbox1.Add(self.pypilot_mode, 0, wx.ALL | wx.RIGHT | wx.EXPAND, 5)
 
-		self.rate_list = ['0.1', '0.25', '0.5', '0.75', '1', '1.5', '2', '5', '30', '60', '300']
 
-		detected_label = wx.StaticText(self.p_compass, label=_('Detected IMU:'))
-		self.detected = wx.StaticText(self.p_compass, label=_('None'))
+		imu_box = wx.StaticBox(self.p_pypilot, label=_(' IMU '))
+		detected_label = wx.StaticText(self.p_pypilot, label=_('Detected IMU:'))
+		self.detected = wx.StaticText(self.p_pypilot, label=_('None'))
+                
+		hbox2 = wx.BoxSizer(wx.HORIZONTAL)
+		hbox2.Add(detected_label, 0, wx.ALL| wx.EXPAND, 5)
+		hbox2.Add(self.detected, 0, wx.ALL | wx.RIGHT | wx.EXPAND, 5)
+                
+		vbox1 = wx.StaticBoxSizer(imu_box, wx.VERTICAL)
+		vbox1.Add(hbox2, 0, wx.ALL | wx.EXPAND, 5)
 
-		compass_rate_label = wx.StaticText(self.p_compass, label=_('Rate (secons)'))
-		self.compass_rate= wx.ComboBox(self.p_compass, choices=self.rate_list, style=wx.CB_READONLY)
-		self.compass_rate.Bind(wx.EVT_COMBOBOX, self.on_select_compass_rate)
+                
+                translator_box = wx.StaticBox(self.p_pypilot, label=_('pypilot SignalK -> node SignalK Translation'))
+                self.pypilot_translation_names_list = ['magnetic_h', 'attitude', 'wind']
+                translation_choices = ['Magnetic heading (imu.heading -> navigation.headingMagnetic)',
+                                       'Attitude (imu.[pitch, roll] -> navigation.attitude.[pitch, roll])',
+                                       'Wind (wind.* -> environment.wind.*)']
+                self.pypilot_signalk_translation = wx.CheckListBox(self.p_pypilot, choices=translation_choices)
+		self.pypilot_signalk_translation.Bind(wx.EVT_CHECKBOX, self.on_compass_enable)
+                
+		vbox2 = wx.StaticBoxSizer(translator_box, wx.VERTICAL)
 
-		self.magnetic_h = wx.CheckBox(self.p_compass, label=_('Magnetic heading (navigation.headingMagnetic)'))
-		self.magnetic_h.Bind(wx.EVT_CHECKBOX, self.on_compass_enable)
+		translation_rate_label = wx.StaticText(self.p_pypilot, label=_('Translation Rate (seconds)'))
+		translation_rate_list = ['0.1', '0.2', '0.5', '1', '2', '5', '10', '30', '60']
+                self.pypilot_translation_rate= wx.Choice(self.p_pypilot, choices=translation_rate_list)
+		self.pypilot_translation_rate.Bind(wx.EVT_COMBOBOX, self.on_select_pypilot_translation_rate)
+                
+		hbox3 = wx.BoxSizer(wx.HORIZONTAL)
+		hbox3.Add(translation_rate_label, 0, wx.UP | wx.EXPAND, 10)
+		hbox3.Add(self.pypilot_translation_rate, 0, wx.ALL | wx.EXPAND, 5)
+                
+		vbox2.Add(self.pypilot_signalk_translation, 0, wx.ALL | wx.EXPAND, 5)
+		vbox2.Add(hbox3, 0, wx.ALL | wx.EXPAND, 5)
 
-		self.heel = wx.CheckBox(self.p_compass, label=_('Heel (navigation.attitude.roll)'))
-		self.heel.Bind(wx.EVT_CHECKBOX, self.on_compass_enable)
+                connections_box = wx.StaticBox(self.p_pypilot, label='pypilot ' + _('Serial Connections'))
+                serial_ports = ['autodetect', 'none']
+		controller_label = wx.StaticText(self.p_pypilot, label=_('Controller'))
+		controller_choice = wx.ComboBox(self.p_pypilot, choices=serial_ports)
+		wind_label = wx.StaticText(self.p_pypilot, label=_('Wind Sensors (nmea0183)'))
+		wind_choice = wx.ComboBox(self.p_pypilot, choices=serial_ports)
+                fgsizer1 = wx.FlexGridSizer(1, 0)
+                fgsizer1.Add(controller_label, 1, wx.ALL | wx.EXPAND, 0)
+                fgsizer1.Add(controller_choice, 1, wx.ALL | wx.EXPAND, 0)
+                fgsizer1.Add(wind_label, 1, wx.ALL | wx.EXPAND, 0)
+                fgsizer1.Add(wind_choice, 1, wx.ALL | wx.EXPAND, 0)
 
-		self.pitch = wx.CheckBox(self.p_compass, label=_('Pitch (navigation.attitude.pitch)'))
-		self.pitch.Bind(wx.EVT_CHECKBOX, self.on_compass_enable)
+		vbox3 = wx.StaticBoxSizer(connections_box, wx.VERTICAL)
+		vbox3.Add(fgsizer1, 0, wx.LEFT | wx.EXPAND, 10)
 
-		self.calibration = wx.Button(self.p_compass, label=_('Calibration'))
-		self.calibration.Bind(wx.EVT_BUTTON, self.on_calibration)
+                
+                webapp_box = wx.StaticBox(self.p_pypilot, label='pypilot webapp')
+                pypilot_webapp = wx.CheckBox(self.p_pypilot, False, _('Enable webapp'))
+		pypilot_webapp_port_label = wx.StaticText(self.p_pypilot, label=_('port:'))
+                pypilot_webapp_port = wx.SpinCtrl(self.p_pypilot, 80)
+		hbox4 = wx.StaticBoxSizer(webapp_box, wx.HORIZONTAL)
+		hbox4.Add(pypilot_webapp, 0, wx.ALL | wx.RIGHT | wx.EXPAND, 5)
+		hbox4.Add(pypilot_webapp_port_label, 0, wx.ALL | wx.RIGHT | wx.EXPAND, 5)
+		hbox4.Add(pypilot_webapp_port, 0, wx.ALL | wx.RIGHT | wx.EXPAND, 5)
 
-		self.scope = wx.Button(self.p_compass, label=_('Scope'))
-		self.scope.Bind(wx.EVT_BUTTON, self.on_scope)
+                
+		calibration = wx.Button(self.p_pypilot, label=_('Calibration'))
+		calibration.Bind(wx.EVT_BUTTON, self.on_pypilot_calibration)
 
-		compass_reset = wx.Button(self.p_compass, label=_('Reset'))
-		compass_reset.Bind(wx.EVT_BUTTON, self.on_compass_reset)
+		scope = wx.Button(self.p_pypilot, label=_('Scope'))
+		scope.Bind(wx.EVT_BUTTON, self.on_scope)
 
-		#autopilot_box = wx.StaticBox(self.p_compass, label=_(' Autopilot '))
+		ap_control = wx.Button(self.p_pypilot, label=_('AP Control'))
+		ap_control.Bind(wx.EVT_BUTTON, self.on_pypilot_control)
 
-		diagnostic = wx.Button(self.p_compass, label=_('SK Diagnostic'))
+		reset = wx.Button(self.p_pypilot, label=_('Reset'))
+		reset.Bind(wx.EVT_BUTTON, self.on_pypilot_reset)
+
+		hbox5 = wx.BoxSizer(wx.HORIZONTAL)
+		hbox5.Add(calibration, 0, wx.ALL | wx.EXPAND, 5)
+		hbox5.Add(scope, 0, wx.ALL | wx.EXPAND, 5)
+		hbox5.Add(ap_control, 0, wx.ALL | wx.EXPAND, 5)
+		hbox5.Add(reset, 0, wx.ALL | wx.EXPAND, 5)
+                
+		diagnostic = wx.Button(self.p_pypilot, label=_('SK Diagnostic'))
 		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
 
-		reset = wx.Button(self.p_compass, label=_('Restart'))
+		reset = wx.Button(self.p_pypilot, label=_('Restart'))
 		reset.Bind(wx.EVT_BUTTON, self.reset_sensors)
 
-		hbox4 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox4.Add(detected_label, 0, wx.ALL| wx.EXPAND, 5)
-		hbox4.Add(self.detected, 0, wx.ALL | wx.RIGHT | wx.EXPAND, 5)
+		hbox5.Add(diagnostic, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 5)
+		hbox5.Add(reset, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 5)
 
-		hbox3 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox3.Add(diagnostic, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 5)
-		hbox3.Add(reset, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 5)
 
-		hbox2 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox2.Add(compass_rate_label, 0, wx.UP | wx.EXPAND, 10)
-		hbox2.Add(self.compass_rate, 0, wx.ALL | wx.EXPAND, 5)
+		sizer = wx.FlexGridSizer(0, 1)
+                sizer.AddGrowableCol(0)
+		sizer.Add(hbox1, 1, wx.ALL | wx.EXPAND, 0)
+		sizer.Add(vbox1, 1, wx.ALL | wx.EXPAND, 0)
+		sizer.Add(vbox2, 1, wx.ALL | wx.EXPAND, 0)
+		sizer.Add(vbox3, 1, wx.ALL | wx.EXPAND, 0)
+		sizer.Add(hbox4, 0, wx.ALL | wx.EXPAND, 5)
+		sizer.Add(hbox5, 0, wx.ALL | wx.EXPAND, 5)
 
-		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox1.Add(self.calibration, 0, wx.ALL | wx.EXPAND, 5)
-		hbox1.Add(self.scope, 0, wx.ALL | wx.EXPAND, 5)
-		hbox1.Add(compass_reset, 0, wx.ALL | wx.EXPAND, 5)
-
-		vbox1 = wx.StaticBoxSizer(imu_box, wx.VERTICAL)
-		vbox1.Add(hbox4, 0, wx.ALL | wx.EXPAND, 5)
-		vbox1.Add(hbox2, 0, wx.LEFT | wx.EXPAND, 10)
-		vbox1.Add(self.magnetic_h, 0, wx.ALL | wx.EXPAND, 5)
-		vbox1.Add(self.heel, 0, wx.ALL | wx.EXPAND, 5)
-		vbox1.Add(self.pitch, 0, wx.ALL | wx.EXPAND, 5)
-		vbox1.Add(hbox1, 0, wx.ALL | wx.EXPAND, 5)
-
-		#vbox2 = wx.StaticBoxSizer(autopilot_box, wx.VERTICAL)
-
-		hbox = wx.BoxSizer(wx.HORIZONTAL)
-		hbox.Add(vbox1, 1, wx.ALL | wx.EXPAND, 5)
-		#hbox.Add(vbox2, 1, wx.ALL | wx.EXPAND, 5)
-
-		vbox = wx.BoxSizer(wx.VERTICAL)
-		vbox.Add(hbox, 1, wx.ALL | wx.EXPAND, 0)
-		vbox.Add(hbox3, 0, wx.ALL | wx.EXPAND, 5)
-
-		self.p_compass.SetSizer(vbox)
+		self.p_pypilot.SetSizer(sizer)
 
 	def check_i2c(self):
 		detected_imu = subprocess.check_output(['python', self.currentpath + '/check_rtimulib.py'], cwd=self.home + '/.pypilot')
@@ -1273,18 +1306,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			imu_data = eval(check_imu) 
 			imu_name = imu_data[0][0]
 			self.detected.SetLabel(imu_name)
-		self.compass_rate.SetValue(self.conf.get('COMPASS', 'rate'))
-		if self.conf.get('COMPASS', 'magnetic_h') == '1': self.magnetic_h.SetValue(True)
-		if self.conf.get('COMPASS', 'heel') == '1': self.heel.SetValue(True)
-		if self.conf.get('COMPASS', 'pitch') == '1': self.pitch.SetValue(True)
-		if self.magnetic_h.GetValue() or self.heel.GetValue() or self.pitch.GetValue():
-			self.calibration.Enable()
-			self.scope.Enable()
-		else:
-			self.calibration.Disable()
-			self.scope.Disable()
+		self.pypilot_translation_rate.SetStringSelection(self.conf.get('PYPILOT', 'translation_rate'))
+                i = 0
+                for name in self.pypilot_translation_names_list:
+                        self.pypilot_signalk_translation.Check(i, self.conf.get('PYPILOT', 'translate_' + name) == '1')
+                        i+=1
 
-	def on_compass_reset(self, e):
+	def on_pypilot_reset(self, e):
 		dlg = wx.MessageDialog(None, _(
 			'Compass settings will be deleted.\n\nYou will have to calibrate again.\n\nAre you sure?'),
 							   _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
@@ -1298,16 +1326,15 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def on_compass_enable(self, e):
 		self.stop_sensors()
-		if self.magnetic_h.GetValue(): self.conf.set('COMPASS', 'magnetic_h', '1')
-		else: self.conf.set('COMPASS', 'magnetic_h', '0')
-		if self.heel.GetValue(): self.conf.set('COMPASS', 'heel', '1')
-		else: self.conf.set('COMPASS', 'heel', '0')
-		if self.pitch.GetValue(): self.conf.set('COMPASS', 'pitch', '1')
-		else: self.conf.set('COMPASS', 'pitch', '0')
+                i = 0
+                for name in self.pypilot_translation_names_list:
+                        self.conf.set('COMPASS', 'magnetic_h', '1' if self.pypilot_translation_list.IsChecked(i) else '0')
+                        i+=1
+
 		self.read_compass()
 		self.start_sensors()
 
-	def on_calibration(self, e):
+	def on_pypilot_calibration(self, e):
 		subprocess.call(['pkill', '-f', 'pypilot_calibration'])
 		subprocess.call(['pkill', '-f', 'signalk_scope_wx'])
 		subprocess.Popen('pypilot_calibration', cwd=self.home + '/.pypilot')
@@ -1317,9 +1344,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		subprocess.call(['pkill', '-f', 'signalk_scope_wx'])
 		subprocess.Popen('signalk_scope_wx')
 
-	def on_select_compass_rate(self, e):
+        def on_pypilot_control(self, e):
+		subprocess.Popen('pypilot_control', cwd=self.home + '/.pypilot')
+
+	def on_select_pypilot_translation_rate(self, e):
 		self.stop_sensors()
-		self.conf.set('COMPASS', 'rate', self.compass_rate.GetValue())
+		self.conf.set('PYPILOT', 'translation_rate', self.pypilot_translation_rate.GetValue())
 		self.start_sensors()
 		
 			###########################################	NMEA 0183 kplex
