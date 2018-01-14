@@ -33,10 +33,10 @@ class Conf:
                         print 'openplotter.conf not found, copying default'
                         import shutil
                         shutil.copy(self.conf_folder+'/openplotter.conf', conf_file)
-
+                self.read()
                 op_folder = self.get('GENERAL', 'op_folder')
                 if not os.path.exists(op_folder):
-                        print 'op_folder', op_folder, 'invalid'
+                        print 'op_folder:', op_folder, 'invalid'
                         op_folder = os.path.normpath(os.path.dirname(os.path.abspath(__file__))+'/..')
                         print 'resetting op_folder to', op_folder
                         self.set('GENERAL', 'op_folder', op_folder)
