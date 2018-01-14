@@ -32,7 +32,7 @@ class MyFrame(wx.Frame):
 	def __init__(self):
 		self.conf = Conf()
 		self.home = self.conf.home
-		self.currentpath = self.home+self.conf.get('GENERAL', 'op_folder')+'/openplotter'
+		self.currentpath = self.conf.get('GENERAL', 'op_folder')
 		Language(self.conf)
 		
 		wx.Frame.__init__(self, None, title=_('Generate N2K from Signal K'), size=(630, 300))

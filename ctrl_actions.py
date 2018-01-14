@@ -25,7 +25,7 @@ action=sys.argv[1]
 start_all_actions='ACT19'
 
 conf = Conf()
-currentpath = conf.home+conf.get('GENERAL', 'op_folder')+'/openplotter'
+currentpath = conf.get('GENERAL', 'op_folder')
 
 Language(conf)
 

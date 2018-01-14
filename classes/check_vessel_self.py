@@ -25,7 +25,7 @@ class checkVesselSelf:
 
 		home = conf.home
 		op_folder = conf.get('GENERAL', 'op_folder')
-		currentpath = home+op_folder+'/openplotter'
+		currentpath = op_folder + '/..'
 
 		if not self.util_process_exist('signalk-server'):
 			print 'Signal K starting'
@@ -47,7 +47,7 @@ class checkVesselSelf:
 			with open(home+'/.openplotter/openplotter-settings.json') as data_file:
 				data = json.load(data_file)
 		except:
-			data = []
+			data = {'vessel' : {'uuid' : 'error'}}
 			print "Error: Can't open file "+home+"/.openplotter/openplotter-settings.json"
 
 		raw_uuid = data['vessel']['uuid']

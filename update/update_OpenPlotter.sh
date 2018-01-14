@@ -17,7 +17,7 @@ if [ -z $op_folder ]; then
 	op_folder="/.config"
 fi
 
-cd $HOME$op_folder
+cd $op_folder/..
 
 echo
 echo "DOWNLOADING NEW OPENPLOTTER CODE..."
@@ -41,7 +41,7 @@ cp -a openplotter/ $DIRDATE/
 cd $DIRDATE
 find . -name "*.pyc" -type f -delete
 
-cd $HOME$op_folder
+cd $op_folder/..
 
 source openplotter_tmp/update/update_settings.sh
 if [ $major = 1 ]; then
@@ -57,7 +57,8 @@ echo
 rm -rf openplotter
 rm -rf $DIRDATE
 mv openplotter_tmp openplotter
+shutdown -r +1
 echo
-read -p "FINISHED, PRESS ENTER TO REBOOT SYSTEM."
+read -p "FINISHED, SYSTEM WILL REBOOT IN 1 MIN, PRESS ENTER TO REBOOT NOW."
 shutdown -r now
 

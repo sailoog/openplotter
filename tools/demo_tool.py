@@ -24,8 +24,7 @@ if 'root' in home:
 	home = '/home/'+os.path.expanduser(os.environ["SUDO_USER"])
 data_conf = ConfigParser.SafeConfigParser()
 data_conf.read(home+'/.openplotter/openplotter.conf')
-op_installation_folder = data_conf.get('GENERAL', 'op_folder')
-op_folder = home+op_installation_folder+'/openplotter'
+op_folder = data_conf.get('GENERAL', 'op_folder')
 sys.path.append(op_folder)
 ##########################################################################
 

@@ -60,9 +60,7 @@ def read_adc(channel):
 def Translate(result):
         translation_table = {'imu.heading' : ['navigation.headingMagnetic', 0.017453293],
                              'imu.roll' : ['navigation.attitude.roll', 0.017453293],
-                             'imu.pitch' : ['navigation.attitude.pitch', 0.017453293],
-                             'wind.direction' : ['environment.wind.direction', 0.017453293],
-                             'wind.speed' : ['environment.wind.speed', 1.0]}
+                             'imu.pitch' : ['navigation.attitude.pitch', 0.017453293]}
         Erg = ''
         for translation in translation_table:
                 if translation in result:
@@ -80,7 +78,6 @@ def work_pypilot():
         
         headingSK = conf.get('PYPILOT', 'translation_magnetic_h')
         attitudeSK = conf.get('PYPILOT', 'translation_attitude')
-        windSK = conf.get('PYPILOT', 'translation_wind')
         
 	SETTINGS_FILE = "RTIMULib"
 	s = RTIMU.Settings(SETTINGS_FILE)
@@ -121,9 +118,6 @@ def work_pypilot():
                 if attitudeSK == '1':
                         client.watch('imu.pitch')
                         client.watch('imu.roll')
-                if windSK == '1' and mode != 'imu': # imu has no nema
-                        client.watch('wind.direction')
-                        client.watch('wind.speed')
 
         client = False
 	tick1 = time.time()

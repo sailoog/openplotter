@@ -29,6 +29,7 @@ echo
 echo "DISABLING SCREENSAVER..."
 echo
 sudo bash -c 'echo -e "\n@xset s 0 0\n@xset s noblank\n@xset s noexpose\n@xset dpms 0 0 0\n" >> /home/pi/.config/lxsession/LXDE-pi/autostart'
+shutdown -r +1
 echo
-read -p "FINISHED, PRESS ENTER TO REBOOT SYSTEM."
+read -p "FINISHED, SYSTEM WILL REBOOT IN 1 MIN, PRESS ENTER TO REBOOT NOW."
 shutdown -r now
