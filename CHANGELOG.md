@@ -1,3 +1,15 @@
+v0.17.0
+* Fix calculate issues
+* Add suport for latest signal k versions
+* Remove node red freeboard
+* Relative openplotter-settings.json
+* Fix bug setting keys
+* Update languages
+* Enable and fix true wind in calculations
+* Check OP hat moitessier
+* Fix true heading calculation
+
+
 v0.16.0
 * Update languages
 * Add Basque and Galician languages

@@ -218,7 +218,7 @@ class addkplex(wx.Dialog):
 		context = self.parent.context
 		for device in context.list_devices(subsystem='tty'):
 			i = device['DEVNAME']
-			if '/dev/ttyU' in i or '/dev/ttyA' in i or '/dev/ttyS' in i or '/dev/ttyO' in i or '/dev/r' in i or '/dev/i' in i:
+			if '/dev/ttyU' in i or '/dev/ttyA' in i or '/dev/ttyS' in i or '/dev/ttyO' in i or '/dev/r' in i or '/dev/i' in i or '/dev/naviDev' in i:
 				self.SerDevLs.append(i[5:])
 				try:
 					ii = device['DEVLINKS']
