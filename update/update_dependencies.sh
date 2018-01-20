@@ -103,6 +103,7 @@ make
 sudo make install
 
 cd $HOME$op_folder/compiling
+pkill aisdecoder
 git clone https://github.com/$repository/aisdecoder.git
 cd aisdecoder
 cmake -DCMAKE_BUILD_TYPE=release
