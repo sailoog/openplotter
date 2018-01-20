@@ -15,9 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import socket, time, math, datetime, platform, threading
+import socket, time, math, datetime, platform, threading, os
 from classes.conf import Conf
-from pypilot.boatimu import *
+from signalk.client import SignalKClient
+
 
 if platform.machine()[0:3]!='arm':
 	print 'This is not a Raspberry Pi -> no GPIO, I2C and SPI'
@@ -54,48 +55,132 @@ def read_adc(channel):
 	return data
 
 # read heading, heel, pitch and GENERATE SK
-def work_compass():
+
+#translate pypilot signalk -> node signalk
+def Translate(result):
+        translation_table = {'imu.heading' : ['navigation.headingMagnetic', 0.017453293],
+                             'imu.roll' : ['navigation.attitude.roll', 0.017453293],
+                             'imu.pitch' : ['navigation.attitude.pitch', 0.017453293],
+                             'wind.direction' : ['environment.wind.direction', 0.017453293],
+                             'wind.speed' : ['environment.wind.speed', 1.0]}
+        Erg = ''
+        for translation in translation_table:
+                if translation in result:
+                        value = result[translation]['value']
+                        tr = translation_table[translation]
+                        Erg += '{"path": "' + tr[0] + '","value":'+str(value*tr[1])+'},'
+        return Erg
+
+def work_pypilot():
+        #init compass
+        mode = conf.get('PYPILOT', 'mode')
+        if mode == 'disabled':
+                print 'pypilot disabled'
+                return
+        
+        headingSK = conf.get('PYPILOT', 'translation_magnetic_h')
+        attitudeSK = conf.get('PYPILOT', 'translation_attitude')
+        windSK = conf.get('PYPILOT', 'translation_wind')
+        
 	SETTINGS_FILE = "RTIMULib"
 	s = RTIMU.Settings(SETTINGS_FILE)
 	imu = RTIMU.RTIMU(s)
 	imuName = imu.IMUName()
 	del imu
 	del s
-	server = SignalKPipeServer()
-	boatimu = BoatIMU(server)
+        if mode == 'imu':
+                cmd = ['pypilot_boatimu', '-q']
+        elif mode == 'basic autopilot':
+                # ensure no serial getty running
+                os.system('sudo systemctl stop serial-getty@ttyAMA0.service')
+                os.system('sudo systemctl stop serial-getty@ttyS0.service')
+                cmd = ['pypilot']
+
 	try:
-		compass_rate = float(conf.get('COMPASS', 'rate'))
+		translation_rate = float(conf.get('PYPILOT', 'translation_rate'))
 	except:
-		compass_rate = 1
-		conf.set('COMPASS', 'rate', '1')
+		translation_rate = 1
+		conf.set('PYPILOT', 'translation_rate', '1')
+
+        pid = os.fork()
+        try:
+                if pid == 0:
+                        os.execvp(cmd[0], cmd)
+                        print 'failed to launch', cmd
+                        exit(1)
+        except:
+                print 'exception launching pypilot'
+                exit(1)
+        print 'launched pypilot pid', pid
+        time.sleep(3) # wait 3 seconds to launch client
+
+        def on_con(client):
+                print 'connected'
+                if headingSK == '1':
+                        client.watch('imu.heading')
+                if attitudeSK == '1':
+                        client.watch('imu.pitch')
+                        client.watch('imu.roll')
+                if windSK == '1' and mode != 'imu': # imu has no nema
+                        client.watch('wind.direction')
+                        client.watch('wind.speed')
+
+        client = False
 	tick1 = time.time()
-	try:
-		while True:
-			t0 = time.time()
-			data = boatimu.IMURead()
-			if data:
-				#print 'pitch', data['pitch'], 'roll', data['roll'], 'heading', data['heading']
-				Erg=''
-				if headingSK == '1':
-					heading = data['heading']
-					Erg += '{"path": "navigation.headingMagnetic","value":'+str(heading*0.017453293)+'},'
-				if heelSK == '1':
-					heel = data['heel']
-					Erg += '{"path": "navigation.attitude.roll","value":'+str(heel*0.017453293)+'},'
-				if pitchSK == '1':
-					pitch = data['pitch']
-					Erg += '{"path": "navigation.attitude.pitch","value":'+str(pitch*0.017453293)+'},'
-				if Erg:
-					if t0 - tick1 > compass_rate:
-						tick1 = t0	
-						SignalK='{"updates":[{"$source":"OPsensors.I2C.'+imuName+'","values":['
-						SignalK+=Erg[0:-1]+']}]}\n'		
-						sock.sendto(SignalK, ('127.0.0.1', 55557))
-			server.HandleRequests()
-			dt = .1 - (time.time() - t0)
-			if dt > 0:
-				time.sleep(dt);
-	except Exception, e: print "RTIMULib (IMU) reading failed: "+str(e)
+        while read_sensors:
+                ret = os.waitpid(pid, os.WNOHANG)
+                if ret[0] == pid:
+                        # should we respawn pypilot if it crashes?
+                        print 'pypilot exited'
+                        break
+
+                # connect to pypilot if not connected
+                try:
+                        if not client:
+                                client = SignalKClient(on_con, 'localhost')
+                except:
+                        time.sleep(1)
+                        continue # not much to do without connection
+                
+                try:
+                        result = client.receive()
+                except:
+                        print 'disconnected from pypilot'
+                        client = False
+                        continue
+                
+                Erg = Translate(result)
+                SignalK='{"updates":[{"$source":"OPsensors.I2C.'+imuName+'","values":['
+                SignalK+=Erg[0:-1]+']}]}\n'		
+                sock.sendto(SignalK, ('127.0.0.1', 55557))
+
+                while True:
+                        dt = translation_rate - time.time() + tick1
+                        if dt <= 0:
+                                break
+                        time.sleep(dt)
+                tick1 = time.time()
+                
+
+        # cleanup
+        try:
+                print 'stopping pypilot pid:', pid
+                os.kill(pid, 15)
+                time.sleep(1) # wait one second to shut down pypilot
+        except:
+                print 'exception stopping pypilot'
+
+        try:
+                if os.waitpid(pid, os.WNOHANG)[0] == pid:
+                        print 'pypilot stopped: ok'
+                else:
+                        print 'killing pypilot pid:', pid
+                        os.kill(pid, 9) # try to kill with signal 9
+        except:
+                pass # pypilot already exited, or other exception
+                
+        print 'pypilot thread exiting'                
+
 
 # read pressure, humidity, temperature and GENERATE SK
 def work_imu_press_hum():
@@ -131,7 +216,7 @@ def work_imu_press_hum():
 	tick6 = tick1
 	tick7 = tick1
 	try:
-		while 1:
+		while read_sensors:
 			time.sleep(timesleep)
 			tick0 = time.time()
 			if imu_press:
@@ -194,7 +279,7 @@ def work_bme280():
 	tick2 = tick1
 	tick3 = tick1
 	try:
-		while 1:
+		while read_sensors:
 			time.sleep(0.1)
 			temperature,pressure,humidity = bme.readBME280All()
 			tick0 = time.time()
@@ -219,7 +304,8 @@ def work_bme280():
 
 # read SPI adc and GENERATE SK
 def work_analog():
-	threading.Timer(rate_ana, work_analog).start()
+        if read_sensors:
+                threading.Timer(rate_ana, work_analog).start()
 	SignalK='{"updates":[{"$source":"OPsensors.SPI.MCP3008","values":[ '
 	Erg=''
 	send=False
@@ -237,7 +323,8 @@ def work_analog():
 	
 # read gpio and GENERATE SK
 def work_gpio():
-	threading.Timer(rate_gpio, work_gpio).start()
+        if read_sensors:
+                threading.Timer(rate_gpio, work_gpio).start()
 	c=0
 	for i in gpio_list:
 		channel=int(i[2])
@@ -259,6 +346,7 @@ def publish_sk(io,channel,current_state,name):
 
 conf = Conf()
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+read_sensors = True
 
 #init SPI MCP
 rate_ana=0.1
@@ -335,25 +423,47 @@ if i2c_sensors:
 			if temp_list[1] == 'press': imu_press = i
 			elif temp_list[1] == 'hum': imu_hum = i
 
-#init compass
-compass = False
-headingSK = conf.get('COMPASS', 'magnetic_h')
-heelSK = conf.get('COMPASS', 'heel')
-pitchSK = conf.get('COMPASS', 'pitch')
-if headingSK == '1' or heelSK == '1' or pitchSK == '1': compass = True
+
+
+def cleanup(signal_number, frame):
+        global read_sensors
+        print 'read sensors got signal', signal_number, 'cleaning up'
+        read_sensors = False
+
+import signal
+
+threads = []
+def add_thread(func):
+        thread = threading.Thread(target=func)
+        thread.start()
+        threads.append(thread)
 
 
 # launch threads
 if analog_: work_analog()
 if gpio_: work_gpio()
 if bme280:
-	thread_bme280=threading.Thread(target=work_bme280)	
-	thread_bme280.start()
+        add_thread(work_bme280)
 if imu_press or imu_hum:
-	thread_imu_press_hum = threading.Thread(target=work_imu_press_hum)	
-	thread_imu_press_hum.start()
-if compass:
-	thread_compass=threading.Thread(target=work_compass)	
-	thread_compass.start()
+        add_thread(work_imu_press_hum)
 
-		
+add_thread(work_pypilot)
+
+# catch signals to cleanly exit
+for s in range(1, 16):
+        if s == 2: # disable this for debugging to allow keyboard interrupts
+                continue
+        if s != 9 and s != 13:
+                signal.signal(s, cleanup)
+#signal.signal(signal.SIGCHLD, cleanup)
+        
+print 'read_sensors_d waiting for signal to exit'
+
+# sleep on conditional
+while read_sensors:
+        time.sleep(1)
+
+print 'waiting for threads'
+for thread in threads:
+        thread.join()
+print 'read_sensors_d finished'
