@@ -604,13 +604,13 @@ class MySK_to_Action_Calc:
 			self.hdt_accuracy = float(self.SK.conf.get('CALCULATE', 'hdt_accuracy'))
 			if self.calcTrueHeading_dev:
 				self.deviation_table = []
-				data = self.SK.conf.get('COMPASS', 'deviation')
+				data = self.SK.conf.get('PYPILOT', 'deviation')
 				if not data:
 					temp_list = []
 					for i in range(37):
 						temp_list.append([i*10,i*10])
-					self.SK.conf.set('COMPASS', 'deviation', str(temp_list))
-					data = self.SK.conf.get('COMPASS', 'deviation')
+					self.SK.conf.set('PYPILOT', 'deviation', str(temp_list))
+					data = self.SK.conf.get('PYPILOT', 'deviation')
 				try: self.deviation_table=eval(data)
 				except: self.deviation_table = []
 

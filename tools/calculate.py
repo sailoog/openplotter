@@ -169,7 +169,6 @@ class MyFrame(wx.Frame):
 
 			if self.conf.get('CALCULATE', 'hdt')=='1': self.heading_t.SetValue(True)
 			if self.conf.get('CALCULATE', 'hdt_dev')=='1': self.add_deviation.SetValue(True)
-			#if self.conf.get('COMPASS', 'magnetic_h')=='1': self.add_deviation.Disable()
 
 			self.th_rate.SetValue(self.conf.get('CALCULATE', 'hdt_rate'))
 			self.th_accu.SetValue(self.conf.get('CALCULATE', 'hdt_accuracy'))
@@ -194,7 +193,6 @@ class MyFrame(wx.Frame):
 					return
 			else: self.conf.set('CALCULATE', 'mag_var', '0')
 
-			#if self.conf.get('COMPASS', 'magnetic_h')=='1': self.add_deviation.SetValue(False)
 			if self.heading_t.GetValue() or self.add_deviation.GetValue():
 				if self.th_rate.GetValue() and self.th_accu.GetValue():
 					if self.heading_t.GetValue(): self.conf.set('CALCULATE', 'hdt', '1')
