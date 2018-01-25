@@ -199,6 +199,8 @@ class MyFrame(wx.Frame):
 			gain=self.conf.get('AIS-SDR', 'gain')
 			ppm=self.conf.get('AIS-SDR', 'ppm')
 			channel=self.conf.get('AIS-SDR', 'channel')
+			webapp=self.conf.get('PYPILOT', 'webapp')
+			webapp_port=self.conf.get('PYPILOT', 'webapp_port')
 
 			N2K_output=self.conf.get('N2K', 'output')
 
@@ -302,12 +304,6 @@ class MyFrame(wx.Frame):
 			self.check_start('mqtt_d.py')
 			self.add_logger_data(_('\nStart N2K send (optional)...'))
 			self.check_start('N2K-server_d.py')
-			
-			subprocess.call(['pkill', '-9', 'kplex'])
-			if kplex=='1':
-				self.add_logger_data(_('\nStarting NMEA 0183 Multiplexer...'))
-				subprocess.Popen('kplex')
-				self.check_start('kplex')
 
 			if util_process_exist('node-red'):
 				subprocess.call('node-red-stop')
@@ -321,13 +317,15 @@ class MyFrame(wx.Frame):
 			subprocess.call(['pkill', '-f', 'read_sensors_d.py'])
 			subprocess.Popen(['python', self.currentpath+'/read_sensors_d.py'], cwd=self.home + '/.pypilot')
 
-			self.add_logger_data(_('\nStart I2C, SPI and GPIO Server (optional)...'))
+			self.add_logger_data(_('\nStarting I2C, SPI, GPIO an Pypilot (optional)...'))
 			self.check_start('read_sensors_d.py')
 
-			if gps_time=='1':
-				self.add_logger_data(_('\nGetting system time from NMEA 0183...'))
-				subprocess.call(['sudo', 'python', self.currentpath+'/time_gps.py'])
-				self.add_logger_data(_(' Done.'))
+			subprocess.call(['pkill', '-f', 'pypilot_webapp'])
+			if webapp=='1':
+				self.add_logger_data(_('\nStarting Pypilot Web App (optional)...'))
+				try: subprocess.Popen(['pypilot_webapp', webapp_port])
+				except: pass
+				self.check_start('pypilot_webapp')
 
 			subprocess.call(['pkill', '-9', 'aisdecoder'])
 			subprocess.call(['pkill', '-9', 'rtl_fm'])
@@ -342,6 +340,18 @@ class MyFrame(wx.Frame):
 			self.add_logger_data(_('\nCheck 800x480 display...'))
 			subprocess.call(['sudo', 'python', self.currentpath+'/display800x480.py'])
 			self.add_logger_data(_(' Done.'))
+
+			subprocess.call(['pkill', '-9', 'kplex'])
+			if kplex=='1':
+				self.add_logger_data(_('\nStarting NMEA 0183 Multiplexer...'))
+				time.sleep(3)
+				subprocess.Popen('kplex')
+				self.check_start('kplex')
+				
+			if gps_time=='1':
+				self.add_logger_data(_('\nGetting system time from NMEA 0183...'))
+				subprocess.call(['sudo', 'python', self.currentpath+'/time_gps.py'])
+				self.add_logger_data(_(' Done.'))
 
 			self.add_logger_data(_('\nStarting Tools...'))
 			index=0

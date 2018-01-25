@@ -598,11 +598,16 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.SerDevLsCheck.append(serial + ' ' + vendor_db + ' ' + model_db)
 	
 		self.SerDevLs.sort()
+		self.SerDevLs.insert(0,_('none'))
 		self.SerDevLsCheck.sort()
 		self.can_usb.Clear()
 		self.sms_dev.Clear()
+		self.pypilot_controller.Clear()
+		self.pypilot_nmea.Clear()
 		self.can_usb.AppendItems(self.SerDevLs)
 		self.sms_dev.AppendItems(self.SerDevLs)
+		self.pypilot_controller.AppendItems(self.SerDevLs)
+		self.pypilot_nmea.AppendItems(self.SerDevLs)
 		
 		bak = ''
 		for i in self.SerDevLsCheck:
@@ -1195,22 +1200,19 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		reset.Bind(wx.EVT_BUTTON, self.on_pypilot_reset)
 
 		connections_box = wx.StaticBox(self.p_pypilot, label= _(' Autopilot '))
-		serial_ports = ['autodetect', 'none']
-		bauds = ['4800', '38400']
+
+		bauds = ['4800', '9600', '19200', '38400', '57600', '115200']
 		controller_label = wx.StaticText(self.p_pypilot, label=_('Controller'))
-		self.pypilot_controller = wx.ComboBox(self.p_pypilot, choices=serial_ports)
-		self.pypilot_controller.SetSelection(0)
+		self.pypilot_controller = wx.ComboBox(self.p_pypilot, choices=self.SerDevLs)
 		self.pypilot_controller_baud = wx.Choice(self.p_pypilot, choices=bauds)
+
 		nmea_label = wx.StaticText(self.p_pypilot, label=_('NMEA 0183 Sensors (Wind/GPS)'))
-		self.pypilot_nmea = wx.ComboBox(self.p_pypilot, choices=serial_ports)
-		self.pypilot_nmea.SetSelection(0)
+		self.pypilot_nmea = wx.ComboBox(self.p_pypilot, choices=self.SerDevLs)
 		self.pypilot_nmea_baud = wx.Choice(self.p_pypilot, choices=bauds)
 
 		self.pypilot_webapp_cb = wx.CheckBox(self.p_pypilot, False, _('Enable webapp'))
-		self.pypilot_webapp_cb.Bind(wx.EVT_CHECKBOX, self.on_pypilot_enable_webapp)
 		pypilot_webapp_port_label = wx.StaticText(self.p_pypilot, label=_('port:'))
 		self.pypilot_webapp_port = wx.SpinCtrl(self.p_pypilot, min=1, max=65536, initial=8080)
-		self.pypilot_webapp_port.Bind(wx.EVT_SPINCTRL, self.on_pypilot_enable_webapp)
 
 		calibration = wx.Button(self.p_pypilot, label=_('Calibration'))
 		calibration.Bind(wx.EVT_BUTTON, self.on_pypilot_calibration)
@@ -1227,15 +1229,18 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		restart = wx.Button(self.p_pypilot, label=_('Restart'))
 		restart.Bind(wx.EVT_BUTTON, self.reset_sensors)
 
-		self.pypilot_translation_names_list = ['magnetic_h', 'attitude', 'wind']
-		translation_choices = ['imu.heading -> navigation.headingMagnetic','imu.[pitch, roll] -> navigation.attitude.[pitch, roll]','wind.* -> environment.wind.*']
+		apply_changes_pypilot = wx.Button(self.p_pypilot, label=_('Apply changes'))
+		apply_changes_pypilot.Bind(wx.EVT_BUTTON, self.on_apply_changes_pypilot)
+		cancel_changes_pypilot = wx.Button(self.p_pypilot, label=_('Cancel changes'))
+		cancel_changes_pypilot.Bind(wx.EVT_BUTTON, self.on_cancel_changes_pypilot)
+
+		self.pypilot_translation_names_list = ['magnetic_h', 'attitude']
+		translation_choices = ['imu.heading -> navigation.headingMagnetic','imu.[pitch, roll] -> navigation.attitude.[pitch, roll]']
 		self.pypilot_signalk_translation = wx.CheckListBox(self.p_pypilot, choices=translation_choices)
-		self.pypilot_signalk_translation.Bind(wx.EVT_CHECKLISTBOX, self.on_pypilot_enable)
 
 		translation_rate_label = wx.StaticText(self.p_pypilot, label=_('Translation Rate (seconds)'))
 		translation_rate_list = ['0.1', '0.2', '0.5', '1', '2', '5', '10', '30', '60']
 		self.pypilot_translation_rate= wx.Choice(self.p_pypilot, choices=translation_rate_list)
-		self.pypilot_translation_rate.Bind(wx.EVT_CHOICE, self.on_pypilot_enable)
 
 		diagnostic = wx.Button(self.p_pypilot, label=_('SK Diagnostic'))
 		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
@@ -1292,6 +1297,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		hbox9 = wx.BoxSizer(wx.HORIZONTAL)
 		hbox9.Add(diagnostic, 0, wx.RIGHT | wx.EXPAND, 5)
 		hbox9.Add(restart, 0, wx.RIGHT | wx.EXPAND, 5)
+		hbox9.Add((0, 0), 1, wx.RIGHT | wx.LEFT, 5)
+		hbox9.Add(apply_changes_pypilot, 0, wx.RIGHT | wx.LEFT, 5)
+		hbox9.Add(cancel_changes_pypilot, 0, wx.RIGHT | wx.LEFT, 5)
 
 		sizer = wx.FlexGridSizer(0, 1)
 		sizer.AddGrowableCol(0)
@@ -1301,15 +1309,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		self.p_pypilot.SetSizer(sizer)
 
-	def check_i2c(self):
-		detected_imu = subprocess.check_output(['python', self.currentpath + '/check_rtimulib.py'], cwd=self.home + '/.pypilot')
-		if 'Error:' in detected_imu: return
-		else:
-			l_detected = detected_imu.split('\n')
-			for line in l_detected:
-				if 'result:' in line: 
-					line2 = line.split(':')
-					return line2[1]
 
 	def read_pypilot(self):
 		mode = self.conf.get('PYPILOT', 'mode')
@@ -1323,22 +1322,30 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			imu_data = eval(check_imu) 
 			imu_name = imu_data[0][0]
 			self.imu_detected.SetLabel(imu_name)
+
 		self.pypilot_translation_rate.SetStringSelection(self.conf.get('PYPILOT', 'translation_rate'))
+
 		i = 0
 		for name in self.pypilot_translation_names_list:
 			self.pypilot_signalk_translation.Check(i, self.conf.get('PYPILOT', 'translation_' + name) == '1')
 			i+=1
-		self.pypilot_gui_enable()
-		self.pypilot_read_serial_connections()
 
-	def write_pypilot(self):
-		self.conf.set('PYPILOT', 'mode', self.pypilot_modes[self.pypilot_mode.GetSelection()])
-		self.conf.set('PYPILOT', 'translation_rate', self.pypilot_translation_rate.GetStringSelection())
-		i = 0
-		for name in self.pypilot_translation_names_list:
-			self.conf.set('PYPILOT', 'translation_' + name, '1' if self.pypilot_signalk_translation.IsChecked(i) else '0')
-			i+=1
+		self.pypilot_read_serial_connections()
 		self.pypilot_gui_enable()
+
+		self.pypilot_webapp_cb.SetValue(self.conf.get('PYPILOT', 'webapp') == '1')
+		try: self.pypilot_webapp_port.SetValue(int(self.conf.get('PYPILOT', 'webapp_port')))
+		except: pass
+
+	def check_i2c(self):
+		detected_imu = subprocess.check_output(['python', self.currentpath + '/check_rtimulib.py'], cwd=self.home + '/.pypilot')
+		if 'Error:' in detected_imu: return
+		else:
+			l_detected = detected_imu.split('\n')
+			for line in l_detected:
+				if 'result:' in line: 
+					line2 = line.split(':')
+					return line2[1]
 
 	def pypilot_gui_enable(self):
 		have_ap = self.pypilot_mode.GetSelection()==2
@@ -1355,7 +1362,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.read_device('nmea0device', self.pypilot_nmea, self.pypilot_nmea_baud)
 
 	def read_device(self, path, path_combo, baud_choice):
-		if path_combo.GetValue() != 'autodetect': return
 		try:
 			pypilot_path = self.home + '/.pypilot/'
 			f = open(pypilot_path + path)
@@ -1363,27 +1369,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			f.close()
 			l[1] # exception if empty
 			l = json.loads(l)
-			path_combo.SetValue(l['path'])
+			if l['path'] == 'none': path_combo.SetSelection(0)
+			else: path_combo.SetValue(l['path'])
 			if 'bauds' in l and len(l['bauds']): baud_choice.SetStringSelection(str(l['bauds'][0]))
-		except: path_combo.SetValue('autodetect')
-
-	def pypilot_write_serial_connections(self):
-		self.write_device('servodevice', self.pypilot_controller, self.pypilot_controller_baud)
-		self.write_device('nmea0device', self.pypilot_nmea, self.pypilot_nmea_baud)
-
-	def write_device(self, path, path_combo, baud_choice):
-		try:
-			pypilot_path = self.home + '/.pypilot/'
-			f = open(pypilot_path + path, 'w')
-			value = path_combo.GetValue()
-			if value != 'autodetect': # empty file means
-				d = {'path': value}
-				try: d['bauds'] = [int(baud_choice.GetStringSelection())]
-				except: d['bauds'] = [38400]
-				f.write(json.dumps(d)+'\n')
-			f.close()
-			value = '' # empty means autodetect to pypilot
-		except: print 'error writing pypilot serial device', path
+		except: path_combo.SetValue(_('none'))
 
 	def on_pypilot_reset(self, e):
 		dlg = wx.MessageDialog(None, _(
@@ -1398,14 +1387,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		dlg.Destroy()
 
 	def on_pypilot_enable(self, e):
-		self.stop_sensors()
-		self.write_pypilot()
-		self.start_sensors()
-
-	def on_pypilot_enable_webapp(self, e):
-		subprocess.call(['pkill', '-f', 'pypilot_webapp'])
-		if not self.pypilot_webapp_cb.IsEnabled() or not self.pypilot_webapp_cb.GetValue(): return
-		subprocess.Popen(['pypilot_webapp', str(self.pypilot_webapp_port.GetValue())])
+		self.pypilot_gui_enable()
 
 	def on_pypilot_calibration(self, e):
 		subprocess.call(['pkill', '-f', 'pypilot_calibration'])
@@ -1419,6 +1401,44 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def on_pypilot_control(self, e):
 		subprocess.Popen('pypilot_control', cwd=self.home + '/.pypilot')
+
+	def on_apply_changes_pypilot(self,e):
+		self.conf.set('PYPILOT', 'mode', self.pypilot_modes[self.pypilot_mode.GetSelection()])
+
+		i = 0
+		for name in self.pypilot_translation_names_list:
+			self.conf.set('PYPILOT', 'translation_' + name, '1' if self.pypilot_signalk_translation.IsChecked(i) else '0')
+			i+=1
+
+		self.conf.set('PYPILOT', 'translation_rate', self.pypilot_translation_rate.GetStringSelection())
+
+		self.write_device('servodevice', self.pypilot_controller, self.pypilot_controller_baud)
+		self.write_device('nmea0device', self.pypilot_nmea, self.pypilot_nmea_baud)
+
+		self.conf.set('PYPILOT', 'webapp', '1' if self.pypilot_webapp_cb.IsEnabled() else '0')
+		self.conf.set('PYPILOT', 'webapp_port', str(self.pypilot_webapp_port.GetValue()))
+
+		self.reset_sensors(0)
+
+		subprocess.call(['pkill', '-f', 'pypilot_webapp'])
+		if self.pypilot_webapp_cb.IsEnabled():
+			subprocess.Popen(['pypilot_webapp', str(self.pypilot_webapp_port.GetValue())])
+
+	def write_device(self, path, path_combo, baud_choice):
+		try:
+			pypilot_path = self.home + '/.pypilot/'
+			f = open(pypilot_path + path, 'w')
+			if path_combo.GetSelection() == 0 or path_combo.GetValue() == '': value = 'none'
+			else: value = path_combo.GetValue()
+			d = {'path': value}
+			try: d['bauds'] = [int(baud_choice.GetStringSelection())]
+			except: d['bauds'] = [38400]
+			f.write(json.dumps(d)+'\n')
+			f.close()
+		except: print 'error writing pypilot serial device', path
+
+	def on_cancel_changes_pypilot(self,e):
+		self.read_pypilot()
 		
 			###########################################	NMEA 0183 kplex
 
@@ -1502,7 +1522,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def edit_kplex(self, e):
 		idx = e.GetIndex()
 
-		if self.kplex[idx][1] == 'system_a' or self.kplex[idx][1] == 'system_b' or self.kplex[idx][1] == 'opencpn' or self.kplex[idx][1] == 'signalk':
+		if self.kplex[idx][1] == 'system_a' or self.kplex[idx][1] == 'system_b' or self.kplex[idx][1] == 'opencpn' or self.kplex[idx][1] == 'signalk' or self.kplex[idx][1] == 'pypilot':
 			self.ShowStatusBarRED(_('You can not edit this.'))
 			return
 		edit = []
@@ -1646,12 +1666,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		data += '###defaults\n\n'
 		data += '[udp]\nname=system_a\ndirection=in\naddress=localhost\nport=10110\n\n'
 		data += '[udp]\nname=system_b\ndirection=in\nport=10110\n\n'
+		data += '[tcp]\nname=pypilot\ndirection=in\noptional=yes\nmode=client\npersist=yes\nretry=10\naddress=localhost\nport=20220\n\n'
 		data += '[tcp]\nname=opencpn\ndirection=out\nmode=server\nofilter=-**RMB\nport=10109\n\n'
 		data += '[udp]\nname=signalk\ndirection=out\nofilter=-OC***\naddress=127.0.0.1\nport=55556\n\n'
 		data += '###end of defaults\n\n###OpenPlotter GUI settings\n\n'
 
 		for index, item in enumerate(self.kplex):
-			if not ('system' in item[1] or 'opencpn' in item[1] or 'signalk' in item[1]):
+			if not ('system' in item[1] or 'opencpn' in item[1] or 'signalk' in item[1] or 'pypilot' in item[1]):
 				if self.list_kplex.IsChecked(index):
 					state = ''
 				else:
@@ -1702,7 +1723,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		num = len(self.kplex)
 		for i in range(num):
 			if self.list_kplex.IsSelected(i):
-				if self.kplex[i][1] == 'system_a' or self.kplex[i][1] == 'system_b' or self.kplex[i][1] == 'opencpn' or self.kplex[i][1] == 'signalk':
+				if self.kplex[i][1] == 'system_a' or self.kplex[i][1] == 'system_b' or self.kplex[i][1] == 'opencpn' or self.kplex[i][1] == 'signalk' or self.kplex[i][1] == 'pypilot':
 					self.ShowStatusBarRED(_('You can not delete this.'))
 					return
 				del self.kplex[i]
@@ -1958,7 +1979,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.apply_changes_i2c()
 
 	def start_sensors(self):
-		self.pypilot_write_serial_connections()
 		subprocess.Popen(['python', self.currentpath + '/read_sensors_d.py'], cwd=self.home + '/.pypilot')
 		self.ShowStatusBarGREEN(_('Sensors restarted'))
 
@@ -1968,7 +1988,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		subprocess.call(['pkill', '-f', 'signalk_scope_wx'])
 		subprocess.call(['pkill', '-f', 'pypilot_control'])
 		subprocess.call(['pkill', '-f', 'read_sensors_d.py'])
-		self.pypilot_read_serial_connections()
 		
 	def reset_sensors(self, e):
 		self.stop_sensors()
@@ -2981,17 +3000,19 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if self.conf.get('N2K', 'output') == '1':
 			self.n2k_out_enable.SetValue(True)
 			self.N2K_diagnostic_out_b.Disable()
-		self.can_usb.SetValue(self.conf.get('N2K', 'can_usb'))
+		if self.conf.get('N2K', 'can_usb') == 'none' or self.conf.get('N2K', 'can_usb') == '': self.can_usb.SetSelection(0)
+		else: self.can_usb.SetValue(self.conf.get('N2K', 'can_usb'))
 
 	def on_n2k_device(self, e):
-		self.conf.set('N2K', 'can_usb', self.can_usb.GetValue())
+		if self.can_usb.GetSelection() == 0: self.conf.set('N2K', 'can_usb', 'none')
+		else: self.conf.set('N2K', 'can_usb', self.can_usb.GetValue())
 
 	def on_n2k_enable(self, e):
 		with open(self.home+'/.openplotter/openplotter-settings.json') as data_file:
 			data = json.load(data_file)
 		isChecked = self.n2k_enable.GetValue()
 		if isChecked:
-			if not self.can_usb.GetValue():
+			if self.can_usb.GetSelection() == 0:
 				self.n2k_enable.SetValue(False)
 				self.ShowStatusBarBLACK(_('You have to select a CAN-USB-CAN device'))
 				return
@@ -3036,7 +3057,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def on_n2k_output(self, e):
 		isChecked = self.n2k_out_enable.GetValue()
 		if isChecked:
-			if not self.can_usb.GetValue():
+			if self.can_usb.GetSelection() == 0:
 				self.n2k_out_enable.SetValue(False)
 				self.ShowStatusBarBLACK(_('You have to select a CAN-USB-CAN device'))
 				return
@@ -3051,8 +3072,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.N2K_diagnostic_out_b.Enable()
 
 	def on_N2K_setting(self, e):
-		tty = str(self.can_usb.GetValue())
-		if len(tty) == 0:
+		if self.can_usb.GetSelection() == 0:
 			self.ShowStatusBarBLACK(_('You have to select a CAN-USB-CAN device'))
 			return
 		subprocess.call(['pkill', '-f', 'CAN-USB-stick.py'])
@@ -3062,8 +3082,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.ShowStatusBarBLACK(_('Select PGNs to transmit and enable N2K input/output again.'))
 
 	def on_N2K_diagnostic(self, e):
-		tty = str(self.can_usb.GetValue())
-		if len(tty) == 0:
+		if self.can_usb.GetSelection() == 0:
 			self.ShowStatusBarBLACK(_('You have to select a CAN-USB-CAN device'))
 			return
 		subprocess.call(['pkill', '-f', 'diagnostic-N2K-input.py'])
@@ -3071,8 +3090,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.ShowStatusBarBLACK(_('Show received PGNs.'))
 
 	def on_N2K_diagnostic_out(self, e):
-		tty = str(self.can_usb.GetValue())
-		if len(tty) == 0:
+		if self.can_usb.GetSelection() == 0:
 			self.ShowStatusBarBLACK(_('You have to select a CAN-USB-CAN device'))
 			return
 		subprocess.call(['pkill', '-f', 'diagnostic-N2K-output.py'])
@@ -3216,11 +3234,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.button_sms_test.Bind(wx.EVT_BUTTON, self.on_sms_test)
 
 	def read_sms(self):
-		if self.conf.get('SMS', 'serial') == '0':
-			try:
-				self.sms_dev.SetValue(self.SerDevLs[0])
-			except:
-				pass
+		if self.conf.get('SMS', 'serial') == 'none' or self.conf.get('SMS', 'serial') == '':
+			self.sms_dev.SetSelection(0)
 		else:
 			self.sms_dev.SetValue(self.conf.get('SMS', 'serial'))
 		self.sms_bt.SetValue(self.conf.get('SMS', 'bluetooth'))
@@ -3257,7 +3272,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def onsms_enable(self, e):
 		isChecked = self.sms_enable.GetValue()
 		if isChecked:
-			if self.sms_dev.GetValue() == _('none'):
+			if self.sms_dev.GetSelection() == 0:
 				if self.sms_bt.GetValue() == '':
 					self.ShowStatusBarRED(_('You have to provide a serial port or a bluetooth address.'))
 					self.sms_enable.SetValue(False)
@@ -3275,8 +3290,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			else:
 				connection = self.sms_con.GetValue()
 			self.conf.set('SMS', 'enable', '1')
-			if self.sms_dev.GetValue() == _('none'):
-				self.conf.set('SMS', 'serial', '0')
+			if self.sms_dev.GetSelection() == 0:
+				self.conf.set('SMS', 'serial', 'none')
 				port = bluetooth
 			else:
 				self.conf.set('SMS', 'serial', serial)
