@@ -20,11 +20,7 @@ from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 try:
 	from classes.add_DS18B20 import addDS18B20
 except:
-	print '1-Wire must be enabled in "Raspberry Pi Configuration->Interfaces->1-Wire"'
-	app = wx.App(False)
-	wx.Frame( None, title="OpenPlotter", size=(710, 460))
-	wx.MessageBox('1-Wire must be enabled in "Raspberry Pi Configuration->Interfaces->1-Wire"', 'Warning', wx.OK | wx.ICON_WARNING)
-	exit()
+        addDS18B20 = None
 from classes.actions import Actions
 from classes.add_MCP import addMCP
 from classes.add_i2c import addI2c
@@ -2750,6 +2746,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.edit_add_DS18B20(0)
 
 	def edit_add_DS18B20(self, edit):
+                if not addDS18B20:
+                	print '1-Wire must be enabled in "Raspberry Pi Configuration->Interfaces->1-Wire"'
+                        app = wx.App(False)
+                        wx.Frame( None, title="OpenPlotter", size=(710, 460))
+                        wx.MessageBox('1-Wire must be enabled in "Raspberry Pi Configuration->Interfaces->1-Wire"', 'Warning', wx.OK | wx.ICON_WARNING)
+                        return
+
 		dlg = addDS18B20(edit)
 		res = dlg.ShowModal()
 		if res == wx.ID_OK:
@@ -3112,9 +3115,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.restart_SK(0x0000)
 		try:	
 			response = requests.get('http://localhost:3000/signalk')
-		except:
-			wx.MessageBox("SignalK doesn't work! Openplotter will exit because it wasn't able to start SignalK", 'Error', wx.OK | wx.ICON_ERROR)
-			self.close()
+		except Exception, e:
+			wx.MessageBox("SignalK doesn't work! Openplotter will exit because it wasn't able to start SignalK" + str(e), 'Error', wx.OK | wx.ICON_ERROR)
+			self.Close()
 		data = response.json()
 		text = _('Version: ').decode('utf8')+data['endpoints']['v1']['version']
 		text += '\n\n'
@@ -3647,7 +3650,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 ############################## Main
 if __name__ == "__main__":
 	conf = Conf()
-	currentpath = conf.home+conf.get('GENERAL', 'op_folder')+'/openplotter'
+	currentpath = conf.get('GENERAL', 'op_folder')
 	app = wx.App()
 	bitmap = wx.Bitmap(currentpath+'/openplotter.ico', wx.BITMAP_TYPE_ICO)
 	splash = wx.SplashScreen(bitmap, wx.SPLASH_CENTRE_ON_SCREEN | wx.SPLASH_TIMEOUT, 500, None, style=wx.SIMPLE_BORDER | wx.STAY_ON_TOP)

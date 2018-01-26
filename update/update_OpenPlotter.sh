@@ -17,7 +17,7 @@ if [ -z $op_folder ]; then
 	op_folder="/.config"
 fi
 
-cd $HOME$op_folder
+cd $op_folder/..
 
 echo
 echo "DOWNLOADING NEW OPENPLOTTER CODE..."
@@ -41,7 +41,7 @@ cp -a openplotter/ $DIRDATE/
 cd $DIRDATE
 find . -name "*.pyc" -type f -delete
 
-cd $HOME$op_folder
+cd $op_folder/..
 
 source openplotter_tmp/update/update_settings.sh
 if [ $major = 1 ]; then
