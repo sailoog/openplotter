@@ -24,7 +24,7 @@ if platform.machine()[0:3] == 'arm':
 class addI2c(wx.Dialog):
 	def __init__(self, parent):
 
-		title = _('Add I2C sensor')
+		title = _('Add I2C sensor without compass')
 
 		wx.Dialog.__init__(self, None, title=title, size=(450, 400))
 

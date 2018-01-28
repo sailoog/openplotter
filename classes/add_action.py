@@ -59,12 +59,16 @@ class addAction(wx.Dialog):
 		self.repeat_unit.SetValue(_('no repeat'))
 
 		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
-		okBtn = wx.Button(panel, wx.ID_OK)
+		self.okBtn = wx.Button(panel, wx.ID_OK, pos=(10, 10))
+		self.okBtn.Hide()
+		self.ok = wx.Button(panel, label=_('OK'))
+		self.Bind(wx.EVT_BUTTON, self.ok_conf, self.ok)
+		
 
 		hbox = wx.BoxSizer(wx.HORIZONTAL)
 		hbox.Add((0, 0), 1, wx.ALL | wx.EXPAND, 5)
 		hbox.Add(cancelBtn, 0, wx.ALL | wx.EXPAND, 5)
-		hbox.Add(okBtn, 0, wx.ALL | wx.EXPAND, 5)
+		hbox.Add(self.ok, 0, wx.ALL | wx.EXPAND, 5)
 
 		hbox2 = wx.BoxSizer(wx.HORIZONTAL)
 		hbox2.Add(self.repeat, 1, wx.LEFT | wx.EXPAND, 5)
@@ -160,5 +164,23 @@ class addAction(wx.Dialog):
 			self.data.SetValue(self.data.GetValue()+'<'+key+'>')
 		dlg.Destroy()
 
+	def ok_conf(self,e):	
+		action_selection = self.action_select.GetCurrentSelection()
+		if action_selection == -1:
+			self.ShowMessage(_('Failed. Select an action.'))
+			return
+		if self.repeat.GetValue():
+			repeat = self.repeat.GetValue()
+		else:
+			repeat = '0'
+		try:
+			repeat = float(repeat)
+		except:
+			self.ShowMessage(_('Failed. "Repeat after" must be a number.'))
+			return
+		
+		evt = wx.PyCommandEvent(wx.EVT_BUTTON.typeId,self.okBtn.GetId())
+		wx.PostEvent(self, evt)
+			
 	def ShowMessage(self, w_msg):
 		wx.MessageBox(w_msg, 'Info', wx.OK | wx.ICON_INFORMATION)

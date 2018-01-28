@@ -2240,39 +2240,19 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		dlg = addGPIO(avalaible_gpio, edit)
 		res = dlg.ShowModal()
 		if res == wx.ID_OK:
-			name = dlg.name.GetValue()
+			gpio_selection = dlg.gpio_select.GetValue().encode('utf8')
+			pull_selection = dlg.pull_select.GetValue().encode('utf8')
+			name = dlg.name.GetValue().encode('utf8')
 			io_selection = dlg.io_select.GetValue()
 			if io_selection == _('output'):
 				io = 'out'
 			else:
 				io = 'in'
-			if io == 'out':
-				dlg2 = wx.MessageDialog(None, _(
-					'CAUTION. If you connect a closed switch or some inappropriate circuit, you could short out and damage your board when this output becomes "High". Are you sure to enable this output?'),
-										_('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_EXCLAMATION)
-				if dlg2.ShowModal() == wx.ID_YES:
-					dlg2.Destroy()
-				else:
-					dlg2.Destroy()
-					dlg.Destroy()
-					return
-			gpio_selection = dlg.gpio_select.GetValue()
-			pull_selection = dlg.pull_select.GetValue()
-			if not name or not io_selection or not gpio_selection or (not pull_selection and io == 'in'):
-				self.ShowMessage(_('Failed. You must fill in all fields.'))
-				dlg.Destroy()
-				return
-			if not re.match('^[0-9a-zA-Z]+$', name):
-				self.ShowMessage(_('Failed. The name must contain only letters and numbers.'))
-				dlg.Destroy()
-				return
+			gpioTmp = [name, io, gpio_selection, pull_selection]
 			if edit == 0:
-				self.gpio.append([name.encode('utf8'), io, gpio_selection.encode('utf8'), pull_selection.encode('utf8')])
+				self.gpio.append(gpioTmp)
 			else:
-				self.gpio[edit[0]][0] = name.encode('utf8')
-				self.gpio[edit[0]][1] = io
-				self.gpio[edit[0]][2] = gpio_selection.encode('utf8')
-				self.gpio[edit[0]][3] = pull_selection.encode('utf8')
+				self.gpio[edit[0]] = gpioTmp
 			self.apply_changes_gpio()
 		dlg.Destroy()
 
@@ -2520,10 +2500,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			value = dlg.value.GetValue()
 			if value:
 				value = value.encode('utf8')
-			else:
-				self.ShowMessage(_('Failed. Enter a value.'))
-				dlg.Destroy()
-				return
 			if dlg.always.GetValue():
 				SKkey0 = _('Date')
 				SKkey = -1
@@ -2531,18 +2507,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				if dlg.skvalue.GetValue(): magnitude = 'value'
 				elif dlg.sktimestamp.GetValue(): magnitude = 'timestamp'
 				elif dlg.sksource.GetValue(): magnitude = 'source'
-				else:
-					self.ShowMessage(_('Failed. Select value, timestamp or source.'))
-					dlg.Destroy()
-					return
 				SKkey0 = dlg.SKkey.GetValue().encode('utf8')
 				if SKkey0: 
 					SKkey0 = SKkey0+'.'+magnitude
 					SKkey = SKkey0
-				else:
-					self.ShowMessage(_('Failed. Select a Signal K key.'))
-					dlg.Destroy()
-					return
 			if edit == 0:
 				self.list_triggers.Append([SKkey0, operator0.decode('utf8'), value.decode('utf8')])
 				tmp = [1, SKkey, operator, value, []]
@@ -2585,10 +2553,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		res = dlg.ShowModal()
 		if res == wx.ID_OK:
 			action_selection = dlg.action_select.GetCurrentSelection()
-			if action_selection == -1:
-				self.ShowMessage(_('Failed. Select an action.'))
-				dlg.Destroy()
-				return
 			if dlg.repeat.GetValue():
 				repeat = dlg.repeat.GetValue()
 			else:
@@ -2596,9 +2560,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			try:
 				repeat = float(repeat)
 			except:
-				self.ShowMessage(_('Failed. "Repeat after" must be a number.'))
-				dlg.Destroy()
-				return
+				repeat = 0.0
 			action = self.actions.options[action_selection][0]
 			data = dlg.data.GetValue().encode('utf8')
 			time_units_selection = dlg.repeat_unit.GetCurrentSelection()
@@ -2757,33 +2719,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			SKkey = dlg.SKkey.GetValue()
 			sensor_id = dlg.id_select.GetValue()
 			offset = dlg.offset.GetValue()
-			if not SKkey:
-				self.ShowMessage(_('Failed. Select a Signal K key.'))
-				dlg.Destroy()
-				return
-			if not name:
-				self.ShowMessage(_('Failed. Provide a name.'))
-				dlg.Destroy()
-				return
-			if not re.match('^[0-9a-zA-Z]+$', name):
-				self.ShowMessage(_('Failed. Name must contain only letters and numbers.'))
-				dlg.Destroy()
-				return
-			if sensor_id == '':
-				self.ShowMessage(_('Failed. Select sensor ID.'))
-				dlg.Destroy()
-				return
-			try:
-				float(offset)
-			except:
-				offset = '0.0'
+			DS18B20Tmp = [name, SKkey, sensor_id, offset]
+			DS18B20TmpE = [x.encode('utf-8') for x in DS18B20Tmp]
 			if edit == 0:
-				self.DS18B20.append([name, SKkey, sensor_id, offset])
+				self.DS18B20.append(DS18B20TmpE)
 			else:
-				self.DS18B20[edit[0]][0] = name
-				self.DS18B20[edit[0]][1] = SKkey
-				self.DS18B20[edit[0]][2] = sensor_id
-				self.DS18B20[edit[0]][3] = offset
+				self.DS18B20[edit[0]]=DS18B20TmpE
+				
 			self.apply_changes_DS18B20()
 		dlg.Destroy()
 
@@ -2850,9 +2792,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			temp_list = []
 		for ii in temp_list:
 			self.USBinst.append(ii)
-			self.list_USBinst.Append(
-				[ii[0].decode('utf8'), ii[1].decode('utf8'), ii[2].decode('utf8'), ii[4].decode('utf8'),
-				 ii[3].decode('utf8'), ii[5]])
+			USBinstTmp = [ii[0],ii[1],ii[2],ii[4],ii[3],ii[5]]
+			self.list_USBinst.Append([x.decode('utf-8') for x in USBinstTmp])
 			sentence = 1
 		try:
 			filesize = os.stat('/etc/udev/rules.d/10-openplotter.rules').st_size
@@ -2865,11 +2806,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.apply_changes_USBinst()
 
 	def edit_USBinst(self, e):
-		selected_USBinst = e.GetIndex()
-		edit = [selected_USBinst, self.USBinst[selected_USBinst][0], self.USBinst[selected_USBinst][1],
-				self.USBinst[selected_USBinst][2], self.USBinst[selected_USBinst][3], self.USBinst[selected_USBinst][4],
-				self.USBinst[selected_USBinst][5], self.USBinst[selected_USBinst][6]]
-		self.edit_add_USBinst(edit)
+		#selected_USBinst = e.GetIndex()
+		jj = self.USBinst[e.GetIndex()]
+		self.edit_add_USBinst([e.GetIndex(),jj[0],jj[1],jj[2],jj[3],jj[4],jj[5],jj[6]])
 
 	def on_add_USBinst(self, e):
 		self.edit_add_USBinst(0)
@@ -2878,44 +2817,27 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		dlg = addUSBinst(edit,self)
 		res = dlg.ShowModal()
 		if res == wx.ID_OK:
-			OPname_selection = dlg.OPname_select.GetValue()
-			if not re.match('^[0-9a-zA-Z]{1,8}$', OPname_selection):
-				self.ShowMessage(_('Failed. The new name must be a string between 1 and 8 letters and/or numbers.'))
-				dlg.Destroy()
-				return
-			OPname_selection = 'ttyOP_' + OPname_selection
-			OPname_selection = OPname_selection.encode('utf8')
+			OPname_selection = 'ttyOP_' + dlg.OPname_select.GetValue()
 			vendor = dlg.vendor
-			vendor = vendor.encode('utf8')
 			product = dlg.product
-			product = product.encode('utf8')
 			serial = dlg.serial
-			serial = serial.encode('utf8')
 			con_port = dlg.con_port
-			con_port = con_port.encode('utf8')
 			device = dlg.device
-			device = device.encode('utf8')
 			rem = dlg.rem
+			USBinstTmp = [OPname_selection, vendor, product, serial, con_port, rem, device]
+			USBinstTmpE = [x.encode('utf-8') for x in USBinstTmp]
 			if edit == 0:
 				self.list_USBinst.Append(
-					[OPname_selection.decode('utf8'), vendor.decode('utf8'), product.decode('utf8'),
-					 con_port.decode('utf8'), serial.decode('utf8'), rem])
-				self.USBinst.append([OPname_selection, vendor, product, serial, con_port, rem, device])
+					[OPname_selection, vendor, product, con_port, serial, rem])
+				self.USBinst.append(USBinstTmpE)
 			else:
-				self.list_USBinst.SetStringItem(edit[0], 0, OPname_selection.decode('utf8'))
-				self.list_USBinst.SetStringItem(edit[0], 1, vendor.decode('utf8'))
-				self.list_USBinst.SetStringItem(edit[0], 2, product.decode('utf8'))
-				self.list_USBinst.SetStringItem(edit[0], 3, con_port.decode('utf8'))
-				self.list_USBinst.SetStringItem(edit[0], 4, serial.decode('utf8'))
-				# self.list_USBinst.SetStringItem(edit[0],5,device.decode('utf8'))
+				self.list_USBinst.SetStringItem(edit[0], 0, OPname_selection)
+				self.list_USBinst.SetStringItem(edit[0], 1, vendor)
+				self.list_USBinst.SetStringItem(edit[0], 2, product)
+				self.list_USBinst.SetStringItem(edit[0], 3, con_port)
+				self.list_USBinst.SetStringItem(edit[0], 4, serial)
 				self.list_USBinst.SetStringItem(edit[0], 5, rem)
-				self.USBinst[edit[0]][0] = OPname_selection
-				self.USBinst[edit[0]][1] = vendor
-				self.USBinst[edit[0]][2] = product
-				self.USBinst[edit[0]][3] = serial
-				self.USBinst[edit[0]][4] = con_port
-				self.USBinst[edit[0]][5] = rem
-				self.USBinst[edit[0]][6] = device
+				self.USBinst[edit[0]] = USBinstTmpE
 			self.apply_changes_USBinst()
 		dlg.Destroy()
 
