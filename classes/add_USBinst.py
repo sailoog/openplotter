@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 import wx
+import re
 
 
 class addUSBinst(wx.Dialog):
@@ -104,8 +105,11 @@ class addUSBinst(wx.Dialog):
 							 vendor_db + ' ' + model_db])
 
 		cancelBtn = wx.Button(panel, wx.ID_CANCEL, pos=(195, 220))
-		okBtn = wx.Button(panel, wx.ID_OK, pos=(305, 220))
-
+		self.okBtn = wx.Button(panel, wx.ID_OK, pos=(305, 220))
+		self.okBtn.Hide()
+		self.ok = wx.Button(panel, label=_('OK'), pos=(305, 220))
+		self.Bind(wx.EVT_BUTTON, self.ok_conf, self.ok)
+		
 	def on_enable_dev(self, e):
 		if self.rem_dev.GetValue():
 			self.rem_port.SetValue(False)
@@ -138,3 +142,13 @@ class addUSBinst(wx.Dialog):
 		self.OPname_label.Enable()
 		self.rem_dev.Enable()
 		self.rem_port.Enable()
+
+	def ok_conf(self,e):
+		if not re.match('^[0-9a-zA-Z]{1,8}$', self.OPname_select.GetValue()):
+			self.ShowMessage(_('Failed. The new name must be a string between 1 and 8 letters and/or numbers.'))
+			return
+		evt = wx.PyCommandEvent(wx.EVT_BUTTON.typeId,self.okBtn.GetId())
+		wx.PostEvent(self, evt)
+
+	def ShowMessage(self, w_msg):
+		wx.MessageBox(w_msg, 'Info', wx.OK | wx.ICON_INFORMATION)		

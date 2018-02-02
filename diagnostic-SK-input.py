@@ -23,7 +23,7 @@ import os
 import websocket
 import wx
 import time
-
+from classes.getkeys import GetKeys
 from classes.conf import Conf
 from classes.language import Language
 
@@ -144,13 +144,8 @@ class MyFrame(wx.Frame):
 	def read(self):
 		self.list_SK_unit = []
 
-		try:
-			with open(self.home+'/.config/signalk-server-node/node_modules/@signalk/signalk-schema/dist/keyswithmetadata.json') as data_file:
-				data = json.load(data_file)
-		except:
-			#old signalk
-			with open(self.home+'/.config/signalk-server-node/node_modules/@signalk/signalk-schema/src/keyswithmetadata.json') as data_file:
-				data = json.load(data_file)
+		self.keys = GetKeys()
+		data = self.keys.data
 
 		data_sk_unit_private = []
 		if os.path.isfile(self.home+'/.openplotter/private_unit.json'):

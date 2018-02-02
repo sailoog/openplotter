@@ -15,29 +15,36 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 import json
+import wx
 from conf import Conf
+
 
 class GetKeys:
 	def __init__(self):
+		keys = []
+
 		conf = Conf()
 		home = conf.home
-		keys = []
-		
+		self.data = ""
 		try:
 			with open(home+'/.config/signalk-server-node/node_modules/@signalk/signalk-schema/dist/keyswithmetadata.json') as data_file:
-				data = json.load(data_file)
+				self.data = json.load(data_file)
 		except:
-			#old signalk
-			with open(home+'/.config/signalk-server-node/node_modules/@signalk/signalk-schema/src/keyswithmetadata.json') as data_file:
-				data = json.load(data_file)
-		for i in data:
+			try:
+				#old signalk
+				with open(home+'/.config/signalk-server-node/node_modules/@signalk/signalk-schema/src/keyswithmetadata.json') as data_file:
+					self.data = json.load(data_file)
+			except:
+				self.ShowMessage(_('file not found ')+'keyswithmetadata.json')		
+
+		for i in self.data:
 			if '/vessels/*/' in i:
 				key = i.replace('/vessels/*/','')
 				key = key.replace('RegExp','*')
 				key = key.replace('/','.')
-				if data[i].has_key('description'): description = data[i]['description']
+				if self.data[i].has_key('description'): description = self.data[i]['description']
 				else: description = '[missing]'
-				if data[i].has_key('units'): units = data[i]['units']
+				if self.data[i].has_key('units'): units = self.data[i]['units']
 				else: units = ''
 				keys.append([key,description,units])
 		list_tmp = []
@@ -56,3 +63,6 @@ class GetKeys:
 		self.keys = sorted(keys)
 		self.groups = sorted(groups)
 		self.ungrouped = sorted(ungrouped)
+		
+	def ShowMessage(self, w_msg):
+		wx.MessageBox(w_msg, 'Info', wx.OK | wx.ICON_INFORMATION)						

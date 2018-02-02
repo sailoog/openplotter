@@ -66,7 +66,10 @@ class addTrigger(wx.Dialog):
 		self.format_t = wx.StaticText(panel, label=_('format: ').decode('utf8')+str( datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S')))
 
 		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
-		okBtn = wx.Button(panel, wx.ID_OK)
+		self.okBtn = wx.Button(panel, wx.ID_OK, pos=(10, 10))
+		self.okBtn.Hide()
+		self.ok = wx.Button(panel, label=_('OK'))
+		self.Bind(wx.EVT_BUTTON, self.ok_conf, self.ok)
 
 		hbox2 = wx.BoxSizer(wx.HORIZONTAL)
 		hbox2.Add(self.SKkey, 1, wx.LEFT | wx.EXPAND, 5)
@@ -80,7 +83,7 @@ class addTrigger(wx.Dialog):
 		hbox = wx.BoxSizer(wx.HORIZONTAL)
 		hbox.Add((0, 0), 1, wx.ALL | wx.EXPAND, 5)
 		hbox.Add(cancelBtn, 0, wx.ALL | wx.EXPAND, 5)
-		hbox.Add(okBtn, 0, wx.ALL | wx.EXPAND, 5)
+		hbox.Add(self.ok, 0, wx.ALL | wx.EXPAND, 5)
 
 		vbox = wx.BoxSizer(wx.VERTICAL)
 		vbox.AddSpacer(5)
@@ -200,6 +203,32 @@ class addTrigger(wx.Dialog):
 					return
 		dlg.Destroy()
 		self.SKkey.SetValue(key)
+		
+	def ok_conf(self,e):
+		operators_ref = self.operators_ref
+		operator = operators_ref[dlg.operator.GetSelection()]
+		operator0 = self.operators_list[operator]
+		if not self.value.GetValue():
+			self.ShowMessage(_('Failed. Enter a value.'))
+			return
+		if self.always.GetValue():
+			pass
+		else:
+			if self.skvalue.GetValue(): magnitude = 'value'
+			elif self.sktimestamp.GetValue(): magnitude = 'timestamp'
+			elif self.sksource.GetValue(): magnitude = 'source'
+			else:
+				self.ShowMessage(_('Failed. Select value, timestamp or source.'))
+				return
+			SKkey0 = self.SKkey.GetValue().encode('utf8')
+			if SKkey0: 
+				pass
+			else:
+				self.ShowMessage(_('Failed. Select a Signal K key.'))
+				return
+
+		evt = wx.PyCommandEvent(wx.EVT_BUTTON.typeId,self.okBtn.GetId())
+		wx.PostEvent(self, evt)		
 
 	def ShowMessage(self, w_msg):
 		wx.MessageBox(w_msg, 'Info', wx.OK | wx.ICON_INFORMATION)
