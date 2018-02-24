@@ -1,0 +1,3540 @@
+#!/usr/bin/python
+
+# This file is part of Openplotter.
+# Copyright (C) 2015 by sailoog <https://github.com/sailoog/openplotter>
+#
+# Openplotter is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# any later version.
+# Openplotter is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
+
+import ConfigParser, json, os, io, pyudev, re, requests, subprocess, sys, time, webbrowser, wx, wx.lib.scrolledpanel
+from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
+try:
+	from classes.add_DS18B20 import addDS18B20
+except:
+	print '1-Wire must be enabled in "Raspberry Pi Configuration->Interfaces->1-Wire"'
+	app = wx.App(False)
+	wx.Frame( None, title="OpenPlotter", size=(710, 460))
+	wx.MessageBox('1-Wire must be enabled in "Raspberry Pi Configuration->Interfaces->1-Wire"', 'Warning', wx.OK | wx.ICON_WARNING)
+	exit()
+from classes.actions import Actions
+from classes.add_MCP import addMCP
+from classes.add_i2c import addI2c
+from classes.edit_i2c import editI2c
+from classes.add_USBinst import addUSBinst
+from classes.add_action import addAction
+from classes.add_gpio import addGPIO
+from classes.add_kplex import addkplex
+from classes.add_tool10 import addTool10
+from classes.add_topic import addTopic
+from classes.add_trigger import addTrigger
+from classes.add_value_setting import addvaluesetting
+from classes.add_deviation_setting import adddeviationsetting
+from classes.check_vessel_self import checkVesselSelf
+from classes.conf import Conf
+from classes.language import Language
+
+class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
+	def __init__(self, parent, height):
+		wx.ListCtrl.__init__(self, parent, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(565, height))
+		CheckListCtrlMixin.__init__(self)
+		ListCtrlAutoWidthMixin.__init__(self)
+
+
+class CheckListCtrl2(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
+	def __init__(self, parent, height):
+		wx.ListCtrl.__init__(self, parent, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(650, height))
+		CheckListCtrlMixin.__init__(self)
+		ListCtrlAutoWidthMixin.__init__(self)
+
+
+class MainFrame(wx.Frame):
+	def __init__(self):
+		self.conf = conf
+		self.home = conf.home
+		self.conf_folder = conf.conf_folder
+		self.currentpath = currentpath
+
+		wx.Frame.__init__(self, None, title="OpenPlotter", size=(710, 460))
+		if self.util_process_exist('startup.py'):
+			print "System not ready, try later."
+			sys.exit(0)
+		self.Bind(wx.EVT_CLOSE, self.when_closed)
+		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
+		self.language = self.conf.get('GENERAL', 'lang')
+		self.vessel_self = checkVesselSelf(self.conf)
+		Language(self.conf)
+		self.p = wx.lib.scrolledpanel.ScrolledPanel(self, -1, style=wx.TAB_TRAVERSAL | wx.SUNKEN_BORDER)
+		self.p.SetAutoLayout(1)
+		self.p.SetupScrolling()
+		self.nb = wx.Notebook(self.p)
+		self.p_usb = wx.Panel(self.nb)
+		self.p_kplex = wx.Panel(self.nb)
+		self.p_n2k = wx.Panel(self.nb)
+		self.p_sk = wx.Panel(self.nb)
+		self.p_wifi = wx.Panel(self.nb)
+		self.p_compass = wx.Panel(self.nb)
+		self.p_action = wx.Panel(self.nb)
+		self.p_gpio = wx.Panel(self.nb)
+		self.p_i2c = wx.Panel(self.nb)
+		self.p_1w = wx.Panel(self.nb)
+		self.p_spi = wx.Panel(self.nb)
+		self.p_account = wx.Panel(self.nb)
+		self.p_mqtt = wx.Panel(self.nb)
+		self.p_sms = wx.Panel(self.nb)
+		self.p_startup = wx.Panel(self.nb)
+		self.nb.AddPage(self.p_usb, _('USB manager'))
+		self.nb.AddPage(self.p_kplex, 'NMEA 0183')
+		self.nb.AddPage(self.p_n2k, 'N2K')
+		self.nb.AddPage(self.p_sk, 'Signal K')
+		self.nb.AddPage(self.p_wifi, _('WiFi AP'))
+		self.nb.AddPage(self.p_compass, _('Compass'))
+		self.nb.AddPage(self.p_action, _('Actions'))
+		self.nb.AddPage(self.p_gpio, _('GPIO'))
+		self.nb.AddPage(self.p_i2c, _('I2C'))
+		self.nb.AddPage(self.p_1w, '1W')
+		self.nb.AddPage(self.p_spi, 'SPI')
+		self.nb.AddPage(self.p_mqtt, 'MQTT')
+		self.nb.AddPage(self.p_account, _('Accounts'))
+		self.nb.AddPage(self.p_sms, _('SMS'))
+		self.nb.AddPage(self.p_startup, _('Startup'))
+		sizer = wx.BoxSizer()
+		sizer.Add(self.nb, 1, wx.EXPAND)
+		self.p.SetSizer(sizer)
+		self.icon = wx.Icon(self.currentpath + '/openplotter.ico', wx.BITMAP_TYPE_ICO)
+		self.SetIcon(self.icon)
+		self.CreateStatusBar()
+		font_statusBar = self.GetStatusBar().GetFont()
+		font_statusBar.SetWeight(wx.BOLD)
+		self.GetStatusBar().SetFont(font_statusBar)
+		self.GetStatusBar().SetForegroundColour(wx.BLACK)
+		self.nb.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.Changingpage)
+		self.Centre()
+
+		########################### menu
+
+		self.menubar = wx.MenuBar()
+		self.settings = wx.Menu()
+		self.time_item1 = self.settings.Append(wx.ID_ANY, _('Set time zone'), _('Set time zone in the new window'))
+		self.Bind(wx.EVT_MENU, self.time_zone, self.time_item1)
+		self.time_item2 = self.settings.Append(wx.ID_ANY, _('Set time from NMEA'), _('Set system time from NMEA data'))
+		self.Bind(wx.EVT_MENU, self.time_gps, self.time_item2)
+		self.gpsd_item1 = self.settings.Append(wx.ID_ANY, _('Set GPSD'), _('Set GPSD in the new window'))
+		self.Bind(wx.EVT_MENU, self.reconfigure_gpsd, self.gpsd_item1)
+		self.settings.AppendSeparator()
+		self.sdr_ais_item1 = self.settings.Append(wx.ID_ANY, _('SDR receiver'),
+												  _('Set an SDR receiver in the new window'))
+		self.Bind(wx.EVT_MENU, self.open_sdr_ais, self.sdr_ais_item1)
+		self.deviation_table = self.settings.Append(wx.ID_ANY, _('Deviation Table'),
+													_('Create a deviation table for your boat'))
+		self.Bind(wx.EVT_MENU, self.on_deviation_table, self.deviation_table)
+		self.calculate_item1 = self.settings.Append(wx.ID_ANY, _('Calculate'),
+													_('Calculate new data from current values'))
+		self.Bind(wx.EVT_MENU, self.open_calculate, self.calculate_item1)
+		self.nmea_0183_item1 = self.settings.Append(wx.ID_ANY, _('NMEA 0183 generator'),
+													_('Generate NMEA 0183 from current values'))
+		self.Bind(wx.EVT_MENU, self.open_nmea_0183, self.nmea_0183_item1)
+		self.nmea_2000_item1 = self.settings.Append(wx.ID_ANY, _('NMEA 2000 generator'),
+													_('Generate NMEA 2000 from current values'))
+		self.Bind(wx.EVT_MENU, self.open_nmea_2000, self.nmea_2000_item1)
+		self.settings.AppendSeparator()
+
+		self.tools_py = []
+		if self.conf.has_section('TOOLS'):
+			if self.conf.has_option('TOOLS', 'py'):
+				data = self.conf.get('TOOLS', 'py')
+				try:
+					temp_list = eval(data)
+				except:
+					temp_list = []
+				if type(temp_list) is list:
+					pass
+				else:
+					temp_list = []
+				for ii in temp_list:
+					self.tools_py.append(ii)
+
+		self.tool10_b = []
+		index = 0
+		for i in self.tools_py:
+			self.tool10_b.append(0)
+			self.tool10_b[index] = self.settings.Append(index, i[0], i[1])
+			self.Bind(wx.EVT_MENU, self.tool10, self.tool10_b[index])
+			index += 1
+		self.menubar.Append(self.settings, _('Tools'))
+
+		self.lang = wx.Menu()
+		self.lang_item8 = self.lang.Append(wx.ID_ANY, _('Basque'), _('Set Basque language'), kind=wx.ITEM_CHECK)
+		self.Bind(wx.EVT_MENU, self.lang_eu, self.lang_item8)
+		self.lang_item2 = self.lang.Append(wx.ID_ANY, _('Catalan'), _('Set Catalan language'), kind=wx.ITEM_CHECK)
+		self.Bind(wx.EVT_MENU, self.lang_ca, self.lang_item2)
+		self.lang_item5 = self.lang.Append(wx.ID_ANY, _('Dutch'), _('Set Dutch language'), kind=wx.ITEM_CHECK)
+		self.Bind(wx.EVT_MENU, self.lang_nl, self.lang_item5)		
+		self.lang_item1 = self.lang.Append(wx.ID_ANY, _('English'), _('Set English language'), kind=wx.ITEM_CHECK)
+		self.Bind(wx.EVT_MENU, self.lang_en, self.lang_item1)
+		self.lang_item4 = self.lang.Append(wx.ID_ANY, _('French'), _('Set French language'), kind=wx.ITEM_CHECK)
+		self.Bind(wx.EVT_MENU, self.lang_fr, self.lang_item4)
+		self.lang_item9 = self.lang.Append(wx.ID_ANY, _('Galician'), _('Set Galician language'), kind=wx.ITEM_CHECK)
+		self.Bind(wx.EVT_MENU, self.lang_gl, self.lang_item9)
+		self.lang_item6 = self.lang.Append(wx.ID_ANY, _('German'), _('Set German language'), kind=wx.ITEM_CHECK)
+		self.Bind(wx.EVT_MENU, self.lang_de, self.lang_item6)
+		self.lang_item7 = self.lang.Append(wx.ID_ANY, _('Italiano'), _('Set Italian language'), kind=wx.ITEM_CHECK)
+		self.Bind(wx.EVT_MENU, self.lang_it, self.lang_item7)
+		self.lang_item3 = self.lang.Append(wx.ID_ANY, _('Spanish'), _('Set Spanish language'), kind=wx.ITEM_CHECK)
+		self.Bind(wx.EVT_MENU, self.lang_es, self.lang_item3)
+		self.menubar.Append(self.lang, _('Language'))
+
+		self.update = wx.Menu()
+		self.opencpn_item1 = self.update.Append(wx.ID_ANY, _('Update OpenCPN'), _('Update OpenCPN to latest stable release'))
+		self.Bind(wx.EVT_MENU, self.update_opencpn, self.opencpn_item1)
+		self.opencpn_item2 = self.update.Append(wx.ID_ANY, _('Update OpenCPN plugins'), _('Update OpenCPN plugins to latest stable releases'))
+		self.Bind(wx.EVT_MENU, self.update_opencpn_plugins, self.opencpn_item2)
+		self.update.AppendSeparator()
+		self.system_item2 = self.update.Append(wx.ID_ANY, _('Set default OpenPlotter desktop'), _('Run this after a major update'))
+		self.Bind(wx.EVT_MENU, self.default_desktop, self.system_item2)		
+		self.update.AppendSeparator()
+		self.openplotter_item1 = self.update.Append(wx.ID_ANY, _('Update OpenPlotter'), _('Apply latest changes'))
+		self.Bind(wx.EVT_MENU, self.update_openplotter, self.openplotter_item1)
+		self.menubar.Append(self.update, _('Updates'))
+
+		self.helpm = wx.Menu()
+		self.helpm_item1 = self.helpm.Append(wx.ID_ANY, _('&About'), _('About OpenPlotter'))
+		self.Bind(wx.EVT_MENU, self.OnAboutBox, self.helpm_item1)
+		self.helpm_item2 = self.helpm.Append(wx.ID_ANY, _('OpenPlotter online documentation'),
+											 _('OpenPlotter online documentation'))
+		self.Bind(wx.EVT_MENU, self.op_doc, self.helpm_item2)
+		self.helpm_item2 = self.helpm.Append(wx.ID_ANY, _('OpenPlotter offline documentation'),
+											 _('OpenPlotter offline documentation'))
+		self.Bind(wx.EVT_MENU, self.op_doc_off, self.helpm_item2)
+		self.menubar.Append(self.helpm, _('&Help'))
+
+		self.SetMenuBar(self.menubar)
+		# ##########################menu
+		self.page_usb()
+		self.page_kplex()
+		self.page_n2k()
+		self.page_sk()
+		self.page_wifi()
+		self.page_compass()
+		self.page_action()
+		self.page_gpio()
+		self.page_i2c()
+		self.page_1w()
+		self.page_spi()
+		self.page_account()
+		self.page_mqtt()
+		self.page_sms()
+		self.page_startup()
+
+		self.manual_settings = ''
+		self.read_kplex_conf()
+		self.SerialCheck()
+		self.SerialWrongPort()
+		self.read_language()
+
+		self.read_account()
+		# self.read_sk()
+		self.read_sms()
+		self.read_startup()
+		self.read_wifi_conf()
+		self.read_triggers()
+		self.read_DS18B20()
+		self.read_USBinst()
+		self.read_gpio()
+		self.read_mqtt()
+		self.read_MCP()
+		self.read_i2c()
+		self.read_compass()
+		self.read_n2k()
+		self.read_triggers()
+		#self.when_closed(0x001)
+
+	###########################################	general functions
+
+	def read_language(self):
+		if self.language == 'en': self.lang.Check(self.lang_item1.GetId(), True)
+		if self.language == 'ca': self.lang.Check(self.lang_item2.GetId(), True)
+		if self.language == 'es': self.lang.Check(self.lang_item3.GetId(), True)
+		if self.language == 'fr': self.lang.Check(self.lang_item4.GetId(), True)
+		if self.language == 'nl': self.lang.Check(self.lang_item5.GetId(), True)
+		if self.language == 'de': self.lang.Check(self.lang_item6.GetId(), True)
+		if self.language == 'it': self.lang.Check(self.lang_item7.GetId(), True)
+		if self.language == 'eu': self.lang.Check(self.lang_item8.GetId(), True)
+		if self.language == 'gl': self.lang.Check(self.lang_item9.GetId(), True)
+
+	def ShowMessage(self, w_msg):
+		wx.MessageBox(w_msg, 'Info', wx.OK | wx.ICON_INFORMATION)
+		
+	def ShowStatusBar(self, w_msg, colour):
+		self.GetStatusBar().SetForegroundColour(colour)
+		self.SetStatusText(w_msg)
+
+	def ShowStatusBarRED(self, w_msg):
+		self.ShowStatusBar(w_msg, wx.RED)
+
+	def ShowStatusBarGREEN(self, w_msg):
+		self.ShowStatusBar(w_msg, wx.GREEN)
+
+	def ShowStatusBarBLACK(self, w_msg):
+		self.ShowStatusBar(w_msg, wx.BLACK)	
+		
+	def time_zone(self, event):
+		subprocess.Popen(['lxterminal', '-e', 'sudo dpkg-reconfigure tzdata'])
+		self.GetStatusBar().SetForegroundColour(wx.BLACK)
+		self.SetStatusText(_('Set time zone in the new window'))
+
+	def time_gps(self, event):
+		self.ShowStatusBarBLACK(_('Waiting for NMEA time...'))
+		time_gps_result = subprocess.check_output(['sudo', 'python', self.currentpath + '/time_gps.py'])
+		msg = ''
+		re = time_gps_result.splitlines()
+		for current in re:
+			msg+=current+'  '
+		self.ShowStatusBarBLACK('')
+		self.ShowMessage(msg)
+
+	def reconfigure_gpsd(self, event):
+		subprocess.Popen(['lxterminal', '-e', 'sudo nano /etc/default/gpsd'])
+		self.ShowStatusBarBLACK(_('Set GPSD in the new window'))
+
+	def open_sdr_ais(self, event):
+		subprocess.call(['pkill', '-f', 'SDR_AIS.py'])
+		subprocess.Popen(['python', self.currentpath + '/tools/SDR_AIS.py'])
+
+	def on_deviation_table(self, e):
+		dlg = adddeviationsetting(self)
+		dlg.ShowModal()
+		dlg.Destroy()
+
+	def open_calculate(self, event):
+		subprocess.call(['pkill', '-f', 'calculate.py'])
+		subprocess.Popen(['python', self.currentpath + '/tools/calculate.py'])
+
+	def open_nmea_0183(self, event):
+		subprocess.call(['pkill', '-f', 'NMEA_0183_generator.py'])
+		subprocess.Popen(['python', self.currentpath + '/tools/NMEA_0183_generator.py'])
+
+	def open_nmea_2000(self, event):
+		subprocess.call(['pkill', '-f', 'NMEA_2000_generator.py'])
+		subprocess.Popen(['python', self.currentpath + '/tools/NMEA_2000_generator.py'])
+
+	def tool10(self, event):
+		menuId = event.Id
+		dlg = addTool10()
+		res = dlg.ShowModal()
+		res = dlg.ButtonNr
+		dlg.Destroy()
+		if res != 4:
+			if os.path.isfile(self.conf_folder + '/tools/' + self.tools_py[menuId][2]):
+				subprocess.call(['pkill', '-9', '-f', self.tools_py[menuId][2]])					
+				if res == 2:
+					subprocess.Popen(['python', self.conf_folder + '/tools/' + self.tools_py[menuId][2]])
+				elif res == 1:
+					subprocess.Popen(['python', self.conf_folder + '/tools/' + self.tools_py[menuId][2], 'settings'])
+			else:
+				if os.path.isfile(self.currentpath + '/tools/' + self.tools_py[menuId][2]):
+					subprocess.call(['pkill', '-9', '-f', self.tools_py[menuId][2]])					
+					if res == 2:
+						subprocess.Popen(['python', self.currentpath + '/tools/' + self.tools_py[menuId][2]])
+					elif res == 1:
+						subprocess.Popen(['python', self.currentpath + '/tools/' + self.tools_py[menuId][2], 'settings'])
+				else:
+					print 'file not found: ', self.tools_py[menuId][2]
+
+	def clear_lang(self):
+		self.lang.Check(self.lang_item1.GetId(), False)
+		self.lang.Check(self.lang_item2.GetId(), False)
+		self.lang.Check(self.lang_item3.GetId(), False)
+		self.lang.Check(self.lang_item4.GetId(), False)
+		self.lang.Check(self.lang_item5.GetId(), False)
+		self.lang.Check(self.lang_item6.GetId(), False)
+		self.lang.Check(self.lang_item7.GetId(), False)
+		self.lang.Check(self.lang_item8.GetId(), False)
+		self.lang.Check(self.lang_item9.GetId(), False)
+		self.ShowMessage(_('The selected language will be enabled when you restart'))
+
+	def lang_en(self, e):
+		self.clear_lang()
+		self.lang.Check(self.lang_item1.GetId(), True)
+		self.conf.set('GENERAL', 'lang', 'en')
+
+	def lang_ca(self, e):
+		self.clear_lang()
+		self.lang.Check(self.lang_item2.GetId(), True)
+		self.conf.set('GENERAL', 'lang', 'ca')
+
+	def lang_es(self, e):
+		self.clear_lang()
+		self.lang.Check(self.lang_item3.GetId(), True)
+		self.conf.set('GENERAL', 'lang', 'es')
+
+	def lang_fr(self, e):
+		self.clear_lang()
+		self.lang.Check(self.lang_item4.GetId(), True)
+		self.conf.set('GENERAL', 'lang', 'fr')
+
+	def lang_nl(self, e):
+		self.clear_lang()
+		self.lang.Check(self.lang_item5.GetId(), True)
+		self.conf.set('GENERAL', 'lang', 'nl')
+
+	def lang_de(self, e):
+		self.clear_lang()
+		self.lang.Check(self.lang_item6.GetId(), True)
+		self.conf.set('GENERAL', 'lang', 'de')
+
+	def lang_it(self, e):
+		self.clear_lang()
+		self.lang.Check(self.lang_item7.GetId(), True)
+		self.conf.set('GENERAL', 'lang', 'it')
+
+	def lang_eu(self, e):
+		self.clear_lang()
+		self.lang.Check(self.lang_item8.GetId(), True)
+		self.conf.set('GENERAL', 'lang', 'eu')
+
+	def lang_gl(self, e):
+		self.clear_lang()
+		self.lang.Check(self.lang_item9.GetId(), True)
+		self.conf.set('GENERAL', 'lang', 'gl')
+
+	def update_opencpn(self, e):
+		subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/update_OpenCPN.sh'])
+		self.ShowStatusBarBLACK(_('Follow the instructions of the new window'))
+
+	def update_opencpn_plugins(self, e):
+		subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/update_OpenCPN_plugins.sh'])
+		self.ShowStatusBarBLACK(_('Follow the instructions of the new window'))
+
+	def update_openplotter(self, e):
+		repository = self.conf.get('GENERAL', 'repository')
+		vl = self.conf.get('GENERAL', 'version')
+		sl = self.conf.get('GENERAL', 'state')
+		vl_list = vl.split('.')
+		local_xxx = int(vl_list[0])
+		local_oxx = int(vl_list[1])
+		local_oox = int(vl_list[2])
+		if not repository:
+			repository = 'openplotter'
+			self.conf.set('GENERAL', 'repository', repository)
+		try:
+			r_master = requests.get('https://raw.githubusercontent.com/'+repository+'/openplotter/master/openplotter.conf')
+			r_beta = requests.get('https://raw.githubusercontent.com/'+repository+'/openplotter/beta/openplotter.conf')
+		except:
+			self.ShowStatusBarRED(_('It was not possible to connect to Github.'))
+			return
+		try:
+			data_conf = ConfigParser.SafeConfigParser()
+			data_conf.readfp(io.StringIO(r_master.text))
+			vr = data_conf.get('GENERAL','version')
+			sr = data_conf.get('GENERAL','state')
+			vr_list = vr.split('.')
+			remote_xxx = int(vr_list[0])
+			remote_oxx = int(vr_list[1])
+			remote_oox = int(vr_list[2])
+		except:
+			self.ShowStatusBarRED(_('Error reading versions.'))
+			return
+
+		check_beta = True
+		if remote_xxx > local_xxx:
+			check_beta = False
+		elif remote_oxx > local_oxx:
+			check_beta = False
+		elif remote_oox > local_oox:
+			check_beta = False
+		if check_beta:
+			try:
+				data_conf = ConfigParser.SafeConfigParser()
+				data_conf.readfp(io.StringIO(r_beta.text))
+				vr = data_conf.get('GENERAL','version')
+				sr = data_conf.get('GENERAL','state')
+				vr_list = vr.split('.')
+				remote_xxx = int(vr_list[0])
+				remote_oxx = int(vr_list[1])
+				remote_oox = int(vr_list[2])
+			except:
+				self.ShowStatusBarRED(_('Error reading versions.'))
+				return
+
+		msg = ''
+		if sl == 'stable' and sr != 'stable':
+			msg += _('You are running a stable version. If you update to a non stable version you will have to keep updating until a stable stage is reached again.\n\n').decode('utf8')
+		if remote_xxx > local_xxx:
+			msg += _('There is a Raspbian upgrade, it is recommended to download the new OpenPlotter RPI image: v').decode('utf8')+str(remote_xxx)+'.x.x '+sr+'.\n'
+			self.ShowMessage(msg)
+			return
+		elif remote_oxx > local_oxx:
+			msg += _('There is a major OpenPlotter update.\n').decode('utf8')
+			msg += _('Please make a backup image of your system before updating.\n\n').decode('utf8')
+			major_update = '1'
+		elif remote_oox > local_oox:
+			msg += _('There is a minor OpenPlotter update.\n\n').decode('utf8')
+			major_update = '0'
+		else:
+			msg += 'OpenPlotter '+vl+' '+sl+_(' is up to date.\n').decode('utf8')
+			msg += _('You do not need to update but if you think something was wrong in your last update, you can force a major update.\n\n').decode('utf8')
+			sr = sl
+			major_update = '1'
+		msg += _('Are you sure you want to update: ').decode('utf8')+vl+' '+sl+' --> '+vr+' '+sr+'?'
+		dlg = wx.MessageDialog(None, msg, _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_EXCLAMATION)
+		if dlg.ShowModal() == wx.ID_YES:
+			subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/update_OpenPlotter.sh', major_update, vr, sr, repository])
+			dlg.Destroy()
+			self.Close()
+		else: dlg.Destroy()
+
+	def default_desktop(self, e):
+		subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/default_openplotter_desk.sh'])
+		self.ShowStatusBarBLACK(_('Follow the instructions of the new window'))
+
+	def OnAboutBox(self, e):
+		description = _(
+			"OpenPlotter is a DIY, open-source, low-cost, low-consumption, modular and scalable sailing platform to run on ARM boards.")
+		licence = """This program is free software: you can redistribute it
+and/or modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version 2 of
+the License, or any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see http://www.gnu.org/licenses/"""
+
+		info = wx.AboutDialogInfo()
+		info.SetName('OpenPlotter')
+		info.SetVersion(self.conf.get('GENERAL', 'version')+' '+self.conf.get('GENERAL', 'state'))
+		info.SetDescription(description)
+		info.SetCopyright('2017 Sailoog')
+		info.SetWebSite('http://www.sailoog.com')
+		info.SetLicence(licence)
+		info.AddDeveloper(
+			'Sailoog\nhttp://github.com/sailoog/openplotter\n-------------------\nOpenCPN: http://opencpn.org/ocpn/\nzyGrib: http://www.zygrib.org/\nMultiplexer: http://www.stripydog.com/kplex/index.html\nrtl-sdr: http://sdr.osmocom.org/trac/wiki/rtl-sdr\naisdecoder: http://www.aishub.net/aisdecoder-via-sound-card.html\ngeomag: http://github.com/cmweiss/geomag\nIMU sensor: http://github.com/richards-tech/RTIMULib2\nNMEA parser: http://github.com/Knio/pynmea2\ntwython: http://github.com/ryanmcgrath/twython\npyrtlsdr: http://github.com/roger-/pyrtlsdr\nkalibrate-rtl: http://github.com/steve-m/kalibrate-rtl\nSignalK: http://signalk.org/\n\n')
+		info.AddDocWriter('Sailoog\n\nDocumentation: http://sailoog.gitbooks.io/openplotter-documentation/')
+		info.AddTranslator('Catalan, English and Spanish by Sailoog\nFrench by Nicolas Janvier.')
+		wx.AboutBox(info)
+
+	def op_doc(self, e):
+		url = "http://sailoog.gitbooks.io/openplotter-documentation/"
+		webbrowser.open(url, new=2)
+
+	def op_doc_off(self, e):
+		subprocess.Popen(['xpdf', self.currentpath+'/docs/openplotter-documentation-en.pdf'])
+
+	def SerialWrongPort(self):
+		try:
+			self.context
+		except NameError:
+			self.context = pyudev.Context()
+
+		data = self.conf.get('UDEV', 'USBinst')
+		try:
+			temp_list = eval(data)
+		except:
+			temp_list = []
+		for ic in temp_list:
+			if ic[5] == 'port':
+				for device in self.context.list_devices(subsystem='usb'):
+					dp = ""
+					imi = ""
+					ivi = ""
+					imfd = ""
+					ivfd = ""
+					if 'DEVPATH' in device: dp = device['DEVPATH']
+					if dp.find(ic[4]) > 0:
+						if 'PRODUCT' in device:
+							pr = device['PRODUCT']
+							s = pr.split('/')
+							imi = s[1].zfill(4)
+							ivi = s[0].zfill(4)
+						if imi == ic[2] and ivi == ic[1]:
+							pass
+						else:
+							if 'ID_MODEL_FROM_DATABASE' in device:    imfd = device['ID_MODEL_FROM_DATABASE']
+							if 'ID_VENDOR_FROM_DATABASE' in device:    ivfd = device['ID_VENDOR_FROM_DATABASE']
+							self.ShowMessage(_('Warning: You have connected the "').decode('utf8') + ivfd + ', ' + imfd + _(
+								'" to the usb port which is reserved for another device').decode('utf8'))
+
+	def SerialCheck(self):
+		self.SerDevLs = []
+		self.SerDevLsCheck = []
+		self.context = pyudev.Context()
+		for device in self.context.list_devices(subsystem='tty'):
+			i = device['DEVNAME']
+			if '/dev/ttyU' in i or '/dev/ttyA' in i or '/dev/ttyS' in i or '/dev/ttyO' in i or '/dev/r' in i or '/dev/i' in i or '/dev/naviDev' in i:
+				self.SerDevLs.append(i)
+				try:
+					if 'DEVLINKS' in device:
+						ii = device['DEVLINKS']
+						value = ii[ii.rfind('/dev/ttyOP_'):]
+						if value.find('/dev/ttyOP_') >= 0:
+							self.SerDevLs.append(value.split(' ')[0])
+				except Exception, e:
+					print 'no tty DEVLINKS found', str(e)
+
+				try:
+					serial = device['ID_SERIAL_SHORT']
+				except:
+					serial = ''
+				try:
+					vendor_db = device['ID_VENDOR_ID']
+				except:
+					vendor_db = ''
+				try:
+					model_db = device['ID_MODEL_ID']
+				except:
+					model_db = ''
+				self.SerDevLsCheck.append(serial + ' ' + vendor_db + ' ' + model_db)
+	
+		self.SerDevLs.sort()
+		self.SerDevLsCheck.sort()
+		self.can_usb.Clear()
+		self.sms_dev.Clear()
+		self.can_usb.AppendItems(self.SerDevLs)
+		self.sms_dev.AppendItems(self.SerDevLs)
+		
+		bak = ''
+		for i in self.SerDevLsCheck:
+			if i == bak:
+				data = self.conf.get('UDEV', 'USBinst')
+				try:
+					temp_list = eval(data)
+				except:
+					temp_list = []
+				for ii in temp_list:
+					if bak == ii[3] + ' ' + ii[1] + ' ' + ii[2] and ii[5] == 'dev':
+						self.ShowMessage(_('Error: USB-Port with vendor product number: "'+ ii[1] + ' ' + ii[2] + ' ' + ii[3] + '" must be set to "Remember port"'))
+			bak = i
+
+	def Changingpage(self, e):
+		self.ShowStatusBarBLACK('')
+
+	def when_closed(self, e):
+		self.nb.Destroy()
+		sys.exit(0)
+
+	def util_process_exist(self, process_name):
+		pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
+		exist = False
+		for pid in pids:
+			try:
+				if process_name in open(os.path.join('/proc', pid, 'cmdline'), 'rb').read():
+					exist = True
+			except IOError:  # proc has already terminated
+				continue
+			if exist:
+				break
+		return exist
+
+	###########################################	startup
+	def page_startup(self):
+		wx.StaticBox(self.p_startup, size=(330, 50), pos=(10, 10))
+		wx.StaticText(self.p_startup, label=_('Delay (seconds)'), pos=(20, 30))
+		self.delay = wx.TextCtrl(self.p_startup, -1, size=(55, 32), pos=(170, 23))
+		button_ok_delay = wx.Button(self.p_startup, label=_('OK'), size=(70, 32), pos=(250, 23))
+		button_ok_delay.Bind(wx.EVT_BUTTON, self.on_ok_delay)
+
+		wx.StaticBox(self.p_startup, size=(330, 230), pos=(10, 65))
+		self.startup_opencpn = wx.CheckBox(self.p_startup, label='OpenCPN', pos=(20, 80))
+		self.startup_opencpn.Bind(wx.EVT_CHECKBOX, self.startup)
+		self.startup_opencpn_nopengl = wx.CheckBox(self.p_startup, label=_('no OpenGL'), pos=(40, 105))
+		self.startup_opencpn_nopengl.Bind(wx.EVT_CHECKBOX, self.startup)
+		self.startup_opencpn_fullscreen = wx.CheckBox(self.p_startup, label=_('fullscreen'), pos=(40, 130))
+		self.startup_opencpn_fullscreen.Bind(wx.EVT_CHECKBOX, self.startup)
+
+		self.startup_multiplexer = wx.CheckBox(self.p_startup, label=_('NMEA 0183 multiplexer'), pos=(20, 165))
+		self.startup_multiplexer.Bind(wx.EVT_CHECKBOX, self.startup)
+		self.startup_nmea_time = wx.CheckBox(self.p_startup, label=_('Set time from NMEA'), pos=(40, 190))
+		self.startup_nmea_time.Bind(wx.EVT_CHECKBOX, self.startup)
+
+		self.startup_remote_desktop = wx.CheckBox(self.p_startup, label=_('VNC remote desktop'), pos=(20, 225))
+		self.startup_remote_desktop.Bind(wx.EVT_CHECKBOX, self.startup)
+		self.startup_vnc_pass = wx.CheckBox(self.p_startup, label=_('use password'), pos=(40, 250))
+		self.startup_vnc_pass.Bind(wx.EVT_CHECKBOX, self.startup)
+
+		wx.StaticBox(self.p_startup, size=(330, 230), pos=(350, 65))
+
+		self.startup_play_sound = wx.CheckBox(self.p_startup, label=_('Play sound'), pos=(360, 80))
+		self.startup_play_sound.Bind(wx.EVT_CHECKBOX, self.startup)
+		self.startup_path_sound = wx.TextCtrl(self.p_startup, -1, size=(200, 32), pos=(360, 110))
+		self.button_select_sound = wx.Button(self.p_startup, label=_('File'), pos=(570, 110))
+		self.button_select_sound.Bind(wx.EVT_BUTTON, self.on_select_sound)
+
+		self.op_maximize = wx.CheckBox(self.p_startup, label=_('Maximize OpenPlotter'), pos=(360, 150))
+		self.op_maximize.Bind(wx.EVT_CHECKBOX, self.startup)
+
+		self.node_red = wx.CheckBox(self.p_startup, label=_('Node-Red (Dashboard, Freeboard)'), pos=(360, 180))
+		self.node_red.Bind(wx.EVT_CHECKBOX, self.startup)
+
+	def read_startup(self):
+		self.delay.SetValue(self.conf.get('STARTUP', 'delay'))
+
+		if self.conf.get('STARTUP', 'opencpn') == '1':
+			self.startup_opencpn.SetValue(True)
+		else:
+			self.startup_opencpn_nopengl.Disable()
+			self.startup_opencpn_fullscreen.Disable()
+		if self.conf.get('STARTUP', 'opencpn_no_opengl') == '1': self.startup_opencpn_nopengl.SetValue(True)
+		if self.conf.get('STARTUP', 'opencpn_fullscreen') == '1': self.startup_opencpn_fullscreen.SetValue(True)
+		if self.conf.get('STARTUP', 'kplex') == '1':
+			self.startup_multiplexer.SetValue(True)
+		else:
+			self.startup_nmea_time.Disable()
+		if self.conf.get('STARTUP', 'gps_time') == '1': self.startup_nmea_time.SetValue(True)
+		if self.conf.get('STARTUP', 'x11vnc') == '1':
+			self.startup_remote_desktop.SetValue(True)
+		else:
+			self.startup_vnc_pass.Disable()
+		if self.conf.get('STARTUP', 'vnc_pass') == '1': self.startup_vnc_pass.SetValue(True)
+		if self.conf.get('STARTUP', 'maximize') == '1':
+			self.op_maximize.SetValue(True)
+			self.Maximize()
+		if self.conf.get('STARTUP', 'node_red') == '1': self.node_red.SetValue(True)
+		self.startup_path_sound.SetValue(self.conf.get('STARTUP', 'sound'))
+		if self.conf.get('STARTUP', 'play') == '1':
+			self.startup_play_sound.SetValue(True)
+
+	def on_select_sound(self, e):
+		dlg = wx.FileDialog(self, message=_('Choose a file'), defaultDir=self.currentpath + '/sounds', defaultFile='',
+							wildcard=_('Audio files').decode('utf8') + ' (*.mp3)|*.mp3|' + _('All files').decode('utf8') + ' (*.*)|*.*',
+							style=wx.OPEN | wx.CHANGE_DIR)
+		if dlg.ShowModal() == wx.ID_OK:
+			file_path = dlg.GetPath()
+			self.startup_path_sound.SetValue(file_path)
+			self.conf.set('STARTUP', 'sound', file_path)
+		dlg.Destroy()
+
+	def on_ok_delay(self, e):
+		delay = self.delay.GetValue()
+		if not re.match('^[0-9]*$', delay):
+			self.ShowStatusBarRED(_('You can enter only numbers.'))
+			return
+		else:
+			if delay != '0': delay = delay.lstrip('0')
+			self.conf.set('STARTUP', 'delay', delay)
+			self.ShowStatusBarBLACK(_('Startup delay set to ').decode('utf8') + delay + _(' seconds').decode('utf8'))
+
+	def startup(self, e):
+		sender = e.GetEventObject()
+
+		if sender == self.startup_opencpn:
+			if self.startup_opencpn.GetValue():
+				self.startup_opencpn_nopengl.Enable()
+				self.startup_opencpn_fullscreen.Enable()
+				self.conf.set('STARTUP', 'opencpn', '1')
+			else:
+				self.startup_opencpn_nopengl.Disable()
+				self.startup_opencpn_fullscreen.Disable()
+				self.conf.set('STARTUP', 'opencpn', '0')
+
+		if sender == self.startup_opencpn_nopengl:
+			if self.startup_opencpn_nopengl.GetValue():
+				self.conf.set('STARTUP', 'opencpn_no_opengl', '1')
+			else:
+				self.conf.set('STARTUP', 'opencpn_no_opengl', '0')
+
+		if sender == self.startup_opencpn_fullscreen:
+			if self.startup_opencpn_fullscreen.GetValue():
+				self.conf.set('STARTUP', 'opencpn_fullscreen', '1')
+			else:
+				self.conf.set('STARTUP', 'opencpn_fullscreen', '0')
+
+		if sender == self.startup_multiplexer:
+			if self.startup_multiplexer.GetValue():
+				self.startup_nmea_time.Enable()
+				self.conf.set('STARTUP', 'kplex', '1')
+			else:
+				self.startup_nmea_time.Disable()
+				self.conf.set('STARTUP', 'kplex', '0')
+
+		if sender == self.startup_nmea_time:
+			if self.startup_nmea_time.GetValue():
+				self.conf.set('STARTUP', 'gps_time', '1')
+			else:
+				self.conf.set('STARTUP', 'gps_time', '0')
+
+		if sender == self.startup_remote_desktop:
+			if self.startup_remote_desktop.GetValue():
+				self.conf.set('STARTUP', 'x11vnc', '1')
+				self.startup_vnc_pass.Enable()
+			else:
+				self.conf.set('STARTUP', 'x11vnc', '0')
+				self.startup_vnc_pass.Disable()
+
+		if sender == self.startup_vnc_pass:
+			if self.startup_vnc_pass.GetValue():
+				self.conf.set('STARTUP', 'vnc_pass', '1')
+				dlg = wx.MessageDialog(None, _('Do you want to change your VNC-Password?'), _('Question'),
+									   wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+				if dlg.ShowModal() == wx.ID_YES:
+					subprocess.Popen(['lxterminal', '-e', 'x11vnc', '-storepasswd'])
+				dlg.Destroy()
+			else:
+				self.conf.set('STARTUP', 'vnc_pass', '0')
+
+		if sender == self.op_maximize:
+			if self.op_maximize.GetValue():
+				self.conf.set('STARTUP', 'maximize', '1')
+			else:
+				self.conf.set('STARTUP', 'maximize', '0')
+
+		if sender == self.startup_play_sound:
+			if self.startup_play_sound.GetValue():
+				self.conf.set('STARTUP', 'play', '1')
+			else:
+				self.conf.set('STARTUP', 'play', '0')
+
+		if sender == self.node_red:
+			if self.node_red.GetValue():
+				self.conf.set('STARTUP', 'node_red', '1')
+			else:
+				self.conf.set('STARTUP', 'node_red', '0')
+
+				########################################### WiFi AP
+
+	def page_wifi(self):
+		wx.StaticBox(self.p_wifi, size=(370, 315), pos=(10, 10))
+
+		self.wifi_enable = wx.CheckBox(self.p_wifi, label=_('Enable access point'), pos=(20, 25))
+		self.wifi_enable.Bind(wx.EVT_CHECKBOX, self.onwifi_enable)
+
+		self.bridge_enable = wx.CheckBox(self.p_wifi, label=_('Enable bridge to eth0'), pos=(180, 25))
+
+		self.available_wireless = []
+		output = subprocess.check_output('ifconfig')
+		for i in range(0, 9):
+			ii = str(i)
+			if 'wlan' + ii in output: self.available_wireless.append('wlan' + ii)
+
+		self.available_wireless_AP = []
+		for i in self.available_wireless:
+			try:
+				output2 = subprocess.check_output(['iw', i, 'info'], stderr=subprocess.STDOUT)
+			except:
+				output2 = ''
+			if output2 != '':
+				startpos = output2.find('wiphy') + 5
+				iwphy = int(output2[startpos:startpos + 3])
+				output2 = subprocess.check_output(['iw', 'phy' + str(iwphy), 'info'], stderr=subprocess.STDOUT)
+				startpos = output2.find('Supported interface modes')
+				if 'AP' in output2[startpos:startpos + 80]:
+					self.available_wireless_AP.append(i)
+
+		self.available_share = [_('none')]
+		for i in range(0, 9):
+			ii = str(i)
+			if 'eth' + ii in output: self.available_share.append('eth' + ii)
+			if 'ppp' + ii in output: self.available_share.append('ppp' + ii)
+			if 'usb' + ii in output: self.available_share.append('usb' + ii)
+			if 'wwan' + ii in output: self.available_share.append('wwan' + ii)
+		for i in self.available_wireless:
+			self.available_share.append(i)
+		share_old = self.conf.get('WIFI', 'share')
+		if share_old != '0' and share_old not in self.available_share: self.available_share.append(share_old)
+		self.wlan_label = wx.StaticText(self.p_wifi, label=_('Access point device'), pos=(20, 55))
+		self.wlan = wx.ComboBox(self.p_wifi, choices=self.available_wireless_AP, style=wx.CB_READONLY, size=(100, 32),
+								pos=(20, 75))
+
+		self.share_label = wx.StaticText(self.p_wifi, label=_('Sharing Internet device'), pos=(180, 55))
+		self.share = wx.ComboBox(self.p_wifi, choices=self.available_share, style=wx.CB_READONLY, size=(100, 32),
+								 pos=(180, 75))
+
+		self.wifi_settings_label = wx.StaticText(self.p_wifi, label=_('Access point settings'), pos=(20, 120))
+
+		self.ssid = wx.TextCtrl(self.p_wifi, -1, size=(120, 32), pos=(20, 140))
+		self.ssid_label = wx.StaticText(self.p_wifi, label=_('SSID \nmaximum 32 characters'), pos=(160, 140))
+
+		self.passw = wx.TextCtrl(self.p_wifi, -1, size=(120, 32), pos=(20, 173))
+		self.passw_label = wx.StaticText(self.p_wifi, label=_('Password \nminimum 8 characters required'),
+										 pos=(160, 175))
+
+		self.wifi_channel_list = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13']
+		self.wifi_channel = wx.ComboBox(self.p_wifi, choices=self.wifi_channel_list, style=wx.CB_READONLY,
+										size=(120, 32), pos=(20, 208))
+		self.wifi_channel_label = wx.StaticText(self.p_wifi, label=_('Channel'), pos=(160, 215))
+
+		self.wifi_mode_list = ['IEEE 802.11b', 'IEEE 802.11g']
+		self.wifi_mode = wx.ComboBox(self.p_wifi, choices=self.wifi_mode_list, style=wx.CB_READONLY, size=(120, 32),
+									 pos=(20, 246))
+		self.wifi_mode_label = wx.StaticText(self.p_wifi, label=_('Mode'), pos=(160, 255))
+
+		self.wifi_wpa_list = [_('none'), 'WPA', 'WPA2', _('Both')]
+		self.wifi_wpa = wx.ComboBox(self.p_wifi, choices=self.wifi_wpa_list, style=wx.CB_READONLY, size=(120, 32),
+									pos=(20, 285))
+		self.wifi_wpa_label = wx.StaticText(self.p_wifi, label=_('WPA'), pos=(160, 290))
+
+		self.wifi_button_default = wx.Button(self.p_wifi, label=_('Defaults'), pos=(275, 240))
+		self.wifi_button_default.Bind(wx.EVT_BUTTON, self.on_wifi_default)
+
+		self.wifi_button_apply = wx.Button(self.p_wifi, label=_('Apply'), pos=(275, 280))
+		self.wifi_button_apply.Bind(wx.EVT_BUTTON, self.onwifi_apply)
+
+		wx.StaticBox(self.p_wifi, label=_(' Addresses '), size=(290, 315), pos=(385, 10))
+		self.ip_info = wx.TextCtrl(self.p_wifi, -1, style=wx.TE_MULTILINE | wx.TE_READONLY, size=(270, 245),
+								   pos=(395, 30))
+		self.ip_info.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_INACTIVECAPTION))
+
+		self.button_refresh_ip = wx.Button(self.p_wifi, label=_('Refresh'), pos=(565, 280))
+		self.button_refresh_ip.Bind(wx.EVT_BUTTON, self.on_show_ip_info)
+
+		self.check_net_b = wx.Button(self.p_wifi, label=_('Status'), pos=(465, 280))
+		self.check_net_b.Bind(wx.EVT_BUTTON, self.on_check_net)
+
+	def read_wifi_conf(self):
+		if len(self.available_wireless) > 0:
+			self.wlan.SetValue(self.conf.get('WIFI', 'device'))
+			self.ssid.SetValue(self.conf.get('WIFI', 'ssid'))
+			self.wifi_channel.SetValue(self.conf.get('WIFI', 'channel'))
+			if self.conf.get('WIFI', 'password'): self.passw.SetValue('**********')
+			if self.conf.get('WIFI', 'share') == '0':
+				self.share.SetValue(_('none'))
+			else:
+				self.share.SetValue(self.conf.get('WIFI', 'share'))
+			if self.conf.get('WIFI', 'hw_mode') == 'b': self.wifi_mode.SetValue('IEEE 802.11b')
+			if self.conf.get('WIFI', 'hw_mode') == 'g': self.wifi_mode.SetValue('IEEE 802.11g')
+			if self.conf.get('WIFI', 'wpa') == '0': self.wifi_wpa.SetValue(_('none'))
+			if self.conf.get('WIFI', 'wpa') == '1': self.wifi_wpa.SetValue('WPA')
+			if self.conf.get('WIFI', 'wpa') == '2': self.wifi_wpa.SetValue('WPA2')
+			if self.conf.get('WIFI', 'wpa') == '3': self.wifi_wpa.SetValue(_('Both'))
+			if self.conf.get('WIFI', 'bridge') == '1':
+				self.bridge_enable.SetValue(True)
+			else:
+				self.bridge_enable.SetValue(False)
+			if self.conf.get('WIFI', 'enable') == '1':
+				self.enable_disable_wifi(1)
+		else:
+			self.enable_disable_wifi(0)
+		self.on_show_ip_info('')
+
+	def onwifi_enable(self, e):
+		if self.wifi_enable.GetValue():
+			self.wifi_active(True)
+		else:
+			self.wifi_active(False)
+	
+	def wifi_active(self, status):
+		if status:
+			self.bridge_enable.Enable()
+			self.wlan_label.Enable()
+			self.wlan.Enable()
+			self.share_label.Enable()
+			self.share.Enable()
+			self.wifi_settings_label.Enable()
+			self.ssid.Enable()
+			self.ssid_label.Enable()
+			self.passw.Enable()
+			self.passw_label.Enable()
+			self.wifi_channel.Enable()
+			self.wifi_channel_label.Enable()
+			self.wifi_mode.Enable()
+			self.wifi_mode_label.Enable()
+			self.wifi_wpa.Enable()
+			self.wifi_wpa_label.Enable()
+			self.wifi_button_default.Enable()		
+		else:
+			self.bridge_enable.Disable()
+			self.wlan_label.Disable()
+			self.wlan.Disable()
+			self.share_label.Disable()
+			self.share.Disable()
+			self.wifi_settings_label.Disable()
+			self.ssid.Disable()
+			self.ssid_label.Disable()
+			self.passw.Disable()
+			self.passw_label.Disable()
+			self.wifi_channel.Disable()
+			self.wifi_channel_label.Disable()
+			self.wifi_mode.Disable()
+			self.wifi_mode_label.Disable()
+			self.wifi_wpa.Disable()
+			self.wifi_wpa_label.Disable()
+			self.wifi_button_default.Disable()
+		
+	def onwifi_apply(self, e):
+		isChecked = self.wifi_enable.GetValue()
+		wlan = self.wlan.GetValue()
+		ssid = self.ssid.GetValue()
+		share = self.share.GetValue()
+		if '*****' in self.passw.GetValue():
+			passw = self.conf.get('WIFI', 'password')
+		else:
+			passw = self.passw.GetValue()
+
+		if not wlan or not passw or not ssid or not share:
+			self.ShowStatusBarRED(_('Failed. You must fill in all fields.'))
+			return
+		if wlan == share:
+			self.ShowStatusBarRED(_('"Access point device" and "Sharing Internet device" must be different'))
+			return
+		if len(ssid) > 32 or len(passw) < 8:
+			self.ShowStatusBarRED(_('Your SSID must have a maximum of 32 characters and your password a minimum of 8.'))
+			return
+		channel = self.wifi_channel.GetValue()
+		mode = self.wifi_mode.GetValue()
+		wpa = self.wifi_wpa.GetValue()
+		bridge = '0'
+		if self.bridge_enable.GetValue(): bridge = '1'
+		if share == _('none'): share = '0'
+		if mode == 'IEEE 802.11b': mode = 'b'
+		if mode == 'IEEE 802.11g': mode = 'g'
+		if wpa == _('none'): wpa = '0'
+		if wpa == 'WPA': wpa = '1'
+		if wpa == 'WPA2': wpa = '2'
+		if wpa == _('Both'): wpa = '3'
+		if not isChecked and self.conf.get('WIFI', 'enable') == '1':
+			dlg = wx.MessageDialog(None, _(
+				'Access point will be disabled.\n\nIf you are on a headless system, you will not be able to reconnect again.\n\nAre you sure?'),
+								   _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+			if dlg.ShowModal() != wx.ID_YES:
+				self.enable_disable_wifi(1)
+				dlg.Destroy()
+				return
+			dlg.Destroy()
+		else:
+			dlg = wx.MessageDialog(None, _(
+				'Changes will be applied.\n\nIf something goes wrong and you are on a headless system,\nyou may not be able to reconnect again.\n\nAre you sure?'),
+								   _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+			if dlg.ShowModal() != wx.ID_YES:
+				dlg.Destroy()
+				return
+			dlg.Destroy()
+		self.conf.set('WIFI', 'device', wlan)
+		self.conf.set('WIFI', 'password', passw)
+		self.conf.set('WIFI', 'ssid', ssid)
+		self.conf.set('WIFI', 'share', share)
+		self.conf.set('WIFI', 'channel', channel)
+		self.conf.set('WIFI', 'hw_mode', mode)
+		self.conf.set('WIFI', 'wpa', wpa)
+		self.conf.set('WIFI', 'bridge', bridge)
+		self.passw.SetValue('**********')
+		if isChecked:
+			self.enable_disable_wifi(1)
+			self.ShowStatusBarRED(_('Configuring WiFi AP, please wait max 3 min...'))
+			wifi_result = subprocess.check_output(['sudo', 'python', self.currentpath + '/wifi_server.py', '1'])
+		else:
+			self.enable_disable_wifi(0)
+			self.ShowStatusBarRED(_('Shutdown WiFi AP, please wait max 3 min...'))
+			wifi_result = subprocess.check_output(['sudo', 'python', self.currentpath + '/wifi_server.py', '0'])
+		msg = wifi_result
+		if 'WiFi access point failed.' in msg:
+			self.enable_disable_wifi(0)
+		msg = msg.replace('WiFi access point failed.', _('WiFi access point failed.'))
+		msg = msg.replace('WiFi access point started.', _('WiFi access point started.'))
+		msg = msg.replace('WiFi access point stopped.', _('WiFi access point stopped.'))
+		self.ShowStatusBarBLACK('')
+		self.ShowMessage(msg)
+		self.on_show_ip_info('')
+
+	def enable_disable_wifi(self, s):
+		if s == 1:
+			self.wifi_enable.SetValue(True)
+			self.wifi_active(True)
+			self.conf.set('WIFI', 'enable', '1')
+		else:
+			self.wifi_enable.SetValue(False)
+			self.wifi_active(False)
+			self.conf.set('WIFI', 'enable', '0')
+
+	def on_show_ip_info_txt(self,port,ips,ip_hostname):
+		out=''
+		if port != '':
+			port=':'+port
+		for ip in ips:
+			if ip[0:7]=='169.254':
+				if not (ip_hostname + '.local'+port in out):
+					out += ip_hostname + '.local'+port+' (169.254...)\n'
+			else:
+				out += ip + port+'\n'
+		return out		
+			
+	def on_show_ip_info(self, e):
+		ip_hostname = subprocess.check_output(['hostname'])[:-1]
+		ip_info = subprocess.check_output(['hostname', '-I'])
+		out = _(' Multiplexed NMEA 0183:\n')
+		ips = ip_info.split()		
+		out += self.on_show_ip_info_txt('10109',ips,ip_hostname)
+		out += _('\n Signal K Server:\n')
+		out += self.on_show_ip_info_txt('3000',ips,ip_hostname)
+		out += _('\n VNC remote desktop:\n')
+		out += self.on_show_ip_info_txt('5900',ips,ip_hostname)
+		out += _('\n RDP remote desktop:\n')
+		out += self.on_show_ip_info_txt('',ips,ip_hostname)
+		out += _('\n node-red:\n')
+		out += self.on_show_ip_info_txt('1880',ips,ip_hostname)
+		out += _('\n MQTT local broker:\n')
+		out += self.on_show_ip_info_txt('1883',ips,ip_hostname)
+		self.ip_info.SetValue(out)
+
+	def on_check_net(self, e):
+		msg = ''
+		msg1 = ''
+		network_info = ''
+		try:
+			network_info = subprocess.check_output('iw wlan0 info'.split())
+		except:
+			pass
+		if 'AP' in network_info: msg1 += 'wlan0 is AP'
+		network_info = ''
+		try:
+			network_info = subprocess.check_output('iw wlan1 info'.split())
+		except:
+			pass
+		if 'AP' in network_info: msg1 += 'wlan1 is AP'
+		if msg1 == '': msg1 += 'missing AP! or driver is not nl80211'
+		msg += msg1 + '\n'
+
+		msg1 = ''
+		network_info = ''
+		try:
+			network_info = subprocess.check_output('ifconfig'.split())
+		except:
+			pass
+		for i in network_info.split('\n'):
+			if 'wlan0' in i: msg1 += 'wlan0 '
+			if 'wlan1' in i: msg1 += 'wlan1 '
+		msg += 'up network: ' + msg1 + '\n'
+
+		msg1 = ''
+		network_info = ''
+		try:
+			network_info = subprocess.check_output('service dnsmasq status'.split())
+		except:
+			pass
+		for i in network_info.split('\n'):
+			if 'running' in i: msg1 += 'running'
+		if msg1 == '': msg1 += 'stopped'
+		msg += 'dnsmasq (dhcp-server): ' + msg1 + '\n'
+
+		msg1 = ''
+		network_info = ''
+		try:
+			network_info = subprocess.check_output('service hostapd status'.split())
+		except:
+			pass
+		for i in network_info.split('\n'):
+			if 'running' in i: msg1 += 'running'
+		if msg1 == '': msg1 += 'stopped'
+		msg += 'hostapd (AP): ' + msg1 + '\n'
+
+		msg1 = ''
+		network_info = ''
+		try:
+			network_info = subprocess.check_output('service networking status'.split())
+		except:
+			pass
+		for i in network_info.split('\n'):
+			if 'SUCCESS' in i and not 'started' in msg1: msg1 += 'started'
+		if msg1 == '': msg1 += 'stopped'
+		msg += 'networking: ' + msg1 + '\n\n'
+
+		msg1 = ''
+		network_info = ''
+		try:
+			network_info = subprocess.check_output('ip addr show wlan0'.split())
+		except:
+			pass
+		for i in network_info.split('\n'):
+			if 'inet ' in i:
+				if not '169.254' in i.split(' ')[5]: msg1 += i.split(' ')[5][0:-3] + ' ' + i[-5:] + '\n'
+		network_info = ''
+		try:
+			network_info = subprocess.check_output('ip addr show wlan1'.split())
+		except:
+			pass
+		for i in network_info.split('\n'):
+			if 'inet ' in i:
+				if not '169.254' in i.split(' ')[5]: msg1 += i.split(' ')[5][0:-3] + ' ' + i[-5:] + '\n'
+		network_info = ''
+		try:
+			network_info = subprocess.check_output('ip addr show br0'.split())
+		except:
+			pass
+		for i in network_info.split('\n'):
+			if 'inet ' in i:
+
+				if not '169.254' in i.split(' ')[5]:
+					if 'br0:0' in i:
+						msg1 += i.split(' ')[5][0:-3] + ' ' + i[-5:] + '\n'
+					else:
+						msg1 += i.split(' ')[5][0:-3] + ' ' + i[-3:] + '\n'
+		msg += 'ip address\n' + msg1 + '\n'
+
+		self.ShowMessage(msg)
+
+	def on_wifi_default(self, e):
+		self.ssid.SetValue('OpenPlotter')
+		self.passw.SetValue('12345678')
+		self.wifi_channel.SetValue('6')
+		self.wifi_mode.SetValue('IEEE 802.11g')
+		self.wifi_wpa.SetValue('WPA2')
+
+				########################################### Compass
+
+	def page_compass(self):
+		imu_box = wx.StaticBox(self.p_compass, label=_(' IMU '))
+
+		self.rate_list = ['0.1', '0.25', '0.5', '0.75', '1', '1.5', '2', '5', '30', '60', '300']
+
+		detected_label = wx.StaticText(self.p_compass, label=_('Detected IMU:'))
+		self.detected = wx.StaticText(self.p_compass, label=_('None'))
+
+		compass_rate_label = wx.StaticText(self.p_compass, label=_('Rate (secons)'))
+		self.compass_rate= wx.ComboBox(self.p_compass, choices=self.rate_list, style=wx.CB_READONLY)
+		self.compass_rate.Bind(wx.EVT_COMBOBOX, self.on_select_compass_rate)
+
+		self.magnetic_h = wx.CheckBox(self.p_compass, label=_('Magnetic heading (navigation.headingMagnetic)'))
+		self.magnetic_h.Bind(wx.EVT_CHECKBOX, self.on_compass_enable)
+
+		self.heel = wx.CheckBox(self.p_compass, label=_('Heel (navigation.attitude.roll)'))
+		self.heel.Bind(wx.EVT_CHECKBOX, self.on_compass_enable)
+
+		self.pitch = wx.CheckBox(self.p_compass, label=_('Pitch (navigation.attitude.pitch)'))
+		self.pitch.Bind(wx.EVT_CHECKBOX, self.on_compass_enable)
+
+		self.calibration = wx.Button(self.p_compass, label=_('Calibration'))
+		self.calibration.Bind(wx.EVT_BUTTON, self.on_calibration)
+
+		self.scope = wx.Button(self.p_compass, label=_('Scope'))
+		self.scope.Bind(wx.EVT_BUTTON, self.on_scope)
+
+		compass_reset = wx.Button(self.p_compass, label=_('Reset'))
+		compass_reset.Bind(wx.EVT_BUTTON, self.on_compass_reset)
+
+		#autopilot_box = wx.StaticBox(self.p_compass, label=_(' Autopilot '))
+
+		diagnostic = wx.Button(self.p_compass, label=_('SK Diagnostic'))
+		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
+
+		reset = wx.Button(self.p_compass, label=_('Restart'))
+		reset.Bind(wx.EVT_BUTTON, self.reset_sensors)
+
+		hbox4 = wx.BoxSizer(wx.HORIZONTAL)
+		hbox4.Add(detected_label, 0, wx.ALL| wx.EXPAND, 5)
+		hbox4.Add(self.detected, 0, wx.ALL | wx.RIGHT | wx.EXPAND, 5)
+
+		hbox3 = wx.BoxSizer(wx.HORIZONTAL)
+		hbox3.Add(diagnostic, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 5)
+		hbox3.Add(reset, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 5)
+
+		hbox2 = wx.BoxSizer(wx.HORIZONTAL)
+		hbox2.Add(compass_rate_label, 0, wx.UP | wx.EXPAND, 10)
+		hbox2.Add(self.compass_rate, 0, wx.ALL | wx.EXPAND, 5)
+
+		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
+		hbox1.Add(self.calibration, 0, wx.ALL | wx.EXPAND, 5)
+		hbox1.Add(self.scope, 0, wx.ALL | wx.EXPAND, 5)
+		hbox1.Add(compass_reset, 0, wx.ALL | wx.EXPAND, 5)
+
+		vbox1 = wx.StaticBoxSizer(imu_box, wx.VERTICAL)
+		vbox1.Add(hbox4, 0, wx.ALL | wx.EXPAND, 5)
+		vbox1.Add(hbox2, 0, wx.LEFT | wx.EXPAND, 10)
+		vbox1.Add(self.magnetic_h, 0, wx.ALL | wx.EXPAND, 5)
+		vbox1.Add(self.heel, 0, wx.ALL | wx.EXPAND, 5)
+		vbox1.Add(self.pitch, 0, wx.ALL | wx.EXPAND, 5)
+		vbox1.Add(hbox1, 0, wx.ALL | wx.EXPAND, 5)
+
+		#vbox2 = wx.StaticBoxSizer(autopilot_box, wx.VERTICAL)
+
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(vbox1, 1, wx.ALL | wx.EXPAND, 5)
+		#hbox.Add(vbox2, 1, wx.ALL | wx.EXPAND, 5)
+
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		vbox.Add(hbox, 1, wx.ALL | wx.EXPAND, 0)
+		vbox.Add(hbox3, 0, wx.ALL | wx.EXPAND, 5)
+
+		self.p_compass.SetSizer(vbox)
+
+	def check_i2c(self):
+		detected_imu = subprocess.check_output(['python', self.currentpath + '/check_rtimulib.py'], cwd=self.home + '/.pypilot')
+		if 'Error:' in detected_imu: return
+		else:
+			l_detected = detected_imu.split('\n')
+			for line in l_detected:
+				if 'result:' in line: 
+					line2 = line.split(':')
+					return line2[1]
+
+	def read_compass(self):
+		check_imu = self.check_i2c()
+		if not check_imu: self.detected.SetLabel(_('Error'))
+		else:
+			imu_data = eval(check_imu) 
+			imu_name = imu_data[0][0]
+			self.detected.SetLabel(imu_name)
+		self.compass_rate.SetValue(self.conf.get('COMPASS', 'rate'))
+		if self.conf.get('COMPASS', 'magnetic_h') == '1': self.magnetic_h.SetValue(True)
+		if self.conf.get('COMPASS', 'heel') == '1': self.heel.SetValue(True)
+		if self.conf.get('COMPASS', 'pitch') == '1': self.pitch.SetValue(True)
+		if self.magnetic_h.GetValue() or self.heel.GetValue() or self.pitch.GetValue():
+			self.calibration.Enable()
+			self.scope.Enable()
+		else:
+			self.calibration.Disable()
+			self.scope.Disable()
+
+	def on_compass_reset(self, e):
+		dlg = wx.MessageDialog(None, _(
+			'Compass settings will be deleted.\n\nYou will have to calibrate again.\n\nAre you sure?'),
+							   _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+		if dlg.ShowModal() == wx.ID_YES:
+			try:
+				os.remove(self.home + '/.pypilot/RTIMULib.ini')
+				os.remove(self.home + '/.pypilot/pypilot.conf')
+			except: pass
+			self.reset_sensors(0)
+		dlg.Destroy()
+
+	def on_compass_enable(self, e):
+		self.stop_sensors()
+		if self.magnetic_h.GetValue(): self.conf.set('COMPASS', 'magnetic_h', '1')
+		else: self.conf.set('COMPASS', 'magnetic_h', '0')
+		if self.heel.GetValue(): self.conf.set('COMPASS', 'heel', '1')
+		else: self.conf.set('COMPASS', 'heel', '0')
+		if self.pitch.GetValue(): self.conf.set('COMPASS', 'pitch', '1')
+		else: self.conf.set('COMPASS', 'pitch', '0')
+		self.read_compass()
+		self.start_sensors()
+
+	def on_calibration(self, e):
+		subprocess.call(['pkill', '-f', 'pypilot_calibration'])
+		subprocess.call(['pkill', '-f', 'signalk_scope_wx'])
+		subprocess.Popen('pypilot_calibration', cwd=self.home + '/.pypilot')
+
+	def on_scope(self, e):
+		subprocess.call(['pkill', '-f', 'pypilot_calibration'])
+		subprocess.call(['pkill', '-f', 'signalk_scope_wx'])
+		subprocess.Popen('signalk_scope_wx')
+
+	def on_select_compass_rate(self, e):
+		self.stop_sensors()
+		self.conf.set('COMPASS', 'rate', self.compass_rate.GetValue())
+		self.start_sensors()
+		
+			###########################################	NMEA 0183 kplex
+
+	def page_kplex(self):
+		title = wx.StaticText(self.p_kplex, label=_(' KPLEX '))
+
+		self.list_kplex = CheckListCtrl2(self.p_kplex, 152)
+		self.list_kplex.InsertColumn(0, _('Name'), width=130)
+		self.list_kplex.InsertColumn(1, _('Type'), width=45)
+		self.list_kplex.InsertColumn(2, _('io'), width=45)
+		self.list_kplex.InsertColumn(3, _('Port/Address'), width=95)
+		self.list_kplex.InsertColumn(4, _('Bauds/Port'), width=60)
+		self.list_kplex.InsertColumn(5, _('inFilter'), width=55)
+		self.list_kplex.InsertColumn(6, _('Filtering'), width=80)
+		self.list_kplex.InsertColumn(7, _('outFilter'), width=60)
+		self.list_kplex.InsertColumn(8, _('Filtering'), width=80)
+		self.list_kplex.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_kplex)
+
+		diagnostic = wx.Button(self.p_kplex, label=_('Diagnostic'))
+		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_kplex)
+
+		add = wx.Button(self.p_kplex, label=_('add'))
+		add.Bind(wx.EVT_BUTTON, self.on_add_kplex)
+		delete = wx.Button(self.p_kplex, label=_('delete'))
+		delete.Bind(wx.EVT_BUTTON, self.on_delete_kplex)
+
+		restart = wx.Button(self.p_kplex, label=_('Restart'))
+		restart.Bind(wx.EVT_BUTTON, self.on_restart_kplex)
+		advanced = wx.Button(self.p_kplex, label=_('Advanced'))
+		advanced.Bind(wx.EVT_BUTTON, self.on_advanced_kplex)
+		apply_changes = wx.Button(self.p_kplex, label=_('Apply changes'))
+		apply_changes.Bind(wx.EVT_BUTTON, self.on_apply_changes_kplex)
+		cancel_changes = wx.Button(self.p_kplex, label=_('Cancel changes'))
+		cancel_changes.Bind(wx.EVT_BUTTON, self.on_cancel_changes_kplex)
+
+		hlistbox = wx.BoxSizer(wx.HORIZONTAL)
+		hlistbox.Add(self.list_kplex, 1, wx.ALL | wx.EXPAND, 5)
+
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add((0, 0), 1, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add(add, 0, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add(delete, 0, wx.RIGHT | wx.LEFT, 5)
+
+		hboxb = wx.BoxSizer(wx.HORIZONTAL)
+		hboxb.Add(diagnostic, 0, wx.RIGHT | wx.LEFT, 5)
+		hboxb.Add(restart, 0, wx.RIGHT | wx.LEFT, 5)
+		hboxb.Add(advanced, 0, wx.RIGHT | wx.LEFT, 5)
+		hboxb.Add((0, 0), 1, wx.RIGHT | wx.LEFT, 5)
+		hboxb.Add(apply_changes, 0, wx.RIGHT | wx.LEFT, 5)
+		hboxb.Add(cancel_changes, 0, wx.RIGHT | wx.LEFT, 5)
+
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		vbox.Add(title, 0, wx.ALL | wx.EXPAND, 5)
+		vbox.Add(hlistbox, 1, wx.ALL | wx.EXPAND, 0)
+		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 5)
+		vbox.AddSpacer(5)
+		vbox.Add(hboxb, 0, wx.ALL | wx.EXPAND, 5)
+
+		self.p_kplex.SetSizer(vbox)
+
+	def on_advanced_kplex(self, event):
+		self.ShowMessage(_(
+			'OpenPlotter will close. Add manual settings at the end of the configuration file. Open OpenPlotter again and restart multiplexer to apply changes.'))
+		subprocess.Popen(['leafpad', self.home + '/.kplex.conf'])
+		self.Close()
+
+	def on_restart_kplex(self, event):
+		self.ShowStatusBarRED(_('Closing Kplex'))
+		subprocess.call(["pkill", '-9', "kplex"])
+		while self.util_process_exist('kplex'):
+			time.sleep(0.05)
+		time.sleep(0.2)
+		subprocess.Popen('kplex')
+		self.ShowStatusBarGREEN(_('Kplex restarted'))
+		self.read_kplex_conf()
+
+	def on_cancel_changes_kplex(self, event):
+		self.read_kplex_conf()
+		self.ShowStatusBarBLACK('')
+
+	def edit_kplex(self, e):
+		idx = e.GetIndex()
+
+		if self.kplex[idx][1] == 'system_a' or self.kplex[idx][1] == 'system_b' or self.kplex[idx][1] == 'opencpn' or self.kplex[idx][1] == 'signalk':
+			self.ShowStatusBarRED(_('You can not edit this.'))
+			return
+		edit = []
+		for i in range(9):
+			edit.append(self.list_kplex.GetItem(idx, i).GetText())
+		edit.append(idx)
+		self.edit_add_kplex(edit)
+
+	def on_add_kplex(self, e):
+		self.edit_add_kplex(0)
+
+	def edit_add_kplex(self, edit):
+		dlg = addkplex(edit, self.kplex, self)
+		dlg.ShowModal()
+		result = dlg.result
+		dlg.Destroy()
+
+		if result != 0:
+			k = int(result[11])
+			if edit == 0:
+				self.kplex.append(result)
+				self.set_list_kplex()
+			else:
+				for i in range(10):
+					self.kplex[k][i] = result[i]
+				self.set_list_kplex()
+
+	def read_kplex_conf(self):
+		self.kplex = []
+		try:
+			file = open(self.home + '/.kplex.conf', 'r')
+			data = file.readlines()
+			file.close()
+
+			l_tmp = [None] * 8
+			self.manual_settings = ''
+			for index, item in enumerate(data):
+
+				if self.manual_settings:
+					if item != '\n': self.manual_settings += item
+				else:
+					if re.search('\[*\]', item):
+						if l_tmp[3] == 'in' or l_tmp[3] == 'out' or l_tmp[3] == 'both':
+							self.kplex.append(l_tmp)
+						l_tmp = [None] * 11
+						l_tmp[6] = 'none'
+						l_tmp[7] = 'nothing'
+						l_tmp[8] = 'none'
+						l_tmp[9] = 'nothing'
+						if '[serial]' in item: l_tmp[2] = 'Serial'
+						if '[tcp]' in item: l_tmp[2] = 'TCP'
+						if '[udp]' in item: l_tmp[2] = 'UDP'
+						if '#[' in item:
+							l_tmp[10] = '0'
+						else:
+							l_tmp[10] = '1'
+					if 'direction=in' in item:
+						l_tmp[3] = 'in'
+					if 'direction=out' in item:
+						l_tmp[3] = 'out'
+					if 'direction=both' in item:
+						l_tmp[3] = 'both'
+					if 'name=' in item and 'filename=' not in item:
+						l_tmp[1] = self.extract_value(item)
+					if 'address=' in item or 'filename=' in item:
+						l_tmp[4] = self.extract_value(item)
+						if '/dev' in l_tmp[4]: l_tmp[4] = l_tmp[4][5:]
+					if 'port=' in item or 'baud=' in item:
+						l_tmp[5] = self.extract_value(item)
+					if 'ifilter=' in item and '-all' in item:
+						l_tmp[6] = 'accept'
+						l_tmp[7] = self.extract_value(item)
+					if 'ifilter=' in item and '-all' not in item:
+						l_tmp[6] = 'ignore'
+						l_tmp[7] = self.extract_value(item)
+					if 'ofilter=' in item and '-all' in item:
+						l_tmp[8] = 'accept'
+						l_tmp[9] = self.extract_value(item)
+					if 'ofilter=' in item and '-all' not in item:
+						l_tmp[8] = 'ignore'
+						l_tmp[9] = self.extract_value(item)
+					if '###Manual settings' in item:
+						self.manual_settings = '###Manual settings\n\n'
+
+			if l_tmp[3] == 'in' or l_tmp[3] == 'out' or l_tmp[3] == 'both':
+				self.kplex.append(l_tmp)
+
+			self.set_list_kplex()
+
+		except IOError:
+			self.ShowMessage(_('Multiplexer configuration file does not exist. Add inputs and apply changes.'))
+
+	def extract_value(self, data):
+		option, value = data.split('=')
+		value = value.strip()
+		return value
+
+	def set_list_kplex(self):
+		self.list_kplex.DeleteAllItems()
+		index = 1
+		for i in self.kplex:
+			if i[1]:
+				index = self.list_kplex.InsertStringItem(sys.maxint, i[1])
+
+			if i[2]: self.list_kplex.SetStringItem(index, 1, i[2])
+			if i[3]:
+				self.list_kplex.SetStringItem(index, 2, i[3])
+			else:
+				self.list_kplex.SetStringItem(index, 2, '127.0.0.1')
+			if i[4]: self.list_kplex.SetStringItem(index, 3, i[4])
+			if i[5]: self.list_kplex.SetStringItem(index, 4, i[5])
+			if i[6]:
+				if i[6] == 'none': self.list_kplex.SetStringItem(index, 5, _('none'))
+				if i[6] == 'accept': self.list_kplex.SetStringItem(index, 5, _('accept'))
+				if i[6] == 'ignore': self.list_kplex.SetStringItem(index, 5, _('ignore'))
+			if i[7] == 'nothing':
+				self.list_kplex.SetStringItem(index, 6, _('nothing'))
+			else:
+				filters = i[7].replace(':-all', '')
+				filters = filters.replace('+', '')
+				filters = filters.replace('-', '')
+				filters = filters.replace(':', ',')
+				self.list_kplex.SetStringItem(index, 6, filters)
+			if i[8]:
+				if i[8] == 'none': self.list_kplex.SetStringItem(index, 7, _('none'))
+				if i[8] == 'accept': self.list_kplex.SetStringItem(index, 7, _('accept'))
+				if i[8] == 'ignore': self.list_kplex.SetStringItem(index, 7, _('ignore'))
+			if i[9] == 'nothing':
+				self.list_kplex.SetStringItem(index, 8, _('nothing'))
+			else:
+				filters = i[9].replace(':-all', '')
+				filters = filters.replace('+', '')
+				filters = filters.replace('-', '')
+				filters = filters.replace(':', ',')
+				self.list_kplex.SetStringItem(index, 8, filters)
+			if i[10] == '1': self.list_kplex.CheckItem(index)
+
+	def on_apply_changes_kplex(self, event):
+		data = '# For advanced manual configuration, please visit: http://www.stripydog.com/kplex/configuration.html\n# Please do not modify defaults nor OpenPlotter GUI settings.\n# Add manual settings at the end of the document.\n\n'
+
+		data += '###defaults\n\n'
+		data += '[udp]\nname=system_a\ndirection=in\naddress=localhost\nport=10110\n\n'
+		data += '[udp]\nname=system_b\ndirection=in\nport=10110\n\n'
+		data += '[tcp]\nname=opencpn\ndirection=out\nmode=server\nofilter=-**RMB\nport=10109\n\n'
+		data += '[udp]\nname=signalk\ndirection=out\nofilter=-OC***\naddress=127.0.0.1\nport=55556\n\n'
+		data += '###end of defaults\n\n###OpenPlotter GUI settings\n\n'
+
+		for index, item in enumerate(self.kplex):
+			if not ('system' in item[1] or 'opencpn' in item[1] or 'signalk' in item[1]):
+				if self.list_kplex.IsChecked(index):
+					state = ''
+				else:
+					state = '#'
+
+				if 'Serial' in item[2]:
+					data += state + '[serial]\n' + state + 'name=' + item[1] + '\n' + state + 'direction=' + item[
+						3] + '\n' + state + 'optional=yes\n'
+					data += state + 'filename=/dev/' + item[4] + '\n' + state + 'baud=' + item[5] + '\n'
+				if 'TCP' in item[2]:
+					data += state + '[tcp]\n' + state + 'name=' + item[1] + '\n' + state + 'direction=' + item[
+						3] + '\n' + state + 'optional=yes\n'
+					if item[1] == 'gpsd': data += state + 'gpsd=yes\n'
+					if item[3] == 'in':
+						data += state + 'mode=client\n'
+						data += state + 'persist=yes\n' + state + 'retry=10\n'
+					else:
+						data += state + 'mode=server\n'
+					data += state + 'address=' + str(item[4]) + '\n' + state + 'port=' + str(item[5]) + '\n'
+				if 'UDP' in item[2]:
+					data += state + '[udp]\n' + state + 'name=' + item[1] + '\n' + state + 'direction=' + item[
+						3] + '\n' + state + 'optional=yes\n'
+					data += state + 'address=' + item[4] + '\n' + state + 'port=' + item[5] + '\n'
+
+				if not (item[6] == _('none') or item[6] == 'none') and not (item[7] == _('nothing') or item[7] == 'nothing'): 
+					data += state + 'ifilter=' + item[7] + '\n'
+				if not (item[8] == _('none') or item[8] == 'none') and not (item[9] == _('nothing') or item[9] == 'nothing'): 
+					data += state + 'ofilter=' + item[9] + '\n'
+				data += '\n'
+
+		data += '###end of OpenPlotter GUI settings\n\n'
+		if self.manual_settings:
+			data += self.manual_settings
+		else:
+			data += '###Manual settings\n\n'
+
+		file = open(self.home + '/.kplex.conf', 'w')
+		file.write(data)
+		file.close()
+		self.on_restart_kplex(0)
+		self.read_kplex_conf()
+
+	def on_delete_kplex(self, event):
+		selected = self.list_kplex.GetFirstSelected()
+		if selected == -1:
+			self.ShowStatusBarRED(_('Select an item.'))
+			return
+		num = len(self.kplex)
+		for i in range(num):
+			if self.list_kplex.IsSelected(i):
+				if self.kplex[i][1] == 'system_a' or self.kplex[i][1] == 'system_b' or self.kplex[i][1] == 'opencpn' or self.kplex[i][1] == 'signalk':
+					self.ShowStatusBarRED(_('You can not delete this.'))
+					return
+				del self.kplex[i]
+		self.set_list_kplex()
+
+	''' TODO check unique name
+	def process_name(self, r):
+		list_tmp = []
+		l = r.split(',')
+		for item in l:
+			item = item.strip()
+			list_tmp.append(item)
+		name = list_tmp[1]
+		found = False
+		for sublist in self.kplex:
+			if sublist[1] == name:
+				found = True
+		for sublist in self.koutputs:
+			if sublist[1] == name:
+				found = True
+		if found == True:
+			self.GetStatusBar().SetForegroundColour(wx.RED)
+			self.SetStatusText(_('Failed. This name already exists.'))
+			return False
+		else:
+			return list_tmp
+	'''
+
+	def on_diagnostic_kplex(self, event):
+		selected = self.list_kplex.GetFirstSelected()
+		if selected == -1:
+			self.ShowStatusBarRED(_('Select an item.'))
+			return
+		num = len(self.kplex)
+		for i in range(num):
+			if self.list_kplex.IsSelected(i):
+				if self.list_kplex.IsChecked(i):
+					file = open(self.home + '/.kplex.conf', 'r')
+					data = file.read()
+					file.close()
+
+					if self.kplex[i][3] == 'in' or self.kplex[i][3] == 'both':
+						data = data + '\n\n[tcp]\nname=system_debugi\ndirection=out\nofilter=+*****%' + self.kplex[i][
+							1] + ':-all\nmode=server\nport=10112\n\n'
+					if self.kplex[i][3] == 'out' or self.kplex[i][3] == 'both':
+						data += '\n\n[tcp]\nname=system_debugo\ndirection=out\n'
+						if self.kplex[i][8] != 'none' and self.kplex[i] != 'nothing': data += 'ofilter=' + \
+																							  self.kplex[i][9] + '\n'
+						data += 'mode=server\nport=10113\n\n'
+
+					file = open(self.home + '/.debugkplex.conf', 'w')
+					file.write(data)
+					file.close()
+
+					subprocess.call(["pkill", '-9', "kplex"])
+					while self.util_process_exist('kplex'):
+						time.sleep(0.05)
+					time.sleep(0.2)
+					subprocess.Popen(['kplex', '-f', self.home + '/.debugkplex.conf'])
+					time.sleep(0.5)
+					subprocess.call(['pkill', '-f', 'diagnostic-NMEA.py'])
+					if self.kplex[i][3] == 'in' or self.kplex[i][3] == 'both':
+						subprocess.Popen(['python', self.currentpath + '/diagnostic-NMEA.py', '10112', 'diagnostic_input'])
+					if self.kplex[i][3] == 'out' or self.kplex[i][3] == 'both':
+						subprocess.Popen(['python', self.currentpath + '/diagnostic-NMEA.py', '10113', 'diagnostic_output'])
+
+						###################################### I2C sensors
+
+	def page_i2c(self):
+		self.i2c_sensors_def = []
+		self.i2c_sensors_def.append(['BMP180','rtimulib.press.2.',['pressure','temperature'],['environment.outside.pressure','']])
+		self.i2c_sensors_def.append(['LPS25H','rtimulib.press.3.',['pressure','temperature'],['environment.outside.pressure','']])
+		self.i2c_sensors_def.append(['MS5611','rtimulib.press.4.',['pressure','temperature'],['environment.outside.pressure','']])
+		self.i2c_sensors_def.append(['MS5637','rtimulib.press.5.',['pressure','temperature'],['environment.outside.pressure','']])
+		self.i2c_sensors_def.append(['HTS221','rtimulib.hum.2.',['humidity','temperature'],['environment.inside.humidity','']])
+		self.i2c_sensors_def.append(['HTU21D','rtimulib.hum.3.',['humidity','temperature'],['environment.inside.humidity','']])
+		self.i2c_sensors_def.append(['BME280','0x76',['pressure','temperature','humidity'],['environment.outside.pressure','','environment.inside.humidity']])
+
+		title = wx.StaticText(self.p_i2c, label=_(' Sensors '))
+
+		self.list_i2c = wx.ListCtrl(self.p_i2c, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
+		self.list_i2c.InsertColumn(0, ' ', width=15)
+		self.list_i2c.InsertColumn(1, _('Name'), width=150)
+		self.list_i2c.InsertColumn(2, _('Address'), width=45)
+		self.list_i2c.InsertColumn(3, _('Magnitude'), width=90)
+		self.list_i2c.InsertColumn(4, _('Signal K key'), width=200)
+		self.list_i2c.InsertColumn(5, _('Rate'), width=40)
+		self.list_i2c.InsertColumn(6, _('Offset'), width=50)
+		self.list_i2c.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_i2c)
+
+		add = wx.Button(self.p_i2c, label=_('add'))
+		add.Bind(wx.EVT_BUTTON, self.on_add_i2c)
+
+		delete = wx.Button(self.p_i2c, label=_('delete'))
+		delete.Bind(wx.EVT_BUTTON, self.on_delete_i2c)
+
+		diagnostic = wx.Button(self.p_i2c, label=_('SK Diagnostic'))
+		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
+
+		reset_i2c = wx.Button(self.p_i2c, label=_('Restart'))
+		reset_i2c.Bind(wx.EVT_BUTTON, self.reset_sensors)
+
+		hlistbox_but = wx.BoxSizer(wx.VERTICAL)
+		hlistbox_but.Add(add, 0, wx.ALL, 5)
+		hlistbox_but.Add(delete, 0, wx.ALL, 5)
+
+		hlistbox = wx.BoxSizer(wx.HORIZONTAL)
+		hlistbox.Add(self.list_i2c, 1, wx.ALL | wx.EXPAND, 5)
+		hlistbox.Add(hlistbox_but, 0, wx.RIGHT | wx.LEFT, 0)
+
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(diagnostic, 0, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add(reset_i2c, 0, wx.RIGHT | wx.LEFT, 5)
+
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		vbox.Add(title, 0, wx.ALL | wx.EXPAND, 5)
+		vbox.Add(hlistbox, 1, wx.ALL | wx.EXPAND, 0)
+		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 5)
+
+		self.p_i2c.SetSizer(vbox)
+
+	def edit_i2c(self, e):
+		selected = self.list_i2c.GetFirstSelected()
+		name = self.list_i2c.GetItem(selected, 1)
+		name = name.GetText()
+		index = self.list_i2c.GetItem(selected, 0)
+		index = index.GetText()
+		magn = self.list_i2c.GetItem(selected, 3)
+		magn = magn.GetText()
+		sk = self.list_i2c.GetItem(selected, 4)
+		sk = sk.GetText()
+		rate = self.list_i2c.GetItem(selected, 5)
+		rate = rate.GetText()
+		offset = self.list_i2c.GetItem(selected, 6)
+		offset = offset.GetText()
+
+		dlg = editI2c(name,magn,sk,rate,offset)
+		res = dlg.ShowModal()
+		if res == wx.ID_OK:
+			sk = dlg.SKkey.GetValue()
+			rate = dlg.rate.GetValue()
+			offset = dlg.offset.GetValue()
+			if not offset: offset = 0.0
+			c = 0
+			for i in self.i2c_sensors:
+				if i[0] == name:
+					self.i2c_sensors[c][2][int(index)][0] = sk.encode('utf8')
+					self.i2c_sensors[c][2][int(index)][1] = float(rate)
+					self.i2c_sensors[c][2][int(index)][2] = float(offset)
+				c = c + 1
+			self.apply_changes_i2c()
+		dlg.Destroy()
+
+	def on_add_i2c(self, e):
+		dlg = addI2c(self)
+		res = dlg.ShowModal()
+		if res == wx.ID_OK:
+			name = dlg.sensor_select.GetValue()
+			if not name:
+				self.ShowMessage(_('Failed. You must select a sensor.'))
+				dlg.Destroy()
+				return
+			address = dlg.address.GetValue()
+			if not address:
+				self.ShowMessage(_('Failed. You must provide an address.'))
+				dlg.Destroy()
+				return
+			new_sensor = []
+			for item in self.i2c_sensors_def:
+				if name == item[0]:
+					new_sensor.append(name.encode('utf8'))
+					if 'rtimulib' in item[1]:
+						new_sensor.append((item[1]+address).encode('utf8'))
+					else:
+						new_sensor.append(address.encode('utf8'))
+					new_sensor.append([])	
+					for ii in item[3]:
+						new_sensor[2].append([ii, 1.0, 0.0])
+			if new_sensor:
+				if 'rtimulib' in new_sensor[1]:
+					temp_list = new_sensor[1].split('.')
+					try:
+						with open(self.home + '/.pypilot/RTIMULib2.ini', "r") as infile:
+							data = ''
+							if temp_list[1] == 'press':
+								for line in infile:
+									if 'PressureType=' in line:
+										data += 'PressureType='+temp_list[2]+'\n'
+									elif 'I2CPressureAddress=' in line:
+										data += 'I2CPressureAddress='+str(int(temp_list[3], 0))+'\n'
+									elif 'BusIsI2C=' in line:
+										data += 'BusIsI2C=true'+'\n'
+									else:
+										data += line
+							if temp_list[1] == 'hum':
+								for line in infile:
+									if 'HumidityType=' in line:
+										data += 'HumidityType='+temp_list[2]+'\n'
+									elif 'I2CHumidityAddress=' in line:
+										data += 'I2CHumidityAddress='+str(int(temp_list[3], 0))+'\n'
+									elif 'BusIsI2C=' in line:
+										data += 'BusIsI2C=true'+'\n'
+									else:
+										data += line
+						with open(self.home + '/.pypilot/RTIMULib2.ini', "w") as outfile:
+							outfile.write(data) 
+					except Exception, e: 
+						print "RTIMU setting failed: "+str(e)
+						dlg.Destroy()
+						return
+				exist = False
+				c = 0
+				for i in self.i2c_sensors:
+					if i[0] == new_sensor[0]: 
+						self.i2c_sensors[c] = new_sensor
+						exist = True
+						break
+					c = c + 1
+				if exist == False and 'rtimulib' in new_sensor[1]:
+					tmp = new_sensor[1].split('.')
+					c = 0
+					for iii in self.i2c_sensors:
+						if 'rtimulib' in iii[1]:
+							tmp2 = iii[1].split('.')
+							if tmp[1] == tmp2[1]:
+								self.i2c_sensors[c] = new_sensor
+								exist = True
+								break
+						c = c + 1
+				if exist == False: self.i2c_sensors.append(new_sensor)
+				self.apply_changes_i2c()
+		dlg.Destroy()
+
+	def apply_changes_i2c(self):
+		self.conf.set('I2C', 'sensors', str(self.i2c_sensors))
+		self.stop_sensors()
+		self.read_i2c()
+		self.start_sensors()
+
+	def on_delete_i2c(self, e):
+		selected = self.list_i2c.GetFirstSelected()
+		if selected == -1:
+			self.ShowStatusBarBLACK(_('Select an item to delete.'))
+			return
+		name = self.list_i2c.GetItem(selected, 1)
+		name = name.GetText()
+		c = 0
+		for i in self.i2c_sensors:
+			if i[0] == name: 
+				del self.i2c_sensors[c]
+				break
+			c = c + 1
+		self.apply_changes_i2c()
+
+	def start_sensors(self):
+		subprocess.Popen(['python', self.currentpath + '/read_sensors_d.py'], cwd=self.home + '/.pypilot')
+		self.ShowStatusBarGREEN(_('Sensors restarted'))
+
+	def stop_sensors(self):
+		self.ShowStatusBarRED(_('Sensors stopped'))
+		subprocess.call(['pkill', '-f', 'pypilot_calibration'])
+		subprocess.call(['pkill', '-f', 'signalk_scope_wx'])
+		subprocess.call(['pkill', '-f', 'read_sensors_d.py'])
+		
+	def reset_sensors(self, e):
+		self.stop_sensors()
+		self.read_i2c()
+		self.read_gpio()
+		self.read_compass()
+		self.start_sensors()
+
+	def read_i2c(self):
+		self.i2c_sensors = []
+		self.list_i2c.DeleteAllItems()
+		data = self.conf.get('I2C', 'sensors')
+		try:
+			self.i2c_sensors = eval(data)
+		except:
+			self.i2c_sensors = []
+		for i in self.i2c_sensors:
+			name = i[0]
+			for ii in self.i2c_sensors_def:
+				if name == ii[0]: 
+					magn_list = ii[2]
+					break
+			address = i[1]
+			if 'rtimulib' in address:
+				tmp = address.split('.')
+				address = tmp[3]
+			c = 0
+			for iii in i[2]:
+				self.list_i2c.Append([str(c), name, address, magn_list[c], iii[0], str(iii[1]), str(iii[2])])
+				c = c + 1
+
+	###################################### SPI
+	def page_spi(self):
+		title = wx.StaticText(self.p_spi, label=_(' SPI MCP3008 '))
+
+		self.list_MCP = wx.ListCtrl(self.p_spi, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
+		self.list_MCP.InsertColumn(0, _('aktiv'), width=40)
+		self.list_MCP.InsertColumn(1, _('channel'), width=65)
+		self.list_MCP.InsertColumn(2, _('Signal K key'), width=310)
+		self.list_MCP.InsertColumn(3, _('*'), width=120)
+		self.list_MCP.InsertColumn(4, _('convert'), width=55)
+		self.list_MCP.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit_MCP)
+
+		diagnostic = wx.Button(self.p_spi, label=_('SK Diagnostic'))
+		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
+
+		restart = wx.Button(self.p_spi, label=_('Restart'))
+		restart.Bind(wx.EVT_BUTTON, self.on_restart_MCP)
+
+		value_setting = wx.Button(self.p_spi, label=_('value setting'))
+		value_setting.Bind(wx.EVT_BUTTON, self.on_value_setting)
+
+		hlistbox = wx.BoxSizer(wx.HORIZONTAL)
+		hlistbox.Add(self.list_MCP, 1, wx.ALL | wx.EXPAND, 5)
+
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(diagnostic, 0, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add(restart, 0, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add((0, 0), 1, wx.RIGHT | wx.EXPAND, 5)
+		hbox.Add(value_setting, 0, wx.RIGHT | wx.LEFT, 5)
+
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		vbox.Add(title, 0, wx.ALL | wx.EXPAND, 5)
+		vbox.Add(hlistbox, 1, wx.ALL | wx.EXPAND, 0)
+		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 5)
+
+		self.p_spi.SetSizer(vbox)
+
+	def read_MCP(self):
+		self.MCP = []
+		self.list_MCP.DeleteAllItems()
+		data = self.conf.get('SPI', 'mcp')
+		try:
+			temp_list = eval(data)
+		except:
+			temp_list = []
+		for ii in temp_list:
+			self.MCP.append(ii)
+			if '.*.' in ii[2]:
+				SKkey2 = ii[2].replace('*', ii[3])
+			else:
+				SKkey2 = ii[2]
+			self.list_MCP.Append([str(ii[0]), str(ii[1]), SKkey2, ii[3], ii[4]])
+
+	def on_restart_MCP(self, e):
+		self.stop_sensors()
+		self.start_sensors()
+
+	def on_value_setting(self, e):
+		edit = self.list_MCP.GetFirstSelected()
+		if edit == -1:
+			return
+		dlg = addvaluesetting(edit, self)
+		dlg.ShowModal()
+
+		if self.MCP[edit][4] == 1:
+			convert = 1
+			self.conf.read()
+			data = self.conf.get('SPI', 'value_' + str(edit))
+			try:
+				temp_list = eval(data)
+			except:
+				temp_list = []
+			min = 1023
+			max = 0
+			for ii in temp_list:
+				if ii[0] > max: max = ii[0]
+				if ii[0] < min: min = ii[0]
+			if min > 0:
+				wx.MessageBox(_('minimum raw value in setting table > 0'), 'info', wx.OK | wx.ICON_INFORMATION)
+				convert = 0
+			if max < 1023:
+				wx.MessageBox(_('maximum raw value in setting table < 1023'), 'info', wx.OK | wx.ICON_INFORMATION)
+				convert = 0
+			if convert == 0:
+				self.MCP[edit][4] = convert
+				self.conf.set('SPI', 'mcp', str(self.MCP))
+				self.read_MCP()
+				wx.MessageBox(_('convert disabled'), 'info', wx.OK | wx.ICON_INFORMATION)
+
+	def on_edit_MCP(self, e):
+		selected_MCP = e.GetIndex()
+		edit = [selected_MCP, self.MCP[selected_MCP][0], self.MCP[selected_MCP][1], self.MCP[selected_MCP][2],
+				self.MCP[selected_MCP][3], self.MCP[selected_MCP][4]]
+
+		dlg = addMCP(edit, self)
+		res = dlg.ShowModal()
+		if res == wx.ID_OK:
+			aktiv = dlg.aktiv.GetValue()
+			convert = dlg.convert.GetValue()
+			SKkey = dlg.SKkey.GetValue().encode('utf8')
+			asterix = dlg.asterix.GetValue().encode('utf8')
+			if aktiv and not SKkey:
+				self.ShowStatusBarRED(_('Failed. Provide name and Signal K values.'))
+				dlg.Destroy()
+				return
+			if '*' in SKkey:
+				if not re.match('^[0-9a-zA-Z]+$', asterix):
+					self.ShowStatusBarRED(_('Failed. The name must contain only letters and numbers.'))
+					dlg.Destroy()
+					return
+				SKkey2 = SKkey.replace('*', asterix)
+			else:
+				SKkey2 = SKkey
+
+			if aktiv:
+				aktiv = 1
+			else:
+				aktiv = 0
+			if convert:
+				convert = 1
+			else:
+				convert = 0
+			self.list_MCP.SetStringItem(edit[0], 0, str(aktiv))
+			self.list_MCP.SetStringItem(edit[0], 2, SKkey2)
+			self.list_MCP.SetStringItem(edit[0], 3, asterix)
+			self.list_MCP.SetStringItem(edit[0], 4, str(convert))
+			self.MCP[edit[0]][0] = aktiv
+			self.MCP[edit[0]][2] = SKkey
+			self.MCP[edit[0]][3] = asterix
+			self.MCP[edit[0]][4] = convert
+			self.conf.set('SPI', 'mcp', str(self.MCP))
+		dlg.Destroy()
+		self.conf.read()
+
+	###################################### GPIO
+
+	def page_gpio(self):
+		title = wx.StaticText(self.p_gpio, label=_(' Sensors '))
+
+		self.list_gpio = wx.ListCtrl(self.p_gpio, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
+		self.list_gpio.InsertColumn(0, _('Name'), width=130)
+		self.list_gpio.InsertColumn(1, _('I/O'), width=60)
+		self.list_gpio.InsertColumn(2, 'GPIO', width=40)
+		self.list_gpio.InsertColumn(3, 'Pull', width=80)
+		self.list_gpio.InsertColumn(4, _('Signal K key'), width=180)
+		self.list_gpio.InsertColumn(5, _('Source'), width=100)
+		self.list_gpio.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_gpio)
+
+		add = wx.Button(self.p_gpio, label=_('add'))
+		add.Bind(wx.EVT_BUTTON, self.on_add_gpio)
+
+		delete = wx.Button(self.p_gpio, label=_('delete'))
+		delete.Bind(wx.EVT_BUTTON, self.on_delete_gpio)
+
+		diagnostic = wx.Button(self.p_gpio, label=_('SK Diagnostic'))
+		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
+
+		reset_gpio = wx.Button(self.p_gpio, label=_('Restart'))
+		reset_gpio.Bind(wx.EVT_BUTTON, self.reset_sensors)
+
+		hlistbox_but = wx.BoxSizer(wx.VERTICAL)
+		hlistbox_but.Add(add, 0, wx.ALL, 5)
+		hlistbox_but.Add(delete, 0, wx.ALL, 5)
+
+		hlistbox = wx.BoxSizer(wx.HORIZONTAL)
+		hlistbox.Add(self.list_gpio, 1, wx.ALL | wx.EXPAND, 5)
+		hlistbox.Add(hlistbox_but, 0, wx.RIGHT | wx.LEFT, 0)
+
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(diagnostic, 0, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add(reset_gpio, 0, wx.RIGHT | wx.LEFT, 5)
+
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		vbox.Add(title, 0, wx.ALL | wx.EXPAND, 5)
+		vbox.Add(hlistbox, 1, wx.ALL | wx.EXPAND, 0)
+		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 5)
+
+		self.p_gpio.SetSizer(vbox)
+
+	def read_gpio(self):
+		self.gpio = []
+		self.list_gpio.DeleteAllItems()
+		data = self.conf.get('GPIO', 'sensors')
+		try:
+			temp_list = eval(data)
+		except:
+			temp_list = []
+		for ii in temp_list:
+			self.gpio.append(ii)
+			# name, io, GPIO, pull
+			if ii[1] == 'out':
+				io = _('output')
+				source = 'output'
+			else:
+				io = _('input')
+				source = 'input'
+			self.list_gpio.Append([ii[0], io, ii[2], ii[3], 'sensors.'+ii[0],'GPIO.'+source+'.'+ii[2]])
+
+	def edit_gpio(self, e):
+		selected_gpio = e.GetIndex()
+		edit = [selected_gpio, self.gpio[selected_gpio][0], self.gpio[selected_gpio][1], self.gpio[selected_gpio][2],
+				self.gpio[selected_gpio][3]]
+		self.edit_add_gpio(edit)
+
+	def on_add_gpio(self, e):
+		self.edit_add_gpio(0)
+
+	def edit_add_gpio(self, edit):
+		selected_gpio = 0
+		if edit != 0: selected_gpio = edit[3]
+		avalaible_gpio = ['5', '6', '12', '13', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27']
+		tmp_list1 = []
+		tmp_list2 = []
+		for i in self.gpio:
+			tmp_list1.append(i[2])
+		for i in avalaible_gpio:
+			if i not in tmp_list1 or i == selected_gpio: tmp_list2.append(i)
+		avalaible_gpio = tmp_list2
+		dlg = addGPIO(avalaible_gpio, edit)
+		res = dlg.ShowModal()
+		if res == wx.ID_OK:
+			name = dlg.name.GetValue()
+			io_selection = dlg.io_select.GetValue()
+			if io_selection == _('output'):
+				io = 'out'
+			else:
+				io = 'in'
+			if io == 'out':
+				dlg2 = wx.MessageDialog(None, _(
+					'CAUTION. If you connect a closed switch or some inappropriate circuit, you could short out and damage your board when this output becomes "High". Are you sure to enable this output?'),
+										_('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_EXCLAMATION)
+				if dlg2.ShowModal() == wx.ID_YES:
+					dlg2.Destroy()
+				else:
+					dlg2.Destroy()
+					dlg.Destroy()
+					return
+			gpio_selection = dlg.gpio_select.GetValue()
+			pull_selection = dlg.pull_select.GetValue()
+			if not name or not io_selection or not gpio_selection or (not pull_selection and io == 'in'):
+				self.ShowMessage(_('Failed. You must fill in all fields.'))
+				dlg.Destroy()
+				return
+			if not re.match('^[0-9a-zA-Z]+$', name):
+				self.ShowMessage(_('Failed. The name must contain only letters and numbers.'))
+				dlg.Destroy()
+				return
+			if edit == 0:
+				self.gpio.append([name.encode('utf8'), io, gpio_selection.encode('utf8'), pull_selection.encode('utf8')])
+			else:
+				self.gpio[edit[0]][0] = name.encode('utf8')
+				self.gpio[edit[0]][1] = io
+				self.gpio[edit[0]][2] = gpio_selection.encode('utf8')
+				self.gpio[edit[0]][3] = pull_selection.encode('utf8')
+			self.apply_changes_gpio()
+		dlg.Destroy()
+
+	def on_delete_gpio(self, e):
+		selected_gpio = self.list_gpio.GetFirstSelected()
+		if selected_gpio == -1:
+			self.ShowStatusBarBLACK(_('Select an item to delete.'))
+			return
+		del self.gpio[selected_gpio]
+		self.list_gpio.DeleteItem(selected_gpio)
+		self.apply_changes_gpio()
+
+	def apply_changes_gpio(self):
+		self.conf.set('GPIO', 'sensors', str(self.gpio))
+		self.stop_sensors()
+		self.start_sensors()
+		self.read_gpio()
+
+	####################### Accounts
+	def page_account(self):
+		wx.StaticBox(self.p_account, label=_(' Twitter '), size=(330, 205), pos=(10, 10))
+		self.twitter_enable = wx.CheckBox(self.p_account, label=_('Enable'), pos=(20, 32))
+		self.twitter_enable.Bind(wx.EVT_CHECKBOX, self.on_twitter_enable)
+
+		wx.StaticText(self.p_account, label=_('apiKey'), pos=(20, 70))
+		self.apiKey = wx.TextCtrl(self.p_account, -1, size=(180, 32), pos=(150, 65))
+		wx.StaticText(self.p_account, label=_('apiSecret'), pos=(20, 105))
+		self.apiSecret = wx.TextCtrl(self.p_account, -1, size=(180, 32), pos=(150, 100))
+		wx.StaticText(self.p_account, label=_('accessToken'), pos=(20, 140))
+		self.accessToken = wx.TextCtrl(self.p_account, -1, size=(180, 32), pos=(150, 135))
+		wx.StaticText(self.p_account, label=_('accessTokenSecret'), pos=(20, 175))
+		self.accessTokenSecret = wx.TextCtrl(self.p_account, -1, size=(180, 32), pos=(150, 170))
+
+		wx.StaticBox(self.p_account, label=_(' Gmail '), size=(330, 205), pos=(350, 10))
+		self.gmail_enable = wx.CheckBox(self.p_account, label=_('Enable'), pos=(360, 32))
+		self.gmail_enable.Bind(wx.EVT_CHECKBOX, self.on_gmail_enable)
+		wx.StaticText(self.p_account, label=_('Gmail account'), pos=(360, 70))
+		self.Gmail_account = wx.TextCtrl(self.p_account, -1, size=(180, 32), pos=(490, 65))
+		wx.StaticText(self.p_account, label=_('Gmail password'), pos=(360, 105))
+		self.Gmail_password = wx.TextCtrl(self.p_account, -1, size=(180, 32), pos=(490, 100))
+		wx.StaticText(self.p_account, label=_('Recipient'), pos=(360, 140))
+		self.Recipient = wx.TextCtrl(self.p_account, -1, size=(180, 32), pos=(490, 135))
+
+	def read_account(self):
+		if self.conf.get('TWITTER', 'apiKey'): self.apiKey.SetValue('********************')
+		if self.conf.get('TWITTER', 'apiSecret'): self.apiSecret.SetValue('********************')
+		if self.conf.get('TWITTER', 'accessToken'): self.accessToken.SetValue('********************')
+		if self.conf.get('TWITTER', 'accessTokenSecret'): self.accessTokenSecret.SetValue('********************')
+		if self.conf.get('TWITTER', 'enable') == '1':
+			self.twitter_enable.SetValue(True)
+			self.apiKey.Disable()
+			self.apiSecret.Disable()
+			self.accessToken.Disable()
+			self.accessTokenSecret.Disable()
+
+		if self.conf.get('GMAIL', 'gmail'): self.Gmail_account.SetValue(self.conf.get('GMAIL', 'gmail'))
+		if self.conf.get('GMAIL', 'password'): self.Gmail_password.SetValue('********************')
+		if self.conf.get('GMAIL', 'recipient'): self.Recipient.SetValue(self.conf.get('GMAIL', 'recipient'))
+		if self.conf.get('GMAIL', 'enable') == '1':
+			self.gmail_enable.SetValue(True)
+			self.Gmail_account.Disable()
+			self.Gmail_password.Disable()
+			self.Recipient.Disable()	
+
+	def on_twitter_enable(self, e):
+		if not self.apiKey.GetValue() or not self.apiSecret.GetValue() or not self.accessToken.GetValue() or not self.accessTokenSecret.GetValue():
+			self.twitter_enable.SetValue(False)
+			self.ShowStatusBarRED(_('Enter valid Twitter apiKey, apiSecret, accessToken and accessTokenSecret.'))
+			return
+		if self.twitter_enable.GetValue():
+			self.apiKey.Disable()
+			self.apiSecret.Disable()
+			self.accessToken.Disable()
+			self.accessTokenSecret.Disable()
+			self.conf.set('TWITTER', 'enable', '1')
+			if not '*****' in self.apiKey.GetValue():
+				self.conf.set('TWITTER', 'apiKey', self.apiKey.GetValue())
+				self.apiKey.SetValue('********************')
+			if not '*****' in self.apiSecret.GetValue():
+				self.conf.set('TWITTER', 'apiSecret', self.apiSecret.GetValue())
+				self.apiSecret.SetValue('********************')
+			if not '*****' in self.accessToken.GetValue():
+				self.conf.set('TWITTER', 'accessToken', self.accessToken.GetValue())
+				self.accessToken.SetValue('********************')
+			if not '*****' in self.accessTokenSecret.GetValue():
+				self.conf.set('TWITTER', 'accessTokenSecret', self.accessTokenSecret.GetValue())
+				self.accessTokenSecret.SetValue('********************')
+		else:
+			self.conf.set('TWITTER', 'enable', '0')
+			self.apiKey.Enable()
+			self.apiSecret.Enable()
+			self.accessToken.Enable()
+			self.accessTokenSecret.Enable()
+
+	def on_gmail_enable(self, e):
+		if not self.Gmail_account.GetValue() or not self.Gmail_password.GetValue() or not self.Recipient.GetValue():
+			self.gmail_enable.SetValue(False)
+			self.ShowStatusBarRED(_('Enter valid Gmail account, Gmail password and Recipient.'))
+			return
+		if self.gmail_enable.GetValue():
+			self.Gmail_account.Disable()
+			self.Gmail_password.Disable()
+			self.Recipient.Disable()
+			self.conf.set('GMAIL', 'enable', '1')
+			self.conf.set('GMAIL', 'gmail', self.Gmail_account.GetValue())
+			if not '*****' in self.Gmail_password.GetValue():
+				self.conf.set('GMAIL', 'password', self.Gmail_password.GetValue())
+				self.Gmail_password.SetValue('********************')
+			self.conf.set('GMAIL', 'recipient', self.Recipient.GetValue())
+		else:
+			self.conf.set('GMAIL', 'enable', '0')
+			self.Gmail_account.Enable()
+			self.Gmail_password.Enable()
+			self.Recipient.Enable()
+
+	####################### Actions
+	def page_action(self):
+		title = wx.StaticText(self.p_action, label=_(' Triggers '))
+
+		self.list_triggers = CheckListCtrl(self.p_action, 100)
+		self.list_triggers.InsertColumn(0, _('trigger'), width=300)
+		self.list_triggers.InsertColumn(1, _('operator'), width=150)
+		self.list_triggers.InsertColumn(2, _('value'))
+		self.list_triggers.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_print_actions)
+		self.list_triggers.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit_triggers)
+		self.list_triggers.SetMinSize((10, 10))
+
+		add_trigger = wx.Button(self.p_action, label=_('add'))
+		add_trigger.Bind(wx.EVT_BUTTON, self.on_add_trigger)
+
+		delete_trigger = wx.Button(self.p_action, label=_('delete'))
+		delete_trigger.Bind(wx.EVT_BUTTON, self.on_delete_trigger)
+
+		self.list_actions = wx.ListCtrl(self.p_action, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
+		self.list_actions.InsertColumn(0, _('action'), width=200)
+		self.list_actions.InsertColumn(1, _('data'), width=260)
+		self.list_actions.InsertColumn(2, _('repeat'), width=130)
+		self.list_actions.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_actions)
+		self.list_actions.SetMinSize((10, 10))
+
+		add_action = wx.Button(self.p_action, label=_('add'))
+		add_action.Bind(wx.EVT_BUTTON, self.on_add_action)
+
+		delete_action = wx.Button(self.p_action, label=_('delete'))
+		delete_action.Bind(wx.EVT_BUTTON, self.on_delete_action)
+
+		stop_all = wx.Button(self.p_action, label=_('Stop all'))
+		stop_all.Bind(wx.EVT_BUTTON, self.on_stop_actions)
+
+		start_all = wx.Button(self.p_action, label=_('Start all'))
+		start_all.Bind(wx.EVT_BUTTON, self.on_start_actions)
+
+		apply_changes = wx.Button(self.p_action, label=_('Apply changes'))
+		apply_changes.Bind(wx.EVT_BUTTON, self.on_apply_changes_actions)
+		cancel_changes = wx.Button(self.p_action, label=_('Cancel changes'))
+		cancel_changes.Bind(wx.EVT_BUTTON, self.on_cancel_changes_actions)
+
+		hlistbox_but = wx.BoxSizer(wx.VERTICAL)
+		hlistbox_but.Add(add_trigger, 0, wx.ALL, 5)
+		hlistbox_but.Add(delete_trigger, 0, wx.ALL, 5)
+
+		hlistbox = wx.BoxSizer(wx.HORIZONTAL)
+		hlistbox.Add(self.list_triggers, 1, wx.ALL | wx.EXPAND, 5)
+		hlistbox.Add(hlistbox_but, 0, wx.RIGHT | wx.LEFT, 0)
+
+		hlistbox_butb10 = wx.BoxSizer(wx.VERTICAL)
+		hlistbox_butb10.Add(add_action, 0, wx.ALL, 5)
+		hlistbox_butb10.Add(delete_action, 0, wx.ALL, 5)
+
+		hlistboxb = wx.BoxSizer(wx.HORIZONTAL)
+		hlistboxb.Add(self.list_actions, 1, wx.ALL | wx.EXPAND, 5)
+		hlistboxb.Add(hlistbox_butb10, 0, wx.RIGHT | wx.LEFT, 0)
+
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(stop_all, 0, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add(start_all, 0, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add((0, 0), 1, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add(apply_changes, 0, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add(cancel_changes, 0, wx.RIGHT | wx.LEFT, 5)
+
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		vbox.Add(title, 0, wx.ALL | wx.EXPAND, 5)
+		vbox.Add(hlistbox, 1, wx.ALL | wx.EXPAND, 0)
+		vbox.Add(hlistboxb, 1, wx.ALL | wx.EXPAND, 0)
+		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 5)
+
+		self.p_action.SetSizer(vbox)
+
+	def read_triggers(self):
+		self.operators_list = [_('was not updated in the last (sec.)'), _('was updated in the last (sec.)'), '=',
+							   '<', '<=', '>', '>=', _('contains')]
+
+		self.triggers = []
+		self.list_triggers.DeleteAllItems()
+		data = self.conf.get('ACTIONS', 'triggers')
+		try:
+			temp_list = eval(data)
+		except:
+			temp_list = []
+		for ii in temp_list:
+			self.triggers.append(ii)
+			if ii[1] == -1: 
+				sk = _('Date')
+				op = self.operators_list[ii[2]]
+			else: 
+				sk = ii[1]
+				op = self.operators_list[ii[2]]
+			self.list_triggers.Append([sk, op.decode('utf8'), ii[3].decode('utf8')])
+			if ii[0] == 1:
+				last = self.list_triggers.GetItemCount() - 1
+				self.list_triggers.CheckItem(last)
+
+	def on_print_actions(self, e):
+		self.actions = Actions(self)
+		selected_trigger = e.GetIndex()
+		self.list_actions.DeleteAllItems()
+		for i in self.triggers[selected_trigger][4]:
+			if i[3] == 0.0:
+				repeat = ''
+			else:
+				repeat = str(i[2])
+			time_units = self.actions.time_units[i[3]]
+			repeat2 = repeat + ' ' + time_units
+			self.list_actions.Append(
+				[self.actions.options[self.actions.getOptionsListIndex(i[0])][0].decode('utf8'), i[1].decode('utf8'), repeat2])
+
+	def on_edit_triggers(self, e):
+		t = e.GetIndex()
+		SKkey = self.triggers[t][1]
+		operator = self.triggers[t][2]
+		value = self.triggers[t][3]
+		edit = [t, SKkey, operator, value]
+		self.edit_add_trigger(edit)
+
+	def on_add_trigger(self, e):
+		self.edit_add_trigger(0)
+
+	def edit_add_trigger(self, edit):
+		dlg = addTrigger(self, edit)
+		res = dlg.ShowModal()
+		if res == wx.ID_OK:
+			operators_ref = dlg.operators_ref
+			operator = operators_ref[dlg.operator.GetSelection()]
+			operator0 = self.operators_list[operator]
+			value = dlg.value.GetValue()
+			if value:
+				value = value.encode('utf8')
+			else:
+				self.ShowMessage(_('Failed. Enter a value.'))
+				dlg.Destroy()
+				return
+			if dlg.always.GetValue():
+				SKkey0 = _('Date')
+				SKkey = -1
+			else:
+				if dlg.skvalue.GetValue(): magnitude = 'value'
+				elif dlg.sktimestamp.GetValue(): magnitude = 'timestamp'
+				elif dlg.sksource.GetValue(): magnitude = 'source'
+				else:
+					self.ShowMessage(_('Failed. Select value, timestamp or source.'))
+					dlg.Destroy()
+					return
+				SKkey0 = dlg.SKkey.GetValue().encode('utf8')
+				if SKkey0: 
+					SKkey0 = SKkey0+'.'+magnitude
+					SKkey = SKkey0
+				else:
+					self.ShowMessage(_('Failed. Select a Signal K key.'))
+					dlg.Destroy()
+					return
+			if edit == 0:
+				self.list_triggers.Append([SKkey0, operator0.decode('utf8'), value.decode('utf8')])
+				tmp = [1, SKkey, operator, value, []]
+				self.triggers.append(tmp)
+				total = self.list_triggers.GetItemCount()
+				for x in xrange(0, total, 1):
+					self.list_triggers.Select(x, on=0)
+				self.list_triggers.Select(total - 1, on=1)
+				self.list_triggers.CheckItem(total - 1)
+			else:
+				self.list_triggers.SetStringItem(edit[0], 0, SKkey0)
+				self.list_triggers.SetStringItem(edit[0], 1, operator0)
+				self.list_triggers.SetStringItem(edit[0], 2, value)
+				self.triggers[edit[0]][1] = SKkey
+				self.triggers[edit[0]][2] = operator
+				self.triggers[edit[0]][3] = value
+		dlg.Destroy()
+
+	def edit_actions(self, e):
+		self.actions = Actions(self)
+		a = e.GetIndex()
+		t = self.list_triggers.GetFirstSelected()
+		action = self.actions.getOptionsListIndex(self.triggers[t][4][a][0])
+		data = self.triggers[t][4][a][1]
+		repeat = self.triggers[t][4][a][2]
+		unit = self.triggers[t][4][a][3]
+		edit = [a, action, data, repeat, unit]
+		self.edit_add_action(edit)
+
+	def on_add_action(self, e):
+		self.edit_add_action(0)
+
+	def edit_add_action(self, edit):
+		self.actions = Actions(self)
+		selected_trigger_position = self.list_triggers.GetFirstSelected()
+		if selected_trigger_position == -1:
+			self.ShowStatusBarBLACK(_('Select a trigger to add actions.'))
+			return
+		dlg = addAction(self, self.actions.options, self.actions.time_units, edit)
+		res = dlg.ShowModal()
+		if res == wx.ID_OK:
+			action_selection = dlg.action_select.GetCurrentSelection()
+			if action_selection == -1:
+				self.ShowMessage(_('Failed. Select an action.'))
+				dlg.Destroy()
+				return
+			if dlg.repeat.GetValue():
+				repeat = dlg.repeat.GetValue()
+			else:
+				repeat = '0'
+			try:
+				repeat = float(repeat)
+			except:
+				self.ShowMessage(_('Failed. "Repeat after" must be a number.'))
+				dlg.Destroy()
+				return
+			action = self.actions.options[action_selection][0]
+			data = dlg.data.GetValue().encode('utf8')
+			time_units_selection = dlg.repeat_unit.GetCurrentSelection()
+			time_units = self.actions.time_units[time_units_selection]
+			if repeat == 0.0:
+				repeat2 = time_units
+			else:
+				repeat2 = str(repeat) + ' ' + time_units
+			if edit == 0:
+				self.list_actions.Append([action.decode('utf8'), data.decode('utf8'), repeat2])
+				tmp = []
+				tmp.append(self.actions.options[action_selection][3].encode('utf8'))
+				tmp.append(data)
+				tmp.append(repeat)
+				tmp.append(time_units_selection)
+				self.triggers[selected_trigger_position][4].append(tmp)
+			else:
+				self.list_actions.SetStringItem(edit[0], 0, action.decode('utf8'))
+				self.list_actions.SetStringItem(edit[0], 1, data.decode('utf8'))
+				self.list_actions.SetStringItem(edit[0], 2, repeat2)
+				self.triggers[selected_trigger_position][4][edit[0]][0] = self.actions.options[action_selection][3].encode('utf8')
+				self.triggers[selected_trigger_position][4][edit[0]][1] = data
+				self.triggers[selected_trigger_position][4][edit[0]][2] = repeat
+				self.triggers[selected_trigger_position][4][edit[0]][3] = time_units_selection
+		dlg.Destroy()
+
+	def on_delete_trigger(self, e):
+		selected = self.list_triggers.GetFirstSelected()
+		if selected == -1:
+			self.ShowStatusBarBLACK(_('Select an item to delete.'))
+		else:
+			del self.triggers[selected]
+			self.list_triggers.DeleteItem(selected)
+			self.list_actions.DeleteAllItems()
+
+	def on_delete_action(self, e):
+		selected_trigger = self.list_triggers.GetFirstSelected()
+		selected_action = self.list_actions.GetFirstSelected()
+		if selected_action == -1:
+			self.ShowStatusBarBLACK(_('Select an item to delete.'))
+		else:
+			del self.triggers[selected_trigger][4][selected_action]
+			self.list_actions.DeleteItem(selected_action)
+
+	def on_apply_changes_actions(self, e):
+		i = 0
+		for ii in self.triggers:
+			if self.list_triggers.IsChecked(i):
+				self.triggers[i][0] = 1
+			else:
+				self.triggers[i][0] = 0
+			i += 1
+		self.conf.set('ACTIONS', 'triggers', str(self.triggers))
+		self.restart_SK(0)
+
+	def on_cancel_changes_actions(self, e):
+		self.read_triggers()
+		self.ShowStatusBarBLACK(_('Actions changes cancelled'))
+
+	def on_stop_actions(self, e):
+		subprocess.call(['python', self.currentpath + '/ctrl_actions.py', '0'])
+		self.ShowStatusBarBLACK(_('Actions stopped'))
+		self.conf.read()
+		self.read_triggers()
+		self.list_actions.DeleteAllItems()
+
+	def on_start_actions(self, e):
+		subprocess.call(['python', self.currentpath + '/ctrl_actions.py', '1'])
+		self.ShowStatusBarBLACK(_('Actions started'))
+		self.conf.read()
+		self.read_triggers()
+		self.list_actions.DeleteAllItems()
+
+	####################### 1W sensors
+	def page_1w(self):
+		title = wx.StaticText(self.p_1w, label=_(' Temperature sensors '))
+
+		self.list_DS18B20 = wx.ListCtrl(self.p_1w, style=wx.LC_REPORT)
+		self.list_DS18B20.InsertColumn(0, _('Name'), width=100)
+		self.list_DS18B20.InsertColumn(1, _('ID'), width=105)
+		self.list_DS18B20.InsertColumn(2, _('Offset'), width=50)
+		self.list_DS18B20.InsertColumn(3, _('Signal K key'), width=215)
+		self.list_DS18B20.InsertColumn(4, _('Source'), width=120)
+		self.list_DS18B20.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_DS18B20)
+
+		add = wx.Button(self.p_1w, label=_('add'))
+		add.Bind(wx.EVT_BUTTON, self.on_add_DS18B20)
+
+		delete = wx.Button(self.p_1w, label=_('delete'))
+		delete.Bind(wx.EVT_BUTTON, self.on_delete_DS18B20)
+
+		diagnostic = wx.Button(self.p_1w, label=_('SK Diagnostic'))
+		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
+
+		reset_1w = wx.Button(self.p_1w, label=_('Restart'))
+		reset_1w.Bind(wx.EVT_BUTTON, self.on_reset_1w)
+
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(diagnostic, 0, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add(reset_1w, 0, wx.RIGHT | wx.LEFT, 5)
+
+		hlistbox_but = wx.BoxSizer(wx.VERTICAL)
+		hlistbox_but.Add(add, 0, wx.ALL, 5)
+		hlistbox_but.Add(delete, 0, wx.ALL, 5)
+
+		hlistbox = wx.BoxSizer(wx.HORIZONTAL)
+		hlistbox.Add(self.list_DS18B20, 1, wx.ALL | wx.EXPAND, 5)
+		hlistbox.Add(hlistbox_but, 0, wx.RIGHT | wx.LEFT, 0)
+
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		vbox.Add(title, 0, wx.ALL | wx.EXPAND, 5)
+		vbox.Add(hlistbox, 1, wx.ALL | wx.EXPAND, 0)
+		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 5)
+
+		self.p_1w.SetSizer(vbox)
+
+	def start_1w(self):
+		subprocess.Popen(['python', self.currentpath + '/1w_d.py'])
+		self.ShowStatusBarGREEN(_('1W sensors restarted'))
+
+	def stop_1w(self):
+		self.ShowStatusBarRED(_('1W sensors stopped'))
+		subprocess.call(['pkill', '-f', '1w_d.py'])
+	
+	def on_reset_1w(self, e):
+		self.stop_1w()
+		self.read_DS18B20()
+		self.start_1w()
+
+	def read_DS18B20(self):
+		self.DS18B20 = []
+		self.list_DS18B20.DeleteAllItems()
+		data = self.conf.get('1W', 'DS18B20')
+		try:
+			temp_list = eval(data)
+		except:
+			temp_list = []
+		for ii in temp_list:
+			self.DS18B20.append(ii)
+			self.list_DS18B20.Append([ii[0], ii[2], ii[3], ii[1],'1W.'+ii[0]])
+
+	def edit_DS18B20(self, e):
+		selected = e.GetIndex()
+		edit = [selected, self.DS18B20[selected][0], self.DS18B20[selected][1],
+				self.DS18B20[selected][2], self.DS18B20[selected][3]]
+		self.edit_add_DS18B20(edit)
+
+	def on_add_DS18B20(self, e):
+		self.edit_add_DS18B20(0)
+
+	def edit_add_DS18B20(self, edit):
+		dlg = addDS18B20(edit)
+		res = dlg.ShowModal()
+		if res == wx.ID_OK:
+			name = dlg.name.GetValue()
+			SKkey = dlg.SKkey.GetValue()
+			sensor_id = dlg.id_select.GetValue()
+			offset = dlg.offset.GetValue()
+			if not SKkey:
+				self.ShowMessage(_('Failed. Select a Signal K key.'))
+				dlg.Destroy()
+				return
+			if not name:
+				self.ShowMessage(_('Failed. Provide a name.'))
+				dlg.Destroy()
+				return
+			if not re.match('^[0-9a-zA-Z]+$', name):
+				self.ShowMessage(_('Failed. Name must contain only letters and numbers.'))
+				dlg.Destroy()
+				return
+			if sensor_id == '':
+				self.ShowMessage(_('Failed. Select sensor ID.'))
+				dlg.Destroy()
+				return
+			try:
+				float(offset)
+			except:
+				offset = '0.0'
+			if edit == 0:
+				self.DS18B20.append([name, SKkey, sensor_id, offset])
+			else:
+				self.DS18B20[edit[0]][0] = name
+				self.DS18B20[edit[0]][1] = SKkey
+				self.DS18B20[edit[0]][2] = sensor_id
+				self.DS18B20[edit[0]][3] = offset
+			self.apply_changes_DS18B20()
+		dlg.Destroy()
+
+	def on_delete_DS18B20(self, e):
+		selected_DS18B20 = self.list_DS18B20.GetFirstSelected()
+		if selected_DS18B20 == -1:
+			self.ShowStatusBarBLACK(_('Select an item to delete.'))
+			return
+		del self.DS18B20[selected_DS18B20]
+		self.list_DS18B20.DeleteItem(selected_DS18B20)
+		self.apply_changes_DS18B20()
+
+	def apply_changes_DS18B20(self):
+		self.conf.set('1W', 'DS18B20', str(self.DS18B20))
+		self.stop_1w()
+		self.start_1w()
+		self.read_DS18B20()
+
+	####################### USB manager
+	def page_usb(self):
+		title = wx.StaticText(self.p_usb, label=_(' USB Serial ports '))
+
+		self.list_USBinst = wx.ListCtrl(self.p_usb, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
+		self.list_USBinst.InsertColumn(0, _('name'), width=130)
+		self.list_USBinst.InsertColumn(1, _('vendor'), width=55)
+		self.list_USBinst.InsertColumn(2, _('product'), width=60)
+		self.list_USBinst.InsertColumn(3, _('port'), width=90)
+		self.list_USBinst.InsertColumn(4, _('serial'), width=130)
+		self.list_USBinst.InsertColumn(5, _('remember'), width=100)
+		self.list_USBinst.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_USBinst)
+
+		add = wx.Button(self.p_usb, label=_('add'))
+		add.Bind(wx.EVT_BUTTON, self.on_add_USBinst)
+
+		delete = wx.Button(self.p_usb, label=_('delete'))
+		delete.Bind(wx.EVT_BUTTON, self.on_delete_USBinst)
+
+		hlistbox = wx.BoxSizer(wx.HORIZONTAL)
+		hlistbox.Add(self.list_USBinst, 1, wx.ALL | wx.EXPAND, 5)
+
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(add, 0, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add(delete, 0, wx.RIGHT | wx.LEFT, 5)
+
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		vbox.Add(title, 0, wx.ALL | wx.EXPAND, 5)
+		vbox.Add(hlistbox, 1, wx.ALL | wx.EXPAND, 0)
+		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 5)
+
+		self.p_usb.SetSizer(vbox)
+
+	def start_udev(self):
+		subprocess.call(['sudo', 'udevadm', 'control', '--reload-rules'])
+		subprocess.call(['sudo', 'udevadm', 'trigger', '--attr-match=subsystem=tty'])
+
+	def read_USBinst(self):
+		self.USBinst = []
+		self.list_USBinst.DeleteAllItems()
+		data = self.conf.get('UDEV', 'USBinst')
+		sentence = 0
+		try:
+			temp_list = eval(data)
+		except:
+			temp_list = []
+		for ii in temp_list:
+			self.USBinst.append(ii)
+			self.list_USBinst.Append(
+				[ii[0].decode('utf8'), ii[1].decode('utf8'), ii[2].decode('utf8'), ii[4].decode('utf8'),
+				 ii[3].decode('utf8'), ii[5]])
+			sentence = 1
+		try:
+			filesize = os.stat('/etc/udev/rules.d/10-openplotter.rules').st_size
+		except:
+			filesize = 0
+
+		if sentence == 0 and filesize > 10:
+			self.apply_changes_USBinst()
+		if sentence == 1 and filesize < 10:
+			self.apply_changes_USBinst()
+
+	def edit_USBinst(self, e):
+		selected_USBinst = e.GetIndex()
+		edit = [selected_USBinst, self.USBinst[selected_USBinst][0], self.USBinst[selected_USBinst][1],
+				self.USBinst[selected_USBinst][2], self.USBinst[selected_USBinst][3], self.USBinst[selected_USBinst][4],
+				self.USBinst[selected_USBinst][5], self.USBinst[selected_USBinst][6]]
+		self.edit_add_USBinst(edit)
+
+	def on_add_USBinst(self, e):
+		self.edit_add_USBinst(0)
+
+	def edit_add_USBinst(self, edit):
+		dlg = addUSBinst(edit,self)
+		res = dlg.ShowModal()
+		if res == wx.ID_OK:
+			OPname_selection = dlg.OPname_select.GetValue()
+			if not re.match('^[0-9a-zA-Z]{1,8}$', OPname_selection):
+				self.ShowMessage(_('Failed. The new name must be a string between 1 and 8 letters and/or numbers.'))
+				dlg.Destroy()
+				return
+			OPname_selection = 'ttyOP_' + OPname_selection
+			OPname_selection = OPname_selection.encode('utf8')
+			vendor = dlg.vendor
+			vendor = vendor.encode('utf8')
+			product = dlg.product
+			product = product.encode('utf8')
+			serial = dlg.serial
+			serial = serial.encode('utf8')
+			con_port = dlg.con_port
+			con_port = con_port.encode('utf8')
+			device = dlg.device
+			device = device.encode('utf8')
+			rem = dlg.rem
+			if edit == 0:
+				self.list_USBinst.Append(
+					[OPname_selection.decode('utf8'), vendor.decode('utf8'), product.decode('utf8'),
+					 con_port.decode('utf8'), serial.decode('utf8'), rem])
+				self.USBinst.append([OPname_selection, vendor, product, serial, con_port, rem, device])
+			else:
+				self.list_USBinst.SetStringItem(edit[0], 0, OPname_selection.decode('utf8'))
+				self.list_USBinst.SetStringItem(edit[0], 1, vendor.decode('utf8'))
+				self.list_USBinst.SetStringItem(edit[0], 2, product.decode('utf8'))
+				self.list_USBinst.SetStringItem(edit[0], 3, con_port.decode('utf8'))
+				self.list_USBinst.SetStringItem(edit[0], 4, serial.decode('utf8'))
+				# self.list_USBinst.SetStringItem(edit[0],5,device.decode('utf8'))
+				self.list_USBinst.SetStringItem(edit[0], 5, rem)
+				self.USBinst[edit[0]][0] = OPname_selection
+				self.USBinst[edit[0]][1] = vendor
+				self.USBinst[edit[0]][2] = product
+				self.USBinst[edit[0]][3] = serial
+				self.USBinst[edit[0]][4] = con_port
+				self.USBinst[edit[0]][5] = rem
+				self.USBinst[edit[0]][6] = device
+			self.apply_changes_USBinst()
+		dlg.Destroy()
+
+	def on_delete_USBinst(self, e):
+		selected_USBinst = self.list_USBinst.GetFirstSelected()
+		if selected_USBinst == -1:
+			self.ShowStatusBarBLACK(_('Select an item to delete.'))
+			return
+		del self.USBinst[selected_USBinst]
+		self.list_USBinst.DeleteItem(selected_USBinst)
+		self.apply_changes_USBinst()
+
+	def apply_changes_USBinst(self):
+		self.conf.set('UDEV', 'USBinst', str(self.USBinst))
+		file = open('10-openplotter.rules', 'w')
+		for i in self.USBinst:
+			index = self.USBinst.index(i)
+			if self.USBinst[index][5] == 'port':
+				write_str = 'KERNEL=="' + self.USBinst[index][6] + '*", KERNELS=="' + self.USBinst[index][4]
+				write_str = write_str + '" ,SYMLINK+="' + self.USBinst[index][0] + '"\n'
+			else:
+				if self.USBinst[index][3] == '':
+					write_str = 'SUBSYSTEM=="tty", ATTRS{idVendor}=="' + self.USBinst[index][1]
+					write_str = write_str + '",ATTRS{idProduct}=="' + self.USBinst[index][2]
+					write_str = write_str + '" ,SYMLINK+="' + self.USBinst[index][0] + '"\n'
+				else:
+					write_str = 'SUBSYSTEM=="tty", ATTRS{idVendor}=="' + self.USBinst[index][1]
+					write_str = write_str + '",ATTRS{idProduct}=="' + self.USBinst[index][2]
+					write_str = write_str + '",ATTRS{serial}=="' + self.USBinst[index][3]
+					write_str = write_str + '" ,SYMLINK+="' + self.USBinst[index][0] + '"\n'
+
+			file.write(write_str)
+		file.close()
+		test = 0
+		test = os.system('sudo mv 10-openplotter.rules /etc/udev/rules.d')
+		self.ShowStatusBarRED(_('Restarting ...'))
+		self.start_udev()
+		time.sleep(1.5)
+		self.ShowStatusBarGREEN(_('USB names added and restarted'))
+		self.SerialCheck()
+
+	###################################### N2K
+	def page_n2k(self):
+		wx.StaticBox(self.p_n2k, label=_(' Settings '), size=(230, 265), pos=(10, 10))
+		i = 35
+		self.CANUSB_label = wx.StaticText(self.p_n2k, label=_('CAN-USB device'), pos=(20, i))
+		self.SerDevLs = []
+		i += 20
+		self.can_usb = wx.ComboBox(self.p_n2k, choices=self.SerDevLs, style=wx.CB_READONLY, size=(140, 32), pos=(20, i))
+		self.can_usb.Bind(wx.EVT_COMBOBOX, self.on_n2k_device)
+		i += 35
+		self.n2k_enable = wx.CheckBox(self.p_n2k, label=_('Enable N2K input'), pos=(20, i))
+		self.n2k_enable.Bind(wx.EVT_CHECKBOX, self.on_n2k_enable)
+		i += 25
+		self.N2K_diagnostic_b = wx.Button(self.p_n2k, label=_('Diagnostic input'), pos=(20, i))
+		self.N2K_diagnostic_b.Bind(wx.EVT_BUTTON, self.on_N2K_diagnostic)
+		i += 35
+		self.n2k_out_enable = wx.CheckBox(self.p_n2k, label=_('Enable N2K output'), pos=(20, i))
+		self.n2k_out_enable.Bind(wx.EVT_CHECKBOX, self.on_n2k_output)
+		i += 25
+		self.N2K_diagnostic_out_b = wx.Button(self.p_n2k, label=_('Diagnostic output'), pos=(20, i))
+		self.N2K_diagnostic_out_b.Bind(wx.EVT_BUTTON, self.on_N2K_diagnostic_out)
+		i += 40
+		self.button_N2K_setting = wx.Button(self.p_n2k, label=_('Output settings'), pos=(20, i))
+		self.button_N2K_setting.Bind(wx.EVT_BUTTON, self.on_N2K_setting)
+
+		wx.StaticBox(self.p_n2k, label=_(' Inputs '), size=(430, 50), pos=(250, 10))
+		self.n2kinputs_label = wx.StaticText(self.p_n2k, label=_('PGNs: All'), pos=(260, 30))
+
+		wx.StaticBox(self.p_n2k, label=_(' Outputs '), size=(430, 210), pos=(250, 65))
+		wx.StaticText(self.p_n2k, label='PGNs:', pos=(260, 85))
+		self.n2koutputs_label = wx.StaticText(self.p_n2k, pos=(260, 105))
+
+	def read_n2k(self):
+		self.mmsi.SetValue(self.vessel_self.mmsi)
+		if self.conf.get('N2K', 'enable') == '1':
+			self.n2k_enable.SetValue(True)
+			self.can_usb.Disable()
+			self.button_N2K_setting.Disable()
+			self.N2K_diagnostic_b.Disable()
+		self.n2koutputs_label.SetLabel(self.conf.get('N2K', 'pgn_output'))
+		if self.conf.get('N2K', 'output') == '1':
+			self.n2k_out_enable.SetValue(True)
+			self.N2K_diagnostic_out_b.Disable()
+		self.can_usb.SetValue(self.conf.get('N2K', 'can_usb'))
+
+	def on_n2k_device(self, e):
+		self.conf.set('N2K', 'can_usb', self.can_usb.GetValue())
+
+	def on_n2k_enable(self, e):
+		with open(self.home+'/.openplotter/openplotter-settings.json') as data_file:
+			data = json.load(data_file)
+		isChecked = self.n2k_enable.GetValue()
+		if isChecked:
+			if not self.can_usb.GetValue():
+				self.n2k_enable.SetValue(False)
+				self.ShowStatusBarBLACK(_('You have to select a CAN-USB-CAN device'))
+				return
+			subprocess.call(['pkill', '-f', 'CAN-USB-stick.py'])
+			self.conf.set('N2K', 'enable', '1')
+			self.conf.set('N2K', 'can_usb', self.can_usb.GetValue())
+			self.can_usb.Disable()
+			self.button_N2K_setting.Disable()
+			self.N2K_diagnostic_b.Disable()
+			exist = 0
+			ii = 0
+			for i in data['pipedProviders']:
+				if i['id'] == 'CAN-USB':
+					# edit nmea 2000
+					data['pipedProviders'][ii]['pipeElements'][0]['options'][
+						'command'] = 'actisense-serial ' + self.can_usb.GetValue()
+					exist = 1
+				ii += 1
+			if exist == 0:
+				new = {"id": "CAN-USB",
+					   "pipeElements": [{"type": "providers/execute", "options": {"command": "actisense-serial xxx"}},
+										{"type": "providers/liner"}, {"type": "providers/n2kAnalyzer"},
+										{"type": "providers/n2k-signalk"}]}
+				new['pipeElements'][0]['options']['command'] = 'actisense-serial ' + self.can_usb.GetValue()
+				data['pipedProviders'].append(new)
+		else:
+			self.conf.set('N2K', 'enable', '0')
+			self.can_usb.Enable()
+			self.button_N2K_setting.Enable()
+			self.N2K_diagnostic_b.Enable()
+			ii = 0
+			for i in data['pipedProviders']:
+				if i['id'] == 'CAN-USB':
+					# delete nmea 2000
+					del data['pipedProviders'][ii]
+				ii += 1
+		self.n2koutputs_label.SetLabel(self.conf.get('N2K', 'pgn_output'))
+		with open(self.home+'/.openplotter/openplotter-settings.json', 'w') as outfile:
+			json.dump(data, outfile)
+		self.restart_SK(0)
+
+	def on_n2k_output(self, e):
+		isChecked = self.n2k_out_enable.GetValue()
+		if isChecked:
+			if not self.can_usb.GetValue():
+				self.n2k_out_enable.SetValue(False)
+				self.ShowStatusBarBLACK(_('You have to select a CAN-USB-CAN device'))
+				return
+			self.N2K_diagnostic_out_b.Disable()
+			self.conf.set('N2K', 'output', '1')
+			subprocess.call(['pkill', '-f', 'diagnostic-N2K-output.py'])
+			subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
+			subprocess.Popen(['python', self.currentpath + '/N2K-server_d.py'])
+		else:
+			self.conf.set('N2K', 'output', '0')
+			subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
+			self.N2K_diagnostic_out_b.Enable()
+
+	def on_N2K_setting(self, e):
+		tty = str(self.can_usb.GetValue())
+		if len(tty) == 0:
+			self.ShowStatusBarBLACK(_('You have to select a CAN-USB-CAN device'))
+			return
+		subprocess.call(['pkill', '-f', 'CAN-USB-stick.py'])
+		self.stop_sensors()
+		self.stop_1w()
+		subprocess.Popen(['python', self.currentpath + '/CAN-USB-stick.py'])
+		self.ShowStatusBarBLACK(_('Select PGNs to transmit and enable N2K input/output again.'))
+
+	def on_N2K_diagnostic(self, e):
+		tty = str(self.can_usb.GetValue())
+		if len(tty) == 0:
+			self.ShowStatusBarBLACK(_('You have to select a CAN-USB-CAN device'))
+			return
+		subprocess.call(['pkill', '-f', 'diagnostic-N2K-input.py'])
+		subprocess.Popen(['python', self.currentpath + '/diagnostic-N2K-input.py'])
+		self.ShowStatusBarBLACK(_('Show received PGNs.'))
+
+	def on_N2K_diagnostic_out(self, e):
+		tty = str(self.can_usb.GetValue())
+		if len(tty) == 0:
+			self.ShowStatusBarBLACK(_('You have to select a CAN-USB-CAN device'))
+			return
+		subprocess.call(['pkill', '-f', 'diagnostic-N2K-output.py'])
+		subprocess.Popen(['python', self.currentpath + '/diagnostic-N2K-output.py'])
+		self.ShowStatusBarBLACK(_('Show sent PGNs.'))
+
+	###################################### Signal K
+	def page_sk(self):
+		sk_settings_box = wx.StaticBox(self.p_sk, label=_(' Settings '))
+		mmsi_label = wx.StaticText(self.p_sk, label='MMSI')
+		self.mmsi = wx.TextCtrl(self.p_sk, -1)
+		apply_changes = wx.Button(self.p_sk, label=_('Apply changes'))
+		apply_changes.Bind(wx.EVT_BUTTON, self.apply_SK)
+
+		sk_info_box = wx.StaticBox(self.p_sk, label=_(' Info '))
+		try:
+			response = requests.get('http://localhost:3000/signalk')
+		except:
+			self.restart_SK(0x0000)
+		try:	
+			response = requests.get('http://localhost:3000/signalk')
+		except:
+			wx.MessageBox("SignalK doesn't work! Openplotter will exit because it wasn't able to start SignalK", 'Error', wx.OK | wx.ICON_ERROR)
+			self.close()
+		data = response.json()
+		text = _('Version: ').decode('utf8')+data['endpoints']['v1']['version']
+		text += '\n\n'
+		text += _('Signal K settings and tools:').decode('utf8')+'\n'+'http://localhost:3000'
+		text += '\n\n'
+		text += _('REST full format output:').decode('utf8')+'\n'+data['endpoints']['v1']['signalk-http']
+		text += '\n\n'
+		text += _('Websocket delta format output:').decode('utf8')+'\n'+data['endpoints']['v1']['signalk-ws']
+		text += '\n\n'
+		text += _('TCP delta format output:').decode('utf8')+'\n'+data['endpoints']['v1']['signalk-tcp']
+		text += '\n\n'
+		text += _('TCP NMEA 0183 format output:').decode('utf8')+'\n'+'tcp://localhost:10110'
+		sk_info_text = wx.StaticText(self.p_sk, label=text)
+
+		diagnostic = wx.Button(self.p_sk, label=_('SK Diagnostic'))
+		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
+
+		button_restartSK = wx.Button(self.p_sk, label=_('Restart'))
+		button_restartSK.Bind(wx.EVT_BUTTON, self.restart_SK)
+
+		tools_SK = wx.Button(self.p_sk, label=_('Signal K tools'))
+		tools_SK.Bind(wx.EVT_BUTTON, self.show_tools_SK)
+
+		v_boxSizer1 = wx.StaticBoxSizer(sk_settings_box, wx.VERTICAL)
+		v_boxSizer1.Add(mmsi_label, 0, wx.ALL | wx.EXPAND, 5)
+		v_boxSizer1.Add(self.mmsi, 0, wx.ALL | wx.EXPAND, 5)
+		v_boxSizer1.Add((0,0), 1, wx.ALL | wx.EXPAND, 5)
+		v_boxSizer1.Add(apply_changes, 0, wx.ALL, 5)
+
+		v_boxSizer2 = wx.StaticBoxSizer(sk_info_box, wx.VERTICAL)
+		v_boxSizer2.Add(sk_info_text, 0, wx.ALL | wx.EXPAND, 5)
+
+		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
+		hbox1.Add(v_boxSizer1, 1, wx.ALL | wx.EXPAND, 5)
+		hbox1.Add(v_boxSizer2, 1, wx.ALL | wx.EXPAND, 5)
+
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(diagnostic, 0, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add(button_restartSK, 0, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add(tools_SK, 0, wx.RIGHT | wx.LEFT, 5)
+
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		vbox.Add(hbox1, 1, wx.ALL | wx.EXPAND, 5)
+		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 5)
+
+		self.p_sk.SetSizer(vbox)
+
+	def show_tools_SK(self, e):
+		url = 'http://localhost:3000'
+		webbrowser.open(url, new=2)
+
+	def restart_SK(self, e):
+		# stopping sk server
+		self.ShowStatusBarRED(_('Closing Signal K server ...'))
+		self.vessel_self = ''
+		subprocess.call(["pkill", '-f', "signalk-server"])
+		while self.util_process_exist("signalk-server"):
+			time.sleep(0.01)
+		# restarting sk server and providers
+		self.vessel_self = checkVesselSelf(self.conf)
+		self.ShowStatusBarGREEN(_('Signal K server restarted'))
+
+	def on_diagnostic_SK(self, e):
+		subprocess.call(['pkill', '-f', 'diagnostic-SK-input.py'])
+		subprocess.Popen(['python', self.currentpath + '/diagnostic-SK-input.py'])
+
+	def apply_SK(self, e):
+		mmsi = self.mmsi.GetValue()
+		uuid = "urn:mrn:imo:mmsi:" + mmsi
+		if mmsi == '':
+			self.ShowStatusBarRED(_('You have to provide a MMSI.'))
+			return
+		with open(self.home+'/.openplotter/openplotter-settings.json') as data_file:
+			data = json.load(data_file)
+		data['vessel']['uuid'] = uuid
+		with open(self.home+'/.openplotter/openplotter-settings.json', 'w') as outfile:
+			json.dump(data, outfile)
+		self.restart_SK(0)
+
+	####################### SMS
+	def page_sms(self):
+		wx.StaticBox(self.p_sms, label=_(' Settings '), size=(330, 180), pos=(10, 10))
+		self.sms_enable = wx.CheckBox(self.p_sms, label=_('Enable settings'), pos=(20, 30))
+		self.sms_enable.Bind(wx.EVT_CHECKBOX, self.onsms_enable)
+
+		self.sms_dev_label = wx.StaticText(self.p_sms, label=_('Serial port'), pos=(20, 60))
+		self.sms_dev = wx.ComboBox(self.p_sms, choices=self.SerDevLs, style=wx.CB_READONLY, size=(150, 32),
+								   pos=(20, 80))
+		sms_con_list = ['at', 'at19200', 'at115200', 'blueat', 'bluephonet', 'bluefbus', 'blueobex', 'bluerfgnapbus',
+						'bluerfat', 'blues60', 'dlr3', 'dku2', 'dku2at', 'dku2phonet', 'dku5', 'dku5fbus', 'fbus',
+						'fbusdlr3', 'fbusdku5', 'fbusblue', 'fbuspl2303', 'irdaphonet', 'irdaat', 'irdaobex',
+						'irdagnapbus', 'phonetblue', 'proxyphonet', 'proxyfbus', 'proxyat', 'proxyobex', 'proxygnapbus',
+						'proxys60', 'mbus']
+
+		self.sms_bt_label = wx.StaticText(self.p_sms, label=_('Bluetooth address'), pos=(180, 60))
+		self.sms_bt = wx.TextCtrl(self.p_sms, -1, size=(150, 32), pos=(180, 80))
+
+		self.sms_con_label = wx.StaticText(self.p_sms, label=_('Connection'), pos=(20, 120))
+		self.sms_con = wx.ComboBox(self.p_sms, choices=sms_con_list, style=wx.CB_READONLY, size=(150, 32),
+								   pos=(20, 140))
+
+		self.button_sms_identify = wx.Button(self.p_sms, label=_('Identify'), pos=(180, 140))
+		self.button_sms_identify.Bind(wx.EVT_BUTTON, self.on_sms_identify)
+
+		wx.StaticBox(self.p_sms, label=_(' Sending '), size=(330, 180), pos=(350, 10))
+
+		self.sms_enable_send = wx.CheckBox(self.p_sms, label=_('Enable sending SMS'), pos=(360, 30))
+		self.sms_enable_send.Bind(wx.EVT_CHECKBOX, self.onsms_enable_send)
+
+		self.phone_number_label = wx.StaticText(self.p_sms, label=_('Send to phone'), pos=(360, 60))
+		self.phone_number = wx.TextCtrl(self.p_sms, -1, size=(150, 32), pos=(360, 80))
+
+		self.sms_text_label = wx.StaticText(self.p_sms, label=_('Text'), pos=(360, 120))
+		self.sms_text = wx.TextCtrl(self.p_sms, -1, size=(150, 32), pos=(360, 140))
+
+		self.button_sms_test = wx.Button(self.p_sms, label=_('Test'), pos=(520, 140))
+		self.button_sms_test.Bind(wx.EVT_BUTTON, self.on_sms_test)
+
+	def read_sms(self):
+		if self.conf.get('SMS', 'serial') == '0':
+			try:
+				self.sms_dev.SetValue(self.SerDevLs[0])
+			except:
+				pass
+		else:
+			self.sms_dev.SetValue(self.conf.get('SMS', 'serial'))
+		self.sms_bt.SetValue(self.conf.get('SMS', 'bluetooth'))
+		self.sms_con.SetValue(self.conf.get('SMS', 'connection'))
+		if self.conf.get('SMS', 'enable') == '1':
+			self.sms_enable.SetValue(True)
+			self.sms_dev_label.Disable()
+			self.sms_dev.Disable()
+			self.sms_bt_label.Disable()
+			self.sms_bt.Disable()
+			self.sms_con_label.Disable()
+			self.sms_con.Disable()
+		else:
+			self.button_sms_identify.Disable()
+
+		self.phone_number.SetValue(self.conf.get('SMS', 'phone'))
+		if self.conf.get('SMS', 'enable_sending') == '1':
+			self.sms_enable_send.SetValue(True)
+			self.phone_number_label.Disable()
+			self.phone_number.Disable()
+		else:
+			self.button_sms_test.Disable()
+			self.sms_text.Disable()
+			self.sms_text_label.Disable()
+
+	def save_gammu_settings(self, port, con):
+		gammu_conf = ConfigParser.SafeConfigParser()
+		gammu_conf.read(self.home + '/.gammurc')
+		gammu_conf.set('gammu', 'port', port)
+		gammu_conf.set('gammu', 'connection', con)
+		with open(self.home + '/.gammurc', 'wb') as configfile:
+			gammu_conf.write(configfile)
+
+	def onsms_enable(self, e):
+		isChecked = self.sms_enable.GetValue()
+		if isChecked:
+			if self.sms_dev.GetValue() == _('none'):
+				if self.sms_bt.GetValue() == '':
+					self.ShowStatusBarRED(_('You have to provide a serial port or a bluetooth address.'))
+					self.sms_enable.SetValue(False)
+					return
+				else:
+					bluetooth = self.sms_bt.GetValue()
+			else:
+				bluetooth = ''
+				self.sms_bt.SetValue(bluetooth)
+				serial = self.sms_dev.GetValue()
+			if self.sms_con.GetValue() == '':
+				self.ShowStatusBarRED(_('You have to provide a connection type.'))
+				self.sms_enable.SetValue(False)
+				return
+			else:
+				connection = self.sms_con.GetValue()
+			self.conf.set('SMS', 'enable', '1')
+			if self.sms_dev.GetValue() == _('none'):
+				self.conf.set('SMS', 'serial', '0')
+				port = bluetooth
+			else:
+				self.conf.set('SMS', 'serial', serial)
+				port = serial
+			self.conf.set('SMS', 'bluetooth', bluetooth)
+			self.conf.set('SMS', 'connection', connection)
+			self.sms_dev_label.Disable()
+			self.sms_dev.Disable()
+			self.sms_bt_label.Disable()
+			self.sms_bt.Disable()
+			self.sms_con_label.Disable()
+			self.sms_con.Disable()
+			self.button_sms_identify.Enable()
+			self.save_gammu_settings(port, connection)
+		else:
+			self.conf.set('SMS', 'enable', '0')
+			self.sms_dev_label.Enable()
+			self.sms_dev.Enable()
+			self.sms_bt_label.Enable()
+			self.sms_bt.Enable()
+			self.sms_con_label.Enable()
+			self.sms_con.Enable()
+			self.button_sms_identify.Disable()
+			self.save_gammu_settings('', '')
+			self.sms_enable_send.SetValue(False)
+			self.onsms_enable_send(0)
+
+	def onsms_enable_send(self, e):
+		isChecked = self.sms_enable_send.GetValue()
+		if isChecked:
+			if not self.sms_enable.GetValue():
+				self.ShowStatusBarBLACK(_('You have to enable settings.'))
+				self.sms_enable_send.SetValue(False)
+				return
+			if self.phone_number.GetValue() == '':
+				self.ShowStatusBarRED(_('You have to provide a phone number.'))
+				self.sms_enable_send.SetValue(False)
+				return
+			self.conf.set('SMS', 'enable_sending', '1')
+			self.conf.set('SMS', 'phone', self.phone_number.GetValue())
+			self.phone_number_label.Disable()
+			self.phone_number.Disable()
+			self.sms_text_label.Enable()
+			self.sms_text.Enable()
+			self.button_sms_test.Enable()
+		else:
+			self.conf.set('SMS', 'enable_sending', '0')
+			self.phone_number_label.Enable()
+			self.phone_number.Enable()
+			self.sms_text_label.Disable()
+			self.sms_text.Disable()
+			self.button_sms_test.Disable()
+
+	def on_sms_identify(self, e):
+		subprocess.call(['pkill', '-f', 'test_sms.py'])
+		subprocess.Popen(['python', self.currentpath + '/test_sms.py', 'i', '0', '0'])
+
+	def on_sms_test(self, e):
+		text = self.sms_text.GetValue()
+		if text == '':
+			self.ShowStatusBarRED(_('You have to provide some text to send.'))
+			return
+		subprocess.call(['pkill', '-f', 'test_sms.py'])
+		subprocess.Popen(['python', self.currentpath + '/test_sms.py', 't', text, self.phone_number.GetValue()])
+
+	####################### MQTT
+	def page_mqtt(self):
+		title = wx.StaticText(self.p_mqtt, label=_(' MQTT '))
+
+		self.mqtt_broker_t = wx.StaticText(self.p_mqtt, label=_('Remote broker'))
+		self.mqtt_broker = wx.TextCtrl(self.p_mqtt, size=(190, -1))
+		self.mqtt_port_t = wx.StaticText(self.p_mqtt, label=_('Port'))
+		self.mqtt_port = wx.TextCtrl(self.p_mqtt, size=(50, -1))
+		self.mqtt_user_t = wx.StaticText(self.p_mqtt, label=_('Username'))
+		self.mqtt_user = wx.TextCtrl(self.p_mqtt, size=(120, -1))
+		self.mqtt_pass_t = wx.StaticText(self.p_mqtt, label=_('Password'))
+		self.mqtt_pass = wx.TextCtrl(self.p_mqtt, size=(120, -1))
+
+		self.button_apply_changes_mqtt = wx.Button(self.p_mqtt, label=_('Apply'))
+		self.button_apply_changes_mqtt.Bind(wx.EVT_BUTTON, self.on_apply_changes_mqtt)
+
+		clear = wx.Button(self.p_mqtt, label=_('Clear'))
+		clear.Bind(wx.EVT_BUTTON, self.on_clear_mqtt)
+
+		self.list_topics = wx.ListCtrl(self.p_mqtt, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
+		self.list_topics.InsertColumn(0, _('Topic'), width=145)
+		self.list_topics.InsertColumn(1, _('Type'), width=100)
+		self.list_topics.InsertColumn(2, _('Signal K key'), width=200)
+		self.list_topics.InsertColumn(3, _('Source'), width=145)
+		self.list_topics.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_topic)
+
+		add = wx.Button(self.p_mqtt, label=_('add'))
+		add.Bind(wx.EVT_BUTTON, self.on_add_topic)
+
+		delete = wx.Button(self.p_mqtt, label=_('delete'))
+		delete.Bind(wx.EVT_BUTTON, self.delete_topic)
+
+		diagnostic = wx.Button(self.p_mqtt, label=_('SK Diagnostic'))
+		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
+
+		reset_mqtt = wx.Button(self.p_mqtt, label=_('Restart'))
+		reset_mqtt.Bind(wx.EVT_BUTTON, self.on_reset_mqtt)
+
+		vboxc1 = wx.BoxSizer(wx.VERTICAL)
+		vboxc1.Add(self.mqtt_broker_t, 0, wx.RIGHT | wx.LEFT, 5)
+		vboxc1.Add(self.mqtt_broker, 0, wx.RIGHT | wx.LEFT, 5)
+
+		vboxc2 = wx.BoxSizer(wx.VERTICAL)
+		vboxc2.Add(self.mqtt_port_t, 0, wx.RIGHT | wx.LEFT, 5)
+		vboxc2.Add(self.mqtt_port, 0, wx.RIGHT | wx.LEFT, 5)
+
+		vboxc3 = wx.BoxSizer(wx.VERTICAL)
+		vboxc3.Add(self.mqtt_user_t, 0, wx.RIGHT | wx.LEFT, 5)
+		vboxc3.Add(self.mqtt_user, 0, wx.RIGHT | wx.LEFT, 5)
+
+		vboxc4 = wx.BoxSizer(wx.VERTICAL)
+		vboxc4.Add(self.mqtt_pass_t, 0, wx.RIGHT | wx.LEFT, 5)
+		vboxc4.Add(self.mqtt_pass, 0, wx.RIGHT | wx.LEFT, 5)
+
+		vboxc5but = wx.BoxSizer(wx.VERTICAL)
+		vboxc5but.Add(self.button_apply_changes_mqtt, 0, wx.ALL | wx.EXPAND, 5)
+		vboxc5but.Add(clear, 0, wx.ALL | wx.EXPAND, 5)
+
+		hinputbox = wx.BoxSizer(wx.HORIZONTAL)
+		hinputbox.Add(vboxc1, 0, wx.ALL | wx.EXPAND, 5)
+		hinputbox.Add(vboxc2, 0, wx.ALL | wx.EXPAND, 5)
+		hinputbox.Add(vboxc3, 0, wx.ALL | wx.EXPAND, 5)
+		hinputbox.Add(vboxc4, 0, wx.ALL | wx.EXPAND, 5)
+		hinputbox.Add((0, 0), 1, wx.EXPAND)
+		hinputbox.Add(vboxc5but, 0, wx.RIGHT | wx.LEFT, 0)
+
+		hlistbox_but = wx.BoxSizer(wx.VERTICAL)
+		hlistbox_but.Add(add, 0, wx.ALL, 5)
+		hlistbox_but.Add(delete, 0, wx.ALL, 5)
+
+		hlistbox = wx.BoxSizer(wx.HORIZONTAL)
+		hlistbox.Add(self.list_topics, 1, wx.ALL | wx.EXPAND, 5)
+		hlistbox.Add(hlistbox_but, 0, wx.RIGHT | wx.LEFT, 0)
+
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(diagnostic, 0, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add(reset_mqtt, 0, wx.RIGHT | wx.LEFT, 5)
+
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		vbox.Add(title, 0, wx.ALL | wx.EXPAND, 5)
+		vbox.Add(hinputbox, 0, wx.ALL | wx.EXPAND, 0)
+		vbox.AddSpacer(5)
+		vbox.Add(hlistbox, 1, wx.ALL | wx.EXPAND, 0)
+		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 5)
+
+		self.p_mqtt.SetSizer(vbox)
+
+
+	def start_mqtt(self):
+		subprocess.Popen(['python', self.currentpath + '/mqtt_d.py'])
+		self.ShowStatusBarGREEN(_('MQTT restarted'))
+
+	def stop_mqtt(self):
+		self.ShowStatusBarRED(_('MQTT stopped'))
+		subprocess.call(['pkill', '-f', 'mqtt_d.py'])
+
+	def on_reset_mqtt(self, e):
+		self.stop_mqtt()
+		self.read_mqtt()
+		self.start_mqtt()
+
+	def read_mqtt(self):
+		broker = self.conf.get('MQTT', 'broker')
+		port = self.conf.get('MQTT', 'port')
+		username = self.conf.get('MQTT', 'username')
+		password = self.conf.get('MQTT', 'password')
+		if broker: self.mqtt_broker.SetValue(broker)
+		if port: self.mqtt_port.SetValue(port)
+		if username: self.mqtt_user.SetValue(username)
+		if password: self.mqtt_pass.SetValue('***************')
+		if username and password:
+			self.mqtt_broker.Disable()
+			self.mqtt_port.Disable()
+			self.mqtt_user.Disable()
+			self.mqtt_pass.Disable()
+			self.button_apply_changes_mqtt.SetLabel(_('Edit'))
+		else:
+			self.mqtt_broker.Enable()
+			self.mqtt_port.Enable()
+			self.mqtt_user.Enable()
+			self.mqtt_pass.Enable()
+			self.button_apply_changes_mqtt.SetLabel(_('Apply'))
+		self.topics = []
+		self.list_topics.DeleteAllItems()
+		data = self.conf.get('MQTT', 'topics')
+		try:
+			temp_list = eval(data)
+		except:
+			temp_list = []
+		for ii in temp_list:
+			self.topics.append(ii)
+			topic = ii[0].encode('utf8')
+			if ii[1] == 0: 
+				topic_type = _('General').encode('utf8')
+				skkey = 'notifications.'+topic
+				source = 'MQTT.'+topic
+			if ii[1] == 1: 
+				topic_type = _('Signal K key input').encode('utf8')
+				skkey = ii[2]
+				source = 'MQTT.'+topic
+			if ii[1] == 2: 
+				topic_type = _('Signal K delta input').encode('utf8')
+				skkey = _('multiple keys').encode('utf8')
+				source = _('multiple sources').encode('utf8')
+			self.list_topics.Append([topic,topic_type,skkey,source])
+
+	def edit_topic(self, e):
+		selected_topic = e.GetIndex()
+		edit = [selected_topic, self.topics[selected_topic]]
+		self.edit_add_topic(edit)
+
+	def on_add_topic(self, e):
+		self.edit_add_topic(0)
+
+	def edit_add_topic(self, edit):
+		if self.mqtt_user.IsEnabled():
+			self.ShowStatusBarRED(_('Failed. Apply settings change.'))
+			return
+		dlg = addTopic(edit)
+		res = dlg.ShowModal()
+		if res == wx.ID_OK:
+			topic = dlg.topic.GetValue()
+			topic_type = dlg.type.GetValue()
+			skkey = dlg.skkey.GetValue()
+			if not topic:
+				self.ShowMessage(_('Failed. You have to provide a name for the topic.'))
+				dlg.Destroy()
+				return
+			if not re.match('^[0-9a-zA-Z]+$', topic):
+				self.ShowMessage(_('Failed. Topics must contain only allowed characters.'))
+				dlg.Destroy()
+				return
+			if edit == 0:
+				for i in self.topics:
+					if i[0] == topic:
+						self.ShowMessage(_('Failed. Topic name must be unique.'))
+						dlg.Destroy()
+						return
+			else:
+				for i in self.topics:
+					if i[0] == topic and edit[1][0] != topic:
+						self.ShowMessage(_('Failed. Topic name must be unique.'))
+						dlg.Destroy()
+						return
+			if topic_type == _('General'): 
+				topic_type2 = 0
+				skkey2 = ''
+			elif topic_type == _('Signal K key input'): 
+				topic_type2 = 1
+				if not skkey:
+					self.ShowMessage(_('Failed. You have to provide a Signal K key.'))
+					dlg.Destroy()
+					return
+				else:
+					skkey2 = skkey
+			elif topic_type == _('Signal K delta input'): 
+				topic_type2 = 2
+				skkey2 = ''
+			else:
+				self.ShowMessage(_('Failed. You have to select a type for the topic.'))
+				dlg.Destroy()
+				return
+			if edit == 0:
+				self.topics.append([topic,topic_type2,skkey2])
+			else:
+				self.topics[edit[0]] = [topic,topic_type2,skkey2]
+			self.conf.set('MQTT', 'topics', str(self.topics))
+			self.stop_mqtt()
+			self.start_mqtt()
+			self.read_mqtt()
+		dlg.Destroy()
+
+	def delete_topic(self, e):
+		if self.mqtt_user.IsEnabled():
+			self.ShowStatusBarRED(_('Failed. Apply settings change.'))
+			return
+		selected_topic = self.list_topics.GetFirstSelected()
+		if selected_topic == -1:
+			self.ShowStatusBarBLACK(_('Select an item to delete.'))
+			return
+		del self.topics[selected_topic]
+		self.list_topics.DeleteItem(selected_topic)
+		self.conf.set('MQTT', 'topics', str(self.topics))
+		self.stop_mqtt()
+		self.start_mqtt()
+		self.read_mqtt()
+
+	def on_apply_changes_mqtt(self, e):
+		if not self.mqtt_user.IsEnabled():
+			self.mqtt_broker.Enable()
+			self.mqtt_port.Enable()
+			self.mqtt_user.Enable()
+			self.mqtt_pass.Enable()
+			self.button_apply_changes_mqtt.SetLabel(_('Apply'))
+			return
+		username = self.mqtt_user.GetValue()
+		passw = self.mqtt_pass.GetValue()
+		if username and passw:
+			self.mqtt_broker.Disable()
+			self.mqtt_port.Disable()
+			self.mqtt_user.Disable()
+			self.mqtt_pass.Disable()
+			self.button_apply_changes_mqtt.SetLabel(_('Edit'))
+		else:
+			self.ShowStatusBarRED(_('Enter at least username and password.'))
+			return
+		self.conf.set('MQTT', 'broker', self.mqtt_broker.GetValue())
+		self.conf.set('MQTT', 'port', self.mqtt_port.GetValue())
+		self.conf.set('MQTT', 'username', username)
+		if not '*******' in passw:
+			self.mqtt_pass.SetValue('***************')
+			self.conf.set('MQTT', 'password', passw)
+		else:
+			passw = self.conf.get('MQTT', 'password')
+		subprocess.call(['sudo', 'sh', '-c', 'echo "' + username + ':' + passw + '" > /etc/mosquitto/passwd.pw'])
+		subprocess.call(['sudo', 'mosquitto_passwd', '-U', '/etc/mosquitto/passwd.pw'])
+		subprocess.call(['sudo', 'service', 'mosquitto', 'restart'])
+		self.stop_mqtt()
+		self.start_mqtt()
+		self.read_mqtt()
+
+	def on_clear_mqtt(self, e):
+		dlg = wx.MessageDialog(None, _('Settings and topics will be deleted. Are you sure?'), _('Question'),
+							   wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+		if dlg.ShowModal() != wx.ID_YES:
+			dlg.Destroy()
+			return
+		dlg.Destroy()
+		self.mqtt_broker.Enable()
+		self.mqtt_port.Enable()
+		self.mqtt_user.Enable()
+		self.mqtt_pass.Enable()
+		self.button_apply_changes_mqtt.SetLabel(_('Apply'))
+		self.mqtt_broker.SetValue('')
+		self.mqtt_port.SetValue('')
+		self.mqtt_user.SetValue('')
+		self.mqtt_pass.SetValue('')
+		self.list_topics.DeleteAllItems()
+		self.topics = []
+		self.conf.set('MQTT', 'broker', '')
+		self.conf.set('MQTT', 'port', '')
+		self.conf.set('MQTT', 'username', '')
+		self.conf.set('MQTT', 'password', '')
+		self.conf.set('MQTT', 'topics', '')
+		self.stop_mqtt()
+
+
+############################## Main
+if __name__ == "__main__":
+	conf = Conf()
+	currentpath = conf.home+conf.get('GENERAL', 'op_folder')+'/openplotter'
+	app = wx.App()
+	bitmap = wx.Bitmap(currentpath+'/openplotter.ico', wx.BITMAP_TYPE_ICO)
+	splash = wx.SplashScreen(bitmap, wx.SPLASH_CENTRE_ON_SCREEN | wx.SPLASH_TIMEOUT, 500, None, style=wx.SIMPLE_BORDER | wx.STAY_ON_TOP)
+	wx.Yield()
+	MainFrame().Show()
+	app.MainLoop()

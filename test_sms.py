@@ -17,11 +17,8 @@
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
 import wx, sys, subprocess, gammu
-from classes.paths import Paths
 from classes.conf import Conf
 from classes.language import Language
-
-
 
 class MainFrame(wx.Frame):
 		
@@ -32,12 +29,11 @@ class MainFrame(wx.Frame):
 			self.text_sms=unicode(self.text_sms,'utf-8')
 			self.phone=sys.argv[3]
 
-			paths=Paths()
-			self.currentpath=paths.currentpath
+			self.conf = Conf()
+			self.home = self.conf.home
+			self.currentpath = self.home+self.conf.get('GENERAL', 'op_folder')+'/openplotter'
 
-			self.conf=Conf()
-
-			Language(self.conf.get('GENERAL','lang'))
+			Language(self.conf)
 
 			wx.Frame.__init__(self, None, title=_('Test SMS'), size=(500,260))
 
@@ -62,7 +58,7 @@ class MainFrame(wx.Frame):
 				self.text.SetLabel(_('Press start to check the settings and connect to the GSM device'))
 
 			if self.option=='t':
-				self.text.SetLabel(_('Press start to send the text "')+self.text_sms+_('"\nto the number "')+self.phone+'"')
+				self.text.SetLabel(_('Press start to send the text "').decode('utf8')+self.text_sms+_('"\nto the number "').decode('utf8')+self.phone+'"')
 
 			self.Centre()
 
@@ -91,7 +87,7 @@ class MainFrame(wx.Frame):
 						'Number': self.phone,
 					}
 					sm.SendSMS(message)
-					output+='\nSMS "'+self.text_sms+_('" sent succesfully to ')+self.phone
+					output+='\nSMS "'+self.text_sms+_('" sent succesfully to ').decode('utf8')+self.phone
 				except Exception,e: output= str(e)
 
 			self.output.SetValue(output)

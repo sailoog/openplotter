@@ -17,7 +17,6 @@
 
 import sys, subprocess, wx
 from classes.conf import Conf
-from classes.paths import Paths
 from classes.language import Language
 
 action=sys.argv[1]
@@ -25,12 +24,10 @@ action=sys.argv[1]
 #see actions.py
 start_all_actions='ACT19'
 
-paths=Paths()
-currentpath=paths.currentpath
+conf = Conf()
+currentpath = conf.home+conf.get('GENERAL', 'op_folder')+'/openplotter'
 
-conf=Conf()
-
-Language(conf.get('GENERAL','lang'))
+Language(conf)
 
 triggers=[]
 data=conf.get('ACTIONS', 'triggers')
@@ -43,15 +40,16 @@ if action=='0':
 	i=0
 	for ii in triggers:
 		templist=ii[4]
-		start_all=False
+		start=0
 		for iii in templist:
-			if iii[0]==start_all_actions: start_all=True
-		if start_all==True: triggers[i][0]=1
-		else: triggers[i][0]=0
+			if iii[0]==start_all_actions: 
+				start=1
+		triggers[i][0]=start
 		i=i+1
 	conf.set('ACTIONS', 'triggers', str(triggers))
-	subprocess.Popen(['pkill', '-f', 'message.py'])
+	subprocess.call(['pkill', '-f', 'SK-base_d.py'])
 	subprocess.Popen(['pkill', '-9', 'mpg123'])
+	subprocess.Popen(['python', currentpath + '/SK-base_d.py'])
 
 #start all
 if action=='1':
@@ -60,9 +58,8 @@ if action=='1':
 		triggers[i][0]=1
 		i=i+1
 	conf.set('ACTIONS', 'triggers', str(triggers))
-
-subprocess.call(['pkill', '-f', 'monitoring.py'])
-subprocess.Popen(['python',currentpath+'/monitoring.py'])
+	subprocess.call(['pkill', '-f', 'SK-base_d.py'])
+	subprocess.Popen(['python', currentpath + '/SK-base_d.py'])
 
 app = wx.App()
 

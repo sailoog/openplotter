@@ -1,0 +1,2872 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: openplotter\n"
+"POT-Creation-Date: 2017-10-08 13:31+0200\n"
+"PO-Revision-Date: 2017-11-25 14:14+0100\n"
+"Last-Translator: sailoog <info@sailoog.com>\n"
+"Language-Team: Galician\n"
+"Language: gl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.8.7.1\n"
+"X-Poedit-KeywordsList: _;gettext;gettext_noop\n"
+"X-Poedit-Basepath: ../../..\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Crowdin-Project: openplotter\n"
+"X-Crowdin-Language: gl\n"
+"X-Crowdin-File: openplotter.po\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#: CAN-USB-stick.py:69 diagnostic-N2K-input.py:65 diagnostic-N2K-output.py:66
+#: tools/NMEA_2000_generator.py:76
+msgid "PGN"
+msgstr "PNG"
+
+#: CAN-USB-stick.py:70 classes/add_USBinst.py:38
+msgid "info"
+msgstr "información"
+
+#: CAN-USB-stick.py:74
+msgid "check"
+msgstr "comprobar"
+
+#: CAN-USB-stick.py:77
+msgid "apply"
+msgstr "aplicar"
+
+#: N2K-from-SK.py:53
+msgid "126992 System_Time"
+msgstr "126992 Hora do sistema"
+
+#: N2K-from-SK.py:55
+msgid "127245 Rudder"
+msgstr "127245 Temón"
+
+#: N2K-from-SK.py:57
+msgid "127250 Heading"
+msgstr "127250 Rumbo"
+
+#: N2K-from-SK.py:59
+msgid "127257 Attitude"
+msgstr "127257 Posición"
+
+#: N2K-from-SK.py:61
+msgid "127488 Engine_Rapid"
+msgstr "127488 Velocidade do Motor"
+
+#: N2K-from-SK.py:63
+msgid "127488 Engine_Rapid starbord"
+msgstr "127488 Velocidade Motor estribor"
+
+#: N2K-from-SK.py:65
+msgid "127489 Engine"
+msgstr "12489 Motor"
+
+#: N2K-from-SK.py:67
+msgid "127489 Engine starbord"
+msgstr "127488 Motor estribor"
+
+#: N2K-from-SK.py:69
+msgid "127505 FluidLevel fuel"
+msgstr "127505 Nivel de combustible"
+
+#: N2K-from-SK.py:71
+msgid "127505 FluidLevel water"
+msgstr "127505 Nivel deposito auga doce"
+
+#: N2K-from-SK.py:73
+msgid "127505 FluidLevel gray water"
+msgstr "127505 Nivel deposito augas grises"
+
+#: N2K-from-SK.py:75
+msgid "127505 FluidLevel black water"
+msgstr "127505 Nivel deposito augas negras"
+
+#: N2K-from-SK.py:77
+msgid "127508 Battery_Status"
+msgstr "127508 Estado da Batería"
+
+#: N2K-from-SK.py:79
+msgid "128259 Speed"
+msgstr "128259 Velocidade"
+
+#: N2K-from-SK.py:81
+msgid "128267 Depth"
+msgstr "128267 Profundidade"
+
+#: N2K-from-SK.py:83
+msgid "128275 Distance_Log"
+msgstr "128275 Distancia percorrida"
+
+#: N2K-from-SK.py:85
+msgid "129025 Position_Rapid"
+msgstr "129025 velocidade de posición"
+
+#: N2K-from-SK.py:87
+msgid "129026 COG_SOG"
+msgstr "29026 COG_SOG"
+
+#: N2K-from-SK.py:89
+msgid "130306 Wind Data"
+msgstr "130306 Datos do vento"
+
+#: N2K-from-SK.py:91
+msgid "130310 Environmental_Parameters"
+msgstr "130310 Parámetros ambientais"
+
+#: N2K-from-SK.py:93
+msgid "130311 Environmental_Parameters"
+msgstr "130311 Parámetros ambientais"
+
+#: N2K-from-SK.py:95
+msgid "130316 Temperature refrigerator"
+msgstr "130316 Temperatura refrixerador"
+
+#: N2K-from-SK.py:97
+msgid "130316 Temperature exhaust"
+msgstr "130316 Temp. do escape"
+
+#: N2K-from-SK.py:100 tools/SK-simulator.py:64
+msgid "all"
+msgstr "todo"
+
+#: N2K-from-SK.py:103 classes/add_kplex.py:81 classes/add_kplex.py:98
+#: classes/add_kplex.py:157 classes/add_kplex.py:165 classes/add_kplex.py:217
+#: classes/add_kplex.py:345 classes/add_kplex.py:369 classes/add_kplex.py:438
+#: classes/add_kplex.py:442 classes/add_kplex.py:446 classes/add_kplex.py:470
+#: tools/SK-simulator.py:67 openplotter:834 openplotter:872 openplotter:901
+#: openplotter:906 openplotter:988 openplotter:991 openplotter:1520
+#: openplotter:1532 openplotter:1581 openplotter:1583 openplotter:3155
+#: openplotter:3173
+msgid "none"
+msgstr "ningún"
+
+#: SK-base_d.py:527 openplotter:2345
+msgid "was not updated in the last (sec.)"
+msgstr "non se actualizou nos últimos (seg.)"
+
+#: SK-base_d.py:527 openplotter:2345
+msgid "was updated in the last (sec.)"
+msgstr "actualizouse nos últimos (seg.)"
+
+#: SK-base_d.py:528 openplotter:2346
+msgid "contains"
+msgstr "contèn"
+
+#: add_tool10.py:23
+msgid "Standalone tool"
+msgstr "Ferramenta autónoma"
+
+#: add_tool10.py:28 classes/add_tool10.py:28
+msgid "settings"
+msgstr "axustes"
+
+#: add_tool10.py:29 classes/add_tool10.py:29
+msgid "start"
+msgstr "iniciar"
+
+#: add_tool10.py:30 classes/add_tool10.py:30
+msgid "stop"
+msgstr "parar"
+
+#: add_tool10.py:31 classes/add_NMEA_0183.py:57 classes/add_tool10.py:31
+msgid "cancel"
+msgstr "cancelar"
+
+#: classes/actions.py:36 classes/add_action.py:59
+msgid "no repeat"
+msgstr "non repetir"
+
+#: classes/actions.py:36
+msgid "seconds"
+msgstr "segundos"
+
+#: classes/actions.py:36
+msgid "minutes"
+msgstr "minutos"
+
+#: classes/actions.py:36
+msgid "hours"
+msgstr "horas"
+
+#: classes/actions.py:36
+msgid "days"
+msgstr "días"
+
+#: classes/actions.py:41 classes/add_action.py:131
+msgid "wait"
+msgstr "agardar"
+
+#: classes/actions.py:41
+msgid "Enter seconds to wait in field \"data\"."
+msgstr "Introduza os segundos a agardar no campo \"datos\"."
+
+#: classes/actions.py:42
+msgid "command"
+msgstr "comando"
+
+#: classes/actions.py:42
+msgid "Enter a Linux command and arguments in the field below."
+msgstr "Introduce a orde de Linux e os argumentos no seguinte campo."
+
+#: classes/actions.py:43
+msgid "reset system"
+msgstr "reiniciar"
+
+#: classes/actions.py:44
+msgid "shutdown system"
+msgstr "apagar o sistema"
+
+#: classes/actions.py:47
+msgid "stop NMEA multiplexer"
+msgstr "deter multiplexor NMEA"
+
+#: classes/actions.py:48
+msgid "reset NMEA multiplexer"
+msgstr "reiniciar multiplexor NMEA"
+
+#: classes/actions.py:49
+msgid "stop WiFi access point"
+msgstr "deter punto de acceso WiFi"
+
+#: classes/actions.py:49 openplotter:997
+msgid ""
+"Access point will be disabled.\n"
+"\n"
+"If you are on a headless system, you will not be able to reconnect again.\n"
+"\n"
+"Are you sure?"
+msgstr "O punto de acceso wi-fi vaise desactivar. Se está nun sistema sen pantalla, non será quén de volver a conectar outra vez. Está seguro?"
+
+#: classes/actions.py:50
+msgid "start WiFi access point"
+msgstr "iniciar o punto de acceso WiFi"
+
+#: classes/actions.py:50
+msgid "Be sure you have filled in all fields in \"WiFi AP\" tab."
+msgstr "Asegúrate de encher tódolos campos da pestana \"WiFi AP\"."
+
+#: classes/actions.py:53
+msgid "publish Twitter"
+msgstr "publicar chío en Twitter"
+
+#: classes/actions.py:53
+msgid ""
+"Be sure you have filled in all fields in \"Accounts\" tab, and enabled Twitter checkbox.\n"
+"\n"
+"Enter text to publish in the field \"data\"."
+msgstr ""
+"Asegúrese de encher tódolos campos da pestana \"Contas\" e activar a marca de Twitter.\n"
+"\n"
+"Escriba o texto a publicar no campo \"datos\"."
+
+#: classes/actions.py:54
+msgid "send e-mail"
+msgstr "enviar e-mail"
+
+#: classes/actions.py:54
+msgid ""
+"Be sure you have filled in all fields in \"Accounts\" tab, and enabled Gmail checkbox.\n"
+"\n"
+"Enter the subject in the field \"data\"."
+msgstr ""
+"Asegúrese de encher tódolos campos da pestana \"Contas\" e de activar a marca de Gmail.\n"
+"\n"
+"Introduza o asunto no campo \"datos\"."
+
+#: classes/actions.py:55
+msgid "send SMS"
+msgstr "enviar SMS"
+
+#: classes/actions.py:55
+msgid ""
+"Be sure you have enabled sending SMS in \"SMS\" tab.\n"
+"\n"
+"Enter the text in field \"data\"."
+msgstr ""
+"Asegúrese de que activou enviar SMS na pestana \"SMS\". \n"
+"\n"
+"Introduza o texto no campo \"datos\"."
+
+#: classes/actions.py:56
+msgid "play sound"
+msgstr "reproducir audio"
+
+#: classes/actions.py:57
+msgid "stop all sounds"
+msgstr "deter tódolos audios"
+
+#: classes/actions.py:58
+msgid "show message"
+msgstr "mostrar mensaxe"
+
+#: classes/actions.py:58
+msgid "Enter the message in field \"data\"."
+msgstr "Escriba a mensaxe no campo \"datos\"."
+
+#: classes/actions.py:59
+msgid "close all messages"
+msgstr "pechar tódolas mensaxes"
+
+#: classes/actions.py:60
+msgid "start all actions"
+msgstr "iniciar tódalas accións"
+
+#: classes/actions.py:61
+msgid "stop all actions"
+msgstr "deter tódalas accións"
+
+#: classes/actions.py:61
+msgid "This action will stop all the triggers except the trigger which has an action \"start all actions\" defined."
+msgstr "Esta acción desactivará tódolos disparadores agás aqueles que conteñan unha acción \"iniciar tódalas accións\"."
+
+#: classes/actions.py:74
+msgid ": High"
+msgstr ": Alto"
+
+#: classes/actions.py:74
+msgid "ATTENTION! if you set this GPIO output to \"High\" and there is not a resistor or a circuit connected to the selected GPIO pin, YOU CAN DAMAGE YOUR BOARD."
+msgstr "¡ATENCIÓN! Se establece esta salida GPIO a \"Alto\" e non hai unha resistencia ou un circuito conectado ao pin GPIO seleccionado, vostede pode danar a súa placa base."
+
+#: classes/actions.py:75
+msgid ": Low"
+msgstr ": Baixo"
+
+#: classes/actions.py:86
+msgid "Publish on topic: "
+msgstr "Publicar tema: "
+
+#: classes/actions.py:89
+msgid "Set Signal K key value"
+msgstr "Axustar valor da chave Signal K"
+
+#: classes/actions.py:151
+msgid ""
+"\n"
+"source: "
+msgstr ""
+"\n"
+"fonte: "
+
+#: classes/actions.py:151
+msgid ""
+"\n"
+"timestamp: "
+msgstr ""
+"\n"
+"data/hora: "
+
+#: classes/add_DS18B20.py:31
+msgid "Add 1W temperature sensor"
+msgstr "Engadir sensor de temperatura de 1W"
+
+#: classes/add_DS18B20.py:32
+msgid "Edit 1W temperature sensor"
+msgstr "Editar sensor de temperatura 1W"
+
+#: classes/add_DS18B20.py:38 classes/add_topic.py:40 classes/add_trigger.py:39
+#: classes/edit_i2c.py:31 openplotter:1693 openplotter:1909 openplotter:2046
+#: openplotter:2563 openplotter:3262
+msgid "Signal K key"
+msgstr "Chave Signal K"
+
+#: classes/add_DS18B20.py:41 classes/add_topic.py:43 classes/add_trigger.py:42
+#: classes/edit_i2c.py:25 classes/edit_i2c.py:35 tools/demo_tool.py:82
+#: openplotter:3355 openplotter:3482
+msgid "Edit"
+msgstr "Editar"
+
+#: classes/add_DS18B20.py:44 classes/add_gpio.py:27 classes/add_i2c.py:39
+#: classes/add_kplex.py:44 diagnostic-N2K-input.py:68
+#: diagnostic-N2K-output.py:69 openplotter:1331 openplotter:1690
+#: openplotter:2042 openplotter:2560
+msgid "Name"
+msgstr "Nome"
+
+#: classes/add_DS18B20.py:46 classes/add_MCP.py:48 classes/add_gpio.py:30
+#: classes/add_topic.py:32 classes/select_key.py:53
+msgid "allowed characters: 0-9, a-z, A-Z"
+msgstr "caracteres permitidos: 0-9, a-z, A-z"
+
+#: classes/add_DS18B20.py:51
+msgid "Sensor ID"
+msgstr "ID do sensor"
+
+#: classes/add_DS18B20.py:54 classes/edit_i2c.py:50 openplotter:1695
+#: openplotter:2562
+msgid "Offset"
+msgstr "Desfase"
+
+#: classes/add_DS18B20.py:76 classes/add_action.py:152 classes/add_topic.py:76
+#: classes/add_trigger.py:193 classes/edit_i2c.py:103 tools/demo_tool.py:140
+msgid "Failed. * must contain only allowed characters."
+msgstr "Erro. * só se admiten caracteres permitidos."
+
+#: classes/add_DS18B20.py:81 classes/add_action.py:157 classes/add_topic.py:81
+#: classes/add_trigger.py:198 classes/edit_i2c.py:108 tools/demo_tool.py:145
+msgid "Failed. You have to provide a name for *."
+msgstr "Erro. Debe indicar un nome para *."
+
+#: classes/add_MCP.py:26
+msgid "Edit MCP analog input "
+msgstr "Editar entrada analóxica MCP "
+
+#: classes/add_MCP.py:46 classes/select_key.py:52 openplotter:1910
+msgid "*"
+msgstr "*"
+
+#: classes/add_MCP.py:50 openplotter:1907
+msgid "aktiv"
+msgstr "activo"
+
+#: classes/add_MCP.py:51 unit-private.py:85 openplotter:1911
+msgid "convert"
+msgstr "converter"
+
+#: classes/add_MCP.py:148 openplotter:1980
+msgid "minimum raw value in setting table > 0"
+msgstr "valor mínimo bruto na táboa de axustes > 0"
+
+#: classes/add_MCP.py:151 openplotter:1983
+msgid "maximum raw value in setting table < 1023"
+msgstr "valor máximo bruto na táboa de axustes > 0"
+
+#: classes/add_MCP.py:154
+msgid "no option value "
+msgstr "sen valor de opción "
+
+#: classes/add_MCP.py:154
+msgid " in openplotter.conf"
+msgstr ""
+
+#: classes/add_NMEA_0183.py:27
+msgid "add NMEA 0183 sentence"
+msgstr "engadir sentenza NMEA0183"
+
+#: classes/add_NMEA_0183.py:42 tools/NMEA_0183_generator.py:45
+msgid "Sentence"
+msgstr "Sentenza"
+
+#: classes/add_NMEA_0183.py:47 tools/calculate.py:53 tools/calculate.py:61
+#: tools/calculate.py:73 tools/calculate.py:85
+msgid "Rate (sec)"
+msgstr "Frecuencia (seg)"
+
+#: classes/add_NMEA_0183.py:51 diagnostic-NMEA.py:65
+msgid "NMEA info"
+msgstr "Información NMEA"
+
+#: classes/add_NMEA_0183.py:54
+msgid "RMC examp"
+msgstr "Exemplo RMC"
+
+#: classes/add_NMEA_0183.py:62
+msgid "Field"
+msgstr "Campo"
+
+#: classes/add_NMEA_0183.py:63 classes/add_trigger.py:63
+#: diagnostic-SK-input.py:70
+msgid "Value"
+msgstr "Valor"
+
+#: classes/add_NMEA_0183.py:67
+msgid "--Select type"
+msgstr "--Escoller tipo"
+
+#: classes/add_NMEA_0183.py:67
+msgid "Expression"
+msgstr "Expresion"
+
+#: classes/add_NMEA_0183.py:67
+msgid "Number"
+msgstr "Número"
+
+#: classes/add_NMEA_0183.py:67 classes/add_NMEA_0183.py:282
+msgid "String"
+msgstr "Cadea"
+
+#: classes/add_NMEA_0183.py:72
+msgid "--vessel"
+msgstr "--buque"
+
+#: classes/add_NMEA_0183.py:83 classes/add_NMEA_0183.py:206
+msgid "--group"
+msgstr "--grupo"
+
+#: classes/add_NMEA_0183.py:87 classes/add_NMEA_0183.py:227
+#: classes/add_NMEA_0183.py:429
+msgid "--key"
+msgstr "--chave"
+
+#: classes/add_NMEA_0183.py:90
+msgid "--operator"
+msgstr "--operador"
+
+#: classes/add_NMEA_0183.py:95
+msgid "="
+msgstr "="
+
+#: classes/add_NMEA_0183.py:100
+msgid "Add value"
+msgstr "Engadir valor"
+
+#: classes/add_NMEA_0183.py:103
+msgid "Delete value"
+msgstr "Borrar valor"
+
+#: classes/add_NMEA_0183.py:284 classes/add_NMEA_0183.py:290
+msgid "Failed. String must contain only allowed characters."
+msgstr "Erro. Introduza só caracteres permitidos."
+
+#: classes/add_NMEA_0183.py:302 classes/add_NMEA_0183.py:320
+#: classes/add_NMEA_0183.py:331 classes/add_NMEA_0183.py:344
+msgid "FAILED. Fill in all the available fields."
+msgstr "ERRO. Encha tódolos campos dispoñibles."
+
+#: classes/add_NMEA_0183.py:309
+msgid "FAILED. This is not a valid expression."
+msgstr "ERRO. Non é unha expresión válida."
+
+#: classes/add_NMEA_0183.py:336
+msgid "FAILED. This field must be a number."
+msgstr "ERRO. Cómpre que este campo sexa un número."
+
+#: classes/add_USBinst.py:25 classes/add_tool10.py:23
+msgid "Add individual name to serial port"
+msgstr "Engadir un nome único á porta serie"
+
+#: classes/add_USBinst.py:33
+msgid "random name"
+msgstr "nome au chou"
+
+#: classes/add_USBinst.py:34 openplotter:2691
+msgid "vendor"
+msgstr "fabricante"
+
+#: classes/add_USBinst.py:35 openplotter:2692
+msgid "product"
+msgstr "produto"
+
+#: classes/add_USBinst.py:36 openplotter:2693
+msgid "port"
+msgstr "porto"
+
+#: classes/add_USBinst.py:37 openplotter:2694
+msgid "serial"
+msgstr "serie"
+
+#: classes/add_USBinst.py:41
+msgid "new name"
+msgstr "novo nome"
+
+#: classes/add_USBinst.py:47
+msgid "Remember device (by vendor, product,(serial))"
+msgstr "Lembrar dispositivo (por fabricante, produto, (serie))"
+
+#: classes/add_USBinst.py:53
+msgid "Remember port (positon on the USB-hub)"
+msgstr "Lembrar porto (posición no hub USB)"
+
+#: classes/add_action.py:23
+msgid "Add action"
+msgstr "Engadir acción"
+
+#: classes/add_action.py:24
+msgid "Edit action"
+msgstr "Editar acción"
+
+#: classes/add_action.py:39 openplotter:2290
+msgid "action"
+msgstr "acción"
+
+#: classes/add_action.py:45 openplotter:2291
+msgid "data"
+msgstr "datos"
+
+#: classes/add_action.py:48
+msgid "Add Signal K key"
+msgstr "Engadir chave Signal K"
+
+#: classes/add_action.py:53
+msgid "repeat after"
+msgstr "repetir despois de"
+
+#: classes/add_action.py:117 openplotter:709
+msgid "Choose a file"
+msgstr "Escolla un arquivo"
+
+#: classes/add_action.py:119 openplotter:710
+msgid "Audio files"
+msgstr "Arquivos de audio"
+
+#: classes/add_action.py:119 openplotter:710
+msgid "All files"
+msgstr "Tódolos arquivos"
+
+#: classes/add_action.py:132
+msgid ""
+"\n"
+"\n"
+"You can add the current value of any Signal K key typing its name between angle brackets, e.g: <navigation.position.latitude>"
+msgstr ""
+"\n"
+"\n"
+"Pode engadir o valor actual de cualquera chave Señal K escribindo o seu nombre entre corchetes angulares, por exemplo: <navigation.position.latitude>"
+
+#: classes/add_deviation_setting.py:26 openplotter:136
+msgid "Deviation Table"
+msgstr "Táboa de desviación"
+
+#: classes/add_deviation_setting.py:33
+msgid "CH"
+msgstr "CH"
+
+#: classes/add_deviation_setting.py:34
+msgid "MH"
+msgstr "MH"
+
+#: classes/add_deviation_setting.py:35
+msgid "deviation"
+msgstr "desvíación"
+
+#: classes/add_deviation_setting.py:38
+msgid "Magnetic Variation"
+msgstr "Declinación Magnética"
+
+#: classes/add_deviation_setting.py:41 classes/add_deviation_setting.py:136
+#: classes/add_deviation_setting.py:177
+msgid "Fix"
+msgstr "Fixar"
+
+#: classes/add_deviation_setting.py:44 show_deviation_table.py:41
+msgid "Compass Heading"
+msgstr "Rumbo do compás"
+
+#: classes/add_deviation_setting.py:47
+msgid "Magnetic Heading"
+msgstr "Rumbo Magnético"
+
+#: classes/add_deviation_setting.py:50
+msgid "True Heading"
+msgstr "Rumbo Verdadeiro"
+
+#: classes/add_deviation_setting.py:53
+msgid "change"
+msgstr "cambiar"
+
+#: classes/add_deviation_setting.py:56 classes/add_i2c.py:43 openplotter:1211
+msgid "Reset"
+msgstr "Reiniciar"
+
+#: classes/add_deviation_setting.py:59 classes/add_value_setting.py:49
+#: test_sms.py:51 tools/SDR_AIS_fine_cal.py:58 startup:98
+msgid "Close"
+msgstr "Pechar"
+
+#: classes/add_deviation_setting.py:62 classes/add_value_setting.py:52
+msgid "graph"
+msgstr "gráfico"
+
+#: classes/add_deviation_setting.py:142 classes/add_deviation_setting.py:189
+msgid "Set"
+msgstr "Establecer"
+
+#: classes/add_deviation_setting.py:165 classes/add_deviation_setting.py:183
+msgid "This value is not a number."
+msgstr "Este valor non é un número."
+
+#: classes/add_deviation_setting.py:178
+msgid "Deviation table will be calculated with this variation. If you change this value you will have to define the complete table again."
+msgstr "A táboa de desvíación calcularáse con esta variación. Se modifica este valor, deberá volver a definir a táboa enteira."
+
+#: classes/add_gpio.py:23
+msgid "Add GPIO sensor"
+msgstr "Engadir sensor GPIO"
+
+#: classes/add_gpio.py:32 classes/add_gpio.py:51 classes/add_gpio.py:62
+#: openplotter:2096
+msgid "input"
+msgstr "entrada"
+
+#: classes/add_gpio.py:32 classes/add_gpio.py:48 classes/add_gpio.py:63
+#: openplotter:2093 openplotter:2125
+msgid "output"
+msgstr "saída"
+
+#: classes/add_gpio.py:33 openplotter:2043
+msgid "I/O"
+msgstr "I/O"
+
+#: classes/add_gpio.py:37 openplotter:101
+msgid "GPIO"
+msgstr "GPIO"
+
+#: classes/add_gpio.py:42
+msgid "Pull"
+msgstr "Tirar"
+
+#: classes/add_i2c.py:27
+msgid "Add I2C sensor"
+msgstr "Engadir sensor I2C"
+
+#: classes/add_i2c.py:36
+msgid "detected"
+msgstr "detectado"
+
+#: classes/add_i2c.py:40 classes/add_kplex.py:60 openplotter:1691
+msgid "Address"
+msgstr "Enderezo"
+
+#: classes/add_i2c.py:46
+msgid "Addresses"
+msgstr "Enderezos"
+
+#: classes/add_i2c.py:51
+msgid "add/update sensor"
+msgstr "engadir/actualizar sensor"
+
+#: classes/add_i2c.py:108
+msgid ""
+"If your sensors are not detected right, try resetting system or forcing name and address.\n"
+"\n"
+"Do you want to try auto detection again?"
+msgstr ""
+"Se os seus sensores non se detectan correctamente, tente reiniciar o sistema ou forzar o nome e mailo o enderezo.\n"
+"\n"
+"Desexa probar coa detección automática de novo?"
+
+#: classes/add_i2c.py:108 openplotter:488 openplotter:778 openplotter:998
+#: openplotter:1007 openplotter:1290 openplotter:2132 openplotter:3502
+msgid "Question"
+msgstr "Pregunta"
+
+#: classes/add_i2c.py:122
+msgid "Detected I2C addresses"
+msgstr "Enderezos I2C detectados"
+
+#: classes/add_kplex.py:25
+msgid "Add/Edit NMEA 0183 (KPLEX)"
+msgstr "Engadir/Editar NMEA 0183 (KPLEX)"
+
+#: classes/add_kplex.py:38 classes/add_topic.py:36 diagnostic-NMEA.py:55
+#: openplotter:1332 openplotter:3261
+msgid "Type"
+msgstr "Tipo"
+
+#: classes/add_kplex.py:47
+msgid " settings "
+msgstr " axustes "
+
+#: classes/add_kplex.py:50 classes/add_kplex.py:62 openplotter:3246
+msgid "Port"
+msgstr "Porto"
+
+#: classes/add_kplex.py:56
+msgid "Bauds"
+msgstr "Baudios"
+
+#: classes/add_kplex.py:67
+msgid "in/out"
+msgstr "entrada/saída"
+
+#: classes/add_kplex.py:80
+msgid "in Filter "
+msgstr "filtro de entrada "
+
+#: classes/add_kplex.py:81 classes/add_kplex.py:98 classes/add_kplex.py:449
+#: classes/add_kplex.py:473
+msgid "Accept only sentences:"
+msgstr "Aceptar só sentenzas:"
+
+#: classes/add_kplex.py:81 classes/add_kplex.py:98 classes/add_kplex.py:460
+#: classes/add_kplex.py:484
+msgid "Ignore sentences:"
+msgstr "Ignorar sentenzas:"
+
+#: classes/add_kplex.py:86 classes/add_kplex.py:103
+msgid "-"
+msgstr "-"
+
+#: classes/add_kplex.py:89 classes/add_kplex.py:107
+msgid "Add sentence"
+msgstr "Engadir sentenza"
+
+#: classes/add_kplex.py:93 classes/add_kplex.py:111
+msgid "Delete"
+msgstr "Borrar"
+
+#: classes/add_kplex.py:97
+msgid "out Filter "
+msgstr "filtro de saída "
+
+#: classes/add_kplex.py:114 classes/add_kplex.py:118 classes/add_kplex.py:183
+#: classes/add_kplex.py:185 classes/add_kplex.py:212 classes/add_kplex.py:214
+#: classes/add_kplex.py:233 classes/add_kplex.py:236 classes/add_kplex.py:259
+#: classes/add_kplex.py:285 classes/add_kplex.py:344 classes/add_kplex.py:368
+#: classes/add_kplex.py:438 classes/add_kplex.py:442 classes/add_kplex.py:447
+#: classes/add_kplex.py:450 classes/add_kplex.py:461 classes/add_kplex.py:471
+#: classes/add_kplex.py:474 classes/add_kplex.py:485 openplotter:1524
+#: openplotter:1536 openplotter:1581 openplotter:1583
+msgid "nothing"
+msgstr "nada"
+
+#: classes/add_kplex.py:122
+msgid "AP examp"
+msgstr "Exemplo de AP"
+
+#: classes/add_kplex.py:125
+msgid "GPS examp"
+msgstr "Exemplo de GPS"
+
+#: classes/add_kplex.py:128
+msgid "gpsd examp"
+msgstr "exemplo gpsd"
+
+#: classes/add_kplex.py:131 tools/NMEA_2000_generator.py:81
+#: tools/calculate.py:91 tools/demo_tool.py:94 openplotter:645
+msgid "OK"
+msgstr "Aceptar"
+
+#: classes/add_kplex.py:158 classes/add_kplex.py:166 openplotter:1521
+#: openplotter:1533
+msgid "accept"
+msgstr "aceptar"
+
+#: classes/add_kplex.py:160 classes/add_kplex.py:168 openplotter:1522
+#: openplotter:1534
+msgid "ignore"
+msgstr "ignorar"
+
+#: classes/add_kplex.py:243 classes/add_kplex.py:269
+msgid "Talker must have 2 uppercase characters. The symbol * matches any character."
+msgstr "O Talker debe ter 2 letras maiúsculas. O símbolo * sustitúe a cualquier letra."
+
+#: classes/add_kplex.py:246 classes/add_kplex.py:272
+msgid "Sentence must have 3 uppercase characters. The symbol * matches any character."
+msgstr "A sentenza tdebe ter 3 letras maiúsculas. O símbolo * sustitúe a cualquier letra."
+
+#: classes/add_kplex.py:254 classes/add_kplex.py:280
+msgid "You must enter 2 uppercase characters for talker or 3 uppercase characters for sentence. The symbol * matches any character."
+msgstr "Debe introducir 2 letras maiúsculas para o Talker ou 3 letras maiúsculas para a Sentenza. O símbolo * sustitúe a cualquier letra."
+
+#: classes/add_kplex.py:257 classes/add_kplex.py:283
+msgid "This sentence already exists."
+msgstr "Esta sentenza xa existe."
+
+#: classes/add_kplex.py:391
+msgid "\"Name\" must be a string between 1 and 13 lowercase letters and/or numbers which is not used as name for another input/output."
+msgstr "\"Nome\" ten que ser unha cadea de texto de entre 1 e 13 letras en minúscula e/ou números que non esteñan sendo usados xa como nome para outra entrada/saída."
+
+#: classes/add_kplex.py:396
+msgid "This name is already in use."
+msgstr "Este nome está en uso."
+
+#: classes/add_kplex.py:400
+msgid "This name is reserved by the system."
+msgstr "Nome reservado polo sistema."
+
+#: classes/add_kplex.py:407
+msgid "You must select a Port."
+msgstr "Debe escoller un Porto."
+
+#: classes/add_kplex.py:412
+msgid "This output is already in use."
+msgstr "Esta saída xa está en uso."
+
+#: classes/add_kplex.py:419
+msgid "You must enter an Address."
+msgstr "Debe introducir un Enderezo."
+
+#: classes/add_kplex.py:424
+msgid "You must enter a Port."
+msgstr "Debe introducir un Porto."
+
+#: classes/add_kplex.py:428
+msgid "Cancelled. Port 10111-10113 are reserved."
+msgstr "Cancelado. Os portos 10111-10113 están reservados."
+
+#: classes/add_kplex.py:435
+msgid "This input is already in use."
+msgstr "Esta entrada xa está en uso."
+
+#: classes/add_kplex.py:439 classes/add_kplex.py:443
+msgid "You must select a Filter type."
+msgstr "Debe escoller un tipo de Filtro."
+
+#: classes/add_topic.py:23
+msgid "Add MQTT topic"
+msgstr "Engadir topic MQTT"
+
+#: classes/add_topic.py:24
+msgid "Edit MQTT topic"
+msgstr "Editar topic MQTT"
+
+#: classes/add_topic.py:31 openplotter:3260
+msgid "Topic"
+msgstr "Tema"
+
+#: classes/add_topic.py:35 classes/add_topic.py:53 openplotter:3373
+#: openplotter:3424
+msgid "General"
+msgstr "Xeral"
+
+#: classes/add_topic.py:35 classes/add_topic.py:55 classes/add_topic.py:88
+#: openplotter:3377 openplotter:3427
+msgid "Signal K key input"
+msgstr "Entrada da chave Signal K"
+
+#: classes/add_topic.py:35 classes/add_topic.py:61 openplotter:3381
+#: openplotter:3435
+msgid "Signal K delta input"
+msgstr "Entrada da chave delta de Signal K"
+
+#: classes/add_trigger.py:25
+msgid "Add trigger"
+msgstr "Engadir disparador"
+
+#: classes/add_trigger.py:26
+msgid "Edit trigger"
+msgstr "Editar disparador"
+
+#: classes/add_trigger.py:34 openplotter:2358 openplotter:2408
+msgid "Date"
+msgstr "Data"
+
+#: classes/add_trigger.py:57
+msgid "Operator"
+msgstr "Operador"
+
+#: classes/add_trigger.py:66
+msgid "format: "
+msgstr "formato: "
+
+#: classes/add_value_setting.py:28
+msgid "convert analog value to expected value of input "
+msgstr "convertir valor analóxico ao valor esperado de entrada "
+
+#: classes/add_value_setting.py:34
+msgid "adc value"
+msgstr "valor adc"
+
+#: classes/add_value_setting.py:35 show_raw_adc_convert.py:39
+msgid "value in unit"
+msgstr "valor en unidade"
+
+#: classes/add_value_setting.py:37
+msgid "raw adc value"
+msgstr "valor bruto de adc"
+
+#: classes/add_value_setting.py:40
+msgid "value in required unit"
+msgstr "valor na unidade requerida"
+
+#: classes/add_value_setting.py:43 tools/NMEA_0183_generator.py:51
+#: openplotter:1345 openplotter:1698 openplotter:2050 openplotter:2283
+#: openplotter:2296 openplotter:2567 openplotter:2698 openplotter:3266
+msgid "add"
+msgstr "engadir"
+
+#: classes/add_value_setting.py:46 tools/NMEA_0183_generator.py:54
+#: openplotter:1347 openplotter:1701 openplotter:2053 openplotter:2286
+#: openplotter:2299 openplotter:2570 openplotter:2701 openplotter:3269
+msgid "delete"
+msgstr "borrar"
+
+#: classes/add_value_setting.py:109
+msgid "nothing selected"
+msgstr "nada seleccionado"
+
+#: classes/add_value_setting.py:129
+msgid "adc value must be a number without dec point"
+msgstr "o valor de Adc debe ser un número sen decimais"
+
+#: classes/add_value_setting.py:132
+msgid "value isn't a number"
+msgstr "o valor introducido non é un número"
+
+#: classes/edit_i2c.py:38
+msgid "Clean"
+msgstr "Borrar"
+
+#: classes/edit_i2c.py:44
+msgid "Rate (seconds)"
+msgstr "Frecuencia (segundos)"
+
+#: classes/getkeys.py:38 classes/select_key.py:25 classes/select_key.py:90
+msgid "ungrouped"
+msgstr "non agrupados"
+
+#: classes/select_key.py:23
+msgid "Select Signal K key"
+msgstr "Escoller chave Signal K"
+
+#: classes/select_key.py:38
+msgid "Groups"
+msgstr "Grupos"
+
+#: classes/select_key.py:46
+msgid "Keys"
+msgstr "Chaves"
+
+#: classes/select_key.py:92
+msgid "Ungrouped Signal K keys."
+msgstr "Chaves Signal K sen agrupar."
+
+#: ctrl_actions.py:67
+msgid "All actions have been stopped."
+msgstr "Detiveronse tódalas accións."
+
+#: ctrl_actions.py:69
+msgid "All actions have been started."
+msgstr "Iniciaronse tódalas accions."
+
+#: diagnostic-N2K-input.py:66 diagnostic-N2K-output.py:67
+#: diagnostic-SK-input.py:68
+msgid "SRC"
+msgstr "SRC"
+
+#: diagnostic-N2K-input.py:67 diagnostic-N2K-output.py:68
+msgid "DST"
+msgstr "DST"
+
+#: diagnostic-N2K-input.py:69 diagnostic-N2K-output.py:70 diagnostic-NMEA.py:56
+#: diagnostic-SK-input.py:72
+msgid "Interval"
+msgstr "Intervalo"
+
+#: diagnostic-N2K-input.py:70 diagnostic-N2K-output.py:71 diagnostic-NMEA.py:57
+msgid "Data"
+msgstr "Datos"
+
+#: diagnostic-N2K-input.py:72 diagnostic-N2K-output.py:73
+#: diagnostic-SK-input.py:76
+msgid "Sort SRC"
+msgstr "Ordear SRC"
+
+#: diagnostic-N2K-input.py:75 diagnostic-N2K-output.py:76
+msgid "Sort PGN"
+msgstr "Ordear PNG"
+
+#: diagnostic-NMEA.py:54
+msgid "Device"
+msgstr "Dispositivo"
+
+#: diagnostic-NMEA.py:59 diagnostic-NMEA.py:176
+msgid "Pause"
+msgstr "Pausa"
+
+#: diagnostic-NMEA.py:62
+msgid "Sort"
+msgstr "Ordear"
+
+#: diagnostic-NMEA.py:108
+msgid "connected to:"
+msgstr "conectado a:"
+
+#: diagnostic-NMEA.py:110
+msgid "Failed to connect with localhost:10113. Error: "
+msgstr "Erro ao conectar con localhost:10113. Erro: "
+
+#: diagnostic-NMEA.py:110
+msgid ", trying to reconnect..."
+msgstr ", tentando reconectar..."
+
+#: diagnostic-NMEA.py:173
+msgid "Resume"
+msgstr "Continuar"
+
+#: diagnostic-SK-input.py:69
+msgid "SignalK"
+msgstr "SignalK"
+
+#: diagnostic-SK-input.py:71 unit-private.py:57
+msgid "Unit"
+msgstr "Unidade"
+
+#: diagnostic-SK-input.py:73 openplotter:891
+msgid "Status"
+msgstr "Estado"
+
+#: diagnostic-SK-input.py:74 unit-private.py:58
+msgid "Description"
+msgstr "Descripción"
+
+#: diagnostic-SK-input.py:79 unit-private.py:66
+msgid "Sort SK"
+msgstr "Ordear SK"
+
+#: diagnostic-SK-input.py:82
+msgid "private Unit"
+msgstr "unidade privada"
+
+#: diagnostic-SK-input.py:86
+msgid "Unit Setting"
+msgstr "Axustes da unidade"
+
+#: message.py:30
+msgid "Message"
+msgstr "Mensaxe"
+
+#: show_deviation_table.py:39
+msgid "Show deviation table as curve"
+msgstr "Mostrar táboa de desvíación como curva"
+
+#: show_deviation_table.py:40
+msgid "Deviation"
+msgstr "Desvíación"
+
+#: show_raw_adc_convert.py:36
+msgid ""
+"settings to convert raw adc values (unlinear and/or no factor and/or no offset)\n"
+" to useable values  for input "
+msgstr "axustes para convertir valores en bruto de adc (non liniais e/ou sen factor e/ou sen compensar) a valores utilizables para a entrada "
+
+#: show_raw_adc_convert.py:38
+msgid "row adc value"
+msgstr "valor da fila adc"
+
+#: test_sms.py:38
+msgid "Test SMS"
+msgstr "Probar SMS"
+
+#: test_sms.py:47 tools/SDR_AIS_fine_cal.py:47 openplotter:1271
+msgid "Error"
+msgstr "Erro"
+
+#: test_sms.py:54
+msgid "Start"
+msgstr "Inicio"
+
+#: test_sms.py:58
+msgid "Press start to check the settings and connect to the GSM device"
+msgstr "Prema Inicio para comprobar a configuración e conectar co dispositivo GSM"
+
+#: test_sms.py:61
+msgid "Press start to send the text \""
+msgstr "Prema Inicio para enviar o texto \""
+
+#: test_sms.py:61
+msgid ""
+"\"\n"
+"to the number \""
+msgstr ""
+"\"\n"
+"ao número \""
+
+#: test_sms.py:69
+msgid "Connecting..."
+msgstr "Conectando..."
+
+#: test_sms.py:72
+msgid "Error opening device. Check settings."
+msgstr "Erro abrindo dispositivo. Comproba a configuración."
+
+#: test_sms.py:74
+msgid "Sending..."
+msgstr "Enviando..."
+
+#: test_sms.py:90
+msgid "\" sent succesfully to "
+msgstr "\" enviado correctamente a "
+
+#: test_sms.py:94 tools/SDR_AIS_fine_cal.py:84
+msgid "Finished"
+msgstr "Rematado"
+
+#: time_gps.py:34 time_gps.py:44
+msgid "Failed to connect with localhost:10109."
+msgstr "Fallou ao conectar con localhost:10109."
+
+#: time_gps.py:35 time_gps.py:45
+msgid "Error: "
+msgstr "Erro: "
+
+#: time_gps.py:70
+msgid "Date and time retrieved from NMEA data successfully."
+msgstr "Data e hora extraídas de datos NMEA con éxito."
+
+#: time_gps.py:72
+msgid "Unable to retrieve date or time from NMEA data."
+msgstr "Imposible recuperar datos da data ou hora desde NMEA."
+
+#: tools/NMEA_0183_generator.py:36 openplotter:142
+msgid "NMEA 0183 generator"
+msgstr "Xerador de NMEA0183"
+
+#: tools/NMEA_0183_generator.py:43
+msgid " NMEA 0183 "
+msgstr " NMEA 0183 "
+
+#: tools/NMEA_0183_generator.py:46 openplotter:1694
+msgid "Rate"
+msgstr "Taxa"
+
+#: tools/NMEA_0183_generator.py:47
+msgid "Fields"
+msgstr "Campos"
+
+#: tools/NMEA_0183_generator.py:57
+msgid ""
+"opencpn\n"
+"default"
+msgstr ""
+"opencpn \n"
+"por defecto"
+
+#: tools/NMEA_0183_generator.py:60
+msgid "NMEA Diagnostic"
+msgstr "Diagnóstico NMEA"
+
+#: tools/NMEA_0183_generator.py:63 openplotter:1216 openplotter:1704
+#: openplotter:1914 openplotter:2056 openplotter:2573 openplotter:3009
+#: openplotter:3272
+msgid "SK Diagnostic"
+msgstr "Diagnóstico SK"
+
+#: tools/NMEA_0183_generator.py:151
+msgid "This function is only allowed when the list is empty."
+msgstr "Esta función só se permite cando a lista está valeira."
+
+#: tools/NMEA_2000_generator.py:38
+msgid "Generate N2K from Signal K"
+msgstr "Xerar N2K desde Signal K"
+
+#: tools/NMEA_2000_generator.py:77
+msgid "description"
+msgstr "descripción"
+
+#: tools/NMEA_2000_generator.py:78
+msgid "Signal K variable"
+msgstr "Variable Signal K"
+
+#: tools/SDR_AIS.py:35 openplotter:133
+msgid "SDR receiver"
+msgstr "Receptor SDR"
+
+#: tools/SDR_AIS.py:44
+msgid "Enable AIS reception"
+msgstr "Activar Recepción AIS"
+
+#: tools/SDR_AIS.py:48
+msgid "Gain"
+msgstr "Ganancia"
+
+#: tools/SDR_AIS.py:50
+msgid "Correction (ppm)"
+msgstr "Corrección (ppm)"
+
+#: tools/SDR_AIS.py:52
+msgid "Channel A 161.975Mhz"
+msgstr "Canle A 161.975Mhz"
+
+#: tools/SDR_AIS.py:54
+msgid "Channel B 162.025Mhz"
+msgstr "Canle B 162.025Mhz"
+
+#: tools/SDR_AIS.py:59
+msgid "Take a look"
+msgstr "Visualizar"
+
+#: tools/SDR_AIS.py:61 openplotter:1205
+msgid "Calibration"
+msgstr "Calibrado"
+
+#: tools/SDR_AIS.py:64
+msgid " Fine calibration using GSM "
+msgstr " Calibrado preciso con GSM "
+
+#: tools/SDR_AIS.py:65
+msgid "Band"
+msgstr "Banda"
+
+#: tools/SDR_AIS.py:69
+msgid "Check band"
+msgstr "Comprobar banda"
+
+#: tools/SDR_AIS.py:71 openplotter:865
+msgid "Channel"
+msgstr "Canle"
+
+#: tools/SDR_AIS.py:73 tools/SDR_AIS_fine_cal.py:38
+msgid "Fine calibration"
+msgstr "Calibrado preciso"
+
+#: tools/SDR_AIS.py:76
+msgid " Radio "
+msgstr " Radio "
+
+#: tools/SDR_AIS.py:167
+msgid "SDR-AIS reception enabled"
+msgstr "Recepción SDR-AIS habilitada"
+
+#: tools/SDR_AIS.py:171
+msgid "SDR-AIS reception disabled"
+msgstr "Recepción SDR-AIS deshabilitada"
+
+#: tools/SDR_AIS.py:188 tools/SDR_AIS.py:208 tools/SDR_AIS.py:221
+#: tools/SDR_AIS.py:228
+msgid "AIS reception disabled. After closing the new window enable AIS reception again."
+msgstr "AIS desactivado. Despois de pechar a fiestra active a recepción AIS de novo."
+
+#: tools/SDR_AIS.py:195
+msgid ""
+"SDR-AIS reception disabled.\n"
+"Check the new window. Copy the maximum supported gain value. Wait for ppm value to stabilize and copy it too."
+msgstr ""
+"Recepción SDR-AIS deshabilitada.\n"
+"Comprobe os datos da nova fiestra. Copie o valor máximo de ganancia posible. Agarde a que o valor ppm se estabilice e cópieo tamén."
+
+#: tools/SDR_AIS_fine_cal.py:53
+msgid "gain: "
+msgstr "ganancia: "
+
+#: tools/SDR_AIS_fine_cal.py:54
+msgid "ppm: "
+msgstr "ppm: "
+
+#: tools/SDR_AIS_fine_cal.py:61 tools/calculate.py:35 openplotter:139
+msgid "Calculate"
+msgstr "Calcular"
+
+#: tools/SDR_AIS_fine_cal.py:65
+msgid ""
+"Press Calculate and wait for the system to calculate the ppm value with\n"
+"the selected channel. Put the obtained value in \"Correction (ppm)\" field\n"
+"and enable SDR-AISreception. Estimated time: 1 min."
+msgstr "Prema Calcular e agarde a que o sistema calcule o valor ppm na canle seleccionado. Introduza o valor ppm obtenido no campo \"Corrección (ppm)\" e active a recepción SDR-AIS. Tempo estimado 1 min."
+
+#: tools/SDR_AIS_fine_cal.py:66
+msgid "channel: "
+msgstr "canle: "
+
+#: tools/SDR_AIS_fine_cal.py:68
+msgid ""
+"Press Calculate and wait for the system to check the band. Write down\n"
+"the strongest channel (power). If you do not find any channel try another\n"
+"band. Estimated time: 5 min."
+msgstr ""
+"Prema Calcular e agarde a que o sistema comprobe a banda. Introduza\n"
+"a canle con maior potencia de transmisión. Se non atopa ningúnha canle probe outra banda. Tempo estimado: 5 min."
+
+#: tools/SDR_AIS_fine_cal.py:73
+msgid "Working..."
+msgstr "Calculando..."
+
+#: tools/SDR_AIS_fine_cal.py:78 tools/SDR_AIS_fine_cal.py:82
+msgid "error"
+msgstr "erro"
+
+#: tools/autosetup_tty.py:398
+msgid "tty auto setup"
+msgstr "auto configuración tty (serie)"
+
+#: tools/autosetup_tty.py:404
+msgid "setup autostart on every boot"
+msgstr "iniciar configurador en cada arranque"
+
+#: tools/autosetup_tty.py:444
+msgid "Auto setup detects hardware. Please make sure that all devices are turned on."
+msgstr "A auto configuración detectará os seus dispositivos. Comprobe que todos están conectados e acesos."
+
+#: tools/calculate.py:48
+msgid " Magnetic variation "
+msgstr " Variación magnética "
+
+#: tools/calculate.py:49 tools/calculate.py:57 openplotter:2177
+#: openplotter:2190
+msgid "Enable"
+msgstr "Activar"
+
+#: tools/calculate.py:50
+msgid "Requires: position, date."
+msgstr "Requerido: posición, data."
+
+#: tools/calculate.py:51 tools/calculate.py:59 tools/calculate.py:71
+#: tools/calculate.py:83
+msgid "Accuracy (sec)"
+msgstr "Precisión (seg)"
+
+#: tools/calculate.py:56
+msgid " Rate of turn "
+msgstr " Ratio de xiro "
+
+#: tools/calculate.py:58
+msgid "Requires: magnetic heading."
+msgstr "Requerido: rumbo magnético."
+
+#: tools/calculate.py:64
+msgid " True heading "
+msgstr " Rumbo verdadeiro "
+
+#: tools/calculate.py:65
+msgid "Deviation is included"
+msgstr "Desvíación incluida"
+
+#: tools/calculate.py:67
+msgid "Requires: magnetic heading, variation."
+msgstr "Requírese: rumbo magnético, variación local."
+
+#: tools/calculate.py:68
+msgid "Add deviation table"
+msgstr "Engadir táboa de desvío"
+
+#: tools/calculate.py:70
+msgid "Requires: magnetic heading, variation, deviation."
+msgstr "Requírese: rumbo magnético, variación local e desvíación."
+
+#: tools/calculate.py:76
+msgid " True wind speed and direction "
+msgstr " Dirección e velocidad do viento verdadeiros "
+
+#: tools/calculate.py:77
+msgid "Use Speed Through Water"
+msgstr "Usar STW (velocidad sobre a agua)"
+
+#: tools/calculate.py:79
+msgid "Requires: STW, AWS, AWA."
+msgstr "Requírese: STW, AWS, AWA."
+
+#: tools/calculate.py:80
+msgid "Use Speed Over Ground"
+msgstr "Usar SOG (velocidade sobre terra)"
+
+#: tools/calculate.py:82
+msgid "Requires: SOG, COG, HDT, AWS, AWA."
+msgstr "Requírese: SOG COG, HDT, AWS, AWA."
+
+#: tools/calculate.py:88 tools/demo_tool.py:91
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: tools/calculate.py:193
+msgid "You have to provide rate and accuracy values for magnetic variation"
+msgstr "Debe proporcionar o valor e a precisión da variación magnética"
+
+#: tools/calculate.py:207
+msgid "You have to provide rate and accuracy values for true heading"
+msgstr "Debe proporcionar o valor e a precisión do rumbo verdadeiro"
+
+#: tools/calculate.py:219
+msgid "You have to provide rate and accuracy values for rate of turn"
+msgstr "Debe proporcionar o valor e a precisión do ratio de xiro"
+
+#: tools/calculate.py:232
+msgid "You have to provide rate and accuracy values for true wind speed and direction"
+msgstr "Debe proporcionar os valores e a precisión da dirección e maila velocidade do vento verdadeiro"
+
+#: tools/demo_tool.py:62
+msgid "Demo tool"
+msgstr "Ferramenta de demostración"
+
+#: tools/demo_tool.py:74
+msgid " OpenPlotter config data "
+msgstr " Datos de configuración de OpenPlotter "
+
+#: tools/demo_tool.py:75
+msgid "OpenPlotter version: "
+msgstr "Versión de OpenPlotter: "
+
+#: tools/demo_tool.py:78
+msgid " Working with Signal K "
+msgstr " Traballando con Signal K "
+
+#: tools/demo_tool.py:79
+msgid "Select a Signal K key"
+msgstr "Escolla una chave Signal K"
+
+#: tools/demo_tool.py:85
+msgid "Write some text to publish"
+msgstr "Escriba o texto para publicar"
+
+#: tools/demo_tool.py:88
+msgid "Publish"
+msgstr "Publicar"
+
+#: unit-private.py:56
+msgid "SK Unit"
+msgstr "Unidade SK"
+
+#: unit-private.py:60
+msgid "Sort SK Unit"
+msgstr "Ordear unidade SK"
+
+#: unit-private.py:63
+msgid "Sort Unit"
+msgstr "Ordear unidade"
+
+#: unit-private.py:69
+msgid "change selected"
+msgstr "cambiar o seleccionado"
+
+#: update/update_dependencies.sh:48
+msgid "gpsd"
+msgstr "gpsd"
+
+#: openplotter:94
+msgid "USB manager"
+msgstr "Xestionar USB"
+
+#: openplotter:98
+msgid "WiFi AP"
+msgstr "WiFi AP"
+
+#: openplotter:99
+msgid "Compass"
+msgstr "Compás"
+
+#: openplotter:100
+msgid "Actions"
+msgstr "Accións"
+
+#: openplotter:102
+msgid "I2C"
+msgstr "I2C"
+
+#: openplotter:106
+msgid "Accounts"
+msgstr "Contas"
+
+#: openplotter:107
+msgid "SMS"
+msgstr "SMS"
+
+#: openplotter:108
+msgid "Startup"
+msgstr "Arrincar ao inicio"
+
+#: openplotter:126
+msgid "Set time zone"
+msgstr "Configurar zona horaria"
+
+#: openplotter:126 openplotter:292
+msgid "Set time zone in the new window"
+msgstr "Configurar zona horaria nunha nova xanela"
+
+#: openplotter:128 openplotter:658
+msgid "Set time from NMEA"
+msgstr "Establecer hora desde NMEA"
+
+#: openplotter:128
+msgid "Set system time from NMEA data"
+msgstr "Configurar a hora do sistema desde os datos NMEA"
+
+#: openplotter:130
+msgid "Set GPSD"
+msgstr "Configurar GPSD"
+
+#: openplotter:130 openplotter:306
+msgid "Set GPSD in the new window"
+msgstr "Configurar GPSD na nova fiestra"
+
+#: openplotter:134
+msgid "Set an SDR receiver in the new window"
+msgstr "Configurar un receptor SDR na nova fiestra"
+
+#: openplotter:137
+msgid "Create a deviation table for your boat"
+msgstr "Crear unha táboa de desvíación para o seu barco"
+
+#: openplotter:140
+msgid "Calculate new data from current values"
+msgstr "Calcular novos datos a partir dos valores actuais"
+
+#: openplotter:143
+msgid "Generate NMEA 0183 from current values"
+msgstr "Xerar NMEA 0183 desde los valores actuais"
+
+#: openplotter:145
+msgid "NMEA 2000 generator"
+msgstr "Xerador de NMEA 2000"
+
+#: openplotter:146
+msgid "Generate NMEA 2000 from current values"
+msgstr "Xerar NMEA 2000 desde os valores actuais"
+
+#: openplotter:172
+msgid "Tools"
+msgstr "Ferramentas"
+
+#: openplotter:175
+msgid "Basque"
+msgstr ""
+
+#: openplotter:175
+msgid "Set Basque language"
+msgstr ""
+
+#: openplotter:177
+msgid "Catalan"
+msgstr "Catalán"
+
+#: openplotter:177
+msgid "Set Catalan language"
+msgstr "Establecer o catalán como idioma"
+
+#: openplotter:179
+msgid "Dutch"
+msgstr "Neerlandés"
+
+#: openplotter:179
+msgid "Set Dutch language"
+msgstr "Establecer o neerlandés como idioma"
+
+#: openplotter:181
+msgid "English"
+msgstr "Inglés"
+
+#: openplotter:181
+msgid "Set English language"
+msgstr "Establecer o inglés como idioma"
+
+#: openplotter:183
+msgid "French"
+msgstr "Francés"
+
+#: openplotter:183
+msgid "Set French language"
+msgstr "Establecer o francés como idioma"
+
+#: openplotter:185
+msgid "Galician"
+msgstr "Galego"
+
+#: openplotter:185
+msgid "Set Galician language"
+msgstr "Establecer o galego como lingua"
+
+#: openplotter:187
+msgid "German"
+msgstr "Alemán"
+
+#: openplotter:187
+msgid "Set German language"
+msgstr "Establecer o alemán como idioma"
+
+#: openplotter:189
+msgid "Italiano"
+msgstr "Italiano"
+
+#: openplotter:189
+msgid "Set Italian language"
+msgstr "Establecer o italiano como idioma"
+
+#: openplotter:191
+msgid "Spanish"
+msgstr "Español"
+
+#: openplotter:191
+msgid "Set Spanish language"
+msgstr "Establecer o español como idioma"
+
+#: openplotter:193
+msgid "Language"
+msgstr "Idioma"
+
+#: openplotter:196
+msgid "Update OpenCPN"
+msgstr "Actualizar OpenCPN"
+
+#: openplotter:196
+msgid "Update OpenCPN to latest stable release"
+msgstr "Actualizar OpenCPN á última versión estable"
+
+#: openplotter:198
+msgid "Update OpenCPN plugins"
+msgstr "Actualizar plugins de OpenCPN"
+
+#: openplotter:198
+msgid "Update OpenCPN plugins to latest stable releases"
+msgstr "Actualizar OpenCPN á última versión estable"
+
+#: openplotter:201
+msgid "Set default OpenPlotter desktop"
+msgstr "Restaurar a configuración predeterminada do escritorio de OpenPlotter"
+
+#: openplotter:201
+msgid "Run this after a major update"
+msgstr "Executar isto despois dunha actualización importante"
+
+#: openplotter:204
+msgid "Update OpenPlotter"
+msgstr "Actualizar OpenPlotter"
+
+#: openplotter:204
+msgid "Apply latest changes"
+msgstr "Aplicálos últimos cambios"
+
+#: openplotter:206
+msgid "Updates"
+msgstr "Actualizacións"
+
+#: openplotter:209
+msgid "&About"
+msgstr "Acerca de"
+
+#: openplotter:209
+msgid "About OpenPlotter"
+msgstr "Acerca de OpenPlotter"
+
+#: openplotter:211 openplotter:212
+msgid "OpenPlotter online documentation"
+msgstr "Documentación en liña de OpenPlotter"
+
+#: openplotter:214 openplotter:215
+msgid "OpenPlotter offline documentation"
+msgstr "Documentación descargada de OpenPlotter"
+
+#: openplotter:217
+msgid "&Help"
+msgstr "&Axuda"
+
+#: openplotter:295
+msgid "Waiting for NMEA time..."
+msgstr "Agardando a obter hora de datos NMEA..."
+
+#: openplotter:362
+msgid "The selected language will be enabled when you restart"
+msgstr "O idioma seleccionado estará activo cuando volva a iniciar o programa"
+
+#: openplotter:411 openplotter:415 openplotter:497
+msgid "Follow the instructions of the new window"
+msgstr "Siga as instruccións que aparecen na fiestra emerxente"
+
+#: openplotter:432
+msgid "It was not possible to connect to Github."
+msgstr "Non foi posible conectar con Github."
+
+#: openplotter:444 openplotter:465
+msgid "Error reading versions."
+msgstr "Erro al leer versións."
+
+#: openplotter:470
+msgid ""
+"You are running a stable version. If you update to a non stable version you will have to keep updating until a stable stage is reached again.\n"
+"\n"
+msgstr ""
+"Está executando unha versión estable. Se actualiza a unha versión non estable deberá continuar actualizando ata chegar a unha etapa estable.\n"
+"\n"
+
+#: openplotter:472
+msgid "There is a Raspbian upgrade, it is recommended to download the new OpenPlotter RPI image: v"
+msgstr "Dispón dunha actualización importante de Raspbian (o sistema operativo base de OpenPlotter). Recoméndase descargar a nova imaxe de instalación de OpenPlotter: v"
+
+#: openplotter:476
+msgid "There is a major OpenPlotter update.\n"
+msgstr "Dispoñible actualización importante de OpenPlotter.\n"
+
+#: openplotter:477
+msgid ""
+"Please make a backup image of your system before updating.\n"
+"\n"
+msgstr ""
+"Por favor, faiga unha copia de seguranza do seu sistema antes de actualizar.\n"
+"\n"
+
+#: openplotter:480
+msgid ""
+"There is a minor OpenPlotter update.\n"
+"\n"
+msgstr ""
+"Dispoñible actualización de OpenPlotter.\n"
+"\n"
+
+#: openplotter:483
+msgid " is up to date.\n"
+msgstr " está actualizado.\n"
+
+#: openplotter:484
+msgid ""
+"You do not need to update but if you think something was wrong in your last update, you can force a major update.\n"
+"\n"
+msgstr ""
+"Non fai falla actualizar, pero se cre que algo foi mal na última actualización pode tentar de forzar unha actualización.\n"
+"\n"
+
+#: openplotter:487
+msgid "Are you sure you want to update: "
+msgstr "Está seguro de que desexa actualizar: "
+
+#: openplotter:501
+msgid "OpenPlotter is a DIY, open-source, low-cost, low-consumption, modular and scalable sailing platform to run on ARM boards."
+msgstr "OpenPlotter é unha plataforma de navegación de auto-construcción, código aberto, baixo consumo, baixo coste, modular e escalable que funciona en placas ARM."
+
+#: openplotter:566
+msgid "Warning: You have connected the \""
+msgstr "Atención: Vostede conectou o \""
+
+#: openplotter:567
+msgid "\" to the usb port which is reserved for another device"
+msgstr "\"a un porto USB reservado para outro dispositivo"
+
+#: openplotter:617
+msgid "Error: USB-Port with vendor product number: \""
+msgstr "Erro no dispositivo USB co número de fabricante (vendor).\""
+
+#: openplotter:643
+msgid "Delay (seconds)"
+msgstr "Retraso (segundos)"
+
+#: openplotter:651
+msgid "no OpenGL"
+msgstr "sen OpenGL"
+
+#: openplotter:653
+msgid "fullscreen"
+msgstr "pantalla completa"
+
+#: openplotter:656
+msgid "NMEA 0183 multiplexer"
+msgstr "Multiplexor NMEA 0183"
+
+#: openplotter:661
+msgid "VNC remote desktop"
+msgstr "Escritorio remoto VNC"
+
+#: openplotter:663
+msgid "use password"
+msgstr "usar contrasinal"
+
+#: openplotter:668
+msgid "Play sound"
+msgstr "Reproducir audio"
+
+#: openplotter:671
+msgid "File"
+msgstr "Arquivo"
+
+#: openplotter:674
+msgid "Maximize OpenPlotter"
+msgstr "Maximizar OpenPlotter"
+
+#: openplotter:677
+msgid "Node-Red (Dashboard, Freeboard)"
+msgstr "Node-Red (Dashboard, Freeboard)"
+
+#: openplotter:721
+msgid "You can enter only numbers."
+msgstr "Só se poden introducir números."
+
+#: openplotter:726
+msgid "Startup delay set to "
+msgstr "Retraso no inicio establecido en "
+
+#: openplotter:726
+msgid " seconds"
+msgstr " segundos"
+
+#: openplotter:778
+msgid "Do you want to change your VNC-Password?"
+msgstr "Queres cambiar o teu contrasinal de VNC?"
+
+#: openplotter:809
+msgid "Enable access point"
+msgstr "Activar punto de acceso"
+
+#: openplotter:812
+msgid "Enable bridge to eth0"
+msgstr "Activar ponte de rede a eth0"
+
+#: openplotter:845
+msgid "Access point device"
+msgstr "Dispositivo punto de acceso"
+
+#: openplotter:849
+msgid "Sharing Internet device"
+msgstr "Dispositivo de internet compartido"
+
+#: openplotter:853
+msgid "Access point settings"
+msgstr "Configuración punto de acceso"
+
+#: openplotter:856
+msgid ""
+"SSID \n"
+"maximum 32 characters"
+msgstr ""
+"SSID \n"
+"máximo 32 caracteres"
+
+#: openplotter:859
+msgid ""
+"Password \n"
+"minimum 8 characters required"
+msgstr ""
+"Contrasinal\n"
+"mínimo 8 caracteres"
+
+#: openplotter:870
+msgid "Mode"
+msgstr "Modo"
+
+#: openplotter:872 openplotter:909 openplotter:994
+msgid "Both"
+msgstr "Ambos"
+
+#: openplotter:875
+msgid "WPA"
+msgstr "WPA"
+
+#: openplotter:877
+msgid "Defaults"
+msgstr "Predeterminados"
+
+#: openplotter:880 openplotter:3253 openplotter:3361 openplotter:3473
+#: openplotter:3512
+msgid "Apply"
+msgstr "Aplicar"
+
+#: openplotter:883
+msgid " Addresses "
+msgstr "Enderezos"
+
+#: openplotter:888
+msgid "Refresh"
+msgstr "Actualizar"
+
+#: openplotter:975 openplotter:2142
+msgid "Failed. You must fill in all fields."
+msgstr "Erro. Debe encher tódolos campos."
+
+#: openplotter:978
+msgid "\"Access point device\" and \"Sharing Internet device\" must be different"
+msgstr "\"Dispositivo de punto acceso\" e \"Dispositivo de internet compartido \" deben ser diferentes"
+
+#: openplotter:981
+msgid "Your SSID must have a maximum of 32 characters and your password a minimum of 8."
+msgstr "O SSID non debe ter máis de 32 caracteres e o contrasinal un mínimo de 8."
+
+#: openplotter:1006
+msgid ""
+"Changes will be applied.\n"
+"\n"
+"If something goes wrong and you are on a headless system,\n"
+"you may not be able to reconnect again.\n"
+"\n"
+"Are you sure?"
+msgstr ""
+"Os cambios vanse aplicar.\n"
+"\n"
+"Se algo vai mal e está usando un sistema sen pantalla (escritorio remoto),\n"
+"pode que non poida conectar de novo.\n"
+"\n"
+"Está seguro?"
+
+#: openplotter:1023
+msgid "Configuring WiFi AP, please wait max 3 min..."
+msgstr "Configurando o punto de acceso wi-fi, por favor agarde (max. 3 min)..."
+
+#: openplotter:1027
+msgid "Shutdown WiFi AP, please wait max 3 min..."
+msgstr "Desconectando o punto de acceso wi-fi, por favor agarde (max. 3 min.)..."
+
+#: openplotter:1032
+msgid "WiFi access point failed."
+msgstr "O punto de acceso WiFi fallou."
+
+#: openplotter:1033
+msgid "WiFi access point started."
+msgstr "Punto de acceso WiFi activado."
+
+#: openplotter:1034
+msgid "WiFi access point stopped."
+msgstr "Punto de acceso WiFi detido."
+
+#: openplotter:1064
+msgid " Multiplexed NMEA 0183:\n"
+msgstr " NMEA 0183 multiplexado:\n"
+
+#: openplotter:1067
+msgid ""
+"\n"
+" Signal K Server:\n"
+msgstr ""
+"\n"
+"Servidor Signal K:\n"
+
+#: openplotter:1069
+msgid ""
+"\n"
+" VNC remote desktop:\n"
+msgstr ""
+"\n"
+" Escritorio remoto VNC:\n"
+
+#: openplotter:1071
+msgid ""
+"\n"
+" RDP remote desktop:\n"
+msgstr ""
+"\n"
+" Escritorio remoto RDP:\n"
+
+#: openplotter:1073
+msgid ""
+"\n"
+" node-red:\n"
+msgstr ""
+"\n"
+"node-red:\n"
+
+#: openplotter:1075
+msgid ""
+"\n"
+" MQTT local broker:\n"
+msgstr ""
+"\n"
+" Broker MQTT local:\n"
+
+#: openplotter:1185
+msgid " IMU "
+msgstr " IMU "
+
+#: openplotter:1189
+msgid "Detected IMU:"
+msgstr "IMU detectado:"
+
+#: openplotter:1190
+msgid "None"
+msgstr "Nada"
+
+#: openplotter:1192
+msgid "Rate (secons)"
+msgstr "Frecuencia (segundos)"
+
+#: openplotter:1196
+msgid "Magnetic heading (navigation.headingMagnetic)"
+msgstr "Rumbo magnetico (navigation.headingMagnetic)"
+
+#: openplotter:1199
+msgid "Heel (navigation.attitude.roll)"
+msgstr "Escora (navigation.attitude.roll)"
+
+#: openplotter:1202
+msgid "Pitch (navigation.attitude.pitch)"
+msgstr "Cabeceo (navigation.attitude.pitch)"
+
+#: openplotter:1208
+msgid "Scope"
+msgstr "Alcance"
+
+#: openplotter:1219 openplotter:1350 openplotter:1707 openplotter:1917
+#: openplotter:2059 openplotter:2576 openplotter:3012 openplotter:3275
+msgid "Restart"
+msgstr "Reiniciar"
+
+#: openplotter:1289
+msgid ""
+"Compass settings will be deleted.\n"
+"\n"
+"You will have to calibrate again.\n"
+"\n"
+"Are you sure?"
+msgstr ""
+"Os axustes do compás vanse eliminar.\n"
+"\n"
+"Deberá efectuar a calibración de novo.\n"
+"\n"
+"Está seguro?"
+
+#: openplotter:1328
+msgid " KPLEX "
+msgstr " KPLEX "
+
+#: openplotter:1333
+msgid "io"
+msgstr "entrada-saída"
+
+#: openplotter:1334
+msgid "Port/Address"
+msgstr "Porto/Enderezo"
+
+#: openplotter:1335
+msgid "Bauds/Port"
+msgstr "Baudios/Porto"
+
+#: openplotter:1336
+msgid "inFilter"
+msgstr "filtro de entrada"
+
+#: openplotter:1337 openplotter:1339
+msgid "Filtering"
+msgstr "Filtrando"
+
+#: openplotter:1338
+msgid "outFilter"
+msgstr "filtro de saída"
+
+#: openplotter:1342
+msgid "Diagnostic"
+msgstr "Diagnóstico"
+
+#: openplotter:1352
+msgid "Advanced"
+msgstr "Avanzado"
+
+#: openplotter:1354 openplotter:2308 openplotter:2986
+msgid "Apply changes"
+msgstr "Aplicar cambios"
+
+#: openplotter:1356 openplotter:2310
+msgid "Cancel changes"
+msgstr "Cancelar cambios"
+
+#: openplotter:1386
+msgid "OpenPlotter will close. Add manual settings at the end of the configuration file. Open OpenPlotter again and restart multiplexer to apply changes."
+msgstr "OpenPlotter vaise pechar. Engada manualmente os cambios ao final do arquivo de configuración. Abra de novo OpenPlotter e reinicie o multiplexor para aplicar os cambios."
+
+#: openplotter:1391
+msgid "Closing Kplex"
+msgstr "Pechando Kplex"
+
+#: openplotter:1397
+msgid "Kplex restarted"
+msgstr "Kplex reiniciado"
+
+#: openplotter:1408
+msgid "You can not edit this."
+msgstr "Non pode editar isto."
+
+#: openplotter:1498
+msgid "Multiplexer configuration file does not exist. Add inputs and apply changes."
+msgstr "O archivo de configuración do multiplexor non existe. Engada entradas e aplique cambios."
+
+#: openplotter:1602 openplotter:1639
+msgid "Select an item."
+msgstr "Escolla un elemento."
+
+#: openplotter:1608
+msgid "You can not delete this."
+msgstr "Non pode eliminar este elemento."
+
+#: openplotter:1686 openplotter:2039
+msgid " Sensors "
+msgstr " Sensores "
+
+#: openplotter:1692
+msgid "Magnitude"
+msgstr "Magnitude"
+
+#: openplotter:1767
+msgid "Failed. You must select a sensor."
+msgstr "Erro. Debe escoller un sensor."
+
+#: openplotter:1772
+msgid "Failed. You must provide an address."
+msgstr "Erro. Debe indicar un enderezo."
+
+#: openplotter:1850 openplotter:2162 openplotter:2511 openplotter:2521
+#: openplotter:2673 openplotter:2805 openplotter:3458
+msgid "Select an item to delete."
+msgstr "Escolla o elemento a eliminar."
+
+#: openplotter:1864
+msgid "Sensors restarted"
+msgstr "Sensores reiniciados"
+
+#: openplotter:1867
+msgid "Sensors stopped"
+msgstr "Sensores detidos"
+
+#: openplotter:1904
+msgid " SPI MCP3008 "
+msgstr " SPI MCP3008 "
+
+#: openplotter:1908
+msgid "channel"
+msgstr "canle"
+
+#: openplotter:1920
+msgid "value setting"
+msgstr "axuste do valor"
+
+#: openplotter:1989
+msgid "convert disabled"
+msgstr "conversión desactivada"
+
+#: openplotter:2004
+msgid "Failed. Provide name and Signal K values."
+msgstr "Erro. Indique nome e valores de Signal K."
+
+#: openplotter:2009 openplotter:2146
+msgid "Failed. The name must contain only letters and numbers."
+msgstr "Erro. O nombre debe conter só letras e números."
+
+#: openplotter:2047 openplotter:2564 openplotter:3263
+msgid "Source"
+msgstr "Fonte"
+
+#: openplotter:2131
+msgid "CAUTION. If you connect a closed switch or some inappropriate circuit, you could short out and damage your board when this output becomes \"High\". Are you sure to enable this output?"
+msgstr ""
+"PRECAUCIÓN. Se vostede conecta un interruptor pechado ou calquera circuito inadecuado podería provocar un cortocircuito e danar a súa placa cuando esta salida se convirta en \"Alta\". \n"
+"Está seguro de que desexa habilitar esta saída?"
+
+#: openplotter:2176
+msgid " Twitter "
+msgstr " Twitter "
+
+#: openplotter:2180
+msgid "apiKey"
+msgstr "apiKey"
+
+#: openplotter:2182
+msgid "apiSecret"
+msgstr "apiSecret"
+
+#: openplotter:2184
+msgid "accessToken"
+msgstr "accessToken"
+
+#: openplotter:2186
+msgid "accessTokenSecret"
+msgstr "accessTokenSecret"
+
+#: openplotter:2189
+msgid " Gmail "
+msgstr " Gmail "
+
+#: openplotter:2192
+msgid "Gmail account"
+msgstr "Conta Gmail"
+
+#: openplotter:2194
+msgid "Gmail password"
+msgstr "Contrasinal Gmail"
+
+#: openplotter:2196
+msgid "Recipient"
+msgstr "Destinatario"
+
+#: openplotter:2223
+msgid "Enter valid Twitter apiKey, apiSecret, accessToken and accessTokenSecret."
+msgstr "Introduce as apiKey, apiSecret, accessToken e accessTokenSecret de Twitter válidas."
+
+#: openplotter:2253
+msgid "Enter valid Gmail account, Gmail password and Recipient."
+msgstr "Introduce un correo Gmail válido, o contrasinal e mailo destinatario."
+
+#: openplotter:2273
+msgid " Triggers "
+msgstr " Disparadores "
+
+#: openplotter:2276
+msgid "trigger"
+msgstr "disparador"
+
+#: openplotter:2277
+msgid "operator"
+msgstr "operador"
+
+#: openplotter:2278
+msgid "value"
+msgstr "valor"
+
+#: openplotter:2292
+msgid "repeat"
+msgstr "repetir"
+
+#: openplotter:2302
+msgid "Stop all"
+msgstr "Deter todas"
+
+#: openplotter:2305
+msgid "Start all"
+msgstr "Iniciar todas"
+
+#: openplotter:2404
+msgid "Failed. Enter a value."
+msgstr "Erro. Introduza un valor."
+
+#: openplotter:2415
+msgid "Failed. Select value, timestamp or source."
+msgstr "Erro. Escolla valor, marca de tempo ou fonte."
+
+#: openplotter:2423 openplotter:2641
+msgid "Failed. Select a Signal K key."
+msgstr "Erro. Escolla unha chave Signal K."
+
+#: openplotter:2462
+msgid "Select a trigger to add actions."
+msgstr "Escolla un disparador para engadir accións."
+
+#: openplotter:2469
+msgid "Failed. Select an action."
+msgstr "Fallou. Escolla unha acción."
+
+#: openplotter:2479
+msgid "Failed. \"Repeat after\" must be a number."
+msgstr "Fallou. \"Repetir tras\" debe ser un número."
+
+#: openplotter:2539
+msgid "Actions changes cancelled"
+msgstr "Cambios en accións cancelados"
+
+#: openplotter:2543
+msgid "Actions stopped"
+msgstr "Accións detidas"
+
+#: openplotter:2550
+msgid "Actions started"
+msgstr "Accións iniciadas"
+
+#: openplotter:2557
+msgid " Temperature sensors "
+msgstr " Sensores de temperatura "
+
+#: openplotter:2561
+msgid "ID"
+msgstr "ID"
+
+#: openplotter:2600
+msgid "1W sensors restarted"
+msgstr "Sensores 1W reiniciados"
+
+#: openplotter:2603
+msgid "1W sensors stopped"
+msgstr "Sensores 1W detidos"
+
+#: openplotter:2645
+msgid "Failed. Provide a name."
+msgstr "Erro. Indique un nome."
+
+#: openplotter:2649
+msgid "Failed. Name must contain only letters and numbers."
+msgstr "Erro. O nome debe conter só letras e números."
+
+#: openplotter:2653
+msgid "Failed. Select sensor ID."
+msgstr "Fallou. Escolla unha ID de sensor."
+
+#: openplotter:2687
+msgid " USB Serial ports "
+msgstr " Portos serie USB "
+
+#: openplotter:2690
+msgid "name"
+msgstr "nome"
+
+#: openplotter:2695
+msgid "remember"
+msgstr "lembrar"
+
+#: openplotter:2763
+msgid "Failed. The new name must be a string between 1 and 8 letters and/or numbers."
+msgstr "Fallou. O novo nome debe ser unha cadea de texto de entre 1 a 8 letras e/ou números."
+
+#: openplotter:2834
+msgid "Restarting ..."
+msgstr "Reiniciando..."
+
+#: openplotter:2837
+msgid "USB names added and restarted"
+msgstr "Nomes de USB engadidos e reiniciados."
+
+#: openplotter:2842 openplotter:2983 openplotter:3076
+msgid " Settings "
+msgstr " Axustes "
+
+#: openplotter:2844
+msgid "CAN-USB device"
+msgstr "Dispositivo CAN-USB"
+
+#: openplotter:2850
+msgid "Enable N2K input"
+msgstr "Activar entrada N2K"
+
+#: openplotter:2853
+msgid "Diagnostic input"
+msgstr "Información de diagnóstico de entradas"
+
+#: openplotter:2856
+msgid "Enable N2K output"
+msgstr "Activar saída N2K"
+
+#: openplotter:2859
+msgid "Diagnostic output"
+msgstr "Información de diagnóstico de saída"
+
+#: openplotter:2862
+msgid "Output settings"
+msgstr "Axustes de saída"
+
+#: openplotter:2865
+msgid " Inputs "
+msgstr " Entradas "
+
+#: openplotter:2866
+msgid "PGNs: All"
+msgstr "PGNs: Todos"
+
+#: openplotter:2868
+msgid " Outputs "
+msgstr " Saídas "
+
+#: openplotter:2895 openplotter:2940 openplotter:2955 openplotter:2966
+#: openplotter:2975
+msgid "You have to select a CAN-USB-CAN device"
+msgstr "Debe escoller un dispositivo CAN-USB-CAN"
+
+#: openplotter:2961
+msgid "Select PGNs to transmit and enable N2K input/output again."
+msgstr "Seleccione os PGNs que desexa transmitir e habilite de novo a entrada/saída N2K."
+
+#: openplotter:2970
+msgid "Show received PGNs."
+msgstr "Amosar os PGNs recibidos."
+
+#: openplotter:2979
+msgid "Show sent PGNs."
+msgstr "Amosar os PGNs enviados."
+
+#: openplotter:2989
+msgid " Info "
+msgstr " Información "
+
+#: openplotter:2996
+msgid "Version: "
+msgstr "Versión: "
+
+#: openplotter:2998
+msgid "Signal K settings and tools:"
+msgstr "Axustes e ferramentas de Signal K:"
+
+#: openplotter:3000
+msgid "REST full format output:"
+msgstr "Saída en formato REST:"
+
+#: openplotter:3002
+msgid "Websocket delta format output:"
+msgstr "Saída en formato Websocket Delta:"
+
+#: openplotter:3004
+msgid "TCP delta format output:"
+msgstr "Saída en formato delta TCP:"
+
+#: openplotter:3006
+msgid "TCP NMEA 0183 format output:"
+msgstr "Saída en formato TCP NMEA0183:"
+
+#: openplotter:3015
+msgid "Signal K tools"
+msgstr "Ferramentas de Signal K"
+
+#: openplotter:3048
+msgid "Closing Signal K server ..."
+msgstr "Pechando servidor de Signal K..."
+
+#: openplotter:3055
+msgid "Signal K server restarted"
+msgstr "Servidor Signal K reiniciado."
+
+#: openplotter:3065
+msgid "You have to provide a MMSI."
+msgstr "Debe indicar un MMSI."
+
+#: openplotter:3077
+msgid "Enable settings"
+msgstr "Activar configuración"
+
+#: openplotter:3080
+msgid "Serial port"
+msgstr "Porto Serie"
+
+#: openplotter:3089
+msgid "Bluetooth address"
+msgstr "Enderezo Bluetooth"
+
+#: openplotter:3092
+msgid "Connection"
+msgstr "Conexión"
+
+#: openplotter:3096
+msgid "Identify"
+msgstr "Identificar"
+
+#: openplotter:3099
+msgid " Sending "
+msgstr " Enviando "
+
+#: openplotter:3101
+msgid "Enable sending SMS"
+msgstr "Activar envío de SMS"
+
+#: openplotter:3104
+msgid "Send to phone"
+msgstr "Enviar ao teléfono"
+
+#: openplotter:3107
+msgid "Text"
+msgstr "Texto"
+
+#: openplotter:3110
+msgid "Test"
+msgstr "Probar"
+
+#: openplotter:3157
+msgid "You have to provide a serial port or a bluetooth address."
+msgstr "Debe proporcionar un porto serie ou un enderezo bluetooth."
+
+#: openplotter:3167
+msgid "You have to provide a connection type."
+msgstr "Debe proporcionar un tipo de conexión."
+
+#: openplotter:3206
+msgid "You have to enable settings."
+msgstr "Debe activar a configuración."
+
+#: openplotter:3210
+msgid "You have to provide a phone number."
+msgstr "Debe proporcionar un número de teléfono."
+
+#: openplotter:3235
+msgid "You have to provide some text to send."
+msgstr "Debe proporcionar algún texto para enviar."
+
+#: openplotter:3242
+msgid " MQTT "
+msgstr " MQTT "
+
+#: openplotter:3244
+msgid "Remote broker"
+msgstr "Broker remoto"
+
+#: openplotter:3248
+msgid "Username"
+msgstr "Nome de usuario"
+
+#: openplotter:3250
+msgid "Password"
+msgstr "Contrasinal"
+
+#: openplotter:3256
+msgid "Clear"
+msgstr "Limpar"
+
+#: openplotter:3330
+msgid "MQTT restarted"
+msgstr "MQTT reiniciado"
+
+#: openplotter:3333
+msgid "MQTT stopped"
+msgstr "MQTT parado"
+
+#: openplotter:3382
+msgid "multiple keys"
+msgstr "múltiples chaves"
+
+#: openplotter:3383
+msgid "multiple sources"
+msgstr "múltiples fontes"
+
+#: openplotter:3396 openplotter:3454
+msgid "Failed. Apply settings change."
+msgstr "Erro. Aplicar cambios de configuración."
+
+#: openplotter:3405
+msgid "Failed. You have to provide a name for the topic."
+msgstr "Erro. Debe indicar un nome para o tema."
+
+#: openplotter:3409
+msgid "Failed. Topics must contain only allowed characters."
+msgstr "Erro. Introduza só caracteres permitidos."
+
+#: openplotter:3415 openplotter:3421
+msgid "Failed. Topic name must be unique."
+msgstr "Erro. O nome do tema debe ser único."
+
+#: openplotter:3430
+msgid "Failed. You have to provide a Signal K key."
+msgstr "Erro. Debe indicar una chave Signal K."
+
+#: openplotter:3439
+msgid "Failed. You have to select a type for the topic."
+msgstr "Erro. Debe seleccionar un tipo para o tema."
+
+#: openplotter:3484
+msgid "Enter at least username and password."
+msgstr "Introduce alomenos o nome de usuario e contrasinal."
+
+#: openplotter:3502
+msgid "Settings and topics will be deleted. Are you sure?"
+msgstr "Vanse borrar as configuracións e os temas. Está seguro?"
+
+#: startup:82
+msgid "Starting OpenPlotter"
+msgstr "Iniciando OpenPlotter"
+
+#: startup:121
+msgid "Starting OpenPlotter. Please wait for all services to start."
+msgstr "Iniciando OpenPlotter. Espere a que tódolos servizos arrinquen, por favor."
+
+#: startup:146
+msgid "There are some warnings. Please close this window and check your system."
+msgstr "Rexistraronse algunhas advertencias. Por favor, peche esta fiestra e comprobe o seu sistema."
+
+#: startup:228
+msgid ""
+"\n"
+"Checking pi password..."
+msgstr ""
+"\n"
+"Comprobando o contrasinal pi..."
+
+#: startup:236
+msgid ""
+"\n"
+"\n"
+"Security warning: You are using the default password for \"pi\" user.\n"
+"Please change password in Menu > Preferences > Raspberry Pi Configuration."
+msgstr ""
+"\n"
+"\n"
+"Advertenza de seguridade: Está utilizando o contrasinal predeterminado para o usuario \"pi\".\n"
+"Por favor, cambieo no Menú > Preferencias > Axustes de Raspberry Pi."
+
+#: startup:237 startup:242 startup:255 startup:274 startup:279 startup:330
+#: startup:344 startup:356 startup:384 startup:389 startup:394 startup:419
+msgid " Done."
+msgstr " Feito."
+
+#: startup:240
+msgid ""
+"\n"
+"Applying "
+msgstr ""
+"\n"
+"Aplicando "
+
+#: startup:240
+msgid " seconds of delay..."
+msgstr " segundos de retraso..."
+
+#: startup:245
+msgid ""
+"\n"
+"Starting VNC..."
+msgstr ""
+"\n"
+"Iniciando VNC..."
+
+#: startup:249
+msgid ""
+"\n"
+"Checking VNC password..."
+msgstr ""
+"\n"
+"Comprobando se VNC dispón de contrasinal..."
+
+#: startup:252 startup:254
+msgid ""
+"\n"
+"\n"
+"Security warning: You have not set a password for VNC.\n"
+"Please set a password in OpenPlotter > Startup."
+msgstr ""
+"\n"
+"\n"
+"Advertenza de seguridade: Non configurou un contrasinal para VNC.\n"
+"Por favor, estableza un contrasinal en OpenPlotter > Inicio."
+
+#: startup:259
+msgid ""
+"\n"
+"Starting OpenCPN..."
+msgstr ""
+"\n"
+"Iniciando OpenCpn..."
+
+#: startup:268
+msgid ""
+"\n"
+"Starting WIFI Access Point..."
+msgstr ""
+"\n"
+"Iniciando punto de acceso wi-fi..."
+
+#: startup:271
+msgid ""
+"\n"
+"Starting WIFI Client..."
+msgstr ""
+"\n"
+"Iniciando cliente wi-fi..."
+
+#: startup:276
+msgid ""
+"\n"
+"checking WIFI Access Point password..."
+msgstr ""
+"\n"
+"comprobando contrasinal do punto de acceso wi-fi..."
+
+#: startup:278
+msgid ""
+"\n"
+"\n"
+"Security warning: You are using the default WIFI Access Point password.\n"
+"Please change password in OpenPlotter > WiFi AP."
+msgstr ""
+"\n"
+"\n"
+"Advertenza de seguridade. Esta usando o contrasinal por defecto do punto de aceso wi-fi. Por favor, cambéa en OpenPlotter > wifi AP."
+
+#: startup:288
+msgid ""
+"\n"
+"Starting SignalK Server..."
+msgstr ""
+"\n"
+"Iniciando servidor Signal K..."
+
+#: startup:297
+msgid ""
+"\n"
+"Start event SK to NMEA and action Server..."
+msgstr ""
+"\n"
+"Iniciar o evento SK a NMEA e o servidor de accións..."
+
+#: startup:299
+msgid ""
+"\n"
+"Start 1wire sensor Server (optional)..."
+msgstr ""
+"\n"
+"Iniciando o servidor de sensores de 1 cable (1W) (opcional)..."
+
+#: startup:301
+msgid ""
+"\n"
+"Start mqtt Server (optional)..."
+msgstr ""
+"\n"
+"Iniciar o servidor Mqtt (opcional)..."
+
+#: startup:303
+msgid ""
+"\n"
+"Start N2K send (optional)..."
+msgstr ""
+"\n"
+"Iniciar o envío N2K (opcional)..."
+
+#: startup:308
+msgid ""
+"\n"
+"Starting NMEA 0183 Multiplexer..."
+msgstr ""
+"\n"
+"Iniciando o multiplexor NMEA0183 (kplex)..."
+
+#: startup:315
+msgid ""
+"\n"
+"Starting Node-RED..."
+msgstr ""
+"\n"
+"Iniciando Node-RED..."
+
+#: startup:324
+msgid ""
+"\n"
+"Start I2C, SPI and GPIO Server (optional)..."
+msgstr ""
+"\n"
+"Iniciar I2C, SPI e mailo servidor GPIO (opcional)..."
+
+#: startup:328
+msgid ""
+"\n"
+"Getting system time from NMEA 0183..."
+msgstr ""
+"\n"
+"Actualizando a hora do sistema desde datos NMEA0183..."
+
+#: startup:335
+msgid ""
+"\n"
+"Starting SDR AIS reception..."
+msgstr ""
+"\n"
+"Iniciando a recepción de AIS a través de SDR..."
+
+#: startup:342
+msgid ""
+"\n"
+"Check 800x480 display..."
+msgstr ""
+"\n"
+"Comprobar resolución mínima de pantalla (800x400)..."
+
+#: startup:346
+msgid ""
+"\n"
+"Starting Tools..."
+msgstr ""
+"\n"
+"Iniciando ferramentas..."
+
+#: startup:359
+msgid ""
+"\n"
+"Checking OpenPlotter updates..."
+msgstr ""
+"\n"
+"Comprobando actualizacións de OpenPlotter..."
+
+#: startup:365
+msgid " It was not possible to connect to Github."
+msgstr " Non foi posible conectar con Github."
+
+#: startup:381
+msgid " Error reading versions."
+msgstr " Erro ao leer versións."
+
+#: startup:385
+msgid ""
+"\n"
+"\n"
+"There is a Raspbian upgrade, it is recommended to download\n"
+"the new OpenPlotter RPI image: v"
+msgstr ""
+"\n"
+"\n"
+"Dispón dunha actualización importante de OpenPlotter, recoméndase descargar a nova imaxe de OpenPlotter: v"
+
+#: startup:386 startup:391 startup:396
+msgid ""
+"\n"
+"See CHANGELOG:"
+msgstr ""
+"\n"
+"Ver a lista de cambios:"
+
+#: startup:390
+msgid ""
+"\n"
+"\n"
+"There is a major OpenPlotter update: "
+msgstr ""
+"\n"
+"\n"
+"Dispoñible unha actualización importante de OpenPlotter: "
+
+#: startup:395
+msgid ""
+"\n"
+"\n"
+"There is a minor OpenPlotter update: "
+msgstr ""
+"\n"
+"\n"
+"Dispoñible unha actualización menor de OpenPlotter: "
+
+#: startup:399
+msgid " is up to date."
+msgstr " está actualizado."
+
+#: startup:421
+msgid " Not Started."
+msgstr " Non iniciado."

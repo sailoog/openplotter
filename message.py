@@ -17,13 +17,15 @@
 
 import wx, sys
 from classes.language import Language
+from classes.conf import Conf
 
 text=sys.argv[1]
 lang=sys.argv[2]
 
 class MyFrame(wx.Frame):
 	def __init__(self, parent):
-		Language(lang)
+		conf = Conf()
+		Language(conf)
 		wx.Frame.__init__(self, parent)
 		dlg = wx.MessageDialog(self, text, _('Message'), wx.OK | wx.ICON_WARNING)
 		dlg.ShowModal()

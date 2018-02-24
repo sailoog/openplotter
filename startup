@@ -1,0 +1,471 @@
+#!/usr/bin/env python
+
+# This file is part of Openplotter.
+# Copyright (C) 2015 by sailoog <https://github.com/sailoog/openplotter>
+# 					  e-sailing <https://github.com/e-sailing/openplotter>
+# Openplotter is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# any later version.
+# Openplotter is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
+
+import wx, subprocess, time, os, threading, sys, platform, requests, ConfigParser, io
+from shutil import copyfile
+from classes.conf import Conf
+from classes.language import Language
+from classes.check_vessel_self import checkVesselSelf
+
+class MyFrame(wx.Frame):
+		
+	def __init__(self):
+
+		try:
+			self.conf = Conf()
+			self.home = self.conf.home
+			op_folder = self.conf.get('GENERAL', 'op_folder')
+			if not op_folder: 
+				op_folder = '/.config'
+				self.conf.set('GENERAL', 'op_folder', op_folder)
+			self.currentpath = self.home+op_folder+'/openplotter'
+		except:
+			self.home = os.path.expanduser('~')
+			if 'root' in self.home:
+				self.home = '/home/'+os.path.expanduser(os.environ["SUDO_USER"]) 
+			self.currentpath = os.path.dirname(os.path.realpath(__file__))
+			conf_file_path = self.home+'/.openplotter/openplotter.conf'
+			conf_file_directory = os.path.dirname(conf_file_path)
+			if not os.path.exists(conf_file_directory):
+				os.makedirs(conf_file_directory)
+			if not os.path.isfile(conf_file_path):
+				copyfile(self.currentpath+'/openplotter.conf', conf_file_path)
+			self.conf = Conf()
+			self.home = self.conf.home
+			op_folder = self.conf.get('GENERAL', 'op_folder')
+			if not op_folder: 
+				op_folder = '/.config'
+				self.conf.set('GENERAL', 'op_folder', op_folder)
+			self.currentpath = self.home+op_folder+'/openplotter'
+
+		sk_file_path = self.home+'/.openplotter/openplotter-settings.json'
+		if not os.path.isfile(sk_file_path):
+			copyfile(self.currentpath+'/OP-signalk/openplotter-settings.json', sk_file_path)
+		private_unit_file_path = self.home+'/.openplotter/private_unit.json'
+		if not os.path.isfile(private_unit_file_path):
+			copyfile(self.currentpath+'/classes/private_unit.json', private_unit_file_path)
+		sk_simulator_file_path = self.home+'/.openplotter/SK-simulator.conf'
+		if not os.path.isfile(sk_simulator_file_path):
+			copyfile(self.currentpath+'/tools/SK-simulator.conf', sk_simulator_file_path)
+		analog_file_path = self.home+'/.openplotter/openplotter_analog.conf'
+		if not os.path.isfile(analog_file_path):
+			copyfile(self.currentpath+'/tools/openplotter_analog.conf', analog_file_path)
+
+		if not os.path.exists(self.home+'/.openplotter/tools'):
+			os.makedirs(self.home+'/.openplotter/tools')
+		demo_tool_file_path = self.home+'/.openplotter/tools/demo_tool.py'
+		if not os.path.isfile(demo_tool_file_path):
+			copyfile(self.currentpath+'/tools/demo_tool.py', demo_tool_file_path)
+
+		Language(self.conf)
+
+		self.ttimer=100
+		self.logger_data=''
+		self.warnings_data=''
+		self.warnings_flag=False
+		self.autoclose=0
+		
+		wx.Frame.__init__(self, None, title=_('Starting OpenPlotter'), style=wx.STAY_ON_TOP, size=(650,435))
+		self.Bind(wx.EVT_CLOSE, self.OnClose)
+		panel = wx.Panel(self, wx.ID_ANY)		
+		
+		self.timer = wx.Timer(self)
+		self.Bind(wx.EVT_TIMER, self.refresh, self.timer)
+
+		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
+		
+		self.icon = wx.Icon(self.currentpath+'/openplotter.ico', wx.BITMAP_TYPE_ICO)
+		self.SetIcon(self.icon)
+
+		self.logger = wx.TextCtrl(panel, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_DONTWRAP|wx.LC_SORT_ASCENDING)
+		self.warnings = wx.TextCtrl(panel, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_DONTWRAP|wx.LC_SORT_ASCENDING)
+
+
+		self.button_close =wx.Button(panel, label=_('Close'), pos=(555, 160))
+		self.button_close.Bind(wx.EVT_BUTTON, self.OnClose_button)
+		self.button_close.Disable()
+		
+		htextbox = wx.BoxSizer(wx.HORIZONTAL)
+		htextbox.Add(self.logger, 1, wx.ALL|wx.EXPAND, 5)
+
+		hwarnbox = wx.BoxSizer(wx.HORIZONTAL)
+		hwarnbox.Add(self.warnings, 1, wx.ALL|wx.EXPAND, 5)
+
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(self.button_close, 0, wx.RIGHT|wx.LEFT, 5)
+
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		vbox.Add(htextbox, 1, wx.ALL|wx.EXPAND, 0)
+		vbox.Add(hwarnbox, 1, wx.ALL|wx.EXPAND, 0)
+		vbox.Add(hbox, 0, wx.ALL|wx.EXPAND, 0)	
+		panel.SetSizer(vbox)
+		
+		self.CreateStatusBar()
+		font_statusBar = self.GetStatusBar().GetFont()
+		font_statusBar.SetWeight(wx.BOLD)
+		self.GetStatusBar().SetFont(font_statusBar)
+		self.SetStatusText(_('Starting OpenPlotter. Please wait for all services to start.'))
+		self.Centre()
+		self.Show(True)
+
+		self.thread1=threading.Thread(target=self.starting)
+		if not self.thread1.isAlive(): self.thread1.start()
+
+		self.timer.Start(self.ttimer)
+		
+	def refresh(self,event):
+		if self.logger_data: 
+			self.logger.AppendText(self.logger_data)
+			self.logger_data=''
+		if self.warnings_data:
+			self.warnings_flag=True
+			self.warnings.AppendText(self.warnings_data)
+			self.warnings_data=''
+		if self.autoclose>0:
+			if self.autoclose<time.time():
+				self.destroy_window()
+		if not self.thread1.isAlive():
+			if not self.warnings_flag: self.destroy_window()
+			else: 
+				self.button_close.Enable()
+				self.GetStatusBar().SetForegroundColour(wx.RED)
+				self.SetStatusText(_('There are some warnings. Please close this window and check your system.'))
+			
+
+	def add_logger_data(self, msg):
+		while self.logger_data:
+			time.sleep(0.1)
+		self.logger_data=msg
+
+	def add_warnings_data(self, msg):
+		while self.warnings_data:
+			time.sleep(0.1)
+		self.warnings_data=msg
+		
+	def starting(self):
+		pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
+		exist=False
+
+		device = ''
+		ssid = ''
+		passw = ''
+		hw_mode = ''
+		channel = ''
+		wpa = ''
+		boot_ap = 0
+		bridge = ''
+		ip = ''
+		share = ''
+
+		for pid in pids:
+			try:
+				if 'signalk-server-node' in open(os.path.join('/proc', pid, 'cmdline'), 'rb').read():
+					exist=True
+			except IOError: # proc has already terminated
+				continue
+
+		if not exist:
+
+			wifi_server=self.conf.get('WIFI', 'enable')
+			wifi_server_pass=self.conf.get('WIFI', 'password')
+
+			delay=int(self.conf.get('STARTUP', 'delay'))
+
+			kplex=self.conf.get('STARTUP', 'kplex')
+			opencpn=self.conf.get('STARTUP', 'opencpn')
+			opencpn_no=self.conf.get('STARTUP', 'opencpn_no_opengl')
+			opencpn_fullscreen=self.conf.get('STARTUP', 'opencpn_fullscreen')
+			x11vnc=self.conf.get('STARTUP', 'x11vnc')
+			vnc_pass=self.conf.get('STARTUP', 'vnc_pass')
+			gps_time=self.conf.get('STARTUP', 'gps_time')
+			play=self.conf.get('STARTUP', 'play')
+			sound=self.conf.get('STARTUP', 'sound')
+			node_red=self.conf.get('STARTUP', 'node_red')
+			enable=self.conf.get('AIS-SDR', 'enable')
+			gain=self.conf.get('AIS-SDR', 'gain')
+			ppm=self.conf.get('AIS-SDR', 'ppm')
+			channel=self.conf.get('AIS-SDR', 'channel')
+
+			N2K_output=self.conf.get('N2K', 'output')
+
+			vl = self.conf.get('GENERAL', 'version')
+			sl = self.conf.get('GENERAL', 'state')
+			repository = self.conf.get('GENERAL', 'repository')
+			if not repository: 
+				repository = 'openplotter'
+				self.conf.set('GENERAL', 'repository', repository)
+
+			tools_py=[]
+			if self.conf.has_section('TOOLS'):
+				if self.conf.has_option('TOOLS', 'py'):
+					data=self.conf.get('TOOLS', 'py')
+					try:
+						temp_list=eval(data)
+					except:temp_list=[]
+					if type(temp_list) is list: pass
+					else:	temp_list=[]
+					for ii in temp_list:
+						tools_py.append(ii)
+			
+			#######################################################
+			subprocess.call(['pkill', '-f', '/openplotter/openplotter'])
+			
+			if platform.machine()[0:3]=='arm':
+				self.add_logger_data(_('\nChecking pi password...'))
+				out = subprocess.check_output(['sudo', '-n', 'grep', '-E', '^pi:', '/etc/shadow'])
+				tmp = out.split(':')
+				passw_a = tmp[1]
+				tmp = passw_a.split('$')
+				salt = tmp[2]
+				passw_b = subprocess.check_output(['mkpasswd', '-msha-512', 'raspberry', salt])
+				if passw_a.rstrip() == passw_b.rstrip():
+					self.add_warnings_data(_('\n\nSecurity warning: You are using the default password for "pi" user.\nPlease change password in Menu > Preferences > Raspberry Pi Configuration.'))
+				self.add_logger_data(_(' Done.'))
+
+			if delay!=0:
+				self.add_logger_data(_('\nApplying ').decode('utf8')+str(delay)+_(' seconds of delay...').decode('utf8'))
+				time.sleep(delay)
+				self.add_logger_data(_(' Done.'))
+
+			if x11vnc=='1' and not util_process_exist('x11vnc'):
+				self.add_logger_data(_('\nStarting VNC...'))
+				if vnc_pass=='1': process = subprocess.Popen(['x11vnc', '-forever', '-shared', '-usepw'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+				else: process = subprocess.Popen(['x11vnc', '-forever', '-shared' ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+				self.check_start('x11vnc')
+				self.add_logger_data(_('\nChecking VNC password...'))
+				if vnc_pass=='1':
+					try: out = subprocess.check_output(['cat', self.home+'/.vnc/passwd'])
+					except: self.add_warnings_data(_('\n\nSecurity warning: You have not set a password for VNC.\nPlease set a password in OpenPlotter > Startup.'))
+				else: 
+					self.add_warnings_data(_('\n\nSecurity warning: You have not set a password for VNC.\nPlease set a password in OpenPlotter > Startup.'))
+				self.add_logger_data(_(' Done.'))
+
+			subprocess.call(['pkill', '-9', 'opencpn'])
+			if opencpn=='1':
+				self.add_logger_data(_('\nStarting OpenCPN...'))
+				opencpn_commands = ['opencpn']
+				if opencpn_no=='1': opencpn_commands.append('-no_opengl')
+				if opencpn_fullscreen=='1': opencpn_commands.append('-fullscreen')
+				if len(opencpn_commands)>1: subprocess.Popen(opencpn_commands)
+				if len(opencpn_commands)==1: subprocess.Popen('opencpn')
+				self.check_start('opencpn')
+
+			if wifi_server == '1':
+				self.add_logger_data(_('\nStarting WIFI Access Point...'))
+				process = subprocess.Popen(['sudo', 'python', self.currentpath+'/wifi_server.py', '1'])
+			else:
+				self.add_logger_data(_('\nStarting WIFI Client...'))
+				process = subprocess.Popen(['sudo', 'python', self.currentpath+'/wifi_server.py', '0'])
+			process.wait()
+			self.add_logger_data(_(' Done.'))
+			if wifi_server == '1':
+				self.add_logger_data(_('\nchecking WIFI Access Point password...'))
+				if wifi_server_pass=='12345678':
+					self.add_warnings_data(_('\n\nSecurity warning: You are using the default WIFI Access Point password.\nPlease change password in OpenPlotter > WiFi AP.'))
+				self.add_logger_data(_(' Done.'))
+
+			subprocess.call(['pkill', '-f', 'mqtt_d.py'])
+			subprocess.Popen(['python', self.currentpath+'/mqtt_d.py'])
+
+			subprocess.call(['pkill', '-f', '1w_d.py'])
+			subprocess.Popen(['python', self.currentpath+'/1w_d.py'])
+
+			subprocess.call(["pkill", '-f', "signalk-server"])
+			self.add_logger_data(_('\nStarting SignalK Server...'))
+			vessel_self=checkVesselSelf(self.conf)
+
+			subprocess.call(['pkill', '-f', 'diagnostic-N2K-output.py'])
+			subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
+			if N2K_output == '1':
+				subprocess.Popen(['python', self.currentpath+'/N2K-server_d.py'])
+
+			self.check_start('signalk-server')
+			self.add_logger_data(_('\nStart event SK to NMEA and action Server...'))
+			self.check_start('SK-base_d.py')
+			self.add_logger_data(_('\nStart 1wire sensor Server (optional)...'))
+			self.check_start('1w_d.py')
+			self.add_logger_data(_('\nStart mqtt Server (optional)...'))
+			self.check_start('mqtt_d.py')
+			self.add_logger_data(_('\nStart N2K send (optional)...'))
+			self.check_start('N2K-server_d.py')
+			
+			subprocess.call(['pkill', '-9', 'kplex'])
+			if kplex=='1':
+				self.add_logger_data(_('\nStarting NMEA 0183 Multiplexer...'))
+				subprocess.Popen('kplex')
+				self.check_start('kplex')
+
+			if util_process_exist('node-red'):
+				subprocess.call('node-red-stop')
+			if node_red=='1':
+				self.add_logger_data(_('\nStarting Node-RED...'))
+				try: 
+					subprocess.Popen('node-red-start')
+					self.check_start('node-red')
+				except: pass
+
+			subprocess.call(['pkill', '-f', 'read_sensors_d.py'])
+			subprocess.Popen(['python', self.currentpath+'/read_sensors_d.py'], cwd=self.home + '/.pypilot')
+
+			self.add_logger_data(_('\nStart I2C, SPI and GPIO Server (optional)...'))
+			self.check_start('read_sensors_d.py')
+
+			if gps_time=='1':
+				self.add_logger_data(_('\nGetting system time from NMEA 0183...'))
+				subprocess.call(['sudo', 'python', self.currentpath+'/time_gps.py'])
+				self.add_logger_data(_(' Done.'))
+
+			subprocess.call(['pkill', '-9', 'aisdecoder'])
+			subprocess.call(['pkill', '-9', 'rtl_fm'])
+			if enable=='1':
+				self.add_logger_data(_('\nStarting SDR AIS reception...'))
+				frecuency='161975000'
+				if channel=='b': frecuency='162025000'
+				rtl_fm=subprocess.Popen(['rtl_fm', '-f', frecuency, '-g', gain, '-p', ppm, '-s', '48k'], stdout = subprocess.PIPE)
+				aisdecoder=subprocess.Popen(['aisdecoder', '-h', 'localhost', '-p', '10110', '-a', 'file', '-c', 'mono', '-d', '-f', '/dev/stdin'], stdin = rtl_fm.stdout)
+				self.check_start('aisdecoder')
+
+			self.add_logger_data(_('\nCheck 800x480 display...'))
+			subprocess.call(['sudo', 'python', self.currentpath+'/display800x480.py'])
+			self.add_logger_data(_(' Done.'))
+
+			self.add_logger_data(_('\nStarting Tools...'))
+			index=0
+			for i in tools_py:
+				if i[3]=='1':
+					subprocess.call(['pkill', '-9', tools_py[index][2]])
+					if os.path.isfile(self.home+'/.openplotter/tools/'+tools_py[index][2]):
+						subprocess.Popen(['python',self.home+'/.openplotter/tools/'+tools_py[index][2]])
+					else:
+						subprocess.Popen(['python',self.currentpath+'/tools/'+tools_py[index][2]])	
+				index+=1
+			self.add_logger_data(_(' Done.'))
+			self.autoclose=time.time() + 60
+
+			self.add_logger_data(_('\nChecking OpenPlotter updates...'))
+			if sl == 'stable': remote_branch = 'master'
+			else: remote_branch = 'beta'
+			try:
+				r = requests.get('https://raw.githubusercontent.com/'+repository+'/openplotter/'+remote_branch+'/openplotter.conf')
+			except:
+				self.add_logger_data(_(' It was not possible to connect to Github.'))
+			else:
+				try:
+					data_conf = ConfigParser.SafeConfigParser()
+					data_conf.readfp(io.StringIO(r.text))
+					vr = data_conf.get('GENERAL','version')
+					sr = data_conf.get('GENERAL','state')
+					vr_list = vr.split('.')
+					vl_list = vl.split('.')
+					remote_xxx = int(vr_list[0])
+					remote_oxx = int(vr_list[1])
+					remote_oox = int(vr_list[2])
+					local_xxx = int(vl_list[0])
+					local_oxx = int(vl_list[1])
+					local_oox = int(vl_list[2])
+				except:
+					self.add_logger_data(_(' Error reading versions.'))
+				else:
+					if remote_xxx > local_xxx:
+						self.add_logger_data(_(' Done.'))
+						self.add_warnings_data(_('\n\nThere is a Raspbian upgrade, it is recommended to download\nthe new OpenPlotter RPI image: v').decode('utf8')+str(remote_xxx)+'.x.x '+sr+'.')
+						self.add_warnings_data(_('\nSee CHANGELOG:'))
+						self.add_warnings_data('\nhttps://raw.githubusercontent.com/'+repository+'/openplotter/'+remote_branch+'/CHANGELOG.md\n')
+					elif remote_oxx > local_oxx:
+						self.add_logger_data(_(' Done.'))
+						self.add_warnings_data(_('\n\nThere is a major OpenPlotter update: ').decode('utf8')+vl+' '+sl+' --> '+vr+' '+sr+'.')
+						self.add_warnings_data(_('\nSee CHANGELOG:'))
+						self.add_warnings_data('\nhttps://raw.githubusercontent.com/'+repository+'/openplotter/'+remote_branch+'/CHANGELOG.md\n')
+					elif remote_oox > local_oox:
+						self.add_logger_data(_(' Done.'))
+						self.add_warnings_data(_('\n\nThere is a minor OpenPlotter update: ').decode('utf8')+vl+' '+sl+' --> '+vr+' '+sr+'.')
+						self.add_warnings_data(_('\nSee CHANGELOG:'))
+						self.add_warnings_data('\nhttps://raw.githubusercontent.com/'+repository+'/openplotter/'+remote_branch+'/CHANGELOG.md\n')
+					else:
+						self.add_logger_data(' OpenPlotter '+vl+' '+sl+_(' is up to date.').decode('utf8'))
+
+			subprocess.call(['pkill', '-9', 'mpg123'])
+			if play=='1':
+				if sound:
+					try: subprocess.Popen(['mpg123', '-q', sound])
+					except: pass
+
+	def OnClose(self, event):
+		pass
+
+	def OnClose_button(self, event):
+		self.destroy_window()
+
+	def destroy_window(self):
+		self.timer.Stop()
+		self.Destroy()
+
+	def check_start(self,process):
+		if util_process_exist(process):
+			self.add_logger_data(_(' Done.'))
+		else:
+			self.add_logger_data(_(' Not Started.'))				
+		
+		
+def util_process_exist(process_name):
+	pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
+	exist = False
+	for pid in pids:
+		try:
+			if process_name in open(os.path.join('/proc', pid, 'cmdline'), 'rb').read():
+				exist = True
+		except IOError:  # proc has already terminated
+			continue
+	return exist	
+						
+if len(sys.argv)>1:
+	if sys.argv[1]=='stop':
+		subprocess.call(['pkill', '-9', 'opencpn'])
+		subprocess.call(['pkill', '-9', 'kplex'])
+		subprocess.call(['pkill', '-f', 'signalk-server'])
+		if util_process_exist('node-red'):
+			subprocess.call('node-red-stop')
+		subprocess.call(['pkill', '-9', 'aisdecoder'])
+		subprocess.call(['pkill', '-9', 'rtl_fm'])
+		subprocess.call(['pkill', '-f', '1w_d.py'])
+		subprocess.call(['pkill', '-f', 'read_sensors_d.py'])
+		subprocess.call(['pkill', '-f', 'mqtt_d.py'])
+		subprocess.call(['pkill', '-f', 'SK-base_d.py'])
+		subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
+		subprocess.call(['pkill', '-f', '/openplotter/openplotter'])
+		subprocess.call(['killall', 'diagnostic-'])
+		
+	elif sys.argv[1]=='restart':
+		subprocess.call(['pkill', '-f', 'signalk-server'])
+		app = wx.App()
+		MyFrame().Show()
+		app.MainLoop()
+	elif sys.argv[1]=='-h':
+		print('This is a part of OpenPlotter software')
+		print('It starts all needed server/services/background processes')
+		print('Options are:')
+		print('startup            (does only run on X display desktop)')
+		print('startup restart    (does only run on X display desktop)')
+		print('startup stop')
+		print('this: startup -h')
+
+else:
+	if not util_process_exist('signalk-server'):
+		app = wx.App()
+		MyFrame().Show()
+		app.MainLoop()
+	
