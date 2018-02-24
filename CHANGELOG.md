@@ -1,3 +1,7 @@
+v0.17.1
+* Marking as stable
+* Ready for new upgrade v1.x.x
+
 v0.17.0
 * Fix calculate issues
 * Add suport for latest signal k versions

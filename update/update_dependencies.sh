@@ -1,11 +1,19 @@
 #!/bin/bash
-repository=$4
+status=$3
 op_folder=$(crudini --get ~/.openplotter/openplotter.conf GENERAL op_folder)
-if [ -z $repository ]; then
-	repository="openplotter"
+
+if [ -z $status ]; then
+	status="stable"
 fi
+
 if [ -z $op_folder ]; then
 	op_folder="/.config"
+fi
+
+if [ $status = "stable" ]; then
+	repository="openplotter"
+else
+	repository="sailoog"
 fi
 
 cd $HOME$op_folder

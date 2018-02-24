@@ -57,8 +57,7 @@ echo
 rm -rf openplotter
 rm -rf $DIRDATE
 mv openplotter_tmp openplotter
-shutdown -r +1
 echo
-read -p "FINISHED, SYSTEM WILL REBOOT IN 1 MIN, PRESS ENTER TO REBOOT NOW."
+read -p "FINISHED, PRESS ENTER TO REBOOT SYSTEM."
 shutdown -r now
 
