@@ -157,12 +157,12 @@ def work_pypilot():
                 
 
         # cleanup
+        print 'stopping pypilot pid:', pid
         try:
-                print 'stopping pypilot pid:', pid
                 os.kill(pid, 15)
                 time.sleep(1) # wait one second to shut down pypilot
-        except:
-                print 'exception stopping pypilot'
+        except Exception, e:
+                print 'exception stopping pypilot', e
 
         try:
                 if os.waitpid(pid, os.WNOHANG)[0] == pid:

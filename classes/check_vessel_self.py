@@ -31,7 +31,7 @@ class checkVesselSelf:
 			print 'Signal K starting'
 			subprocess.call(['pkill', '-f', 'SK-base_d.py'])
 			time.sleep(1)
-			subprocess.Popen(['bin/signalk-server','-c',home+'/.openplotter','-s','openplotter-settings.json'],cwd=home+op_folder+'/signalk-server-node')
+			subprocess.Popen(['bin/signalk-server','-c',home+'/.openplotter','-s','openplotter-settings.json'],cwd=currentpath+'/signalk-server-node')
 			starttime = time.time()
 			error = True
 			while starttime + 10 > time.time() and error:
@@ -41,7 +41,7 @@ class checkVesselSelf:
 					response = requests.get('http://localhost:3000/signalk/v1/api/vessels/self')
 				except:
 					error = True
-			subprocess.Popen(['python', currentpath + '/SK-base_d.py'])
+			subprocess.Popen(['python', op_folder + '/SK-base_d.py'])
 			time.sleep(1)									
 		try:
 			with open(home+'/.openplotter/openplotter-settings.json') as data_file:
