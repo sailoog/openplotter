@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openplotter\n"
 "POT-Creation-Date: 2017-10-08 13:31+0200\n"
-"PO-Revision-Date: 2017-11-25 14:14+0100\n"
+"PO-Revision-Date: 2018-02-26 20:08+0100\n"
 "Last-Translator: sailoog <info@sailoog.com>\n"
 "Language-Team: French\n"
 "Language: fr\n"
@@ -153,7 +153,7 @@ msgstr "a été mis à jour dans les dernières (secondes)"
 
 #: SK-base_d.py:528 openplotter:2346
 msgid "contains"
-msgstr ""
+msgstr "contient"
 
 #: add_tool10.py:23
 msgid "Standalone tool"
@@ -425,11 +425,11 @@ msgstr "convertir"
 
 #: classes/add_MCP.py:148 openplotter:1980
 msgid "minimum raw value in setting table > 0"
-msgstr ""
+msgstr "dans la table en cours de saisie, la plus petite valeur doit être >0"
 
 #: classes/add_MCP.py:151 openplotter:1983
 msgid "maximum raw value in setting table < 1023"
-msgstr ""
+msgstr "dans la table en cours de saisie, la plus grande valeur doit être < 1023"
 
 #: classes/add_MCP.py:154
 msgid "no option value "
@@ -437,7 +437,7 @@ msgstr ""
 
 #: classes/add_MCP.py:154
 msgid " in openplotter.conf"
-msgstr ""
+msgstr " dans openplotter.conf"
 
 #: classes/add_NMEA_0183.py:27
 msgid "add NMEA 0183 sentence"
@@ -908,7 +908,7 @@ msgstr ""
 
 #: classes/add_topic.py:31 openplotter:3260
 msgid "Topic"
-msgstr ""
+msgstr "Sujet"
 
 #: classes/add_topic.py:35 classes/add_topic.py:53 openplotter:3373
 #: openplotter:3424
@@ -1003,7 +1003,7 @@ msgstr "non groupé"
 
 #: classes/select_key.py:23
 msgid "Select Signal K key"
-msgstr ""
+msgstr "Sélectionnez une clé Signal K"
 
 #: classes/select_key.py:38
 msgid "Groups"
@@ -1062,11 +1062,11 @@ msgstr "Pause"
 
 #: diagnostic-NMEA.py:62
 msgid "Sort"
-msgstr ""
+msgstr "Trier"
 
 #: diagnostic-NMEA.py:108
 msgid "connected to:"
-msgstr ""
+msgstr "connecté à:"
 
 #: diagnostic-NMEA.py:110
 msgid "Failed to connect with localhost:10113. Error: "
@@ -1106,7 +1106,7 @@ msgstr "unité privée"
 
 #: diagnostic-SK-input.py:86
 msgid "Unit Setting"
-msgstr ""
+msgstr "Réglage de l’unité"
 
 #: message.py:30
 msgid "Message"
@@ -1443,11 +1443,11 @@ msgstr "Annuler"
 
 #: tools/calculate.py:193
 msgid "You have to provide rate and accuracy values for magnetic variation"
-msgstr ""
+msgstr "Vous devez fournir des valeurs de taux et de précision pour la déclinaison magnétique"
 
 #: tools/calculate.py:207
 msgid "You have to provide rate and accuracy values for true heading"
-msgstr ""
+msgstr "Vous devez fournir des valeurs de taux et de précision pour le Cap vrai"
 
 #: tools/calculate.py:219
 msgid "You have to provide rate and accuracy values for rate of turn"
@@ -1591,11 +1591,11 @@ msgstr "Outils"
 
 #: openplotter:175
 msgid "Basque"
-msgstr ""
+msgstr "Basque"
 
 #: openplotter:175
 msgid "Set Basque language"
-msgstr ""
+msgstr "Langue : Basque"
 
 #: openplotter:177
 msgid "Catalan"
@@ -1631,11 +1631,11 @@ msgstr "Langue: Français"
 
 #: openplotter:185
 msgid "Galician"
-msgstr ""
+msgstr "Galicien"
 
 #: openplotter:185
 msgid "Set Galician language"
-msgstr ""
+msgstr "Langue : Galicien"
 
 #: openplotter:187
 msgid "German"
@@ -1683,11 +1683,11 @@ msgstr "Mise à jour des modules d'OpenCPN vers la dernière version stable"
 
 #: openplotter:201
 msgid "Set default OpenPlotter desktop"
-msgstr ""
+msgstr "Sélectionne le bureau OpenPlotter défaut"
 
 #: openplotter:201
 msgid "Run this after a major update"
-msgstr ""
+msgstr "A exécuter après une mise à jour majeure"
 
 #: openplotter:204
 msgid "Update OpenPlotter"
@@ -1739,17 +1739,19 @@ msgstr "Il n’était pas possible de se connecter à Github."
 
 #: openplotter:444 openplotter:465
 msgid "Error reading versions."
-msgstr ""
+msgstr "Erreur de version."
 
 #: openplotter:470
 msgid ""
 "You are running a stable version. If you update to a non stable version you will have to keep updating until a stable stage is reached again.\n"
 "\n"
 msgstr ""
+"Vous exécutez une version stable. Si vous mettez à jour vers une version non stable, vous devrez alors continuer les mises à jour jusqu'à ce qu’une version stable soit de nouveau atteinte.\n"
+"\n"
 
 #: openplotter:472
 msgid "There is a Raspbian upgrade, it is recommended to download the new OpenPlotter RPI image: v"
-msgstr ""
+msgstr "Il y a une mise à jour de Raspbian, il est recommandé de télécharger la nouvelle image de Openplotter RPI : v"
 
 #: openplotter:476
 msgid "There is a major OpenPlotter update.\n"
@@ -1801,7 +1803,7 @@ msgstr ""
 
 #: openplotter:617
 msgid "Error: USB-Port with vendor product number: \""
-msgstr ""
+msgstr "Erreur : Port USB avec le numéro de produit fournisseur : »"
 
 #: openplotter:643
 msgid "Delay (seconds)"
@@ -1901,7 +1903,7 @@ msgstr "Mode"
 
 #: openplotter:872 openplotter:909 openplotter:994
 msgid "Both"
-msgstr ""
+msgstr "Les deux"
 
 #: openplotter:875
 msgid "WPA"
@@ -2004,12 +2006,16 @@ msgid ""
 "\n"
 " node-red:\n"
 msgstr ""
+"\n"
+"node-red :\n"
 
 #: openplotter:1075
 msgid ""
 "\n"
 " MQTT local broker:\n"
 msgstr ""
+"\n"
+"MQTT local broker :\n"
 
 #: openplotter:1185
 msgid " IMU "
@@ -2021,7 +2027,7 @@ msgstr "IMU détecté:"
 
 #: openplotter:1190
 msgid "None"
-msgstr ""
+msgstr "Aucun"
 
 #: openplotter:1192
 msgid "Rate (secons)"
@@ -2162,7 +2168,7 @@ msgstr "Capteurs arrêtés"
 
 #: openplotter:1904
 msgid " SPI MCP3008 "
-msgstr ""
+msgstr " SPI MCP3008 "
 
 #: openplotter:1908
 msgid "channel"
@@ -2174,11 +2180,11 @@ msgstr "réglage de la valeur"
 
 #: openplotter:1989
 msgid "convert disabled"
-msgstr ""
+msgstr "conversion indisponible"
 
 #: openplotter:2004
 msgid "Failed. Provide name and Signal K values."
-msgstr ""
+msgstr "Échec. Fournir nom et valeur Signal K."
 
 #: openplotter:2009 openplotter:2146
 msgid "Failed. The name must contain only letters and numbers."
@@ -2276,7 +2282,7 @@ msgstr "Erreur. Sélectionnez valeur, un horodatage ou une source."
 
 #: openplotter:2423 openplotter:2641
 msgid "Failed. Select a Signal K key."
-msgstr ""
+msgstr "Echec. Sélectionnez une clé Signal K."
 
 #: openplotter:2462
 msgid "Select a trigger to add actions."
@@ -2399,7 +2405,7 @@ msgstr " Sorties "
 #: openplotter:2895 openplotter:2940 openplotter:2955 openplotter:2966
 #: openplotter:2975
 msgid "You have to select a CAN-USB-CAN device"
-msgstr ""
+msgstr "Vous devez sélectionner un périphérique CAN-USB-CAN"
 
 #: openplotter:2961
 msgid "Select PGNs to transmit and enable N2K input/output again."
@@ -2801,6 +2807,9 @@ msgid ""
 "There is a Raspbian upgrade, it is recommended to download\n"
 "the new OpenPlotter RPI image: v"
 msgstr ""
+"\n"
+"\n"
+"Une mise à jour de Raspbian est disponible, il est recommandé de télécharger la nouvelle image de Openplotter RPI: v"
 
 #: startup:386 startup:391 startup:396
 msgid ""
@@ -2814,6 +2823,9 @@ msgid ""
 "\n"
 "There is a major OpenPlotter update: "
 msgstr ""
+"\n"
+"\n"
+"Une mise à jour majeure d'OpenPlotter est disponible: "
 
 #: startup:395
 msgid ""
@@ -2821,10 +2833,13 @@ msgid ""
 "\n"
 "There is a minor OpenPlotter update: "
 msgstr ""
+"\n"
+"\n"
+"Une mise à jour mineur d'OpenPlotter est disponible: "
 
 #: startup:399
 msgid " is up to date."
-msgstr ""
+msgstr " est à jour."
 
 #: startup:421
 msgid " Not Started."
