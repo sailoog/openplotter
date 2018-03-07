@@ -25,7 +25,6 @@ from classes.actions import Actions
 from classes.add_MCP import addMCP
 from classes.add_i2c import addI2c
 from classes.edit_i2c import editI2c
-from classes.add_Serialinst import addSerialinst
 from classes.add_action import addAction
 from classes.add_gpio import addGPIO
 from classes.add_kplex import addkplex
@@ -2692,14 +2691,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	####################### Serial manager
 	def page_serial(self):
 		self.list_Serialinst = wx.ListCtrl(self.p_serial, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
-		self.list_Serialinst.InsertColumn(0, _('name'), width=130)
-		self.list_Serialinst.InsertColumn(1, _('device'), width=130)
+		self.list_Serialinst.InsertColumn(0, _('name'), width=100)
+		self.list_Serialinst.InsertColumn(1, _('device'), width=90)
 		self.list_Serialinst.InsertColumn(2, _('vendor'), width=55)
 		self.list_Serialinst.InsertColumn(3, _('product'), width=60)
 		self.list_Serialinst.InsertColumn(4, _('port'), width=90)
-		self.list_Serialinst.InsertColumn(5, _('serial'), width=130)
-		self.list_Serialinst.InsertColumn(6, _('assignment'), width=130)
-		self.list_Serialinst.InsertColumn(7, _('remember'), width=100)
+		self.list_Serialinst.InsertColumn(5, _('serial'), width=90)
+		self.list_Serialinst.InsertColumn(6, _('assignment'), width=90)
+		self.list_Serialinst.InsertColumn(7, _('remember'), width=90)
 		self.list_Serialinst.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_SerialinstSelected)
 
 		hlistbox = wx.BoxSizer(wx.HORIZONTAL)
@@ -2749,17 +2748,15 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
                 self.on_refresh_Serialinst()
 
         def on_refresh_Serialinst(self, e=0):
-		self.Serialinst = []
 		self.list_Serialinst.DeleteAllItems()
 
                 data = self.conf.get('UDEV', 'Serialinst')
 		try:
-			temp_list = eval(data)
+			self.Serialinst = eval(data)
 		except:
-			temp_list = []
+			self.Serialinst = {}
 
 		sentence = 0
-
 
 		try:
 			self.context
@@ -2804,15 +2801,16 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
                         remember = ''
 
                         
-                        for ii in temp_list:
+                        for n in self.Serialinst:
+                                ii = self.Serialinst[n]
                                 if ii['remember'] == 'port' and ii['port'] == port:
                                         if ii['vendor'] != vendor_id or ii['product'] != model_id or ii['serial'] != serial:
                                                 self.ShowMessage(_('Warning: You have connected the "').decode('utf8') + vendor_id + ', ' + model_id + _('" to the usb port which is reserved for another device').decode('utf8'))
                                 elif ii['remember'] != 'dev' or ii['vendor'] != vendor_id or ii['product'] != model_id or ii['serial'] != serial:
                                         continue
                                 remember = ii['remember']
-                                name = ii['name']
                                 assignment = ii['assignment']
+                                name = n
 
                         l = [name, i, vendor_id, model_id, port, serial, assignment, remember]
 			self.list_Serialinst.Append(map(lambda x : x.decode('utf8'), l))
@@ -2870,32 +2868,50 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
                                         
 	def apply_changes_Serialinst(self, ind=-1):
                 # read values back from list control
-                Serialinst = []
+                cur_name = ''
+                names = [] # determine if duplicate names are used
                 for i in range(self.list_Serialinst.GetItemCount()):
                         ii = {}
                         cols = ['name', 'device', 'vendor', 'product', 'port', 'serial', 'assignment', 'remember']
                         for j in range(len(cols)):
                                 ii[cols[j]] = self.list_Serialinst.GetItemText(i, j)
-                        if not ii['name']:
+                        name = ii['name']
+                        if not name:
                                 continue
-                        if i == ind:
-                                ind = len(Serialinst)
-                        Serialinst.append(ii)
+                        if i == ind: # this is the index of the currently updated item
+                                cur_name = name
+                        del ii['name'] # no need to store the name as it is the key
+                        if name in names:
+                                self.ShowMessage(_('Error:  Same name used for multiple devices'))
+                                if i != ind: # replace only if selected
+                                        continue
+
+                        names.append(name)
+                        self.Serialinst[name] = ii
                 
                 # make sure there are not two ports with the same product/vendor that
-                if ind >= 0 and Serialinst[ind]['remember'] != 'port' and not 'serial' in Serialinst[ind]['port']:
-                        for ii in range(len(Serialinst)):
-                                if ii != ind and \
-                                   Serialinst[ii]['vendor'] == Serialinst[ind]['vendor'] and \
-                                   Serialinst[ii]['product'] == Serialinst[ind]['product'] and \
-                                   Serialinst[ii]['serial'] == Serialinst[ind]['serialp']:
-                                        self.ShowMessage(_('Error: USB-Port with duplicate vendor product must be set to "Remember port"'))
-                                        return
+                if cur_name and self.Serialinst[cur_name]['remember'] == 'dev':
+                        for name in self.Serialinst:
+                                if name != cur_name and \
+                                   self.Serialinst[name]['vendor'] == self.Serialinst[cur_name]['vendor'] and \
+                                   self.Serialinst[name]['product'] == self.Serialinst[cur_name]['product'] and \
+                                   self.Serialinst[name]['serial'] == self.Serialinst[cur_name]['serial']:
+                                        self.ShowMessage(_('Warning: USB-Port with duplicate vendor product must be set to "Remember port"'))
+                                        del self.Serialinst[name] # remove duplicate
+                                        break
+                # do not allow entrees with the same port and different name
+                if cur_name and self.Serialinst[cur_name]['remember'] == 'port':
+                        for name in self.Serialinst:
+                                if name != cur_name and \
+                                   self.Serialinst[name]['port'] == self.Serialinst[cur_name]['port']:
+                                        del self.Serialinst[name] # remove duplicate
+                                        break
 
-		self.conf.set('UDEV', 'Serialinst', str(Serialinst))
+		self.conf.set('UDEV', 'Serialinst', str(self.Serialinst))
 
 		file = open('10-openplotter.rules', 'w')
-		for i in Serialinst:
+		for name in self.Serialinst:
+                        i = self.Serialinst[name]
 			if 'port' == i['remember']: # non-usb serial
 				write_str = 'KERNEL=="' + i['device'][5:-1] + '*", KERNELS=="' + i['port']
 			else:
@@ -2903,13 +2919,16 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
                                 write_str += '",ATTRS{idProduct}=="' + i['product']
                                 if i['serial'] != '':
 					write_str += '",ATTRS{serial}=="' + i['serial']
-                        write_str += '",SYMLINK+="ttyOP_' + i['name'] + '"\n'
+                        write_str += '",SYMLINK+="ttyOP_' + name + '"\n'
 
 			file.write(write_str)
 		file.close()
 		test = 0
 		test = os.system('sudo mv 10-openplotter.rules /etc/udev/rules.d')
 
+		self.ShowStatusBarRED(_('Restarting ...'))
+		self.start_udev()
+                
                 # write gpsd config
                 file = open('/etc/default/gpsd', 'r')
                 file1 = open('gpsd', 'w')
@@ -2919,9 +2938,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
                                 break
                         if line[:9] == 'DEVICES="':
                                 file1.write('DEVICES="')
-                                for i in Serialinst:
-                                        if i['assignment'] == 'gpsd':
-                                                port = '/dev/ttyOP_' + i['name']
+                                for name in self.Serialinst:
+                                        if self.Serialinst[name]['assignment'] == 'gpsd':
+                                                port = '/dev/ttyOP_' + name
                                                 file1.write(port + ' ')
                                 file1.write('"\n')
                         else:
@@ -2931,15 +2950,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
                 # write pypilot allowed ports
                 file = open('pypilot_serial_ports', 'w')
-                for i in Serialinst:
-                        if i['assignment'] == 'pypilot':
-                                port = '/dev/ttyOP_' + i['name']
+                for name in self.Serialinst:
+                        if self.Serialinst[name]['assignment'] == 'pypilot':
+                                port = '/dev/ttyOP_' + name
                                 file.write(port + '\n')
                                 os.system('sudo chown pi ' + port) # set permissions
                 file.close()
 
-		self.ShowStatusBarRED(_('Restarting ...'))
-		self.start_udev()
                 if os.system('diff gpsd /etc/default/gpsd > /dev/null'):
                         # only restart gpsd if changed
                         print 'gpsd changed'
