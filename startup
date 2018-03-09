@@ -28,11 +28,7 @@ class MyFrame(wx.Frame):
 		try:
 			self.conf = Conf()
 			self.home = self.conf.home
-			op_folder = self.conf.get('GENERAL', 'op_folder')
-			if not op_folder: 
-				op_folder = '/.config'
-				self.conf.set('GENERAL', 'op_folder', op_folder)
-			self.currentpath = self.home+op_folder+'/openplotter'
+			self.currentpath = self.conf.get('GENERAL', 'op_folder')
 		except:
 			self.home = os.path.expanduser('~')
 			if 'root' in self.home:
@@ -46,11 +42,7 @@ class MyFrame(wx.Frame):
 				copyfile(self.currentpath+'/openplotter.conf', conf_file_path)
 			self.conf = Conf()
 			self.home = self.conf.home
-			op_folder = self.conf.get('GENERAL', 'op_folder')
-			if not op_folder: 
-				op_folder = '/.config'
-				self.conf.set('GENERAL', 'op_folder', op_folder)
-			self.currentpath = self.home+op_folder+'/openplotter'
+			self.currentpath = self.conf.get('GENERAL', 'op_folder')
 
 		sk_file_path = self.home+'/.openplotter/openplotter-settings.json'
 		if not os.path.isfile(sk_file_path):

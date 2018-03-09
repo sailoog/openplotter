@@ -19,11 +19,27 @@ import ConfigParser, os
 class Conf:
 	def __init__(self):
 		self.home = os.path.expanduser('~')
+		self.data_conf = ConfigParser.SafeConfigParser()
 		if 'root' in self.home:
 			self.home = '/home/'+os.path.expanduser(os.environ["SUDO_USER"])
 		self.conf_folder = self.home+'/.openplotter'
-		self.data_conf = ConfigParser.SafeConfigParser()
-		self.read()
+                if not os.path.exists(self.conf_folder):
+                        print 'creating configuration directory', self.conf_folder
+                        os.mkdir(self.conf_folder)
+
+                conf_file = self.conf_folder+'/openplotter.conf'
+                if not os.path.exists(conf_file):
+                        # setup config if it doesn't exist
+                        print 'openplotter.conf not found, copying default'
+                        import shutil
+                        shutil.copy(self.conf_folder+'/openplotter.conf', conf_file)
+                self.read()
+                op_folder = self.get('GENERAL', 'op_folder')
+                if not os.path.exists(op_folder):
+                        print 'op_folder:', op_folder, 'invalid'
+                        op_folder = os.path.normpath(os.path.dirname(os.path.abspath(__file__))+'/..')
+                        print 'resetting op_folder to', op_folder
+                        self.set('GENERAL', 'op_folder', op_folder)
 
 	def read(self):
 		self.data_conf.read(self.conf_folder+'/openplotter.conf')

@@ -26,7 +26,7 @@ class MyFrame(wx.Frame):
 	def __init__(self):
 		self.conf = conf
 		self.home = home
-		self.currentpath = self.home+self.conf.get('GENERAL', 'op_folder')+'/openplotter'
+		self.currentpath = self.conf.get('GENERAL', 'op_folder')
 
 		self.tick=0
 		self.deg2rad=0.0174533
