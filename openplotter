@@ -33,7 +33,6 @@ from classes.add_topic import addTopic
 from classes.add_trigger import addTrigger
 from classes.add_value_setting import addvaluesetting
 from classes.add_deviation_setting import adddeviationsetting
-from classes.check_vessel_self import checkVesselSelf
 from classes.conf import Conf
 from classes.language import Language
 
@@ -65,7 +64,6 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_CLOSE, self.when_closed)
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 		self.language = self.conf.get('GENERAL', 'lang')
-		self.vessel_self = checkVesselSelf(self.conf)
 		Language(self.conf)
 		self.p = wx.lib.scrolledpanel.ScrolledPanel(self, -1, style=wx.TAB_TRAVERSAL | wx.SUNKEN_BORDER)
 		self.p.SetAutoLayout(1)
@@ -118,10 +116,6 @@ class MainFrame(wx.Frame):
 
 		self.menubar = wx.MenuBar()
 		self.settings = wx.Menu()
-		self.time_item1 = self.settings.Append(wx.ID_ANY, _('Set time zone'), _('Set time zone in the new window'))
-		self.Bind(wx.EVT_MENU, self.time_zone, self.time_item1)
-		self.time_item2 = self.settings.Append(wx.ID_ANY, _('Set time from NMEA'), _('Set system time from NMEA data'))
-		self.Bind(wx.EVT_MENU, self.time_gps, self.time_item2)
 		self.gpsd_item1 = self.settings.Append(wx.ID_ANY, _('Set GPSD'), _('Set GPSD in the new window'))
 		self.Bind(wx.EVT_MENU, self.reconfigure_gpsd, self.gpsd_item1)
 		self.settings.AppendSeparator()
@@ -278,21 +272,6 @@ class MainFrame(wx.Frame):
 
 	def ShowStatusBarBLACK(self, w_msg):
 		self.ShowStatusBar(w_msg, wx.BLACK)	
-		
-	def time_zone(self, event):
-		subprocess.Popen(['lxterminal', '-e', 'sudo dpkg-reconfigure tzdata'])
-		self.GetStatusBar().SetForegroundColour(wx.BLACK)
-		self.SetStatusText(_('Set time zone in the new window'))
-
-	def time_gps(self, event):
-		self.ShowStatusBarBLACK(_('Waiting for NMEA time...'))
-		time_gps_result = subprocess.check_output(['sudo', 'python', self.currentpath + '/time_gps.py'])
-		msg = ''
-		re = time_gps_result.splitlines()
-		for current in re:
-			msg+=current+'  '
-		self.ShowStatusBarBLACK('')
-		self.ShowMessage(msg)
 
 	def reconfigure_gpsd(self, event):
 		subprocess.Popen(['lxterminal', '-e', 'sudo nano /etc/default/gpsd'])
@@ -561,11 +540,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.startup_opencpn_fullscreen = wx.CheckBox(self.p_startup, label=_('fullscreen'), pos=(40, 130))
 		self.startup_opencpn_fullscreen.Bind(wx.EVT_CHECKBOX, self.startup)
 
-		self.startup_multiplexer = wx.CheckBox(self.p_startup, label=_('NMEA 0183 multiplexer'), pos=(20, 165))
-		self.startup_multiplexer.Bind(wx.EVT_CHECKBOX, self.startup)
-		self.startup_nmea_time = wx.CheckBox(self.p_startup, label=_('Set time from NMEA'), pos=(40, 190))
-		self.startup_nmea_time.Bind(wx.EVT_CHECKBOX, self.startup)
-
 		self.startup_remote_desktop = wx.CheckBox(self.p_startup, label=_('VNC remote desktop'), pos=(20, 225))
 		self.startup_remote_desktop.Bind(wx.EVT_CHECKBOX, self.startup)
 		self.startup_vnc_pass = wx.CheckBox(self.p_startup, label=_('use password'), pos=(40, 250))
@@ -595,11 +569,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.startup_opencpn_fullscreen.Disable()
 		if self.conf.get('STARTUP', 'opencpn_no_opengl') == '1': self.startup_opencpn_nopengl.SetValue(True)
 		if self.conf.get('STARTUP', 'opencpn_fullscreen') == '1': self.startup_opencpn_fullscreen.SetValue(True)
-		if self.conf.get('STARTUP', 'kplex') == '1':
-			self.startup_multiplexer.SetValue(True)
-		else:
-			self.startup_nmea_time.Disable()
-		if self.conf.get('STARTUP', 'gps_time') == '1': self.startup_nmea_time.SetValue(True)
+
 		if self.conf.get('STARTUP', 'x11vnc') == '1':
 			self.startup_remote_desktop.SetValue(True)
 		else:
@@ -657,20 +627,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.conf.set('STARTUP', 'opencpn_fullscreen', '1')
 			else:
 				self.conf.set('STARTUP', 'opencpn_fullscreen', '0')
-
-		if sender == self.startup_multiplexer:
-			if self.startup_multiplexer.GetValue():
-				self.startup_nmea_time.Enable()
-				self.conf.set('STARTUP', 'kplex', '1')
-			else:
-				self.startup_nmea_time.Disable()
-				self.conf.set('STARTUP', 'kplex', '0')
-
-		if sender == self.startup_nmea_time:
-			if self.startup_nmea_time.GetValue():
-				self.conf.set('STARTUP', 'gps_time', '1')
-			else:
-				self.conf.set('STARTUP', 'gps_time', '0')
 
 		if sender == self.startup_remote_desktop:
 			if self.startup_remote_desktop.GetValue():
@@ -2946,7 +2902,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.n2koutputs_label = wx.StaticText(self.p_n2k, pos=(260, 105))
 
 	def read_n2k(self):
-		self.mmsi.SetValue(self.vessel_self.mmsi)
 		if self.conf.get('N2K', 'enable') == '1':
 			self.n2k_enable.SetValue(True)
 			self.can_usb.Disable()
@@ -3125,12 +3080,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def restart_SK(self, e):
 		# stopping sk server
 		self.ShowStatusBarRED(_('Closing Signal K server ...'))
-		self.vessel_self = ''
-		subprocess.call(["pkill", '-f', "signalk-server"])
-		while self.util_process_exist("signalk-server"):
-			time.sleep(0.01)
-		# restarting sk server and providers
-		self.vessel_self = checkVesselSelf(self.conf)
+		subprocess.call(['sudo', 'systemctl', 'stop', 'signalk.service'])
+		subprocess.call(['sudo', 'systemctl', 'stop', 'signalk.socket'])
+		# restarting sk server
+		subprocess.call(['sudo', 'systemctl', 'start', 'signalk.socket'])
+		subprocess.call(['sudo', 'systemctl', 'start', 'signalk.service'])
 		self.ShowStatusBarGREEN(_('Signal K server restarted'))
 
 	def on_diagnostic_SK(self, e):

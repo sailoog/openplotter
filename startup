@@ -149,8 +149,8 @@ class MyFrame(wx.Frame):
 		self.warnings_data=msg
 		
 	def starting(self):
-		pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
-		exist=False
+		
+		if util_process_exist('signalk-server'):# cambiar
 
 		device = ''
 		ssid = ''
@@ -177,13 +177,11 @@ class MyFrame(wx.Frame):
 
 			delay=int(self.conf.get('STARTUP', 'delay'))
 
-			kplex=self.conf.get('STARTUP', 'kplex')
 			opencpn=self.conf.get('STARTUP', 'opencpn')
 			opencpn_no=self.conf.get('STARTUP', 'opencpn_no_opengl')
 			opencpn_fullscreen=self.conf.get('STARTUP', 'opencpn_fullscreen')
 			x11vnc=self.conf.get('STARTUP', 'x11vnc')
 			vnc_pass=self.conf.get('STARTUP', 'vnc_pass')
-			gps_time=self.conf.get('STARTUP', 'gps_time')
 			play=self.conf.get('STARTUP', 'play')
 			sound=self.conf.get('STARTUP', 'sound')
 			node_red=self.conf.get('STARTUP', 'node_red')
@@ -216,7 +214,18 @@ class MyFrame(wx.Frame):
 						tools_py.append(ii)
 			
 			#######################################################
+			
 			subprocess.call(['pkill', '-f', '/openplotter/openplotter'])
+
+			#añadir checking...
+			try:
+				out = subprocess.check_output(['more','product'],cwd='/proc/device-tree/hat')
+				if 'Moitessier Navigation HAT' in out:
+					subprocess.call(['sudo', 'insmod', self.currentpath+'/drivers/navHat/naviDev.ko'])
+					subprocess.call(['sudo', 'chown', 'pi:pi', '/dev/naviDev.tty' ])
+			except: pass
+
+			#comprobar signal k settings y modificar si es necesario
 			
 			if platform.machine()[0:3]=='arm':
 				self.add_logger_data(_('\nChecking pi password...'))
@@ -229,6 +238,8 @@ class MyFrame(wx.Frame):
 				if passw_a.rstrip() == passw_b.rstrip():
 					self.add_warnings_data(_('\n\nSecurity warning: You are using the default password for "pi" user.\nPlease change password in Menu > Preferences > Raspberry Pi Configuration.'))
 				self.add_logger_data(_(' Done.'))
+
+			# comprobar signalk password
 
 			if delay!=0:
 				self.add_logger_data(_('\nApplying ').decode('utf8')+str(delay)+_(' seconds of delay...').decode('utf8'))
@@ -334,16 +345,10 @@ class MyFrame(wx.Frame):
 			self.add_logger_data(_(' Done.'))
 
 			subprocess.call(['pkill', '-9', 'kplex'])
-			if kplex=='1':
-				self.add_logger_data(_('\nStarting NMEA 0183 Multiplexer...'))
-				time.sleep(3)
-				subprocess.Popen('kplex')
-				self.check_start('kplex')
-				
-			if gps_time=='1':
-				self.add_logger_data(_('\nGetting system time from NMEA 0183...'))
-				subprocess.call(['sudo', 'python', self.currentpath+'/time_gps.py'])
-				self.add_logger_data(_(' Done.'))
+			self.add_logger_data(_('\nStarting NMEA 0183 Multiplexer...'))
+			time.sleep(3)
+			subprocess.Popen('kplex')
+			self.check_start('kplex')
 
 			self.add_logger_data(_('\nStarting Tools...'))
 			index=0
@@ -436,6 +441,8 @@ def util_process_exist(process_name):
 						
 if len(sys.argv)>1:
 	if sys.argv[1]=='stop':
+		subprocess.call(['sudo', 'systemctl', 'stop', 'signalk.service'])
+		subprocess.call(['sudo', 'systemctl', 'stop', 'signalk.socket'])
 		subprocess.call(['pkill', '-9', 'opencpn'])
 		subprocess.call(['pkill', '-9', 'kplex'])
 		subprocess.call(['pkill', '-f', 'signalk-server'])
@@ -452,7 +459,10 @@ if len(sys.argv)>1:
 		subprocess.call(['killall', 'diagnostic-'])
 		
 	elif sys.argv[1]=='restart':
-		subprocess.call(['pkill', '-f', 'signalk-server'])
+		subprocess.call(['sudo', 'systemctl', 'stop', 'signalk.service'])
+		subprocess.call(['sudo', 'systemctl', 'stop', 'signalk.socket'])
+		subprocess.call(['sudo', 'systemctl', 'start', 'signalk.socket'])
+		subprocess.call(['sudo', 'systemctl', 'start', 'signalk.service'])
 		app = wx.App()
 		MyFrame().Show()
 		app.MainLoop()
