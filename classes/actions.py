@@ -14,12 +14,20 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
-import gammu, platform, subprocess, time, json, requests, socket, re
 
-import paho.mqtt.publish as publish
+try:
+	import gammu
+except:
+        gammu = None
+
+import platform, subprocess, time, json, requests, socket, re
+
+try:	import paho.mqtt.publish as publish
+except:	publish = 'warn'
 
 from classes.gmailbot import GmailBot
-from classes.twitterbot import TwitterBot
+try: from classes.twitterbot import TwitterBot
+except: TwitterBot = None
 
 if platform.machine()[0:3] == 'arm':
 	import RPi.GPIO as GPIO
@@ -201,5 +209,15 @@ class Actions:
 			topic = option[4:]
 			payload = text
 			auth = {'username': conf.get('MQTT', 'username'), 'password': conf.get('MQTT', 'password')}
+			if publish == 'warn':
+				msg = 'mqtt python module not installed, functionallity not available'
+				print msg
+				app = wx.App(False)
+				wx.Frame( None, title="OpenPlotter", size=(710, 460))
+				wx.MessageBox(msg, 'Warning', wx.OK | wx.ICON_WARNING)
+				publish = None
+			if not publish:
+				return
+
 			publish.single(topic, payload=payload, hostname='127.0.0.1', port='1883', auth=auth)
 			publish.single(topic, payload=payload, hostname=conf.get('MQTT', 'broker'), port=conf.get('MQTT', 'port'), auth=auth)

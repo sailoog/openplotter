@@ -26,7 +26,7 @@ class MyFrame(wx.Frame):
 
 		self.conf = Conf()
 		self.home = self.conf.home
-		self.currentpath = self.home+self.conf.get('GENERAL', 'op_folder')+'/openplotter'
+		self.currentpath = self.conf.get('GENERAL', 'op_folder')
 		
 		try:
 			self.ser = serial.Serial(self.conf.get('N2K', 'can_usb'), 115200, timeout=0.5)

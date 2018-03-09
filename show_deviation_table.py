@@ -22,7 +22,7 @@ from classes.language import Language
 conf = Conf()
 Language(conf)
 
-data = conf.get('COMPASS', 'deviation')
+data = conf.get('PYPILOT', 'deviation')
 listsave = []
 try:
 	listsave = eval(data)

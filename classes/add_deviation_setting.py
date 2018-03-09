@@ -108,13 +108,13 @@ class adddeviationsetting(wx.Dialog):
 			self.list.DeleteAllItems()
 		except:
 			pass
-		data = self.conf.get('COMPASS', 'deviation')
+		data = self.conf.get('PYPILOT', 'deviation')
 		if not data:
 			temp_list = []
 			for i in range(37):
 				temp_list.append([i*10,i*10])
-			self.conf.set('COMPASS', 'deviation', str(temp_list))
-			data = self.conf.get('COMPASS', 'deviation')
+			self.conf.set('PYPILOT', 'deviation', str(temp_list))
+			data = self.conf.get('PYPILOT', 'deviation')
 		try:
 			self.edit = eval(data)
 		except:
@@ -127,7 +127,7 @@ class adddeviationsetting(wx.Dialog):
 		self.unitvalue.SetValue('')
 		self.mag_head.SetValue('')
 
-		var = self.conf.get('COMPASS', 'variation')
+		var = self.conf.get('PYPILOT', 'variation')
 		self.variation.SetValue(var)
 		if not var:
 			self.fixed = False
@@ -166,7 +166,7 @@ class adddeviationsetting(wx.Dialog):
 				self.ShowMessage(_('This value is not a number.'))
 				return
 			self.edit[self.selected][1] = u	- var 	
-			self.conf.set('COMPASS', 'deviation', str(self.edit))
+			self.conf.set('PYPILOT', 'deviation', str(self.edit))
 			self.read_list()
 
 	def on_fix(self, e):
@@ -188,15 +188,15 @@ class adddeviationsetting(wx.Dialog):
 			self.change.Enable()
 			self.variation.Disable()
 			self.fix.SetLabel(_('Set'))
-			self.conf.set('COMPASS', 'variation', str(var))
+			self.conf.set('PYPILOT', 'variation', str(var))
 			temp_list = []
 			for i in range(37):
 				temp_list.append([i*10,i*10])
-			self.conf.set('COMPASS', 'deviation', str(temp_list))
+			self.conf.set('PYPILOT', 'deviation', str(temp_list))
 			self.read_list()
 
 	def on_reset(self, e):
-		self.conf.set('COMPASS', 'deviation', '')
+		self.conf.set('PYPILOT', 'deviation', '')
 		self.read_list()
 
 	def on_graph(self, e):

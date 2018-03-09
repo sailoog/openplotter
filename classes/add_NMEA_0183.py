@@ -22,7 +22,7 @@ class addNMEA_0183(wx.Dialog):
 
 		self.conf = conf
 		self.home = self.conf.home
-		self.currentpath = self.home+self.conf.get('GENERAL', 'op_folder')+'/openplotter'
+		self.currentpath = self.conf.get('GENERAL', 'op_folder')
 
 		wx.Dialog.__init__(self, None, title=_('add NMEA 0183 sentence'), size=(670,410))
 

@@ -14,16 +14,16 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
-import gettext
+import gettext, os
 
 class Language:
 
 	def __init__(self, conf):
 
 		home = conf.home
-		op_folder = conf.get('GENERAL', 'op_folder')+'/openplotter'
-		locale_folder = home+op_folder+'/locale'
+		op_folder = conf.get('GENERAL', 'op_folder')
 		language = conf.get('GENERAL', 'lang')
+                locale_folder = op_folder+'/locale'
 
 		gettext.install('openplotter', locale_folder, unicode=False)
 		presLan_en = gettext.translation('openplotter', locale_folder, languages=['en'])

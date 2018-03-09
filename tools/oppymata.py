@@ -94,7 +94,7 @@ def init():
 
 conf = Conf()
 home = conf.home
-currentpath = home+conf.get('GENERAL', 'op_folder')+'/openplotter'
+currentpath = conf.get('GENERAL', 'op_folder')
 
 if len(sys.argv)>1:
 	index=1

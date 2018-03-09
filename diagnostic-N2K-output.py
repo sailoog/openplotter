@@ -32,7 +32,7 @@ class MyFrame(wx.Frame):
 		self.ttimer=20
 		self.conf = Conf()
 		self.home = self.conf.home
-		self.currentpath = self.home+self.conf.get('GENERAL', 'op_folder')+'/openplotter'
+		self.currentpath = self.conf.get('GENERAL', 'op_folder')
 		
 		Language(self.conf)
 		print self.conf.get('GENERAL','lang')

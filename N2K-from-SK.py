@@ -26,7 +26,7 @@ class MyFrame(wx.Frame):
 		logging.basicConfig()
 		self.conf = Conf()
 		self.home = self.conf.home
-		self.currentpath = self.home+self.conf.get('GENERAL', 'op_folder')+'/openplotter'
+		self.currentpath = self.conf.get('GENERAL', 'op_folder')
 		#self.Check127488_pos=100
 		#self.Check127489_pos=100
 		#self.Check127505_pos=100
