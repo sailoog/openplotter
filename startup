@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, subprocess, time, os, threading, sys, platform, requests, ConfigParser, io
+import wx, subprocess, time, os, threading, sys, platform, requests, ConfigParser, io, json
 from shutil import copyfile
 from classes.conf import Conf
 from classes.language import Language
@@ -177,15 +177,28 @@ class MyFrame(wx.Frame):
 		
 		subprocess.call(['pkill', '-f', '/openplotter/openplotter'])
 
-		#anadir checking...
+		self.add_logger_data(_('\nStarting Moitessier HAT...'))
 		try:
 			out = subprocess.check_output(['more','product'],cwd='/proc/device-tree/hat')
 			if 'Moitessier Navigation HAT' in out:
 				subprocess.call(['sudo', 'insmod', self.op_folder+'/drivers/navHat/naviDev.ko'])
 				subprocess.call(['sudo', 'chown', 'pi:pi', '/dev/naviDev.tty' ])
+				self.add_logger_data(_(' Done.'))
+			else: self.add_logger_data(_(' Not Started.'))
 		except: pass
 
-		#comprobar signal k settings y modificar si es necesario
+		self.add_logger_data(_('\nChecking Signal K password...'))
+		with open(self.home+'/.signalk/security.json') as data_file:
+			data = json.load(data_file)
+		for i in data['users']:
+			if i['username'] == 'openplotter' and i['password'] == '$2a$10$fNaojwZ94bz4NCPIisa9g.NbmilEzXNWHMaoV1NpD00nbldIjhynS':
+				self.add_warnings_data(_('\n\nSecurity warning: You are using the default password for Signal K server.\nPlease change password in Signal K > Security > Users > openplotter.'))
+				self.add_logger_data(_(' See warning.'))
+			else: self.add_logger_data(_(' Done.'))
+
+		# comprobar signal k settings y modificar si es necesario
+
+		# comprobar si signal k esta ejecutandose	if util_process_exist('signalk-server'):
 		
 		if platform.machine()[0:3]=='arm':
 			self.add_logger_data(_('\nChecking pi password...'))
@@ -197,11 +210,8 @@ class MyFrame(wx.Frame):
 			passw_b = subprocess.check_output(['mkpasswd', '-msha-512', 'raspberry', salt])
 			if passw_a.rstrip() == passw_b.rstrip():
 				self.add_warnings_data(_('\n\nSecurity warning: You are using the default password for "pi" user.\nPlease change password in Menu > Preferences > Raspberry Pi Configuration.'))
-			self.add_logger_data(_(' Done.'))
-
-		# comprobar signalk password
-
-		# comprobar si signal k esta ejecutandose	if util_process_exist('signalk-server'):
+				self.add_logger_data(_(' See warning.'))
+			else: self.add_logger_data(_(' Done.'))
 
 		if delay!=0:
 			self.add_logger_data(_('\nApplying ').decode('utf8')+str(delay)+_(' seconds of delay...').decode('utf8'))
@@ -215,11 +225,16 @@ class MyFrame(wx.Frame):
 			self.check_start('x11vnc')
 			self.add_logger_data(_('\nChecking VNC password...'))
 			if vnc_pass=='1':
-				try: out = subprocess.check_output(['cat', self.home+'/.vnc/passwd'])
-				except: self.add_warnings_data(_('\n\nSecurity warning: You have not set a password for VNC.\nPlease set a password in OpenPlotter > Startup.'))
+				try: 
+					out = subprocess.check_output(['cat', self.home+'/.vnc/passwd'])
+					self.add_logger_data(_(' Done.'))
+				except: 
+					self.add_warnings_data(_('\n\nSecurity warning: You have not set a password for VNC.\nPlease set a password in OpenPlotter > Startup.'))
+					self.add_logger_data(_(' See warning.'))
 			else: 
 				self.add_warnings_data(_('\n\nSecurity warning: You have not set a password for VNC.\nPlease set a password in OpenPlotter > Startup.'))
-			self.add_logger_data(_(' Done.'))
+				self.add_logger_data(_(' See warning.'))
+			
 
 		subprocess.call(['pkill', '-9', 'opencpn'])
 		if opencpn=='1':
@@ -240,31 +255,34 @@ class MyFrame(wx.Frame):
 		process.wait()
 		self.add_logger_data(_(' Done.'))
 		if wifi_server == '1':
-			self.add_logger_data(_('\nchecking WIFI Access Point password...'))
+			self.add_logger_data(_('\nChecking WIFI Access Point password...'))
 			if wifi_server_pass=='12345678':
 				self.add_warnings_data(_('\n\nSecurity warning: You are using the default WIFI Access Point password.\nPlease change password in OpenPlotter > WiFi AP.'))
-			self.add_logger_data(_(' Done.'))
-
+				self.add_logger_data(_(' See warning.'))
+			else:
+				self.add_logger_data(_(' Done.'))
+		
 		subprocess.call(['pkill', '-f', 'mqtt_d.py'])
+		self.add_logger_data(_('\nStarting MQTT server...'))
 		subprocess.Popen(['python', self.op_folder+'/mqtt_d.py'])
+		self.check_start('mqtt_d.py')
 
 		subprocess.call(['pkill', '-f', '1w_d.py'])
+		self.add_logger_data(_('\nStarting 1W sensors...'))
 		subprocess.Popen(['python', self.op_folder+'/1w_d.py'])
+		self.check_start('1w_d.py')
 
 		subprocess.call(['pkill', '-f', 'diagnostic-N2K-output.py'])
 		subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
 		if N2K_output == '1':
+			self.add_logger_data(_('\nStarting N2K server...'))
 			subprocess.Popen(['python', self.op_folder+'/N2K-server_d.py'])
+			self.check_start('N2K-server_d.py')
 
-		self.check_start('signalk-server')
-		self.add_logger_data(_('\nStart event SK to NMEA and action Server...'))
+		subprocess.call(['pkill', '-f', 'SK-base_d.py'])
+		self.add_logger_data(_('\nStarting actions and NMEA 0183/N2K generators...'))
+		subprocess.Popen(['python', self.op_folder+'/SK-base_d.py'])
 		self.check_start('SK-base_d.py')
-		self.add_logger_data(_('\nStart 1wire sensor Server (optional)...'))
-		self.check_start('1w_d.py')
-		self.add_logger_data(_('\nStart mqtt Server (optional)...'))
-		self.check_start('mqtt_d.py')
-		self.add_logger_data(_('\nStart N2K send (optional)...'))
-		self.check_start('N2K-server_d.py')
 
 		if util_process_exist('node-red'):
 			subprocess.call('node-red-stop')
@@ -276,14 +294,13 @@ class MyFrame(wx.Frame):
 			except: pass
 
 		subprocess.call(['pkill', '-f', 'read_sensors_d.py'])
+		self.add_logger_data(_('\nStarting I2C, SPI, GPIO and Pypilot...'))
 		subprocess.Popen(['python', self.op_folder+'/read_sensors_d.py'], cwd=self.home + '/.pypilot')
-
-		self.add_logger_data(_('\nStarting I2C, SPI, GPIO an Pypilot (optional)...'))
 		self.check_start('read_sensors_d.py')
 
 		subprocess.call(['pkill', '-f', 'pypilot_webapp'])
 		if webapp=='1':
-			self.add_logger_data(_('\nStarting Pypilot Web App (optional)...'))
+			self.add_logger_data(_('\nStarting Pypilot Web App...'))
 			try: subprocess.Popen(['pypilot_webapp', webapp_port])
 			except: pass
 			self.check_start('pypilot_webapp')
@@ -298,7 +315,7 @@ class MyFrame(wx.Frame):
 			aisdecoder=subprocess.Popen(['aisdecoder', '-h', 'localhost', '-p', '10110', '-a', 'file', '-c', 'mono', '-d', '-f', '/dev/stdin'], stdin = rtl_fm.stdout)
 			self.check_start('aisdecoder')
 
-		self.add_logger_data(_('\nCheck 800x480 display...'))
+		self.add_logger_data(_('\nChecking 800x480 display...'))
 		subprocess.call(['sudo', 'python', self.op_folder+'/display800x480.py'])
 		self.add_logger_data(_(' Done.'))
 
@@ -313,13 +330,12 @@ class MyFrame(wx.Frame):
 		for i in tools_py:
 			if i[3]=='1':
 				subprocess.call(['pkill', '-9', tools_py[index][2]])
-				if os.path.isfile(self.home+'/.openplotter/tools/'+tools_py[index][2]):
-					subprocess.Popen(['python',self.home+'/.openplotter/tools/'+tools_py[index][2]])
+				if os.path.isfile(self.conf_folder+'/tools/'+tools_py[index][2]):
+					subprocess.Popen(['python',self.conf_folder+'/tools/'+tools_py[index][2]])
 				else:
 					subprocess.Popen(['python',self.op_folder+'/tools/'+tools_py[index][2]])	
 			index+=1
 		self.add_logger_data(_(' Done.'))
-		self.autoclose=time.time() + 60
 
 		self.add_logger_data(_('\nChecking OpenPlotter updates...'))
 		if sl == 'stable': remote_branch = 'master'
@@ -368,6 +384,8 @@ class MyFrame(wx.Frame):
 			if sound:
 				try: subprocess.Popen(['mpg123', '-q', sound])
 				except: pass
+
+		self.autoclose=time.time() + 60
 
 	def OnClose(self, event):
 		pass
