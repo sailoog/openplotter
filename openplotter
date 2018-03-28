@@ -1357,7 +1357,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def edit_kplex(self, e):
 		idx = e.GetIndex()
 
-		if self.kplex[idx][1] == 'system_a' or self.kplex[idx][1] == 'system_b' or self.kplex[idx][1] == 'opencpn' or self.kplex[idx][1] == 'signalk' or self.kplex[idx][1] == 'pypilot':
+		if self.kplex[idx][1] == 'system_a' or self.kplex[idx][1] == 'system_b' or self.kplex[idx][1] == 'signalk':
 			self.ShowStatusBarRED(_('You can not edit this.'))
 			return
 		edit = []
@@ -1501,13 +1501,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		data += '###defaults\n\n'
 		data += '[udp]\nname=system_a\ndirection=in\naddress=localhost\nport=10110\n\n'
 		data += '[udp]\nname=system_b\ndirection=in\nport=10110\n\n'
-		data += '[tcp]\nname=pypilot\ndirection=in\noptional=yes\nmode=client\npersist=yes\nretry=10\naddress=localhost\nport=20220\n\n'
-		data += '[tcp]\nname=opencpn\ndirection=out\nmode=server\nofilter=-**RMB\nport=10109\n\n'
-		data += '[udp]\nname=signalk\ndirection=out\nofilter=-OC***\naddress=127.0.0.1\nport=55556\n\n'
+		data += '[tcp]\nname=signalk\ndirection=out\nmode=server\nport=30330\n\n'
 		data += '###end of defaults\n\n###OpenPlotter GUI settings\n\n'
 
 		for index, item in enumerate(self.kplex):
-			if not ('system' in item[1] or 'opencpn' in item[1] or 'signalk' in item[1] or 'pypilot' in item[1]):
+			if not ('system' in item[1] or 'signalk' in item[1]):
 				if self.list_kplex.IsChecked(index):
 					state = ''
 				else:
@@ -1558,34 +1556,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		num = len(self.kplex)
 		for i in range(num):
 			if self.list_kplex.IsSelected(i):
-				if self.kplex[i][1] == 'system_a' or self.kplex[i][1] == 'system_b' or self.kplex[i][1] == 'opencpn' or self.kplex[i][1] == 'signalk' or self.kplex[i][1] == 'pypilot':
+				if self.kplex[i][1] == 'system_a' or self.kplex[i][1] == 'system_b' or self.kplex[i][1] == 'signalk':
 					self.ShowStatusBarRED(_('You can not delete this.'))
 					return
 				del self.kplex[i]
 		self.set_list_kplex()
-
-	''' TODO check unique name
-	def process_name(self, r):
-		list_tmp = []
-		l = r.split(',')
-		for item in l:
-			item = item.strip()
-			list_tmp.append(item)
-		name = list_tmp[1]
-		found = False
-		for sublist in self.kplex:
-			if sublist[1] == name:
-				found = True
-		for sublist in self.koutputs:
-			if sublist[1] == name:
-				found = True
-		if found == True:
-			self.GetStatusBar().SetForegroundColour(wx.RED)
-			self.SetStatusText(_('Failed. This name already exists.'))
-			return False
-		else:
-			return list_tmp
-	'''
 
 	def on_diagnostic_kplex(self, event):
 		selected = self.list_kplex.GetFirstSelected()
