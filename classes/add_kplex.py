@@ -36,7 +36,7 @@ class addkplex(wx.Dialog):
 		self.SetIcon(self.icon)
 
 		wx.StaticText(panel, label=_('Type'), pos=(20, 30))
-		self.kplex_type_list = ['Serial', 'TCP', 'UDP']
+		self.kplex_type_list = ['TCP', 'UDP']
 		self.kplex_type = wx.ComboBox(panel, choices=self.kplex_type_list, style=wx.CB_READONLY, size=(80, 32),
 									  pos=(20, 55))
 		self.Bind(wx.EVT_COMBOBOX, self.on_kplex_type_change, self.kplex_type)
@@ -46,16 +46,13 @@ class addkplex(wx.Dialog):
 
 		wx.StaticBox(panel, label=_(' settings '), size=(530, 90), pos=(10, 10))
 
-		self.SerialCheck()
 		self.kplex_ser_T1 = wx.StaticText(panel, label=_('Port'), pos=(230, 35))
-		self.kplex_device_select = wx.ComboBox(panel, choices=self.SerDevLs, style=wx.CB_DROPDOWN, size=(140, 32),
-											   pos=(225, 55))
-		if self.SerDevLs: self.kplex_device_select.SetValue(self.SerDevLs[0])
+		self.kplex_device = wx.TextCtrl(panel, -1, size=(140, 32), pos=(225, 55))
+
 		self.bauds = ['4800', '9600', '19200', '38400', '57600', '115200']
 		#self.bauds = ['4800', '9600', '19200', '38400', '57600', '115200', '230400', '460800']
 		self.kplex_ser_T2 = wx.StaticText(panel, label=_('Bauds'), pos=(375, 35))
-		self.kplex_baud_select = wx.ComboBox(panel, choices=self.bauds, style=wx.CB_READONLY, size=(90, 32),
-											 pos=(370, 55))
+		self.kplex_baud_select = wx.ComboBox(panel, choices=self.bauds, style=wx.CB_READONLY, size=(90, 32),pos=(370, 55))
 
 		self.kplex_net_T1 = wx.StaticText(panel, label=_('Address'), pos=(235, 35))
 		self.kplex_address = wx.TextCtrl(panel, -1, size=(120, 32), pos=(230, 55))
@@ -65,10 +62,8 @@ class addkplex(wx.Dialog):
 		self.ser_io_list = ['in', 'out', 'both']
 		self.net_io_list = ['in', 'out']
 		wx.StaticText(panel, label=_('in/out'), pos=(470, 35))
-		self.kplex_io_ser = wx.ComboBox(panel, choices=self.ser_io_list, style=wx.CB_READONLY, size=(70, 32),
-										pos=(465, 55))
-		self.kplex_io_net = wx.ComboBox(panel, choices=self.net_io_list, style=wx.CB_READONLY, size=(70, 32),
-										pos=(465, 55))
+		self.kplex_io_ser = wx.ComboBox(panel, choices=self.ser_io_list, style=wx.CB_READONLY, size=(70, 32),pos=(465, 55))
+		self.kplex_io_net = wx.ComboBox(panel, choices=self.net_io_list, style=wx.CB_READONLY, size=(70, 32),pos=(465, 55))
 		self.Bind(wx.EVT_COMBOBOX, self.on_kplex_io_change, self.kplex_io_ser)
 		self.Bind(wx.EVT_COMBOBOX, self.on_kplex_io_change, self.kplex_io_net)
 
@@ -119,12 +114,6 @@ class addkplex(wx.Dialog):
 		self.otalker.SetValue('**')
 		self.osent.SetValue('***')
 
-		self.AP_examp_b = wx.Button(panel, label=_('AP examp'), pos=(20, 320))
-		self.Bind(wx.EVT_BUTTON, self.AP_examp, self.AP_examp_b)
-
-		self.GPS_examp_b = wx.Button(panel, label=_('GPS examp'), pos=(120, 320))
-		self.Bind(wx.EVT_BUTTON, self.GPS_examp, self.GPS_examp_b)
-
 		self.gpsd_examp_b = wx.Button(panel, label=_('gpsd examp'), pos=(220, 320))
 		self.Bind(wx.EVT_BUTTON, self.gpsd_examp, self.gpsd_examp_b)
 
@@ -134,25 +123,32 @@ class addkplex(wx.Dialog):
 
 		if edit == 0:
 			edit = ['0', '0', '0', '0', '0', '0', '0', '0', '0', -1]
-			self.kplex_type.SetValue('Serial')
-			self.kplex_baud_select.SetValue('4800')
+			self.kplex_type.SetValue('TCP')
 			self.kplex_io_ser.SetValue('in')
 			self.kplex_io_net.SetValue('in')
-			self.switch_ser_net(True)
+			self.switch_ser_net(False)
 			self.switch_io_out(False)
 		else:
 			self.kplex_name.SetValue(edit[0])
-			self.kplex_type.SetValue(edit[1])
 			if edit[1] == 'Serial':
+				self.kplex_type_list = ['TCP', 'UDP', 'Serial']
+				self.kplex_type.Clear()
+				self.kplex_type.AppendItems(self.kplex_type_list)
 				self.kplex_io_ser.SetValue(edit[2])
 				self.switch_ser_net(True)
-				self.kplex_device_select.SetValue(edit[3])
+				self.kplex_device.SetValue(edit[3])
 				self.kplex_baud_select.SetValue(edit[4])
+				self.kplex_type.Disable()
+				self.kplex_name.Disable()
+				self.kplex_device.Disable()
+				self.kplex_baud_select.Disable()
+				self.gpsd_examp_b.Disable()
 			else:
 				self.kplex_io_net.SetValue(edit[2])
 				self.switch_ser_net(False)
 				self.kplex_address.SetValue(edit[3])
 				self.kplex_netport.SetValue(edit[4])
+			self.kplex_type.SetValue(edit[1])
 			self.on_kplex_io_change(0)
 			if edit[5] != _('none').decode("utf-8"):
 				if edit[5] == _('accept').decode("utf-8"):
@@ -170,7 +166,7 @@ class addkplex(wx.Dialog):
 				self.ofilter_sentences.SetValue(edit[8])
 			else:
 				self.ofilter_select.SetValue(self.mode_ofilter[0])
-
+	'''
 	def GPS_examp(self, e):
 		self.kplex_type.SetValue('Serial')
 		self.kplex_io_ser.SetValue('in')
@@ -196,7 +192,7 @@ class addkplex(wx.Dialog):
 		self.ifilter_sentences.SetValue('**HDM,**RSA')
 		self.ofilter_select.SetValue(self.mode_ifilter[1])
 		self.ofilter_sentences.SetValue('**RM*,**VHW,**VWR')
-
+	'''
 	def gpsd_examp(self, e):
 		self.kplex_type.SetValue('TCP')
 		self.kplex_io_net.SetValue('in')
@@ -212,22 +208,6 @@ class addkplex(wx.Dialog):
 		self.ifilter_sentences.SetValue(_('nothing'))
 		self.ofilter_select.SetValue(self.mode_ifilter[0])
 		self.ofilter_sentences.SetValue(_('nothing'))
-
-	def SerialCheck(self):
-		self.SerDevLs = [_('none')]
-		context = self.parent.context
-		for device in context.list_devices(subsystem='tty'):
-			i = device['DEVNAME']
-			if '/dev/ttyU' in i or '/dev/ttyA' in i or '/dev/ttyS' in i or '/dev/ttyO' in i or '/dev/r' in i or '/dev/i' in i or '/dev/naviDev' in i:
-				self.SerDevLs.append(i[5:])
-				try:
-					ii = device['DEVLINKS']
-					value = ii[ii.rfind('/dev/ttyOP_'):]
-					if value.find('/dev/ttyOP_') >= 0:
-						self.SerDevLs.append(value.split(' ')[0][5:])
-				except:
-					pass
-		self.SerDevLs.sort()
 
 	def ifilter_del(self, event):
 		self.ifilter_sentences.SetValue(_('nothing'))
@@ -295,7 +275,7 @@ class addkplex(wx.Dialog):
 
 	def switch_ser_net(self, b):
 		self.kplex_ser_T1.Show(b)
-		self.kplex_device_select.Show(b)
+		self.kplex_device.Show(b)
 		self.kplex_ser_T2.Show(b)
 		self.kplex_baud_select.Show(b)
 		self.kplex_io_ser.Show(b)
@@ -401,8 +381,8 @@ class addkplex(wx.Dialog):
 			return
 
 		if type_conn == 'Serial':
-			if str(self.kplex_device_select.GetValue()) != 'none':
-				port_address = str(self.kplex_device_select.GetValue())
+			if str(self.kplex_device.GetValue()) != 'none':
+				port_address = str(self.kplex_device.GetValue())
 			else:
 				self.ShowMessage(_('You must select a Port.'))
 				return

@@ -85,11 +85,11 @@ class MainFrame(wx.Frame):
 		self.p_sms = wx.Panel(self.nb)
 		self.p_startup = wx.Panel(self.nb)
 		self.nb.AddPage(self.p_serial, _('Serial ports'))
-		self.nb.AddPage(self.p_kplex, 'NMEA 0183')
-		self.nb.AddPage(self.p_n2k, 'N2K')
+		self.nb.AddPage(self.p_kplex, 'Kplex')
+		self.nb.AddPage(self.p_pypilot, _('Pypilot'))
+		self.nb.AddPage(self.p_n2k, 'CAN-USB')
 		self.nb.AddPage(self.p_sk, 'Signal K')
 		self.nb.AddPage(self.p_wifi, _('WiFi AP'))
-		self.nb.AddPage(self.p_pypilot, _('Pypilot'))
 		self.nb.AddPage(self.p_action, _('Actions'))
 		self.nb.AddPage(self.p_gpio, _('GPIO'))
 		self.nb.AddPage(self.p_i2c, _('I2C'))
@@ -1275,10 +1275,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def on_cancel_changes_pypilot(self,e):
 		self.read_pypilot()
 		
-			###########################################	NMEA 0183 kplex
+			########################################### kplex
 
 	def page_kplex(self):
-		title = wx.StaticText(self.p_kplex, label=_(' KPLEX '))
 
 		self.list_kplex = CheckListCtrl2(self.p_kplex, 152)
 		self.list_kplex.InsertColumn(0, _('Name'), width=130)
@@ -1326,7 +1325,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		hboxb.Add(cancel_changes, 0, wx.RIGHT | wx.LEFT, 5)
 
 		vbox = wx.BoxSizer(wx.VERTICAL)
-		vbox.Add(title, 0, wx.ALL | wx.EXPAND, 5)
 		vbox.Add(hlistbox, 1, wx.ALL | wx.EXPAND, 0)
 		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 5)
 		vbox.AddSpacer(5)
@@ -1557,8 +1555,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		for i in range(num):
 			if self.list_kplex.IsSelected(i):
 				if self.kplex[i][1] == 'system_a' or self.kplex[i][1] == 'system_b' or self.kplex[i][1] == 'signalk':
-					self.ShowStatusBarRED(_('You can not delete this.'))
+					self.ShowStatusBarRED(_('You can not delete this'))
 					return
+				if self.kplex[i][2] == 'Serial':
+					self.ShowStatusBarRED(_('Unassign this device on "Serial ports" tab'))
+					return	
 				del self.kplex[i]
 		self.set_list_kplex()
 
@@ -2568,31 +2569,39 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.list_Serialinst.InsertColumn(1, _('device'), width=90)
 		self.list_Serialinst.InsertColumn(2, _('vendor'), width=55)
 		self.list_Serialinst.InsertColumn(3, _('product'), width=60)
-		self.list_Serialinst.InsertColumn(4, _('port'), width=90)
-		self.list_Serialinst.InsertColumn(5, _('serial'), width=90)
-		self.list_Serialinst.InsertColumn(6, _('assignment'), width=90)
-		self.list_Serialinst.InsertColumn(7, _('remember'), width=90)
+		self.list_Serialinst.InsertColumn(4, _('port'), width=80)
+		self.list_Serialinst.InsertColumn(5, _('serial'), width=80)
+		self.list_Serialinst.InsertColumn(6, _('assignment'), width=80)
+		self.list_Serialinst.InsertColumn(7, _('remember'), width=80)
+		self.list_Serialinst.InsertColumn(8, _('bauds'), width=50)
 		self.list_Serialinst.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_SerialinstSelected)
 
 		hlistbox = wx.BoxSizer(wx.HORIZONTAL)
 		hlistbox.Add(self.list_Serialinst, 1, wx.ALL | wx.EXPAND, 5)
 
-                controls = wx.FlexGridSizer(0, 2)
+		controls = wx.FlexGridSizer(0, 2)
 		controls.Add(wx.StaticText(self.p_serial, label=_('name /dev/ttyOP_')), 1, wx.ALL | wx.EXPAND, 5)
-                self.Serial_OPname = wx.TextCtrl(self.p_serial, size=(100, 30))
-                controls.Add(self.Serial_OPname)
+		self.Serial_OPname = wx.TextCtrl(self.p_serial, size=(100, 30))
+		controls.Add(self.Serial_OPname)
 
 		self.Serial_rem_dev = wx.RadioButton(self.p_serial, label=_('Remember device (by vendor, product, serial)'))
-                controls.Add(self.Serial_rem_dev)
-                
-		self.Serial_rem_port = wx.RadioButton(self.p_serial, label=_('Remember port (positon on the USB-hub)'))
-                controls.Add(self.Serial_rem_port)
+		controls.Add(self.Serial_rem_dev)
 
+		self.Serial_rem_port = wx.RadioButton(self.p_serial, label=_('Remember port (positon on the USB-hub)'))
+		controls.Add(self.Serial_rem_port)
+
+		self.assignment = [_('none'), 'Kplex', 'Pypilot', 'CAN-USB', 'GPSD', 'SMS']
 		controls.Add(wx.StaticText(self.p_serial, label=_('assignment')))
-                self.Serial_assignment = wx.Choice(self.p_serial, choices=[_('none'), _('k-plex'), _('gpsd'), _('can-usb'), _('sms'), _('pypilot')], pos=(90, 195))
-                self.Serial_assignment.SetSelection(0)
-                controls.Add(self.Serial_assignment)
-                
+		self.Serial_assignment = wx.Choice(self.p_serial, choices=self.assignment, style=wx.CB_READONLY)
+		self.Serial_assignment.SetSelection(0)
+		controls.Add(self.Serial_assignment)
+
+		self.bauds = ['4800', '9600', '19200', '38400', '57600', '115200']
+		controls.Add(wx.StaticText(self.p_serial, label=_('bauds')))
+		self.Serial_baud_select = wx.Choice(self.p_serial, choices=self.bauds, style=wx.CB_READONLY)
+		self.Serial_baud_select.SetSelection(0)
+		controls.Add(self.Serial_baud_select)
+
 		update = wx.Button(self.p_serial, label=_('update'))
 		update.Bind(wx.EVT_BUTTON, self.on_update_Serialinst)
 
@@ -2604,13 +2613,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		hbox.Add(refresh, 0, wx.RIGHT | wx.LEFT, 5)
 
 		vbox = wx.FlexGridSizer(0, 1)
-                vbox.AddGrowableRow(0)
+		vbox.AddGrowableRow(0)
 		vbox.Add(hlistbox, 1, wx.ALL | wx.EXPAND, 0)
 		vbox.Add(controls, 1, wx.ALL | wx.EXPAND, 0)
 		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 5)
 
-                self.on_SerialinstSelected()
-                
+		self.on_SerialinstSelected()
+
 		self.p_serial.SetSizer(vbox)
 
 	def start_udev(self):
@@ -2618,74 +2627,73 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		subprocess.call(['sudo', 'udevadm', 'trigger', '--attr-match=subsystem=tty'])
 
 	def read_Serialinst(self):
-                self.on_refresh_Serialinst()
+		self.on_refresh_Serialinst()
 
-        def on_refresh_Serialinst(self, e=0):
+	def on_refresh_Serialinst(self, e=0):
 		self.list_Serialinst.DeleteAllItems()
-
-                data = self.conf.get('UDEV', 'Serialinst')
+		data = self.conf.get('UDEV', 'Serialinst')
 		try:
 			self.Serialinst = eval(data)
 		except:
 			self.Serialinst = {}
-
 		sentence = 0
-
 		try:
 			self.context
 		except:
 			self.context = pyudev.Context()
 
-                for device in self.context.list_devices(subsystem='tty'):
-                        i = device['DEVNAME']
-                        try:
-                                ii = device['DEVLINKS']
-                        except:
-                                continue
-                        if not ('/dev/ttyACM' in i or '/dev/ttyUSB' in i or '/dev/serial0' in ii):
-                                continue
-                        value = device['DEVPATH']
-                        port = value[value.rfind('/usb1/') + 6:-(len(value) - value.find('/tty'))]
-                        port = port[port.rfind('/') + 1:]
-                        try:
-                                serial = device['ID_SERIAL_SHORT']
-                        except:
-                                serial = ''
-                        try:
-                                vendor_db = device['ID_VENDOR_FROM_DATABASE']
-                        except:
-                                vendor_db = ''
-                        try:
-                                model_db = device['ID_MODEL_FROM_DATABASE']
-                        except:
-                                model_db = ''
-                        try:
-                                vendor_id = device['ID_VENDOR_ID']
-                        except:
-                                vendor_id = ''
-                        try:
-                                model_id = device['ID_MODEL_ID']
-                        except:
-                                model_id = ''
+		for device in self.context.list_devices(subsystem='tty'):
+			i = device['DEVNAME']
+			if not '/dev/naviDev' in i:
+				try:
+					ii = device['DEVLINKS']
+				except:
+					continue
+			if not ('/dev/naviDev' in i or '/dev/ttyACM' in i or '/dev/ttyUSB' in i or '/dev/serial0' in ii):
+				continue
+			value = device['DEVPATH']
+			port = value[value.rfind('/usb1/') + 6:-(len(value) - value.find('/tty'))]
+			port = port[port.rfind('/') + 1:]
+			try:
+				serial = device['ID_SERIAL_SHORT']
+			except:
+				serial = ''
+			try:
+				vendor_db = device['ID_VENDOR_FROM_DATABASE']
+			except:
+				vendor_db = ''
+			try:
+				model_db = device['ID_MODEL_FROM_DATABASE']
+			except:
+				model_db = ''
+			try:
+				vendor_id = device['ID_VENDOR_ID']
+			except:
+				vendor_id = ''
+			try:
+				model_id = device['ID_MODEL_ID']
+			except:
+				model_id = ''
 
-                        # default values if this port is not configured
-                        name = ''
-                        assignment = 'none'
-                        remember = ''
+			# default values if this port is not configured
+			name = ''
+			assignment = 'none'
+			remember = ''
+			bauds = ''
 
-                        
-                        for n in self.Serialinst:
-                                ii = self.Serialinst[n]
-                                if ii['remember'] == 'port' and ii['port'] == port:
-                                        if ii['vendor'] != vendor_id or ii['product'] != model_id or ii['serial'] != serial:
-                                                self.ShowMessage(_('Warning: You have connected the "').decode('utf8') + vendor_id + ', ' + model_id + _('" to the usb port which is reserved for another device').decode('utf8'))
-                                elif ii['remember'] != 'dev' or ii['vendor'] != vendor_id or ii['product'] != model_id or ii['serial'] != serial:
-                                        continue
-                                remember = ii['remember']
-                                assignment = ii['assignment']
-                                name = n
+			for n in self.Serialinst:
+				ii = self.Serialinst[n]
+				if ii['remember'] == 'port' and ii['port'] == port:
+					if ii['vendor'] != vendor_id or ii['product'] != model_id or ii['serial'] != serial:
+						self.ShowMessage(_('Warning: You have connected the "').decode('utf8') + vendor_id + ', ' + model_id + _('" to the usb port which is reserved for another device').decode('utf8'))
+				elif ii['remember'] != 'dev' or ii['vendor'] != vendor_id or ii['product'] != model_id or ii['serial'] != serial:
+					continue
+				remember = ii['remember']
+				assignment = ii['assignment']
+				name = n
+				bauds = ii['bauds']
 
-                        l = [name, i, vendor_id, model_id, port, serial, assignment, remember]
+			l = [name, i, vendor_id, model_id, port, serial, assignment, remember, bauds]
 			self.list_Serialinst.Append(map(lambda x : x.decode('utf8'), l))
 			sentence = 1
 		try:
@@ -2698,46 +2706,50 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if sentence == 1 and filesize < 10:
 			self.apply_changes_Serialinst()
 
-        def on_SerialinstSelected(self, e=False):
-                valid = e and e.GetIndex() >= 0
-                self.Serial_OPname.Enable(valid)
-                self.Serial_assignment.Enable(valid)
-                self.Serial_rem_dev.Enable(valid)
-                self.Serial_rem_port.Enable(valid)
-                if not valid:
-                        return
+	def on_SerialinstSelected(self, e=False):
+		valid = e and e.GetIndex() >= 0
+		self.Serial_OPname.Enable(valid)
+		self.Serial_assignment.Enable(valid)
+		self.Serial_baud_select.Enable(valid)
+		self.Serial_rem_dev.Enable(valid)
+		self.Serial_rem_port.Enable(valid)
+		if not valid:
+			return
 
-                i = e.GetIndex()
-                if 'serial' in self.list_Serialinst.GetItemText(i, 4):
-                        self.Serial_rem_port.SetValue(True) # remember by port for non usb
-                        self.Serial_rem_dev.Disable()
-                        self.Serial_rem_port.Disable()
-                else:
-                        rem = self.list_Serialinst.GetItemText(i, 7)
-                        self.Serial_rem_dev.SetValue(rem == 'dev')
-                        self.Serial_rem_port.SetValue(rem == 'port')
+		i = e.GetIndex()
+		if 'serial' in self.list_Serialinst.GetItemText(i, 4):
+			self.Serial_rem_port.SetValue(True) # remember by port for non usb
+			self.Serial_rem_dev.Disable()
+			self.Serial_rem_port.Disable()
+		else:
+			rem = self.list_Serialinst.GetItemText(i, 7)
+			self.Serial_rem_dev.SetValue(rem == 'dev')
+			self.Serial_rem_port.SetValue(rem == 'port')
 
-                self.Serial_OPname.SetValue(self.list_Serialinst.GetItemText(i, 0))
-                self.Serial_assignment.SetStringSelection(self.list_Serialinst.GetItemText(i, 6))
+		self.Serial_OPname.SetValue(self.list_Serialinst.GetItemText(i, 0))
+		self.Serial_assignment.SetStringSelection(self.list_Serialinst.GetItemText(i, 6))
+		self.Serial_baud_select.SetStringSelection(self.list_Serialinst.GetItemText(i, 8))
 
 	def on_update_Serialinst(self, e):
-                index = self.list_Serialinst.GetNextItem(-1, wx.LIST_NEXT_ALL, wx.LIST_STATE_SELECTED)
-                if index < 0:
-                        self.ShowMessage(_('Failed. No Port selected'))
-                        return
 
-                name = self.Serial_OPname.GetValue()
-                if not re.match('^[0-9a-zA-Z]{1,8}$', name):
-                        self.ShowMessage(_('Failed. The new name must be a string between 1 and 8 letters and/or numbers.'))
-                        return
-                self.list_Serialinst.SetStringItem(index, 0, name)
-                self.list_Serialinst.SetStringItem(index, 6, self.Serial_assignment.GetStringSelection())
-                if self.Serial_rem_dev.GetValue():
-                        rem = 'dev'
-                else:
-                        rem = 'port'
-                self.list_Serialinst.SetStringItem(index, 7, rem)
-                self.apply_changes_Serialinst(index)
+		index = self.list_Serialinst.GetNextItem(-1, wx.LIST_NEXT_ALL, wx.LIST_STATE_SELECTED)
+		if index < 0:
+			self.ShowMessage(_('Failed. No port selected'))
+			return
+
+		name = self.Serial_OPname.GetValue()
+		if not re.match('^[0-9a-zA-Z]{1,8}$', name):
+			self.ShowMessage(_('Failed. The new name must be a string between 1 and 8 letters and/or numbers.'))
+			return
+		self.list_Serialinst.SetStringItem(index, 0, name)
+		self.list_Serialinst.SetStringItem(index, 6, self.Serial_assignment.GetStringSelection())
+		if self.Serial_rem_dev.GetValue():
+			rem = 'dev'
+		else:
+			rem = 'port'
+		self.list_Serialinst.SetStringItem(index, 7, rem)
+		self.list_Serialinst.SetStringItem(index, 8, self.Serial_baud_select.GetStringSelection())
+		self.apply_changes_Serialinst(index)
                                         
 	def apply_changes_Serialinst(self, ind=-1):
                 # read values back from list control
@@ -2745,7 +2757,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
                 names = [] # determine if duplicate names are used
                 for i in range(self.list_Serialinst.GetItemCount()):
                         ii = {}
-                        cols = ['name', 'device', 'vendor', 'product', 'port', 'serial', 'assignment', 'remember']
+                        cols = ['name', 'device', 'vendor', 'product', 'port', 'serial', 'assignment', 'remember', 'bauds']
                         for j in range(len(cols)):
                                 ii[cols[j]] = self.list_Serialinst.GetItemText(i, j)
                         name = ii['name']
@@ -2755,7 +2767,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
                                 cur_name = name
                         del ii['name'] # no need to store the name as it is the key
                         if name in names:
-                                self.ShowMessage(_('Error:  Same name used for multiple devices'))
+                                self.ShowMessage(_('Failed. Same name used for multiple devices'))
                                 if i != ind: # replace only if selected
                                         continue
 
@@ -2784,15 +2796,17 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		file = open('10-openplotter.rules', 'w')
 		for name in self.Serialinst:
-                        i = self.Serialinst[name]
-			if 'port' == i['remember']: # non-usb serial
+			i = self.Serialinst[name]
+			if 'virtual' == i['port']:
+				write_str = 'KERNEL=="'+i['device'][5:]
+			elif 'port' == i['remember']: # non-usb serial
 				write_str = 'KERNEL=="' + i['device'][5:-1] + '*", KERNELS=="' + i['port']
 			else:
-                                write_str = 'SUBSYSTEM=="tty", ATTRS{idVendor}=="' + i['vendor']
-                                write_str += '",ATTRS{idProduct}=="' + i['product']
-                                if i['serial'] != '':
+				write_str = 'SUBSYSTEM=="tty", ATTRS{idVendor}=="' + i['vendor']
+				write_str += '",ATTRS{idProduct}=="' + i['product']
+				if i['serial'] != '':
 					write_str += '",ATTRS{serial}=="' + i['serial']
-                        write_str += '",SYMLINK+="ttyOP_' + name + '"\n'
+			write_str += '",SYMLINK+="ttyOP_' + name + '"\n'
 
 			file.write(write_str)
 		file.close()
@@ -2812,7 +2826,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
                         if line[:9] == 'DEVICES="':
                                 file1.write('DEVICES="')
                                 for name in self.Serialinst:
-                                        if self.Serialinst[name]['assignment'] == 'gpsd':
+                                        if self.Serialinst[name]['assignment'] == 'GPSD':
                                                 port = '/dev/ttyOP_' + name
                                                 file1.write(port + ' ')
                                 file1.write('"\n')
@@ -2824,7 +2838,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
                 # write pypilot allowed ports
                 file = open('pypilot_serial_ports', 'w')
                 for name in self.Serialinst:
-                        if self.Serialinst[name]['assignment'] == 'pypilot':
+                        if self.Serialinst[name]['assignment'] == 'Pypilot':
                                 port = '/dev/ttyOP_' + name
                                 file.write(port + '\n')
                                 os.system('sudo chown pi ' + port) # set permissions
@@ -2840,9 +2854,34 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
                 if os.system('diff pypilot_serial_ports ' + path + ' > /dev/null'):
                         os.system('mv pypilot_serial_ports ' + path)
                         self.reset_sensors()
-                
+
+        #set kplex devices
+		self.read_kplex_conf()
+		for name in self.Serialinst:
+			if self.Serialinst[name]['assignment'] == 'Kplex':
+				exist = False
+				for index, i in enumerate(self.kplex):
+					if i[1] == name:
+						if i[2] != 'Serial':
+							self.Serialinst[name]['assignment'] == _('none')
+                            self.ShowMessage(_('Failed. Same name used for multiple devices'))
+						else:
+							exist = True
+							self.kplex[index][5] = self.Serialinst[name]['bauds']
+				if not exist:
+					self.kplex.append([None, name, 'Serial', 'in', 'ttyOP_'+name, self.Serialinst[name]['bauds'], 'none', 'nothing', 'none', 'nothing', '1'])
+		
+		for index, i in enumerate(self.kplex):
+			if i[2] == 'Serial':
+				exist = False
+				for name in self.Serialinst:
+					if i[1] == name and self.Serialinst[name]['assignment'] == 'Kplex': exist = True
+				if not exist: del self.kplex[index]
+		self.set_list_kplex()
+		self.on_apply_changes_kplex(0)
+
 		time.sleep(1.5)
-		self.ShowStatusBarGREEN(_('Serial names added and restarted'))
+		self.ShowStatusBarGREEN(_('Serial port modified and restarted'))
 
 	###################################### N2K
 	def page_n2k(self):
