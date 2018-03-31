@@ -72,7 +72,6 @@ class MainFrame(wx.Frame):
 		self.p_serial = wx.Panel(self.nb)
 		self.p_kplex = wx.Panel(self.nb)
 		self.p_n2k = wx.Panel(self.nb)
-		self.p_sk = wx.Panel(self.nb)
 		self.p_wifi = wx.Panel(self.nb)
 		self.p_pypilot = wx.Panel(self.nb)
 		self.p_action = wx.Panel(self.nb)
@@ -88,7 +87,6 @@ class MainFrame(wx.Frame):
 		self.nb.AddPage(self.p_kplex, 'Kplex')
 		self.nb.AddPage(self.p_pypilot, _('Pypilot'))
 		self.nb.AddPage(self.p_n2k, 'CAN-USB')
-		self.nb.AddPage(self.p_sk, 'Signal K')
 		self.nb.AddPage(self.p_wifi, _('WiFi AP'))
 		self.nb.AddPage(self.p_action, _('Actions'))
 		self.nb.AddPage(self.p_gpio, _('GPIO'))
@@ -210,7 +208,6 @@ class MainFrame(wx.Frame):
 		self.page_serial()
 		self.page_kplex()
 		self.page_n2k()
-		self.page_sk()
 		self.page_wifi()
 		self.page_pypilot()
 		self.page_action()
@@ -228,7 +225,6 @@ class MainFrame(wx.Frame):
 		self.read_language()
 
 		self.read_account()
-		# self.read_sk()
 		self.read_sms()
 		self.read_startup()
 		self.read_wifi_conf()
@@ -2425,7 +2421,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.triggers[i][0] = 0
 			i += 1
 		self.conf.set('ACTIONS', 'triggers', str(self.triggers))
-		self.restart_SK(0)
+		self.restart_SK()
 
 	def on_cancel_changes_actions(self, e):
 		self.read_triggers()
@@ -2977,7 +2973,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.n2koutputs_label.SetLabel(self.conf.get('N2K', 'pgn_output'))
 		with open(self.home+'/.openplotter/openplotter-settings.json', 'w') as outfile:
 			json.dump(data, outfile)
-		self.restart_SK(0)
+		self.restart_SK()
 
 	def on_n2k_output(self, e):
 		isChecked = self.n2k_out_enable.GetValue()
@@ -3023,75 +3019,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.ShowStatusBarBLACK(_('Show sent PGNs.'))
 
 	###################################### Signal K
-	def page_sk(self):
-		sk_settings_box = wx.StaticBox(self.p_sk, label=_(' Settings '))
-		mmsi_label = wx.StaticText(self.p_sk, label='MMSI')
-		self.mmsi = wx.TextCtrl(self.p_sk, -1)
-		apply_changes = wx.Button(self.p_sk, label=_('Apply changes'))
-		apply_changes.Bind(wx.EVT_BUTTON, self.apply_SK)
 
-		sk_info_box = wx.StaticBox(self.p_sk, label=_(' Info '))
-		try:
-			response = requests.get('http://localhost:3000/signalk')
-		except:
-			self.restart_SK(0x0000)
-		try:	
-			response = requests.get('http://localhost:3000/signalk')
-		except Exception, e:
-			wx.MessageBox("SignalK doesn't work! Openplotter will exit because it wasn't able to start SignalK" + str(e), 'Error', wx.OK | wx.ICON_ERROR)
-			self.Close()
-		data = response.json()
-		text = _('Version: ').decode('utf8')+data['endpoints']['v1']['version']
-		text += '\n\n'
-		text += _('Signal K settings and tools:').decode('utf8')+'\n'+'http://localhost:3000'
-		text += '\n\n'
-		text += _('REST full format output:').decode('utf8')+'\n'+data['endpoints']['v1']['signalk-http']
-		text += '\n\n'
-		text += _('Websocket delta format output:').decode('utf8')+'\n'+data['endpoints']['v1']['signalk-ws']
-		text += '\n\n'
-		text += _('TCP delta format output:').decode('utf8')+'\n'+data['endpoints']['v1']['signalk-tcp']
-		text += '\n\n'
-		text += _('TCP NMEA 0183 format output:').decode('utf8')+'\n'+'tcp://localhost:10110'
-		sk_info_text = wx.StaticText(self.p_sk, label=text)
-
-		diagnostic = wx.Button(self.p_sk, label=_('SK Diagnostic'))
-		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
-
-		button_restartSK = wx.Button(self.p_sk, label=_('Restart'))
-		button_restartSK.Bind(wx.EVT_BUTTON, self.restart_SK)
-
-		tools_SK = wx.Button(self.p_sk, label=_('Signal K tools'))
-		tools_SK.Bind(wx.EVT_BUTTON, self.show_tools_SK)
-
-		v_boxSizer1 = wx.StaticBoxSizer(sk_settings_box, wx.VERTICAL)
-		v_boxSizer1.Add(mmsi_label, 0, wx.ALL | wx.EXPAND, 5)
-		v_boxSizer1.Add(self.mmsi, 0, wx.ALL | wx.EXPAND, 5)
-		v_boxSizer1.Add((0,0), 1, wx.ALL | wx.EXPAND, 5)
-		v_boxSizer1.Add(apply_changes, 0, wx.ALL, 5)
-
-		v_boxSizer2 = wx.StaticBoxSizer(sk_info_box, wx.VERTICAL)
-		v_boxSizer2.Add(sk_info_text, 0, wx.ALL | wx.EXPAND, 5)
-
-		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox1.Add(v_boxSizer1, 1, wx.ALL | wx.EXPAND, 5)
-		hbox1.Add(v_boxSizer2, 1, wx.ALL | wx.EXPAND, 5)
-
-		hbox = wx.BoxSizer(wx.HORIZONTAL)
-		hbox.Add(diagnostic, 0, wx.RIGHT | wx.LEFT, 5)
-		hbox.Add(button_restartSK, 0, wx.RIGHT | wx.LEFT, 5)
-		hbox.Add(tools_SK, 0, wx.RIGHT | wx.LEFT, 5)
-
-		vbox = wx.BoxSizer(wx.VERTICAL)
-		vbox.Add(hbox1, 1, wx.ALL | wx.EXPAND, 5)
-		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 5)
-
-		self.p_sk.SetSizer(vbox)
-
-	def show_tools_SK(self, e):
-		url = 'http://localhost:3000'
-		webbrowser.open(url, new=2)
-
-	def restart_SK(self, e):
+	def restart_SK(self):
 		# stopping sk server
 		self.ShowStatusBarRED(_('Closing Signal K server ...'))
 		subprocess.call(['sudo', 'systemctl', 'stop', 'signalk.service'])
@@ -3104,19 +3033,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def on_diagnostic_SK(self, e):
 		subprocess.call(['pkill', '-f', 'diagnostic-SK-input.py'])
 		subprocess.Popen(['python', self.currentpath + '/diagnostic-SK-input.py'])
-
-	def apply_SK(self, e):
-		mmsi = self.mmsi.GetValue()
-		uuid = "urn:mrn:imo:mmsi:" + mmsi
-		if mmsi == '':
-			self.ShowStatusBarRED(_('You have to provide a MMSI.'))
-			return
-		with open(self.home+'/.openplotter/openplotter-settings.json') as data_file:
-			data = json.load(data_file)
-		data['vessel']['uuid'] = uuid
-		with open(self.home+'/.openplotter/openplotter-settings.json', 'w') as outfile:
-			json.dump(data, outfile)
-		self.restart_SK(0)
 
 	####################### SMS
 	def page_sms(self):
