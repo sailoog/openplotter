@@ -129,9 +129,6 @@ class MainFrame(wx.Frame):
 		self.nmea_0183_item1 = self.settings.Append(wx.ID_ANY, _('NMEA 0183 generator'),
 													_('Generate NMEA 0183 from current values'))
 		self.Bind(wx.EVT_MENU, self.open_nmea_0183, self.nmea_0183_item1)
-		self.nmea_2000_item1 = self.settings.Append(wx.ID_ANY, _('NMEA 2000 generator'),
-													_('Generate NMEA 2000 from current values'))
-		self.Bind(wx.EVT_MENU, self.open_nmea_2000, self.nmea_2000_item1)
 		self.settings.AppendSeparator()
 
 		self.tools_py = []
@@ -289,10 +286,6 @@ class MainFrame(wx.Frame):
 	def open_nmea_0183(self, event):
 		subprocess.call(['pkill', '-f', 'NMEA_0183_generator.py'])
 		subprocess.Popen(['python', self.currentpath + '/tools/NMEA_0183_generator.py'])
-
-	def open_nmea_2000(self, event):
-		subprocess.call(['pkill', '-f', 'NMEA_2000_generator.py'])
-		subprocess.Popen(['python', self.currentpath + '/tools/NMEA_2000_generator.py'])
 
 	def tool10(self, event):
 		menuId = event.Id
@@ -2916,7 +2909,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		#set kplex devices
 		self.read_kplex_conf()
-
 		for name in self.Serialinst:
 			if self.Serialinst[name]['assignment'] == 'Kplex':
 				if self.Serialinst[name]['bauds'] == '':
@@ -2934,22 +2926,23 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 								self.kplex[index][5] = self.Serialinst[name]['bauds']
 					if not exist:
 						self.kplex.append([None, name, 'Serial', 'in', 'ttyOP_'+name, self.Serialinst[name]['bauds'], 'none', 'nothing', 'none', 'nothing', '1'])
-			
 		for index, i in enumerate(self.kplex):
 			if i[2] == 'Serial':
 				exist = False
 				for name in self.Serialinst:
 					if i[1] == name and self.Serialinst[name]['assignment'] == 'Kplex': exist = True
 				if not exist: del self.kplex[index]
-
 		self.set_list_kplex()
 		self.on_apply_changes_kplex(0)
 
 		#set CAN-USB devices
+		can_device = ''
 		for name in self.Serialinst:
 			if self.Serialinst[name]['assignment'] == 'CAN-USB':
-				self.conf.set('N2K', 'can_usb', 'ttyOP_'+name)
-				self.read_n2k()
+				can_device = 'ttyOP_'+name
+				break
+		self.conf.set('N2K', 'can_usb', can_device)
+		self.on_n2k_enable()
 
 		time.sleep(1.5)
 		self.ShowStatusBarGREEN(_('Serial port modified and restarted'))
@@ -2965,137 +2958,171 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	###################################### N2K
 
 	def page_n2k(self):
-		wx.StaticBox(self.p_n2k, label=_(' Settings '), size=(230, 265), pos=(10, 10))
-		i = 35
-		self.CANUSB_label = wx.StaticText(self.p_n2k, label=_('CAN-USB device:'), pos=(20, i))
-		i += 20
-		self.can_usb = wx.StaticText(self.p_n2k, pos=(20, i))
-		i += 35
-		self.n2k_enable = wx.CheckBox(self.p_n2k, label=_('Enable N2K input'), pos=(20, i))
+	
+		CANUSB_label = wx.StaticText(self.p_n2k, label=_('CAN-USB port:'))
+		self.can_usb = wx.StaticText(self.p_n2k)
+
+		n2k_input_box = wx.StaticBox(self.p_n2k, label=_(' Input ')) 
+
+		self.n2k_enable = wx.CheckBox(self.p_n2k, label=_('Enable N2K input'))
 		self.n2k_enable.Bind(wx.EVT_CHECKBOX, self.on_n2k_enable)
-		i += 25
-		self.N2K_diagnostic_b = wx.Button(self.p_n2k, label=_('Diagnostic input'), pos=(20, i))
+
+		self.N2K_diagnostic_b = wx.Button(self.p_n2k, label=_('Diagnostic'))
 		self.N2K_diagnostic_b.Bind(wx.EVT_BUTTON, self.on_N2K_diagnostic)
-		i += 35
-		self.n2k_out_enable = wx.CheckBox(self.p_n2k, label=_('Enable N2K output'), pos=(20, i))
+
+		n2k_output_box = wx.StaticBox(self.p_n2k, label=_(' Output ')) 
+
+		self.n2k_out_enable = wx.CheckBox(self.p_n2k, label=_('Enable N2K output'))
 		self.n2k_out_enable.Bind(wx.EVT_CHECKBOX, self.on_n2k_output)
-		i += 25
-		self.N2K_diagnostic_out_b = wx.Button(self.p_n2k, label=_('Diagnostic output'), pos=(20, i))
+
+		self.N2K_diagnostic_out_b = wx.Button(self.p_n2k, label=_('Diagnostic'))
 		self.N2K_diagnostic_out_b.Bind(wx.EVT_BUTTON, self.on_N2K_diagnostic_out)
-		i += 40
-		self.button_N2K_setting = wx.Button(self.p_n2k, label=_('Output settings'), pos=(20, i))
+	
+		self.button_N2K_setting = wx.Button(self.p_n2k, label=_('Device settings'))
 		self.button_N2K_setting.Bind(wx.EVT_BUTTON, self.on_N2K_setting)
+	
+		self.SK_to_N2K = wx.Button(self.p_n2k, label=_('Signal K to N2K converter'))
+		self.SK_to_N2K.Bind(wx.EVT_BUTTON, self.on_SK_to_N2K)
 
-		wx.StaticBox(self.p_n2k, label=_(' Inputs '), size=(430, 50), pos=(250, 10))
-		self.n2kinputs_label = wx.StaticText(self.p_n2k, label=_('PGNs: All'), pos=(260, 30))
+		hbox = wx.BoxSizer(wx.HORIZONTAL) 
+		hbox.Add(CANUSB_label, 0, wx.ALL | wx.EXPAND, 5) 
+		hbox.Add(self.can_usb, 0, wx.ALL | wx.EXPAND, 5)
 
-		wx.StaticBox(self.p_n2k, label=_(' Outputs '), size=(430, 210), pos=(250, 65))
-		wx.StaticText(self.p_n2k, label='PGNs:', pos=(260, 85))
-		self.n2koutputs_label = wx.StaticText(self.p_n2k, pos=(260, 105))
+		v_boxSizer1 = wx.StaticBoxSizer(n2k_input_box, wx.HORIZONTAL) 
+		v_boxSizer1.Add(self.n2k_enable, 0, wx.ALL | wx.EXPAND, 5)
+		v_boxSizer1.Add(self.N2K_diagnostic_b, 0, wx.ALL | wx.EXPAND, 5)
+
+		v_boxSizer2 = wx.StaticBoxSizer(n2k_output_box, wx.HORIZONTAL) 
+		v_boxSizer2.Add(self.n2k_out_enable, 0, wx.ALL | wx.EXPAND, 5)
+		v_boxSizer2.Add(self.N2K_diagnostic_out_b, 0, wx.ALL | wx.EXPAND, 5)
+		v_boxSizer2.Add(self.button_N2K_setting, 0, wx.ALL | wx.EXPAND, 5)
+		v_boxSizer2.Add(self.SK_to_N2K, 0, wx.ALL | wx.EXPAND, 5) 
+
+		vbox = wx.BoxSizer(wx.VERTICAL) 
+		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 5) 
+		vbox.Add(v_boxSizer1, 0, wx.ALL | wx.EXPAND, 5)
+		vbox.Add(v_boxSizer2, 0, wx.ALL | wx.EXPAND, 5) 
+
+		self.p_n2k.SetSizer(vbox) 
+
+
+	def on_SK_to_N2K(self, event):
+		subprocess.call(['pkill', '-f', 'SK_to_N2K.py'])
+		subprocess.Popen(['python', self.currentpath + '/SK_to_N2K.py'])
 
 	def read_n2k(self):
-		if self.conf.get('N2K', 'enable') == '1':
-			self.n2k_enable.SetValue(True)
-			self.can_usb.Disable()
+		can_device = self.conf.get('N2K', 'can_usb')
+		if not can_device: 
+			self.can_usb.SetLabel(_('none')) 
+			self.conf.set('N2K', 'enable', '0')
+			self.conf.set('N2K', 'output', '0')
+			self.n2k_enable.SetValue(False)
+			self.n2k_out_enable.SetValue(False)
+			self.n2k_enable.Disable()
+			self.n2k_out_enable.Disable()
 			self.button_N2K_setting.Disable()
 			self.N2K_diagnostic_b.Disable()
-		self.n2koutputs_label.SetLabel(self.conf.get('N2K', 'pgn_output'))
+			self.N2K_diagnostic_out_b.Disable()
+			return
+
+		self.can_usb.SetLabel('/dev/'+can_device)
+		self.n2k_enable.Enable()
+		self.n2k_out_enable.Enable()
+
+		if self.conf.get('N2K', 'enable') == '1':
+			self.n2k_enable.SetValue(True)
+			self.button_N2K_setting.Disable()
+			self.N2K_diagnostic_b.Disable()
+		else:
+			self.n2k_enable.SetValue(False)
+			self.button_N2K_setting.Enable()
+			self.N2K_diagnostic_b.Enable()
+
 		if self.conf.get('N2K', 'output') == '1':
 			self.n2k_out_enable.SetValue(True)
 			self.N2K_diagnostic_out_b.Disable()
-		can_device = self.conf.get('N2K', 'can_usb')
-		if not can_device: can_device = _('none')
-		self.can_usb.SetLabel(can_device)
+		else:
+			self.n2k_out_enable.SetValue(False)
+			self.N2K_diagnostic_out_b.Enable()
 
-	def on_n2k_enable(self, e):
-		with open(self.home+'/.openplotter/openplotter-settings.json') as data_file:
+	def on_n2k_enable(self, e=0):
+		with open(self.home+'/.signalk/settings.json') as data_file:
 			data = json.load(data_file)
 		isChecked = self.n2k_enable.GetValue()
+		can_device = self.conf.get('N2K', 'can_usb')
 		if isChecked:
-			if self.can_usb.GetSelection() == 0:
-				self.n2k_enable.SetValue(False)
-				self.ShowStatusBarBLACK(_('You have to select a CAN-USB-CAN device'))
-				return
 			subprocess.call(['pkill', '-f', 'CAN-USB-stick.py'])
 			self.conf.set('N2K', 'enable', '1')
-			self.conf.set('N2K', 'can_usb', self.can_usb.GetValue())
-			self.can_usb.Disable()
-			self.button_N2K_setting.Disable()
-			self.N2K_diagnostic_b.Disable()
-			exist = 0
+			exist = False
 			ii = 0
 			for i in data['pipedProviders']:
-				if i['id'] == 'CAN-USB':
-					# edit nmea 2000
-					data['pipedProviders'][ii]['pipeElements'][0]['options'][
-						'command'] = 'actisense-serial ' + self.can_usb.GetValue()
-					exist = 1
+				if i['id'] == 'OPcan':
+					exist = True
+					data['pipedProviders'][ii]['pipeElements'][0]['options']['subOptions']['device'] = '/dev/'+can_device
+					data['pipedProviders'][ii]['enabled'] = True
 				ii += 1
-			if exist == 0:
-				new = {"id": "CAN-USB",
-					   "pipeElements": [{"type": "providers/execute", "options": {"command": "actisense-serial xxx"}},
-										{"type": "providers/liner"}, {"type": "providers/n2kAnalyzer"},
-										{"type": "providers/n2k-signalk"}]}
-				new['pipeElements'][0]['options']['command'] = 'actisense-serial ' + self.can_usb.GetValue()
+			if not exist:
+				new = {"id": "OPcan","pipeElements": [{"type": "providers/simple","options": {"logging": False,"type": "NMEA2000","subOptions": {"type": "ngt-1","device": "/dev/"+can_device}}}],"enabled": True}
 				data['pipedProviders'].append(new)
 		else:
 			self.conf.set('N2K', 'enable', '0')
-			self.can_usb.Enable()
-			self.button_N2K_setting.Enable()
-			self.N2K_diagnostic_b.Enable()
-			ii = 0
-			for i in data['pipedProviders']:
-				if i['id'] == 'CAN-USB':
-					# delete nmea 2000
-					del data['pipedProviders'][ii]
-				ii += 1
-		self.n2koutputs_label.SetLabel(self.conf.get('N2K', 'pgn_output'))
-		with open(self.home+'/.openplotter/openplotter-settings.json', 'w') as outfile:
+			if can_device:
+				ii = 0
+				for i in data['pipedProviders']:
+					if i['id'] == 'OPcan':
+						data['pipedProviders'][ii]['enabled'] = False
+					ii += 1
+			else:
+				ii = 0
+				for i in data['pipedProviders']:
+					if i['id'] == 'OPcan':
+						del data['pipedProviders'][ii]
+					ii += 1
+
+		with open(self.home+'/.signalk/settings.json', 'w') as outfile:
 			json.dump(data, outfile)
+		self.read_n2k()
 		self.restart_SK()
 
 	def on_n2k_output(self, e):
 		isChecked = self.n2k_out_enable.GetValue()
 		if isChecked:
-			if self.can_usb.GetSelection() == 0:
-				self.n2k_out_enable.SetValue(False)
-				self.ShowStatusBarBLACK(_('You have to select a CAN-USB-CAN device'))
-				return
-			self.N2K_diagnostic_out_b.Disable()
-			self.conf.set('N2K', 'output', '1')
-			subprocess.call(['pkill', '-f', 'diagnostic-N2K-output.py'])
-			subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
-			subprocess.Popen(['python', self.currentpath + '/N2K-server_d.py'])
+			if self.check_can_device():
+				self.conf.set('N2K', 'output', '1')
+				subprocess.call(['pkill', '-f', 'diagnostic-N2K-output.py'])
+				subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
+				subprocess.Popen(['python', self.currentpath + '/N2K-server_d.py'])
 		else:
 			self.conf.set('N2K', 'output', '0')
 			subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
-			self.N2K_diagnostic_out_b.Enable()
+		self.read_n2k()
 
 	def on_N2K_setting(self, e):
-		if self.can_usb.GetSelection() == 0:
-			self.ShowStatusBarBLACK(_('You have to select a CAN-USB-CAN device'))
-			return
-		subprocess.call(['pkill', '-f', 'CAN-USB-stick.py'])
-		self.stop_sensors()
-		self.stop_1w()
-		subprocess.Popen(['python', self.currentpath + '/CAN-USB-stick.py'])
-		self.ShowStatusBarBLACK(_('Select PGNs to transmit and enable N2K input/output again.'))
+		if self.check_can_device():
+			subprocess.call(['pkill', '-f', 'CAN-USB-stick.py'])
+			subprocess.Popen(['python', self.currentpath + '/CAN-USB-stick.py'])
+			self.ShowStatusBarBLACK(_('Select PGNs to transmit and enable N2K input/output again.'))
 
 	def on_N2K_diagnostic(self, e):
-		if self.can_usb.GetSelection() == 0:
-			self.ShowStatusBarBLACK(_('You have to select a CAN-USB-CAN device'))
-			return
-		subprocess.call(['pkill', '-f', 'diagnostic-N2K-input.py'])
-		subprocess.Popen(['python', self.currentpath + '/diagnostic-N2K-input.py'])
-		self.ShowStatusBarBLACK(_('Show received PGNs.'))
+		if self.check_can_device():
+			subprocess.call(['pkill', '-f', 'diagnostic-N2K-input.py'])
+			subprocess.Popen(['python', self.currentpath + '/diagnostic-N2K-input.py'])
+			self.ShowStatusBarBLACK(_('Show received PGNs.'))
 
 	def on_N2K_diagnostic_out(self, e):
-		if self.can_usb.GetSelection() == 0:
-			self.ShowStatusBarBLACK(_('You have to select a CAN-USB-CAN device'))
-			return
-		subprocess.call(['pkill', '-f', 'diagnostic-N2K-output.py'])
-		subprocess.Popen(['python', self.currentpath + '/diagnostic-N2K-output.py'])
-		self.ShowStatusBarBLACK(_('Show sent PGNs.'))
+		if self.check_can_device():
+			subprocess.call(['pkill', '-f', 'diagnostic-N2K-output.py'])
+			subprocess.Popen(['python', self.currentpath + '/diagnostic-N2K-output.py'])
+			self.ShowStatusBarBLACK(_('Show sent PGNs.'))
+
+	def check_can_device(self):
+		can_device = self.conf.get('N2K', 'can_usb')
+		if not can_device:
+			self.n2k_enable.SetValue(False)
+			self.n2k_out_enable.SetValue(False)
+			self.ShowStatusBarBLACK(_('You have to add a CAN-USB device on Serial ports tab'))
+			return False
+		else: return True
 
 	###################################### Signal K
 

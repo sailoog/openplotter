@@ -29,9 +29,9 @@ if not activ:
 	sys.exit(0)
 
 try:
-	ser = serial.Serial(conf.get('N2K', 'can_usb'), 115200, timeout=0.5)
+	ser = serial.Serial('/dev/'+conf.get('N2K', 'can_usb'), 115200, timeout=0.5)
 except:
-	print 'failed to start N2K output server on ' + conf.get('N2K', 'can_usb')
+	print 'failed to start N2K output server on /dev/' + conf.get('N2K', 'can_usb')
 	sys.exit(0)
 
 	

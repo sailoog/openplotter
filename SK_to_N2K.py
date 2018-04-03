@@ -16,11 +16,8 @@
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 import wx, os, sys
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
-
-op_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')
-sys.path.append(op_folder+'/classes')
-from conf import Conf
-from language import Language
+from classes.conf import Conf
+from classes.language import Language
 
 class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 	def __init__(self, parent, height):

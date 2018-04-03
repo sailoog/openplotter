@@ -29,9 +29,9 @@ class MyFrame(wx.Frame):
 		self.currentpath = self.conf.get('GENERAL', 'op_folder')
 		
 		try:
-			self.ser = serial.Serial(self.conf.get('N2K', 'can_usb'), 115200, timeout=0.5)
+			self.ser = serial.Serial('/dev/'+self.conf.get('N2K', 'can_usb'), 115200, timeout=0.5)
 		except:
-			print 'failed to start N2K input diagnostic on '+self.conf.get('N2K', 'can_usb')
+			print 'failed to start N2K input diagnostic on /dev/'+self.conf.get('N2K', 'can_usb')
 			sys.exit(0)
 					
 		Language(self.conf)
