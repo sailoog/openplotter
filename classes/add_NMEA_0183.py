@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 import wx, pynmea2, inspect, webbrowser, json, subprocess, requests, re
+from SK_settings import SK_settings
+
 
 class addNMEA_0183(wx.Dialog):
 
@@ -23,6 +25,11 @@ class addNMEA_0183(wx.Dialog):
 		self.conf = conf
 		self.home = self.conf.home
 		self.currentpath = self.conf.get('GENERAL', 'op_folder')
+
+		SK_ = SK_settings()
+		self.port = SK_.aktport
+		self.http = SK_.http
+		
 
 		wx.Dialog.__init__(self, None, title=_('add NMEA 0183 sentence'), size=(670,410))
 
@@ -71,7 +78,7 @@ class addNMEA_0183(wx.Dialog):
 
 		self.list_vessels=[_('--vessel'),'self']
 		try:
-			response = requests.get('http://localhost:3000/signalk/v1/api/vessels')
+			response = requests.get(self.http+'localhost:'+str(self.port)+'/signalk/v1/api/vessels')
 			data = response.json()
 		except:data=None
 		if data:

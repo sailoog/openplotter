@@ -34,6 +34,7 @@ from classes.add_trigger import addTrigger
 from classes.add_value_setting import addvaluesetting
 from classes.add_deviation_setting import adddeviationsetting
 from classes.conf import Conf
+from classes.SK_settings import SK_settings
 from classes.language import Language
 
 class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
@@ -56,6 +57,7 @@ class MainFrame(wx.Frame):
 		self.home = conf.home
 		self.conf_folder = conf.conf_folder
 		self.currentpath = currentpath
+		self.SK_settings = SK_settings()
 
 		wx.Frame.__init__(self, None, title="OpenPlotter", size=(710, 460))
 		if self.util_process_exist('startup.py'):
@@ -1053,7 +1055,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.pypilot_controller = wx.StaticText(self.p_pypilot)
 
 		nmea_label = wx.StaticText(self.p_pypilot, label=_('NMEA 0183 Sensors (Wind/GPS)'))
-		self.pypilot_nmea = wx.StaticText(self.p_pypilot)
+		self.pypilot_nmea = wx.TextCtrl(self.p_pypilot,style=wx.TE_MULTILINE | wx.VSCROLL | wx.TE_READONLY, size=(280,60))
 
 		self.pypilot_webapp_cb = wx.CheckBox(self.p_pypilot, False, _('Enable webapp'))
 		pypilot_webapp_port_label = wx.StaticText(self.p_pypilot, label=_('port:'))
@@ -1099,37 +1101,39 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		hbox2.Add(self.imu_detected, 0, wx.ALL | wx.RIGHT | wx.EXPAND, 5)
 
 		hbox5 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox5.Add(calibration, 0, wx.ALL | wx.EXPAND, 5)
-		hbox5.Add(scope, 0, wx.ALL | wx.EXPAND, 5)
-		hbox5.Add(client, 0, wx.ALL | wx.EXPAND, 5)
-		hbox5.Add(reset, 0, wx.ALL | wx.EXPAND, 5)
+		hbox5.Add(calibration, 0, 0, 5)
+		hbox5.Add(scope, 0, 0, 5)
+		hbox5.Add(client, 0, 0, 5)
+		hbox5.Add(reset, 0, 0, 5)
 
 		hbox3 = wx.BoxSizer(wx.HORIZONTAL)
 		hbox3.Add(translation_rate_label, 0, wx.UP | wx.EXPAND, 10)
 		hbox3.Add(self.pypilot_translation_rate, 0, wx.ALL | wx.EXPAND, 5)
 
 		vbox1 = wx.StaticBoxSizer(imu_box, wx.VERTICAL)
-		vbox1.Add(hbox2, 0, wx.ALL | wx.EXPAND, 5)
-		vbox1.Add(hbox5, 0, wx.ALL | wx.EXPAND, 5)
-		vbox1.Add(self.pypilot_signalk_translation, 0, wx.ALL | wx.EXPAND, 5)
-		vbox1.Add(hbox3, 0, wx.ALL | wx.EXPAND, 5)
+		vbox1.Add(hbox2, 0, 0, 5)
+		vbox1.Add(hbox5, 0, 0, 5)
+		vbox1.Add(self.pypilot_signalk_translation, 0, 0, 5)
+		vbox1.Add(hbox3, 0, 0, 5)
 
 		hbox6 = wx.BoxSizer(wx.HORIZONTAL)
+		hbox6.Add(controller_label, 0, wx.ALL | wx.EXPAND, 5)
 		hbox6.Add(self.pypilot_controller, 0, wx.ALL | wx.EXPAND, 5)
 
-		hbox7 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox7.Add(self.pypilot_nmea, 0, wx.ALL | wx.EXPAND, 5)
+		#hbox7 = wx.BoxSizer(wx.HORIZONTAL)
+		#hbox7.Add(self.pypilot_nmea, 0, wx.ALL | wx.EXPAND, 5)
 
 		hbox4 = wx.BoxSizer(wx.HORIZONTAL)
 		hbox4.Add(pypilot_webapp_port_label, 0, wx.UP | wx.LEFT | wx.EXPAND, 10)
 		hbox4.Add(self.pypilot_webapp_port, 0, wx.ALL | wx.EXPAND, 5)
 
 		vbox2 = wx.StaticBoxSizer(connections_box, wx.VERTICAL)
-		vbox2.Add(controller_label, 0, wx.UP | wx.LEFT | wx.EXPAND, 5)
-		vbox2.Add(hbox6, 0, wx.DOWN | wx.EXPAND, 5)
-		vbox2.Add(nmea_label, 0, wx.UP | wx.LEFT | wx.EXPAND, 5)
-		vbox2.Add(hbox7, 0, wx.DOWN | wx.EXPAND, 5)
-		vbox2.Add(self.pypilot_control, 0, wx.ALL, 5)
+		#vbox2.Add(controller_label, 0, wx.UP | wx.LEFT | wx.EXPAND, 5)
+		vbox2.Add(hbox6, 0, 0, 5)
+		#vbox2.Add(self.pypilot_controller, 0, wx.UP | wx.LEFT | wx.EXPAND, 5)
+		vbox2.Add(nmea_label, 0, 0, 5)
+		vbox2.Add(self.pypilot_nmea, 1, wx.ALL | wx.EXPAND, 5)
+		vbox2.Add(self.pypilot_control, 0, 0, 5)
 		vbox2.Add(self.pypilot_webapp_cb, 0, wx.UP | wx.EXPAND, 5)
 		vbox2.Add(hbox4, 0, wx.DOWN | wx.EXPAND, 5)
 
@@ -1252,13 +1256,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		self.conf.set('PYPILOT', 'translation_rate', self.pypilot_translation_rate.GetStringSelection())
 
-		self.conf.set('PYPILOT', 'webapp', '1' if self.pypilot_webapp_cb.IsEnabled() else '0')
+		self.conf.set('PYPILOT', 'webapp', '1' if self.pypilot_webapp_cb.GetValue() else '0')
 		self.conf.set('PYPILOT', 'webapp_port', str(self.pypilot_webapp_port.GetValue()))
 
 		self.reset_sensors()
 
 		subprocess.call(['pkill', '-f', 'pypilot_webapp'])
-		if self.pypilot_webapp_cb.IsEnabled():
+		if self.pypilot_webapp_cb.GetValue():
 			subprocess.Popen(['pypilot_webapp', str(self.pypilot_webapp_port.GetValue())])
 
 	def on_cancel_changes_pypilot(self,e):
@@ -2673,7 +2677,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			name = ''
 			assignment = _('none')
 			remember = ''
-			bauds = ''
+			bauds = '4800'
 
 			for n in self.Serialinst:
 				ii = self.Serialinst[n]
@@ -2685,7 +2689,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					name = n
 					assignment = ii['assignment']
 					remember = ii['remember']
-					bauds = ii['bauds']
+					try:
+						bauds = ii['bauds']
+					except:
+						pass
 					break
 				elif ii['remember'] == 'dev' and ii['vendor'] == vendor_id and ii['product'] == model_id and ii['serial'] == serial:
 					#check if device with same product/vendor/serial has been added
@@ -2696,8 +2703,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 						name = n
 						assignment = ii['assignment']
 						remember = ii['remember']
-						bauds = ii['bauds']
-						break
+						try:
+							bauds = ii['bauds']
+						except:
+							pass
 
 			l = [name, i, vendor_id, model_id, port, serial, assignment, remember, bauds]
 			self.list_Serialinst.Append(map(lambda x : x.decode('utf8'), l))
