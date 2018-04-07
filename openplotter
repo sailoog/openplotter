@@ -3078,22 +3078,23 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.button_N2K_setting.Disable()
 			self.N2K_diagnostic_b.Disable()
 			self.N2K_diagnostic_out_b.Disable()
-			return
-		self.can_usb.SetLabel('/dev/'+can_device)		
-		self.n2k_enable.SetValue(self.SK_settings.ngt1_enabled==1)
-		if self.SK_settings.ngt1_enabled == 0:
-			self.button_N2K_setting.Enable()
-			self.N2K_diagnostic_b.Enable()
 		else:
-			self.button_N2K_setting.Disable()
-			self.N2K_diagnostic_b.Disable()
-		if self.conf.get('N2K', 'output') == '1':
-			self.n2k_out_enable.SetValue(True)
-			self.button_N2K_setting.Disable()
-			self.N2K_diagnostic_out_b.Disable()
-		else:
-			self.n2k_out_enable.SetValue(False)
-			self.N2K_diagnostic_out_b.Enable()
+			self.can_usb.SetLabel('/dev/'+can_device)		
+			self.n2k_enable.SetValue(self.SK_settings.ngt1_enabled==1)
+			if self.SK_settings.ngt1_enabled == 0:
+				self.button_N2K_setting.Enable()
+				self.N2K_diagnostic_b.Enable()
+			else:
+				self.button_N2K_setting.Disable()
+				self.N2K_diagnostic_b.Disable()
+			if self.conf.get('N2K', 'output') == '1':
+				self.n2k_out_enable.SetValue(True)
+				self.button_N2K_setting.Disable()
+				self.N2K_diagnostic_out_b.Disable()
+			else:
+				self.n2k_out_enable.SetValue(False)
+				self.N2K_diagnostic_out_b.Enable()
+	
 		if self.SK_settings.canbus_enabled != -1:
 			self.n2k_can0_enable.SetValue(self.SK_settings.canbus_enabled == 1)
 				
