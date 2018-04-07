@@ -373,7 +373,7 @@ for ii in temp_list:
 if analog_:
 	try:
 		spi = spidev.SpiDev()
-		spi.open(0,0)
+		spi.open(0,1)
 	except:
 		analog_=False
 		print 'spi is disabled in raspberry-pi-configuration device tab'

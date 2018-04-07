@@ -25,6 +25,9 @@ class SK_settings:
 		self.home = self.conf.home
 		
 		self.setting_file = self.home+'/.signalk/settings.json'
+		self.load()
+		
+	def load(self):
 		if os.path.isfile(self.setting_file):
 			with open(self.setting_file) as data_file:
 				self.data = yaml.load(data_file)
@@ -34,7 +37,7 @@ class SK_settings:
 		self.port = -1
 		if 'port' in self.data: self.port = self.data['port']
 		self.ssl = -1
-		if 'ssl' in self.data: self.ssl = self.data['ssl'] == 'true'
+		if 'ssl' in self.data: self.ssl = self.data['ssl']
 		
 		self.http = 'http://'
 		self.ws = 'ws://'
@@ -62,21 +65,17 @@ class SK_settings:
 		if 'pipedProviders' in self.data:
 			try:
 				for i in self.data['pipedProviders']:
-					#print i
 					if i['pipeElements'][0]['options']['subOptions']['type'] == 'ngt-1':
-						self.ngt1_enabled=str(i['enabled'])=='True'
+						self.ngt1_enabled=i['enabled']
 						self.ngt1=count
 						self.ngt1_device=i['pipeElements'][0]['options']['subOptions']['device']
 					elif i['pipeElements'][0]['options']['subOptions']['type'] == 'canbus':
-						self.canbus_enabled=str(i['enabled'])=='True'
-						#print i['enabled']
+						self.canbus_enabled=i['enabled']
 						self.canbus=count
 						self.canbus_interface=i['pipeElements'][0]['options']['subOptions']['interface']
 					count+=1
 			except:
 				print 'Error parsing setting.json'
-		#print self.ngt1_enabled,self.ngt1,self.ngt1_device
-		#print self.canbus_enabled,self.canbus,self.canbus_interface
 				
 	def set_ngt1_device(self,device):
 		if self.ngt1_enabled != -1:
@@ -86,17 +85,17 @@ class SK_settings:
 	def set_ngt1_enable(self,enable):
 		if self.ngt1_enabled != -1:
 			if enable == 1:
-				self.data['pipedProviders'][self.ngt1]['enabled']='true'
+				self.data['pipedProviders'][self.ngt1]['enabled']=True
 			elif enable == 0:
-				self.data['pipedProviders'][self.ngt1]['enabled']='false'
+				self.data['pipedProviders'][self.ngt1]['enabled']=False
 			self.write_settings()
 
 	def set_canbus_enable(self,enable):
 		if self.canbus_enabled != -1:
 			if enable == 1:
-				self.data['pipedProviders'][self.canbus]['enabled']='true'
+				self.data['pipedProviders'][self.canbus]['enabled']=True
 			elif enable == 0:
-				self.data['pipedProviders'][self.canbus]['enabled']='false'
+				self.data['pipedProviders'][self.canbus]['enabled']=False
 			self.write_settings()
 			
 	def write_settings(self):
@@ -105,7 +104,7 @@ class SK_settings:
 			wififile = open(self.setting_file, 'w')
 			wififile.write(data)
 			wififile.close()
-			self.data = yaml.load(data)
+			self.load()
 		except:
 			print 'Error saving setting.json'
 

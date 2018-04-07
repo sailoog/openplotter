@@ -32,7 +32,8 @@ from classes.add_tool10 import addTool10
 from classes.add_topic import addTopic
 from classes.add_trigger import addTrigger
 from classes.add_value_setting import addvaluesetting
-from classes.add_deviation_setting import adddeviationsetting
+from classes.add_value_setting import addvaluesetting
+from classes.add_SK_to_N2K import addSKtoN2K
 from classes.conf import Conf
 from classes.SK_settings import SK_settings
 from classes.language import Language
@@ -2558,15 +2559,15 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	####################### Serial manager
 	def page_serial(self):
 		self.list_Serialinst = wx.ListCtrl(self.p_serial, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
-		self.list_Serialinst.InsertColumn(0, _('name'), width=100)
-		self.list_Serialinst.InsertColumn(1, _('device'), width=90)
-		self.list_Serialinst.InsertColumn(2, _('vendor'), width=55)
-		self.list_Serialinst.InsertColumn(3, _('product'), width=60)
-		self.list_Serialinst.InsertColumn(4, _('port'), width=80)
+		self.list_Serialinst.InsertColumn(0, _('name'), width=80)
+		self.list_Serialinst.InsertColumn(1, _('device'), width=95)
+		self.list_Serialinst.InsertColumn(2, _('vendor'), width=50)
+		self.list_Serialinst.InsertColumn(3, _('product'), width=55)
+		self.list_Serialinst.InsertColumn(4, _('port'), width=90)
 		self.list_Serialinst.InsertColumn(5, _('serial'), width=80)
 		self.list_Serialinst.InsertColumn(6, _('assignment'), width=80)
-		self.list_Serialinst.InsertColumn(7, _('remember'), width=80)
-		self.list_Serialinst.InsertColumn(8, _('bauds'), width=50)
+		self.list_Serialinst.InsertColumn(7, _('remember'), width=75)
+		self.list_Serialinst.InsertColumn(8, _('bauds'), width=60)
 		self.list_Serialinst.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_SerialinstSelected)
 
 		hlistbox = wx.BoxSizer(wx.HORIZONTAL)
@@ -2984,6 +2985,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.n2k_out_enable = wx.CheckBox(self.p_n2k, label=_('Enable N2K output'))
 		self.n2k_out_enable.Bind(wx.EVT_CHECKBOX, self.on_n2k_output)
 
+		if self.SK_settings.canbus_enabled != -1:		
+			n2k_can0_input_box = wx.StaticBox(self.p_n2k, label=_(' Input can0 ')) 
+
+			self.n2k_can0_enable = wx.CheckBox(self.p_n2k, label=_('Enable can0 N2K input'))
+			self.n2k_can0_enable.Bind(wx.EVT_CHECKBOX, self.on_n2k_can0_enable)		
+		
 		self.N2K_diagnostic_out_b = wx.Button(self.p_n2k, label=_('Diagnostic'))
 		self.N2K_diagnostic_out_b.Bind(wx.EVT_BUTTON, self.on_N2K_diagnostic_out)
 	
@@ -3007,104 +3014,99 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		v_boxSizer2.Add(self.button_N2K_setting, 0, wx.ALL | wx.EXPAND, 5)
 		v_boxSizer2.Add(self.SK_to_N2K, 0, wx.ALL | wx.EXPAND, 5) 
 
+		v_boxSizer3 = wx.StaticBoxSizer(n2k_can0_input_box, wx.HORIZONTAL) 
+		v_boxSizer3.Add(self.n2k_can0_enable, 0, wx.ALL | wx.EXPAND, 5)
+
 		vbox = wx.BoxSizer(wx.VERTICAL) 
 		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 5) 
 		vbox.Add(v_boxSizer1, 0, wx.ALL | wx.EXPAND, 5)
-		vbox.Add(v_boxSizer2, 0, wx.ALL | wx.EXPAND, 5) 
-
+		vbox.Add(v_boxSizer2, 0, wx.ALL | wx.EXPAND, 5)
+		if self.SK_settings.canbus_enabled != -1:
+			vbox.Add(v_boxSizer3, 0, wx.ALL | wx.EXPAND, 5)
 		self.p_n2k.SetSizer(vbox) 
 
-
 	def on_SK_to_N2K(self, event):
-		subprocess.call(['pkill', '-f', 'SK_to_N2K.py'])
-		subprocess.Popen(['python', self.currentpath + '/SK_to_N2K.py'])
+		dlg = addSKtoN2K()
+		res = dlg.ShowModal()
+		dlg.Destroy()
+	
+		#subprocess.call(['pkill', '-f', 'SK_to_N2K.py'])
+		#subprocess.Popen(['python', self.currentpath + '/SK_to_N2K.py'])
 
-	def read_n2k(self):
-		can_device = self.conf.get('N2K', 'can_usb')
-		if not can_device: 
-			self.can_usb.SetLabel(_('none')) 
-			self.conf.set('N2K', 'enable', '0')
-			self.conf.set('N2K', 'output', '0')
+
+	def set_n2k_enable(self,enable):
+		if enable == 1:
+			#if self.conf.get('N2K', 'enable') != '1':
+			#	self.conf.set('N2K', 'enable', '1')
+			if self.SK_settings.ngt1_enabled != 1:
+				self.SK_settings.set_ngt1_enable(1)
+				self.SK_settings.write_settings()
+				self.restart_SK()
+			self.n2k_enable.SetValue(True)
+		else:
+			#if self.conf.get('N2K', 'enable') != '0':
+			#	self.conf.set('N2K', 'enable', '0')
+			if self.SK_settings.ngt1_enabled != 0:
+				self.SK_settings.set_ngt1_enable(0)
+				self.SK_settings.write_settings()				
+				self.restart_SK()
 			self.n2k_enable.SetValue(False)
+
+	def set_n2k_out_enable(self,enable):
+		if enable == 1:
+			if self.conf.get('N2K', 'output') != '1':
+				self.conf.set('N2K', 'output', '1')
+			self.n2k_out_enable.SetValue(True)
+			subprocess.call(['pkill', '-f', 'diagnostic-N2K-output.py'])
+			subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
+			subprocess.Popen(['python', self.currentpath + '/N2K-server_d.py'])			
+		else:
+			if self.conf.get('N2K', 'output') != '0':
+				self.conf.set('N2K', 'output', '0')
 			self.n2k_out_enable.SetValue(False)
+			subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
+
+
+	def update_form(self):
+		can_device = self.conf.get('N2K', 'can_usb')
+		if not can_device:
+			self.set_n2k_enable(0)
+			self.set_n2k_out_enable(0)
+			self.can_usb.SetLabel(_('none')) 
 			self.n2k_enable.Disable()
 			self.n2k_out_enable.Disable()
 			self.button_N2K_setting.Disable()
 			self.N2K_diagnostic_b.Disable()
 			self.N2K_diagnostic_out_b.Disable()
 			return
-
-		self.can_usb.SetLabel('/dev/'+can_device)
-		self.n2k_enable.Enable()
-		self.n2k_out_enable.Enable()
-
-		if self.conf.get('N2K', 'enable') == '1':
-			self.n2k_enable.SetValue(True)
-			self.button_N2K_setting.Disable()
-			self.N2K_diagnostic_b.Disable()
-		else:
-			self.n2k_enable.SetValue(False)
+		self.can_usb.SetLabel('/dev/'+can_device)		
+		self.n2k_enable.SetValue(self.SK_settings.ngt1_enabled==1)
+		if self.SK_settings.ngt1_enabled == 0:
 			self.button_N2K_setting.Enable()
 			self.N2K_diagnostic_b.Enable()
-
+		else:
+			self.button_N2K_setting.Disable()
+			self.N2K_diagnostic_b.Disable()
 		if self.conf.get('N2K', 'output') == '1':
 			self.n2k_out_enable.SetValue(True)
+			self.button_N2K_setting.Disable()
 			self.N2K_diagnostic_out_b.Disable()
 		else:
 			self.n2k_out_enable.SetValue(False)
 			self.N2K_diagnostic_out_b.Enable()
+		if self.SK_settings.canbus_enabled != -1:
+			self.n2k_can0_enable.SetValue(self.SK_settings.canbus_enabled == 1)
+				
+	def read_n2k(self):
+		self.update_form()
 
 	def on_n2k_enable(self, e=0):
-		with open(self.home+'/.signalk/settings.json') as data_file:
-			data = json.load(data_file)
-		isChecked = self.n2k_enable.GetValue()
-		can_device = self.conf.get('N2K', 'can_usb')
-		if isChecked:
-			subprocess.call(['pkill', '-f', 'CAN-USB-stick.py'])
-			self.conf.set('N2K', 'enable', '1')
-			exist = False
-			ii = 0
-			for i in data['pipedProviders']:
-				if i['id'] == 'OPcan':
-					exist = True
-					data['pipedProviders'][ii]['pipeElements'][0]['options']['subOptions']['device'] = '/dev/'+can_device
-					data['pipedProviders'][ii]['enabled'] = True
-				ii += 1
-			if not exist:
-				new = {"id": "OPcan","pipeElements": [{"type": "providers/simple","options": {"logging": False,"type": "NMEA2000","subOptions": {"type": "ngt-1","device": "/dev/"+can_device}}}],"enabled": True}
-				data['pipedProviders'].append(new)
-		else:
-			self.conf.set('N2K', 'enable', '0')
-			if can_device:
-				ii = 0
-				for i in data['pipedProviders']:
-					if i['id'] == 'OPcan':
-						data['pipedProviders'][ii]['enabled'] = False
-					ii += 1
-			else:
-				ii = 0
-				for i in data['pipedProviders']:
-					if i['id'] == 'OPcan':
-						del data['pipedProviders'][ii]
-					ii += 1
-
-		with open(self.home+'/.signalk/settings.json', 'w') as outfile:
-			json.dump(data, outfile)
-		self.read_n2k()
-		self.restart_SK()
+		self.set_n2k_enable(self.n2k_enable.GetValue())
+		self.update_form()
 
 	def on_n2k_output(self, e):
-		isChecked = self.n2k_out_enable.GetValue()
-		if isChecked:
-			if self.check_can_device():
-				self.conf.set('N2K', 'output', '1')
-				subprocess.call(['pkill', '-f', 'diagnostic-N2K-output.py'])
-				subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
-				subprocess.Popen(['python', self.currentpath + '/N2K-server_d.py'])
-		else:
-			self.conf.set('N2K', 'output', '0')
-			subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
-		self.read_n2k()
+		self.set_n2k_out_enable(self.n2k_out_enable.GetValue())
+		self.update_form()
 
 	def on_N2K_setting(self, e):
 		if self.check_can_device():
@@ -3124,6 +3126,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			subprocess.Popen(['python', self.currentpath + '/diagnostic-N2K-output.py'])
 			self.ShowStatusBarBLACK(_('Show sent PGNs.'))
 
+	def on_n2k_can0_enable(self, e):
+		if self.SK_settings.canbus_enabled != self.n2k_can0_enable.GetValue():
+			self.SK_settings.set_canbus_enable(self.n2k_can0_enable.GetValue())
+			self.SK_settings.write_settings()
+			self.restart_SK()
+			
 	def check_can_device(self):
 		can_device = self.conf.get('N2K', 'can_usb')
 		if not can_device:

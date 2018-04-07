@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
-import wx, os, sys
+import wx, os, sys, subprocess
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 from classes.conf import Conf
 from classes.language import Language
@@ -25,15 +25,16 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		CheckListCtrlMixin.__init__(self)
 		ListCtrlAutoWidthMixin.__init__(self)
 
-class MyFrame(wx.Frame):
+class addSKtoN2K(wx.Dialog):
 	def __init__(self):
 		self.conf = Conf()
 		self.home = self.conf.home
 		self.currentpath = self.conf.get('GENERAL', 'op_folder')
 		Language(self.conf)
-		
-		wx.Frame.__init__(self, None, title=_('Generate N2K from Signal K'), size=(630, 300))
+		style = wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER
+		wx.Dialog.__init__(self, None, title=_('Generate N2K from Signal K'),style=style)
 		self.Bind(wx.EVT_CLOSE, self.when_closed)
+		self.SetInitialSize((720, 400))
 		#self.SetAutoLayout(1)
 		#self.SetupScrolling()
 
@@ -75,7 +76,7 @@ class MyFrame(wx.Frame):
 		self.list_N2K.InsertColumn(2, _('Signal K variable'), width=920)
 		self.list_N2K.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_selected)
 
-		OK = wx.Button(self.panel, label=_('OK'))
+		OK = wx.Button(self.panel, label=_('Apply changes'))
 		OK.Bind(wx.EVT_BUTTON, self.on_OK)
 
 		hlistbox = wx.BoxSizer(wx.HORIZONTAL)
@@ -110,6 +111,8 @@ class MyFrame(wx.Frame):
 				result.append(str(ii[0]))
 			i += 1
 		self.conf.set('N2K', 'pgn_generate', str(result))
+		subprocess.call(['pkill', '-f', 'SK-base_d.py'])
+		subprocess.Popen(['python',self.currentpath+'/SK-base_d.py'])		
 	
 		self.when_closed(e)
 		
@@ -120,6 +123,6 @@ class MyFrame(wx.Frame):
 		self.Destroy()
 
 		
-app = wx.App()
-MyFrame().Show()
-app.MainLoop()
+#app = wx.App()
+#MyFrame().Show()
+#app.MainLoop()

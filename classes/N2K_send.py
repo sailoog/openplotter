@@ -199,10 +199,12 @@ class N2K_send:
 		length = 8
 		lPGN = 129025
 		self.set_header(length, lPGN)
-
-		self.set_data32(0, long(Latitude * 10000000), Latitude)
-		self.set_data32(4, long(Longitude * 10000000), Longitude)
-		self.send_UDP()
+		try:
+			self.set_data32(0, long(Latitude * 10000000), Latitude)
+			self.set_data32(4, long(Longitude * 10000000), Longitude)
+			self.send_UDP()
+		except:
+			pass
 
 	def Send_COG_SOG(self, CourseGround, SpeedGround):
 		length = 8
