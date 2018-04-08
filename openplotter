@@ -3014,8 +3014,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		v_boxSizer2.Add(self.button_N2K_setting, 0, wx.ALL | wx.EXPAND, 5)
 		v_boxSizer2.Add(self.SK_to_N2K, 0, wx.ALL | wx.EXPAND, 5) 
 
-		v_boxSizer3 = wx.StaticBoxSizer(n2k_can0_input_box, wx.HORIZONTAL) 
-		v_boxSizer3.Add(self.n2k_can0_enable, 0, wx.ALL | wx.EXPAND, 5)
+		if self.SK_settings.canbus_enabled != -1:
+			v_boxSizer3 = wx.StaticBoxSizer(n2k_can0_input_box, wx.HORIZONTAL) 
+			v_boxSizer3.Add(self.n2k_can0_enable, 0, wx.ALL | wx.EXPAND, 5)
 
 		vbox = wx.BoxSizer(wx.VERTICAL) 
 		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 5) 
@@ -3079,6 +3080,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.N2K_diagnostic_b.Disable()
 			self.N2K_diagnostic_out_b.Disable()
 		else:
+			self.n2k_enable.Enable()
+			self.n2k_out_enable.Enable()
 			self.can_usb.SetLabel('/dev/'+can_device)		
 			self.n2k_enable.SetValue(self.SK_settings.ngt1_enabled==1)
 			if self.SK_settings.ngt1_enabled == 0:
