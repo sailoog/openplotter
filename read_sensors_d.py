@@ -73,7 +73,7 @@ def work_pypilot():
         #init compass
         mode = conf.get('PYPILOT', 'mode')
         if mode == 'disabled':
-                print 'pypilot disabled'
+                print 'pypilot disabled  '
                 return
         
         headingSK = conf.get('PYPILOT', 'translation_magnetic_h')
@@ -373,7 +373,7 @@ for ii in temp_list:
 if analog_:
 	try:
 		spi = spidev.SpiDev()
-		spi.open(0,0)
+		spi.open(0,1)
 	except:
 		analog_=False
 		print 'spi is disabled in raspberry-pi-configuration device tab'
@@ -451,7 +451,7 @@ for s in range(1, 16):
                 signal.signal(s, cleanup)
 #signal.signal(signal.SIGCHLD, cleanup)
         
-print 'read_sensors_d waiting for signal to exit'
+print 'read_sensors_d waiting for signal to exit '
 
 # sleep on conditional
 while read_sensors:
