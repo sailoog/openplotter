@@ -2558,7 +2558,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	####################### Serial manager
 	def page_serial(self):
-		self.list_Serialinst = wx.ListCtrl(self.p_serial, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
+		self.list_Serialinst = wx.ListCtrl(self.p_serial, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER | wx.LC_SINGLE_SEL)
 		self.list_Serialinst.InsertColumn(0, _('name'), width=80)
 		self.list_Serialinst.InsertColumn(1, _('device'), width=95)
 		self.list_Serialinst.InsertColumn(2, _('vendor'), width=50)
@@ -2573,29 +2573,36 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		hlistbox = wx.BoxSizer(wx.HORIZONTAL)
 		hlistbox.Add(self.list_Serialinst, 1, wx.ALL | wx.EXPAND, 5)
 
-		controls = wx.FlexGridSizer(0, 2)
-		controls.Add(wx.StaticText(self.p_serial, label=_('name /dev/ttyOP_')), 1, wx.ALL | wx.EXPAND, 5)
-		self.Serial_OPname = wx.TextCtrl(self.p_serial, size=(100, 30))
-		controls.Add(self.Serial_OPname)
+		namebox = wx.BoxSizer(wx.HORIZONTAL)
+		namebox.Add(wx.StaticText(self.p_serial, label=_('name /dev/ttyOP_')), 1, wx.ALL | wx.EXPAND, 5)
 
+		self.Serial_OPname = wx.TextCtrl(self.p_serial, size=(100, 30))
+		namebox.Add(self.Serial_OPname)
+
+		rememberbox = wx.BoxSizer(wx.HORIZONTAL)
 		self.Serial_rem_dev = wx.RadioButton(self.p_serial, label=_('Remember device (by vendor, product, serial)'))
-		controls.Add(self.Serial_rem_dev)
+		rememberbox.Add(self.Serial_rem_dev)
 
 		self.Serial_rem_port = wx.RadioButton(self.p_serial, label=_('Remember port (positon on the USB-hub)'))
-		controls.Add(self.Serial_rem_port)
+		rememberbox.Add(self.Serial_rem_port)
 
+		assignmentbox = wx.BoxSizer(wx.HORIZONTAL)
 		self.assignment = [_('none'), 'Kplex', 'Pypilot', 'CAN-USB', 'GPSD', 'SMS']
-		controls.Add(wx.StaticText(self.p_serial, label=_('assignment')))
+		assignmentbox.Add(wx.StaticText(self.p_serial, label=_('assignment')))
 		self.Serial_assignment = wx.Choice(self.p_serial, choices=self.assignment, style=wx.CB_READONLY)
 		self.Serial_assignment.Bind(wx.EVT_CHOICE, self.onSelectAssigment)
 		self.Serial_assignment.SetSelection(0)
-		controls.Add(self.Serial_assignment)
+		assignmentbox.Add(self.Serial_assignment)
+
+		detect = wx.Button(self.p_serial, label=_('detect'))
+		detect.Bind(wx.EVT_BUTTON, self.on_detect_Serialinst)
+		assignmentbox.Add(detect, 0, wx.RIGHT | wx.LEFT, 5)
 
 		self.bauds = ['','4800', '9600', '19200', '38400', '57600', '115200']
-		controls.Add(wx.StaticText(self.p_serial, label=_('bauds')))
+		assignmentbox.Add(wx.StaticText(self.p_serial, label=_('bauds')))
 		self.Serial_baud_select = wx.Choice(self.p_serial, choices=self.bauds, style=wx.CB_READONLY)
 		self.Serial_baud_select.SetSelection(0)
-		controls.Add(self.Serial_baud_select)
+		assignmentbox.Add(self.Serial_baud_select)
 
 		update = wx.Button(self.p_serial, label=_('update'))
 		update.Bind(wx.EVT_BUTTON, self.on_update_Serialinst)
@@ -2605,16 +2612,22 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		refresh = wx.Button(self.p_serial, label=_('refresh'))
 		refresh.Bind(wx.EVT_BUTTON, self.on_refresh_Serialinst)
-                
+
+                detect_all = wx.Button(self.p_serial, label=_('detect all'))
+		detect_all.Bind(wx.EVT_BUTTON, self.on_detect_all_Serialinst)
+
 		hbox = wx.BoxSizer(wx.HORIZONTAL)
 		hbox.Add(update, 0, wx.RIGHT | wx.LEFT, 5)
 		hbox.Add(delete, 0, wx.RIGHT | wx.LEFT, 5)
 		hbox.Add(refresh, 0, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add(detect_all, 0, wx.RIGHT | wx.LEFT, 5)
 
 		vbox = wx.FlexGridSizer(0, 1)
 		vbox.AddGrowableRow(0)
 		vbox.Add(hlistbox, 1, wx.ALL | wx.EXPAND, 0)
-		vbox.Add(controls, 1, wx.ALL | wx.EXPAND, 0)
+		vbox.Add(namebox, 1, wx.ALL | wx.EXPAND, 0)
+		vbox.Add(rememberbox, 1, wx.ALL | wx.EXPAND, 0)
+		vbox.Add(assignmentbox, 1, wx.ALL | wx.EXPAND, 0)
 		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 5)
 
 		self.on_SerialinstSelected()
@@ -2734,6 +2747,73 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		self.on_SerialinstSelected()
 
+        def detect_pypilot_servo(self, device, baud):
+                # try pypilot binary arduino servo
+		self.ShowStatusBarBLACK(_('Detecting pypilot servo on ') + device + " B%d" % baud)
+		test = os.system('sudo pypilot_servo -t ' + device + ' %d' % baud)
+                if test == 0:
+                        return True
+                return False
+
+        def detect_gps_device(self, device, baud):
+                subprocess.call(['killall', '-9', 'gpscat'])
+		self.ShowStatusBarBLACK(_('Detecting gps servo on ') + device + " B%d" % baud)
+                gpscat = subprocess.Popen(['gpscat', '-s', '%dN1' % baud, '-t', device], stdout=subprocess.PIPE)
+                #poll = select.poll()
+                #poll.register(gpscat.stdout, select.POLLOUT)
+                #x = poll.poll(5000)
+                #ret = x[0][1] == select.POLLOUT
+                import fcntl
+                fcntl.fcntl(gpscat.stdout.fileno(), fcntl.F_SETFD, os.O_NONBLOCK)
+                time.sleep(3)
+                ret = gpscat.stdout.readline()
+                os.system('kill %d' % gpscat.pid)
+                return ret
+        
+        def detect_serial(self, index):
+                name = self.list_Serialinst.GetItemText(index, 0)
+                if not name: # assign name if the user has not
+                        name = 'serial%d'%index
+                        self.Serial_OPname.SetValue(name)
+                        self.on_update_Serialinst()
+                device = self.Serialinst[name]['device']
+                baud = None
+                if baud:
+                        baud = int(self.Serialinst[name]['bauds'])
+                # only detect 38400 baud (slow bauds are slow to detect
+                if self.detect_pypilot_servo(device, 38400):
+                        assignment = 'Pypilot'
+                        baud = 38400
+                elif baud and self.detect_gps_device(device, baud):
+                        assignment = 'gpsd'
+                elif self.detect_gps_device(device, 4800):
+                        assignment = 'gpsd'
+                        baud = 4800
+                else:
+                        return
+                self.Serialinst[name]['assignment'] = assignment
+                self.Serialinst[name]['bauds'] = str(baud)
+                
+	def on_detect_Serialinst(self, e):
+                self.stop_sensors()
+		index = self.list_Serialinst.GetNextItem(-1, wx.LIST_NEXT_ALL, wx.LIST_STATE_SELECTED)
+                if index < 0:
+                        return
+
+                self.detect_serial(index)
+                self.conf.set('UDEV', 'Serialinst', str(self.Serialinst))
+                self.on_refresh_Serialinst()
+                self.start_sensors()
+
+	def on_detect_all_Serialinst(self, e):
+                self.stop_sensors()
+		for i in range(self.list_Serialinst.GetItemCount()):
+                        self.list_Serialinst.Select(i)
+                        self.detect_serial(i)
+                self.conf.set('UDEV', 'Serialinst', str(self.Serialinst))
+                self.on_refresh_Serialinst()
+                self.start_sensors()
+                
 	def on_SerialinstSelected(self, e=False):
 		valid = e and e.GetIndex() >= 0
 		self.Serial_OPname.Enable(valid)
@@ -2759,7 +2839,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.Serial_assignment.SetStringSelection(self.list_Serialinst.GetItemText(i, 6))
 		self.Serial_baud_select.SetStringSelection(self.list_Serialinst.GetItemText(i, 8))
 
-	def on_update_Serialinst(self, e):
+	def on_update_Serialinst(self, e=0):
 
 		index = self.list_Serialinst.GetNextItem(-1, wx.LIST_NEXT_ALL, wx.LIST_STATE_SELECTED)
 		if index < 0:
@@ -2824,6 +2904,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		self.conf.set('UDEV', 'Serialinst', str(self.Serialinst))
 		self.on_refresh_Serialinst()
+		self.Serialinst[name] = ii
 		self.apply_changes_Serialinst()
 
 	def on_delete_Serialinst(self, e):
