@@ -88,7 +88,7 @@ class MainFrame(wx.Frame):
 		self.p_startup = wx.Panel(self.nb)
 		self.nb.AddPage(self.p_serial, _('Serial ports'))
 		self.nb.AddPage(self.p_kplex, 'Kplex')
-		self.nb.AddPage(self.p_pypilot, _('Pypilot'))
+		self.nb.AddPage(self.p_pypilot, _('pypilot'))
 		self.nb.AddPage(self.p_n2k, 'CAN-USB')
 		self.nb.AddPage(self.p_wifi, _('WiFi AP'))
 		self.nb.AddPage(self.p_action, _('Actions'))
@@ -1038,7 +1038,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				########################################### PYPILOT
 
 	def page_pypilot(self):
-		pypilot_mode_label = wx.StaticText(self.p_pypilot, label=_('Pypilot Mode:'))
+		pypilot_mode_label = wx.StaticText(self.p_pypilot, label=_('pypilot Mode:'))
 		self.pypilot_modes = ['disabled', 'imu', 'basic autopilot'] # nontranslated for config
 		self.pypilot_mode = wx.Choice(self.p_pypilot, choices=[_('disabled'), _('IMU only'), _('basic autopilot')], style=wx.CB_READONLY)
 		self.pypilot_mode.Bind(wx.EVT_CHOICE, self.on_pypilot_enable)
@@ -2587,7 +2587,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		rememberbox.Add(self.Serial_rem_port)
 
 		assignmentbox = wx.BoxSizer(wx.HORIZONTAL)
-		self.assignment = [_('none'), 'Kplex', 'Pypilot', 'CAN-USB', 'GPSD', 'SMS']
+		self.assignment = [_('none'), 'Kplex', 'pypilot', 'CAN-USB', 'GPSD', 'SMS']
 		assignmentbox.Add(wx.StaticText(self.p_serial, label=_('assignment')))
 		self.Serial_assignment = wx.Choice(self.p_serial, choices=self.assignment, style=wx.CB_READONLY)
 		self.Serial_assignment.Bind(wx.EVT_CHOICE, self.onSelectAssigment)
@@ -2782,7 +2782,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
                         baud = int(self.Serialinst[name]['bauds'])
                 # only detect 38400 baud (slow bauds are slow to detect
                 if self.detect_pypilot_servo(device, 38400):
-                        assignment = 'Pypilot'
+                        assignment = 'pypilot'
                         baud = 38400
                 elif baud and self.detect_gps_device(device, baud):
                         assignment = 'gpsd'
@@ -2981,7 +2981,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
                 # write pypilot allowed ports
                 file = open('pypilot_serial_ports', 'w')
                 for name in self.Serialinst:
-                        if self.Serialinst[name]['assignment'] == 'Pypilot':
+                        if self.Serialinst[name]['assignment'] == 'pypilot':
                                 port = '/dev/ttyOP_' + name
                                 file.write(port + '\n')
                                 os.system('sudo chown pi ' + port) # set permissions
