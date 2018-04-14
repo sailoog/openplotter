@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import ConfigParser, json, os, io, pyudev, re, requests, subprocess, sys, time, webbrowser, wx, wx.lib.scrolledpanel
+import ConfigParser, json, os, io, pyudev, re, requests, subprocess, sys, time, webbrowser, wx, wx.lib.scrolledpanel, serial
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 try:
 	from classes.add_DS18B20 import addDS18B20
@@ -1342,6 +1342,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.ShowStatusBarGREEN(_('Kplex restarted'))
 		self.read_kplex_conf()
 
+	def stop_kplex(self):
+		subprocess.call(["pkill", '-9', "kplex"])
+		while self.util_process_exist('kplex'):
+			time.sleep(0.05)
+
+	def start_kplex(self):
+		subprocess.Popen('kplex')
+
 	def on_cancel_changes_kplex(self, event):
 		self.read_kplex_conf()
 		self.ShowStatusBarBLACK('')
@@ -2594,9 +2602,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.Serial_assignment.SetSelection(0)
 		assignmentbox.Add(self.Serial_assignment)
 
-		detect = wx.Button(self.p_serial, label=_('detect'))
-		detect.Bind(wx.EVT_BUTTON, self.on_detect_Serialinst)
-		assignmentbox.Add(detect, 0, wx.RIGHT | wx.LEFT, 5)
+		self.serial_detect = wx.Button(self.p_serial, label=_('auto'))
+		self.serial_detect.Bind(wx.EVT_BUTTON, self.on_detect_Serialinst)
+		assignmentbox.Add(self.serial_detect, 0, wx.RIGHT | wx.LEFT, 5)
 
 		self.bauds = ['','4800', '9600', '19200', '38400', '57600', '115200']
 		assignmentbox.Add(wx.StaticText(self.p_serial, label=_('bauds')))
@@ -2613,14 +2621,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		refresh = wx.Button(self.p_serial, label=_('refresh'))
 		refresh.Bind(wx.EVT_BUTTON, self.on_refresh_Serialinst)
 
-                detect_all = wx.Button(self.p_serial, label=_('detect all'))
-		detect_all.Bind(wx.EVT_BUTTON, self.on_detect_all_Serialinst)
-
 		hbox = wx.BoxSizer(wx.HORIZONTAL)
 		hbox.Add(update, 0, wx.RIGHT | wx.LEFT, 5)
 		hbox.Add(delete, 0, wx.RIGHT | wx.LEFT, 5)
 		hbox.Add(refresh, 0, wx.RIGHT | wx.LEFT, 5)
-		hbox.Add(detect_all, 0, wx.RIGHT | wx.LEFT, 5)
 
 		vbox = wx.FlexGridSizer(0, 1)
 		vbox.AddGrowableRow(0)
@@ -2747,77 +2751,140 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		self.on_SerialinstSelected()
 
-        def detect_pypilot_servo(self, device, baud):
-                # try pypilot binary arduino servo
-		self.ShowStatusBarBLACK(_('Detecting pypilot servo on ') + device + " B%d" % baud)
+	def detect_pypilot_servo(self, device, baud):
+		# try pypilot binary arduino servo
 		test = os.system('sudo pypilot_servo -t ' + device + ' %d' % baud)
-                if test == 0:
-                        return True
-                return False
+		if test == 0: return True
+		else: return False
 
-        def detect_gps_device(self, device, baud):
-                subprocess.call(['killall', '-9', 'gpscat'])
-		self.ShowStatusBarBLACK(_('Detecting gps servo on ') + device + " B%d" % baud)
-                gpscat = subprocess.Popen(['gpscat', '-s', '%dN1' % baud, '-t', device], stdout=subprocess.PIPE)
-                #poll = select.poll()
-                #poll.register(gpscat.stdout, select.POLLOUT)
-                #x = poll.poll(5000)
-                #ret = x[0][1] == select.POLLOUT
-                import fcntl
-                fcntl.fcntl(gpscat.stdout.fileno(), fcntl.F_SETFD, os.O_NONBLOCK)
-                time.sleep(3)
-                ret = gpscat.stdout.readline()
-                os.system('kill %d' % gpscat.pid)
-                return ret
-        
-        def detect_serial(self, index):
-                name = self.list_Serialinst.GetItemText(index, 0)
-                if not name: # assign name if the user has not
-                        name = 'serial%d'%index
-                        self.Serial_OPname.SetValue(name)
-                        self.on_update_Serialinst()
-                device = self.Serialinst[name]['device']
-                baud = None
-                if baud:
-                        baud = int(self.Serialinst[name]['bauds'])
-                # only detect 38400 baud (slow bauds are slow to detect
-                if self.detect_pypilot_servo(device, 38400):
-                        assignment = 'pypilot'
-                        baud = 38400
-                elif baud and self.detect_gps_device(device, baud):
-                        assignment = 'gpsd'
-                elif self.detect_gps_device(device, 4800):
-                        assignment = 'gpsd'
-                        baud = 4800
-                else:
-                        return
-                self.Serialinst[name]['assignment'] = assignment
-                self.Serialinst[name]['bauds'] = str(baud)
+	def detect_gps_device(self, device, baud):
+		subprocess.call(['killall', '-9', 'gpscat'])
+		gpscat = subprocess.Popen(['gpscat', '-s', '%dN1' % baud, '-t', device], stdout=subprocess.PIPE)
+		#poll = select.poll()
+		#poll.register(gpscat.stdout, select.POLLOUT)
+		#x = poll.poll(5000)
+		#ret = x[0][1] == select.POLLOUT
+		import fcntl
+		fcntl.fcntl(gpscat.stdout.fileno(), fcntl.F_SETFD, os.O_NONBLOCK)
+		time.sleep(3)
+		ret = gpscat.stdout.readline()
+		os.system('kill %d' % gpscat.pid)
+		return ret
+
+	def readNMEA0183(self, port, baudrate):
+		try:
+			self.serial = serial.Serial(port, baudrate, timeout=1)
+		except:
+			return False
+		timewait = time.time() + 1.5
+		index = 0
+		countwrong = 0
+		text = ''
+		while time.time() < timewait:
+			try:
+				c = self.serial.read(1)
+			except: c = ''
+			if c != '':
+				b = ord(c)
+				# print c
+				if b == 10 or b == 13 or (32 <= b < 128):
+					index += 1
+					if b == 13:
+						print '	' + text[:-1]
+						text = ''
+					elif b == 10:
+						pass
+					else:
+						text += c
+				else:
+					#print 'countwrong ', b
+					countwrong += 1
+		if index > 10 and countwrong < index/10:
+			return True
+		else:
+			return False
+
+	def readNMEA2000(self, port, baudrate):
+		try:
+			self.serial = serial.Serial(port, baudrate, timeout=1)
+		except:
+			return False
+		timewait = time.time() + 0.5
+		data = [0x10, 0x2, 0xa1, 0x01, 0x01, 0x5d, 0x10, 0x03]
+		for i in data:
+			self.serial.write(chr(i))
+		while time.time() < timewait:
+			try:
+				c = self.serial.read(1)
+			except: c = ''
+			if c != '':
+				b = ord(c)
+				if b == 0x10:
+					try:
+						c = self.serial.read(1)
+					except: c = ''
+					if c != '':
+						b = ord(c)
+						if b == 0x02:
+							return True
+		return False
+
+	def detect_serial(self, index):
+		name = self.list_Serialinst.GetItemText(index, 0)
+		if not name: name = 'serial%d'%index
+		device = self.list_Serialinst.GetItemText(index, 1)
+		bauds = self.list_Serialinst.GetItemText(index, 8)
+		if bauds: bauds = int(bauds)
+		pypilot_mode = self.conf.get('PYPILOT', 'mode')
+
+		if device == '/dev/naviDev.tty':
+			assignment = 'GPSD'
+			bauds = '115200'
+		elif self.readNMEA2000(device, '115200'):
+			assignment = 'CAN-USB'
+			bauds = '115200'
+		elif self.detect_pypilot_servo(device, 38400):
+			assignment = 'pypilot'
+			bauds = '38400'
+		elif pypilot_mode == 'basic autopilot' and bauds and self.detect_gps_device(device, bauds):
+			assignment = 'GPSD'
+			bauds = str(bauds)
+		elif pypilot_mode == 'basic autopilot' and self.detect_gps_device(device, 4800):
+			assignment = 'GPSD'
+			bauds = '4800'
+		else: return False
+
+		self.Serial_OPname.SetValue(name)
+		self.Serial_assignment.SetStringSelection(assignment)
+		self.Serial_baud_select.SetStringSelection(bauds)
+		return True
                 
 	def on_detect_Serialinst(self, e):
-                self.stop_sensors()
 		index = self.list_Serialinst.GetNextItem(-1, wx.LIST_NEXT_ALL, wx.LIST_STATE_SELECTED)
-                if index < 0:
-                        return
+		if index < 0:
+			self.ShowMessage(_('Failed. No port selected'))
+			self.on_SerialinstSelected()
+			return
+		self.stop_sensors()
+		self.stop_kplex()
+		os.system('sudo service gpsd stop')
+		self.stop_n2k()
+		self.ShowStatusBarGREEN(_('Checking selected device ...'))
+		result = self.detect_serial(index)
+		os.system('sudo service gpsd start')
+		self.start_kplex()
+		self.start_sensors()
+		self.start_n2k()
+		if result:
+			self.ShowStatusBarGREEN(_('Suitable parameters according to your system settings. Press update to save.'))
+		else: 
+			self.ShowStatusBarRED (_('We have not found any recognizable data on your device.'))
 
-                self.detect_serial(index)
-                self.conf.set('UDEV', 'Serialinst', str(self.Serialinst))
-                self.on_refresh_Serialinst()
-                self.start_sensors()
-
-	def on_detect_all_Serialinst(self, e):
-                self.stop_sensors()
-		for i in range(self.list_Serialinst.GetItemCount()):
-                        self.list_Serialinst.Select(i)
-                        self.detect_serial(i)
-                self.conf.set('UDEV', 'Serialinst', str(self.Serialinst))
-                self.on_refresh_Serialinst()
-                self.start_sensors()
-                
 	def on_SerialinstSelected(self, e=False):
 		valid = e and e.GetIndex() >= 0
 		self.Serial_OPname.Enable(valid)
 		self.Serial_assignment.Enable(valid)
+		self.serial_detect.Enable(valid)
 		self.Serial_baud_select.Enable(valid)
 		self.Serial_rem_dev.Enable(valid)
 		self.Serial_rem_port.Enable(valid)
@@ -2908,7 +2975,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.apply_changes_Serialinst()
 
 	def on_delete_Serialinst(self, e):
-
 		index = self.list_Serialinst.GetNextItem(-1, wx.LIST_NEXT_ALL, wx.LIST_STATE_SELECTED)
 		if index < 0:
 			self.ShowMessage(_('Failed. No port selected'))
@@ -3033,7 +3099,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				can_device = 'ttyOP_'+name
 				break
 		self.conf.set('N2K', 'can_usb', can_device)
-		self.on_n2k_enable()
+		self.SK_settings.set_ngt1_device(can_device)
+		self.on_n2k_enable(self.n2k_enable.GetValue())
+		self.on_n2k_output(self.n2k_out_enable.GetValue())
 
 		time.sleep(1.5)
 		self.ShowStatusBarGREEN(_('Serial port modified and restarted'))
@@ -3115,27 +3183,24 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		#subprocess.call(['pkill', '-f', 'SK_to_N2K.py'])
 		#subprocess.Popen(['python', self.currentpath + '/SK_to_N2K.py'])
 
-
 	def set_n2k_enable(self,enable):
-		if enable == 1:
+		if enable:
 			#if self.conf.get('N2K', 'enable') != '1':
 			#	self.conf.set('N2K', 'enable', '1')
 			if self.SK_settings.ngt1_enabled != 1:
 				self.SK_settings.set_ngt1_enable(1)
-				self.SK_settings.write_settings()
 				self.restart_SK()
 			self.n2k_enable.SetValue(True)
 		else:
 			#if self.conf.get('N2K', 'enable') != '0':
 			#	self.conf.set('N2K', 'enable', '0')
 			if self.SK_settings.ngt1_enabled != 0:
-				self.SK_settings.set_ngt1_enable(0)
-				self.SK_settings.write_settings()				
+				self.SK_settings.set_ngt1_enable(0)			
 				self.restart_SK()
 			self.n2k_enable.SetValue(False)
 
 	def set_n2k_out_enable(self,enable):
-		if enable == 1:
+		if enable:
 			if self.conf.get('N2K', 'output') != '1':
 				self.conf.set('N2K', 'output', '1')
 			self.n2k_out_enable.SetValue(True)
@@ -3148,12 +3213,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.n2k_out_enable.SetValue(False)
 			subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
 
-
 	def update_form(self):
 		can_device = self.conf.get('N2K', 'can_usb')
 		if not can_device:
-			self.set_n2k_enable(0)
-			self.set_n2k_out_enable(0)
+			self.set_n2k_enable(False)
+			self.set_n2k_out_enable(False)
 			self.can_usb.SetLabel(_('none')) 
 			self.n2k_enable.Disable()
 			self.n2k_out_enable.Disable()
@@ -3185,7 +3249,18 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def read_n2k(self):
 		self.update_form()
 
-	def on_n2k_enable(self, e=0):
+	def stop_n2k(self):
+		subprocess.call(['pkill', '-f', 'CAN-USB-stick.py'])
+		subprocess.call(['pkill', '-f', 'diagnostic-N2K-input.py'])
+		subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
+		self.SK_settings.set_ngt1_enable(0)
+		self.restart_SK()
+
+	def start_n2k(self):
+		self.set_n2k_enable(self.n2k_enable.GetValue())
+		self.set_n2k_out_enable(self.n2k_out_enable.GetValue())
+
+	def on_n2k_enable(self, e):
 		self.set_n2k_enable(self.n2k_enable.GetValue())
 		self.update_form()
 
@@ -3214,7 +3289,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def on_n2k_can0_enable(self, e):
 		if self.SK_settings.canbus_enabled != self.n2k_can0_enable.GetValue():
 			self.SK_settings.set_canbus_enable(self.n2k_can0_enable.GetValue())
-			self.SK_settings.write_settings()
 			self.restart_SK()
 			
 	def check_can_device(self):
@@ -3237,6 +3311,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		subprocess.call(['sudo', 'systemctl', 'start', 'signalk.socket'])
 		subprocess.call(['sudo', 'systemctl', 'start', 'signalk.service'])
 		self.ShowStatusBarGREEN(_('Signal K server restarted'))
+
+	def start_SK(self):
+		subprocess.call(['sudo', 'systemctl', 'start', 'signalk.socket'])
+		subprocess.call(['sudo', 'systemctl', 'start', 'signalk.service'])
+
+	def stop_SK(self):
+		subprocess.call(['sudo', 'systemctl', 'stop', 'signalk.service'])
+		subprocess.call(['sudo', 'systemctl', 'stop', 'signalk.socket'])
 
 	def on_diagnostic_SK(self, e):
 		subprocess.call(['pkill', '-f', 'diagnostic-SK-input.py'])

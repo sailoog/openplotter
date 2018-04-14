@@ -28,20 +28,18 @@ class SK_settings:
 		self.load()
 		
 	def load(self):
-                print 'load', self.setting_file
-                self.ssl = False
-                self.port= 13213
-                self.data = {}
+		
 		if os.path.isfile(self.setting_file):
 			with open(self.setting_file) as data_file:
 				self.data = yaml.load(data_file)
+		else: self.data = {}
 
-                self.sslport = -1
-                if 'sslport' in self.data: self.sslport = self.data['sslport']
-                self.port = -1
-                if 'port' in self.data: self.port = self.data['port']
-                self.ssl = -1
-                if 'ssl' in self.data: self.ssl = self.data['ssl']
+		self.sslport = -1
+		if 'sslport' in self.data: self.sslport = self.data['sslport']
+		self.port = -1
+		if 'port' in self.data: self.port = self.data['port']
+		self.ssl = -1
+		if 'ssl' in self.data: self.ssl = self.data['ssl']
 		
 		self.http = 'http://'
 		self.ws = 'ws://'
