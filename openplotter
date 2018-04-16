@@ -2612,7 +2612,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.Serial_baud_select.SetSelection(0)
 		assignmentbox.Add(self.Serial_baud_select)
 
-		update = wx.Button(self.p_serial, label=_('update'))
+		update = wx.Button(self.p_serial, label=_('apply'))
 		update.Bind(wx.EVT_BUTTON, self.on_update_Serialinst)
 
 		delete = wx.Button(self.p_serial, label=_('delete'))
@@ -2774,8 +2774,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def readNMEA0183(self, port, baudrate):
 		try:
 			self.serial = serial.Serial(port, baudrate, timeout=1)
-		except:
-			return False
+		except: return False
 		timewait = time.time() + 1.5
 		index = 0
 		countwrong = 0
@@ -2790,7 +2789,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				if b == 10 or b == 13 or (32 <= b < 128):
 					index += 1
 					if b == 13:
-						print '	' + text[:-1]
+						#print '	' + text[:-1]
 						text = ''
 					elif b == 10:
 						pass
@@ -2799,16 +2798,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				else:
 					#print 'countwrong ', b
 					countwrong += 1
-		if index > 10 and countwrong < index/10:
-			return True
-		else:
-			return False
+		if index > 10 and countwrong < index/10: return True
+		else: return False
 
 	def readNMEA2000(self, port, baudrate):
 		try:
 			self.serial = serial.Serial(port, baudrate, timeout=1)
-		except:
-			return False
+		except: return False
 		timewait = time.time() + 0.5
 		data = [0x10, 0x2, 0xa1, 0x01, 0x01, 0x5d, 0x10, 0x03]
 		for i in data:
@@ -2852,7 +2848,15 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		elif pypilot_mode == 'basic autopilot' and self.detect_gps_device(device, 4800):
 			assignment = 'GPSD'
 			bauds = '4800'
-		else: return False
+		else:
+			bauds = ''
+			for i in self.bauds:
+				if i != '':
+					print i
+					if self.readNMEA0183(device, i):
+						assignment = 'Kplex'
+						bauds = i
+			if not bauds: return False
 
 		self.Serial_OPname.SetValue(name)
 		self.Serial_assignment.SetStringSelection(assignment)
@@ -2876,7 +2880,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.start_sensors()
 		self.start_n2k()
 		if result:
-			self.ShowStatusBarGREEN(_('Suitable parameters according to your system settings. Press update to save.'))
+			self.ShowStatusBarGREEN(_('Suitable parameters according to your system settings. Press apply to save.'))
 		else: 
 			self.ShowStatusBarRED (_('We have not found any recognizable data on your device.'))
 
