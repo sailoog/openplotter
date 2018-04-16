@@ -15,7 +15,7 @@ To enable the demo tool open the OpenPlotter configuration file in *~/.openplott
 
 ```
 [TOOLS]
-py = [['Analog ads1115', 'put analog values to SignalK', 'analog_ads1115.py', '0'], ['Analog Firmata', 'put analog values to SignalK', 'oppymata.py', '0'], ['SignalK Simulator', 'change values with sliders and send values to SignalK', 'SK-simulator.py', '0'], ['Auto Setup', 'configure basic system', 'autosetup_tty.py', '0']]
+py = [['Analog ads1115', 'put analog values to SignalK', 'analog_ads1115.py', '0'], ['Analog Firmata', 'put analog values to SignalK', 'oppymata.py', '0'], ['SignalK Simulator', 'change values with sliders and send values to SignalK', 'SK-simulator.py', '0']]
 ```
 
 The syntax of this array is:
