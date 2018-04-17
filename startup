@@ -140,8 +140,6 @@ class MyFrame(wx.Frame):
 		opencpn=self.conf.get('STARTUP', 'opencpn')
 		opencpn_no=self.conf.get('STARTUP', 'opencpn_no_opengl')
 		opencpn_fullscreen=self.conf.get('STARTUP', 'opencpn_fullscreen')
-		x11vnc=self.conf.get('STARTUP', 'x11vnc')
-		vnc_pass=self.conf.get('STARTUP', 'vnc_pass')
 		play=self.conf.get('STARTUP', 'play')
 		sound=self.conf.get('STARTUP', 'sound')
 		node_red=self.conf.get('STARTUP', 'node_red')
@@ -216,25 +214,7 @@ class MyFrame(wx.Frame):
 		if delay!=0:
 			self.add_logger_data(_('\nApplying ').decode('utf8')+str(delay)+_(' seconds of delay...').decode('utf8'))
 			time.sleep(delay)
-			self.add_logger_data(_(' Done.'))
-
-		if x11vnc=='1' and not util_process_exist('x11vnc'):
-			self.add_logger_data(_('\nStarting VNC...'))
-			if vnc_pass=='1': process = subprocess.Popen(['x11vnc', '-forever', '-shared', '-usepw'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-			else: process = subprocess.Popen(['x11vnc', '-forever', '-shared' ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-			self.check_start('x11vnc')
-			self.add_logger_data(_('\nChecking VNC password...'))
-			if vnc_pass=='1':
-				try: 
-					out = subprocess.check_output(['cat', self.home+'/.vnc/passwd'])
-					self.add_logger_data(_(' Done.'))
-				except: 
-					self.add_warnings_data(_('\n\nSecurity warning: You have not set a password for VNC.\nPlease set a password in OpenPlotter > Startup.'))
-					self.add_logger_data(_(' See warning.'))
-			else: 
-				self.add_warnings_data(_('\n\nSecurity warning: You have not set a password for VNC.\nPlease set a password in OpenPlotter > Startup.'))
-				self.add_logger_data(_(' See warning.'))
-			
+			self.add_logger_data(_(' Done.'))		
 
 		subprocess.call(['pkill', '-9', 'opencpn'])
 		if opencpn=='1':

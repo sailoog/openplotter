@@ -25,13 +25,6 @@ else
 fi
 cd $op_folder/..
 
-
-echo
-echo "REMOVING UNUSED PACKAGES..."
-echo
-sudo apt-get -y remove --purge librtimulib-dev librtimulib-utils librtimulib7 python-rtimulib python3-rtimulib realvnc* xrdp
-sudo apt-get -y autoremove
-echo
 echo "UPDATING PACKAGE LISTS..."
 echo
 sudo apt-get update
@@ -61,7 +54,7 @@ fi
 echo
 echo "INSTALLING DEPENDENCIES..."
 echo
-sudo apt-get -y install gettext gpsd python-w1thermsensor x11vnc xrdp python-wxgtk3.0 hostapd dnsmasq isc-dhcp-server network-manager network-manager-gnome mpg123 python-gammu gammu mosquitto libusb-1.0-0-dev libfftw3-dev qt5-qmake libasound2-dev libpulse-dev  autoconf automake python-dev python-matplotlib bridge-utils crudini libqt5gui5 libqt5core5a libqt5network5 libqt5widgets5 libqt5svg5 libportaudio2 make gcc xsltproc curl git build-essential libtool libusb-1.0.0-dev librtlsdr-dev rtl-sdr i2c-tools cmake libqt4-dev libproj-dev libnova-dev swig python-numpy python-scipy python-serial python-gps python-PIL python-opengl python-pillow python-flask libnss-mdns avahi-utils libavahi-compat-libdnssd-dev
+sudo apt-get -y install gettext gpsd gpsd-clients python-w1thermsensor python-wxgtk3.0 hostapd dnsmasq isc-dhcp-server network-manager network-manager-gnome mpg123 python-gammu gammu mosquitto crudini whois libusb-1.0-0-dev libfftw3-dev qt5-qmake libasound2-dev libpulse-dev  autoconf automake python-dev python-matplotlib bridge-utils libqt4-dev gnuradio libvolk1-bin libusb-1.0-0 gr-iqbal qt5-default libqt5svg5 libportaudio2 make gcc xsltproc curl git build-essential libtool librtlsdr-dev rtl-sdr i2c-tools cmake zygrib libnss-mdns avahi-utils libavahi-compat-libdnssd-dev swig python-numpy python-scipy python-serial python-gps python-pil python-opengl python-flask
 if [ $? -ne 0 ]; then
 	echo
 	read -p "#### ERROR. ABORTING, PRESS ENTER TO EXIT ####"

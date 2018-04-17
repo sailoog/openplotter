@@ -532,11 +532,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.startup_opencpn_fullscreen = wx.CheckBox(self.p_startup, label=_('fullscreen'), pos=(40, 130))
 		self.startup_opencpn_fullscreen.Bind(wx.EVT_CHECKBOX, self.startup)
 
-		self.startup_remote_desktop = wx.CheckBox(self.p_startup, label=_('VNC remote desktop'), pos=(20, 225))
-		self.startup_remote_desktop.Bind(wx.EVT_CHECKBOX, self.startup)
-		self.startup_vnc_pass = wx.CheckBox(self.p_startup, label=_('use password'), pos=(40, 250))
-		self.startup_vnc_pass.Bind(wx.EVT_CHECKBOX, self.startup)
-
 		wx.StaticBox(self.p_startup, size=(330, 230), pos=(350, 65))
 
 		self.startup_play_sound = wx.CheckBox(self.p_startup, label=_('Play sound'), pos=(360, 80))
@@ -548,7 +543,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.op_maximize = wx.CheckBox(self.p_startup, label=_('Maximize OpenPlotter'), pos=(360, 150))
 		self.op_maximize.Bind(wx.EVT_CHECKBOX, self.startup)
 
-		self.node_red = wx.CheckBox(self.p_startup, label=_('Node-Red (Dashboard, Freeboard)'), pos=(360, 180))
+		self.node_red = wx.CheckBox(self.p_startup, label=_('Node-Red'), pos=(360, 180))
 		self.node_red.Bind(wx.EVT_CHECKBOX, self.startup)
 
 	def read_startup(self):
@@ -561,12 +556,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.startup_opencpn_fullscreen.Disable()
 		if self.conf.get('STARTUP', 'opencpn_no_opengl') == '1': self.startup_opencpn_nopengl.SetValue(True)
 		if self.conf.get('STARTUP', 'opencpn_fullscreen') == '1': self.startup_opencpn_fullscreen.SetValue(True)
-
-		if self.conf.get('STARTUP', 'x11vnc') == '1':
-			self.startup_remote_desktop.SetValue(True)
-		else:
-			self.startup_vnc_pass.Disable()
-		if self.conf.get('STARTUP', 'vnc_pass') == '1': self.startup_vnc_pass.SetValue(True)
 		if self.conf.get('STARTUP', 'maximize') == '1':
 			self.op_maximize.SetValue(True)
 			self.Maximize()
@@ -619,25 +608,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.conf.set('STARTUP', 'opencpn_fullscreen', '1')
 			else:
 				self.conf.set('STARTUP', 'opencpn_fullscreen', '0')
-
-		if sender == self.startup_remote_desktop:
-			if self.startup_remote_desktop.GetValue():
-				self.conf.set('STARTUP', 'x11vnc', '1')
-				self.startup_vnc_pass.Enable()
-			else:
-				self.conf.set('STARTUP', 'x11vnc', '0')
-				self.startup_vnc_pass.Disable()
-
-		if sender == self.startup_vnc_pass:
-			if self.startup_vnc_pass.GetValue():
-				self.conf.set('STARTUP', 'vnc_pass', '1')
-				dlg = wx.MessageDialog(None, _('Do you want to change your VNC-Password?'), _('Question'),
-									   wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
-				if dlg.ShowModal() == wx.ID_YES:
-					subprocess.Popen(['lxterminal', '-e', 'x11vnc', '-storepasswd'])
-				dlg.Destroy()
-			else:
-				self.conf.set('STARTUP', 'vnc_pass', '0')
 
 		if sender == self.op_maximize:
 			if self.op_maximize.GetValue():
@@ -924,8 +894,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		out += self.on_show_ip_info_txt('3000',ips,ip_hostname)
 		out += _('\n VNC remote desktop:\n')
 		out += self.on_show_ip_info_txt('5900',ips,ip_hostname)
-		out += _('\n RDP remote desktop:\n')
-		out += self.on_show_ip_info_txt('',ips,ip_hostname)
 		out += _('\n node-red:\n')
 		out += self.on_show_ip_info_txt('1880',ips,ip_hostname)
 		out += _('\n MQTT local broker:\n')
