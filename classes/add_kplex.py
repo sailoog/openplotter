@@ -114,9 +114,6 @@ class addkplex(wx.Dialog):
 		self.otalker.SetValue('**')
 		self.osent.SetValue('***')
 
-		self.gpsd_examp_b = wx.Button(panel, label=_('gpsd examp'), pos=(220, 320))
-		self.Bind(wx.EVT_BUTTON, self.gpsd_examp, self.gpsd_examp_b)
-
 		self.ok = wx.Button(panel, label=_('OK'), pos=(425, 320))
 		self.Bind(wx.EVT_BUTTON, self.ok_conn, self.ok)
 		cancelBtn = wx.Button(panel, wx.ID_CANCEL, pos=(330, 320))
@@ -142,7 +139,6 @@ class addkplex(wx.Dialog):
 				self.kplex_name.Disable()
 				self.kplex_device.Disable()
 				self.kplex_baud_select.Disable()
-				self.gpsd_examp_b.Disable()
 			else:
 				self.kplex_io_net.SetValue(edit[2])
 				self.switch_ser_net(False)
@@ -166,6 +162,7 @@ class addkplex(wx.Dialog):
 				self.ofilter_sentences.SetValue(edit[8])
 			else:
 				self.ofilter_select.SetValue(self.mode_ofilter[0])
+
 	'''
 	def GPS_examp(self, e):
 		self.kplex_type.SetValue('Serial')
@@ -192,7 +189,7 @@ class addkplex(wx.Dialog):
 		self.ifilter_sentences.SetValue('**HDM,**RSA')
 		self.ofilter_select.SetValue(self.mode_ifilter[1])
 		self.ofilter_sentences.SetValue('**RM*,**VHW,**VWR')
-	'''
+	
 	def gpsd_examp(self, e):
 		self.kplex_type.SetValue('TCP')
 		self.kplex_io_net.SetValue('in')
@@ -208,6 +205,7 @@ class addkplex(wx.Dialog):
 		self.ifilter_sentences.SetValue(_('nothing'))
 		self.ofilter_select.SetValue(self.mode_ifilter[0])
 		self.ofilter_sentences.SetValue(_('nothing'))
+	'''
 
 	def ifilter_del(self, event):
 		self.ifilter_sentences.SetValue(_('nothing'))
@@ -376,7 +374,7 @@ class addkplex(wx.Dialog):
 				self.ShowMessage(_('This name is already in use.'))
 				return
 
-		if name == 'system_input' or name == 'system_output':
+		if 'system' in name or name == 'signalk' or name == 'gpsd':
 			self.ShowMessage(_('This name is reserved by the system.'))
 			return
 

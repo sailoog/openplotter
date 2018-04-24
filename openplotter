@@ -117,9 +117,6 @@ class MainFrame(wx.Frame):
 
 		self.menubar = wx.MenuBar()
 		self.settings = wx.Menu()
-		self.gpsd_item1 = self.settings.Append(wx.ID_ANY, _('Set GPSD'), _('Set GPSD in the new window'))
-		self.Bind(wx.EVT_MENU, self.reconfigure_gpsd, self.gpsd_item1)
-		self.settings.AppendSeparator()
 		self.sdr_ais_item1 = self.settings.Append(wx.ID_ANY, _('SDR receiver'),
 												  _('Set an SDR receiver in the new window'))
 		self.Bind(wx.EVT_MENU, self.open_sdr_ais, self.sdr_ais_item1)
@@ -268,10 +265,6 @@ class MainFrame(wx.Frame):
 
 	def ShowStatusBarBLACK(self, w_msg):
 		self.ShowStatusBar(w_msg, wx.BLACK)	
-
-	def reconfigure_gpsd(self, event):
-		subprocess.Popen(['lxterminal', '-e', 'sudo nano /etc/default/gpsd'])
-		self.ShowStatusBarBLACK(_('Set GPSD in the new window'))
 
 	def open_sdr_ais(self, event):
 		subprocess.call(['pkill', '-f', 'SDR_AIS.py'])
@@ -1256,7 +1249,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		diagnostic = wx.Button(self.p_kplex, label=_('Diagnostic'))
 		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_kplex)
 
-		add = wx.Button(self.p_kplex, label=_('add'))
+		add = wx.Button(self.p_kplex, label=_('add network'))
 		add.Bind(wx.EVT_BUTTON, self.on_add_kplex)
 		delete = wx.Button(self.p_kplex, label=_('delete'))
 		delete.Bind(wx.EVT_BUTTON, self.on_delete_kplex)
@@ -1325,7 +1318,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def edit_kplex(self, e):
 		idx = e.GetIndex()
 
-		if self.kplex[idx][1] == 'system_a' or self.kplex[idx][1] == 'system_b' or self.kplex[idx][1] == 'signalk':
+		if self.kplex[idx][1] == 'system_a' or self.kplex[idx][1] == 'system_b' or self.kplex[idx][1] == 'signalk' or self.kplex[idx][1] == 'gpsd':
 			self.ShowStatusBarRED(_('You can not edit this.'))
 			return
 		edit = []
@@ -1527,7 +1520,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				if self.kplex[i][1] == 'system_a' or self.kplex[i][1] == 'system_b' or self.kplex[i][1] == 'signalk':
 					self.ShowStatusBarRED(_('You can not delete this'))
 					return
-				if self.kplex[i][2] == 'Serial':
+				if self.kplex[i][2] == 'Serial' or self.kplex[i][1] == 'gpsd':
 					self.ShowStatusBarRED(_('Unassign this device on "Serial ports" tab'))
 					return	
 				del self.kplex[i]
@@ -2725,9 +2718,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if test == 0: return True
 		else: return False
 
-	def detect_gps_device(self, device, baud):
+	def detect_gps_device(self, device):
 		subprocess.call(['killall', '-9', 'gpscat'])
-		gpscat = subprocess.Popen(['gpscat', '-s', '%dN1' % baud, '-t', device], stdout=subprocess.PIPE)
+		gpscat = subprocess.Popen(['gpscat','-t',device], stdout=subprocess.PIPE)
 		#poll = select.poll()
 		#poll.register(gpscat.stdout, select.POLLOUT)
 		#x = poll.poll(5000)
@@ -2803,24 +2796,20 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		if device == '/dev/naviDev.tty':
 			assignment = 'GPSD'
-			bauds = '115200'
+			bauds = ''
 		elif self.readNMEA2000(device, '115200'):
 			assignment = 'CAN-USB'
 			bauds = '115200'
 		elif self.detect_pypilot_servo(device, 38400):
 			assignment = 'pypilot'
 			bauds = '38400'
-		elif pypilot_mode == 'basic autopilot' and bauds and self.detect_gps_device(device, bauds):
+		elif pypilot_mode == 'basic autopilot' and self.detect_gps_device(device):
 			assignment = 'GPSD'
-			bauds = str(bauds)
-		elif pypilot_mode == 'basic autopilot' and self.detect_gps_device(device, 4800):
-			assignment = 'GPSD'
-			bauds = '4800'
+			bauds = ''
 		else:
 			bauds = ''
 			for i in self.bauds:
 				if i != '':
-					print i
 					if self.readNMEA0183(device, i):
 						assignment = 'Kplex'
 						bauds = i
@@ -2906,6 +2895,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.list_Serialinst.SetStringItem(index, 0, name)
 		assignment = self.Serial_assignment.GetStringSelection()
 		bauds = self.Serial_baud_select.GetStringSelection()
+
+		if (assignment == 'Kplex' or assignment == 'pypilot') and bauds == '':
+			self.ShowMessage(_('Failed. Select bauds.'))
+			return
 
 		self.list_Serialinst.SetStringItem(index, 6, assignment)
 		if self.Serial_rem_dev.GetValue():
@@ -2996,25 +2989,32 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		self.ShowStatusBarRED(_('Restarting ...'))
 		self.start_udev()
-                
-                # write gpsd config
-                file = open('/etc/default/gpsd', 'r')
-                file1 = open('gpsd', 'w')
-                while True:
-                        line = file.readline()
-                        if not line:
-                                break
-                        if line[:9] == 'DEVICES="':
-                                file1.write('DEVICES="')
-                                for name in self.Serialinst:
-                                        if self.Serialinst[name]['assignment'] == 'GPSD':
-                                                port = '/dev/ttyOP_' + name
-                                                file1.write(port + ' ')
-                                file1.write('"\n')
-                        else:
-                                file1.write(line)
-                file.close()
-                file1.close()
+
+		# write gpsd config
+		gpsd_exists = False
+		file = open('/etc/default/gpsd', 'r')
+		file1 = open('gpsd', 'w')
+		while True:
+			line = file.readline()
+			if not line: break
+			if line[:9] == 'DEVICES="':
+				file1.write('DEVICES="')
+				for name in self.Serialinst:
+					if self.Serialinst[name]['assignment'] == 'GPSD':
+						gpsd_exists = True
+						port = '/dev/ttyOP_' + name
+						file1.write(port + ' ')
+				file1.write('"\n')
+			else: file1.write(line)
+		file.close()
+		file1.close()
+
+		if os.system('diff gpsd /etc/default/gpsd > /dev/null'):
+			# only restart gpsd if changed
+			print 'gpsd changed'
+			os.system('sudo mv gpsd /etc/default')
+			os.system('sudo service gpsd restart')
+		#else remove gpsd?
 
                 # write pypilot allowed ports
                 file = open('pypilot_serial_ports', 'w')
@@ -3025,12 +3025,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
                                 os.system('sudo chown pi ' + port) # set permissions
                 file.close()
 
-                if os.system('diff gpsd /etc/default/gpsd > /dev/null'):
-                        # only restart gpsd if changed
-                        print 'gpsd changed'
-                        os.system('sudo mv gpsd /etc/default')
-                        os.system('sudo service gpsd restart')
-
                 path = self.home + '/.pypilot/serial_ports'
                 if os.system('diff pypilot_serial_ports ' + path + ' > /dev/null'):
                         os.system('mv pypilot_serial_ports ' + path)
@@ -3040,21 +3034,32 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.read_kplex_conf()
 		for name in self.Serialinst:
 			if self.Serialinst[name]['assignment'] == 'Kplex':
-				if self.Serialinst[name]['bauds'] == '':
-					self.Serialinst[name]['assignment'] == _('none')
-					self.ShowMessage(_('Failed. Select bauds'))
-				else:
-					exist = False
-					for index, i in enumerate(self.kplex):
-						if i[1] == name:
-							if i[2] != 'Serial':
-								self.Serialinst[name]['assignment'] == _('none')
-								self.ShowMessage(_('Failed. Same name used for multiple devices'))
-							else:
-								exist = True
-								self.kplex[index][5] = self.Serialinst[name]['bauds']
-					if not exist:
-						self.kplex.append([None, name, 'Serial', 'in', 'ttyOP_'+name, self.Serialinst[name]['bauds'], 'none', 'nothing', 'none', 'nothing', '1'])
+				exist = False
+				for index, i in enumerate(self.kplex):
+					if i[1] == name:
+						if i[2] != 'Serial':
+							self.Serialinst[name]['assignment'] == _('none')
+							self.ShowMessage(_('Failed. Same name used for multiple devices: ')+name)
+						else:
+							exist = True
+							self.kplex[index][5] = self.Serialinst[name]['bauds']
+				if not exist:
+					self.kplex.append([None, name, 'Serial', 'in', 'ttyOP_'+name, self.Serialinst[name]['bauds'], 'none', 'nothing', 'none', 'nothing', '1'])
+	
+		#check if there is gpsd and create kplex input
+		if gpsd_exists:
+			exist = False
+			for index, i in enumerate(self.kplex):
+				if i[1] == 'gpsd': exist = True
+			if not exist:
+				self.kplex.append([None, 'gpsd', 'TCP', 'in', 'localhost', '2947', 'none', 'nothing', 'none', 'nothing', '1'])
+		else:
+			for index, i in enumerate(self.kplex):
+				if i[1] == 'gpsd': 
+					del self.kplex[index]
+					break
+
+		#clean kplex
 		for index, i in enumerate(self.kplex):
 			if i[2] == 'Serial':
 				exist = False
