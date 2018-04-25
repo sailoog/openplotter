@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
-import ConfigParser, os, yaml, json
+import ConfigParser, os, yaml, json, subprocess
 from conf import Conf
 
 
@@ -57,6 +57,61 @@ class SK_settings:
 				
 		self.http_address = self.http+self.ip+':'+str(self.aktport)
 		
+		#check defaults
+		write = False
+		OPcan = False
+		OPpypilot = False
+		OPkplex = False
+		OPwifi = False
+		OPserial = False
+		OPnotifications = False
+		OPsensors = False
+		if 'pipedProviders' in self.data:
+			try:
+				for i in self.data['pipedProviders']:
+					if i['id'] == 'OPcan': OPcan = True
+					elif i['id'] == 'OPpypilot': 
+						OPpypilot = True
+						if not i['enabled']: 
+							i['enabled'] = True
+							write = True
+					elif i['id'] == 'OPkplex': 
+						OPkplex = True
+						if not i['enabled']: 
+							i['enabled'] = True
+							write = True
+					elif i['id'] == 'OPwifi': 
+						OPwifi = True
+						if not i['enabled']: 
+							i['enabled'] = True
+							write = True
+					elif i['id'] == 'OPserial': 
+						OPserial = True
+						if not i['enabled']: 
+							i['enabled'] = True
+							write = True
+					elif i['id'] == 'OPnotifications': 
+						OPnotifications = True
+						if not i['enabled']: 
+							i['enabled'] = True
+							write = True
+					elif i['id'] == 'OPsensors': 
+						OPsensors = True
+						if not i['enabled']: 
+							i['enabled'] = True
+							write = True
+			except:
+				print 'Error parsing setting.json'
+
+		if not OPcan: self.data['pipedProviders'].append({'pipeElements': [{'type': 'providers/simple', 'options': {'logging': False, 'type': 'NMEA2000', 'subOptions': {'device': '/dev/ttyOP_', 'type': 'ngt-1'}}}], 'enabled': False, 'id': 'OPcan'})
+		if not OPpypilot: self.data['pipedProviders'].append({'pipeElements': [{'type': 'providers/simple', 'options': {'logging': False, 'type': 'NMEA0183', 'subOptions': {'host': 'localhost', 'type': 'tcp', 'port': '20220'}}}], 'enabled': True, 'id': 'OPpypilot'})
+		if not OPkplex: self.data['pipedProviders'].append({'pipeElements': [{'type': 'providers/simple', 'options': {'logging': False, 'type': 'NMEA0183', 'subOptions': {'host': 'localhost', 'type': 'tcp', 'port': '30330'}}}], 'enabled': True, 'id': 'OPkplex'})
+		if not OPwifi: self.data['pipedProviders'].append({'pipeElements': [{'type': 'providers/simple', 'options': {'logging': False, 'type': 'SignalK', 'subOptions': {'type': 'udp', 'port': '55561'}}}], 'enabled': True, 'id': 'OPwifi'})
+		if not OPserial: self.data['pipedProviders'].append({'pipeElements': [{'type': 'providers/simple', 'options': {'logging': False, 'type': 'SignalK', 'subOptions': {'type': 'udp', 'port': '55559'}}}], 'enabled': True, 'id': 'OPserial'})
+		if not OPnotifications: self.data['pipedProviders'].append({'pipeElements': [{'type': 'providers/simple', 'options': {'logging': False, 'type': 'SignalK', 'subOptions': {'type': 'udp', 'port': '55558'}}}], 'enabled': True, 'id': 'OPnotifications'})
+		if not OPsensors: self.data['pipedProviders'].append({'pipeElements': [{'type': 'providers/simple', 'options': {'logging': False, 'type': 'SignalK', 'subOptions': {'type': 'udp', 'port': '55557'}}}], 'enabled': True, 'id': 'OPsensors'})
+
+		#check can devices
 		self.ngt1=''
 		self.ngt1_enabled=-1
 		self.ngt1_device=''
@@ -78,6 +133,8 @@ class SK_settings:
 					count+=1
 			except:
 				print 'Error parsing setting.json'
+
+		if write or not OPcan or not OPpypilot or not OPkplex or not OPwifi or not OPserial or not OPnotifications or not OPsensors: self.write_settings()
 				
 	def set_ngt1_device(self,device):
 		if self.ngt1_enabled != -1:
@@ -106,6 +163,12 @@ class SK_settings:
 			wififile = open(self.setting_file, 'w')
 			wififile.write(data)
 			wififile.close()
+			# stopping sk server
+			subprocess.call(['sudo', 'systemctl', 'stop', 'signalk.service'])
+			subprocess.call(['sudo', 'systemctl', 'stop', 'signalk.socket'])
+			# restarting sk server
+			subprocess.call(['sudo', 'systemctl', 'start', 'signalk.socket'])
+			subprocess.call(['sudo', 'systemctl', 'start', 'signalk.service'])
 			self.load()
 		except:
 			print 'Error saving setting.json'

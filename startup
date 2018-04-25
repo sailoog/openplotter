@@ -19,6 +19,7 @@ import wx, subprocess, time, os, threading, sys, platform, requests, ConfigParse
 from shutil import copyfile
 from classes.conf import Conf
 from classes.language import Language
+from classes.SK_settings import SK_settings
 
 class MyFrame(wx.Frame):
 		
@@ -175,7 +176,7 @@ class MyFrame(wx.Frame):
 		
 		subprocess.call(['pkill', '-f', '/openplotter/openplotter'])
 
-		self.add_logger_data(_('\nChecking Signal K password...'))
+		self.add_logger_data(_('Checking Signal K password...'))
 		with open(self.home+'/.signalk/security.json') as data_file:
 			data = json.load(data_file)
 		for i in data['users']:
@@ -184,9 +185,9 @@ class MyFrame(wx.Frame):
 				self.add_logger_data(_(' See warning.'))
 			else: self.add_logger_data(_(' Done.'))
 
-		# comprobar signal k settings y modificar si es necesario
-
-		# comprobar si signal k esta ejecutandose	if util_process_exist('signalk-server'):
+		self.add_logger_data(_('\nChecking Signal K defaults...'))
+		self.SK_settings = SK_settings()
+		self.check_start('signalk-server')
 		
 		if platform.machine()[0:3]=='arm':
 			self.add_logger_data(_('\nChecking pi password...'))
@@ -205,16 +206,6 @@ class MyFrame(wx.Frame):
 			self.add_logger_data(_('\nApplying ').decode('utf8')+str(delay)+_(' seconds of delay...').decode('utf8'))
 			time.sleep(delay)
 			self.add_logger_data(_(' Done.'))		
-
-		subprocess.call(['pkill', '-9', 'opencpn'])
-		if opencpn=='1':
-			self.add_logger_data(_('\nStarting OpenCPN...'))
-			opencpn_commands = ['opencpn']
-			if opencpn_no=='1': opencpn_commands.append('-no_opengl')
-			if opencpn_fullscreen=='1': opencpn_commands.append('-fullscreen')
-			if len(opencpn_commands)>1: subprocess.Popen(opencpn_commands)
-			if len(opencpn_commands)==1: subprocess.Popen('opencpn')
-			self.check_start('opencpn')
 
 		if wifi_server == '1':
 			self.add_logger_data(_('\nStarting WIFI Access Point...'))
@@ -291,9 +282,18 @@ class MyFrame(wx.Frame):
 
 		subprocess.call(['pkill', '-9', 'kplex'])
 		self.add_logger_data(_('\nStarting NMEA 0183 Multiplexer...'))
-		time.sleep(3)
 		subprocess.Popen('kplex')
 		self.check_start('kplex')
+
+		subprocess.call(['pkill', '-9', 'opencpn'])
+		if opencpn=='1':
+			self.add_logger_data(_('\nStarting OpenCPN...'))
+			opencpn_commands = ['opencpn']
+			if opencpn_no=='1': opencpn_commands.append('-no_opengl')
+			if opencpn_fullscreen=='1': opencpn_commands.append('-fullscreen')
+			if len(opencpn_commands)>1: subprocess.Popen(opencpn_commands)
+			if len(opencpn_commands)==1: subprocess.Popen('opencpn')
+			self.check_start('opencpn')
 
 		self.add_logger_data(_('\nStarting Tools...'))
 		index=0
@@ -368,6 +368,7 @@ class MyFrame(wx.Frame):
 		self.Destroy()
 
 	def check_start(self,process):
+		time.sleep(2)
 		if util_process_exist(process):
 			self.add_logger_data(_(' Done.'))
 		else:

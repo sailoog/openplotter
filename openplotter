@@ -3166,14 +3166,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			#	self.conf.set('N2K', 'enable', '1')
 			if self.SK_settings.ngt1_enabled != 1:
 				self.SK_settings.set_ngt1_enable(1)
-				self.restart_SK()
 			self.n2k_enable.SetValue(True)
 		else:
 			#if self.conf.get('N2K', 'enable') != '0':
 			#	self.conf.set('N2K', 'enable', '0')
 			if self.SK_settings.ngt1_enabled != 0:
 				self.SK_settings.set_ngt1_enable(0)			
-				self.restart_SK()
 			self.n2k_enable.SetValue(False)
 
 	def set_n2k_out_enable(self,enable):
@@ -3231,7 +3229,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		subprocess.call(['pkill', '-f', 'diagnostic-N2K-input.py'])
 		subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
 		self.SK_settings.set_ngt1_enable(0)
-		self.restart_SK()
 
 	def start_n2k(self):
 		self.set_n2k_enable(self.n2k_enable.GetValue())
@@ -3266,7 +3263,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def on_n2k_can0_enable(self, e):
 		if self.SK_settings.canbus_enabled != self.n2k_can0_enable.GetValue():
 			self.SK_settings.set_canbus_enable(self.n2k_can0_enable.GetValue())
-			self.restart_SK()
 			
 	def check_can_device(self):
 		can_device = self.conf.get('N2K', 'can_usb')
