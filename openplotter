@@ -2621,12 +2621,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		for device in self.context.list_devices(subsystem='tty'):
 			i = device['DEVNAME']
-			if not '/dev/naviDev' in i:
+			if not '/dev/moitessier' in i:
 				try:
 					ii = device['DEVLINKS']
 				except:
 					continue
-			if not ('/dev/naviDev' in i or '/dev/ttyACM' in i or '/dev/ttyUSB' in i or '/dev/serial0' in ii):
+			if not ('/dev/moitessier' in i or '/dev/ttyACM' in i or '/dev/ttyUSB' in i or '/dev/serial0' in ii):
 				continue
 			value = device['DEVPATH']
 			port = value[value.rfind('/usb1/') + 6:-(len(value) - value.find('/tty'))]
@@ -2794,7 +2794,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if bauds: bauds = int(bauds)
 		pypilot_mode = self.conf.get('PYPILOT', 'mode')
 
-		if device == '/dev/naviDev.tty':
+		if device == '/dev/moitessier.tty':
 			assignment = 'GPSD'
 			bauds = ''
 		elif self.readNMEA2000(device, '115200'):

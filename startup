@@ -175,16 +175,6 @@ class MyFrame(wx.Frame):
 		
 		subprocess.call(['pkill', '-f', '/openplotter/openplotter'])
 
-		self.add_logger_data(_('\nStarting Moitessier HAT...'))
-		try:
-			out = subprocess.check_output(['more','product'],cwd='/proc/device-tree/hat')
-			if 'Moitessier Navigation HAT' in out:
-				subprocess.call(['sudo', 'insmod', self.op_folder+'/drivers/navHat/naviDev.ko'])
-				subprocess.call(['sudo', 'chown', 'pi:pi', '/dev/naviDev.tty' ])
-				self.add_logger_data(_(' Done.'))
-			else: self.add_logger_data(_(' Not Started.'))
-		except: pass
-
 		self.add_logger_data(_('\nChecking Signal K password...'))
 		with open(self.home+'/.signalk/security.json') as data_file:
 			data = json.load(data_file)
