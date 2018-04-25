@@ -364,11 +364,11 @@ class MainFrame(wx.Frame):
 		self.conf.set('GENERAL', 'lang', 'gl')
 
 	def update_opencpn(self, e):
-		subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/update_OpenCPN.sh'])
+		subprocess.Popen(['lxterminal', '-e', 'bash', self.currentpath+'/update/update_OpenCPN.sh'])
 		self.ShowStatusBarBLACK(_('Follow the instructions of the new window'))
 
 	def update_opencpn_plugins(self, e):
-		subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/update_OpenCPN_plugins.sh'])
+		subprocess.Popen(['lxterminal', '-e', 'bash', self.currentpath+'/update/update_OpenCPN_plugins.sh'])
 		self.ShowStatusBarBLACK(_('Follow the instructions of the new window'))
 
 	def update_openplotter(self, e):
@@ -444,13 +444,13 @@ class MainFrame(wx.Frame):
 		msg += _('Are you sure you want to update: ').decode('utf8')+vl+' '+sl+' --> '+vr+' '+sr+'?'
 		dlg = wx.MessageDialog(None, msg, _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_EXCLAMATION)
 		if dlg.ShowModal() == wx.ID_YES:
-			subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/update_OpenPlotter.sh', major_update, vr, sr, repository])
+			subprocess.Popen(['lxterminal', '-e', 'bash', self.currentpath+'/update/update_OpenPlotter.sh', major_update, vr, sr, repository])
 			dlg.Destroy()
 			self.Close()
 		else: dlg.Destroy()
 
 	def default_desktop(self, e):
-		subprocess.Popen(['lxterminal', '-e', 'bash '+self.currentpath+ '/update/default_openplotter_desk.sh'])
+		subprocess.Popen(['lxterminal', '-e', 'bash', self.currentpath+'/update/default_openplotter_desk.sh'])
 		self.ShowStatusBarBLACK(_('Follow the instructions of the new window'))
 
 	def OnAboutBox(self, e):
