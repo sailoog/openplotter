@@ -27,6 +27,7 @@ from classes.getkeys import GetKeys
 from classes.conf import Conf
 from classes.SK_settings import SK_settings
 from classes.language import Language
+from classes.show_keys import showKeys
 
 class MyFrame(wx.Frame):
 	def __init__(self):
@@ -82,6 +83,9 @@ class MyFrame(wx.Frame):
 		sort_SK = wx.Button(panel, label=_('Sort SK'))
 		sort_SK.Bind(wx.EVT_BUTTON, self.on_sort_SK)
 
+		show_keys = wx.Button(panel, label=_('Show SK keys'))
+		show_keys.Bind(wx.EVT_BUTTON, self.on_show_keys)
+
 		self.private_unit = wx.CheckBox(panel, label=_('private Unit'), pos=(360, 32))
 		self.private_unit.Bind(wx.EVT_CHECKBOX, self.on_private_unit)
 		self.private_unit.SetValue(self.private_unit_s)
@@ -95,6 +99,7 @@ class MyFrame(wx.Frame):
 		hlistbox.Add(self.list, 1, wx.ALL | wx.EXPAND, 5)
 		hbox.Add(sort_SRC, 0, wx.RIGHT | wx.LEFT, 5)
 		hbox.Add(sort_SK, 0, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add(show_keys, 0, wx.RIGHT | wx.LEFT, 5)
 		hbox.Add((0,0), 1, wx.RIGHT | wx.LEFT, 5)
 		hbox.Add(self.private_unit, 0, wx.RIGHT | wx.LEFT, 5)
 		hbox.Add(unit_setting, 0, wx.RIGHT | wx.LEFT, 5)
@@ -277,6 +282,11 @@ class MyFrame(wx.Frame):
 	def on_sort_SK(self, e):
 		self.sortCol = 1
 		self.sorting()
+
+	def on_show_keys(self,e):
+		dlg = showKeys()
+		res = dlg.ShowModal()
+		dlg.Destroy()
 
 	def sorting(self):
 		self.list.DeleteAllItems()
