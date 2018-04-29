@@ -29,6 +29,7 @@ class MyFrame(wx.Frame):
 
 			self.conf = Conf()
 			self.home = self.conf.home
+			self.op_folder = self.conf.op_folder
 
 			Language(self.conf)
 			
@@ -244,18 +245,39 @@ class MyFrame(wx.Frame):
 			self.p_settings.SetSizer(vbox4)
 
 ##################################################################### settings
-			
+
+			kernel_box = wx.StaticBox(self.p_update, -1, _(' Current Kernel version '))
+
+			self.kernel_label = wx.StaticText(self.p_update, -1)
+
+			packages_box = wx.StaticBox(self.p_update, -1, _(' Available packages '))
+
+			self.packages_list = os.listdir(self.op_folder+'/tools/moitessier_hat/packages')
+			self.packages_select = wx.Choice(self.p_update, choices=self.packages_list, style=wx.CB_READONLY)
+
+			self.button_install =wx.Button(self.p_update, label=_('Install'))
+			self.Bind(wx.EVT_BUTTON, self.on_install, self.button_install)
+
 			self.logger3 = wx.TextCtrl(self.p_update, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_DONTWRAP|wx.LC_SORT_ASCENDING)
 
 			button_ok3 =wx.Button(self.p_update, label=_('Close'))
 			self.Bind(wx.EVT_BUTTON, self.on_ok, button_ok3)
+
+			v_kernel_box = wx.StaticBoxSizer(kernel_box, wx.VERTICAL)
+			v_kernel_box.AddSpacer(5)
+			v_kernel_box.Add(self.kernel_label, 0, wx.ALL | wx.EXPAND, 5)
+
+			h_packages_box = wx.StaticBoxSizer(packages_box, wx.HORIZONTAL)
+			h_packages_box.Add(self.packages_select, 1, wx.ALL | wx.EXPAND, 5)
+			h_packages_box.Add(self.button_install, 0, wx.ALL | wx.EXPAND, 5)
 
 			buttons3 = wx.BoxSizer(wx.HORIZONTAL)
 			buttons3.Add((0,0), 1, wx.ALL | wx.EXPAND, 0)
 			buttons3.Add(button_ok3, 0, wx.ALL | wx.EXPAND, 0)
 
 			update_final = wx.BoxSizer(wx.VERTICAL)
-			update_final.AddSpacer(5)
+			update_final.Add(v_kernel_box, 0, wx.ALL | wx.EXPAND, 5)
+			update_final.Add(h_packages_box, 0, wx.ALL | wx.EXPAND, 5)
 			update_final.Add(self.logger3, 1, wx.ALL | wx.EXPAND, 5)
 			update_final.Add(buttons3, 0, wx.ALL | wx.EXPAND, 5)
 
@@ -269,8 +291,8 @@ class MyFrame(wx.Frame):
 
 
 		def read(self):
-			self.current_kernel = subprocess.check_output(['uname','-r'])
-			self.logger3.SetValue(_('Current Kernel version: ')+self.current_kernel)
+			self.current_kernel = subprocess.check_output(['uname','-r','-v'])
+			self.kernel_label.SetLabel(self.current_kernel)
 
 			out = subprocess.check_output(['more','product'],cwd='/proc/device-tree/hat') 
 			if not 'Moitessier' in out: 
@@ -323,32 +345,17 @@ class MyFrame(wx.Frame):
 				self.logger2.AppendText(_('Failure reading config.xml file!'))
 				self.disable_all_buttons()
 
+		def on_install(self,e):
+			if self.packages_select.GetStringSelection() == '':
+				self.logger3.SetValue(_('Select a package to install.'))
+			else:
+				subprocess.Popen(['lxterminal', '-e', 'bash', self.op_folder+'/tools/moitessier_hat/install.sh', self.op_folder+'/tools/moitessier_hat/packages/'+self.packages_select.GetStringSelection()])
+				self.logger3.SetValue(_('Updating Moitessier Hat modules and firmware...'))
+
 		def disable_all_buttons(self):
-			self.button_get_info.Disable()
-			self.button_statistics.Disable()
-			self.button_reset_statistics.Disable()
-			self.button_MPU9250.Disable()
-			self.button_MS560702BA03.Disable()
-			self.button_Si7020A20.Disable()
-			self.button_enable_gnss.Disable()
-			self.button_disable_gnss.Disable()
-			self.button_reset.Disable()
-			self.button_defaults.Disable()
-			self.simulator.Disable()
-			self.interval.Disable()
-			self.mmsi1.Disable()
-			self.mmsi2.Disable()
-			self.rec1_freq1.Disable()
-			self.rec1_freq2.Disable()
-			self.rec1_metamask.Disable()
-			self.rec1_afcRange.Disable()
-			self.rec1_tcxoFreq.Disable()
-			self.rec2_freq1.Disable()
-			self.rec2_freq2.Disable()
-			self.rec2_metamask.Disable()
-			self.rec2_afcRange.Disable()
-			self.rec2_tcxoFreq.Disable()
-			self.button_apply.Disable()
+			self.disable_info_settings_buttons()
+			self.packages_select.Disable()
+			self.button_install.Disable()
 
 		def disable_info_settings_buttons(self):
 			self.button_get_info.Disable()
