@@ -38,9 +38,6 @@ fi
 if [ ! -f ~/.openplotter/private_unit.json ]; then
 	cp -f $DIRDATE/classes/private_unit.json ~/.openplotter/
 fi
-if [ ! -f ~/.openplotter/SK-simulator.conf ]; then
-	cp -f $DIRDATE/tools/SK-simulator.conf ~/.openplotter/
-fi
 if [ ! -f ~/.openplotter/openplotter_analog.conf ]; then
 	cp -f $DIRDATE/tools/openplotter_analog.conf ~/.openplotter/
 fi
