@@ -17,7 +17,7 @@
 import signal, sys, os, time, socket, subprocess
 import shlex
 
-op_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')
+op_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../..')
 sys.path.append(op_folder+'/classes')
 from conf_analog import Conf_analog
 

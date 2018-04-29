@@ -18,27 +18,17 @@
 import wx, wx.lib.scrolledpanel, sys, os, ConfigParser, re, subprocess, time
 import xml.etree.ElementTree as ET
 
-##########################################################################
-# You can access to all OpenPlotter classes
-home = os.path.expanduser('~')
-if 'root' in home:
-	home = '/home/'+os.path.expanduser(os.environ["SUDO_USER"])
-data_conf = ConfigParser.SafeConfigParser()
-data_conf.read(home+'/.openplotter/openplotter.conf')
-op_folder = data_conf.get('GENERAL', 'op_folder')
-sys.path.append(op_folder)
-##########################################################################
-
-from classes.conf import Conf
-from classes.language import Language
-
-##########################################################################
+op_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../..')
+sys.path.append(op_folder+'/classes')
+from conf import Conf
+from language import Language
 
 class MyFrame(wx.Frame):
 		
 		def __init__(self):
 
 			self.conf = Conf()
+			self.home = self.conf.home
 
 			Language(self.conf)
 			
@@ -289,7 +279,7 @@ class MyFrame(wx.Frame):
 				return
 			else: self.logger.SetValue(_('Moitessier HAT is attached.\n'))
 
-			if not os.path.isfile(home+'/moitessier/app/moitessier_ctrl/moitessier_ctrl'):
+			if not os.path.isfile(self.home+'/moitessier/app/moitessier_ctrl/moitessier_ctrl'):
 				self.logger.AppendText(_('Moitessier HAT package is not installed!'))
 				self.disable_info_settings_buttons()
 				return
@@ -298,7 +288,7 @@ class MyFrame(wx.Frame):
 				self.logger2.SetValue(_('All changes will be temporal.\nDefault settings will be loaded after reboot.\n'))
 
 			try:
-				tree = ET.parse(home+'/moitessier/app/moitessier_ctrl/config.xml')
+				tree = ET.parse(self.home+'/moitessier/app/moitessier_ctrl/config.xml')
 				root = tree.getroot()
 				for item in root.iter("simulator"):
 					for subitem in item.iter("enabled"):
@@ -388,7 +378,7 @@ class MyFrame(wx.Frame):
 			self.button_apply.Disable()
 
 		def on_defaults(self,e):
-			subprocess.call([home+'/moitessier/app/moitessier_ctrl/moitessier_ctrl','/dev/moitessier.ctrl','4','1'])
+			subprocess.call([self.home+'/moitessier/app/moitessier_ctrl/moitessier_ctrl','/dev/moitessier.ctrl','4','1'])
 			self.simulator.SetValue(False)
 			self.interval.SetValue(1000)
 			self.mmsi1.SetValue(222222222) 
@@ -408,7 +398,7 @@ class MyFrame(wx.Frame):
 
 		def on_apply(self,e=0):
 			try: 
-				tree = ET.parse(home+'/moitessier/app/moitessier_ctrl/config.xml')
+				tree = ET.parse(self.home+'/moitessier/app/moitessier_ctrl/config.xml')
 				root = tree.getroot()
 				for item in root.iter("simulator"):
 					for subitem in item.iter("enabled"):
@@ -439,42 +429,42 @@ class MyFrame(wx.Frame):
 						subitem.text = str(self.rec2_afcRange.GetValue())
 					for subitem in item.iter("tcxoFreq"):
 						subitem.text = str(self.rec2_tcxoFreq.GetValue())
-				tree.write(home+'/moitessier/app/moitessier_ctrl/config.xml',encoding='utf-8', xml_declaration=True)
-				subprocess.call([home+'/moitessier/app/moitessier_ctrl/moitessier_ctrl','/dev/moitessier.ctrl','5',home+'/moitessier/app/moitessier_ctrl/config.xml'])
+				tree.write(self.home+'/moitessier/app/moitessier_ctrl/config.xml',encoding='utf-8', xml_declaration=True)
+				subprocess.call([self.home+'/moitessier/app/moitessier_ctrl/moitessier_ctrl','/dev/moitessier.ctrl','5',self.home+'/moitessier/app/moitessier_ctrl/config.xml'])
 				self.logger2.SetValue(_('Changes applied.\n'))
 			except: self.logger2.SetValue(_('Apply changes failed!\n'))
 
 		def on_get_info(self, e):
-			output = subprocess.check_output([home+'/moitessier/app/moitessier_ctrl/moitessier_ctrl','/dev/moitessier.ctrl','1'])
+			output = subprocess.check_output([self.home+'/moitessier/app/moitessier_ctrl/moitessier_ctrl','/dev/moitessier.ctrl','1'])
 			self.logger.SetValue(output)
 
 		def on_statistics(self, e):
-			output = subprocess.check_output([home+'/moitessier/app/moitessier_ctrl/moitessier_ctrl','/dev/moitessier.ctrl','0'])
+			output = subprocess.check_output([self.home+'/moitessier/app/moitessier_ctrl/moitessier_ctrl','/dev/moitessier.ctrl','0'])
 			self.logger.SetValue(output)
 
 		def on_reset_statistics(self, e):
-			output = subprocess.check_output([home+'/moitessier/app/moitessier_ctrl/moitessier_ctrl','/dev/moitessier.ctrl','3'])
+			output = subprocess.check_output([self.home+'/moitessier/app/moitessier_ctrl/moitessier_ctrl','/dev/moitessier.ctrl','3'])
 			self.logger.SetValue(output)
 
 		def on_enable_gnss(self, e):
-			output = subprocess.check_output([home+'/moitessier/app/moitessier_ctrl/moitessier_ctrl','/dev/moitessier.ctrl','4','1'])
+			output = subprocess.check_output([self.home+'/moitessier/app/moitessier_ctrl/moitessier_ctrl','/dev/moitessier.ctrl','4','1'])
 			self.logger2.SetValue(output)
 
 		def on_disable_gnss(self, e):
-			output = subprocess.check_output([home+'/moitessier/app/moitessier_ctrl/moitessier_ctrl','/dev/moitessier.ctrl','4','0'])
+			output = subprocess.check_output([self.home+'/moitessier/app/moitessier_ctrl/moitessier_ctrl','/dev/moitessier.ctrl','4','0'])
 			self.logger2.SetValue(output)
 
 		def on_MPU9250(self, e):
-			subprocess.Popen(['lxterminal', '-e', home+'/moitessier/app/sensors/MPU-9250'])
+			subprocess.Popen(['lxterminal', '-e', self.home+'/moitessier/app/sensors/MPU-9250'])
 
 		def on_MS560702BA03(self, e):
-			subprocess.Popen(['lxterminal', '-e', home+'/moitessier/app/sensors/MS5607-02BA03'])
+			subprocess.Popen(['lxterminal', '-e', self.home+'/moitessier/app/sensors/MS5607-02BA03'])
 
 		def on_Si7020A20(self, e):
-			subprocess.Popen(['lxterminal', '-e', home+'/moitessier/app/sensors/Si7020-A20'])
+			subprocess.Popen(['lxterminal', '-e', self.home+'/moitessier/app/sensors/Si7020-A20'])
 
 		def on_reset(self, e):
-			output = subprocess.check_output([home+'/moitessier/app/moitessier_ctrl/moitessier_ctrl','/dev/moitessier.ctrl','2'])
+			output = subprocess.check_output([self.home+'/moitessier/app/moitessier_ctrl/moitessier_ctrl','/dev/moitessier.ctrl','2'])
 			self.logger2.SetValue(output)
 
 		def on_ok(self, e):

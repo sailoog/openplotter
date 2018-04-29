@@ -34,16 +34,17 @@ from classes.language import Language
 
 ##########################################################################
 # If you are using a config file for your tool, edit "conf_file" variable.
-# If the file does not exist it will be created in ~/.openplotter.
+# If the file does not exist it will be created in ~/.openplotter/tools/<folder>.
 # If you do not need a config file remove this block.
+folder = 'demo_tool'
 conf_file = 'demo_tool.conf'
 
 # This will open the config file with the text editor when the button 
 # settings is pressed and the argument "settings" is passed.
-conf2 = Conf2(conf_file)
+conf2 = Conf2(folder,conf_file)
 if len(sys.argv)>1:
 	if sys.argv[1]=='settings':
-		subprocess.Popen(['leafpad',home+'/.openplotter/'+conf_file])
+		subprocess.Popen(['leafpad',home+'/.openplotter/tools/'+folder+'/'+conf_file])
 	exit()
 ##########################################################################
 
@@ -60,7 +61,7 @@ class MyFrame(wx.Frame):
 			
 			title = _('Demo tool')
 
-			wx.Frame.__init__(self, None, title=title, size=(600,330))
+			wx.Frame.__init__(self, None, title=title, size=(600,360))
 			
 			self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 			
@@ -68,6 +69,8 @@ class MyFrame(wx.Frame):
 			self.SetIcon(self.icon)
 
 			panel = wx.Panel(self)
+
+			info = wx.StaticText(panel, label = _('To create tools see ~/.openplotter/tools/README.md.'))
 
 			# Getting info from OpenPlotter configuration file. When reading from demo tool conf file or OpenPlotter conf file, if section or option do not exist, they will be created with no value.
 			op_data_box = wx.StaticBox(panel, -1, _(' OpenPlotter config data '))
@@ -118,6 +121,7 @@ class MyFrame(wx.Frame):
 			buttons.Add(button_ok, 0, wx.ALL | wx.EXPAND, 10)
 
 			vbox3 = wx.BoxSizer(wx.VERTICAL)
+			vbox3.Add(info, 0, wx.ALL | wx.EXPAND, 10)
 			vbox3.Add(v_boxSizer1, 0, wx.ALL | wx.EXPAND, 5)
 			vbox3.Add(v_boxSizer2, 0, wx.ALL | wx.EXPAND, 5)
 			vbox3.Add(buttons, 0, wx.ALL | wx.EXPAND, 0)

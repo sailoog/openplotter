@@ -32,7 +32,7 @@ from classes.add_tool10 import addTool10
 from classes.add_topic import addTopic
 from classes.add_trigger import addTrigger
 from classes.add_value_setting import addvaluesetting
-from classes.add_value_setting import addvaluesetting
+from classes.add_deviation_setting import adddeviationsetting
 from classes.add_SK_to_N2K import addSKtoN2K
 from classes.conf import Conf
 from classes.SK_settings import SK_settings
@@ -268,7 +268,7 @@ class MainFrame(wx.Frame):
 
 	def open_sdr_ais(self, event):
 		subprocess.call(['pkill', '-f', 'SDR_AIS.py'])
-		subprocess.Popen(['python', self.currentpath + '/tools/SDR_AIS.py'])
+		subprocess.Popen(['python', self.currentpath + '/tools/SDR_AIS/SDR_AIS.py'])
 
 	def on_deviation_table(self, e):
 		dlg = adddeviationsetting(self)
@@ -277,11 +277,11 @@ class MainFrame(wx.Frame):
 
 	def open_calculate(self, event):
 		subprocess.call(['pkill', '-f', 'calculate.py'])
-		subprocess.Popen(['python', self.currentpath + '/tools/calculate.py'])
+		subprocess.Popen(['python', self.currentpath + '/tools/calculate/calculate.py'])
 
 	def open_nmea_0183(self, event):
 		subprocess.call(['pkill', '-f', 'NMEA_0183_generator.py'])
-		subprocess.Popen(['python', self.currentpath + '/tools/NMEA_0183_generator.py'])
+		subprocess.Popen(['python', self.currentpath + '/tools/NMEA_0183_generator/NMEA_0183_generator.py'])
 
 	def tool10(self, event):
 		menuId = event.Id
@@ -290,21 +290,23 @@ class MainFrame(wx.Frame):
 		res = dlg.ButtonNr
 		dlg.Destroy()
 		if res != 4:
-			if os.path.isfile(self.conf_folder + '/tools/' + self.tools_py[menuId][2]):
-				subprocess.call(['pkill', '-9', '-f', self.tools_py[menuId][2]])					
+			folder = self.tools_py[menuId][2]
+			file = folder+'.py'
+			if os.path.isfile(self.conf_folder + '/tools/'+folder+'/'+file):
+				subprocess.call(['pkill', '-9', '-f', file])					
 				if res == 2:
-					subprocess.Popen(['python', self.conf_folder + '/tools/' + self.tools_py[menuId][2]])
+					subprocess.Popen(['python', self.conf_folder + '/tools/'+folder+'/'+file])
 				elif res == 1:
-					subprocess.Popen(['python', self.conf_folder + '/tools/' + self.tools_py[menuId][2], 'settings'])
+					subprocess.Popen(['python', self.conf_folder + '/tools/'+folder+'/'+file, 'settings'])
 			else:
-				if os.path.isfile(self.currentpath + '/tools/' + self.tools_py[menuId][2]):
-					subprocess.call(['pkill', '-9', '-f', self.tools_py[menuId][2]])					
+				if os.path.isfile(self.currentpath + '/tools/'+folder+'/'+file):
+					subprocess.call(['pkill', '-9', '-f', file])					
 					if res == 2:
-						subprocess.Popen(['python', self.currentpath + '/tools/' + self.tools_py[menuId][2]])
+						subprocess.Popen(['python', self.currentpath + '/tools/'+folder+'/'+file])
 					elif res == 1:
-						subprocess.Popen(['python', self.currentpath + '/tools/' + self.tools_py[menuId][2], 'settings'])
+						subprocess.Popen(['python', self.currentpath + '/tools/'+folder+'/'+file, 'settings'])
 				else:
-					print 'file not found: ', self.tools_py[menuId][2]
+					print 'file not found: ', file
 
 	def clear_lang(self):
 		self.lang.Check(self.lang_item1.GetId(), False)

@@ -17,7 +17,7 @@
 
 import wx, os, sys, socket, time, ConfigParser, subprocess
 
-op_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')
+op_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../..')
 sys.path.append(op_folder+'/classes')
 from conf import Conf
 from language import Language
@@ -114,15 +114,15 @@ class MyFrame(wx.Frame):
 		
 	def read_conf(self):
 		self.data_conf = ConfigParser.SafeConfigParser()
-		self.data_conf.read(self.home+'/.openplotter/SK-simulator.conf')
+		self.data_conf.read(self.home+'/.openplotter/tools/SK-simulator/SK-simulator.conf')
 		if not self.data_conf.has_section('main'):
 			value=[0,'navigation.courseOverGroundTrue',0,0,360,self.deg2rad,0]
-			cfgfile = open(self.home+'/.openplotter/SK-simulator.conf','w')
+			cfgfile = open(self.home+'/.openplotter/tools/SK-simulator/SK-simulator.conf','w')
 			self.data_conf.add_section('main')
 			self.data_conf.set('main','item_0', str(value))
 			self.data_conf.write(cfgfile)
 			
-			self.data_conf.read(self.home+'/.openplotter/SK-simulator.conf')			
+			self.data_conf.read(self.home+'/.openplotter/tools/SK-simulator/SK-simulator.conf')			
 			
 		self.Slider_list=[]
 		for i in range(40):
@@ -171,7 +171,7 @@ home = conf.home
 
 if len(sys.argv)>1:
 	if sys.argv[1]=='settings':
-		subprocess.Popen(['leafpad', home+'/.openplotter/SK-simulator.conf'])
+		subprocess.Popen(['leafpad', home+'/.openplotter/tools/SK-simulator/SK-simulator.conf'])
 else:
 	app = wx.App()
 	MyFrame().Show()

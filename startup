@@ -30,21 +30,35 @@ class MyFrame(wx.Frame):
 		self.op_folder = self.conf.op_folder
 		self.conf_folder = self.conf.conf_folder
 
-		private_unit_file_path = self.conf_folder+'/private_unit.json'
-		if not os.path.isfile(private_unit_file_path):
-			copyfile(self.op_folder+'/classes/private_unit.json', private_unit_file_path)
-		sk_simulator_file_path = self.conf_folder+'/SK-simulator.conf'
-		if not os.path.isfile(sk_simulator_file_path):
-			copyfile(self.op_folder+'/tools/SK-simulator.conf', sk_simulator_file_path)
-		analog_file_path = self.conf_folder+'/openplotter_analog.conf'
-		if not os.path.isfile(analog_file_path):
-			copyfile(self.op_folder+'/tools/openplotter_analog.conf', analog_file_path)
+		try:
+			private_unit_file_path = self.conf_folder+'/private_unit.json'
+			if not os.path.isfile(private_unit_file_path):
+				copyfile(self.op_folder+'/classes/private_unit.json', private_unit_file_path)
 
-		if not os.path.exists(self.conf_folder+'/tools'):
-			os.makedirs(self.conf_folder+'/tools')
-		demo_tool_file_path = self.conf_folder+'/tools/demo_tool.py'
-		if not os.path.isfile(demo_tool_file_path):
-			copyfile(self.op_folder+'/tools/demo_tool.py', demo_tool_file_path)
+			if not os.path.exists(self.conf_folder+'/tools/demo_tool'):
+				os.makedirs(self.conf_folder+'/tools/demo_tool')
+			demo_tool_file_path = self.conf_folder+'/tools/demo_tool/demo_tool.py'
+			if not os.path.isfile(demo_tool_file_path):
+				copyfile(self.op_folder+'/tools/demo_tool/demo_tool.py', demo_tool_file_path)
+			readme_tool_file_path = self.conf_folder+'/tools/README.md'
+			if not os.path.isfile(readme_tool_file_path):
+				copyfile(self.op_folder+'/tools/README.md', readme_tool_file_path)
+
+			if not os.path.exists(self.conf_folder+'/tools/SK-simulator'):
+				os.makedirs(self.conf_folder+'/tools/SK-simulator')
+			sk_simulator_file_path = self.conf_folder+'/tools/SK-simulator/SK-simulator.conf'
+			if not os.path.isfile(sk_simulator_file_path):
+				copyfile(self.op_folder+'/tools/SK-simulator/SK-simulator.conf', sk_simulator_file_path)
+
+			if not os.path.exists(self.conf_folder+'/tools'):
+				os.makedirs(self.conf_folder+'/tools')
+			analog_file_path = self.conf_folder+'/tools/openplotter_analog.conf'
+			if not os.path.isfile(analog_file_path):
+				copyfile(self.op_folder+'/tools/openplotter_analog.conf', analog_file_path)
+			install_analog_file_path = self.conf_folder+'/tools/install_analog.txt'
+			if not os.path.isfile(install_analog_file_path):
+				copyfile(self.op_folder+'/tools/install_analog.txt', install_analog_file_path)
+		except: pass
 
 		Language(self.conf)
 
@@ -298,12 +312,14 @@ class MyFrame(wx.Frame):
 		self.add_logger_data(_('\nStarting Tools...'))
 		index=0
 		for i in tools_py:
+			folder = tools_py[index][2]
+			file = folder+'.py'
 			if i[3]=='1':
-				subprocess.call(['pkill', '-9', tools_py[index][2]])
-				if os.path.isfile(self.conf_folder+'/tools/'+tools_py[index][2]):
-					subprocess.Popen(['python',self.conf_folder+'/tools/'+tools_py[index][2]])
+				subprocess.call(['pkill', '-9', file])
+				if os.path.isfile(self.conf_folder+'/tools/'+folder+'/'+file):
+					subprocess.Popen(['python',self.conf_folder+'/tools/'+folder+'/'+file])
 				else:
-					subprocess.Popen(['python',self.op_folder+'/tools/'+tools_py[index][2]])	
+					subprocess.Popen(['python',self.op_folder+'/tools/'+folder+'/'+file])	
 			index+=1
 		self.add_logger_data(_(' Done.'))
 
