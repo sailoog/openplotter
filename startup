@@ -156,6 +156,7 @@ class MyFrame(wx.Frame):
 		gain=self.conf.get('AIS-SDR', 'gain')
 		ppm=self.conf.get('AIS-SDR', 'ppm')
 		channel=self.conf.get('AIS-SDR', 'channel')
+		pypilot_mode=self.conf.get('PYPILOT', 'mode')
 		webapp=self.conf.get('PYPILOT', 'webapp')
 		webapp_port=self.conf.get('PYPILOT', 'webapp_port')
 
@@ -268,7 +269,7 @@ class MyFrame(wx.Frame):
 		self.check_start('read_sensors_d.py')
 
 		subprocess.call(['pkill', '-f', 'pypilot_webapp'])
-		if webapp=='1':
+		if webapp=='1' and pypilot_mode == 'basic autopilot':
 			self.add_logger_data(_('\nStarting Pypilot Web App...'))
 			try: subprocess.Popen(['pypilot_webapp', webapp_port])
 			except: pass
@@ -417,6 +418,7 @@ if len(sys.argv)>1:
 		subprocess.call(['pkill', '-9', 'rtl_fm'])
 		subprocess.call(['pkill', '-f', '1w_d.py'])
 		subprocess.call(['pkill', '-f', 'read_sensors_d.py'])
+		subprocess.call(['pkill', '-f', 'pypilot_webapp'])
 		subprocess.call(['pkill', '-f', 'mqtt_d.py'])
 		subprocess.call(['pkill', '-f', 'SK-base_d.py'])
 		subprocess.call(['pkill', '-f', 'N2K-server_d.py'])

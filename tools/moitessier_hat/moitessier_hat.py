@@ -307,7 +307,8 @@ class MyFrame(wx.Frame):
 				return
 			else:
 				self.logger.AppendText(_('Moitessier HAT package is installed.\n'))
-				self.logger2.SetValue(_('All changes will be temporal.\nDefault settings will be loaded after reboot.\n'))
+				self.logger2.SetValue(_('All changes will be temporal.\nDefault settings will be loaded after rebooting.\n'))
+				self.logger3.SetValue(_('Select the package that matches the current Kernel version.\nBefore installing, be sure the HAT is not being used by any service (kplex, GPSD, OpenCPN ...).\nIf installation fails, you may have to try to install the package several times.'))
 
 			try:
 				tree = ET.parse(self.home+'/moitessier/app/moitessier_ctrl/config.xml')

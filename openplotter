@@ -1004,35 +1004,32 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		pypilot_mode_label = wx.StaticText(self.p_pypilot, label=_('pypilot Mode:'))
 		self.pypilot_modes = ['disabled', 'imu', 'basic autopilot'] # nontranslated for config
 		self.pypilot_mode = wx.Choice(self.p_pypilot, choices=[_('disabled'), _('IMU only'), _('basic autopilot')], style=wx.CB_READONLY)
-		self.pypilot_mode.Bind(wx.EVT_CHOICE, self.on_pypilot_enable)
+		self.pypilot_mode.Bind(wx.EVT_CHOICE, self.select_pypilot)
 
 		imu_box = wx.StaticBox(self.p_pypilot, label=_(' IMU '))
 		detected_label = wx.StaticText(self.p_pypilot, label=_('Detected IMU:'))
 		self.imu_detected = wx.StaticText(self.p_pypilot, label=_('None'))
 
-		reset = wx.Button(self.p_pypilot, label=_('Reset'))
-		reset.Bind(wx.EVT_BUTTON, self.on_pypilot_reset)
+		self.reset_imu = wx.Button(self.p_pypilot, label=_('Reset'))
+		self.reset_imu.Bind(wx.EVT_BUTTON, self.on_pypilot_reset)
 
 		connections_box = wx.StaticBox(self.p_pypilot, label= _(' Autopilot '))
 
-		controller_label = wx.StaticText(self.p_pypilot, label=_('Controller'))
-		self.pypilot_controller = wx.StaticText(self.p_pypilot)
-
-		nmea_label = wx.StaticText(self.p_pypilot, label=_('NMEA 0183 Sensors (Wind/GPS)'))
+		serial_ports_label = wx.StaticText(self.p_pypilot, label=_('Serial ports (Controller/Wind/GPS)'))
 		self.pypilot_nmea = wx.TextCtrl(self.p_pypilot,style=wx.TE_MULTILINE | wx.VSCROLL | wx.TE_READONLY, size=(280,60))
 
 		self.pypilot_webapp_cb = wx.CheckBox(self.p_pypilot, False, _('Enable webapp'))
 		pypilot_webapp_port_label = wx.StaticText(self.p_pypilot, label=_('port:'))
 		self.pypilot_webapp_port = wx.SpinCtrl(self.p_pypilot, min=1, max=65536, initial=8080)
 
-		calibration = wx.Button(self.p_pypilot, label=_('Calibration'))
-		calibration.Bind(wx.EVT_BUTTON, self.on_pypilot_calibration)
+		self.calibration = wx.Button(self.p_pypilot, label=_('Calibration'))
+		self.calibration.Bind(wx.EVT_BUTTON, self.on_pypilot_calibration)
 
-		scope = wx.Button(self.p_pypilot, label=_('Scope'))
-		scope.Bind(wx.EVT_BUTTON, self.on_pypilot_scope)
+		self.scope = wx.Button(self.p_pypilot, label=_('Scope'))
+		self.scope.Bind(wx.EVT_BUTTON, self.on_pypilot_scope)
 
-		client = wx.Button(self.p_pypilot, label=_('Client'))
-		client.Bind(wx.EVT_BUTTON, self.on_pypilot_client)
+		self.client = wx.Button(self.p_pypilot, label=_('Client'))
+		self.client.Bind(wx.EVT_BUTTON, self.on_pypilot_client)
 
 		self.pypilot_control = wx.Button(self.p_pypilot, label=_('Autopilot Control'))
 		self.pypilot_control.Bind(wx.EVT_BUTTON, self.on_pypilot_control)
@@ -1065,10 +1062,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		hbox2.Add(self.imu_detected, 0, wx.ALL | wx.RIGHT | wx.EXPAND, 5)
 
 		hbox5 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox5.Add(calibration, 0, 0, 5)
-		hbox5.Add(scope, 0, 0, 5)
-		hbox5.Add(client, 0, 0, 5)
-		hbox5.Add(reset, 0, 0, 5)
+		hbox5.Add(self.calibration, 0, 0, 5)
+		hbox5.Add(self.scope, 0, 0, 5)
+		hbox5.Add(self.client, 0, 0, 5)
+		hbox5.Add(self.reset_imu, 0, 0, 5)
 
 		hbox3 = wx.BoxSizer(wx.HORIZONTAL)
 		hbox3.Add(translation_rate_label, 0, wx.UP | wx.EXPAND, 10)
@@ -1080,22 +1077,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		vbox1.Add(self.pypilot_signalk_translation, 0, 0, 5)
 		vbox1.Add(hbox3, 0, 0, 5)
 
-		hbox6 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox6.Add(controller_label, 0, wx.ALL | wx.EXPAND, 5)
-		hbox6.Add(self.pypilot_controller, 0, wx.ALL | wx.EXPAND, 5)
-
-		#hbox7 = wx.BoxSizer(wx.HORIZONTAL)
-		#hbox7.Add(self.pypilot_nmea, 0, wx.ALL | wx.EXPAND, 5)
-
 		hbox4 = wx.BoxSizer(wx.HORIZONTAL)
 		hbox4.Add(pypilot_webapp_port_label, 0, wx.UP | wx.LEFT | wx.EXPAND, 10)
 		hbox4.Add(self.pypilot_webapp_port, 0, wx.ALL | wx.EXPAND, 5)
 
 		vbox2 = wx.StaticBoxSizer(connections_box, wx.VERTICAL)
-		#vbox2.Add(controller_label, 0, wx.UP | wx.LEFT | wx.EXPAND, 5)
-		vbox2.Add(hbox6, 0, 0, 5)
-		#vbox2.Add(self.pypilot_controller, 0, wx.UP | wx.LEFT | wx.EXPAND, 5)
-		vbox2.Add(nmea_label, 0, 0, 5)
+		vbox2.Add(serial_ports_label, 0, 0, 5)
 		vbox2.Add(self.pypilot_nmea, 1, wx.ALL | wx.EXPAND, 5)
 		vbox2.Add(self.pypilot_control, 0, 0, 5)
 		vbox2.Add(self.pypilot_webapp_cb, 0, wx.UP | wx.EXPAND, 5)
@@ -1120,14 +1107,65 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		self.p_pypilot.SetSizer(sizer)
 
+	def disable_autopilot(self):
+		self.pypilot_nmea.Disable()
+		self.pypilot_control.Disable()
+		self.pypilot_webapp_cb.Disable()
+		self.pypilot_webapp_port.Disable()
 
-	def read_pypilot(self):
+	def enable_autopilot(self):
+		self.pypilot_nmea.Enable()
+		self.pypilot_control.Enable()
+		self.pypilot_webapp_cb.Enable()
+		self.pypilot_webapp_port.Enable()
+
+	def enable_imu(self):
+		self.calibration.Enable()
+		self.scope.Enable()
+		self.client.Enable()
+		self.reset_imu.Enable()
+		self.pypilot_signalk_translation.Enable()
+		self.pypilot_translation_rate.Enable()
+
+	def disable_imu(self):
+		self.calibration.Disable()
+		self.scope.Disable()
+		self.client.Disable()
+		self.reset_imu.Disable()
+		self.pypilot_signalk_translation.Disable()
+		self.pypilot_translation_rate.Disable()
+
+	def select_pypilot(self,e=0):
+		mode = self.pypilot_modes[self.pypilot_mode.GetSelection()]
+
+		if mode == 'basic autopilot': self.enable_autopilot()
+		else: self.disable_autopilot()
+
+		if mode == 'imu' or mode == 'basic autopilot': self.enable_imu()
+		else: self.disable_imu()
+
+		if mode == 'disabled':
+			self.disable_autopilot()
+			self.disable_imu()
+
+	def read_pypilot(self, e=0):
 		mode = self.conf.get('PYPILOT', 'mode')
 		try: i = self.pypilot_modes.index(mode)
 		except: i = 0 # disable
 		self.pypilot_mode.SetSelection(i)
 
-		check_imu = self.check_i2c()
+		try:
+			file = open(self.home+'/.pypilot/serial_ports', 'r')
+			data = file.read()
+			file.close()
+			self.pypilot_nmea.SetValue(data)
+		except: pass
+
+		self.pypilot_webapp_cb.SetValue(self.conf.get('PYPILOT', 'webapp') == '1')
+		try: self.pypilot_webapp_port.SetValue(int(self.conf.get('PYPILOT', 'webapp_port')))
+		except: pass
+
+		check_imu = self.check_imu()
 		if not check_imu: self.imu_detected.SetLabel(_('Error'))
 		else:
 			imu_data = eval(check_imu) 
@@ -1140,15 +1178,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		for name in self.pypilot_translation_names_list:
 			self.pypilot_signalk_translation.Check(i, self.conf.get('PYPILOT', 'translation_' + name) == '1')
 			i+=1
+		
+		self.select_pypilot()
 
-		self.pypilot_read_serial_connections()
-		self.pypilot_gui_enable()
-
-		self.pypilot_webapp_cb.SetValue(self.conf.get('PYPILOT', 'webapp') == '1')
-		try: self.pypilot_webapp_port.SetValue(int(self.conf.get('PYPILOT', 'webapp_port')))
-		except: pass
-
-	def check_i2c(self):
+	def check_imu(self):
 		detected_imu = subprocess.check_output(['python', self.currentpath + '/check_rtimulib.py'], cwd=self.home + '/.pypilot')
 		if 'Error:' in detected_imu: return
 		else:
@@ -1157,30 +1190,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				if 'result:' in line: 
 					line2 = line.split(':')
 					return line2[1]
-
-	def pypilot_gui_enable(self):
-		have_ap = self.pypilot_mode.GetSelection()==2
-		self.pypilot_controller.Enable(have_ap)
-		self.pypilot_control.Enable(have_ap)
-
-	def pypilot_read_serial_connections(self):
-		self.read_device('servodevice', self.pypilot_controller)
-		self.read_device('nmea0device', self.pypilot_nmea)
-
-	def read_device(self, path, statictext):
-		try:
-			pypilot_path = self.home + '/.pypilot/'
-			f = open(pypilot_path + path)
-			l = f.readline()
-			f.close()
-			l[1] # exception if empty
-			l = json.loads(l)
-			if l['path'] == 'none':
-                                statictext.SetLabel('none')
-                        else:
-                                statictext.SetLabel(l['path'] + ' ' + ('baud %d' % l['bauds'][0]))
-		except:
-                        statictext.SetLabel('error parsing')
 
 	def on_pypilot_reset(self, e):
 		dlg = wx.MessageDialog(None, _(
@@ -1193,9 +1202,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			except: pass
 			self.reset_sensors()
 		dlg.Destroy()
-
-	def on_pypilot_enable(self, e):
-		self.pypilot_gui_enable()
 
 	def on_pypilot_calibration(self, e):
 		subprocess.call(['pkill', '-f', 'pypilot_calibration'])
@@ -1210,7 +1216,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def on_pypilot_control(self, e):
 		subprocess.Popen('pypilot_control', cwd=self.home + '/.pypilot')
 
-	def on_apply_changes_pypilot(self,e):
+	def on_apply_changes_pypilot(self,e=0):
 		self.conf.set('PYPILOT', 'mode', self.pypilot_modes[self.pypilot_mode.GetSelection()])
 
 		i = 0
@@ -1226,7 +1232,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.reset_sensors()
 
 		subprocess.call(['pkill', '-f', 'pypilot_webapp'])
-		if self.pypilot_webapp_cb.GetValue():
+		if self.pypilot_webapp_cb.GetValue() and self.pypilot_mode.GetSelection() == 2:
 			subprocess.Popen(['pypilot_webapp', str(self.pypilot_webapp_port.GetValue())])
 
 	def on_cancel_changes_pypilot(self,e):
@@ -3018,19 +3024,32 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			os.system('sudo service gpsd restart')
 		#else remove gpsd?
 
-                # write pypilot allowed ports
-                file = open('pypilot_serial_ports', 'w')
-                for name in self.Serialinst:
-                        if self.Serialinst[name]['assignment'] == 'pypilot':
-                                port = '/dev/ttyOP_' + name
-                                file.write(port + '\n')
-                                os.system('sudo chown pi ' + port) # set permissions
-                file.close()
+		# write pypilot allowed ports
+		file = open('pypilot_serial_ports', 'w')
+		pypilot_exists = False
+		for name in self.Serialinst:
+			if self.Serialinst[name]['assignment'] == 'pypilot':
+				pypilot_exists = True
+				port = '/dev/ttyOP_' + name
+				file.write(port + '\n')
+				os.system('sudo chown pi ' + port) # set permissions
+		file.close()
 
-                path = self.home + '/.pypilot/serial_ports'
-                if os.system('diff pypilot_serial_ports ' + path + ' > /dev/null'):
-                        os.system('mv pypilot_serial_ports ' + path)
-                        self.reset_sensors()
+		path = self.home + '/.pypilot/serial_ports'
+		if os.system('diff pypilot_serial_ports ' + path + ' > /dev/null'):
+			os.system('mv pypilot_serial_ports ' + path)
+			if pypilot_exists:
+				self.conf.set('PYPILOT', 'mode', 'basic autopilot')
+			else:
+				self.conf.set('PYPILOT', 'mode', 'disabled')
+				check_imu = self.check_imu()
+				if check_imu: 
+					imu_data = eval(check_imu) 
+					imu_name = imu_data[0][0]
+					if imu_name != '0': self.conf.set('PYPILOT', 'mode', 'imu')
+			self.read_pypilot()
+			self.on_apply_changes_pypilot()
+		#else remove pypilot_serial_ports?
 
 		#set kplex devices
 		self.read_kplex_conf()
