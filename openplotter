@@ -1583,7 +1583,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.i2c_sensors_def.append(['HTS221','rtimulib.hum.2.',['humidity','temperature'],['environment.inside.humidity','']])
 		self.i2c_sensors_def.append(['HTU21D','rtimulib.hum.3.',['humidity','temperature'],['environment.inside.humidity','']])
 		self.i2c_sensors_def.append(['BME280','0x76',['pressure','temperature','humidity'],['environment.outside.pressure','','environment.inside.humidity']])
-
+		self.i2c_sensors_def.append(['MS5607-02BA03','0x77',['pressure','temperature'],['environment.outside.pressure','']])
+		#self.i2c_sensors_def.append(['Si7020-A20','0x40',['humidity','temperature'],['environment.inside.humidity','']])
 		title = wx.StaticText(self.p_i2c, label=_(' Sensors '))
 
 		self.list_i2c = wx.ListCtrl(self.p_i2c, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
