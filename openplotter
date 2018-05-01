@@ -2742,15 +2742,17 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def readNMEA0183(self, port, baudrate):
 		try:
-			self.serial = serial.Serial(port, baudrate, timeout=1)
-		except: return False
+			device = serial.Serial(port, baudrate, timeout=1)
+		except Exception as e:
+			print str(e)
+			return False
 		timewait = time.time() + 1.5
 		index = 0
 		countwrong = 0
 		text = ''
 		while time.time() < timewait:
 			try:
-				c = self.serial.read(1)
+				c = device.read(1)
 			except: c = ''
 			if c != '':
 				b = ord(c)
@@ -2772,21 +2774,23 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def readNMEA2000(self, port, baudrate):
 		try:
-			self.serial = serial.Serial(port, baudrate, timeout=1)
-		except: return False
+			device = serial.Serial(port, baudrate, timeout=1)
+		except Exception as e:
+			print str(e)
+			return False
 		timewait = time.time() + 0.5
 		data = [0x10, 0x2, 0xa1, 0x01, 0x01, 0x5d, 0x10, 0x03]
 		for i in data:
-			self.serial.write(chr(i))
+			device.write(chr(i))
 		while time.time() < timewait:
 			try:
-				c = self.serial.read(1)
+				c = device.read(1)
 			except: c = ''
 			if c != '':
 				b = ord(c)
 				if b == 0x10:
 					try:
-						c = self.serial.read(1)
+						c = device.read(1)
 					except: c = ''
 					if c != '':
 						b = ord(c)
@@ -2904,7 +2908,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		assignment = self.Serial_assignment.GetStringSelection()
 		bauds = self.Serial_baud_select.GetStringSelection()
 
-		if (assignment == 'Kplex' or assignment == 'pypilot') and bauds == '':
+		if assignment == 'Kplex' and bauds == '':
 			self.ShowMessage(_('Failed. Select bauds.'))
 			return
 
