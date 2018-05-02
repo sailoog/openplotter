@@ -689,12 +689,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def read_wifi_conf(self):		
 		self.conf_network = self.conf_folder + '/Network'			
-			
-		self.bak_net_sys = os.listdir(self.conf_network)
-		if len(self.bak_net_sys)>0: 
-			self.bak_net_sys = self.bak_net_sys[0]
-		else:
-			self.bak_net_sys = ''
+		self.bak_net_sys = ''
+
+		if os.path.isdir(self.conf_network):
+			self.bak_net_sys = os.listdir(self.conf_network)
+			if len(self.bak_net_sys)>0: 
+				self.bak_net_sys = self.bak_net_sys[0]
 		
 		self.bak_passw=''
 		self.bak_share=''
@@ -982,7 +982,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		shutil.copytree('/home/pi/.config/openplotter/Network/'+self.net_sys.GetValue(), '/home/pi/.openplotter/Network/'+self.net_sys.GetValue())
 		self.read_wifi_conf()
 		
-	########################################### PYPILOT
+				########################################### PYPILOT
 
 	def page_pypilot(self):
 		pypilot_mode_label = wx.StaticText(self.p_pypilot, label=_('pypilot Mode:'))

@@ -141,8 +141,8 @@ class MyFrame(wx.Frame):
 		
 	def starting(self):
 
-		wifi_server=self.conf.get('WIFI', 'enable')
-		wifi_server_pass=self.conf.get('WIFI', 'password')
+		#wifi_server=self.conf.get('WIFI', 'enable')
+		#wifi_server_pass=self.conf.get('WIFI', 'password')
 
 		delay=int(self.conf.get('STARTUP', 'delay'))
 
@@ -151,7 +151,7 @@ class MyFrame(wx.Frame):
 		opencpn_fullscreen=self.conf.get('STARTUP', 'opencpn_fullscreen')
 		play=self.conf.get('STARTUP', 'play')
 		sound=self.conf.get('STARTUP', 'sound')
-		#node_red=self.conf.get('STARTUP', 'node_red')
+		node_red=self.conf.get('STARTUP', 'node_red')
 		enable=self.conf.get('AIS-SDR', 'enable')
 		gain=self.conf.get('AIS-SDR', 'gain')
 		ppm=self.conf.get('AIS-SDR', 'ppm')
@@ -216,21 +216,21 @@ class MyFrame(wx.Frame):
 			time.sleep(delay)
 			self.add_logger_data(_(' Done.'))		
 
-		if wifi_server == '1':
-			self.add_logger_data(_('\nStarting WIFI Access Point...'))
-			process = subprocess.Popen(['sudo', 'python', self.op_folder+'/wifi_server.py', '1'])
-		else:
-			self.add_logger_data(_('\nStarting WIFI Client...'))
-			process = subprocess.Popen(['sudo', 'python', self.op_folder+'/wifi_server.py', '0'])
-		process.wait()
-		self.add_logger_data(_(' Done.'))
-		if wifi_server == '1':
-			self.add_logger_data(_('\nChecking WIFI Access Point password...'))
-			if wifi_server_pass=='12345678':
-				self.add_warnings_data(_('\n\nSecurity warning: You are using the default WIFI Access Point password.\nPlease change password in OpenPlotter > WiFi AP.'))
-				self.add_logger_data(_(' See warning.'))
-			else:
-				self.add_logger_data(_(' Done.'))
+		#if wifi_server == '1':
+		#	self.add_logger_data(_('\nStarting WIFI Access Point...'))
+		#	process = subprocess.Popen(['sudo', 'python', self.op_folder+'/wifi_server.py', '1'])
+		#else:
+		#	self.add_logger_data(_('\nStarting WIFI Client...'))
+		#	process = subprocess.Popen(['sudo', 'python', self.op_folder+'/wifi_server.py', '0'])
+		#process.wait()
+		#self.add_logger_data(_(' Done.'))
+		#if wifi_server == '1':
+		#	self.add_logger_data(_('\nChecking WIFI Access Point password...'))
+		#	if wifi_server_pass=='12345678':
+		#		self.add_warnings_data(_('\n\nSecurity warning: You are using the default WIFI Access Point password.\nPlease change password in OpenPlotter > WiFi AP.'))
+		#		self.add_logger_data(_(' See warning.'))
+		#	else:
+		#		self.add_logger_data(_(' Done.'))
 		
 		subprocess.call(['pkill', '-f', 'mqtt_d.py'])
 		self.add_logger_data(_('\nStarting MQTT server...'))
@@ -256,12 +256,12 @@ class MyFrame(wx.Frame):
 
 		if util_process_exist('node-red'):
 			subprocess.call('node-red-stop')
-		#if node_red=='1':
-			#self.add_logger_data(_('\nStarting Node-RED...'))
-			#try: 
-			#	subprocess.Popen('node-red-start')
-			#	self.check_start('node-red')
-			#except: pass
+		if node_red=='1':
+			self.add_logger_data(_('\nStarting Node-RED...'))
+			try: 
+				subprocess.Popen('node-red-start')
+				self.check_start('node-red')
+			except: pass
 
 		subprocess.call(['pkill', '-f', 'read_sensors_d.py'])
 		self.add_logger_data(_('\nStarting I2C, SPI, GPIO and Pypilot...'))
