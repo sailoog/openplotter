@@ -88,11 +88,11 @@ class Conf:
 		return self.data_conf.add_section(section)
 
 class Conf2:
-	def __init__(self, file):
+	def __init__(self, folder, file):
 		self.home = os.path.expanduser('~')
 		if 'root' in self.home:
 			self.home = '/home/'+os.path.expanduser(os.environ["SUDO_USER"])
-		self.conf_file_path = self.home+'/.openplotter/'+file
+		self.conf_file_path = self.home+'/.openplotter/tools/'+folder+'/'+file
 		self.data_conf = ConfigParser.SafeConfigParser()
 		if not os.path.isfile(self.conf_file_path):
 			with open(self.conf_file_path,'w') as f:

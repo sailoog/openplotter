@@ -33,13 +33,16 @@ class GetKeys:
 		jsonstr='{"/vessels/*/environment/wind/speedTrue": {"units": "m/s","description": "..."}}'
 		self.data = json.loads(jsonstr)
 		
+		sk_folder = conf.get('GENERAL', 'sk_folder')
+		self.data = ""
 		try:
-			with open(home+'/.config/signalk-server-node/node_modules/@signalk/signalk-schema/dist/keyswithmetadata.json') as data_file:
+			with open(sk_folder+'/node_modules/@signalk/signalk-schema/dist/keyswithmetadata.json') as data_file:
 				self.data = json.load(data_file)
 		except:
 			try:
-				#signalk standard
-				with open('/usr/lib/node_modules/signalk-server/node_modules/@signalk/signalk-schema/dist/keyswithmetadata.json') as data_file:
+				#signalk old
+				with open(home+'/.config/signalk-server-node/node_modules/@signalk/signalk-schema/dist/keyswithmetadata.json') as data_file:
+
 					self.data = json.load(data_file)
 			except:
 				self.ShowMessage(_('file not found ')+'keyswithmetadata.json')		

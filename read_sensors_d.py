@@ -26,6 +26,7 @@ else:
 	import RPi.GPIO as GPIO
 	import spidev,RTIMU
 	from classes.bme280 import Bme280
+	from classes.MS5607 import ms5607
 
 def interpolread(idx,erg):
 	lin = -999999
@@ -296,6 +297,42 @@ def work_bme280():
 				sock.sendto(SignalK, ('127.0.0.1', 55557))
 	except Exception, e: print "BME280 reading failed: "+str(e)
 
+# read MS5607 and send SK
+def work_MS5607():
+	name = MS5607[0]
+	address = MS5607[1]
+	pressureSK = MS5607[2][0][0]
+	pressureRate = MS5607[2][0][1]
+	pressureOffset = MS5607[2][0][2]
+	temperatureSK = MS5607[2][1][0]
+	temperatureRate = MS5607[2][1][1]
+	temperatureOffset = MS5607[2][1][2]
+	MS = ms5607(address)
+	tick1 = time.time()
+	tick2 = tick1
+	try:
+		while read_sensors:
+			time.sleep(0.1)
+			dig_temperature = MS.getDigitalTemperature()
+			dig_pressure = MS.getDigitalPressure()
+			pressure = MS.convertPressureTemperature(dig_pressure, dig_temperature)
+			temperature = MS.getTemperature()
+			tick0 = time.time()
+			Erg=''
+			if pressureSK:
+				if tick0 - tick1 > pressureRate:
+					Erg += '{"path": "'+pressureSK+'","value":'+str(pressureOffset+(pressure))+'},'
+					tick1 = tick0
+			if temperatureSK:
+				if tick0 - tick2 > temperatureRate:
+					Erg += '{"path": "'+temperatureSK+'","value":'+str(temperatureOffset+(temperature+273.15))+'},'
+					tick2 = tick0
+			if Erg:		
+				SignalK='{"updates":[{"$source":"OPsensors.I2C.'+name+'","values":['
+				SignalK+=Erg[0:-1]+']}]}\n'		
+				sock.sendto(SignalK, ('127.0.0.1', 55557))
+	except Exception, e: print "MS5607-02BA03 reading failed: "+str(e)
+
 # read SPI adc and GENERATE SK
 def work_analog():
         if read_sensors:
@@ -403,6 +440,7 @@ if gpio_list:
 
 #init I2C
 bme280 = False
+MS5607 = False
 imu_press = False
 imu_hum = False
 try:
@@ -412,6 +450,7 @@ except: i2c_sensors=[]
 if i2c_sensors:
 	for i in i2c_sensors:
 		if i[0] == 'BME280': bme280 = i
+		elif i[0] == 'MS5607-02BA03': MS5607 = i
 		elif 'rtimulib' in i[1]:
 			temp_list = i[1].split('.')
 			if temp_list[1] == 'press': imu_press = i
@@ -437,9 +476,11 @@ def add_thread(func):
 if analog_: work_analog()
 if gpio_: work_gpio()
 if bme280:
-        add_thread(work_bme280)
+	add_thread(work_bme280)
+if MS5607:
+	add_thread(work_MS5607)
 if imu_press or imu_hum:
-        add_thread(work_imu_press_hum)
+	add_thread(work_imu_press_hum)
 
 add_thread(work_pypilot)
 

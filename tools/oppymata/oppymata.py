@@ -17,7 +17,7 @@
 import signal, sys, time, socket, datetime, subprocess, os
 from PyMata.pymata import PyMata
 
-op_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')
+op_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../..')
 sys.path.append(op_folder+'/classes')
 from conf import Conf
 from language import Language
@@ -99,8 +99,8 @@ currentpath = conf.get('GENERAL', 'op_folder')
 if len(sys.argv)>1:
 	index=1
 	if sys.argv[1]=='settings':
-		print home+'/.openplotter/openplotter_analog.conf'
-		subprocess.Popen(['leafpad',home+'/.openplotter/openplotter_analog.conf'])
+		print home+'/.openplotter/tools/openplotter_analog.conf'
+		subprocess.Popen(['leafpad',home+'/.openplotter/tools/openplotter_analog.conf'])
 	exit
 else:
 	RawValue=[]
@@ -113,12 +113,12 @@ else:
 	SignalK=''
 
 if os.path.exists('/dev/ttyOP_FIRM') and index == 0:
-	output = subprocess.check_output(['python', currentpath+'/tools/op_pymata_check.py'])
+	output = subprocess.check_output(['python', currentpath+'/tools/oppymata/op_pymata_check.py'])
 	if 'Total Number' in output:
 		pass
 	else:
 		print 'some errors so second try'
-		output = subprocess.check_output(['python', currentpath+'/tools/op_pymata_check.py'])
+		output = subprocess.check_output(['python', currentpath+'/tools/oppymata/op_pymata_check.py'])
 		if 'Total Number' in output:
 			pass
 		else:

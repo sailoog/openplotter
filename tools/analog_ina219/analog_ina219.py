@@ -17,7 +17,7 @@
 
 import socket, time, math, csv, datetime, subprocess, sys, os
 
-op_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')
+op_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../..')
 sys.path.append(op_folder+'/classes')
 from ads1115 import Ads1115
 from conf_analog import Conf_analog
@@ -31,8 +31,8 @@ home = conf_analog.home
 
 if len(sys.argv)>1:
 	if sys.argv[1]=='settings':
-		print home+'/.openplotter/openplotter_analog.conf'
-		subprocess.Popen(['leafpad',home+'/.openplotter/openplotter_analog.conf'])
+		print home+'/.openplotter/tools/openplotter_analog.conf'
+		subprocess.Popen(['leafpad',home+'/.openplotter/tools/openplotter_analog.conf'])
 	exit
 else:
 

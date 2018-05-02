@@ -18,7 +18,7 @@
 
 import wx, os, sys, subprocess
 
-op_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')
+op_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../..')
 sys.path.append(op_folder+'/classes')
 from conf import Conf
 from language import Language
