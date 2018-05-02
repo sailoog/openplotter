@@ -2560,7 +2560,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.serial_detect.Bind(wx.EVT_BUTTON, self.on_detect_Serialinst)
 		assignmentbox.Add(self.serial_detect, 0, wx.RIGHT | wx.LEFT, 5)
 
-		self.bauds = ['','4800', '9600', '19200', '38400', '57600', '115200']
+		self.bauds = ['','4800', '9600', '19200', '38400', '57600', '115200','230400','460800']
 		assignmentbox.Add(wx.StaticText(self.p_serial, label=_('bauds')))
 		self.Serial_baud_select = wx.Choice(self.p_serial, choices=self.bauds, style=wx.CB_READONLY)
 		self.Serial_baud_select.SetSelection(0)
