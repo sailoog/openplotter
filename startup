@@ -189,7 +189,7 @@ class MyFrame(wx.Frame):
 		with open(self.home+'/.signalk/security.json') as data_file:
 			data = json.load(data_file)
 		for i in data['users']:
-			if i['username'] == 'openplotter' and i['password'] == '$2a$10$fNaojwZ94bz4NCPIisa9g.NbmilEzXNWHMaoV1NpD00nbldIjhynS':
+			if i['username'] == 'openplotter' and i['password'] == '$2a$10$quNPtJWG7r1wpEKTHPEjqeiCPXNl3dCTS/D235x92sS2lAgcGCH0O':
 				self.add_warnings_data(_('\n\nSecurity warning: You are using the default password for Signal K server.\nPlease change password in Signal K > Security > Users > openplotter.'))
 				self.add_logger_data(_(' See warning.'))
 			else: self.add_logger_data(_(' Done.'))
@@ -282,7 +282,7 @@ class MyFrame(wx.Frame):
 			frecuency='161975000'
 			if channel=='b': frecuency='162025000'
 			rtl_fm=subprocess.Popen(['rtl_fm', '-f', frecuency, '-g', gain, '-p', ppm, '-s', '48k'], stdout = subprocess.PIPE)
-			aisdecoder=subprocess.Popen(['aisdecoder', '-h', 'localhost', '-p', '10110', '-a', 'file', '-c', 'mono', '-d', '-f', '/dev/stdin'], stdin = rtl_fm.stdout)
+			aisdecoder=subprocess.Popen(['aisdecoder', '-h', '127.0.0.1', '-p', '10110', '-a', 'file', '-c', 'mono', '-d', '-f', '/dev/stdin'], stdin = rtl_fm.stdout)
 			self.check_start('aisdecoder')
 
 		self.add_logger_data(_('\nChecking 800x480 display...'))
