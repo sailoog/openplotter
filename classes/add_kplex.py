@@ -374,7 +374,7 @@ class addkplex(wx.Dialog):
 				self.ShowMessage(_('This name is already in use.'))
 				return
 
-		if 'system' in name or name == 'signalk' or name == 'gpsd':
+		if name == 'system' or name == 'signalk' or name == 'gpsd':
 			self.ShowMessage(_('This name is reserved by the system.'))
 			return
 

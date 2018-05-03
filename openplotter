@@ -192,12 +192,9 @@ class MainFrame(wx.Frame):
 		self.helpm = wx.Menu()
 		self.helpm_item1 = self.helpm.Append(wx.ID_ANY, _('&About'), _('About OpenPlotter'))
 		self.Bind(wx.EVT_MENU, self.OnAboutBox, self.helpm_item1)
-		self.helpm_item2 = self.helpm.Append(wx.ID_ANY, _('OpenPlotter online documentation'),
+		self.helpm_item2 = self.helpm.Append(wx.ID_ANY, _('Online documentation'),
 											 _('OpenPlotter online documentation'))
 		self.Bind(wx.EVT_MENU, self.op_doc, self.helpm_item2)
-		self.helpm_item2 = self.helpm.Append(wx.ID_ANY, _('OpenPlotter offline documentation'),
-											 _('OpenPlotter offline documentation'))
-		self.Bind(wx.EVT_MENU, self.op_doc_off, self.helpm_item2)
 		self.menubar.Append(self.helpm, _('&Help'))
 
 		self.SetMenuBar(self.menubar)
@@ -475,21 +472,18 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		info.SetName('OpenPlotter')
 		info.SetVersion(self.conf.get('GENERAL', 'version')+' '+self.conf.get('GENERAL', 'state'))
 		info.SetDescription(description)
-		info.SetCopyright('2017 Sailoog')
+		info.SetCopyright('2018 Sailoog')
 		info.SetWebSite('http://www.sailoog.com')
 		info.SetLicence(licence)
 		info.AddDeveloper(
-			'Sailoog\nhttp://github.com/sailoog/openplotter\n-------------------\nOpenCPN: http://opencpn.org/ocpn/\nzyGrib: http://www.zygrib.org/\nMultiplexer: http://www.stripydog.com/kplex/index.html\nrtl-sdr: http://sdr.osmocom.org/trac/wiki/rtl-sdr\naisdecoder: http://www.aishub.net/aisdecoder-via-sound-card.html\ngeomag: http://github.com/cmweiss/geomag\nIMU sensor: http://github.com/richards-tech/RTIMULib2\nNMEA parser: http://github.com/Knio/pynmea2\ntwython: http://github.com/ryanmcgrath/twython\npyrtlsdr: http://github.com/roger-/pyrtlsdr\nkalibrate-rtl: http://github.com/steve-m/kalibrate-rtl\nSignalK: http://signalk.org/\n\n')
-		info.AddDocWriter('Sailoog\n\nDocumentation: http://sailoog.gitbooks.io/openplotter-documentation/')
-		info.AddTranslator('Catalan, English and Spanish by Sailoog\nFrench by Nicolas Janvier.')
+			'sailoog\nhttps://github.com/sailoog\ne-sailing\nhttps://github.com/e-sailing\nseandepagnier\nhttps://github.com/seandepagnier\n')
+		info.AddDocWriter('Gitbook\nhttps://openplotter.gitbook.io/documentation-v1-x-x')
+		info.AddTranslator('Crowdin\nhttps://crowdin.com/project/openplotter')
 		wx.AboutBox(info)
 
 	def op_doc(self, e):
-		url = "http://sailoog.gitbooks.io/openplotter-documentation/"
+		url = "https://openplotter.gitbook.io/documentation-v1-x-x"
 		webbrowser.open(url, new=2)
-
-	def op_doc_off(self, e):
-		subprocess.Popen(['xpdf', self.currentpath+'/docs/openplotter-documentation-en.pdf'])
 
 	def Changingpage(self, e):
 		self.ShowStatusBarBLACK('')
@@ -1326,7 +1320,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def edit_kplex(self, e):
 		idx = e.GetIndex()
 
-		if self.kplex[idx][1] == 'system_a' or self.kplex[idx][1] == 'system_b' or self.kplex[idx][1] == 'signalk' or self.kplex[idx][1] == 'gpsd':
+		if self.kplex[idx][1] == 'system' or self.kplex[idx][1] == 'signalk' or self.kplex[idx][1] == 'gpsd':
 			self.ShowStatusBarRED(_('You can not edit this.'))
 			return
 		edit = []
@@ -1468,8 +1462,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		data = '# For advanced manual configuration, please visit: http://www.stripydog.com/kplex/configuration.html\n# Please do not modify defaults nor OpenPlotter GUI settings.\n# Add manual settings at the end of the document.\n\n'
 
 		data += '###defaults\n\n'
-		data += '[udp]\nname=system_a\ndirection=in\naddress=localhost\nport=10110\n\n'
-		data += '[udp]\nname=system_b\ndirection=in\nport=10110\n\n'
+		data += '[udp]\nname=system\ndirection=in\nport=10110\n\n'
 		data += '[tcp]\nname=signalk\ndirection=out\nmode=server\nport=30330\n\n'
 		data += '###end of defaults\n\n###OpenPlotter GUI settings\n\n'
 
@@ -1525,7 +1518,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		num = len(self.kplex)
 		for i in range(num):
 			if self.list_kplex.IsSelected(i):
-				if self.kplex[i][1] == 'system_a' or self.kplex[i][1] == 'system_b' or self.kplex[i][1] == 'signalk':
+				if self.kplex[i][1] == 'system' or self.kplex[i][1] == 'signalk':
 					self.ShowStatusBarRED(_('You can not delete this'))
 					return
 				if self.kplex[i][2] == 'Serial' or self.kplex[i][1] == 'gpsd':
