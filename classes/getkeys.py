@@ -25,12 +25,24 @@ class GetKeys:
 
 		conf = Conf()
 		home = conf.home
-		sk_folder = conf.get('GENERAL', 'sk_folder')
-		self.data = ""
+		jsonstr='{"/self": {"description": "X"},'
+		jsonstr+='"/vessels": {"description": "X"},'
+		jsonstr+='"/vessels/*": {"description": "X"},'
+		jsonstr+='"/vessels/*/url": {"description": "X"}}'
+		
+		jsonstr='{"/vessels/*/environment/wind/speedTrue": {"units": "m/s","description": "..."}}'
+		self.data = json.loads(jsonstr)
+		
 		try:
-			with open(sk_folder+'/node_modules/@signalk/signalk-schema/dist/keyswithmetadata.json') as data_file:
+			with open(home+'/.config/signalk-server-node/node_modules/@signalk/signalk-schema/dist/keyswithmetadata.json') as data_file:
 				self.data = json.load(data_file)
-		except: self.ShowMessage(_('File not found: ')+'keyswithmetadata.json')		
+		except:
+			try:
+				#signalk standard
+				with open('/usr/lib/node_modules/signalk-server/node_modules/@signalk/signalk-schema/dist/keyswithmetadata.json') as data_file:
+					self.data = json.load(data_file)
+			except:
+				self.ShowMessage(_('file not found ')+'keyswithmetadata.json')		
 
 		for i in self.data:
 			if '/vessels/*/' in i:
