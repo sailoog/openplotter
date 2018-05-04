@@ -55,7 +55,7 @@ class MyFrame(wx.Frame):
 
 		Language(self.conf)
 
-		wx.Frame.__init__(self, None, title='diagnostic SignalK input', size=(770, 435))
+		wx.Frame.__init__(self, None, title='diagnostic Signal K input', size=(770, 435))
 		self.Bind(wx.EVT_CLOSE, self.OnClose)
 		panel = wx.Panel(self, wx.ID_ANY)
 
@@ -70,7 +70,7 @@ class MyFrame(wx.Frame):
 
 		self.list = wx.ListCtrl(panel, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
 		self.list.InsertColumn(0, _('SRC'), width=200)
-		self.list.InsertColumn(1, _('SignalK'), width=310)
+		self.list.InsertColumn(1, _('Signal K'), width=310)
 		self.list.InsertColumn(2, _('Value'), wx.LIST_FORMAT_RIGHT, width=190)
 		self.list.InsertColumn(3, _('Unit'), width=45)
 		self.list.InsertColumn(4, _('Interval'), wx.LIST_FORMAT_RIGHT, width=55)
@@ -83,7 +83,7 @@ class MyFrame(wx.Frame):
 		sort_SK = wx.Button(panel, label=_('Sort SK'))
 		sort_SK.Bind(wx.EVT_BUTTON, self.on_sort_SK)
 
-		show_keys = wx.Button(panel, label=_('Show SK keys'))
+		show_keys = wx.Button(panel, label=_('Show All SK keys'))
 		show_keys.Bind(wx.EVT_BUTTON, self.on_show_keys)
 
 		self.private_unit = wx.CheckBox(panel, label=_('private Unit'), pos=(360, 32))
