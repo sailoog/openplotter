@@ -2005,7 +2005,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def edit_add_gpio(self, edit):
 		selected_gpio = 0
 		if edit != 0: selected_gpio = edit[3]
-		avalaible_gpio = ['5', '6', '12', '13', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27']
+		avalaible_gpio = ['5', '6', '12', '13', '16', '19', '20', '21', '25', '26']
 		tmp_list1 = []
 		tmp_list2 = []
 		for i in self.gpio:
