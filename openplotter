@@ -3104,6 +3104,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				break
 		self.conf.set('N2K', 'can_usb', can_device)
 		self.SK_settings.set_ngt1_device(can_device)
+		if can_device: self.n2k_enable.SetValue(True)
 		self.on_n2k_enable(self.n2k_enable.GetValue())
 		self.on_n2k_output(self.n2k_out_enable.GetValue())
 
