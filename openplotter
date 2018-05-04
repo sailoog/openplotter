@@ -2568,10 +2568,18 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		refresh = wx.Button(self.p_serial, label=_('refresh'))
 		refresh.Bind(wx.EVT_BUTTON, self.on_refresh_Serialinst)
 
+		enableUART = wx.Button(self.p_serial, label=_('enable UART'))
+		enableUART.Bind(wx.EVT_BUTTON, self.on_enable_UART)
+
+		disableUART = wx.Button(self.p_serial, label=_('disable UART'))
+		disableUART.Bind(wx.EVT_BUTTON, self.on_disable_UART)
+
 		hbox = wx.BoxSizer(wx.HORIZONTAL)
 		hbox.Add(update, 0, wx.RIGHT | wx.LEFT, 5)
 		hbox.Add(delete, 0, wx.RIGHT | wx.LEFT, 5)
 		hbox.Add(refresh, 0, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add(enableUART, 0, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add(disableUART, 0, wx.RIGHT | wx.LEFT, 5)
 
 		vbox = wx.FlexGridSizer(0, 1)
 		vbox.AddGrowableRow(0)
@@ -3093,6 +3101,47 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				if self.Serialinst[name]['assignment'] == selected:
 					self.ShowMessage(_('Failed. You can assign only one ')+selected+_(' device'))
 					self.Serial_assignment.SetSelection(0)
+
+	def on_enable_UART(self,e):
+		msg = _('This action disables Bluetooth and enables UART. OpenPlotter will reboot.\n').decode('utf8')
+		msg += _('Are you sure?').decode('utf8')
+		dlg = wx.MessageDialog(None, msg, _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_EXCLAMATION)
+		if dlg.ShowModal() == wx.ID_YES: self.edit_boot(True)
+		dlg.Destroy()
+
+	def on_disable_UART(self,e):
+		msg = _('This action disables UART and enables Bluetooth. OpenPlotter will reboot.\n').decode('utf8')
+		msg += _('Are you sure?').decode('utf8')
+		dlg = wx.MessageDialog(None, msg, _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_EXCLAMATION)
+		if dlg.ShowModal() == wx.ID_YES: self.edit_boot(False)
+		dlg.Destroy()
+
+	def edit_boot(self, onoff):
+		file = open('/boot/config.txt', 'r')
+		file1 = open('config.txt', 'w')
+		exists = False
+		while True:
+			line = file.readline()
+			if not line: break
+			if onoff and 'dtoverlay=pi3-disable-bt' in line: 
+				file1.write('dtoverlay=pi3-disable-bt\n')
+				os.system('sudo systemctl disable hciuart')
+				exists = True
+			elif not onoff and 'dtoverlay=pi3-disable-bt' in line: 
+				file1.write('#dtoverlay=pi3-disable-bt\n')
+				os.system('sudo systemctl enable hciuart')
+				exists = True
+			else: file1.write(line)
+		if onoff and not exists: 
+			file1.write('\ndtoverlay=pi3-disable-bt\n')
+			os.system('sudo systemctl disable hciuart')
+		file.close()
+		file1.close()
+
+		if os.system('diff config.txt /boot/config.txt > /dev/null'):
+			os.system('sudo mv config.txt /boot')
+			os.system('sudo shutdown -r now')
+		else: os.system('rm -f config.txt')
 
 	###################################### N2K
 
