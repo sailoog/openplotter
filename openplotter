@@ -665,9 +665,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.available_net_sys.append('pi3_uap0_wlan0')
 		self.available_net_sys.append('pi3_wlan1_with_eth0_wlan0')
 		self.available_net_sys.append('pi3_wlan1_wlan0')
+		self.available_net_sys.append('pi3+_wlan1_with_eth0_wlan0')
+		self.available_net_sys.append('pi3+_wlan1_wlan0')
 		
-		share_old = self.conf.get('WIFI', 'share')
-		if share_old != '0' and share_old not in self.available_share: self.available_share.append(share_old)
 		self.net_sys_label = wx.StaticText(self.p_wifi, label=_('Network system'), pos=(20, 25))
 		self.net_sys = wx.ComboBox(self.p_wifi, choices=self.available_net_sys, style=wx.CB_READONLY, size=(240, 32),pos=(20, 40))
 
@@ -725,6 +725,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		
 			wififile = open(self.conf_network+'/'+self.bak_net_sys+'/hostapd/hostapd.conf', 'r', 2000)
 			bak = wififile.read()
+			wififile.close()
 			i=bak.find("channel")
 			if i>=0:
 				j=bak[i:].find("\n")
@@ -767,10 +768,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				if len(sline)>1:
 					self.hostapd_bridge=sline[1]
 	
-			wififile.close()
-
 			wififile = open(self.conf_network+'/'+self.bak_net_sys+'/.openplotter/start-ap-managed-wifi.sh', 'r', 2000)
 			bak = wififile.read()
+			wififile.close()
 			i=bak.find("iptables -t nat -A POSTROUTING -o ")
 			if i>0:
 				j=bak[i:].find("\n")
@@ -779,6 +779,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				sline = line.split()
 				if len(sline)>7:
 					self.bak_share=sline[6]
+					if sline[6] in self.available_share:
+						pass
+					else: self.share.Append(sline[6])
 					self.share.SetValue(sline[6])
 			
 		else:
@@ -850,8 +853,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 				wififile = open(self.conf_network+'/'+self.bak_net_sys+'/.openplotter/start-ap-managed-wifi.sh', 'w')
 				for line in lines:
-					if 0<=line.find("iptables -t nat -A POSTROUTING -o "): line.replace("self.bak_share", share)
-					if 0<=line.find("iptables -A FORWARD"): line.replace("self.bak_share", share)
+					if 0<=line.find("iptables -t nat -A POSTROUTING -o "): line = line.replace(self.bak_share, share)
+					if 0<=line.find("iptables -A FORWARD"): line = line.replace(self.bak_share, share)
 					wififile.write(line)
 				wififile.close()
 		process = subprocess.Popen(['bash', self.conf_network+'/'+self.bak_net_sys+'/install.sh'], cwd = self.conf_network+'/'+self.bak_net_sys)
