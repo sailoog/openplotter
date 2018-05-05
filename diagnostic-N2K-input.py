@@ -27,13 +27,25 @@ class MyFrame(wx.Frame):
 		self.conf = Conf()
 		self.home = self.conf.home
 		self.currentpath = self.conf.get('GENERAL', 'op_folder')
-		
+
+		data = self.conf.get('UDEV', 'Serialinst')
 		try:
-			self.ser = serial.Serial('/dev/'+self.conf.get('N2K', 'can_usb'), 115200, timeout=0.5)
+			Serialinst = eval(data)
 		except:
-			print 'failed to start N2K input diagnostic on /dev/'+self.conf.get('N2K', 'can_usb')
+			Serialinst = {}
+
+		can_device = ''
+		for name in Serialinst:
+			if Serialinst[name]['assignment'] == 'CAN-USB':
+				can_device = '/dev/ttyOP_'+name
+				break
+				
+		try:
+			self.ser = serial.Serial(can_device, 115200, timeout=0.5)
+		except:
+			print 'failed to start N2K input diagnostic on '+can_device
 			sys.exit(0)
-					
+
 		Language(self.conf)
 
 		list_N2K_txt=[]

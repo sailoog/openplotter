@@ -665,9 +665,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.available_net_sys.append('pi3_uap0_wlan0')
 		self.available_net_sys.append('pi3_wlan1_with_eth0_wlan0')
 		self.available_net_sys.append('pi3_wlan1_wlan0')
+		self.available_net_sys.append('pi3+_wlan1_with_eth0_wlan0')
+		self.available_net_sys.append('pi3+_wlan1_wlan0')
 		
-		share_old = self.conf.get('WIFI', 'share')
-		if share_old != '0' and share_old not in self.available_share: self.available_share.append(share_old)
 		self.net_sys_label = wx.StaticText(self.p_wifi, label=_('Network system'), pos=(20, 25))
 		self.net_sys = wx.ComboBox(self.p_wifi, choices=self.available_net_sys, style=wx.CB_READONLY, size=(240, 32),pos=(20, 40))
 
@@ -725,6 +725,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		
 			wififile = open(self.conf_network+'/'+self.bak_net_sys+'/hostapd/hostapd.conf', 'r', 2000)
 			bak = wififile.read()
+			wififile.close()
 			i=bak.find("channel")
 			if i>=0:
 				j=bak[i:].find("\n")
@@ -767,10 +768,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				if len(sline)>1:
 					self.hostapd_bridge=sline[1]
 	
-			wififile.close()
-
 			wififile = open(self.conf_network+'/'+self.bak_net_sys+'/.openplotter/start-ap-managed-wifi.sh', 'r', 2000)
 			bak = wififile.read()
+			wififile.close()
 			i=bak.find("iptables -t nat -A POSTROUTING -o ")
 			if i>0:
 				j=bak[i:].find("\n")
@@ -779,6 +779,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				sline = line.split()
 				if len(sline)>7:
 					self.bak_share=sline[6]
+					if sline[6] in self.available_share:
+						pass
+					else: self.share.Append(sline[6])
 					self.share.SetValue(sline[6])
 			
 		else:
@@ -850,8 +853,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 				wififile = open(self.conf_network+'/'+self.bak_net_sys+'/.openplotter/start-ap-managed-wifi.sh', 'w')
 				for line in lines:
-					if 0<=line.find("iptables -t nat -A POSTROUTING -o "): line.replace("self.bak_share", share)
-					if 0<=line.find("iptables -A FORWARD"): line.replace("self.bak_share", share)
+					if 0<=line.find("iptables -t nat -A POSTROUTING -o "): line = line.replace(self.bak_share, share)
+					if 0<=line.find("iptables -A FORWARD"): line = line.replace(self.bak_share, share)
 					wififile.write(line)
 				wififile.close()
 		process = subprocess.Popen(['bash', self.conf_network+'/'+self.bak_net_sys+'/install.sh'], cwd = self.conf_network+'/'+self.bak_net_sys)
@@ -3127,7 +3130,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			if self.Serialinst[name]['assignment'] == 'CAN-USB':
 				can_device = 'ttyOP_'+name
 				break
-		self.conf.set('N2K', 'can_usb', can_device)
 		self.SK_settings.set_ngt1_device(can_device)
 		if can_device: self.n2k_enable.SetValue(True)
 		self.on_n2k_enable(self.n2k_enable.GetValue())
@@ -3267,14 +3269,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def set_n2k_enable(self,enable):
 		if enable:
-			#if self.conf.get('N2K', 'enable') != '1':
-			#	self.conf.set('N2K', 'enable', '1')
 			if self.SK_settings.ngt1_enabled != 1:
+				self.SK_settings.set_ngt1_enable(1)
+				if self.SK_settings.ngt1_device <> self.can_device:
+					self.SK_settings.set_ngt1_device(self.can_device)
 				self.SK_settings.set_ngt1_enable(1)
 			self.n2k_enable.SetValue(True)
 		else:
-			#if self.conf.get('N2K', 'enable') != '0':
-			#	self.conf.set('N2K', 'enable', '0')
 			if self.SK_settings.ngt1_enabled != 0:
 				self.SK_settings.set_ngt1_enable(0)			
 			self.n2k_enable.SetValue(False)
@@ -3294,8 +3295,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
 
 	def update_form(self):
-		can_device = self.conf.get('N2K', 'can_usb')
-		if not can_device:
+		self.can_device = ''
+		for name in self.Serialinst:
+			if self.Serialinst[name]['assignment'] == 'CAN-USB':
+				self.can_device = '/dev/ttyOP_'+name
+				break
+	
+		if not self.can_device:
 			self.set_n2k_enable(False)
 			self.set_n2k_out_enable(False)
 			self.can_usb.SetLabel(_('none')) 
@@ -3307,7 +3313,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		else:
 			self.n2k_enable.Enable()
 			self.n2k_out_enable.Enable()
-			self.can_usb.SetLabel('/dev/'+can_device)		
+			self.can_usb.SetLabel(self.can_device)		
 			self.n2k_enable.SetValue(self.SK_settings.ngt1_enabled==1)
 			if self.SK_settings.ngt1_enabled == 0:
 				self.button_N2K_setting.Enable()
@@ -3370,8 +3376,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.SK_settings.set_canbus_enable(self.n2k_can0_enable.GetValue())
 			
 	def check_can_device(self):
-		can_device = self.conf.get('N2K', 'can_usb')
-		if not can_device:
+		if not self.SK_settings.ngt1_device:
 			self.n2k_enable.SetValue(False)
 			self.n2k_out_enable.SetValue(False)
 			self.ShowStatusBarBLACK(_('You have to add a CAN-USB device on Serial ports tab'))

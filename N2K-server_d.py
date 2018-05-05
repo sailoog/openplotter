@@ -28,10 +28,22 @@ activ = conf.get('N2K', 'output') == '1'
 if not activ:
 	sys.exit(0)
 
+data = conf.get('UDEV', 'Serialinst')
 try:
-	ser = serial.Serial('/dev/'+conf.get('N2K', 'can_usb'), 115200, timeout=0.5)
+	Serialinst = eval(data)
 except:
-	print 'failed to start N2K output server on /dev/' + conf.get('N2K', 'can_usb')
+	Serialinst = {}
+
+can_device = ''
+for name in Serialinst:
+	if Serialinst[name]['assignment'] == 'CAN-USB':
+		can_device = '/dev/ttyOP_'+name
+		break
+		
+try:
+	ser = serial.Serial(can_device, 115200, timeout=0.5)
+except:
+	print 'failed to start N2K output server on '+can_device
 	sys.exit(0)
 
 	

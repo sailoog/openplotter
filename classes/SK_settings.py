@@ -138,7 +138,7 @@ class SK_settings:
 				
 	def set_ngt1_device(self,device):
 		if self.ngt1_enabled != -1:
-			self.data['pipedProviders'][self.ngt1]['pipeElements'][0]['options']['subOptions']['device'] = '/dev/'+device
+			self.data['pipedProviders'][self.ngt1]['pipeElements'][0]['options']['subOptions']['device'] = device
 			self.write_settings()
 
 	def set_ngt1_enable(self,enable):
