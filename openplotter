@@ -3128,7 +3128,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		can_device = ''
 		for name in self.Serialinst:
 			if self.Serialinst[name]['assignment'] == 'CAN-USB':
-				can_device = 'ttyOP_'+name
+				can_device = '/dev/ttyOP_'+name
 				break
 		self.SK_settings.set_ngt1_device(can_device)
 		if can_device: self.n2k_enable.SetValue(True)
@@ -3241,9 +3241,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		v_boxSizer2 = wx.StaticBoxSizer(n2k_output_box, wx.HORIZONTAL) 
 		v_boxSizer2.Add(self.n2k_out_enable, 0, wx.ALL | wx.EXPAND, 5)
-		v_boxSizer2.Add(self.N2K_diagnostic_out_b, 0, wx.ALL | wx.EXPAND, 5)
+		v_boxSizer2.Add(self.SK_to_N2K, 0, wx.ALL | wx.EXPAND, 5)
 		v_boxSizer2.Add(self.button_N2K_setting, 0, wx.ALL | wx.EXPAND, 5)
-		v_boxSizer2.Add(self.SK_to_N2K, 0, wx.ALL | wx.EXPAND, 5) 
+		v_boxSizer2.Add(self.N2K_diagnostic_out_b, 0, wx.ALL | wx.EXPAND, 5)
 
 		if self.SK_settings.canbus_enabled != -1:
 			v_boxSizer3 = wx.StaticBoxSizer(n2k_can0_input_box, wx.HORIZONTAL) 
