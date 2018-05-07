@@ -3135,6 +3135,22 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.on_n2k_enable(self.n2k_enable.GetValue())
 		self.on_n2k_output(self.n2k_out_enable.GetValue())
 
+		#set SMS device
+		sms_device = ''
+		sms_exists = False
+		for name in self.Serialinst:
+			if self.Serialinst[name]['assignment'] == 'SMS':
+				sms_device = '/dev/ttyOP_'+name
+				sms_exists = True
+				break
+		if sms_exists: self.conf.set('SMS', 'serial', sms_device)
+		else: 
+			self.conf.set('SMS', 'serial', '')
+			self.conf.set('SMS', 'enable', '0')
+			self.conf.set('SMS', 'enable_sending', '0')
+		self.read_sms()
+
+
 		time.sleep(1.5)
 		self.ShowStatusBarGREEN(_('Serial port modified and restarted'))
 
@@ -3412,10 +3428,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		wx.StaticBox(self.p_sms, label=_(' Settings '), size=(330, 180), pos=(10, 10))
 		self.sms_enable = wx.CheckBox(self.p_sms, label=_('Enable settings'), pos=(20, 30))
 		self.sms_enable.Bind(wx.EVT_CHECKBOX, self.onsms_enable)
-		self.SerDevLs = []
 		self.sms_dev_label = wx.StaticText(self.p_sms, label=_('Serial port'), pos=(20, 60))
-		self.sms_dev = wx.ComboBox(self.p_sms, choices=self.SerDevLs, style=wx.CB_READONLY, size=(150, 32),
-								   pos=(20, 80))
+		self.sms_dev = wx.TextCtrl(self.p_sms, style=wx.CB_READONLY, size=(150, 32), pos=(20, 80))
+
 		sms_con_list = ['at', 'at19200', 'at115200', 'blueat', 'bluephonet', 'bluefbus', 'blueobex', 'bluerfgnapbus',
 						'bluerfat', 'blues60', 'dlr3', 'dku2', 'dku2at', 'dku2phonet', 'dku5', 'dku5fbus', 'fbus',
 						'fbusdlr3', 'fbusdku5', 'fbusblue', 'fbuspl2303', 'irdaphonet', 'irdaat', 'irdaobex',
@@ -3447,10 +3462,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.button_sms_test.Bind(wx.EVT_BUTTON, self.on_sms_test)
 
 	def read_sms(self):
-		if self.conf.get('SMS', 'serial') == 'none' or self.conf.get('SMS', 'serial') == '':
-			self.sms_dev.SetSelection(0)
-		else:
-			self.sms_dev.SetValue(self.conf.get('SMS', 'serial'))
+		self.sms_dev.SetValue(self.conf.get('SMS', 'serial'))
 		self.sms_bt.SetValue(self.conf.get('SMS', 'bluetooth'))
 		self.sms_con.SetValue(self.conf.get('SMS', 'connection'))
 		if self.conf.get('SMS', 'enable') == '1':
@@ -3461,7 +3473,15 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.sms_bt.Disable()
 			self.sms_con_label.Disable()
 			self.sms_con.Disable()
+			self.button_sms_identify.Enable()
 		else:
+			self.sms_enable.SetValue(False)
+			self.sms_dev_label.Enable()
+			self.sms_dev.Enable()
+			self.sms_bt_label.Enable()
+			self.sms_bt.Enable()
+			self.sms_con_label.Enable()
+			self.sms_con.Enable()
 			self.button_sms_identify.Disable()
 
 		self.phone_number.SetValue(self.conf.get('SMS', 'phone'))
@@ -3469,7 +3489,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.sms_enable_send.SetValue(True)
 			self.phone_number_label.Disable()
 			self.phone_number.Disable()
+			self.button_sms_test.Enable()
+			self.sms_text.Enable()
+			self.sms_text_label.Enable()
 		else:
+			self.phone_number_label.Enable()
+			self.phone_number.Enable()
 			self.button_sms_test.Disable()
 			self.sms_text.Disable()
 			self.sms_text_label.Disable()
@@ -3485,7 +3510,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def onsms_enable(self, e):
 		isChecked = self.sms_enable.GetValue()
 		if isChecked:
-			if self.sms_dev.GetSelection() == 0:
+			if self.sms_dev.GetValue() == '':
 				if self.sms_bt.GetValue() == '':
 					self.ShowStatusBarRED(_('You have to provide a serial port or a bluetooth address.'))
 					self.sms_enable.SetValue(False)
@@ -3503,8 +3528,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			else:
 				connection = self.sms_con.GetValue()
 			self.conf.set('SMS', 'enable', '1')
-			if self.sms_dev.GetSelection() == 0:
-				self.conf.set('SMS', 'serial', 'none')
+			if self.sms_dev.GetValue() == '':
+				self.conf.set('SMS', 'serial', '')
 				port = bluetooth
 			else:
 				self.conf.set('SMS', 'serial', serial)
