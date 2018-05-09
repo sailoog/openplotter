@@ -400,12 +400,9 @@ class MainFrame(wx.Frame):
 			return
 
 		check_beta = True
-		if remote_xxx > local_xxx:
-			check_beta = False
-		elif remote_oxx > local_oxx:
-			check_beta = False
-		elif remote_oox > local_oox:
-			check_beta = False
+		if remote_xxx > local_xxx: check_beta = False
+		elif remote_xxx == local_xxx and remote_oxx > local_oxx: check_beta = False
+		elif remote_xxx == local_xxx and remote_oxx == local_oxx and remote_oox > local_oox: check_beta = False
 		if check_beta:
 			try:
 				data_conf = ConfigParser.SafeConfigParser()
@@ -419,7 +416,6 @@ class MainFrame(wx.Frame):
 			except:
 				self.ShowStatusBarRED(_('Error reading versions.'))
 				return
-
 		msg = ''
 		if sl == 'stable' and sr != 'stable':
 			msg += _('You are running a stable version. If you update to a non stable version you will have to keep updating until a stable stage is reached again.\n\n').decode('utf8')
@@ -427,18 +423,17 @@ class MainFrame(wx.Frame):
 			msg += _('There is a major Raspbian upgrade, you have to download the new OpenPlotter image: v').decode('utf8')+str(remote_xxx)+'.x.x '+sr+'.\n'
 			self.ShowMessage(msg)
 			return
-		elif remote_oxx > local_oxx:
+		elif remote_xxx == local_xxx and remote_oxx > local_oxx:
 			msg += _('There is a major OpenPlotter update.\n').decode('utf8')
 			msg += _('Please make a backup image of your system before updating.\n\n').decode('utf8')
 			update_type = 'major'
-		elif remote_oox > local_oox:
+		elif remote_xxx == local_xxx and remote_oxx == local_oxx and remote_oox > local_oox:
 			msg += _('There is a minor OpenPlotter update.\n\n').decode('utf8')
 			update_type = 'minor'
 		else:
 			msg += 'OpenPlotter '+vl+' '+sl+_(' is up to date.\n').decode('utf8')
-			msg += _('You do not need to update but if something went wrong in your last update, you can force a major update.\n\n').decode('utf8')
-			sr = sl
-			update_type = 'major'
+			self.ShowMessage(msg)
+			return
 		msg += _('Are you sure you want to update: ').decode('utf8')+vl+' '+sl+' --> '+vr+' '+sr+'?'
 		if sr == 'stable': branch = 'stable'
 		else: branch = 'beta'

@@ -342,8 +342,8 @@ class MyFrame(wx.Frame):
 			else:
 				check_beta = True
 				if remote_xxx > local_xxx: check_beta = False
-				elif remote_oxx > local_oxx: check_beta = False
-				elif remote_oox > local_oox: check_beta = False
+				elif remote_xxx == local_xxx and remote_oxx > local_oxx: check_beta = False
+				elif remote_xxx == local_xxx and remote_oxx == local_oxx and remote_oox > local_oox: check_beta = False
 				if check_beta:
 					try:
 						data_conf = ConfigParser.SafeConfigParser()
@@ -366,12 +366,12 @@ class MyFrame(wx.Frame):
 					self.add_warnings_data(_('\n\nThere is a major Raspbian upgrade, you have to download\nthe new OpenPlotter image: v').decode('utf8')+str(remote_xxx)+'.x.x '+sr+'.')
 					self.add_warnings_data(_('\nSee CHANGELOG:'))
 					self.add_warnings_data('\nhttps://raw.githubusercontent.com/'+master_github_repositories+'/openplotter/'+branch+'/CHANGELOG.md\n')
-				elif remote_oxx > local_oxx:
+				elif remote_xxx == local_xxx and remote_oxx > local_oxx:
 					self.add_logger_data(_(' Done.'))
 					self.add_warnings_data(_('\n\nThere is a major OpenPlotter update: ').decode('utf8')+vl+' '+sl+' --> '+vr+' '+sr+'.')
 					self.add_warnings_data(_('\nSee CHANGELOG:'))
 					self.add_warnings_data('\nhttps://raw.githubusercontent.com/'+master_github_repositories+'/openplotter/'+branch+'/CHANGELOG.md\n')
-				elif remote_oox > local_oox:
+				elif remote_xxx == local_xxx and remote_oxx == local_oxx and remote_oox > local_oox:
 					self.add_logger_data(_(' Done.'))
 					self.add_warnings_data(_('\n\nThere is a minor OpenPlotter update: ').decode('utf8')+vl+' '+sl+' --> '+vr+' '+sr+'.')
 					self.add_warnings_data(_('\nSee CHANGELOG:'))
