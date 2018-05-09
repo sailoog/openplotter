@@ -1,30 +1,18 @@
 #!/bin/bash
-status=$3
-op_folder=$(crudini --get ~/.openplotter/openplotter.conf GENERAL op_folder)
 
-if [ -z $status ]; then
-	status="stable"
-fi
+cd $HOME
 
-if [ -z $op_folder ]; then
-	op_folder="/.config"
-fi
-
-if [ $status = "stable" ]; then
-	repository="openplotter"
+if [ $branch = "stable" ]; then
+	repository=$master_github_repositories
+elif [ $branch = "beta" ]; then
+	repository=$beta_github_repositories
 else
-	repository="sailoog"
+	echo
+	read -p "#### WRONG GITHUB REPOSITORIES. ABORTING, PRESS ENTER TO EXIT ####"
+	exit 1
 fi
 
-cd $HOME$op_folder
-
-if [ $status = "stable" ]; then
-	repository="openplotter"
-else
-	repository="sailoog"
-fi
-cd $op_folder/..
-
+echo
 echo "UPDATING PACKAGE LISTS..."
 echo
 sudo apt-get update
@@ -33,17 +21,9 @@ if [ $? -ne 0 ]; then
 	read -p "#### ERROR. ABORTING, PRESS ENTER TO EXIT ####"
 	exit 1
 fi
+
 echo
 echo "UPDATING PACKAGES..."
-echo
-sudo apt-get -y upgrade
-if [ $? -ne 0 ]; then
-	echo
-	read -p "#### ERROR. ABORTING, PRESS ENTER TO EXIT ####"
-	exit 1
-fi
-echo
-echo "UPGRADING RASPBIAN..."
 echo
 sudo apt-get -y dist-upgrade
 if [ $? -ne 0 ]; then
@@ -51,50 +31,50 @@ if [ $? -ne 0 ]; then
 	read -p "#### ERROR. ABORTING, PRESS ENTER TO EXIT ####"
 	exit 1
 fi
+
+#echo
+#echo "INSTALLING DEPENDENCIES..."
+#echo
+#sudo apt-get -y install 
+#if [ $? -ne 0 ]; then
+#	echo
+#	read -p "#### ERROR. ABORTING, PRESS ENTER TO EXIT ####"
+#	exit 1
+#fi
+
 echo
-echo "INSTALLING DEPENDENCIES..."
-echo
-sudo apt-get -y install gettext gpsd gpsd-clients python-w1thermsensor python-wxgtk3.0 hostapd dnsmasq isc-dhcp-server network-manager network-manager-gnome mpg123 python-gammu gammu mosquitto crudini whois libusb-1.0-0-dev libfftw3-dev qt5-qmake libasound2-dev libpulse-dev  autoconf automake python-dev python-matplotlib bridge-utils libqt4-dev gnuradio libvolk1-bin libusb-1.0-0 gr-iqbal qt5-default libqt5svg5 libportaudio2 make gcc xsltproc curl git build-essential libtool librtlsdr-dev rtl-sdr i2c-tools cmake zygrib libnss-mdns avahi-utils libavahi-compat-libdnssd-dev swig python-numpy python-scipy python-serial python-gps python-pil python-opengl python-flask
-if [ $? -ne 0 ]; then
-	echo
-	read -p "#### ERROR. ABORTING, PRESS ENTER TO EXIT ####"
-	exit 1
-fi
-echo
-echo "INSTALLING PYTHON PACKAGES..."
+echo "UPDATING PYTHON PACKAGES..."
 echo
 sudo easy_install pip
-sudo pip install --upgrade paho-mqtt pyudev pyrtlsdr pynmea2 twython websocket-client spidev PyMata requests_oauthlib requests pyglet pywavefront ujson Flask flask-socketio
+sudo pip install --upgrade paho-mqtt pyudev pyrtlsdr pynmea2 twython websocket-client spidev PyMata requests requests_oauthlib PyMata pyglet pywavefront ujson Flask flask-socketio
 if [ $? -ne 0 ]; then
 	echo
 	read -p "#### ERROR. ABORTING, PRESS ENTER TO EXIT ####"
 	exit 1
 fi
+
 echo
-echo "UPDATING NODEJS AND NODE-RED..."
+echo "UPDATING NODEJS, NPM AND NODE-RED..."
 echo
-rm -rf $HOME/.node-red/node_modules/node-red-contrib-freeboard
 update-nodejs-and-nodered
 sudo rm -rf /usr/share/applications/Node-RED.desktop
+cd $HOME/.node-red
+npm update node-red-dashboard
+npm update node-red-contrib-jsonpath
+npm update mdns
+
 echo
 echo "UPDATING SIGNAL K..."
 echo
-cd $op_folder/..
-rm -rf signalk-server-node_tmp
-git clone https://github.com/$repository/signalk-server-node.git signalk-server-node_tmp
-cd ~/.config/signalk-server-node_tmp
-npm install
-npm install mdns
-cd $op_folder/..
-rm -rf signalk-server-node
-mv signalk-server-node_tmp signalk-server-node
+sudo npm install --unsafe-perm -g signalk-server
+
 echo
 echo "COMPILING PACKAGES..."
 echo
-cd $op_folder/..
-mkdir compiling
+cd $HOME
+mkdir delete
 
-cd $op_folder/../compiling
+cd $HOME/delete
 git clone https://github.com/$repository/kalibrate-rtl.git
 cd kalibrate-rtl
 ./bootstrap && CXXFLAGS='-W -Wall -O3'
@@ -102,7 +82,7 @@ cd kalibrate-rtl
 make
 sudo make install
 
-cd $op_folder/../compiling
+cd $HOME/delete
 git clone https://github.com/$repository/rtl_433.git
 cd rtl_433/
 mkdir build
@@ -111,7 +91,7 @@ cmake ../
 make
 sudo make install
 
-cd $op_folder/../compiling
+cd $HOME/delete
 pkill aisdecoder
 git clone https://github.com/$repository/aisdecoder.git
 cd aisdecoder
@@ -119,25 +99,25 @@ cmake -DCMAKE_BUILD_TYPE=release
 make
 sudo cp aisdecoder /usr/local/bin
 
-cd $op_folder/../compiling
+cd $HOME/delete
 git clone https://github.com/$repository/kplex.git
 cd kplex
 make
 sudo make install
 
-cd $op_folder/../compiling
+cd $HOME/delete
 git clone git://github.com/$repository/canboat
 cd canboat
 make
 sudo make install
 
-cd $op_folder/../compiling
+cd $HOME/delete
 git clone https://github.com/$repository/geomag.git
 cd geomag/geomag
 python setup.py build
 sudo python setup.py install
 
-cd $op_folder/../compiling
+cd $HOME/delete
 git clone https://github.com/$repository/RTIMULib2.git
 cd RTIMULib2/Linux
 mkdir build
@@ -159,26 +139,17 @@ cd python
 python setup.py build
 sudo python setup.py install
 
-cd $op_folder/../compiling
+cd $HOME/delete
 git clone https://github.com/$repository/pypilot
+git clone https://github.com/$repository/pypilot_data
+cp -rv pypilot_data/* pypilot
 cd pypilot
 python setup.py build
 sudo python setup.py install
 
-cd $op_folder/../compiling
-git clone https://github.com/$repository/pypilot_data.git
-if [ ! -d ~/.pypilot ]; then
-	mkdir ~/.pypilot
-fi
-cd pypilot_data
-cp -f ui/Vagabond.mtl ~/.pypilot/
-cp -f ui/Vagabond.obj ~/.pypilot/
-cp -f ui/compass.png ~/.pypilot/
 
-cd $op_folder/..
-sudo rm -rf $HOME$op_folder/compiling/
-
-echo '{"host": "localhost"}' > ~/.pypilot/signalk.conf
+cd $HOME
+sudo rm -rf delete
 
 if grep -Fq "self.shininess = min(128, self.shininess)" /usr/local/lib/python2.7/dist-packages/pywavefront/material.py
 then
@@ -188,15 +159,13 @@ else
 fi
 
 echo
-echo "INSTALLING/UPDATING GQRX..."
+echo "UPDATING GQRX..."
 echo
 cd ~/.config
-wget https://github.com/csete/gqrx/releases/download/v2.6/gqrx-2.6-rpi3-3.tar.xz
-tar xf gqrx-2.6-rpi3-3.tar.xz
-rm gqrx-2.6-rpi3-3.tar.xz
+wget https://github.com/csete/gqrx/releases/download/v2.11.4/gqrx-sdr-2.11.4-linux-rpi3.tar.xz
+tar xf gqrx-sdr-2.11.4-linux-rpi3.tar.xz
+rm gqrx-sdr-2.11.4-linux-rpi3.tar.xz
 rm -rf gqrx
-mv gqrx-2.6-rpi3-3 gqrx
+mv gqrx-sdr-2.11.4-linux-rpi3 gqrx
 cd gqrx
-./setup_gqrx.sh
-
-cd $op_folder/..
+sudo cp udev/*.rules /etc/udev/rules.d/

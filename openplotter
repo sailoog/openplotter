@@ -185,7 +185,7 @@ class MainFrame(wx.Frame):
 		self.system_item2 = self.update.Append(wx.ID_ANY, _('Set default OpenPlotter desktop'), _('Run this after a major update'))
 		self.Bind(wx.EVT_MENU, self.default_desktop, self.system_item2)		
 		self.update.AppendSeparator()
-		self.openplotter_item1 = self.update.Append(wx.ID_ANY, _('Update OpenPlotter'), _('Apply latest changes'))
+		self.openplotter_item1 = self.update.Append(wx.ID_ANY, _('Update OpenPlotter'), _('Apply latest changes on OpenPlotter and update the system if necessary'))
 		self.Bind(wx.EVT_MENU, self.update_openplotter, self.openplotter_item1)
 		self.menubar.Append(self.update, _('Updates'))
 
@@ -371,25 +371,24 @@ class MainFrame(wx.Frame):
 		self.ShowStatusBarBLACK(_('Follow the instructions of the new window'))
 
 	def update_openplotter(self, e):
-		repository = self.conf.get('GENERAL', 'repository')
 		vl = self.conf.get('GENERAL', 'version')
 		sl = self.conf.get('GENERAL', 'state')
 		vl_list = vl.split('.')
 		local_xxx = int(vl_list[0])
 		local_oxx = int(vl_list[1])
 		local_oox = int(vl_list[2])
-		if not repository:
-			repository = 'openplotter'
-			self.conf.set('GENERAL', 'repository', repository)
+		master_github_repositories = self.conf.get('UPDATE', 'master_github_repositories')
+		stable_branch = self.conf.get('UPDATE', 'stable_branch')
+		beta_branch = self.conf.get('UPDATE', 'beta_branch')
 		try:
-			r_master = requests.get('https://raw.githubusercontent.com/'+repository+'/openplotter/master/openplotter.conf')
-			r_beta = requests.get('https://raw.githubusercontent.com/'+repository+'/openplotter/beta/openplotter.conf')
+			r_stable = requests.get('https://raw.githubusercontent.com/'+master_github_repositories+'/openplotter/'+stable_branch+'/openplotter.conf')
+			r_beta = requests.get('https://raw.githubusercontent.com/'+master_github_repositories+'/openplotter/'+beta_branch+'/openplotter.conf')
 		except:
 			self.ShowStatusBarRED(_('It was not possible to connect to Github.'))
 			return
 		try:
 			data_conf = ConfigParser.SafeConfigParser()
-			data_conf.readfp(io.StringIO(r_master.text))
+			data_conf.readfp(io.StringIO(r_stable.text))
 			vr = data_conf.get('GENERAL','version')
 			sr = data_conf.get('GENERAL','state')
 			vr_list = vr.split('.')
@@ -425,25 +424,27 @@ class MainFrame(wx.Frame):
 		if sl == 'stable' and sr != 'stable':
 			msg += _('You are running a stable version. If you update to a non stable version you will have to keep updating until a stable stage is reached again.\n\n').decode('utf8')
 		if remote_xxx > local_xxx:
-			msg += _('There is a Raspbian upgrade, it is recommended to download the new OpenPlotter RPI image: v').decode('utf8')+str(remote_xxx)+'.x.x '+sr+'.\n'
+			msg += _('There is a major Raspbian upgrade, you have to download the new OpenPlotter image: v').decode('utf8')+str(remote_xxx)+'.x.x '+sr+'.\n'
 			self.ShowMessage(msg)
 			return
 		elif remote_oxx > local_oxx:
 			msg += _('There is a major OpenPlotter update.\n').decode('utf8')
 			msg += _('Please make a backup image of your system before updating.\n\n').decode('utf8')
-			major_update = '1'
+			update_type = 'major'
 		elif remote_oox > local_oox:
 			msg += _('There is a minor OpenPlotter update.\n\n').decode('utf8')
-			major_update = '0'
+			update_type = 'minor'
 		else:
 			msg += 'OpenPlotter '+vl+' '+sl+_(' is up to date.\n').decode('utf8')
-			msg += _('You do not need to update but if you think something was wrong in your last update, you can force a major update.\n\n').decode('utf8')
+			msg += _('You do not need to update but if something went wrong in your last update, you can force a major update.\n\n').decode('utf8')
 			sr = sl
-			major_update = '1'
+			update_type = 'major'
 		msg += _('Are you sure you want to update: ').decode('utf8')+vl+' '+sl+' --> '+vr+' '+sr+'?'
+		if sr == 'stable': branch = 'stable'
+		else: branch = 'beta'
 		dlg = wx.MessageDialog(None, msg, _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_EXCLAMATION)
 		if dlg.ShowModal() == wx.ID_YES:
-			subprocess.Popen(['lxterminal', '-e', 'bash', self.currentpath+'/update/update_OpenPlotter.sh', major_update, vr, sr, repository])
+			subprocess.Popen(['lxterminal', '-e', 'bash', self.currentpath+'/update/update_OpenPlotter.sh', update_type, branch])
 			dlg.Destroy()
 			self.Close()
 		else: dlg.Destroy()
