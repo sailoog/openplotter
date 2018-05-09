@@ -1,6 +1,5 @@
 #!/bin/bash
-
-if [ $1 -eq 0 ] || [ $2 -eq 0 ]
+if [ -z "$1" ] || [ -z "$2" ]
 	then
 		echo "No arguments supplied: update_OpenPlotter.sh <type> <branch>"
 		echo "<type>: major or minor"
