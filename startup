@@ -342,17 +342,38 @@ class MyFrame(wx.Frame):
 			except:
 				self.add_logger_data(_(' Error reading versions.'))
 			else:
+				check_beta = True
+				if remote_xxx > local_xxx: check_beta = False
+				elif remote_xxx == local_xxx and remote_oxx > local_oxx: check_beta = False
+				elif remote_xxx == local_xxx and remote_oxx == local_oxx and remote_oox > local_oox: check_beta = False
+				if check_beta:
+					try:
+						data_conf = ConfigParser.SafeConfigParser()
+						data_conf.readfp(io.StringIO(r_beta.text))
+						vr = data_conf.get('GENERAL','version')
+						sr = data_conf.get('GENERAL','state')
+						vr_list = vr.split('.')
+						print vr_list
+						remote_xxx = int(vr_list[0])
+						remote_oxx = int(vr_list[1])
+						remote_oox = int(vr_list[2])
+						print 'remote '+str(remote_xxx)
+						print 'local '+str(local_xxx)
+					except:
+						self.add_logger_data(_(' Error reading versions.'))
+				if sr == 'stable': branch = stable_branch
+				else: branch = beta_branch
 				if remote_xxx > local_xxx:
 					self.add_logger_data(_(' Done.'))
 					self.add_warnings_data(_('\n\nThere is a Raspbian upgrade, it is recommended to download\nthe new OpenPlotter RPI image: v').decode('utf8')+str(remote_xxx)+'.x.x '+sr+'.')
 					self.add_warnings_data(_('\nSee CHANGELOG:'))
-					self.add_warnings_data('\nhttps://raw.githubusercontent.com/'+repository+'/openplotter/'+remote_branch+'/CHANGELOG.md\n')
-				elif remote_oxx > local_oxx:
+					self.add_warnings_data('\nhttps://raw.githubusercontent.com/'+master_github_repositories+'/openplotter/'+branch+'/CHANGELOG.md\n')
+				elif remote_xxx == local_xxx and remote_oxx > local_oxx:
 					self.add_logger_data(_(' Done.'))
 					self.add_warnings_data(_('\n\nThere is a major OpenPlotter update: ').decode('utf8')+vl+' '+sl+' --> '+vr+' '+sr+'.')
 					self.add_warnings_data(_('\nSee CHANGELOG:'))
-					self.add_warnings_data('\nhttps://raw.githubusercontent.com/'+repository+'/openplotter/'+remote_branch+'/CHANGELOG.md\n')
-				elif remote_oox > local_oox:
+					self.add_warnings_data('\nhttps://raw.githubusercontent.com/'+master_github_repositories+'/openplotter/'+branch+'/CHANGELOG.md\n')
+				elif remote_xxx == local_xxx and remote_oxx == local_oxx and remote_oox > local_oox:
 					self.add_logger_data(_(' Done.'))
 					self.add_warnings_data(_('\n\nThere is a minor OpenPlotter update: ').decode('utf8')+vl+' '+sl+' --> '+vr+' '+sr+'.')
 					self.add_warnings_data(_('\nSee CHANGELOG:'))
