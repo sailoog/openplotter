@@ -159,15 +159,7 @@ class MyFrame(wx.Frame):
 		pypilot_mode=self.conf.get('PYPILOT', 'mode')
 		webapp=self.conf.get('PYPILOT', 'webapp')
 		webapp_port=self.conf.get('PYPILOT', 'webapp_port')
-
 		N2K_output=self.conf.get('N2K', 'output')
-
-		vl = self.conf.get('GENERAL', 'version')
-		sl = self.conf.get('GENERAL', 'state')
-		repository = self.conf.get('GENERAL', 'repository')
-		if not repository: 
-			repository = 'openplotter'
-			self.conf.set('GENERAL', 'repository', repository)
 
 		tools_py=[]
 		if self.conf.has_section('TOOLS'):
@@ -190,7 +182,7 @@ class MyFrame(wx.Frame):
 			data = json.load(data_file)
 		for i in data['users']:
 			if i['username'] == 'openplotter' and i['password'] == '$2a$10$quNPtJWG7r1wpEKTHPEjqeiCPXNl3dCTS/D235x92sS2lAgcGCH0O':
-				self.add_warnings_data(_('\n\nSecurity warning: You are using the default password for Signal K server.\nPlease change password in Signal K > Security > Users > openplotter.'))
+				self.add_warnings_data(_('\n\nSecurity warning: You are using the default password for Signal K server (openplotter).\nPlease change password in Signal K > Security > Users > openplotter.'))
 				self.add_logger_data(_(' See warning.'))
 			else: self.add_logger_data(_(' Done.'))
 
@@ -207,7 +199,7 @@ class MyFrame(wx.Frame):
 			salt = tmp[2]
 			passw_b = subprocess.check_output(['mkpasswd', '-msha-512', 'raspberry', salt])
 			if passw_a.rstrip() == passw_b.rstrip():
-				self.add_warnings_data(_('\n\nSecurity warning: You are using the default password for "pi" user.\nPlease change password in Menu > Preferences > Raspberry Pi Configuration.'))
+				self.add_warnings_data(_('\n\nSecurity warning: You are using the default password for "pi" user (raspberry).\nPlease change password in Menu > Preferences > Raspberry Pi Configuration.'))
 				self.add_logger_data(_(' See warning.'))
 			else: self.add_logger_data(_(' Done.'))
 
@@ -319,44 +311,71 @@ class MyFrame(wx.Frame):
 		self.add_logger_data(_(' Done.'))
 
 		self.add_logger_data(_('\nChecking OpenPlotter updates...'))
-		if sl == 'stable': remote_branch = 'master'
-		else: remote_branch = 'beta'
+
+		vl = self.conf.get('GENERAL', 'version')
+		sl = self.conf.get('GENERAL', 'state')
+		vl_list = vl.split('.')
+		local_xxx = int(vl_list[0])
+		local_oxx = int(vl_list[1])
+		local_oox = int(vl_list[2])
+		master_github_repositories = self.conf.get('UPDATE', 'master_github_repositories')
+		stable_branch = self.conf.get('UPDATE', 'stable_branch')
+		beta_branch = self.conf.get('UPDATE', 'beta_branch')
+
 		try:
-			r = requests.get('https://raw.githubusercontent.com/'+repository+'/openplotter/'+remote_branch+'/openplotter.conf')
+			r_stable = requests.get('https://raw.githubusercontent.com/'+master_github_repositories+'/openplotter/'+stable_branch+'/openplotter.conf')
+			r_beta = requests.get('https://raw.githubusercontent.com/'+master_github_repositories+'/openplotter/'+beta_branch+'/openplotter.conf')
 		except:
 			self.add_logger_data(_(' It was not possible to connect to Github.'))
 		else:
 			try:
 				data_conf = ConfigParser.SafeConfigParser()
-				data_conf.readfp(io.StringIO(r.text))
+				data_conf.readfp(io.StringIO(r_stable.text))
 				vr = data_conf.get('GENERAL','version')
 				sr = data_conf.get('GENERAL','state')
 				vr_list = vr.split('.')
-				vl_list = vl.split('.')
 				remote_xxx = int(vr_list[0])
 				remote_oxx = int(vr_list[1])
 				remote_oox = int(vr_list[2])
-				local_xxx = int(vl_list[0])
-				local_oxx = int(vl_list[1])
-				local_oox = int(vl_list[2])
 			except:
 				self.add_logger_data(_(' Error reading versions.'))
 			else:
+				check_beta = True
+				if remote_xxx > local_xxx: check_beta = False
+				elif remote_xxx == local_xxx and remote_oxx > local_oxx: check_beta = False
+				elif remote_xxx == local_xxx and remote_oxx == local_oxx and remote_oox > local_oox: check_beta = False
+				if check_beta:
+					try:
+						data_conf = ConfigParser.SafeConfigParser()
+						data_conf.readfp(io.StringIO(r_beta.text))
+						vr = data_conf.get('GENERAL','version')
+						sr = data_conf.get('GENERAL','state')
+						vr_list = vr.split('.')
+						print vr_list
+						remote_xxx = int(vr_list[0])
+						remote_oxx = int(vr_list[1])
+						remote_oox = int(vr_list[2])
+						print 'remote '+str(remote_xxx)
+						print 'local '+str(local_xxx)
+					except:
+						self.add_logger_data(_(' Error reading versions.'))
+				if sr == 'stable': branch = stable_branch
+				else: branch = beta_branch
 				if remote_xxx > local_xxx:
 					self.add_logger_data(_(' Done.'))
-					self.add_warnings_data(_('\n\nThere is a Raspbian upgrade, it is recommended to download\nthe new OpenPlotter RPI image: v').decode('utf8')+str(remote_xxx)+'.x.x '+sr+'.')
+					self.add_warnings_data(_('\n\nThere is a major Raspbian upgrade, you have to download\nthe new OpenPlotter image: v').decode('utf8')+str(remote_xxx)+'.x.x '+sr+'.')
 					self.add_warnings_data(_('\nSee CHANGELOG:'))
-					self.add_warnings_data('\nhttps://raw.githubusercontent.com/'+repository+'/openplotter/'+remote_branch+'/CHANGELOG.md\n')
-				elif remote_oxx > local_oxx:
+					self.add_warnings_data('\nhttps://raw.githubusercontent.com/'+master_github_repositories+'/openplotter/'+branch+'/CHANGELOG.md\n')
+				elif remote_xxx == local_xxx and remote_oxx > local_oxx:
 					self.add_logger_data(_(' Done.'))
 					self.add_warnings_data(_('\n\nThere is a major OpenPlotter update: ').decode('utf8')+vl+' '+sl+' --> '+vr+' '+sr+'.')
 					self.add_warnings_data(_('\nSee CHANGELOG:'))
-					self.add_warnings_data('\nhttps://raw.githubusercontent.com/'+repository+'/openplotter/'+remote_branch+'/CHANGELOG.md\n')
-				elif remote_oox > local_oox:
+					self.add_warnings_data('\nhttps://raw.githubusercontent.com/'+master_github_repositories+'/openplotter/'+branch+'/CHANGELOG.md\n')
+				elif remote_xxx == local_xxx and remote_oxx == local_oxx and remote_oox > local_oox:
 					self.add_logger_data(_(' Done.'))
 					self.add_warnings_data(_('\n\nThere is a minor OpenPlotter update: ').decode('utf8')+vl+' '+sl+' --> '+vr+' '+sr+'.')
 					self.add_warnings_data(_('\nSee CHANGELOG:'))
-					self.add_warnings_data('\nhttps://raw.githubusercontent.com/'+repository+'/openplotter/'+remote_branch+'/CHANGELOG.md\n')
+					self.add_warnings_data('\nhttps://raw.githubusercontent.com/'+master_github_repositories+'/openplotter/'+branch+'/CHANGELOG.md\n')
 				else:
 					self.add_logger_data(' OpenPlotter '+vl+' '+sl+_(' is up to date.').decode('utf8'))
 

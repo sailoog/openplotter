@@ -185,7 +185,7 @@ class MainFrame(wx.Frame):
 		self.system_item2 = self.update.Append(wx.ID_ANY, _('Set default OpenPlotter desktop'), _('Run this after a major update'))
 		self.Bind(wx.EVT_MENU, self.default_desktop, self.system_item2)		
 		self.update.AppendSeparator()
-		self.openplotter_item1 = self.update.Append(wx.ID_ANY, _('Update OpenPlotter'), _('Apply latest changes'))
+		self.openplotter_item1 = self.update.Append(wx.ID_ANY, _('Update OpenPlotter'), _('Apply latest changes on OpenPlotter and update the system if necessary'))
 		self.Bind(wx.EVT_MENU, self.update_openplotter, self.openplotter_item1)
 		self.menubar.Append(self.update, _('Updates'))
 
@@ -371,25 +371,24 @@ class MainFrame(wx.Frame):
 		self.ShowStatusBarBLACK(_('Follow the instructions of the new window'))
 
 	def update_openplotter(self, e):
-		repository = self.conf.get('GENERAL', 'repository')
 		vl = self.conf.get('GENERAL', 'version')
 		sl = self.conf.get('GENERAL', 'state')
 		vl_list = vl.split('.')
 		local_xxx = int(vl_list[0])
 		local_oxx = int(vl_list[1])
 		local_oox = int(vl_list[2])
-		if not repository:
-			repository = 'openplotter'
-			self.conf.set('GENERAL', 'repository', repository)
+		master_github_repositories = self.conf.get('UPDATE', 'master_github_repositories')
+		stable_branch = self.conf.get('UPDATE', 'stable_branch')
+		beta_branch = self.conf.get('UPDATE', 'beta_branch')
 		try:
-			r_master = requests.get('https://raw.githubusercontent.com/'+repository+'/openplotter/master/openplotter.conf')
-			r_beta = requests.get('https://raw.githubusercontent.com/'+repository+'/openplotter/beta/openplotter.conf')
+			r_stable = requests.get('https://raw.githubusercontent.com/'+master_github_repositories+'/openplotter/'+stable_branch+'/openplotter.conf')
+			r_beta = requests.get('https://raw.githubusercontent.com/'+master_github_repositories+'/openplotter/'+beta_branch+'/openplotter.conf')
 		except:
 			self.ShowStatusBarRED(_('It was not possible to connect to Github.'))
 			return
 		try:
 			data_conf = ConfigParser.SafeConfigParser()
-			data_conf.readfp(io.StringIO(r_master.text))
+			data_conf.readfp(io.StringIO(r_stable.text))
 			vr = data_conf.get('GENERAL','version')
 			sr = data_conf.get('GENERAL','state')
 			vr_list = vr.split('.')
@@ -401,12 +400,9 @@ class MainFrame(wx.Frame):
 			return
 
 		check_beta = True
-		if remote_xxx > local_xxx:
-			check_beta = False
-		elif remote_oxx > local_oxx:
-			check_beta = False
-		elif remote_oox > local_oox:
-			check_beta = False
+		if remote_xxx > local_xxx: check_beta = False
+		elif remote_xxx == local_xxx and remote_oxx > local_oxx: check_beta = False
+		elif remote_xxx == local_xxx and remote_oxx == local_oxx and remote_oox > local_oox: check_beta = False
 		if check_beta:
 			try:
 				data_conf = ConfigParser.SafeConfigParser()
@@ -420,30 +416,30 @@ class MainFrame(wx.Frame):
 			except:
 				self.ShowStatusBarRED(_('Error reading versions.'))
 				return
-
 		msg = ''
 		if sl == 'stable' and sr != 'stable':
 			msg += _('You are running a stable version. If you update to a non stable version you will have to keep updating until a stable stage is reached again.\n\n').decode('utf8')
 		if remote_xxx > local_xxx:
-			msg += _('There is a Raspbian upgrade, it is recommended to download the new OpenPlotter RPI image: v').decode('utf8')+str(remote_xxx)+'.x.x '+sr+'.\n'
+			msg += _('There is a major Raspbian upgrade, you have to download the new OpenPlotter image: v').decode('utf8')+str(remote_xxx)+'.x.x '+sr+'.\n'
 			self.ShowMessage(msg)
 			return
-		elif remote_oxx > local_oxx:
+		elif remote_xxx == local_xxx and remote_oxx > local_oxx:
 			msg += _('There is a major OpenPlotter update.\n').decode('utf8')
 			msg += _('Please make a backup image of your system before updating.\n\n').decode('utf8')
-			major_update = '1'
-		elif remote_oox > local_oox:
+			update_type = 'major'
+		elif remote_xxx == local_xxx and remote_oxx == local_oxx and remote_oox > local_oox:
 			msg += _('There is a minor OpenPlotter update.\n\n').decode('utf8')
-			major_update = '0'
+			update_type = 'minor'
 		else:
 			msg += 'OpenPlotter '+vl+' '+sl+_(' is up to date.\n').decode('utf8')
-			msg += _('You do not need to update but if you think something was wrong in your last update, you can force a major update.\n\n').decode('utf8')
-			sr = sl
-			major_update = '1'
+			self.ShowMessage(msg)
+			return
 		msg += _('Are you sure you want to update: ').decode('utf8')+vl+' '+sl+' --> '+vr+' '+sr+'?'
+		if sr == 'stable': branch = 'stable'
+		else: branch = 'beta'
 		dlg = wx.MessageDialog(None, msg, _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_EXCLAMATION)
 		if dlg.ShowModal() == wx.ID_YES:
-			subprocess.Popen(['lxterminal', '-e', 'bash', self.currentpath+'/update/update_OpenPlotter.sh', major_update, vr, sr, repository])
+			subprocess.Popen(['lxterminal', '-e', 'bash', self.currentpath+'/update/update_OpenPlotter.sh', update_type, branch])
 			dlg.Destroy()
 			self.Close()
 		else: dlg.Destroy()
@@ -3128,12 +3124,28 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		can_device = ''
 		for name in self.Serialinst:
 			if self.Serialinst[name]['assignment'] == 'CAN-USB':
-				can_device = 'ttyOP_'+name
+				can_device = '/dev/ttyOP_'+name
 				break
 		self.SK_settings.set_ngt1_device(can_device)
 		if can_device: self.n2k_enable.SetValue(True)
 		self.on_n2k_enable(self.n2k_enable.GetValue())
 		self.on_n2k_output(self.n2k_out_enable.GetValue())
+
+		#set SMS device
+		sms_device = ''
+		sms_exists = False
+		for name in self.Serialinst:
+			if self.Serialinst[name]['assignment'] == 'SMS':
+				sms_device = '/dev/ttyOP_'+name
+				sms_exists = True
+				break
+		if sms_exists: self.conf.set('SMS', 'serial', sms_device)
+		else: 
+			self.conf.set('SMS', 'serial', '')
+			self.conf.set('SMS', 'enable', '0')
+			self.conf.set('SMS', 'enable_sending', '0')
+		self.read_sms()
+
 
 		time.sleep(1.5)
 		self.ShowStatusBarGREEN(_('Serial port modified and restarted'))
@@ -3241,9 +3253,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		v_boxSizer2 = wx.StaticBoxSizer(n2k_output_box, wx.HORIZONTAL) 
 		v_boxSizer2.Add(self.n2k_out_enable, 0, wx.ALL | wx.EXPAND, 5)
-		v_boxSizer2.Add(self.N2K_diagnostic_out_b, 0, wx.ALL | wx.EXPAND, 5)
+		v_boxSizer2.Add(self.SK_to_N2K, 0, wx.ALL | wx.EXPAND, 5)
 		v_boxSizer2.Add(self.button_N2K_setting, 0, wx.ALL | wx.EXPAND, 5)
-		v_boxSizer2.Add(self.SK_to_N2K, 0, wx.ALL | wx.EXPAND, 5) 
+		v_boxSizer2.Add(self.N2K_diagnostic_out_b, 0, wx.ALL | wx.EXPAND, 5)
 
 		if self.SK_settings.canbus_enabled != -1:
 			v_boxSizer3 = wx.StaticBoxSizer(n2k_can0_input_box, wx.HORIZONTAL) 
@@ -3412,10 +3424,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		wx.StaticBox(self.p_sms, label=_(' Settings '), size=(330, 180), pos=(10, 10))
 		self.sms_enable = wx.CheckBox(self.p_sms, label=_('Enable settings'), pos=(20, 30))
 		self.sms_enable.Bind(wx.EVT_CHECKBOX, self.onsms_enable)
-		self.SerDevLs = []
 		self.sms_dev_label = wx.StaticText(self.p_sms, label=_('Serial port'), pos=(20, 60))
-		self.sms_dev = wx.ComboBox(self.p_sms, choices=self.SerDevLs, style=wx.CB_READONLY, size=(150, 32),
-								   pos=(20, 80))
+		self.sms_dev = wx.TextCtrl(self.p_sms, style=wx.CB_READONLY, size=(150, 32), pos=(20, 80))
+
 		sms_con_list = ['at', 'at19200', 'at115200', 'blueat', 'bluephonet', 'bluefbus', 'blueobex', 'bluerfgnapbus',
 						'bluerfat', 'blues60', 'dlr3', 'dku2', 'dku2at', 'dku2phonet', 'dku5', 'dku5fbus', 'fbus',
 						'fbusdlr3', 'fbusdku5', 'fbusblue', 'fbuspl2303', 'irdaphonet', 'irdaat', 'irdaobex',
@@ -3447,10 +3458,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.button_sms_test.Bind(wx.EVT_BUTTON, self.on_sms_test)
 
 	def read_sms(self):
-		if self.conf.get('SMS', 'serial') == 'none' or self.conf.get('SMS', 'serial') == '':
-			self.sms_dev.SetSelection(0)
-		else:
-			self.sms_dev.SetValue(self.conf.get('SMS', 'serial'))
+		self.sms_dev.SetValue(self.conf.get('SMS', 'serial'))
 		self.sms_bt.SetValue(self.conf.get('SMS', 'bluetooth'))
 		self.sms_con.SetValue(self.conf.get('SMS', 'connection'))
 		if self.conf.get('SMS', 'enable') == '1':
@@ -3461,7 +3469,15 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.sms_bt.Disable()
 			self.sms_con_label.Disable()
 			self.sms_con.Disable()
+			self.button_sms_identify.Enable()
 		else:
+			self.sms_enable.SetValue(False)
+			self.sms_dev_label.Enable()
+			self.sms_dev.Enable()
+			self.sms_bt_label.Enable()
+			self.sms_bt.Enable()
+			self.sms_con_label.Enable()
+			self.sms_con.Enable()
 			self.button_sms_identify.Disable()
 
 		self.phone_number.SetValue(self.conf.get('SMS', 'phone'))
@@ -3469,7 +3485,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.sms_enable_send.SetValue(True)
 			self.phone_number_label.Disable()
 			self.phone_number.Disable()
+			self.button_sms_test.Enable()
+			self.sms_text.Enable()
+			self.sms_text_label.Enable()
 		else:
+			self.phone_number_label.Enable()
+			self.phone_number.Enable()
 			self.button_sms_test.Disable()
 			self.sms_text.Disable()
 			self.sms_text_label.Disable()
@@ -3485,7 +3506,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def onsms_enable(self, e):
 		isChecked = self.sms_enable.GetValue()
 		if isChecked:
-			if self.sms_dev.GetSelection() == 0:
+			if self.sms_dev.GetValue() == '':
 				if self.sms_bt.GetValue() == '':
 					self.ShowStatusBarRED(_('You have to provide a serial port or a bluetooth address.'))
 					self.sms_enable.SetValue(False)
@@ -3503,8 +3524,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			else:
 				connection = self.sms_con.GetValue()
 			self.conf.set('SMS', 'enable', '1')
-			if self.sms_dev.GetSelection() == 0:
-				self.conf.set('SMS', 'serial', 'none')
+			if self.sms_dev.GetValue() == '':
+				self.conf.set('SMS', 'serial', '')
 				port = bluetooth
 			else:
 				self.conf.set('SMS', 'serial', serial)
