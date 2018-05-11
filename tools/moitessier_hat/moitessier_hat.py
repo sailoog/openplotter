@@ -293,13 +293,18 @@ class MyFrame(wx.Frame):
 		def read(self):
 			self.current_kernel = subprocess.check_output(['uname','-r','-v'])
 			self.kernel_label.SetLabel(self.current_kernel)
-
-			out = subprocess.check_output(['more','product'],cwd='/proc/device-tree/hat') 
-			if not 'Moitessier' in out: 
+			try:
+				out = subprocess.check_output(['more','product'],cwd='/proc/device-tree/hat')
+			except:
 				self.logger.SetValue(_('Moitessier HAT is not attached!'))
 				self.disable_all_buttons()
 				return
-			else: self.logger.SetValue(_('Moitessier HAT is attached.\n'))
+			else:
+				if not 'Moitessier' in out: 
+					self.logger.SetValue(_('Moitessier HAT is not attached!'))
+					self.disable_all_buttons()
+					return
+				else: self.logger.SetValue(_('Moitessier HAT is attached.\n'))
 
 			if not os.path.isfile(self.home+'/moitessier/app/moitessier_ctrl/moitessier_ctrl'):
 				self.logger.AppendText(_('Moitessier HAT package is not installed!'))
