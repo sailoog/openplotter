@@ -662,6 +662,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.available_net_sys.append('pi3_wlan1_with_eth0_wlan0')
 		self.available_net_sys.append('pi3_wlan1_wlan0')
 		self.available_net_sys.append('pi3+_wlan1_with_eth0_wlan0')
+		self.available_net_sys.append('pi3+_wlan1_5G_w_eth0_wlan0')
+		self.available_net_sys.append('pi3+_wlan1_5GH_eth0_wlan0')
 		self.available_net_sys.append('pi3+_wlan1_wlan0')
 		
 		self.net_sys_label = wx.StaticText(self.p_wifi, label=_('Network system'), pos=(20, 25))
@@ -680,8 +682,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		self.passw = wx.TextCtrl(self.p_wifi, -1, size=(120, 32), pos=(20, 210))
 		self.passw_label = wx.StaticText(self.p_wifi, label=_('Password \nminimum 8 characters required'), pos=(160, 210))
-
-		self.wifi_channel_list = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13']
+		
+		self.wifi_channel_list = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13','36','40','44','48','149','153','157','161','165']
 		self.wifi_channel = wx.ComboBox(self.p_wifi, choices=self.wifi_channel_list, style=wx.CB_READONLY,
 										size=(120, 32), pos=(20, 253))
 		self.wifi_channel_label = wx.StaticText(self.p_wifi, label=_('Channel'), pos=(160, 260))
@@ -3031,7 +3033,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		# write gpsd config
 		gpsd_exists = False
 		file = open('/etc/default/gpsd', 'r')
-		file1 = open('gpsd', 'w')
+		file1 = open(self.home+'/gpsd', 'w')
 		while True:
 			line = file.readline()
 			if not line: break
@@ -3055,7 +3057,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		#else remove gpsd?
 
 		# write pypilot allowed ports
-		file = open('pypilot_serial_ports', 'w')
+		file = open(self.home+'/pypilot_serial_ports', 'w')
 		pypilot_exists = False
 		for name in self.Serialinst:
 			if self.Serialinst[name]['assignment'] == 'pypilot':
@@ -3066,8 +3068,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		file.close()
 
 		path = self.home + '/.pypilot/serial_ports'
-		if os.system('diff pypilot_serial_ports ' + path + ' > /dev/null'):
-			os.system('mv pypilot_serial_ports ' + path)
+		if os.system('diff '+self.home +'/pypilot_serial_ports ' + path + ' > /dev/null'):
+			os.system('mv '+self.home +'/pypilot_serial_ports ' + path)
 			if pypilot_exists:
 				self.conf.set('PYPILOT', 'mode', 'basic autopilot')
 			else:
