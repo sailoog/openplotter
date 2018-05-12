@@ -473,12 +473,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		info.SetLicence(licence)
 		info.AddDeveloper(
 			'sailoog\nhttps://github.com/sailoog\ne-sailing\nhttps://github.com/e-sailing\nseandepagnier\nhttps://github.com/seandepagnier\n')
-		info.AddDocWriter('Gitbook\nhttps://openplotter.gitbook.io/documentation-v1-x-x')
+		info.AddDocWriter('Gitbook\nhttps://docs.sailoog.com/openplotter-v1-x-x')
 		info.AddTranslator('Crowdin\nhttps://crowdin.com/project/openplotter')
 		wx.AboutBox(info)
 
 	def op_doc(self, e):
-		url = "https://openplotter.gitbook.io/documentation-v1-x-x"
+		url = "https://docs.sailoog.com/openplotter-v1-x-x"
 		webbrowser.open(url, new=2)
 
 	def Changingpage(self, e):
