@@ -41,6 +41,8 @@ class SK_settings:
 		self.ssl = -1
 		if 'ssl' in self.data: self.ssl = self.data['ssl']
 		
+		if (self.ssl == -1 or self.ssl == False) and self.port == -1: self.port = 3000 
+		
 		self.http = 'http://'
 		self.ws = 'ws://'
 		self.aktport = self.port
