@@ -254,6 +254,7 @@ class MyFrame(wx.Frame):
 
 			self.packages_list = os.listdir(self.op_folder+'/tools/moitessier_hat/packages')
 			self.packages_select = wx.Choice(self.p_update, choices=self.packages_list, style=wx.CB_READONLY)
+			self.packages_select.SetSelection(0)
 
 			self.button_install =wx.Button(self.p_update, label=_('Install'))
 			self.Bind(wx.EVT_BUTTON, self.on_install, self.button_install)
