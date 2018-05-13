@@ -74,13 +74,6 @@ echo
 cd $HOME
 mkdir delete
 
-cd $HOME/delete
-git clone https://github.com/$repository/kalibrate-rtl.git
-cd kalibrate-rtl
-./bootstrap && CXXFLAGS='-W -Wall -O3'
-./configure
-make
-sudo make install
 
 cd $HOME/delete
 git clone https://github.com/$repository/rtl_433.git
@@ -90,14 +83,6 @@ cd build
 cmake ../
 make
 sudo make install
-
-cd $HOME/delete
-pkill aisdecoder
-git clone https://github.com/$repository/aisdecoder.git
-cd aisdecoder
-cmake -DCMAKE_BUILD_TYPE=release
-make
-sudo cp aisdecoder /usr/local/bin
 
 cd $HOME/delete
 git clone https://github.com/$repository/kplex.git
@@ -111,33 +96,49 @@ cd canboat
 make
 sudo make install
 
-cd $HOME/delete
-git clone https://github.com/$repository/geomag.git
-cd geomag/geomag
-python setup.py build
-sudo python setup.py install
+#cd $HOME/delete
+#pkill aisdecoder
+#git clone https://github.com/$repository/aisdecoder.git
+#cd aisdecoder
+#cmake -DCMAKE_BUILD_TYPE=release
+#make
+#sudo cp aisdecoder /usr/local/bin
 
-cd $HOME/delete
-git clone https://github.com/$repository/RTIMULib2.git
-cd RTIMULib2/Linux
-mkdir build
-cd build
-cmake ..
-make -j4
-sudo make install
-sudo ldconfig
-cd ..
-cd RTIMULibDrive
-make -j4
-sudo make install
-cd ..
-cd RTIMULibDrive10
-make -j4
-sudo make install
-cd ..
-cd python
-python setup.py build
-sudo python setup.py install
+#cd $HOME/delete
+#git clone https://github.com/$repository/kalibrate-rtl.git
+#cd kalibrate-rtl
+#./bootstrap && CXXFLAGS='-W -Wall -O3'
+#./configure
+#make
+#sudo make install
+
+#cd $HOME/delete
+#git clone https://github.com/$repository/geomag.git
+#cd geomag/geomag
+#python setup.py build
+#sudo python setup.py install
+
+#cd $HOME/delete
+#git clone https://github.com/$repository/RTIMULib2.git
+#cd RTIMULib2/Linux
+#mkdir build
+#cd build
+#cmake ..
+#make -j4
+#sudo make install
+#sudo ldconfig
+#cd ..
+#cd RTIMULibDrive
+#make -j4
+#sudo make install
+#cd ..
+#cd RTIMULibDrive10
+#make -j4
+#sudo make install
+#cd ..
+#cd python
+#python setup.py build
+#sudo python setup.py install
 
 cd $HOME/delete
 git clone https://github.com/$repository/pypilot
