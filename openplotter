@@ -89,7 +89,7 @@ class MainFrame(wx.Frame):
 		self.nb.AddPage(self.p_serial, _('Serial ports'))
 		self.nb.AddPage(self.p_kplex, 'Kplex')
 		self.nb.AddPage(self.p_pypilot, _('pypilot'))
-		self.nb.AddPage(self.p_n2k, 'CAN-USB')
+		self.nb.AddPage(self.p_n2k, 'CAN')
 		self.nb.AddPage(self.p_wifi, _('WiFi AP'))
 		self.nb.AddPage(self.p_action, _('Actions'))
 		self.nb.AddPage(self.p_gpio, _('GPIO'))
@@ -875,7 +875,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		ip_info = subprocess.check_output(['hostname', '-I'])
 		out = _(' Multiplexed NMEA 0183:\n')
 		ips = ip_info.split()		
-		out += self.on_show_ip_info_txt('10109',ips,ip_hostname)
+		out += self.on_show_ip_info_txt('10110',ips,ip_hostname)
 		out += _('\n Signal K Server:\n')
 		out += self.on_show_ip_info_txt('3000',ips,ip_hostname)
 		out += _('\n VNC remote desktop:\n')
@@ -3049,12 +3049,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		file.close()
 		file1.close()
 
-		if os.system('diff gpsd /etc/default/gpsd > /dev/null'):
+		if os.system('diff '+self.home+'/gpsd /etc/default/gpsd > /dev/null'):
 			# only restart gpsd if changed
-			print 'gpsd changed'
-			os.system('sudo mv gpsd /etc/default')
+			os.system('sudo mv '+self.home+'/gpsd /etc/default')
 			os.system('sudo service gpsd restart')
-		#else remove gpsd?
+		else: os.system('rm -f '+self.home+'/gpsd')
 
 		# write pypilot allowed ports
 		file = open(self.home+'/pypilot_serial_ports', 'w')
@@ -3068,8 +3067,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		file.close()
 
 		path = self.home + '/.pypilot/serial_ports'
-		if os.system('diff '+self.home +'/pypilot_serial_ports ' + path + ' > /dev/null'):
-			os.system('mv '+self.home +'/pypilot_serial_ports ' + path)
+		if os.system('diff '+self.home+'/pypilot_serial_ports ' + path + ' > /dev/null'):
+			os.system('mv '+self.home+'/pypilot_serial_ports ' + path)
 			if pypilot_exists:
 				self.conf.set('PYPILOT', 'mode', 'basic autopilot')
 			else:
@@ -3081,7 +3080,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					if imu_name != '0': self.conf.set('PYPILOT', 'mode', 'imu')
 			self.read_pypilot()
 			self.on_apply_changes_pypilot()
-		#else remove pypilot_serial_ports?
+		else: os.system('rm -f '+self.home+'/pypilot_serial_ports')
 
 		#set kplex devices
 		self.read_kplex_conf()
@@ -3182,7 +3181,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def edit_boot(self, onoff):
 		file = open('/boot/config.txt', 'r')
-		file1 = open('config.txt', 'w')
+		file1 = open(self.home+'/config.txt', 'w')
 		exists = False
 		while True:
 			line = file.readline()
@@ -3202,10 +3201,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		file.close()
 		file1.close()
 
-		if os.system('diff config.txt /boot/config.txt > /dev/null'):
-			os.system('sudo mv config.txt /boot')
+		if os.system('diff '+self.home+'/config.txt /boot/config.txt > /dev/null'):
+			os.system('sudo mv '+self.home+'/config.txt /boot')
 			os.system('sudo shutdown -r now')
-		else: os.system('rm -f config.txt')
+		else: os.system('rm -f '+self.home+'/config.txt')
 
 	###################################### N2K
 
