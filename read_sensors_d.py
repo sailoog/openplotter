@@ -380,7 +380,7 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 read_sensors = True
 
 #init SPI MCP
-rate_ana=0.1
+rate_ana=0.25
 MCP=[]
 adjust_point=[]
 SignalK=''
@@ -411,6 +411,7 @@ if analog_:
 	try:
 		spi = spidev.SpiDev()
 		spi.open(0,1)
+		spi.max_speed_hz = 200000
 	except:
 		analog_=False
 		print 'spi is disabled in raspberry-pi-configuration device tab'
