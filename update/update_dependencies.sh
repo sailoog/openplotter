@@ -58,6 +58,10 @@ echo "UPDATING NODEJS, NPM AND NODE-RED..."
 echo
 update-nodejs-and-nodered
 sudo rm -rf /usr/share/applications/Node-RED.desktop
+
+echo
+echo "UPDATING NPM PACKAGES..."
+echo
 cd $HOME/.node-red
 npm update node-red-dashboard
 npm update node-red-contrib-jsonpath
