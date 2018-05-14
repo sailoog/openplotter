@@ -86,7 +86,7 @@ class MainFrame(wx.Frame):
 		self.p_mqtt = wx.Panel(self.nb)
 		self.p_sms = wx.Panel(self.nb)
 		self.p_startup = wx.Panel(self.nb)
-		self.nb.AddPage(self.p_serial, _('Serial ports'))
+		self.nb.AddPage(self.p_serial, _('Serial'))
 		self.nb.AddPage(self.p_kplex, 'Kplex')
 		self.nb.AddPage(self.p_pypilot, _('pypilot'))
 		self.nb.AddPage(self.p_n2k, 'CAN')
@@ -3201,11 +3201,31 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		file.close()
 		file1.close()
 
+		file = open('/boot/cmdline.txt', 'r')
+		file1 = open(self.home+'/cmdline.txt', 'w')
+		text = file.read()
+		text = text.replace('\n', '')
+		text_list = text.split(' ')
+		if onoff and 'console=serial0,115200' in text_list: 
+			text_list.remove('console=serial0,115200')
+		if not onoff and not 'console=serial0,115200' in text_list: 
+			text_list.append('console=serial0,115200')
+		final = ' '.join(text_list)+'\n'
+		file1.write(final)
+		file.close()
+		file1.close()
+
+		reset = False
 		if os.system('diff '+self.home+'/config.txt /boot/config.txt > /dev/null'):
 			os.system('sudo mv '+self.home+'/config.txt /boot')
-			os.system('sudo shutdown -r now')
+			reset = True
 		else: os.system('rm -f '+self.home+'/config.txt')
+		if os.system('diff '+self.home+'/cmdline.txt /boot/cmdline.txt > /dev/null'):
+			os.system('sudo mv '+self.home+'/cmdline.txt /boot')
+			reset = True
+		else: os.system('rm -f '+self.home+'/cmdline.txt')
 
+		if reset == True : os.system('sudo shutdown -r now')
 	###################################### N2K
 
 	def page_n2k(self):
