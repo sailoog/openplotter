@@ -45,8 +45,6 @@ find . -name "*.pyc" -type f -delete
 
 cd $op_folder/..
 
-source openplotter_tmp/update/update_settings.sh
-
 if [ $type = "major" ]; then
 	source openplotter_tmp/update/update_dependencies.sh
 elif [ $type = "minor" ]; then
@@ -56,6 +54,8 @@ else
 	read -p "#### WRONG UPDATE TYPE. ABORTING, PRESS ENTER TO EXIT ####"
 	exit 1
 fi
+
+source openplotter_tmp/update/update_settings.sh
 
 cd $op_folder/..
 
