@@ -2559,7 +2559,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.Serial_assignment.SetSelection(0)
 
 		bauds_label = wx.StaticText(self.p_serial, label=_('bauds'))
-		self.bauds = ['','4800', '9600', '19200', '38400', '57600', '115200']
+		self.bauds = ['','4800', '9600', '19200', '38400', '57600', '115200', '230400', '460800']
 		self.Serial_baud_select = wx.Choice(self.p_serial, choices=self.bauds, style=wx.CB_READONLY)
 		self.Serial_baud_select.SetSelection(0)
 
