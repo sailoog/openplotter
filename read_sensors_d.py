@@ -269,11 +269,11 @@ def work_bme280():
 	humiditySK = bme280[2][2][0]
 	humidityRate = bme280[2][2][1]
 	humidityOffset = bme280[2][2][2]
-	bme = Bme280(address)
-	tick1 = time.time()
-	tick2 = tick1
-	tick3 = tick1
 	try:
+		bme = Bme280(address)
+		tick1 = time.time()
+		tick2 = tick1
+		tick3 = tick1
 		while read_sensors:
 			time.sleep(0.1)
 			temperature,pressure,humidity = bme.readBME280All()
@@ -307,10 +307,10 @@ def work_MS5607():
 	temperatureSK = MS5607[2][1][0]
 	temperatureRate = MS5607[2][1][1]
 	temperatureOffset = MS5607[2][1][2]
-	MS = ms5607(address)
-	tick1 = time.time()
-	tick2 = tick1
 	try:
+		MS = ms5607(address)
+		tick1 = time.time()
+		tick2 = tick1
 		while read_sensors:
 			time.sleep(0.1)
 			dig_temperature = MS.getDigitalTemperature()
