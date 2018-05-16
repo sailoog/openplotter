@@ -254,6 +254,7 @@ class MyFrame(wx.Frame):
 
 			self.packages_list = os.listdir(self.op_folder+'/tools/moitessier_hat/packages')
 			self.packages_select = wx.Choice(self.p_update, choices=self.packages_list, style=wx.CB_READONLY)
+			self.packages_select.SetSelection(0)
 
 			self.button_install =wx.Button(self.p_update, label=_('Install'))
 			self.Bind(wx.EVT_BUTTON, self.on_install, self.button_install)
@@ -293,13 +294,18 @@ class MyFrame(wx.Frame):
 		def read(self):
 			self.current_kernel = subprocess.check_output(['uname','-r','-v'])
 			self.kernel_label.SetLabel(self.current_kernel)
-
-			out = subprocess.check_output(['more','product'],cwd='/proc/device-tree/hat') 
-			if not 'Moitessier' in out: 
+			try:
+				out = subprocess.check_output(['more','product'],cwd='/proc/device-tree/hat')
+			except:
 				self.logger.SetValue(_('Moitessier HAT is not attached!'))
 				self.disable_all_buttons()
 				return
-			else: self.logger.SetValue(_('Moitessier HAT is attached.\n'))
+			else:
+				if not 'Moitessier' in out: 
+					self.logger.SetValue(_('Moitessier HAT is not attached!'))
+					self.disable_all_buttons()
+					return
+				else: self.logger.SetValue(_('Moitessier HAT is attached.\n'))
 
 			if not os.path.isfile(self.home+'/moitessier/app/moitessier_ctrl/moitessier_ctrl'):
 				self.logger.AppendText(_('Moitessier HAT package is not installed!'))

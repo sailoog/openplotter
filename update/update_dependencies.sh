@@ -58,6 +58,10 @@ echo "UPDATING NODEJS, NPM AND NODE-RED..."
 echo
 update-nodejs-and-nodered
 sudo rm -rf /usr/share/applications/Node-RED.desktop
+
+echo
+echo "UPDATING NPM PACKAGES..."
+echo
 cd $HOME/.node-red
 npm update node-red-dashboard
 npm update node-red-contrib-jsonpath
@@ -74,13 +78,6 @@ echo
 cd $HOME
 mkdir delete
 
-cd $HOME/delete
-git clone https://github.com/$repository/kalibrate-rtl.git
-cd kalibrate-rtl
-./bootstrap && CXXFLAGS='-W -Wall -O3'
-./configure
-make
-sudo make install
 
 cd $HOME/delete
 git clone https://github.com/$repository/rtl_433.git
@@ -90,14 +87,6 @@ cd build
 cmake ../
 make
 sudo make install
-
-cd $HOME/delete
-pkill aisdecoder
-git clone https://github.com/$repository/aisdecoder.git
-cd aisdecoder
-cmake -DCMAKE_BUILD_TYPE=release
-make
-sudo cp aisdecoder /usr/local/bin
 
 cd $HOME/delete
 git clone https://github.com/$repository/kplex.git
@@ -111,33 +100,49 @@ cd canboat
 make
 sudo make install
 
-cd $HOME/delete
-git clone https://github.com/$repository/geomag.git
-cd geomag/geomag
-python setup.py build
-sudo python setup.py install
+#cd $HOME/delete
+#pkill aisdecoder
+#git clone https://github.com/$repository/aisdecoder.git
+#cd aisdecoder
+#cmake -DCMAKE_BUILD_TYPE=release
+#make
+#sudo cp aisdecoder /usr/local/bin
 
-cd $HOME/delete
-git clone https://github.com/$repository/RTIMULib2.git
-cd RTIMULib2/Linux
-mkdir build
-cd build
-cmake ..
-make -j4
-sudo make install
-sudo ldconfig
-cd ..
-cd RTIMULibDrive
-make -j4
-sudo make install
-cd ..
-cd RTIMULibDrive10
-make -j4
-sudo make install
-cd ..
-cd python
-python setup.py build
-sudo python setup.py install
+#cd $HOME/delete
+#git clone https://github.com/$repository/kalibrate-rtl.git
+#cd kalibrate-rtl
+#./bootstrap && CXXFLAGS='-W -Wall -O3'
+#./configure
+#make
+#sudo make install
+
+#cd $HOME/delete
+#git clone https://github.com/$repository/geomag.git
+#cd geomag/geomag
+#python setup.py build
+#sudo python setup.py install
+
+#cd $HOME/delete
+#git clone https://github.com/$repository/RTIMULib2.git
+#cd RTIMULib2/Linux
+#mkdir build
+#cd build
+#cmake ..
+#make -j4
+#sudo make install
+#sudo ldconfig
+#cd ..
+#cd RTIMULibDrive
+#make -j4
+#sudo make install
+#cd ..
+#cd RTIMULibDrive10
+#make -j4
+#sudo make install
+#cd ..
+#cd python
+#python setup.py build
+#sudo python setup.py install
 
 cd $HOME/delete
 git clone https://github.com/$repository/pypilot
@@ -147,9 +152,11 @@ cd pypilot
 python setup.py build
 sudo python setup.py install
 
-
 cd $HOME
 sudo rm -rf delete
+
+cd $op_folder/..
+sudo dpkg -i openplotter_tmp/update/files/pypilot_pi_0.4.000-1_armhf.deb
 
 if grep -Fq "self.shininess = min(128, self.shininess)" /usr/local/lib/python2.7/dist-packages/pywavefront/material.py
 then
