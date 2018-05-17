@@ -164,6 +164,8 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_MENU, self.lang_nl, self.lang_item5)		
 		self.lang_item1 = self.lang.Append(wx.ID_ANY, _('English'), _('Set English language'), kind=wx.ITEM_CHECK)
 		self.Bind(wx.EVT_MENU, self.lang_en, self.lang_item1)
+		self.lang_item10 = self.lang.Append(wx.ID_ANY, _('Finnish'), _('Set Finnish language'), kind=wx.ITEM_CHECK)
+		self.Bind(wx.EVT_MENU, self.lang_fi, self.lang_item10)
 		self.lang_item4 = self.lang.Append(wx.ID_ANY, _('French'), _('Set French language'), kind=wx.ITEM_CHECK)
 		self.Bind(wx.EVT_MENU, self.lang_fr, self.lang_item4)
 		self.lang_item9 = self.lang.Append(wx.ID_ANY, _('Galician'), _('Set Galician language'), kind=wx.ITEM_CHECK)
@@ -246,6 +248,7 @@ class MainFrame(wx.Frame):
 		if self.language == 'it': self.lang.Check(self.lang_item7.GetId(), True)
 		if self.language == 'eu': self.lang.Check(self.lang_item8.GetId(), True)
 		if self.language == 'gl': self.lang.Check(self.lang_item9.GetId(), True)
+		if self.language == 'fi': self.lang.Check(self.lang_item10.GetId(), True)
 
 	def ShowMessage(self, w_msg):
 		wx.MessageBox(w_msg, 'Info', wx.OK | wx.ICON_INFORMATION)
@@ -315,6 +318,7 @@ class MainFrame(wx.Frame):
 		self.lang.Check(self.lang_item7.GetId(), False)
 		self.lang.Check(self.lang_item8.GetId(), False)
 		self.lang.Check(self.lang_item9.GetId(), False)
+		self.lang.Check(self.lang_item10.GetId(), False)
 		self.ShowMessage(_('The selected language will be enabled when you restart'))
 
 	def lang_en(self, e):
@@ -361,6 +365,11 @@ class MainFrame(wx.Frame):
 		self.clear_lang()
 		self.lang.Check(self.lang_item9.GetId(), True)
 		self.conf.set('GENERAL', 'lang', 'gl')
+
+	def lang_fi(self, e):
+		self.clear_lang()
+		self.lang.Check(self.lang_item10.GetId(), True)
+		self.conf.set('GENERAL', 'lang', 'fi')
 
 	def update_opencpn(self, e):
 		subprocess.Popen(['lxterminal', '-e', 'bash', self.currentpath+'/update/update_OpenCPN.sh'])
