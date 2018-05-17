@@ -155,9 +155,6 @@ sudo python setup.py install
 cd $HOME
 sudo rm -rf delete
 
-cd $op_folder/..
-sudo dpkg -i openplotter_tmp/update/files/pypilot_pi_0.4.000-1_armhf.deb
-
 if grep -Fq "self.shininess = min(128, self.shininess)" /usr/local/lib/python2.7/dist-packages/pywavefront/material.py
 then
 	true
