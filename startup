@@ -141,9 +141,6 @@ class MyFrame(wx.Frame):
 		
 	def starting(self):
 
-		#wifi_server=self.conf.get('WIFI', 'enable')
-		#wifi_server_pass=self.conf.get('WIFI', 'password')
-
 		delay=int(self.conf.get('STARTUP', 'delay'))
 
 		opencpn=self.conf.get('STARTUP', 'opencpn')
@@ -203,26 +200,33 @@ class MyFrame(wx.Frame):
 				self.add_logger_data(_(' See warning.'))
 			else: self.add_logger_data(_(' Done.'))
 
+		wifi_default = self.conf_folder + '/Network/default'
+		if not os.path.isdir(wifi_default):
+			self.add_logger_data(_('\nChecking WIFI Access Point password...'))
+			wifi_pass = ''
+			try:
+				hostapd = open('/etc/hostapd/hostapd.conf', 'r')
+				data = hostapd.read()
+				hostapd.close()
+				i=data.find("wpa_passphrase")
+				if i>=0:
+					j=data[i:].find("\n")
+					if j==0:j=data[i:].length
+					line = data[i:i+j]
+					sline = line.split('=')
+					if len(sline)>1:
+						wifi_pass=sline[1]
+			except: pass
+			if wifi_pass == '12345678':
+				self.add_warnings_data(_('\n\nSecurity warning: You are using the default WIFI Access Point password.\nPlease change password in OpenPlotter > WiFi AP.'))
+				self.add_logger_data(_(' See warning.'))
+			else:
+				self.add_logger_data(_(' Done.'))
+				
 		if delay!=0:
 			self.add_logger_data(_('\nApplying ').decode('utf8')+str(delay)+_(' seconds of delay...').decode('utf8'))
 			time.sleep(delay)
 			self.add_logger_data(_(' Done.'))		
-
-		#if wifi_server == '1':
-		#	self.add_logger_data(_('\nStarting WIFI Access Point...'))
-		#	process = subprocess.Popen(['sudo', 'python', self.op_folder+'/wifi_server.py', '1'])
-		#else:
-		#	self.add_logger_data(_('\nStarting WIFI Client...'))
-		#	process = subprocess.Popen(['sudo', 'python', self.op_folder+'/wifi_server.py', '0'])
-		#process.wait()
-		#self.add_logger_data(_(' Done.'))
-		#if wifi_server == '1':
-		#	self.add_logger_data(_('\nChecking WIFI Access Point password...'))
-		#	if wifi_server_pass=='12345678':
-		#		self.add_warnings_data(_('\n\nSecurity warning: You are using the default WIFI Access Point password.\nPlease change password in OpenPlotter > WiFi AP.'))
-		#		self.add_logger_data(_(' See warning.'))
-		#	else:
-		#		self.add_logger_data(_(' Done.'))
 		
 		subprocess.call(['pkill', '-f', 'mqtt_d.py'])
 		self.add_logger_data(_('\nStarting MQTT server...'))
