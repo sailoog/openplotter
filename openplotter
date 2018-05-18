@@ -828,13 +828,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			used_interfaces.append('eth0')
 		#print used_interfaces,share
 		if share in used_interfaces:
-			self.ShowStatusBarRED(_('The interface you want to share is in use (bridge or AP).'))
+			self.ShowStatusBarRED(_('The device you want to share is in use (bridge or AP).'))
 			return
 							
 		dlg = wx.MessageDialog(None, _(
-			'Changes will be set for next boot.\n\nIf something goes wrong and you are on a headless system,\nyou may not be able to reconnect again.\n\nAre you sure?'),
+			'Changes will be applied after next reboot.\n\nIf something goes wrong and you are on a headless system,\nyou may not be able to reconnect again.\n\nAre you sure?'),
 							   _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
-		if dlg.ShowModal() != wx.ID_YES:
+		if dlg.ShowModal() != wx.ID_YES:	
 			dlg.Destroy()
 			return
 						
@@ -909,8 +909,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				network_info = subprocess.check_output(('iw '+str(i)+' info').split())
 			except:
 				pass
-			if 'AP' in network_info: msg1 += str(i)+' is AP'
-		if msg1 == '': msg1 += 'no AP'
+			if 'AP' in network_info: msg1 += str(i)+_(' is AP')
+		if msg1 == '': msg1 += _('no AP')
 		msg += msg1 + '\n'
 
 		msg1 = ''
@@ -923,7 +923,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			if 'wlan0' in i: msg1 += 'wlan0 '
 			if 'wlan1' in i: msg1 += 'wlan1 '
 			if 'uap0' in i: msg1 += 'uap0 '
-		msg += 'up network: ' + msg1 + '\n'
+		msg += _('up network: ') + msg1 + '\n'
 
 		msg1 = ''
 		network_info = ''
@@ -932,8 +932,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		except:
 			pass
 		for i in network_info.split('\n'):
-			if 'running' in i: msg1 += 'running'
-		if msg1 == '': msg1 += 'stopped'
+			if 'running' in i: msg1 += _('running')
+		if msg1 == '': msg1 += _('stopped')
 		msg += 'dnsmasq (dhcp-server):\t' + msg1 + '\n'
 
 		msg1 = ''
@@ -943,8 +943,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		except:
 			pass
 		for i in network_info.split('\n'):
-			if 'running' in i: msg1 += 'running'
-		if msg1 == '': msg1 += 'stopped'
+			if 'running' in i: msg1 += _('running')
+		if msg1 == '': msg1 += _('stopped')
 		msg += 'hostapd (AP):\t\t\t' + msg1 + '\n'
 
 		msg1 = ''
@@ -954,8 +954,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		except:
 			pass
 		for i in network_info.split('\n'):
-			if 'running' in i: msg1 += 'running'
-		if msg1 == '': msg1 += 'stopped'
+			if 'running' in i: msg1 += _('running')
+		if msg1 == '': msg1 += _('stopped')
 		msg += 'dhcpcd:\t\t\t\t\t' + msg1 + '\n'
 		
 		msg1 = ''
@@ -965,11 +965,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		except:
 			pass
 		for i in network_info.split('\n'):
-			if 'running' in i: msg1 += 'running'
+			if 'running' in i: msg1 += _('running')
 		if msg1 == '': 
-			msg1 += 'stopped'
+			msg1 += _('stopped')
 		else:
-			msg1 = 'running'
+			msg1 = _('running')
 		msg += 'avahi-daemon:\t\t\t' + msg1 + '\n'
 		
 		msg1 = ''
@@ -1002,13 +1002,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 						msg1 += i.split(' ')[5][0:-3] + ' ' + i[-5:] + '\n'
 					else:
 						msg1 += i.split(' ')[5][0:-3] + ' ' + i[-3:] + '\n'
-		msg += 'ip address\n' + msg1 + '\n'
+		msg += _('IP address\n') + msg1 + '\n'
 
 		self.ShowMessage(msg)
 
 	def on_wifi_set(self, e):
-		os.system("rm -rf '/home/pi/.openplotter/Network/"+self.bak_net_sys+"'")
-		shutil.copytree('/home/pi/.config/openplotter/Network/'+self.net_sys.GetValue(), '/home/pi/.openplotter/Network/'+self.net_sys.GetValue())
+		os.system("rm -rf '"+self.conf_folder+"/Network/"+self.bak_net_sys+"'")
+		shutil.copytree(self.currentpath+'/Network/'+self.net_sys.GetValue(), self.conf_folder+'/Network/'+self.net_sys.GetValue())
 		self.read_wifi_conf()
 		
 				########################################### PYPILOT
