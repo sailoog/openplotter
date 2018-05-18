@@ -719,6 +719,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.bak_net_sys = os.listdir(self.conf_network)
 			if len(self.bak_net_sys)>0: 
 				self.bak_net_sys = self.bak_net_sys[0]
+			else:
+				self.bak_net_sys = ''
 		
 		self.bak_passw=''
 		self.bak_share=''
