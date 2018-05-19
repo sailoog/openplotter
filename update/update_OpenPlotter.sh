@@ -55,6 +55,8 @@ else
 	exit 1
 fi
 
+cd $op_folder/..
+
 source openplotter_tmp/update/update_settings.sh
 
 cd $op_folder/..
