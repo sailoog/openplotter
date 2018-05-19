@@ -39,12 +39,16 @@ class addNMEA_0183(wx.Dialog):
 		self.sentences=[]
 		self.fields=[]
 
+		#do not allow sentences that SK can parse to avoid loops
+		NMEAtoSK = ['ALK','APB','DBT','DPT','DSC','GGA','GLL','HDG','HDM','HDT','KEP','MTW','MWV','RMB','RMC','ROT','RPM','VDM','VDO','VDR','VHW','VPW','VTG','VWR','ZDA']
 		for name, obj in inspect.getmembers(pynmea2):
 			if inspect.isclass(obj):
 				if 'pynmea2.types.talker.' in str(obj) and 'pynmea2.types.talker.Transducer' not in str(obj):
-					self.list_sentences.append('$--'+obj.__name__)
-					self.sentences.append(obj.__name__)
-					self.fields.append(obj.fields)
+					sentence = obj.__name__
+					if not sentence in NMEAtoSK:
+						self.list_sentences.append('$--'+sentence)
+						self.sentences.append(sentence)
+						self.fields.append(obj.fields)
 
 		wx.StaticText(panel, label=_('Sentence'), pos=(10, 10))
 		self.sentence= wx.ComboBox(panel, choices=self.list_sentences, style=wx.CB_READONLY, size=(120, 30), pos=(10, 35))

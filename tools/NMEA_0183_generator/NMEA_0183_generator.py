@@ -150,7 +150,7 @@ class MyFrame(wx.Frame):
 			if self.list_nmea.GetItemCount()>0:
 				self.SetStatusText(_('This function is only allowed when the list is empty.'))
 				return
-			self.conf.set('NMEA0183', 'sentences', "[['HDG', [['navigation.headingMagnetic', 'x.x|deg', '+', 0.0], '', '', '', ''], 0.5], ['XDR', ['A', ['navigation.attitude.roll', 'x.x|deg', '+', 0.0], 'D', 'ROLL'], 1.0], ['XDR', ['A', ['navigation.attitude.pitch', 'x.x|deg', '+', 0.0], 'D', 'PTCH'], 1.0], ['XDR', ['P', ['environment.outside.pressure', 'x.xxxx', '/', 100000.0], 'B', 'Barometer'], 5.0], ['XDR', ['C', ['environment.outside.temperature', 'x.x|C', '+', 0.0], 'C', 'ENV_OUTAIR_T'], 5.0], ['MTW', [['environment.water.temperature', 'x.x|C', '+', 0.0], 'C'], 5.0]]")
+			self.conf.set('NMEA0183', 'sentences', "[['XDR', ['A', ['navigation.attitude.roll', 'x.x|deg', '+', 0.0], 'D', 'ROLL'], 1.0], ['XDR', ['A', ['navigation.attitude.pitch', 'x.x|deg', '+', 0.0], 'D', 'PTCH'], 1.0], ['XDR', ['P', ['environment.outside.pressure', 'x.xxxx', '/', 100000.0], 'B', 'Barometer'], 5.0], ['XDR', ['C', ['environment.outside.temperature', 'x.x|C', '+', 0.0], 'C', 'ENV_OUTAIR_T'], 5.0]]")
 			self.start_d()
 			self.read_sentences()
 			
