@@ -54,8 +54,6 @@ class Actions:
 		self.options.append(['startup restart', 0, 0, 'ACT8'])
 		self.options.append([_('stop NMEA multiplexer'), 0, 0, 'ACT5'])
 		self.options.append([_('reset NMEA multiplexer'), 0, 0, 'ACT6'])
-		self.options.append([_('stop WiFi access point'),_('Access point will be disabled.\n\nIf you are on a headless system, you will not be able to reconnect again.\n\nAre you sure?'),0,'ACT9'])
-		self.options.append([_('start WiFi access point'),_('Be sure you have filled in all fields in "WiFi AP" tab.'),0, 'ACT10'])
 		#self.options.append([_('stop SDR-AIS'), 0, 0, 'ACT11'])
 		#self.options.append([_('reset SDR-AIS'), _('Be sure you have filled in Gain and Correction fields in "SDR-AIS" tab and enabled AIS NMEA generation.'),0, 'ACT12'])
 		self.options.append([_('publish Twitter'), _('Be sure you have filled in all fields in "Accounts" tab, and enabled Twitter checkbox.\n\nEnter text to publish in the field "data".'),1, 'ACT13'])
@@ -132,12 +130,8 @@ class Actions:
 			subprocess.Popen(['startup', 'stop'])
 		elif option == 'ACT8':
 			subprocess.Popen(['startup', 'restart'])
-		elif option == 'ACT9':
-			subprocess.Popen(['sudo', 'python', self.currentpath +'/wifi_server.py', '0'])
-			conf.set('WIFI', 'enable', '0')
-		elif option == 'ACT10':
-			subprocess.Popen(['sudo', 'python', self.currentpath+'/wifi_server.py', '1'])
-			conf.set('WIFI', 'enable', '1')
+		#elif option == 'ACT9':
+		#elif option == 'ACT10':
 		#elif option == 'ACT11':
 		#elif option == 'ACT12':
 		elif option == 'ACT13':

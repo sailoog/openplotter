@@ -51,11 +51,7 @@ class SK_settings:
 			self.ws = 'wss://'
 			self.aktport = self.sslport
 			
-		self.ip = '10.10.10.1'
-		
-		if self.conf.has_section('WIFI'):
-			if self.conf.has_option('WIFI', 'ip'):
-				self.ip = self.conf.get('WIFI', 'ip')
+		self.ip = 'localhost'
 				
 		self.http_address = self.http+self.ip+':'+str(self.aktport)
 		

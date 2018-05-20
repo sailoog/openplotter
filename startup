@@ -218,7 +218,7 @@ class MyFrame(wx.Frame):
 						wifi_pass=sline[1]
 			except: pass
 			if wifi_pass == '12345678':
-				self.add_warnings_data(_('\n\nSecurity warning: You are using the default WIFI Access Point password.\nPlease change password in OpenPlotter > WiFi AP.'))
+				self.add_warnings_data(_('\n\nSecurity warning: You are using the default WIFI Access Point password.\nPlease change password in OpenPlotter > Network.'))
 				self.add_logger_data(_(' See warning.'))
 			else:
 				self.add_logger_data(_(' Done.'))
