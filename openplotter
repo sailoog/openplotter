@@ -664,21 +664,26 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			if 'wwan' + ii in output: self.available_share.append('wwan' + ii)
 		for i in self.available_wireless:
 			self.available_share.append(i)
-			
-		self.available_net_sys = ['default']
-		self.available_net_sys.append('pi3_uap0_with_eth0_wlan0')
-		self.available_net_sys.append('pi3_uap0_wlan0')
-		self.available_net_sys.append('pi3_wlan1_with_eth0_wlan0')
-		self.available_net_sys.append('pi3_wlan1_wlan0')
-		self.available_net_sys.append('pi3+_wlan1_with_eth0_wlan0')
-		self.available_net_sys.append('pi3+_wlan1_5G_w_eth0_wlan0')
-		self.available_net_sys.append('pi3+_wlan1_5GH_eth0_wlan0')
-		self.available_net_sys.append('pi3+_wlan1_wlan0')
+		
+		self.available_net_sys = []
+		self.available_net_sys.append(['default','default'])
+		self.available_net_sys.append(['pi3_uap0_with_eth0_wlan0','RPi3: AP/client + bridge eth0'])
+		self.available_net_sys.append(['pi3_uap0_wlan0','RPi3: AP/client'])
+		self.available_net_sys.append(['pi3_wlan1_with_eth0_wlan0','RPi3: AP + client + bridge eth0'])
+		self.available_net_sys.append(['pi3_wlan1_wlan0','RPi3: AP + client'])
+		self.available_net_sys.append(['pi3+_wlan1_with_eth0_wlan0','RPi3+: AP + client + bridge eth0'])
+		self.available_net_sys.append(['pi3+_wlan1_5G_w_eth0_wlan0','RPi3+: AP 5G + client + bridge eth0'])
+		self.available_net_sys.append(['pi3+_wlan1_5GH_eth0_wlan0','RPi3+: AP 5GH + client + bridge eth0'])
+		self.available_net_sys.append(['pi3+_wlan1_wlan0','RPi3+: AP + client'])
+		
+		self.available_net_sys2 = []
+		for i in self.available_net_sys:
+			self.available_net_sys2.append(i[1])
 		
 		self.net_sys_label = wx.StaticText(self.p_wifi, label=_('Network system'), pos=(20, 25))
-		self.net_sys = wx.ComboBox(self.p_wifi, choices=self.available_net_sys, style=wx.CB_READONLY, size=(240, 32),pos=(20, 40))
+		self.net_sys = wx.ComboBox(self.p_wifi, choices=self.available_net_sys2, style=wx.CB_READONLY, size=(265, 32),pos=(20, 40))
 
-		self.wifi_button_set = wx.Button(self.p_wifi, label=_('Set'), pos=(275, 40))
+		self.wifi_button_set = wx.Button(self.p_wifi, label=_('Set'),size=(75, 32), pos=(285, 40))
 		self.wifi_button_set.Bind(wx.EVT_BUTTON, self.on_wifi_set)		
 		
 		self.share_label = wx.StaticText(self.p_wifi, label=_('Sharing Internet device'), pos=(20, 85))
@@ -803,8 +808,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.passw.SetValue('')
 			self.ssid.SetValue('')
 			self.share.SetValue('')
-			
-		self.net_sys.SetValue(self.bak_net_sys)
+
+		for i in self.available_net_sys:
+			if i[0] == self.bak_net_sys:
+				self.net_sys.SetValue(i[1])		
 		self.on_show_ip_info('')
 
 		
@@ -1007,8 +1014,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.ShowMessage(msg)
 
 	def on_wifi_set(self, e):
-		os.system("rm -rf '"+self.conf_folder+"/Network/"+self.bak_net_sys+"'")
-		shutil.copytree(self.currentpath+'/Network/'+self.net_sys.GetValue(), self.conf_folder+'/Network/'+self.net_sys.GetValue())
+		os.system("rm -rf '/home/pi/.openplotter/Network/"+self.bak_net_sys+"'")
+		j = self.net_sys.GetValue()
+		for i in self.available_net_sys:
+			if i[1] == j:
+				shutil.copytree('/home/pi/.config/openplotter/Network/'+i[0], '/home/pi/.openplotter/Network/'+i[0])
 		self.read_wifi_conf()
 		
 				########################################### PYPILOT
