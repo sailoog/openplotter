@@ -90,7 +90,7 @@ class MainFrame(wx.Frame):
 		self.nb.AddPage(self.p_kplex, 'Kplex')
 		self.nb.AddPage(self.p_pypilot, _('pypilot'))
 		self.nb.AddPage(self.p_n2k, 'CAN')
-		self.nb.AddPage(self.p_wifi, _('WiFi AP'))
+		self.nb.AddPage(self.p_wifi, _('Network'))
 		self.nb.AddPage(self.p_action, _('Actions'))
 		self.nb.AddPage(self.p_gpio, _('GPIO'))
 		self.nb.AddPage(self.p_i2c, _('I2C'))
@@ -644,7 +644,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			else:
 				self.conf.set('STARTUP', 'node_red', '0')
 
-				########################################### WiFi AP
+				########################################### Network
 
 	def page_wifi(self):
 		wx.StaticBox(self.p_wifi, size=(370, 315), pos=(10, 10))
@@ -666,21 +666,21 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.available_share.append(i)
 		
 		self.available_net_sys = []
-		self.available_net_sys.append(['default','default'])
-		self.available_net_sys.append(['pi3_uap0_with_eth0_wlan0','RPi3: AP/client + bridge eth0'])
-		self.available_net_sys.append(['pi3_uap0_wlan0','RPi3: AP/client'])
-		self.available_net_sys.append(['pi3_wlan1_with_eth0_wlan0','RPi3: AP + client + bridge eth0'])
-		self.available_net_sys.append(['pi3_wlan1_wlan0','RPi3: AP + client'])
-		self.available_net_sys.append(['pi3+_wlan1_with_eth0_wlan0','RPi3+: AP + client + bridge eth0'])
-		self.available_net_sys.append(['pi3+_wlan1_5G_w_eth0_wlan0','RPi3+: AP 5G + client + bridge eth0'])
-		self.available_net_sys.append(['pi3+_wlan1_5GH_eth0_wlan0','RPi3+: AP 5GH + client + bridge eth0'])
-		self.available_net_sys.append(['pi3+_wlan1_wlan0','RPi3+: AP + client'])
+		self.available_net_sys.append(['default',_('client')])
+		self.available_net_sys.append(['pi3_uap0_with_eth0_wlan0',_('RPi3: AP/client + bridge eth0')])
+		self.available_net_sys.append(['pi3_uap0_wlan0',_('RPi3: AP/client')])
+		self.available_net_sys.append(['pi3_wlan1_with_eth0_wlan0',_('RPi3: AP + client + bridge eth0')])
+		self.available_net_sys.append(['pi3_wlan1_wlan0',_('RPi3: AP + client')])
+		self.available_net_sys.append(['pi3+_wlan1_with_eth0_wlan0',_('RPi3+: AP + client + bridge eth0')])
+		self.available_net_sys.append(['pi3+_wlan1_5G_w_eth0_wlan0',_('RPi3+: AP 5G + client + bridge eth0')])
+		self.available_net_sys.append(['pi3+_wlan1_5GH_eth0_wlan0',_('RPi3+: AP 5GH + client + bridge eth0')])
+		self.available_net_sys.append(['pi3+_wlan1_wlan0',_('RPi3+: AP + client')])
 		
 		self.available_net_sys2 = []
 		for i in self.available_net_sys:
 			self.available_net_sys2.append(i[1])
 		
-		self.net_sys_label = wx.StaticText(self.p_wifi, label=_('Network system'), pos=(20, 25))
+		self.net_sys_label = wx.StaticText(self.p_wifi, label=_('Network mode'), pos=(20, 25))
 		self.net_sys = wx.ComboBox(self.p_wifi, choices=self.available_net_sys2, style=wx.CB_READONLY, size=(265, 32),pos=(20, 40))
 
 		self.wifi_button_set = wx.Button(self.p_wifi, label=_('Set'),size=(75, 32), pos=(285, 40))
@@ -1014,11 +1014,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.ShowMessage(msg)
 
 	def on_wifi_set(self, e):
-		os.system("rm -rf '/home/pi/.openplotter/Network/"+self.bak_net_sys+"'")
+		os.system("rm -rf '"+self.conf_folder+"/Network/"+self.bak_net_sys+"'") 
 		j = self.net_sys.GetValue()
 		for i in self.available_net_sys:
 			if i[1] == j:
-				shutil.copytree('/home/pi/.config/openplotter/Network/'+i[0], '/home/pi/.openplotter/Network/'+i[0])
+				shutil.copytree(self.currentpath+'/Network/'+i[0], self.conf_folder+'/Network/'+i[0]) 
 		self.read_wifi_conf()
 		
 				########################################### PYPILOT
