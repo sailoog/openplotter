@@ -1,0 +1,2872 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: openplotter\n"
+"POT-Creation-Date: 2018-05-20 16:54+0200\n"
+"PO-Revision-Date: 2018-05-22 22:08+0200\n"
+"Last-Translator: sailoog <info@sailoog.com>\n"
+"Language-Team: Greek\n"
+"Language: el\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.8.7.1\n"
+"X-Poedit-KeywordsList: _;gettext;gettext_noop\n"
+"X-Poedit-Basepath: ../../..\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Crowdin-Project: openplotter\n"
+"X-Crowdin-Language: el\n"
+"X-Crowdin-File: openplotter.po\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#: CAN-USB-stick.py:82 classes/add_SK_to_N2K.py:74 diagnostic-N2K-input.py:77
+#: diagnostic-N2K-output.py:66
+msgid "PGN"
+msgstr "PGN"
+
+#: CAN-USB-stick.py:83
+msgid "info"
+msgstr "πληροφ"
+
+#: CAN-USB-stick.py:87
+msgid "check"
+msgstr "έλεγχος"
+
+#: CAN-USB-stick.py:90 openplotter:2590
+msgid "apply"
+msgstr "εφαρμογή"
+
+#: SK-base_d.py:551 openplotter:2250
+msgid "was not updated in the last (sec.)"
+msgstr "δεν ενημερώθηκε τα τελευταία (δευτ.)"
+
+#: SK-base_d.py:551 openplotter:2250
+msgid "was updated in the last (sec.)"
+msgstr "ενημερώθηκε τα τελευταία (δευτ.)"
+
+#: SK-base_d.py:552 openplotter:2251
+msgid "contains"
+msgstr "περιέχει"
+
+#: add_tool10.py:23
+msgid "Standalone tool"
+msgstr "Αυτόνομο εργαλείο"
+
+#: add_tool10.py:28 classes/add_tool10.py:28
+msgid "settings"
+msgstr "ρυθμίσεις"
+
+#: add_tool10.py:29 classes/add_tool10.py:29
+msgid "start"
+msgstr "έναρξη"
+
+#: add_tool10.py:30 classes/add_tool10.py:30
+msgid "stop"
+msgstr "σταμάτα"
+
+#: add_tool10.py:31 classes/add_NMEA_0183.py:68 classes/add_tool10.py:31
+msgid "cancel"
+msgstr "ακύρωση"
+
+#: classes/actions.py:44 classes/add_action.py:59
+msgid "no repeat"
+msgstr "χωρίς επανάληψη"
+
+#: classes/actions.py:44
+msgid "seconds"
+msgstr "δευτερόλεπτα"
+
+#: classes/actions.py:44
+msgid "minutes"
+msgstr "λεπτά"
+
+#: classes/actions.py:44
+msgid "hours"
+msgstr "ώρες"
+
+#: classes/actions.py:44
+msgid "days"
+msgstr "ημέρες"
+
+#: classes/actions.py:49 classes/add_action.py:135
+msgid "wait"
+msgstr "αναμονή"
+
+#: classes/actions.py:49
+msgid "Enter seconds to wait in field \"data\"."
+msgstr "Εισάγετε δευτερόλεπτα αναμονής στο πεδίο «δεδομένα»."
+
+#: classes/actions.py:50
+msgid "command"
+msgstr "εντολή"
+
+#: classes/actions.py:50
+msgid "Enter a Linux command and arguments in the field below."
+msgstr "Πληκτρολογήστε μια εντολή Linux και τις παραμέτρους στο παρακάτω πεδίο."
+
+#: classes/actions.py:51
+msgid "reset system"
+msgstr "επαναφορά συστήματος"
+
+#: classes/actions.py:52
+msgid "shutdown system"
+msgstr "τερματισμός το συστήματος"
+
+#: classes/actions.py:55
+msgid "stop NMEA multiplexer"
+msgstr "σταματήσε τον NMEA πολυπλέκτη"
+
+#: classes/actions.py:56
+msgid "reset NMEA multiplexer"
+msgstr "επαναφορά του NMEA πολυπλέκτη"
+
+#: classes/actions.py:59
+msgid "publish Twitter"
+msgstr "δημοσιεύση στο Twitter"
+
+#: classes/actions.py:59
+msgid ""
+"Be sure you have filled in all fields in \"Accounts\" tab, and enabled Twitter checkbox.\n"
+"\n"
+"Enter text to publish in the field \"data\"."
+msgstr ""
+"Να βεβαιωθείτε ότι έχετε συμπληρώσει όλα τα πεδία στην καρτέλα \"Λογαριασμοί\" και έχετε επιλέξει τη επιλογή Twitter. \n"
+"\n"
+"Πληκτρολογήστε κείμενο για να δημοσιεύσετε στο πεδίο «δεδομένα»."
+
+#: classes/actions.py:60
+msgid "send e-mail"
+msgstr "αποστολή e-mail"
+
+#: classes/actions.py:60
+msgid ""
+"Be sure you have filled in all fields in \"Accounts\" tab, and enabled Gmail checkbox.\n"
+"\n"
+"Enter the subject in the field \"data\"."
+msgstr ""
+"Να βεβαιωθείτε ότι έχετε συμπληρώσει όλα τα πεδία στην καρτέλα \"Λογαριασμοί\" και έχετε επιλέξει τη επιλογή Twitter. \n"
+"\n"
+"Πληκτρολογήστε το θέμα για να δημοσιεύσετε στο πεδίο «δεδομένα»."
+
+#: classes/actions.py:61
+msgid "send SMS"
+msgstr "αποστολή SMS"
+
+#: classes/actions.py:61
+msgid ""
+"Be sure you have enabled sending SMS in \"SMS\" tab.\n"
+"\n"
+"Enter the text in field \"data\"."
+msgstr ""
+"Βεβαιωθείτε ότι έχετε ενεργοποιήσει την αποστολή μηνυμάτων SMS στην καρτέλα «SMS». \n"
+"\n"
+"Εισαγάγετε το κείμενο στο πεδίο «δεδομένα»."
+
+#: classes/actions.py:62
+msgid "play sound"
+msgstr "αναπαραγωγή ήχου"
+
+#: classes/actions.py:63
+msgid "stop all sounds"
+msgstr "σίγαση όλων των ήχων"
+
+#: classes/actions.py:64
+msgid "show message"
+msgstr "εμφάνισε μήνυμα"
+
+#: classes/actions.py:64
+msgid "Enter the message in field \"data\"."
+msgstr "Εισάγετε το μήνυμα στο πεδίο «δεδομένα»."
+
+#: classes/actions.py:65
+msgid "close all messages"
+msgstr "κλείστε όλα τα μηνύματα"
+
+#: classes/actions.py:66
+msgid "start all actions"
+msgstr "ξεκινήστε όλες τις δράσεις"
+
+#: classes/actions.py:67
+msgid "stop all actions"
+msgstr "σταμάτησε όλες τις δράσεις"
+
+#: classes/actions.py:67
+msgid "This action will stop all the triggers except the trigger which has an action \"start all actions\" defined."
+msgstr "Αυτή η ενέργεια θα σταματήσει ολα τα ενάυσματα εκτός από το έναυσμα, το οποίο έχει οριζμένη την ενέργεια «έναρξη όλες τις ενέργειες»."
+
+#: classes/actions.py:80
+msgid ": High"
+msgstr ": Υψηλή"
+
+#: classes/actions.py:80
+msgid "ATTENTION! if you set this GPIO output to \"High\" and there is not a resistor or a circuit connected to the selected GPIO pin, YOU CAN DAMAGE YOUR BOARD."
+msgstr "ΠΡΟΣΟΧΉ! Εάν ορίσετε αυτήν την έξοδο GPIO για «Υψηλή» και δεν υπάρχει μια αντίσταση ή ένα κύκλωμα που συνδέεται με το επιλεγμένο GPIO pin, μπορείτε να ΠΡΟΚΑΛΕΣΕΤΕ ΖΗΜΙΑ ΣΤΟΝ ΕΞΟΠΛΙΣΜΟ ΣΑΣ."
+
+#: classes/actions.py:81
+msgid ": Low"
+msgstr ": Χαμηλή"
+
+#: classes/actions.py:92
+msgid "Publish on topic: "
+msgstr "Δημοσίευση σχετικά με το θέμα: "
+
+#: classes/actions.py:95
+msgid "Set Signal K key value"
+msgstr "Όρισε τιμή Signal K"
+
+#: classes/actions.py:153
+msgid ""
+"\n"
+"source: "
+msgstr ""
+"\n"
+"πηγή: "
+
+#: classes/actions.py:153
+msgid ""
+"\n"
+"timestamp: "
+msgstr ""
+"\n"
+"χρονική σήμανση: "
+
+#: classes/add_DS18B20.py:31
+msgid "Add 1W temperature sensor"
+msgstr "Προσθέστε 1W αισθητήρα θερμοκρασίας"
+
+#: classes/add_DS18B20.py:32
+msgid "Edit 1W temperature sensor"
+msgstr "Επεξεργασία 1W αισθητήρα θερμοκρασίας"
+
+#: classes/add_DS18B20.py:38 classes/add_topic.py:40 classes/add_trigger.py:39
+#: classes/edit_i2c.py:31 openplotter:1617 openplotter:1834 openplotter:1971
+#: openplotter:2450 openplotter:3658
+msgid "Signal K key"
+msgstr "Signal K κλειδί"
+
+#: classes/add_DS18B20.py:41 classes/add_topic.py:43 classes/add_trigger.py:42
+#: classes/edit_i2c.py:25 classes/edit_i2c.py:35
+#: tools/demo_tool/demo_tool.py:84 openplotter:3751 openplotter:3878
+msgid "Edit"
+msgstr "Επεξεργασία"
+
+#: classes/add_DS18B20.py:44 classes/add_gpio.py:27 classes/add_i2c.py:39
+#: classes/add_kplex.py:44 diagnostic-N2K-input.py:80
+#: diagnostic-N2K-output.py:69 openplotter:1269 openplotter:1614
+#: openplotter:1967 openplotter:2447
+msgid "Name"
+msgstr "Όνομα"
+
+#: classes/add_DS18B20.py:47 classes/add_MCP.py:55 classes/add_gpio.py:30
+#: classes/add_topic.py:32 classes/select_key.py:53
+msgid "allowed characters: 0-9, a-z, A-Z"
+msgstr "επιτρεπόμενοι χαρακτήρες: 0-9, a-z, A-Z"
+
+#: classes/add_DS18B20.py:52
+msgid "Sensor ID"
+msgstr "ID Αισθητήρα"
+
+#: classes/add_DS18B20.py:55 classes/edit_i2c.py:50 openplotter:1619
+#: openplotter:2449
+msgid "Offset"
+msgstr "Μετατόπιση"
+
+#: classes/add_DS18B20.py:67 classes/add_MCP.py:68 classes/add_action.py:64
+#: classes/add_gpio.py:60 classes/add_kplex.py:117 classes/add_trigger.py:71
+#: tools/calculate/calculate.py:91 tools/demo_tool/demo_tool.py:96
+#: openplotter:518
+msgid "OK"
+msgstr "Εντάξει"
+
+#: classes/add_DS18B20.py:81 classes/add_action.py:156 classes/add_topic.py:76
+#: classes/add_trigger.py:196 classes/edit_i2c.py:103
+#: tools/demo_tool/demo_tool.py:143
+msgid "Failed. * must contain only allowed characters."
+msgstr "Απέτυχε. * πρέπει να περιέχει μόνο επιτρέπομενους χαρακτήρες."
+
+#: classes/add_DS18B20.py:86 classes/add_action.py:161 classes/add_topic.py:81
+#: classes/add_trigger.py:201 classes/edit_i2c.py:108
+#: tools/demo_tool/demo_tool.py:148
+msgid "Failed. You have to provide a name for *."
+msgstr "Απέτυχε. Πρέπει να δώσετε ένα όνομα για *."
+
+#: classes/add_DS18B20.py:94 classes/add_trigger.py:227
+msgid "Failed. Select a Signal K key."
+msgstr "Απέτυχε. Επιλέξτε ένα κλειδι Signal K."
+
+#: classes/add_DS18B20.py:99
+msgid "Failed. Provide a name."
+msgstr "Απέτυχε. Δώστε ένα όνομα."
+
+#: classes/add_DS18B20.py:103
+msgid "Failed. Name must contain only letters and numbers."
+msgstr "Απέτυχε. Το όνομα πρέπει να περιέχει μόνο γράμματα και αριθμούς."
+
+#: classes/add_DS18B20.py:107
+msgid "Failed. Select sensor ID."
+msgstr "Απέτυχε. Επιλέξτε ID αισθητήρα."
+
+#: classes/add_MCP.py:29
+msgid "Edit MCP analog input "
+msgstr "Επεξεργασία αναλογικής είσοδου MCP "
+
+#: classes/add_MCP.py:53 classes/select_key.py:52 openplotter:1835
+msgid "*"
+msgstr "*"
+
+#: classes/add_MCP.py:57 openplotter:1832
+msgid "aktiv"
+msgstr "aktiv"
+
+#: classes/add_MCP.py:58 unit-private.py:84 openplotter:1836
+msgid "convert"
+msgstr "μετατροπή"
+
+#: classes/add_MCP.py:61
+msgid "clean"
+msgstr "εκκαθάριση"
+
+#: classes/add_MCP.py:163 openplotter:1905
+msgid "minimum raw value in setting table > 0"
+msgstr "ελάχιστη τιμή στη ρύθμιση πίνακα > 0"
+
+#: classes/add_MCP.py:166 openplotter:1908
+msgid "maximum raw value in setting table < 1023"
+msgstr "μέγιστη τιμή στη ρύθμιση πίνακα > 0"
+
+#: classes/add_MCP.py:169
+msgid "no option value "
+msgstr "καμία τιμή επιλογής "
+
+#: classes/add_MCP.py:169
+msgid " in openplotter.conf"
+msgstr " στο openplotter.conf"
+
+#: classes/add_MCP.py:187 openplotter:1929
+msgid "Failed. Provide name and Signal K values."
+msgstr "Απέτυχε. Δώστε όνομα και τιμές Signal K."
+
+#: classes/add_MCP.py:191 classes/add_gpio.py:91 openplotter:1934
+msgid "Failed. The name must contain only letters and numbers."
+msgstr "Απέτυχε. Το όνομα πρέπει να περιέχει μόνο γράμματα και αριθμούς."
+
+#: classes/add_NMEA_0183.py:34
+msgid "add NMEA 0183 sentence"
+msgstr "προσθέστε NMEA 0183 πρόταση"
+
+#: classes/add_NMEA_0183.py:53
+#: tools/NMEA_0183_generator/NMEA_0183_generator.py:45
+msgid "Sentence"
+msgstr "Προτάση"
+
+#: classes/add_NMEA_0183.py:58 tools/calculate/calculate.py:53
+#: tools/calculate/calculate.py:61 tools/calculate/calculate.py:73
+#: tools/calculate/calculate.py:85
+msgid "Rate (sec)"
+msgstr "Ρυθμός (sec)"
+
+#: classes/add_NMEA_0183.py:62 diagnostic-NMEA.py:65
+msgid "NMEA info"
+msgstr "Πληροφορίες NMEA"
+
+#: classes/add_NMEA_0183.py:65
+msgid "RMC examp"
+msgstr "RMC παράδει"
+
+#: classes/add_NMEA_0183.py:73
+msgid "Field"
+msgstr "Πεδίο"
+
+#: classes/add_NMEA_0183.py:74 classes/add_trigger.py:63
+#: diagnostic-SK-input.py:74
+msgid "Value"
+msgstr "Τιμή"
+
+#: classes/add_NMEA_0183.py:78
+msgid "--Select type"
+msgstr "--Επιλέξτε τύπο"
+
+#: classes/add_NMEA_0183.py:78
+msgid "Expression"
+msgstr "Έκφραση"
+
+#: classes/add_NMEA_0183.py:78
+msgid "Number"
+msgstr "Αριθμός"
+
+#: classes/add_NMEA_0183.py:78 classes/add_NMEA_0183.py:293
+msgid "String"
+msgstr "Ακολουθία"
+
+#: classes/add_NMEA_0183.py:83
+msgid "--vessel"
+msgstr "--σκάφους"
+
+#: classes/add_NMEA_0183.py:94 classes/add_NMEA_0183.py:217
+msgid "--group"
+msgstr "--ομάδα"
+
+#: classes/add_NMEA_0183.py:98 classes/add_NMEA_0183.py:238
+#: classes/add_NMEA_0183.py:440
+msgid "--key"
+msgstr "--κλειδί"
+
+#: classes/add_NMEA_0183.py:101
+msgid "--operator"
+msgstr "--διαχειριστής"
+
+#: classes/add_NMEA_0183.py:106
+msgid "="
+msgstr "="
+
+#: classes/add_NMEA_0183.py:111
+msgid "Add value"
+msgstr "Προσθήκη τιμής"
+
+#: classes/add_NMEA_0183.py:114
+msgid "Delete value"
+msgstr "Διαγραφή τιμής"
+
+#: classes/add_NMEA_0183.py:295 classes/add_NMEA_0183.py:301
+msgid "Failed. String must contain only allowed characters."
+msgstr "Απέτυχε. Πρέπει να περιέχει μόνο επιτρέπομενους χαρακτήρες."
+
+#: classes/add_NMEA_0183.py:313 classes/add_NMEA_0183.py:331
+#: classes/add_NMEA_0183.py:342 classes/add_NMEA_0183.py:355
+msgid "FAILED. Fill in all the available fields."
+msgstr "ΑΠEΤΥΧΕ. Συμπληρώστε όλα τα διαθέσιμα πεδία."
+
+#: classes/add_NMEA_0183.py:320
+msgid "FAILED. This is not a valid expression."
+msgstr "ΑΠΈΤΥΧΕ. Αυτή δεν είναι έγκυρη έκφραση."
+
+#: classes/add_NMEA_0183.py:347
+msgid "FAILED. This field must be a number."
+msgstr "ΑΠΈΤΥΧΕ. Το πεδίο πρέπει να είναι αριθμός."
+
+#: classes/add_SK_to_N2K.py:35
+msgid "Generate N2K from Signal K"
+msgstr "Δημιουργία N2K από Signal K"
+
+#: classes/add_SK_to_N2K.py:75
+msgid "description"
+msgstr "περιγραφή"
+
+#: classes/add_SK_to_N2K.py:76
+msgid "Signal K variable"
+msgstr "Μεταβλητή Signal K"
+
+#: classes/add_SK_to_N2K.py:79 tools/moitessier_hat/moitessier_hat.py:170
+#: openplotter:1063 openplotter:1292 openplotter:2213
+msgid "Apply changes"
+msgstr "Εφαρμογή αλλαγών"
+
+#: classes/add_action.py:23
+msgid "Add action"
+msgstr "Προσθήκη ενέργειας"
+
+#: classes/add_action.py:24
+msgid "Edit action"
+msgstr "Επεξεργασία ενέργειας"
+
+#: classes/add_action.py:39 openplotter:2195
+msgid "action"
+msgstr "ενέργεια"
+
+#: classes/add_action.py:45 openplotter:2196
+msgid "data"
+msgstr "δεδομένα"
+
+#: classes/add_action.py:48
+msgid "Add Signal K key"
+msgstr "Προσθήκη κλειδιού Signal K"
+
+#: classes/add_action.py:53
+msgid "repeat after"
+msgstr "επανέλαβε μετά από"
+
+#: classes/add_action.py:121 openplotter:585
+msgid "Choose a file"
+msgstr "Επιλογή αρχείου"
+
+#: classes/add_action.py:123 openplotter:586
+msgid "Audio files"
+msgstr "Αρχεία Ήχου"
+
+#: classes/add_action.py:123 openplotter:586
+msgid "All files"
+msgstr "Όλα τα αρχεία"
+
+#: classes/add_action.py:136
+msgid ""
+"\n"
+"\n"
+"You can add the current value of any Signal K key typing its name between angle brackets, e.g: <navigation.position.latitude>"
+msgstr ""
+"\n"
+"\n"
+"Μπορείτε να προσθέσετε την τρέχουσα τιμή του κάθε κλειδίου Signal K πληκτρολογώντας το όνομά του ανάμεσα σε γωνιακές αγκύλες, π.χ.: <navigation.position.latitude>"
+
+#: classes/add_action.py:170
+msgid "Failed. Select an action."
+msgstr "Απέτυχε. Επιλέξτε μια ενέργεια."
+
+#: classes/add_action.py:179
+msgid "Failed. \"Repeat after\" must be a number."
+msgstr "Απέτυχε. «Επανάληψη μετά» πρέπει να είναι ένας αριθμός."
+
+#: classes/add_deviation_setting.py:26 openplotter:123
+msgid "Deviation Table"
+msgstr "Πίνακας aπόκλισης"
+
+#: classes/add_deviation_setting.py:33
+msgid "CH"
+msgstr "CH"
+
+#: classes/add_deviation_setting.py:34
+msgid "MH"
+msgstr "MH"
+
+#: classes/add_deviation_setting.py:35
+msgid "deviation"
+msgstr "απόκλιση"
+
+#: classes/add_deviation_setting.py:38
+msgid "Magnetic Variation"
+msgstr "Μαγνητική απόκλιση"
+
+#: classes/add_deviation_setting.py:41 classes/add_deviation_setting.py:137
+#: classes/add_deviation_setting.py:178
+msgid "Fix"
+msgstr "Fix"
+
+#: classes/add_deviation_setting.py:44 show_deviation_table.py:41
+msgid "Compass Heading"
+msgstr "Πορεία της πυξίδας"
+
+#: classes/add_deviation_setting.py:47
+msgid "Magnetic Heading"
+msgstr "Μαγνητική πορεία"
+
+#: classes/add_deviation_setting.py:50
+msgid "True Heading"
+msgstr "Πραγματική πορεία"
+
+#: classes/add_deviation_setting.py:53
+msgid "change"
+msgstr "αλλαγή"
+
+#: classes/add_deviation_setting.py:56 classes/add_i2c.py:43 openplotter:1036
+msgid "Reset"
+msgstr "Αρχικοποίηση"
+
+#: classes/add_deviation_setting.py:59 classes/add_value_setting.py:49
+#: test_sms.py:51 tools/SDR_AIS/SDR_AIS_fine_cal.py:58
+#: tools/moitessier_hat/moitessier_hat.py:85
+#: tools/moitessier_hat/moitessier_hat.py:173
+#: tools/moitessier_hat/moitessier_hat.py:264 startup:81
+msgid "Close"
+msgstr "Κλείσιμο"
+
+#: classes/add_deviation_setting.py:62 classes/add_value_setting.py:52
+msgid "graph"
+msgstr "γράφημα"
+
+#: classes/add_deviation_setting.py:143 classes/add_deviation_setting.py:190
+#: openplotter:686
+msgid "Set"
+msgstr "Ορισμός"
+
+#: classes/add_deviation_setting.py:166 classes/add_deviation_setting.py:184
+msgid "This value is not a number."
+msgstr "Αυτή η τιμή δεν είναι αριθμός."
+
+#: classes/add_deviation_setting.py:179
+msgid "Deviation table will be calculated with this variation. If you change this value you will have to define the complete table again."
+msgstr "Πίνακας απόκλιση θα υπολογιστεί με αυτήν την παραλλαγή. Εάν αλλάξετε αυτήν την τιμή θα πρέπει να ορίσετε τον πλήρη πίνακα ξανά."
+
+#: classes/add_gpio.py:23
+msgid "Add GPIO sensor"
+msgstr "Προσθήκη GPIO αισθητήρα"
+
+#: classes/add_gpio.py:32 classes/add_gpio.py:51 classes/add_gpio.py:66
+#: openplotter:2021
+msgid "input"
+msgstr "είσοδος"
+
+#: classes/add_gpio.py:32 classes/add_gpio.py:48 classes/add_gpio.py:67
+#: classes/add_gpio.py:74 openplotter:2018 openplotter:2052
+msgid "output"
+msgstr "αποτέλεσμα"
+
+#: classes/add_gpio.py:33 openplotter:1968
+msgid "I/O"
+msgstr "I/O"
+
+#: classes/add_gpio.py:37 openplotter:95
+msgid "GPIO"
+msgstr "GPIO"
+
+#: classes/add_gpio.py:42
+msgid "Pull"
+msgstr "Έλξη"
+
+#: classes/add_gpio.py:80
+msgid "CAUTION. If you connect a closed switch or some inappropriate circuit, you could short out and damage your board when this output becomes \"High\". Are you sure to enable this output?"
+msgstr "ΠΡΟΣΟΧΉ. Εάν συνδέσετε ένα κλειστό διακόπτη ή κάποιο ακατάλληλο κύκλωμα, θα μπορούσατε να βλάψετε το συστημα σας, όταν αυτή η έξοδος πάρει ρεύμα. Είστε βέβαιοι ότι θελετε να ενεργοποιήσετε αυτήν την έξοδο;"
+
+#: classes/add_gpio.py:81 classes/add_i2c.py:108 openplotter:449
+#: openplotter:843 openplotter:1220 openplotter:3192 openplotter:3199
+#: openplotter:3898
+msgid "Question"
+msgstr "Ερώτηση"
+
+#: classes/add_gpio.py:88
+msgid "Failed. You must fill in all fields."
+msgstr "Απέτυχε. Πρέπει να συμπληρώσετε όλα τα πεδία."
+
+#: classes/add_i2c.py:27
+msgid "Add I2C sensor without compass"
+msgstr "Προσθέστε I2C αισθητήρα χωρίς πυξίδα"
+
+#: classes/add_i2c.py:36
+msgid "detected"
+msgstr "ανιχνεύθηκαν"
+
+#: classes/add_i2c.py:40 classes/add_kplex.py:57 openplotter:1615
+msgid "Address"
+msgstr "Διεύθυνση"
+
+#: classes/add_i2c.py:46
+msgid "Addresses"
+msgstr "Διευθύνσεις"
+
+#: classes/add_i2c.py:51
+msgid "add/update sensor"
+msgstr "προσθήκη/Ενημέρωση αισθητήρα"
+
+#: classes/add_i2c.py:108
+msgid ""
+"If your sensors are not detected right, try resetting system or forcing name and address.\n"
+"\n"
+"Do you want to try auto detection again?"
+msgstr ""
+"Εάν αισθητήρες σας δεν εντοπίζονται σωστά, δοκιμάστε να επαναφέρετε το σύστημα ή δηλώστε το όνομα και τη διεύθυνση. \n"
+"\n"
+"Θέλετε να δοκιμάσετε την αυτόματη ανίχνευση και πάλι;"
+
+#: classes/add_i2c.py:122
+msgid "Detected I2C addresses"
+msgstr "Εντοπίστηκαν οι I2C διευθύνσεις"
+
+#: classes/add_kplex.py:25
+msgid "Add/Edit NMEA 0183 (KPLEX)"
+msgstr "Προσθήκη/Επεξεργασία NMEA 0183 (KPLEX)"
+
+#: classes/add_kplex.py:38 classes/add_topic.py:36 diagnostic-NMEA.py:55
+#: openplotter:1270 openplotter:3657
+msgid "Type"
+msgstr "Τύπος"
+
+#: classes/add_kplex.py:47
+msgid " settings "
+msgstr " ρυθμίσεις "
+
+#: classes/add_kplex.py:49 classes/add_kplex.py:59 openplotter:3642
+msgid "Port"
+msgstr "Θύρα"
+
+#: classes/add_kplex.py:54
+msgid "Bauds"
+msgstr "Bauds"
+
+#: classes/add_kplex.py:64
+msgid "in/out"
+msgstr "εισοδός/έξοδος"
+
+#: classes/add_kplex.py:75
+msgid "in Filter "
+msgstr "στο φίλτρο "
+
+#: classes/add_kplex.py:76 classes/add_kplex.py:93 classes/add_kplex.py:149
+#: classes/add_kplex.py:157 classes/add_kplex.py:323 classes/add_kplex.py:347
+#: classes/add_kplex.py:416 classes/add_kplex.py:420 classes/add_kplex.py:424
+#: classes/add_kplex.py:448 openplotter:658 openplotter:1465 openplotter:1477
+#: openplotter:1524 openplotter:1526 openplotter:2577 openplotter:2701
+#: openplotter:3016 openplotter:3114 openplotter:3361
+msgid "none"
+msgstr "κανένα"
+
+#: classes/add_kplex.py:76 classes/add_kplex.py:93 classes/add_kplex.py:427
+#: classes/add_kplex.py:451
+msgid "Accept only sentences:"
+msgstr "Αποδέξου μόνο δεδομένα:"
+
+#: classes/add_kplex.py:76 classes/add_kplex.py:93 classes/add_kplex.py:438
+#: classes/add_kplex.py:462
+msgid "Ignore sentences:"
+msgstr "Αγνόησε δεδομένα:"
+
+#: classes/add_kplex.py:81 classes/add_kplex.py:98
+msgid "-"
+msgstr "-"
+
+#: classes/add_kplex.py:84 classes/add_kplex.py:102
+msgid "Add sentence"
+msgstr "Προσθήκη πρότασης"
+
+#: classes/add_kplex.py:88 classes/add_kplex.py:106
+msgid "Delete"
+msgstr "Διαγραφή"
+
+#: classes/add_kplex.py:92
+msgid "out Filter "
+msgstr "φίλτρο εξόδου "
+
+#: classes/add_kplex.py:109 classes/add_kplex.py:113 classes/add_kplex.py:211
+#: classes/add_kplex.py:214 classes/add_kplex.py:237 classes/add_kplex.py:263
+#: classes/add_kplex.py:322 classes/add_kplex.py:346 classes/add_kplex.py:416
+#: classes/add_kplex.py:420 classes/add_kplex.py:425 classes/add_kplex.py:428
+#: classes/add_kplex.py:439 classes/add_kplex.py:449 classes/add_kplex.py:452
+#: classes/add_kplex.py:463 openplotter:1469 openplotter:1481 openplotter:1524
+#: openplotter:1526
+msgid "nothing"
+msgstr "τίποτα"
+
+#: classes/add_kplex.py:150 classes/add_kplex.py:158 openplotter:1466
+#: openplotter:1478
+msgid "accept"
+msgstr "αποδοχή"
+
+#: classes/add_kplex.py:152 classes/add_kplex.py:160 openplotter:1467
+#: openplotter:1479
+msgid "ignore"
+msgstr "παράβλεψη"
+
+#: classes/add_kplex.py:221 classes/add_kplex.py:247
+msgid "Talker must have 2 uppercase characters. The symbol * matches any character."
+msgstr "Ο εκφραστής πρέπει να έχει 2 κεφαλαίους χαρακτήρες. Το σύμβολο * αντιστοιχεί σε οποιονδήποτε χαρακτήρα."
+
+#: classes/add_kplex.py:224 classes/add_kplex.py:250
+msgid "Sentence must have 3 uppercase characters. The symbol * matches any character."
+msgstr "Η έκφραση πρέπει να έχει 3 κεφαλαίους χαρακτήρες. Το σύμβολο * αντιστοιχεί σε οποιονδήποτε χαρακτήρα."
+
+#: classes/add_kplex.py:232 classes/add_kplex.py:258
+msgid "You must enter 2 uppercase characters for talker or 3 uppercase characters for sentence. The symbol * matches any character."
+msgstr "Πρέπει να εισάγετε 2 κεφαλαίους χαρακτήρες για το talker ή 3 κεφαλαίους χαρακτήρες για την πρόταση. Το σύμβολο * αντιστοιχεί σε οποιονδήποτε χαρακτήρα."
+
+#: classes/add_kplex.py:235 classes/add_kplex.py:261
+msgid "This sentence already exists."
+msgstr "Η πρόταση αυτή, υπάρχει ήδη."
+
+#: classes/add_kplex.py:369
+msgid "\"Name\" must be a string between 1 and 13 lowercase letters and/or numbers which is not used as name for another input/output."
+msgstr "«Όνομα» πρέπει να είναι μια συμβολοσειρά μεταξύ 1 και 13 πεζών γράμματων ή αριθμων που δεν χρησιμοποιείται ως όνομα για μία άλλη εισόδο/εξόδο."
+
+#: classes/add_kplex.py:374
+msgid "This name is already in use."
+msgstr "Αυτό το όνομα είναι ήδη σε χρήση."
+
+#: classes/add_kplex.py:378
+msgid "This name is reserved by the system."
+msgstr "Αυτό το όνομα είναι δεσμευμένο από το σύστημα."
+
+#: classes/add_kplex.py:385
+msgid "You must select a Port."
+msgstr "Πρέπει να επιλέξετε μία Θύρα."
+
+#: classes/add_kplex.py:390
+msgid "This output is already in use."
+msgstr "Αυτή η εξόδος είναι ήδη σε χρήση."
+
+#: classes/add_kplex.py:397
+msgid "You must enter an Address."
+msgstr "Πρέπει να γράψετε μία διεύθυνση."
+
+#: classes/add_kplex.py:402
+msgid "You must enter a Port."
+msgstr "Πρέπει να γράψετε μια θύρα."
+
+#: classes/add_kplex.py:406
+msgid "Cancelled. Port 10111-10113 are reserved."
+msgstr "Άκυρο. Οι Θύρες 10111-10113 είναι σε χρήση."
+
+#: classes/add_kplex.py:413
+msgid "This input is already in use."
+msgstr "Αυτή η εισόδος είναι ήδη σε χρήση."
+
+#: classes/add_kplex.py:417 classes/add_kplex.py:421
+msgid "You must select a Filter type."
+msgstr "Πρέπει να επιλέξετε έναν τύπο φίλτρου."
+
+#: classes/add_tool10.py:23
+msgid "Tool"
+msgstr "Εργαλείο"
+
+#: classes/add_topic.py:23
+msgid "Add MQTT topic"
+msgstr "Προσθήκη θέματος MQTT"
+
+#: classes/add_topic.py:24
+msgid "Edit MQTT topic"
+msgstr "Επεξεργασία θέματος MQTT"
+
+#: classes/add_topic.py:31 openplotter:3656
+msgid "Topic"
+msgstr "Θέμα"
+
+#: classes/add_topic.py:35 classes/add_topic.py:53 openplotter:3769
+#: openplotter:3820
+msgid "General"
+msgstr "Γενικά"
+
+#: classes/add_topic.py:35 classes/add_topic.py:55 classes/add_topic.py:88
+#: openplotter:3773 openplotter:3823
+msgid "Signal K key input"
+msgstr "Signal K κλειδί εισόδου"
+
+#: classes/add_topic.py:35 classes/add_topic.py:61 openplotter:3777
+#: openplotter:3831
+msgid "Signal K delta input"
+msgstr "Signal K κλειδί εισόδου"
+
+#: classes/add_trigger.py:25
+msgid "Add trigger"
+msgstr "Προσθήκη Ενεργοποίησης"
+
+#: classes/add_trigger.py:26
+msgid "Edit trigger"
+msgstr "Επεξεργασία ενεργοποίησης"
+
+#: classes/add_trigger.py:34 openplotter:2263 openplotter:2309
+msgid "Date"
+msgstr "Ημερομηνία"
+
+#: classes/add_trigger.py:57
+msgid "Operator"
+msgstr "Διαχειριστής"
+
+#: classes/add_trigger.py:66
+msgid "format: "
+msgstr "μορφή: "
+
+#: classes/add_trigger.py:212
+msgid "Failed. Enter a value."
+msgstr "Απέτυχε. Εισαγάγετε μια τιμή."
+
+#: classes/add_trigger.py:221
+msgid "Failed. Select value, timestamp or source."
+msgstr "Απέτυχε. Επιλέξτε τιμή, χρονική σήμανση ή πηγή."
+
+#: classes/add_value_setting.py:28
+msgid "convert analog value to expected value of input "
+msgstr "μετατροπή αναλογικής τιμής στήν αναμενόμενη τιμή εισόδου "
+
+#: classes/add_value_setting.py:34
+msgid "adc value"
+msgstr "τιμή Adc"
+
+#: classes/add_value_setting.py:35 show_raw_adc_convert.py:39
+msgid "value in unit"
+msgstr "τιμή μονάδας εισόδου"
+
+#: classes/add_value_setting.py:37
+msgid "raw adc value"
+msgstr "ακατεργαστή τημή Adc"
+
+#: classes/add_value_setting.py:40
+msgid "value in required unit"
+msgstr "τιμή στην απαιτούμενη μονάδα"
+
+#: classes/add_value_setting.py:43
+#: tools/NMEA_0183_generator/NMEA_0183_generator.py:51 openplotter:1622
+#: openplotter:1975 openplotter:2188 openplotter:2201 openplotter:2454
+#: openplotter:3662
+msgid "add"
+msgstr "προσθήκη"
+
+#: classes/add_value_setting.py:46
+#: tools/NMEA_0183_generator/NMEA_0183_generator.py:54 openplotter:1285
+#: openplotter:1625 openplotter:1978 openplotter:2191 openplotter:2204
+#: openplotter:2457 openplotter:2596 openplotter:3665
+msgid "delete"
+msgstr "διαγραφή"
+
+#: classes/add_value_setting.py:109
+msgid "nothing selected"
+msgstr "κενή επιλογή"
+
+#: classes/add_value_setting.py:129
+msgid "adc value must be a number without dec point"
+msgstr "η Adc τιμή πρέπει να είναι ένας αριθμός χωρίς δεκαδικά"
+
+#: classes/add_value_setting.py:132
+msgid "value isn't a number"
+msgstr "αυτή η τιμή δεν είναι αριθμός"
+
+#: classes/edit_i2c.py:38
+msgid "Clean"
+msgstr "Καθαρισμός"
+
+#: classes/edit_i2c.py:44
+msgid "Rate (seconds)"
+msgstr "Ρυθμός (sec)"
+
+#: classes/getkeys.py:33
+msgid "File not found: "
+msgstr "Το αρχείο δεν βρέθηκε: "
+
+#: classes/getkeys.py:46 classes/select_key.py:25 classes/select_key.py:90
+#: classes/show_keys.py:25 classes/show_keys.py:56
+msgid "ungrouped"
+msgstr "διαχωρισμός ομάδας"
+
+#: classes/select_key.py:23
+msgid "Select Signal K key"
+msgstr "Επιλέξτε το κλειδί του Signal K"
+
+#: classes/select_key.py:38 classes/show_keys.py:35
+msgid "Groups"
+msgstr "Ομάδες"
+
+#: classes/select_key.py:46 classes/show_keys.py:43
+msgid "Keys"
+msgstr "Κλειδιά"
+
+#: classes/select_key.py:92 classes/show_keys.py:58
+msgid "Ungrouped Signal K keys."
+msgstr "Κατάργηση ομαδοποίησης κλειδιών Signal K."
+
+#: classes/show_keys.py:23
+msgid "Show Signal K keys"
+msgstr "Εμφάνιση κλειδιών Signal K"
+
+#: ctrl_actions.py:67
+msgid "All actions have been stopped."
+msgstr "Όλες οι ενέργειες έχουν σταματίσει."
+
+#: ctrl_actions.py:69
+msgid "All actions have been started."
+msgstr "Όλες οι ενέργειες έχουν ξεκινήσει."
+
+#: diagnostic-N2K-input.py:78 diagnostic-N2K-output.py:67
+#: diagnostic-SK-input.py:72
+msgid "SRC"
+msgstr "SRC"
+
+#: diagnostic-N2K-input.py:79 diagnostic-N2K-output.py:68
+msgid "DST"
+msgstr "ΘΕΡΙΝΗ ΩΡΑ"
+
+#: diagnostic-N2K-input.py:81 diagnostic-N2K-output.py:70 diagnostic-NMEA.py:56
+#: diagnostic-SK-input.py:76
+msgid "Interval"
+msgstr "Διάστημα"
+
+#: diagnostic-N2K-input.py:82 diagnostic-N2K-output.py:71 diagnostic-NMEA.py:57
+msgid "Data"
+msgstr "Δεδομένα"
+
+#: diagnostic-N2K-input.py:84 diagnostic-N2K-output.py:73
+#: diagnostic-SK-input.py:80
+msgid "Sort SRC"
+msgstr "Ταξινόμηση SRC"
+
+#: diagnostic-N2K-input.py:87 diagnostic-N2K-output.py:76
+msgid "Sort PGN"
+msgstr "Ταξινόμηση PGN"
+
+#: diagnostic-NMEA.py:54
+msgid "Device"
+msgstr "Συσκευή"
+
+#: diagnostic-NMEA.py:59 diagnostic-NMEA.py:176
+msgid "Pause"
+msgstr "Παύση"
+
+#: diagnostic-NMEA.py:62
+msgid "Sort"
+msgstr "Ταξινόμηση"
+
+#: diagnostic-NMEA.py:108
+msgid "connected to:"
+msgstr "συνδεδεμένο με:"
+
+#: diagnostic-NMEA.py:110
+msgid "Failed to connect with localhost:10113. Error: "
+msgstr "Απέτυχε η σύνδεση με localhost:10113. Σφάλμα: "
+
+#: diagnostic-NMEA.py:110
+msgid ", trying to reconnect..."
+msgstr ", προσπάθεια να επανασύνδεσης..."
+
+#: diagnostic-NMEA.py:173
+msgid "Resume"
+msgstr "Συνέχιση"
+
+#: diagnostic-SK-input.py:73
+msgid "Signal K"
+msgstr "Signal K"
+
+#: diagnostic-SK-input.py:75 unit-private.py:56
+msgid "Unit"
+msgstr "Μονάδα"
+
+#: diagnostic-SK-input.py:77 openplotter:716
+msgid "Status"
+msgstr "Κατάσταση"
+
+#: diagnostic-SK-input.py:78 unit-private.py:57
+msgid "Description"
+msgstr "Περιγραφή"
+
+#: diagnostic-SK-input.py:83 unit-private.py:65
+msgid "Sort SK"
+msgstr "Ταξινόμηση SK"
+
+#: diagnostic-SK-input.py:86
+msgid "Show All SK keys"
+msgstr "Προβολή ολων των κλειδιών Signal K"
+
+#: diagnostic-SK-input.py:89
+msgid "private Unit"
+msgstr "ιδιωτική μονάδα"
+
+#: diagnostic-SK-input.py:93
+msgid "Unit Setting"
+msgstr "Ρυθμίσεις μονάδων μέτρησης"
+
+#: message.py:30
+msgid "Message"
+msgstr "Μήνυμα"
+
+#: show_deviation_table.py:39
+msgid "Show deviation table as curve"
+msgstr "Εμφάνιση πίνακα απόκλισης ως καμπύλη"
+
+#: show_deviation_table.py:40
+msgid "Deviation"
+msgstr "Απόκλιση"
+
+#: show_raw_adc_convert.py:36
+msgid ""
+"settings to convert raw adc values (unlinear and/or no factor and/or no offset)\n"
+" to useable values  for input "
+msgstr ""
+"ρυθμίσεις για τη μετατροπή ακατέργαστων adc τιμών (μη γραμμικών και/ή στοιχείο συντελεστή  και/ή μετατόπιση) \n"
+" ωφέλιμες τιμές εισόδου "
+
+#: show_raw_adc_convert.py:38
+msgid "row adc value"
+msgstr "ακατεργαστή τημή Adc"
+
+#: test_sms.py:38
+msgid "Test SMS"
+msgstr "Δοκιμαστικό μήνυμα SMS"
+
+#: test_sms.py:47 tools/SDR_AIS/SDR_AIS_fine_cal.py:47 openplotter:1192
+msgid "Error"
+msgstr "Σφάλμα"
+
+#: test_sms.py:54
+msgid "Start"
+msgstr "Eκκίνηση"
+
+#: test_sms.py:58
+msgid "Press start to check the settings and connect to the GSM device"
+msgstr "Πατήστε έναρξη για να ελέγξετε τις ρυθμίσεις και να συνδεθείτε με τη συσκευή GSM"
+
+#: test_sms.py:61
+msgid "Press start to send the text \""
+msgstr "Πατήστε Έναρξη για να στείλετε το κείμενο»"
+
+#: test_sms.py:61
+msgid ""
+"\"\n"
+"to the number \""
+msgstr "«στον αριθμό τηλ»"
+
+#: test_sms.py:69
+msgid "Connecting..."
+msgstr "Σύνδεση..."
+
+#: test_sms.py:72
+msgid "Error opening device. Check settings."
+msgstr "Σφάλμα αρχικοπίησης της συσκευής. Ελέγξτε τις ρυθμίσεις."
+
+#: test_sms.py:74
+msgid "Sending..."
+msgstr "Αποστολή..."
+
+#: test_sms.py:90
+msgid "\" sent succesfully to "
+msgstr "«στάλθηκε με επιτυχία στο "
+
+#: test_sms.py:94 tools/SDR_AIS/SDR_AIS_fine_cal.py:84
+msgid "Finished"
+msgstr "Ολοκληρώθηκε"
+
+#: tools/NMEA_0183_generator/NMEA_0183_generator.py:36 openplotter:129
+msgid "NMEA 0183 generator"
+msgstr "Γεννήτρια NMEA 0183"
+
+#: tools/NMEA_0183_generator/NMEA_0183_generator.py:43
+msgid " NMEA 0183 "
+msgstr " NMEA 0183 "
+
+#: tools/NMEA_0183_generator/NMEA_0183_generator.py:46 openplotter:1618
+msgid "Rate"
+msgstr "Ρυθμός"
+
+#: tools/NMEA_0183_generator/NMEA_0183_generator.py:47
+msgid "Fields"
+msgstr "Πεδία"
+
+#: tools/NMEA_0183_generator/NMEA_0183_generator.py:57
+msgid ""
+"opencpn\n"
+"default"
+msgstr "προεπιλογή opencpn"
+
+#: tools/NMEA_0183_generator/NMEA_0183_generator.py:60
+msgid "NMEA Diagnostic"
+msgstr "Διαγνωστικά NMEA"
+
+#: tools/NMEA_0183_generator/NMEA_0183_generator.py:63 openplotter:1076
+#: openplotter:1628 openplotter:1839 openplotter:1981 openplotter:2460
+#: openplotter:3285 openplotter:3668
+msgid "SK Diagnostic"
+msgstr "Διαγνωστικά SK"
+
+#: tools/NMEA_0183_generator/NMEA_0183_generator.py:151
+msgid "This function is only allowed when the list is empty."
+msgstr "Αυτή η λειτουργία επιτρέπεται μόνο όταν η λίστα είναι κενή."
+
+#: tools/SDR_AIS/SDR_AIS.py:35 openplotter:120
+msgid "SDR receiver"
+msgstr "Δέκτης SDR"
+
+#: tools/SDR_AIS/SDR_AIS.py:44
+msgid "Enable AIS reception"
+msgstr "Ενεργοποιήσε λήψη AIS"
+
+#: tools/SDR_AIS/SDR_AIS.py:48
+msgid "Gain"
+msgstr "Gain"
+
+#: tools/SDR_AIS/SDR_AIS.py:50
+msgid "Correction (ppm)"
+msgstr "Διόρθωση (ppm)"
+
+#: tools/SDR_AIS/SDR_AIS.py:52
+msgid "Channel A 161.975Mhz"
+msgstr "Κανάλι Α 161.975Mhz"
+
+#: tools/SDR_AIS/SDR_AIS.py:54
+msgid "Channel B 162.025Mhz"
+msgstr "Κανάλι B 162.025Mhz"
+
+#: tools/SDR_AIS/SDR_AIS.py:59
+msgid "Take a look"
+msgstr "Ρίξτε μια ματιά"
+
+#: tools/SDR_AIS/SDR_AIS.py:61 openplotter:1048
+msgid "Calibration"
+msgstr "Βαθμονόμηση"
+
+#: tools/SDR_AIS/SDR_AIS.py:64
+msgid " Fine calibration using GSM "
+msgstr " Λεπτομερής βαθμονόμηση με χρήση GSM "
+
+#: tools/SDR_AIS/SDR_AIS.py:65
+msgid "Band"
+msgstr "Μπάντα"
+
+#: tools/SDR_AIS/SDR_AIS.py:69
+msgid "Check band"
+msgstr "Ελέγχος Μπάντας"
+
+#: tools/SDR_AIS/SDR_AIS.py:71 openplotter:703
+msgid "Channel"
+msgstr "Κανάλι"
+
+#: tools/SDR_AIS/SDR_AIS.py:73 tools/SDR_AIS/SDR_AIS_fine_cal.py:38
+msgid "Fine calibration"
+msgstr "Λεπτομερής βαθμονόμηση"
+
+#: tools/SDR_AIS/SDR_AIS.py:76
+msgid " Radio "
+msgstr " Radio "
+
+#: tools/SDR_AIS/SDR_AIS.py:167
+msgid "SDR-AIS reception enabled"
+msgstr "Η λήψη SDR-AIS ενεργοποιήθηκε"
+
+#: tools/SDR_AIS/SDR_AIS.py:171
+msgid "SDR-AIS reception disabled"
+msgstr "Η λήψη SDR-AIS απενεργοποιήθηκε"
+
+#: tools/SDR_AIS/SDR_AIS.py:188 tools/SDR_AIS/SDR_AIS.py:208
+#: tools/SDR_AIS/SDR_AIS.py:221 tools/SDR_AIS/SDR_AIS.py:228
+msgid "AIS reception disabled. After closing the new window enable AIS reception again."
+msgstr "Η λήψη AIS ειναι απενεργοποιημένη. Μετά το κλείσιμο του νέου παράθυρου ενεργοποίηστε τη λήψη AIS ξανά."
+
+#: tools/SDR_AIS/SDR_AIS.py:195
+msgid ""
+"SDR-AIS reception disabled.\n"
+"Check the new window. Copy the maximum supported gain value. Wait for ppm value to stabilize and copy it too."
+msgstr "Η λήψη SDR-AIS απενεργοποιήθηκε. Ελέγξτε στο νέο παράθυρο. Αντίγραψτε η μέγιστη υποστηριζόμενη gain τιμή. Περιμένετε να σταθεροποιήθει η τιμή ppm αξία και αντιγράψετε επίσης."
+
+#: tools/SDR_AIS/SDR_AIS_fine_cal.py:53
+msgid "gain: "
+msgstr "gain: "
+
+#: tools/SDR_AIS/SDR_AIS_fine_cal.py:54
+msgid "ppm: "
+msgstr "ppm: "
+
+#: tools/SDR_AIS/SDR_AIS_fine_cal.py:61 tools/calculate/calculate.py:35
+#: openplotter:126
+msgid "Calculate"
+msgstr "Υπολογισμός"
+
+#: tools/SDR_AIS/SDR_AIS_fine_cal.py:65
+msgid ""
+"Press Calculate and wait for the system to calculate the ppm value with\n"
+"the selected channel. Put the obtained value in \"Correction (ppm)\" field\n"
+"and enable SDR-AISreception. Estimated time: 1 min."
+msgstr "Πατήστε υπολογισμός και περιμένετε για το σύστημα για τον υπολογισμό της τιμής ppm στο επιλεγμένο κανάλι. Βάλτε την τιμή που λαμβάνονται στο πεδίο «Διόρθωση (ppm)» και να ενεργοποιήσετε τη λήψη SDR-AIS. Εκτιμώμενος χρόνος: 1 λεπτό."
+
+#: tools/SDR_AIS/SDR_AIS_fine_cal.py:66
+msgid "channel: "
+msgstr "κανάλι: "
+
+#: tools/SDR_AIS/SDR_AIS_fine_cal.py:68
+msgid ""
+"Press Calculate and wait for the system to check the band. Write down\n"
+"the strongest channel (power). If you do not find any channel try another\n"
+"band. Estimated time: 5 min."
+msgstr "Πατήστε υπολογισμός και περιμένετε για το σύστημα για να ελέγξετε την μπάντα. Σημειώστε το ισχυρότερο κανάλι (ισχύς). Εάν δεν μπορείτε να βρείτε κάνένα κανάλι δοκιμάστε μια άλλη μπάντα. Εκτιμώμενος χρόνος: 5 λεπτά."
+
+#: tools/SDR_AIS/SDR_AIS_fine_cal.py:73
+msgid "Working..."
+msgstr "Απασχολημένο..."
+
+#: tools/SDR_AIS/SDR_AIS_fine_cal.py:78 tools/SDR_AIS/SDR_AIS_fine_cal.py:82
+msgid "error"
+msgstr "σφάλμα"
+
+#: tools/calculate/calculate.py:48
+msgid " Magnetic variation "
+msgstr " Μαγνητική απόκλιση "
+
+#: tools/calculate/calculate.py:49 tools/calculate/calculate.py:57
+#: tools/moitessier_hat/moitessier_hat.py:119 openplotter:2082 openplotter:2095
+msgid "Enable"
+msgstr "Ενεργοποίηση"
+
+#: tools/calculate/calculate.py:50
+msgid "Requires: position, date."
+msgstr "Απαιτεί: θέση, ημερομηνία."
+
+#: tools/calculate/calculate.py:51 tools/calculate/calculate.py:59
+#: tools/calculate/calculate.py:71 tools/calculate/calculate.py:83
+msgid "Accuracy (sec)"
+msgstr "Ακρίβεια (sec)"
+
+#: tools/calculate/calculate.py:56
+msgid " Rate of turn "
+msgstr " Ταχύτητας στροφής "
+
+#: tools/calculate/calculate.py:58
+msgid "Requires: magnetic heading."
+msgstr "Απαιτεί: μαγνητική κατέυθυνση."
+
+#: tools/calculate/calculate.py:64
+msgid " True heading "
+msgstr " Πραγματική πορεία "
+
+#: tools/calculate/calculate.py:65
+msgid "Deviation is included"
+msgstr "Περιλαμβάνεται η απόκλιση"
+
+#: tools/calculate/calculate.py:67
+msgid "Requires: magnetic heading, variation."
+msgstr "Απαιτεί: Απόκλιση μαγνητικής κατέυθυνσης."
+
+#: tools/calculate/calculate.py:68
+msgid "Add deviation table"
+msgstr "Προσθήκη πίνακα αποκλίσεων"
+
+#: tools/calculate/calculate.py:70
+msgid "Requires: magnetic heading, variation, deviation."
+msgstr "Απαιτεί: μαγνητική κατέυθυνση, παραλλαγή, απόκλιση."
+
+#: tools/calculate/calculate.py:76
+msgid " True wind speed and direction "
+msgstr " Πραγματική ταχύτητα ανέμου και την κατεύθυνση "
+
+#: tools/calculate/calculate.py:77
+msgid "Use Speed Through Water"
+msgstr "Χρησιμοποιήστε ταχύτητα επιφανείας"
+
+#: tools/calculate/calculate.py:79
+msgid "Requires: SignalK STW, AWS, AWA."
+msgstr "Απαιτεί: Signal K STW, AWS, AWA."
+
+#: tools/calculate/calculate.py:80
+msgid "Use Speed Over Ground"
+msgstr "Χρησιμοποιήσε ταχύτητα εδάφους"
+
+#: tools/calculate/calculate.py:82
+msgid "Requires: SignalK SOG, COG, HDT, AWS, AWA."
+msgstr "Απαιτεί: SignalK SOG, COG, HDT, AWS, AWA."
+
+#: tools/calculate/calculate.py:88 tools/demo_tool/demo_tool.py:93
+msgid "Cancel"
+msgstr "Ακύρωση"
+
+#: tools/calculate/calculate.py:192
+msgid "You have to provide rate and accuracy values for magnetic variation"
+msgstr "Πρέπει να δώσετε ταχύτητα και ρυθμό για πραγματική μαγνητική κατέυθηνση"
+
+#: tools/calculate/calculate.py:205
+msgid "You have to provide rate and accuracy values for true heading"
+msgstr "Πρέπει να δώσετε ταχύτητα και ακρίβεια για πραγματική κατέυθηνση"
+
+#: tools/calculate/calculate.py:217
+msgid "You have to provide rate and accuracy values for rate of turn"
+msgstr "Πρέπει να δώσετε ταχύτητα και ακρίβεια για πραγματική κατέυθηνση"
+
+#: tools/calculate/calculate.py:230
+msgid "You have to provide rate and accuracy values for true wind speed and direction"
+msgstr "Πρέπει να δώσετε ταχύτητα και ακρίβεια για την πραγματική ταχύτητα ανέμου και την κατεύθυνση"
+
+#: tools/demo_tool/demo_tool.py:62
+msgid "Demo tool"
+msgstr "Εργαλείο επίδειξης"
+
+#: tools/demo_tool/demo_tool.py:73
+msgid "To create tools see ~/.openplotter/tools/README.md."
+msgstr "Για να δημιουργήσετε εργαλεία δείτε το ~ /.openplotter/tools/README.md."
+
+#: tools/demo_tool/demo_tool.py:76
+msgid " OpenPlotter config data "
+msgstr " OpenPlotter δεδομένα config "
+
+#: tools/demo_tool/demo_tool.py:77
+msgid "OpenPlotter version: "
+msgstr "Έκδοση OpenPlotter: "
+
+#: tools/demo_tool/demo_tool.py:80
+msgid " Working with Signal K "
+msgstr " Λειτουργεί με Signal K "
+
+#: tools/demo_tool/demo_tool.py:81
+msgid "Select a Signal K key"
+msgstr "Επιλέξτε το κλειδί του Signal K"
+
+#: tools/demo_tool/demo_tool.py:87
+msgid "Write some text to publish"
+msgstr "Γράψτε κάποιο κείμενο γιά δημοσίευση"
+
+#: tools/demo_tool/demo_tool.py:90
+msgid "Publish"
+msgstr "Δημοσίευση"
+
+#: tools/moitessier_hat/moitessier_hat.py:36
+msgid "Moitessier HAT Settings"
+msgstr "Ρυθμίσεις για την προσθήκη Moitessier"
+
+#: tools/moitessier_hat/moitessier_hat.py:52
+msgid "Info"
+msgstr "Πληροφ"
+
+#: tools/moitessier_hat/moitessier_hat.py:53
+msgid "Settings"
+msgstr "Ρυθμίσεις"
+
+#: tools/moitessier_hat/moitessier_hat.py:54
+#: tools/moitessier_hat/moitessier_hat.py:259
+msgid "Install"
+msgstr "Εγκατάσταση"
+
+#: tools/moitessier_hat/moitessier_hat.py:61
+msgid " Info "
+msgstr " Πληροφορίες "
+
+#: tools/moitessier_hat/moitessier_hat.py:63
+msgid "HAT info"
+msgstr "Πληροφορίες πρόσθετης συσκευής"
+
+#: tools/moitessier_hat/moitessier_hat.py:66
+msgid "Statistics"
+msgstr "Στατιστικά"
+
+#: tools/moitessier_hat/moitessier_hat.py:69
+msgid "Reset statistics"
+msgstr "Επαναφορά στατιστικών"
+
+#: tools/moitessier_hat/moitessier_hat.py:72 openplotter:1610 openplotter:1964
+msgid " Sensors "
+msgstr " Αισθητήρες "
+
+#: tools/moitessier_hat/moitessier_hat.py:74
+msgid "MPU-9250"
+msgstr "MPU-9250"
+
+#: tools/moitessier_hat/moitessier_hat.py:77
+msgid "MS5607-02BA03"
+msgstr "MS5607-02BA03"
+
+#: tools/moitessier_hat/moitessier_hat.py:80
+msgid "Si7020-A20"
+msgstr "Si7020-A20"
+
+#: tools/moitessier_hat/moitessier_hat.py:122
+msgid "Disable"
+msgstr "Απενεργοποίηση"
+
+#: tools/moitessier_hat/moitessier_hat.py:125
+msgid " General "
+msgstr " Γενικά "
+
+#: tools/moitessier_hat/moitessier_hat.py:127
+msgid "Reset HAT"
+msgstr "Επαναφορά προσθετής συσκευής"
+
+#: tools/moitessier_hat/moitessier_hat.py:130
+msgid "Load defaults"
+msgstr "Φορτώση προεπιλογών"
+
+#: tools/moitessier_hat/moitessier_hat.py:135
+msgid "enable simulator"
+msgstr "ενεργοποίηση προσομοιωτή"
+
+#: tools/moitessier_hat/moitessier_hat.py:137
+msgid "interval (ms)"
+msgstr "διάστημα (ms)"
+
+#: tools/moitessier_hat/moitessier_hat.py:140
+msgid "MMSI boat 1"
+msgstr "MMSI σκάφος 1"
+
+#: tools/moitessier_hat/moitessier_hat.py:143
+msgid "MMSI boat 2"
+msgstr "MMSI σκάφος 2"
+
+#: tools/moitessier_hat/moitessier_hat.py:150
+msgid "frequency 1"
+msgstr "συχνότητα 1"
+
+#: tools/moitessier_hat/moitessier_hat.py:151
+msgid "frequency 2"
+msgstr "συχνότητα 2"
+
+#: tools/moitessier_hat/moitessier_hat.py:249
+msgid " Current Kernel version "
+msgstr " Τρέχουσα έκδοση του πυρήνα "
+
+#: tools/moitessier_hat/moitessier_hat.py:253
+msgid " Available packages "
+msgstr " Διαθέσιμα πακέτα "
+
+#: tools/moitessier_hat/moitessier_hat.py:300
+#: tools/moitessier_hat/moitessier_hat.py:305
+msgid "Moitessier HAT is not attached!"
+msgstr "Η προέκαταση Moitessier δεν συνδέεται!"
+
+#: tools/moitessier_hat/moitessier_hat.py:308
+msgid "Moitessier HAT is attached.\n"
+msgstr "Η προέκαταση Moitessier ειναι συνδεδεμένη.\n"
+
+#: tools/moitessier_hat/moitessier_hat.py:311
+msgid "Moitessier HAT package is not installed!"
+msgstr "Δεν είναι εγκατεστημένη η πρόεκταση Moitessier!"
+
+#: tools/moitessier_hat/moitessier_hat.py:315
+msgid "Moitessier HAT package is installed.\n"
+msgstr "Η πρόεκταση Moitessier είναι εγκατεστημένη.\n"
+
+#: tools/moitessier_hat/moitessier_hat.py:316
+msgid ""
+"All changes will be temporal.\n"
+"Default settings will be loaded after rebooting.\n"
+msgstr "Όλες οι αλλαγές θα ειναι προσωρινές. Οι προεπιλεγμένες ρυθμίσεις θα φορτωθούν μετά την επανεκκίνηση.\n"
+
+#: tools/moitessier_hat/moitessier_hat.py:317
+msgid ""
+"Select the package that matches the current Kernel version.\n"
+"Before installing, be sure the HAT is not being used by any service (kplex, GPSD, OpenCPN ...).\n"
+"If installation fails, you may have to try to install the package several times."
+msgstr "Επιλέξτε το πακέτο που ταιριάζει με την τρέχουσα έκδοση του πυρήνα. Πριν από την εγκατάσταση, να είστε βέβαιος οτι η προέκταση δεν χρησιμοποιείται από οποιαδήποτε υπηρεσία (kplex, GPSD, OpenCPN...). Εάν αποτύχει η εγκατάσταση, ίσως χρειαστεί να προσπαθήσετε να εγκαταστήσετε το πακέτο αρκετές φορές."
+
+#: tools/moitessier_hat/moitessier_hat.py:352
+msgid "Failure reading config.xml file!"
+msgstr "Αποτυχία ανάγνωσης αρχείου config.xml!"
+
+#: tools/moitessier_hat/moitessier_hat.py:357
+msgid "Select a package to install."
+msgstr "Επιλέξτε ένα πακέτο για εγκατάσταση."
+
+#: tools/moitessier_hat/moitessier_hat.py:360
+msgid "Updating Moitessier Hat modules and firmware..."
+msgstr "Ενημέρωση ενοτήτων της προέκτασης Moitessier και του firmware..."
+
+#: tools/moitessier_hat/moitessier_hat.py:411
+msgid "Defaults loaded.\n"
+msgstr "Προεπιλεγμένες ρυθμίσεις φορτώθηκαν.\n"
+
+#: tools/moitessier_hat/moitessier_hat.py:448
+msgid "Changes applied.\n"
+msgstr "Οι αλλαγές εφαρμόστηκαν.\n"
+
+#: tools/moitessier_hat/moitessier_hat.py:449
+msgid "Apply changes failed!\n"
+msgstr "Η εφαρμογή τών αλλαγών απέτυχε!\n"
+
+#: unit-private.py:55
+msgid "SK Unit"
+msgstr "Μονάδα SK"
+
+#: unit-private.py:59
+msgid "Sort SK Unit"
+msgstr "Ταξινόμηση μονάδων SK"
+
+#: unit-private.py:62
+msgid "Sort Unit"
+msgstr "Ταξινόμηση μονάδων"
+
+#: unit-private.py:68
+msgid "change selected"
+msgstr "αλλαγή επιλεγμένου"
+
+#: openplotter:89
+msgid "Serial"
+msgstr "Σειριακή"
+
+#: openplotter:91
+msgid "pypilot"
+msgstr "pypilot"
+
+#: openplotter:93
+msgid "Network"
+msgstr "Δίκτυο"
+
+#: openplotter:94
+msgid "Actions"
+msgstr "Ενέργειες"
+
+#: openplotter:96
+msgid "I2C"
+msgstr "I2C"
+
+#: openplotter:100
+msgid "Accounts"
+msgstr "Λογαριασμοί"
+
+#: openplotter:101
+msgid "SMS"
+msgstr "SMS"
+
+#: openplotter:102
+msgid "Startup"
+msgstr "Εκκίνηση"
+
+#: openplotter:121
+msgid "Set an SDR receiver in the new window"
+msgstr "Ορίστε έναν δέκτη SDR στο νέο παράθυρο"
+
+#: openplotter:124
+msgid "Create a deviation table for your boat"
+msgstr "Δημιουργήστε έναν πίνακα απόκλισης για το σκάφος σας"
+
+#: openplotter:127
+msgid "Calculate new data from current values"
+msgstr "Υπολογίσε νέα δεδομένα από τις τρέχουσες τιμές"
+
+#: openplotter:130
+msgid "Generate NMEA 0183 from current values"
+msgstr "Δημιουργία NMEA 0183 από τρέχουσες τιμές"
+
+#: openplotter:156
+msgid "Tools"
+msgstr "Εργαλεία"
+
+#: openplotter:159
+msgid "Basque"
+msgstr "Βασκικά"
+
+#: openplotter:159
+msgid "Set Basque language"
+msgstr "Βασκική γλώσσα"
+
+#: openplotter:161
+msgid "Catalan"
+msgstr "Καταλανικά"
+
+#: openplotter:161
+msgid "Set Catalan language"
+msgstr "Καταλανική γλώσσα"
+
+#: openplotter:163
+msgid "Dutch"
+msgstr "Ολλανδικά"
+
+#: openplotter:163
+msgid "Set Dutch language"
+msgstr "Ολλανδική γλώσσα"
+
+#: openplotter:165
+msgid "English"
+msgstr "Αγγλικά"
+
+#: openplotter:165
+msgid "Set English language"
+msgstr "Ρύθμιση αγγλικής γλώσσας"
+
+#: openplotter:167
+msgid "Finnish"
+msgstr "Φινλανδικά"
+
+#: openplotter:167
+msgid "Set Finnish language"
+msgstr "Ορισμός γλώσσας Φινλανδικά"
+
+#: openplotter:169
+msgid "French"
+msgstr "Γαλλικά"
+
+#: openplotter:169
+msgid "Set French language"
+msgstr "Ορισμός γλώσσας Γαλλικά"
+
+#: openplotter:171
+msgid "Galician"
+msgstr "Γαλικικά"
+
+#: openplotter:171
+msgid "Set Galician language"
+msgstr "Ορισμός γλώσσας Γαλικικά"
+
+#: openplotter:173
+msgid "German"
+msgstr "Γερμανικά"
+
+#: openplotter:173
+msgid "Set German language"
+msgstr "Ορισμός γλώσσας Γερμανικά"
+
+#: openplotter:175
+msgid "Italiano"
+msgstr "Ιταλικά"
+
+#: openplotter:175
+msgid "Set Italian language"
+msgstr "Ορισμός γλώσσας Ιταλικά"
+
+#: openplotter:177
+msgid "Spanish"
+msgstr "Ισπανικά"
+
+#: openplotter:177
+msgid "Set Spanish language"
+msgstr "Ορισμός γλώσσας Ισπανικά"
+
+#: openplotter:179
+msgid "Language"
+msgstr "Γλώσσα"
+
+#: openplotter:182
+msgid "Update OpenCPN"
+msgstr "Ενημέρωση έκδοσης OpenCPN"
+
+#: openplotter:182
+msgid "Update OpenCPN to latest stable release"
+msgstr "Ενημέρωση OpenCPN στην τελευταία σταθερή έκδοση"
+
+#: openplotter:184
+msgid "Update OpenCPN plugins"
+msgstr "Ενημέρωση προσθέτων OpenCPN"
+
+#: openplotter:184
+msgid "Update OpenCPN plugins to latest stable releases"
+msgstr "Ενημέρωση τών προσθέτων του OpenCPN στην τελευταία σταθερή έκδοση"
+
+#: openplotter:187
+msgid "Set default OpenPlotter desktop"
+msgstr "Ορίσετε την προεπιλεγμένη επιφάνεια εργασίας OpenPlotter"
+
+#: openplotter:187
+msgid "Run this after a major update"
+msgstr "Εκτελέστε αυτό μετά από μια σημαντική ενημέρωση"
+
+#: openplotter:190
+msgid "Update OpenPlotter"
+msgstr "Ενημέρωση έκδοσης OpenPlotter"
+
+#: openplotter:190
+msgid "Apply latest changes on OpenPlotter and update the system if necessary"
+msgstr "Εφαρμόστε πιο πρόσφατες αλλαγές στο OpenPlotter και ενημέρωση του συστήματος, εάν είναι απαραίτητο"
+
+#: openplotter:192
+msgid "Updates"
+msgstr "Ενημερώσεις"
+
+#: openplotter:195
+msgid "&About"
+msgstr "Σχετικά"
+
+#: openplotter:195
+msgid "About OpenPlotter"
+msgstr "Σχετικά με OpenPlotter"
+
+#: openplotter:197
+msgid "Online documentation"
+msgstr "Προβολή ηλεκτρονικής τεκμηρίωσης"
+
+#: openplotter:198
+msgid "OpenPlotter online documentation"
+msgstr "OpenPlotter ηλεκτρονική τεκμηρίωση"
+
+#: openplotter:200
+msgid "&Help"
+msgstr "Βοήθεια"
+
+#: openplotter:322
+msgid "The selected language will be enabled when you restart"
+msgstr "Η επιλεγμένη γλώσσα θα είναι ενεργοποιημένη μετά την επανεκκίνηση"
+
+#: openplotter:376 openplotter:380 openplotter:458
+msgid "Follow the instructions of the new window"
+msgstr "Ακολουθήστε τις οδηγίες στο νέο παράθυρο"
+
+#: openplotter:396
+msgid "It was not possible to connect to Github."
+msgstr "Δεν ήταν δυνατή η σύνδεση στο Github."
+
+#: openplotter:408 openplotter:426
+msgid "Error reading versions."
+msgstr "Σφάλμα ανάγνωσης εκδόσεων."
+
+#: openplotter:430
+msgid ""
+"You are running a stable version. If you update to a non stable version you will have to keep updating until a stable stage is reached again.\n"
+"\n"
+msgstr ""
+"Εκτελείτε μια σταθερή έκδοση. Αν θελετε να εγκαταστήσετε μια μη σταθερή έκδοση θα πρέπει να αναβαθμίζετε μέχρι να φθάσει ξανά σε ένα σταθερό στάδιο.\n"
+"\n"
+
+#: openplotter:432
+msgid "There is a major Raspbian upgrade, you have to download the new OpenPlotter image: v"
+msgstr "Υπάρχει μια σημαντική αναβάθμιση Raspbian, θα πρέπει να κατεβάσετε τη νέα έκδοση OpenPlotter: v"
+
+#: openplotter:436
+msgid "There is a major OpenPlotter update.\n"
+msgstr "Υπάρχει μια σημαντική ενημέρωση για το OpenPlotter.\n"
+
+#: openplotter:437
+msgid ""
+"Please make a backup image of your system before updating.\n"
+"\n"
+msgstr ""
+"Παρακαλούμε να κάνετε ένα αντίγραφο ασφαλείας πριν από την ενημέρωση.\n"
+"\n"
+
+#: openplotter:440
+msgid ""
+"There is a minor OpenPlotter update.\n"
+"\n"
+msgstr ""
+"Υπάρχει μια ενημέρωση για το OpenPlotter.\n"
+"\n"
+
+#: openplotter:443
+msgid " is up to date.\n"
+msgstr " είναι ενημερωμένο.\n"
+
+#: openplotter:446
+msgid "Are you sure you want to update: "
+msgstr "Σίγουρα θέλετε να ενημερωθεί: "
+
+#: openplotter:462
+msgid "OpenPlotter is a DIY, open-source, low-cost, low-consumption, modular and scalable sailing platform to run on ARM boards."
+msgstr "OpenPlotter είναι ένα DIY συστήμα, χαμηλού κόστους, χαμηλής κατανάλωσης, και επεκτάσιμη πλατφόρμα για ιστιοπλοϊκα σκάφη συμβατή με αρχιτεκτονική επεξεργαστών ARM."
+
+#: openplotter:516
+msgid "Delay (seconds)"
+msgstr "Καθυστέρηση (δευτ)"
+
+#: openplotter:523
+msgid "no OpenGL"
+msgstr "χωρίς OpenGL"
+
+#: openplotter:525
+msgid "fullscreen"
+msgstr "πλήρης οθόνη"
+
+#: openplotter:528
+msgid "Play sound"
+msgstr "Αναπαραγωγή ήχου"
+
+#: openplotter:531
+msgid "File"
+msgstr "Aρχείο"
+
+#: openplotter:534
+msgid "Maximize OpenPlotter"
+msgstr "Μεγιστοποίηση του OpenPlotter"
+
+#: openplotter:537
+msgid "Node-Red"
+msgstr "Node-Red"
+
+#: openplotter:597
+msgid "You can enter only numbers."
+msgstr "Εισαγάγετε μόνο αριθμούς."
+
+#: openplotter:602
+msgid "Startup delay set to "
+msgstr "Καθυστέρηση εκκίνησης ορίσθηκε σε "
+
+#: openplotter:602
+msgid " seconds"
+msgstr " δευτερόλεπτα"
+
+#: openplotter:669
+msgid "client"
+msgstr "πελάτης"
+
+#: openplotter:670
+msgid "RPi3: AP/client + bridge eth0"
+msgstr "RPi3+: AP + client + bridge eth0"
+
+#: openplotter:671
+msgid "RPi3: AP/client"
+msgstr "RPi3: AP/client"
+
+#: openplotter:672
+msgid "RPi3: AP + client + bridge eth0"
+msgstr "RPi3+: AP + client + bridge eth0"
+
+#: openplotter:673
+msgid "RPi3: AP + client"
+msgstr "RPi3: AP/client"
+
+#: openplotter:674
+msgid "RPi3+: AP + client + bridge eth0"
+msgstr "RPi3+: AP + client + bridge eth0"
+
+#: openplotter:675
+msgid "RPi3+: AP 5G + client + bridge eth0"
+msgstr "RPi3+: AP 5G + client + bridge eth0"
+
+#: openplotter:676
+msgid "RPi3+: AP 5GH + client + bridge eth0"
+msgstr "RPi3+: AP 5GH + client + bridge eth0"
+
+#: openplotter:677
+msgid "RPi3+: AP + client"
+msgstr "RPi3+: AP + client"
+
+#: openplotter:683
+msgid "Network mode"
+msgstr "Τύπος δικτύου"
+
+#: openplotter:689
+msgid "Sharing Internet device"
+msgstr "Κοινή χρήση της συσκευής στο Internet"
+
+#: openplotter:692
+msgid "Access point settings"
+msgstr "Ρυθμίσεις του σημείου πρόσβασης"
+
+#: openplotter:695
+msgid ""
+"SSID \n"
+"maximum 32 characters"
+msgstr ""
+"SSID\n"
+"Μέγιστο 32 χαρακτήρες"
+
+#: openplotter:698
+msgid ""
+"Password \n"
+"minimum 8 characters required"
+msgstr "Απαιτούνται τουλάχιστον 8 χαρακτήρες για κωδικό πρόσβασης,"
+
+#: openplotter:705 openplotter:3649 openplotter:3757 openplotter:3869
+#: openplotter:3908
+msgid "Apply"
+msgstr "Εφαρμογή"
+
+#: openplotter:708
+msgid " Addresses "
+msgstr " Διευθύνσεις "
+
+#: openplotter:713
+msgid "Refresh"
+msgstr "Ανανέωση"
+
+#: openplotter:830
+msgid "Your SSID must have a maximum of 32 characters and your password a minimum of 8."
+msgstr "Το SSID, πρέπει να έχει μέγιστο 32 χαρακτήρες και ο κωδικός το ελάχιστο 8."
+
+#: openplotter:838
+msgid "The device you want to share is in use (bridge or AP)."
+msgstr "Η συσκευή που θέλετε να μοιραστείτε είναι σε χρήση (γέφυρα ή AP)."
+
+#: openplotter:842
+msgid ""
+"Changes will be applied after next reboot.\n"
+"\n"
+"If something goes wrong and you are on a headless system,\n"
+"you may not be able to reconnect again.\n"
+"\n"
+"Are you sure?"
+msgstr "Οι αλλαγές θα εφαρμοστούν μετά την επανεκκίνηση. Αν κάτι πάει στραβά και βρίσκεστε σε ένα σύστημα χωρίς οθόνη, μπορεί να μην είστε σε θέση να επανασυνδεθείτε. Είσαι σίγουρος?"
+
+#: openplotter:894
+msgid " Multiplexed NMEA 0183:\n"
+msgstr " Πολυπλεξία NMEA 0183:\n"
+
+#: openplotter:897
+msgid ""
+"\n"
+" Signal K Server:\n"
+msgstr ""
+"\n"
+"Signal K διακομιστής:\n"
+
+#: openplotter:899
+msgid ""
+"\n"
+" VNC remote desktop:\n"
+msgstr ""
+"\n"
+" VNC απομακρυσμένη επιφάνεια εργασίας:\n"
+
+#: openplotter:901
+msgid ""
+"\n"
+" node-red:\n"
+msgstr ""
+"\n"
+"  node-red:\n"
+
+#: openplotter:903
+msgid ""
+"\n"
+" MQTT local broker:\n"
+msgstr ""
+"\n"
+"MQTT τοπικός broker:\n"
+
+#: openplotter:919
+msgid " is AP"
+msgstr " είναι σημείο πρόσβασης"
+
+#: openplotter:920
+msgid "no AP"
+msgstr "κανένα σημείο πρόσβασης"
+
+#: openplotter:933
+msgid "up network: "
+msgstr "δίκτυο: "
+
+#: openplotter:942 openplotter:953 openplotter:964 openplotter:975
+#: openplotter:979
+msgid "running"
+msgstr "λειτουργεί"
+
+#: openplotter:943 openplotter:954 openplotter:965 openplotter:977
+msgid "stopped"
+msgstr "διακόπηκε"
+
+#: openplotter:1012
+msgid "IP address\n"
+msgstr "Διεύθυνση IP\n"
+
+#: openplotter:1027
+msgid "pypilot Mode:"
+msgstr "λειτουργία pypilot:"
+
+#: openplotter:1029
+msgid "disabled"
+msgstr "απενεργοποιημένη"
+
+#: openplotter:1029
+msgid "IMU only"
+msgstr "IMU μόνο"
+
+#: openplotter:1029
+msgid "basic autopilot"
+msgstr "βασικός αυτόματος πιλότος"
+
+#: openplotter:1032
+msgid " IMU "
+msgstr " IMU "
+
+#: openplotter:1033
+msgid "Detected IMU:"
+msgstr "Εντοπίστηκε IMU:"
+
+#: openplotter:1034
+msgid "None"
+msgstr "Κανένα"
+
+#: openplotter:1039
+msgid " Autopilot "
+msgstr " Αυτόματος Πιλότος "
+
+#: openplotter:1041
+msgid "Serial ports (Controller/Wind/GPS)"
+msgstr "Σειριακές θύρες (ελεγκτή/ανέμου/GPS)"
+
+#: openplotter:1044
+msgid "Enable webapp"
+msgstr "Ενεργοποίηση webapp"
+
+#: openplotter:1045
+msgid "port:"
+msgstr "θύρα:"
+
+#: openplotter:1051
+msgid "Scope"
+msgstr "Πεδίο εφαρμογής"
+
+#: openplotter:1054
+msgid "Client"
+msgstr "Πελάτης"
+
+#: openplotter:1057
+msgid "Autopilot Control"
+msgstr "Αυτόματος πιλότος"
+
+#: openplotter:1060 openplotter:1288 openplotter:1631 openplotter:1842
+#: openplotter:1984 openplotter:2463 openplotter:3671
+msgid "Restart"
+msgstr "Επανεκκίνηση"
+
+#: openplotter:1065 openplotter:1294 openplotter:2215
+msgid "Cancel changes"
+msgstr "Ακύρωση αλλαγών"
+
+#: openplotter:1072
+msgid "Translation Rate (seconds)"
+msgstr "Μετάφραση ρυθμός (δευτερόλεπτα)"
+
+#: openplotter:1219
+msgid ""
+"Compass settings will be deleted.\n"
+"\n"
+"You will have to calibrate again.\n"
+"\n"
+"Are you sure?"
+msgstr "Οι Ρυθμίσεις πυξίδας θα διαγραφούν. Θα πρέπει να επαναλάβετε τη μικρορύθμιση. Είσαι σίγουρος;"
+
+#: openplotter:1271
+msgid "io"
+msgstr "io"
+
+#: openplotter:1272
+msgid "Port/Address"
+msgstr "Διεύθυνση θύρας"
+
+#: openplotter:1273
+msgid "Bauds/Port"
+msgstr "Ταχύτητα της Θύρας"
+
+#: openplotter:1274
+msgid "inFilter"
+msgstr "inFilter"
+
+#: openplotter:1275 openplotter:1277
+msgid "Filtering"
+msgstr "Φιλτράρισμα"
+
+#: openplotter:1276
+msgid "outFilter"
+msgstr "outFilter"
+
+#: openplotter:1280 openplotter:3262 openplotter:3276
+msgid "Diagnostic"
+msgstr "Διαγνωστικά"
+
+#: openplotter:1283
+msgid "add network"
+msgstr "προσθήκη δικτύου"
+
+#: openplotter:1290
+msgid "Advanced"
+msgstr "Για προχωρημένους"
+
+#: openplotter:1323
+msgid "OpenPlotter will close. Add manual settings at the end of the configuration file. Open OpenPlotter again and restart multiplexer to apply changes."
+msgstr "Το OpenPlotter θα κλείσει. Προσθέστε χειροκίνητες ρυθμίσεις στο τέλος του αρχείου ρύθμισης παραμέτρων. Ανοίξτε το OpenPlotter ξανά και επανεκκίνηστε τις υπηρεσίες για να εφαρμοστούν οι αλλαγές."
+
+#: openplotter:1328
+msgid "Closing Kplex"
+msgstr "Κλείσιμο Kplex"
+
+#: openplotter:1334
+msgid "Kplex restarted"
+msgstr "Επανεκκίνηθηκε ο Kplex"
+
+#: openplotter:1353
+msgid "You can not edit this."
+msgstr "Δεν μπορείτε να το επεξεργαστείτε αυτό."
+
+#: openplotter:1443
+msgid "Multiplexer configuration file does not exist. Add inputs and apply changes."
+msgstr "Πολυπλέκτης αρχείο ρύθμισης παραμέτρων δεν υπάρχει. Προσθέστε εισόδους και να εφαρμόσετε τις αλλαγές."
+
+#: openplotter:1545 openplotter:1562
+msgid "Select an item."
+msgstr "Επιλέξτε ένα στοιχείο."
+
+#: openplotter:1551
+msgid "You can not delete this"
+msgstr "Δεν μπορείτε να το διαγράψετε αυτο"
+
+#: openplotter:1554
+msgid "Unassign this device on \"Serial ports\" tab"
+msgstr "Αποσύνδεση της συσκευής στην καρτέλα «Σειριακές θύρες»"
+
+#: openplotter:1616
+msgid "Magnitude"
+msgstr "Μέγεθος"
+
+#: openplotter:1691
+msgid "Failed. You must select a sensor."
+msgstr "Απέτυχε. Πρέπει να επιλέξετε έναν αισθητήρα."
+
+#: openplotter:1696
+msgid "Failed. You must provide an address."
+msgstr "Απέτυχε. Πρέπει να δώσετε μια διεύθυνση."
+
+#: openplotter:1774 openplotter:2067 openplotter:2398 openplotter:2408
+#: openplotter:2547 openplotter:3854
+msgid "Select an item to delete."
+msgstr "Επιλέξτε ένα στοιχείο για διαγραφή."
+
+#: openplotter:1788
+msgid "Sensors restarted"
+msgstr "Οι αισθητήρες επανεκκίνηθηκαν"
+
+#: openplotter:1791
+msgid "Sensors stopped"
+msgstr "Οι αισθητήρες σταμάτησαν"
+
+#: openplotter:1829
+msgid " SPI MCP3008 "
+msgstr " SPI MCP3008 "
+
+#: openplotter:1833
+msgid "channel"
+msgstr "κανάλι"
+
+#: openplotter:1845
+msgid "value setting"
+msgstr "ρύθμιση τιμής"
+
+#: openplotter:1914
+msgid "convert disabled"
+msgstr "η μετατροπή απενεργοποιήθηκε"
+
+#: openplotter:1972 openplotter:2451 openplotter:3659
+msgid "Source"
+msgstr "Πηγή"
+
+#: openplotter:2081
+msgid " Twitter "
+msgstr " Twitter "
+
+#: openplotter:2085
+msgid "apiKey"
+msgstr "apiKey"
+
+#: openplotter:2087
+msgid "apiSecret"
+msgstr "apiSecret"
+
+#: openplotter:2089
+msgid "accessToken"
+msgstr "accessToken"
+
+#: openplotter:2091
+msgid "accessTokenSecret"
+msgstr "accessTokenSecret"
+
+#: openplotter:2094
+msgid " Gmail "
+msgstr " Gmail "
+
+#: openplotter:2097
+msgid "Gmail account"
+msgstr "Λογαργιασμός Gmail"
+
+#: openplotter:2099
+msgid "Gmail password"
+msgstr "Συνθηματικό Gmail"
+
+#: openplotter:2101
+msgid "Recipient"
+msgstr "Παραλήπτης"
+
+#: openplotter:2128
+msgid "Enter valid Twitter apiKey, apiSecret, accessToken and accessTokenSecret."
+msgstr "Εισάγετε ενα έγκυρο Twitter apiKey, apiSecret, accessToken και accessTokenSecret."
+
+#: openplotter:2158
+msgid "Enter valid Gmail account, Gmail password and Recipient."
+msgstr "Πληκτρολογήστε ενα έγκυρο λογαριασμό Gmail, τον κωδικό πρόσβασης, και τον παραλήπτη."
+
+#: openplotter:2178
+msgid " Triggers "
+msgstr " Εναύσματα "
+
+#: openplotter:2181
+msgid "trigger"
+msgstr "έναυσμα"
+
+#: openplotter:2182
+msgid "operator"
+msgstr "διαχειριστής"
+
+#: openplotter:2183
+msgid "value"
+msgstr "τιμή"
+
+#: openplotter:2197
+msgid "repeat"
+msgstr "επανάληψη"
+
+#: openplotter:2207
+msgid "Stop all"
+msgstr "Διακοπή όλων"
+
+#: openplotter:2210
+msgid "Start all"
+msgstr "Εκκίνηση όλων"
+
+#: openplotter:2355
+msgid "Select a trigger to add actions."
+msgstr "Επιλέξτε ένα έναυσμα για να προσθέσετε ενέργειες."
+
+#: openplotter:2426
+msgid "Actions changes cancelled"
+msgstr "Οι αλλαγές στις ενέργεις ακυρώθηκαν"
+
+#: openplotter:2430
+msgid "Actions stopped"
+msgstr "Οι ενέργειες σταμάτησαν"
+
+#: openplotter:2437
+msgid "Actions started"
+msgstr "Οι ενέργειες ξεκίνησαν"
+
+#: openplotter:2444
+msgid " Temperature sensors "
+msgstr " Αισθητήρες θερμοκρασίας "
+
+#: openplotter:2448
+msgid "ID"
+msgstr "Αναγνωριστικό"
+
+#: openplotter:2487
+msgid "1W sensors restarted"
+msgstr "Οι αισθητήρες 1W επανεκκίνηθηκαν"
+
+#: openplotter:2490
+msgid "1W sensors stopped"
+msgstr "Οι αισθητήρες 1W σταμάτησαν"
+
+#: openplotter:2562
+msgid "name"
+msgstr "όνομα"
+
+#: openplotter:2563
+msgid "device"
+msgstr "συσκευή"
+
+#: openplotter:2564
+msgid "vendor"
+msgstr "προμηθευτής"
+
+#: openplotter:2565
+msgid "product"
+msgstr "προϊόν"
+
+#: openplotter:2566
+msgid "port"
+msgstr "θύρα"
+
+#: openplotter:2567
+msgid "serial"
+msgstr "σειριακή"
+
+#: openplotter:2568 openplotter:2576
+msgid "assignment"
+msgstr "ανάθεση"
+
+#: openplotter:2569
+msgid "remember"
+msgstr "απομνημόνευση"
+
+#: openplotter:2570 openplotter:2582
+msgid "bauds"
+msgstr "bauds"
+
+#: openplotter:2573
+msgid "name /dev/ttyOP_"
+msgstr "όνομα /dev/ttyOP_"
+
+#: openplotter:2587
+msgid "Remember device (by vendor, product, serial)"
+msgstr "Απομνημόνευση της συσκευής (από τον προμηθευτή, προϊόν, σειριακό)"
+
+#: openplotter:2588
+msgid "Remember port (positon on the USB-hub)"
+msgstr "Απομνημόνευση της θύρας (θέση στο USB-hub)"
+
+#: openplotter:2593
+msgid "auto"
+msgstr "αυτόματο"
+
+#: openplotter:2599
+msgid "refresh"
+msgstr "ανανέωση"
+
+#: openplotter:2602
+msgid "enable UART"
+msgstr "ενεργοποίηση UART"
+
+#: openplotter:2605
+msgid "disable UART"
+msgstr "απενεργοποίηση UART"
+
+#: openplotter:2710
+msgid "Warning: You have connected the \""
+msgstr "Προειδοποίηση: έχετε συνδέσει τις»"
+
+#: openplotter:2710
+msgid "\" to the usb port which is reserved for another device"
+msgstr "«στη θύρα usb που είναι δεσμευμένη για μια άλλη συσκευή"
+
+#: openplotter:2874 openplotter:2935 openplotter:3006
+msgid "Failed. No port selected"
+msgstr "Απέτυχε. Δεν εχεί επιλεγεί θύρα"
+
+#: openplotter:2881
+msgid "Checking selected device ..."
+msgstr "Έλεγχος επιλεγμένης συσκευής..."
+
+#: openplotter:2893
+msgid "Suitable parameters according to your system settings. Press apply to save."
+msgstr "Κατάλληλες παραμέτρους σύμφωνα με τις ρυθμίσεις του συστήματός σας. Πατήστε εφαρμογή για να αποθηκεύσετε."
+
+#: openplotter:2895
+msgid "We have not found any recognizable data on your device."
+msgstr "Δεν έχουμε βρει οποιαδήποτε αναγνωρίσιμα δεδομένα στη συσκευή σας."
+
+#: openplotter:2943
+msgid "Failed. You have to provide a name (between 1 and 8 letters and/or numbers)."
+msgstr "Απέτυχε. Πρέπει να δώσετε ένα όνομα (μεταξύ 1 και 8 γράμματα ή αριθμούς)."
+
+#: openplotter:2948
+msgid "Failed. Same name used for multiple devices"
+msgstr "Απέτυχε. Ίδιο όνομα χρησιμοποιείται για πολλές συσκευές"
+
+#: openplotter:2952
+msgid "Failed. The new name must be a string between 1 and 8 letters and/or numbers."
+msgstr "Απέτυχε. Το νέο όνομα πρέπει να είναι μια συμβολοσειρά μεταξύ 1 και 8 γράμματα ή αριθμούς."
+
+#: openplotter:2961
+msgid "Failed. Select bauds."
+msgstr "Απέτυχε. Επιλέξτε ταχύτητα."
+
+#: openplotter:2984
+msgid "Warning: USB-Port with duplicate vendor product must be set to \"Remember port\"."
+msgstr "Προειδοποίηση: USB θύρας με διπλό προμηθευτή προϊόντος πρέπει να οριστεί σε «Θυμήσου θύρα»."
+
+#: openplotter:2992
+msgid "Warning: This port is already reserved and must be set to \"Remember device\"."
+msgstr "Προειδοποίηση: Αυτή η θύρα είναι ήδη δεσμευμένη και πρέπει να οριστεί σε «Θυμήσου συσκευή»."
+
+#: openplotter:3051
+msgid "Restarting ..."
+msgstr "Επανεκκίνηση..."
+
+#: openplotter:3115
+msgid "Failed. Same name used for multiple devices: "
+msgstr "Απέτυχε. Το ίδιο όνομα χρησιμοποιείται για πολλές συσκευές: "
+
+#: openplotter:3173
+msgid "Serial port modified and restarted"
+msgstr "Σειριακή θύρα ενημέρωθηκε και επανεκκίνηθηκε"
+
+#: openplotter:3180
+msgid "Failed. You can assign only one "
+msgstr "Απέτυχε. Μπορείτε να αντιστοιχίσετε μόνο μία "
+
+#: openplotter:3180
+msgid " device"
+msgstr " συσκευή"
+
+#: openplotter:3190
+msgid "This action disables Bluetooth and enables UART. OpenPlotter will reboot.\n"
+msgstr "Αυτή η ενέργεια απενεργοποιεί το Bluetooth και ενεργοποιεί UART. Το OpenPlotter θα κάνει επανεκκίνηση.\n"
+
+#: openplotter:3191 openplotter:3198
+msgid "Are you sure?"
+msgstr "Είστε σίγουρος;"
+
+#: openplotter:3197
+msgid "This action disables UART and enables Bluetooth. OpenPlotter will reboot.\n"
+msgstr "Αυτή η ενέργεια απενεργοποιεί το Bluetooth και ενεργοποιεί UART. Το OpenPlotter θα κάνει επανεκκίνηση.\n"
+
+#: openplotter:3254
+msgid "CAN-USB port:"
+msgstr "CAN-USB θύρα:"
+
+#: openplotter:3257
+msgid " Input "
+msgstr " Είσοδος "
+
+#: openplotter:3259
+msgid "Enable N2K input"
+msgstr "Ενεργοποίηση εισόδου N2K"
+
+#: openplotter:3265
+msgid " Output "
+msgstr " Έξοδος "
+
+#: openplotter:3267
+msgid "Enable N2K output"
+msgstr "Ενεργοποίηση εξόδου N2K"
+
+#: openplotter:3271
+msgid " Input can0 "
+msgstr " Εισόδος can0 "
+
+#: openplotter:3273
+msgid "Enable can0 N2K input"
+msgstr "Ενεργοποίηση εισόδου can0 N2K"
+
+#: openplotter:3279
+msgid "Device settings"
+msgstr "Ρυθμίσεις συσκευής"
+
+#: openplotter:3282
+msgid "Signal K to N2K converter"
+msgstr "Mετατροπέας Signal K σε N2K"
+
+#: openplotter:3414
+msgid "Select PGNs to transmit and enable N2K input/output again."
+msgstr "Επιλέξτε PGNs για μετάδοση και να επανενεργοποιήσε εισόδο/εξόδο N2K."
+
+#: openplotter:3420
+msgid "Show received PGNs."
+msgstr "Εμφάνιση ληφθέντων PGNs."
+
+#: openplotter:3426
+msgid "Show sent PGNs."
+msgstr "Εμφάνιση απεσταλμένων PGNs."
+
+#: openplotter:3436
+msgid "You have to add a CAN-USB device on Serial ports tab"
+msgstr "Πρέπει να προσθέσετε μια συσκευή CAN-USB στην καρτέλα για σειριακές θύρες"
+
+#: openplotter:3444
+msgid "Closing Signal K server ..."
+msgstr "Κλείσιμο Signal K διακομιστή..."
+
+#: openplotter:3450
+msgid "Signal K server restarted"
+msgstr "Ο Signal K διακομιστής επανεκκίνηθηκε"
+
+#: openplotter:3466
+msgid " Settings "
+msgstr " Ρυθμίσεις "
+
+#: openplotter:3467
+msgid "Enable settings"
+msgstr "Ενεργοποίηση ρυθμίσεων"
+
+#: openplotter:3469
+msgid "Serial port"
+msgstr "Σειριακή θύρα"
+
+#: openplotter:3478
+msgid "Bluetooth address"
+msgstr "Διεύθυνση Bluetooth"
+
+#: openplotter:3481
+msgid "Connection"
+msgstr "Σύνδεση"
+
+#: openplotter:3485
+msgid "Identify"
+msgstr "Αναγνώρηση"
+
+#: openplotter:3488
+msgid " Sending "
+msgstr " Αποστολή "
+
+#: openplotter:3490
+msgid "Enable sending SMS"
+msgstr "Ενεργοποίηση αποστολής SMS"
+
+#: openplotter:3493
+msgid "Send to phone"
+msgstr "Στείλετε στο τηλέφωνο"
+
+#: openplotter:3496
+msgid "Text"
+msgstr "Κείμενο"
+
+#: openplotter:3499
+msgid "Test"
+msgstr "Δοκιμή"
+
+#: openplotter:3553
+msgid "You have to provide a serial port or a bluetooth address."
+msgstr "Θα πρέπει να παρέχετε μια σειριακή θύρα ή μια διεύθυνση bluetooth."
+
+#: openplotter:3563
+msgid "You have to provide a connection type."
+msgstr "Θα πρέπει να παρέχετε ένα τύπο σύνδεσης."
+
+#: openplotter:3602
+msgid "You have to enable settings."
+msgstr "Πρέπει να ενεργοποιήσετε τις ρυθμίσεις."
+
+#: openplotter:3606
+msgid "You have to provide a phone number."
+msgstr "Πρέπει να δώσετε έναν αριθμό τηλεφώνου."
+
+#: openplotter:3631
+msgid "You have to provide some text to send."
+msgstr "Πρέπει να δώσετε κάποιο κείμενο για την αποστολή."
+
+#: openplotter:3638
+msgid " MQTT "
+msgstr " MQTT "
+
+#: openplotter:3640
+msgid "Remote broker"
+msgstr "Απομακρυσμένος broker"
+
+#: openplotter:3644
+msgid "Username"
+msgstr "Όνομα χρήστη"
+
+#: openplotter:3646
+msgid "Password"
+msgstr "Συνθηματικό"
+
+#: openplotter:3652
+msgid "Clear"
+msgstr "Καθαρισμός"
+
+#: openplotter:3726
+msgid "MQTT restarted"
+msgstr "Eπανεκκίνηση MQTT"
+
+#: openplotter:3729
+msgid "MQTT stopped"
+msgstr "Το MQTT σταμάτησε"
+
+#: openplotter:3778
+msgid "multiple keys"
+msgstr "πολλάπλα κλειδιά"
+
+#: openplotter:3779
+msgid "multiple sources"
+msgstr "πολλαπλές πηγές"
+
+#: openplotter:3792 openplotter:3850
+msgid "Failed. Apply settings change."
+msgstr "Απέτυχε. Εφαρμόστε αλλαγή ρυθμίσεων."
+
+#: openplotter:3801
+msgid "Failed. You have to provide a name for the topic."
+msgstr "Απέτυχε. Πρέπει να δώσετε ένα όνομα για το θέμα."
+
+#: openplotter:3805
+msgid "Failed. Topics must contain only allowed characters."
+msgstr "Απέτυχε. Τα θέματα πρέπει να περιέχουν μόνο επιτρεπόμενους χαρακτήρες."
+
+#: openplotter:3811 openplotter:3817
+msgid "Failed. Topic name must be unique."
+msgstr "Απέτυχε. Όνομα θέματος πρέπει να είναι μοναδικό."
+
+#: openplotter:3826
+msgid "Failed. You have to provide a Signal K key."
+msgstr "Απέτυχε. Πρέπει να δώσετε ένα κλειδί Signal K."
+
+#: openplotter:3835
+msgid "Failed. You have to select a type for the topic."
+msgstr "Απέτυχε. Πρέπει να επιλέξετε έναν τύπο για το θέμα."
+
+#: openplotter:3880
+msgid "Enter at least username and password."
+msgstr "Εισάγετε κατελάχιστον το όνομα χρήστη και κωδικό πρόσβασης."
+
+#: openplotter:3898
+msgid "Settings and topics will be deleted. Are you sure?"
+msgstr "Ρυθμίσεις και θέματα θα διαγράφονται. Είσαι σίγουρος;"
+
+#: startup:65
+msgid "Starting OpenPlotter"
+msgstr "Έναρξη OpenPlotter"
+
+#: startup:104
+msgid "Starting OpenPlotter. Please wait for all services to start."
+msgstr "Έναρξη OpenPlotter. Παρακαλώ περιμένετε όλες τις υπηρεσίες να ξεκινήσουν."
+
+#: startup:129
+msgid "There are some warnings. Please close this window and check your system."
+msgstr "Υπάρχουν κάποιες προειδοποιήσεις. Παρακαλούμε κλείστε αυτό το παράθυρο και να ελέγξετε το σύστημα σας."
+
+#: startup:177
+msgid "Checking Signal K password..."
+msgstr "Έλεγχος κωδικού πρόσβασης Signal K..."
+
+#: startup:182
+msgid ""
+"\n"
+"\n"
+"Security warning: You are using the default password for Signal K server (openplotter).\n"
+"Please change password in Signal K > Security > Users > openplotter."
+msgstr ""
+"\n"
+"\n"
+"Προειδοποίηση ασφαλείας: χρησιμοποιείτε τον προεπιλεγμένο κωδικό πρόσβασης για το διακομιστή Signal K (openplotter). Παρακαλούμε να αλλάξετε τον κωδικό πρόσβασης στο Signal K > ασφαλεία > χρήστες > openplotter."
+
+#: startup:183 startup:200 startup:222
+msgid " See warning."
+msgstr " Δείτε την προειδοποίηση."
+
+#: startup:184 startup:201 startup:224 startup:229 startup:286 startup:315
+#: startup:369 startup:374 startup:379 startup:407
+msgid " Done."
+msgstr " Έγινε."
+
+#: startup:186
+msgid ""
+"\n"
+"Checking Signal K defaults..."
+msgstr ""
+"\n"
+"Έλεγχος προεπιλογών Signal K..."
+
+#: startup:191
+msgid ""
+"\n"
+"Checking pi password..."
+msgstr ""
+"\n"
+"Γίνεται έλεγχος του κωδικού πρόσβασης..."
+
+#: startup:199
+msgid ""
+"\n"
+"\n"
+"Security warning: You are using the default password for \"pi\" user (raspberry).\n"
+"Please change password in Menu > Preferences > Raspberry Pi Configuration."
+msgstr ""
+"\n"
+"\n"
+"Προειδοποίηση ασφαλείας: χρησιμοποιείτε τον προεπιλεγμένο κωδικό πρόσβασης για το χρήστη 'pi'. Παρακαλούμε να αλλάξετε τον κωδικό πρόσβασης στο μενού > Προτιμήσεις > Raspberry Pi ρύθμισης παραμέτρων."
+
+#: startup:205
+msgid ""
+"\n"
+"Checking WIFI Access Point password..."
+msgstr ""
+"\n"
+"Έλεγχος κωδικόυ για το σημείο πρόσβασης WIFI..."
+
+#: startup:221
+msgid ""
+"\n"
+"\n"
+"Security warning: You are using the default WIFI Access Point password.\n"
+"Please change password in OpenPlotter > Network."
+msgstr ""
+"\n"
+"\n"
+"Προειδοποίηση ασφαλείας: χρησιμοποιείτε τον προεπιλεγμένο κωδικό του σημείου πρόσβασης Wi-Fi. Παρακαλούμε να αλλάξετε τον κωδικό πρόσβασης στα OpenPlotter > Δικτύο."
+
+#: startup:227
+msgid ""
+"\n"
+"Applying "
+msgstr ""
+"\n"
+"Εφαρμογή "
+
+#: startup:227
+msgid " seconds of delay..."
+msgstr " δευτερόλεπτα καθυστέρησης..."
+
+#: startup:232
+msgid ""
+"\n"
+"Starting MQTT server..."
+msgstr ""
+"\n"
+"Έναρξη διακομιστή MQTT..."
+
+#: startup:237
+msgid ""
+"\n"
+"Starting 1W sensors..."
+msgstr ""
+"\n"
+"Εκκίνηση των αισθητήρων 1W..."
+
+#: startup:244
+msgid ""
+"\n"
+"Starting N2K server..."
+msgstr ""
+"\n"
+"Έναρξη διακομιστή Ν2Κ..."
+
+#: startup:249
+msgid ""
+"\n"
+"Starting actions and NMEA 0183/N2K generators..."
+msgstr ""
+"\n"
+"Εκκίνηση δράσεων και γεννήτριας NMEA 0183/N2K..."
+
+#: startup:256
+msgid ""
+"\n"
+"Starting Node-RED..."
+msgstr ""
+"\n"
+"Έναρξη Node-RED..."
+
+#: startup:263
+msgid ""
+"\n"
+"Starting I2C, SPI, GPIO and Pypilot..."
+msgstr ""
+"\n"
+"Εναρξή τών I2C, SPI, GPIO και Pypilot..."
+
+#: startup:269
+msgid ""
+"\n"
+"Starting Pypilot Web App..."
+msgstr ""
+"\n"
+"Έναρξη του Pypilot Web App..."
+
+#: startup:277
+msgid ""
+"\n"
+"Starting SDR AIS reception..."
+msgstr ""
+"\n"
+"Εναρξή της λήψης SDR AIS..."
+
+#: startup:284
+msgid ""
+"\n"
+"Checking 800x480 display..."
+msgstr ""
+"\n"
+"Έλεγχος 800 x 480 για οθόνη..."
+
+#: startup:289
+msgid ""
+"\n"
+"Starting NMEA 0183 Multiplexer..."
+msgstr ""
+"\n"
+"Εκκήνηση NMEA 0183 πολυπλέκτης..."
+
+#: startup:295
+msgid ""
+"\n"
+"Starting OpenCPN..."
+msgstr ""
+"\n"
+"Εκκήνηση OpenCPN..."
+
+#: startup:303
+msgid ""
+"\n"
+"Starting Tools..."
+msgstr ""
+"\n"
+"Εκκήνηση εργαλεία..."
+
+#: startup:317
+msgid ""
+"\n"
+"Checking OpenPlotter updates..."
+msgstr ""
+"\n"
+"Έλεγχος ενημερωμένων εκδόσεων OpenPlotter..."
+
+#: startup:333
+msgid " It was not possible to connect to Github."
+msgstr " Δεν ήταν δυνατή η σύνδεση στο Github."
+
+#: startup:345 startup:365
+msgid " Error reading versions."
+msgstr " Σφάλμα ανάγνωσης εκδόσεων."
+
+#: startup:370
+msgid ""
+"\n"
+"\n"
+"There is a major Raspbian upgrade, you have to download\n"
+"the new OpenPlotter image: v"
+msgstr ""
+"\n"
+"\n"
+"Υπάρχει μια σημαντική αναβάθμιση Raspbian, θα πρέπει να κατεβάσετε τη νέα έκδοση OpenPlotter: v"
+
+#: startup:371 startup:376 startup:381
+msgid ""
+"\n"
+"See CHANGELOG:"
+msgstr ""
+"\n"
+"Δείτε το CHANGELOG:"
+
+#: startup:375
+msgid ""
+"\n"
+"\n"
+"There is a major OpenPlotter update: "
+msgstr ""
+"\n"
+"\n"
+"Υπάρχει μια σημαντική ενημέρωση για το OpenPlotter: "
+
+#: startup:380
+msgid ""
+"\n"
+"\n"
+"There is a minor OpenPlotter update: "
+msgstr ""
+"\n"
+"\n"
+"Υπάρχει μια ενημέρωση για το OpenPlotter: "
+
+#: startup:384
+msgid " is up to date."
+msgstr " είναι ενημερωμένο."
+
+#: startup:409
+msgid " Not Started."
+msgstr " Δεν ξεκίνησε."
