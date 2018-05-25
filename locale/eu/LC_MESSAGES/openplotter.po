@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: openplotter\n"
-"POT-Creation-Date: 2017-10-08 13:31+0200\n"
-"PO-Revision-Date: 2018-02-26 20:07+0100\n"
+"POT-Creation-Date: 2018-05-20 16:54+0200\n"
+"PO-Revision-Date: 2018-05-25 18:37+0200\n"
 "Last-Translator: sailoog <info@sailoog.com>\n"
 "Language-Team: Basque\n"
 "Language: eu\n"
@@ -19,139 +19,32 @@ msgstr ""
 "X-Crowdin-File: openplotter.po\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: CAN-USB-stick.py:69 diagnostic-N2K-input.py:65 diagnostic-N2K-output.py:66
-#: tools/NMEA_2000_generator.py:76
+#: CAN-USB-stick.py:82 classes/add_SK_to_N2K.py:74 diagnostic-N2K-input.py:77
+#: diagnostic-N2K-output.py:66
 msgid "PGN"
 msgstr "PGN"
 
-#: CAN-USB-stick.py:70 classes/add_USBinst.py:38
+#: CAN-USB-stick.py:83
 msgid "info"
 msgstr "argibideak"
 
-#: CAN-USB-stick.py:74
+#: CAN-USB-stick.py:87
 msgid "check"
 msgstr "egiaztatu"
 
-#: CAN-USB-stick.py:77
+#: CAN-USB-stick.py:90 openplotter:2590
 msgid "apply"
 msgstr "aplikatu"
 
-#: N2K-from-SK.py:53
-msgid "126992 System_Time"
-msgstr "126992 Sistemaren_Ordua"
-
-#: N2K-from-SK.py:55
-msgid "127245 Rudder"
-msgstr "127245 Lema"
-
-#: N2K-from-SK.py:57
-msgid "127250 Heading"
-msgstr "127250 Norabidea"
-
-#: N2K-from-SK.py:59
-msgid "127257 Attitude"
-msgstr "127257 Jarrera"
-
-#: N2K-from-SK.py:61
-msgid "127488 Engine_Rapid"
-msgstr "127488 Motorraren_Abiadura"
-
-#: N2K-from-SK.py:63
-msgid "127488 Engine_Rapid starbord"
-msgstr "127488 Istribirreko Motorraren_abiadura"
-
-#: N2K-from-SK.py:65
-msgid "127489 Engine"
-msgstr "127489 Motorra"
-
-#: N2K-from-SK.py:67
-msgid "127489 Engine starbord"
-msgstr "127489 Istribirreko motorra"
-
-#: N2K-from-SK.py:69
-msgid "127505 FluidLevel fuel"
-msgstr "127505 Erregai maila"
-
-#: N2K-from-SK.py:71
-msgid "127505 FluidLevel water"
-msgstr "127505 Ur maila"
-
-#: N2K-from-SK.py:73
-msgid "127505 FluidLevel gray water"
-msgstr "127505 Ur Gris maila"
-
-#: N2K-from-SK.py:75
-msgid "127505 FluidLevel black water"
-msgstr "127505 Ur beltz maila"
-
-#: N2K-from-SK.py:77
-msgid "127508 Battery_Status"
-msgstr "127508 Bateri_egoera"
-
-#: N2K-from-SK.py:79
-msgid "128259 Speed"
-msgstr "128259 Abiadura"
-
-#: N2K-from-SK.py:81
-msgid "128267 Depth"
-msgstr "128267 Sakontasuna"
-
-#: N2K-from-SK.py:83
-msgid "128275 Distance_Log"
-msgstr "128275 Bidaiatutako distantzia"
-
-#: N2K-from-SK.py:85
-msgid "129025 Position_Rapid"
-msgstr "129025 Posizio_abiadura"
-
-#: N2K-from-SK.py:87
-msgid "129026 COG_SOG"
-msgstr "129026 COG_SOG"
-
-#: N2K-from-SK.py:89
-msgid "130306 Wind Data"
-msgstr "130306 Haizearen datuak"
-
-#: N2K-from-SK.py:91
-msgid "130310 Environmental_Parameters"
-msgstr "130310 Ingurumen_parametroak"
-
-#: N2K-from-SK.py:93
-msgid "130311 Environmental_Parameters"
-msgstr "130311 Ingurumen_parametroak"
-
-#: N2K-from-SK.py:95
-msgid "130316 Temperature refrigerator"
-msgstr "130316 Hotzgailuaren tenperatura"
-
-#: N2K-from-SK.py:97
-msgid "130316 Temperature exhaust"
-msgstr "130316 Ihesaren tenperatura"
-
-#: N2K-from-SK.py:100 tools/SK-simulator.py:64
-msgid "all"
-msgstr "dena"
-
-#: N2K-from-SK.py:103 classes/add_kplex.py:81 classes/add_kplex.py:98
-#: classes/add_kplex.py:157 classes/add_kplex.py:165 classes/add_kplex.py:217
-#: classes/add_kplex.py:345 classes/add_kplex.py:369 classes/add_kplex.py:438
-#: classes/add_kplex.py:442 classes/add_kplex.py:446 classes/add_kplex.py:470
-#: tools/SK-simulator.py:67 openplotter:834 openplotter:872 openplotter:901
-#: openplotter:906 openplotter:988 openplotter:991 openplotter:1520
-#: openplotter:1532 openplotter:1581 openplotter:1583 openplotter:3155
-#: openplotter:3173
-msgid "none"
-msgstr "ezer"
-
-#: SK-base_d.py:527 openplotter:2345
+#: SK-base_d.py:551 openplotter:2250
 msgid "was not updated in the last (sec.)"
 msgstr "ez da eguneratu azkenengo (seg.)"
 
-#: SK-base_d.py:527 openplotter:2345
+#: SK-base_d.py:551 openplotter:2250
 msgid "was updated in the last (sec.)"
 msgstr "eguneratu da azkenengo (seg.)"
 
-#: SK-base_d.py:528 openplotter:2346
+#: SK-base_d.py:552 openplotter:2251
 msgid "contains"
 msgstr "dauka"
 
@@ -171,93 +64,67 @@ msgstr "hasiera"
 msgid "stop"
 msgstr "gelditu"
 
-#: add_tool10.py:31 classes/add_NMEA_0183.py:57 classes/add_tool10.py:31
+#: add_tool10.py:31 classes/add_NMEA_0183.py:68 classes/add_tool10.py:31
 msgid "cancel"
 msgstr "ezeztatu"
 
-#: classes/actions.py:36 classes/add_action.py:59
+#: classes/actions.py:44 classes/add_action.py:59
 msgid "no repeat"
 msgstr "ez errepikatu"
 
-#: classes/actions.py:36
+#: classes/actions.py:44
 msgid "seconds"
 msgstr "segunduak"
 
-#: classes/actions.py:36
+#: classes/actions.py:44
 msgid "minutes"
 msgstr "minutuak"
 
-#: classes/actions.py:36
+#: classes/actions.py:44
 msgid "hours"
 msgstr "orduak"
 
-#: classes/actions.py:36
+#: classes/actions.py:44
 msgid "days"
 msgstr "egunak"
 
-#: classes/actions.py:41 classes/add_action.py:131
+#: classes/actions.py:49 classes/add_action.py:135
 msgid "wait"
 msgstr "itxoin"
 
-#: classes/actions.py:41
+#: classes/actions.py:49
 msgid "Enter seconds to wait in field \"data\"."
 msgstr "\"data\" eremuan itxoin beharreko segunfuak ezarri."
 
-#: classes/actions.py:42
+#: classes/actions.py:50
 msgid "command"
 msgstr "agindua"
 
-#: classes/actions.py:42
+#: classes/actions.py:50
 msgid "Enter a Linux command and arguments in the field below."
 msgstr "Hurrengo eremuan Linux aginduak eta argibideak sartu."
 
-#: classes/actions.py:43
+#: classes/actions.py:51
 msgid "reset system"
 msgstr "berrerasi sistema"
 
-#: classes/actions.py:44
+#: classes/actions.py:52
 msgid "shutdown system"
 msgstr "sistema itzali"
 
-#: classes/actions.py:47
+#: classes/actions.py:55
 msgid "stop NMEA multiplexer"
 msgstr "NMEA multiplexorra gelditu"
 
-#: classes/actions.py:48
+#: classes/actions.py:56
 msgid "reset NMEA multiplexer"
 msgstr "NMEA multiplexorra berrabiarazi"
 
-#: classes/actions.py:49
-msgid "stop WiFi access point"
-msgstr "WiFi sarrera puntua gelditu"
-
-#: classes/actions.py:49 openplotter:997
-msgid ""
-"Access point will be disabled.\n"
-"\n"
-"If you are on a headless system, you will not be able to reconnect again.\n"
-"\n"
-"Are you sure?"
-msgstr ""
-"Sarbide puntua desgaituko da.\n"
-"\n"
-"Bururik gabeko sisteman bazaude, berriro ezin izango duzu berriro konektatu.\n"
-"\n"
-"Ziur zaude?"
-
-#: classes/actions.py:50
-msgid "start WiFi access point"
-msgstr "WiFi sarrera puntua hasi"
-
-#: classes/actions.py:50
-msgid "Be sure you have filled in all fields in \"WiFi AP\" tab."
-msgstr "Ziurtatu \"WiFi AP\" fitxan eremu guztiak bete dituzula."
-
-#: classes/actions.py:53
+#: classes/actions.py:59
 msgid "publish Twitter"
 msgstr "Twitterren argitaratu"
 
-#: classes/actions.py:53
+#: classes/actions.py:59
 msgid ""
 "Be sure you have filled in all fields in \"Accounts\" tab, and enabled Twitter checkbox.\n"
 "\n"
@@ -267,11 +134,11 @@ msgstr ""
 "\n"
 "Idatzi testua \"datuak\" eremuan argitaratzeko."
 
-#: classes/actions.py:54
+#: classes/actions.py:60
 msgid "send e-mail"
 msgstr "e-maila bidali"
 
-#: classes/actions.py:54
+#: classes/actions.py:60
 msgid ""
 "Be sure you have filled in all fields in \"Accounts\" tab, and enabled Gmail checkbox.\n"
 "\n"
@@ -281,11 +148,11 @@ msgstr ""
 "\n"
 "Idatzi gaia \"datuak\" eremuan."
 
-#: classes/actions.py:55
+#: classes/actions.py:61
 msgid "send SMS"
 msgstr "SMS bidali"
 
-#: classes/actions.py:55
+#: classes/actions.py:61
 msgid ""
 "Be sure you have enabled sending SMS in \"SMS\" tab.\n"
 "\n"
@@ -295,59 +162,59 @@ msgstr ""
 "\n"
 "Idatzi testua \"datuen\" eremuan."
 
-#: classes/actions.py:56
+#: classes/actions.py:62
 msgid "play sound"
 msgstr "soinua jo"
 
-#: classes/actions.py:57
+#: classes/actions.py:63
 msgid "stop all sounds"
 msgstr "soinu guztiak gelditu"
 
-#: classes/actions.py:58
+#: classes/actions.py:64
 msgid "show message"
 msgstr "mesuak ikusi"
 
-#: classes/actions.py:58
+#: classes/actions.py:64
 msgid "Enter the message in field \"data\"."
 msgstr "\"data\" eremuan mesua ezarri."
 
-#: classes/actions.py:59
+#: classes/actions.py:65
 msgid "close all messages"
 msgstr "mesu guztiak itxi"
 
-#: classes/actions.py:60
+#: classes/actions.py:66
 msgid "start all actions"
 msgstr "ekintza guztiak hasi"
 
-#: classes/actions.py:61
+#: classes/actions.py:67
 msgid "stop all actions"
 msgstr "ekintza guztiak gelditu"
 
-#: classes/actions.py:61
+#: classes/actions.py:67
 msgid "This action will stop all the triggers except the trigger which has an action \"start all actions\" defined."
 msgstr "Ekintza honek abiarazle guztiak geldituko ditu, \"ekintza guztiak abiaraztean\" ekintza bat duen ekintza izan ezik izan ezik."
 
-#: classes/actions.py:74
+#: classes/actions.py:80
 msgid ": High"
 msgstr ": Altua"
 
-#: classes/actions.py:74
+#: classes/actions.py:80
 msgid "ATTENTION! if you set this GPIO output to \"High\" and there is not a resistor or a circuit connected to the selected GPIO pin, YOU CAN DAMAGE YOUR BOARD."
 msgstr "ERNE! GPIO irteera \"High\" hau ezartzen baduzu eta ez bada erresistentzia edo hautatutako GPIO pin konektatutako zirkuitu bat, YOUR BOARD CAN DAUDE."
 
-#: classes/actions.py:75
+#: classes/actions.py:81
 msgid ": Low"
 msgstr ": Baxua"
 
-#: classes/actions.py:86
+#: classes/actions.py:92
 msgid "Publish on topic: "
 msgstr "Gaia argitaratu: "
 
-#: classes/actions.py:89
+#: classes/actions.py:95
 msgid "Set Signal K key value"
 msgstr "Ezarri seinalea K tekla-balioa"
 
-#: classes/actions.py:151
+#: classes/actions.py:153
 msgid ""
 "\n"
 "source: "
@@ -355,7 +222,7 @@ msgstr ""
 "\n"
 "iturria: "
 
-#: classes/actions.py:151
+#: classes/actions.py:153
 msgid ""
 "\n"
 "timestamp: "
@@ -372,207 +239,227 @@ msgid "Edit 1W temperature sensor"
 msgstr "Editatu 1Wtioko tenperatura sensorea"
 
 #: classes/add_DS18B20.py:38 classes/add_topic.py:40 classes/add_trigger.py:39
-#: classes/edit_i2c.py:31 openplotter:1693 openplotter:1909 openplotter:2046
-#: openplotter:2563 openplotter:3262
+#: classes/edit_i2c.py:31 openplotter:1617 openplotter:1834 openplotter:1971
+#: openplotter:2450 openplotter:3658
 msgid "Signal K key"
 msgstr "Seinalearen K tekla"
 
 #: classes/add_DS18B20.py:41 classes/add_topic.py:43 classes/add_trigger.py:42
-#: classes/edit_i2c.py:25 classes/edit_i2c.py:35 tools/demo_tool.py:82
-#: openplotter:3355 openplotter:3482
+#: classes/edit_i2c.py:25 classes/edit_i2c.py:35
+#: tools/demo_tool/demo_tool.py:84 openplotter:3751 openplotter:3878
 msgid "Edit"
 msgstr "Editatu"
 
 #: classes/add_DS18B20.py:44 classes/add_gpio.py:27 classes/add_i2c.py:39
-#: classes/add_kplex.py:44 diagnostic-N2K-input.py:68
-#: diagnostic-N2K-output.py:69 openplotter:1331 openplotter:1690
-#: openplotter:2042 openplotter:2560
+#: classes/add_kplex.py:44 diagnostic-N2K-input.py:80
+#: diagnostic-N2K-output.py:69 openplotter:1269 openplotter:1614
+#: openplotter:1967 openplotter:2447
 msgid "Name"
 msgstr "Izena"
 
-#: classes/add_DS18B20.py:46 classes/add_MCP.py:48 classes/add_gpio.py:30
+#: classes/add_DS18B20.py:47 classes/add_MCP.py:55 classes/add_gpio.py:30
 #: classes/add_topic.py:32 classes/select_key.py:53
 msgid "allowed characters: 0-9, a-z, A-Z"
 msgstr "karakter guztiak: 0-9, a-z, A-Z"
 
-#: classes/add_DS18B20.py:51
+#: classes/add_DS18B20.py:52
 msgid "Sensor ID"
 msgstr "Sensorearen ID"
 
-#: classes/add_DS18B20.py:54 classes/edit_i2c.py:50 openplotter:1695
-#: openplotter:2562
+#: classes/add_DS18B20.py:55 classes/edit_i2c.py:50 openplotter:1619
+#: openplotter:2449
 msgid "Offset"
 msgstr "Desplazamendua"
 
-#: classes/add_DS18B20.py:76 classes/add_action.py:152 classes/add_topic.py:76
-#: classes/add_trigger.py:193 classes/edit_i2c.py:103 tools/demo_tool.py:140
+#: classes/add_DS18B20.py:67 classes/add_MCP.py:68 classes/add_action.py:64
+#: classes/add_gpio.py:60 classes/add_kplex.py:117 classes/add_trigger.py:71
+#: tools/calculate/calculate.py:91 tools/demo_tool/demo_tool.py:96
+#: openplotter:518
+msgid "OK"
+msgstr "OK"
+
+#: classes/add_DS18B20.py:81 classes/add_action.py:156 classes/add_topic.py:76
+#: classes/add_trigger.py:196 classes/edit_i2c.py:103
+#: tools/demo_tool/demo_tool.py:143
 msgid "Failed. * must contain only allowed characters."
 msgstr "Huts. *Onartutako karaktereak besterik erabil daitezke."
 
-#: classes/add_DS18B20.py:81 classes/add_action.py:157 classes/add_topic.py:81
-#: classes/add_trigger.py:198 classes/edit_i2c.py:108 tools/demo_tool.py:145
+#: classes/add_DS18B20.py:86 classes/add_action.py:161 classes/add_topic.py:81
+#: classes/add_trigger.py:201 classes/edit_i2c.py:108
+#: tools/demo_tool/demo_tool.py:148
 msgid "Failed. You have to provide a name for *."
 msgstr "Huts. *rentzako izena behar da."
 
-#: classes/add_MCP.py:26
+#: classes/add_DS18B20.py:94 classes/add_trigger.py:227
+msgid "Failed. Select a Signal K key."
+msgstr "Huts egin. Hautatu seinalearen K tekla."
+
+#: classes/add_DS18B20.py:99
+msgid "Failed. Provide a name."
+msgstr ""
+
+#: classes/add_DS18B20.py:103
+msgid "Failed. Name must contain only letters and numbers."
+msgstr ""
+
+#: classes/add_DS18B20.py:107
+msgid "Failed. Select sensor ID."
+msgstr ""
+
+#: classes/add_MCP.py:29
 msgid "Edit MCP analog input "
 msgstr "Editatu MCP sarrera analogikoa "
 
-#: classes/add_MCP.py:46 classes/select_key.py:52 openplotter:1910
+#: classes/add_MCP.py:53 classes/select_key.py:52 openplotter:1835
 msgid "*"
 msgstr "*"
 
-#: classes/add_MCP.py:50 openplotter:1907
+#: classes/add_MCP.py:57 openplotter:1832
 msgid "aktiv"
 msgstr "aktiv"
 
-#: classes/add_MCP.py:51 unit-private.py:85 openplotter:1911
+#: classes/add_MCP.py:58 unit-private.py:84 openplotter:1836
 msgid "convert"
 msgstr "bihurtu"
 
-#: classes/add_MCP.py:148 openplotter:1980
+#: classes/add_MCP.py:61
+msgid "clean"
+msgstr ""
+
+#: classes/add_MCP.py:163 openplotter:1905
 msgid "minimum raw value in setting table > 0"
 msgstr "gutxieneko lehengaia gutxieneko taula ezartzeko> 0"
 
-#: classes/add_MCP.py:151 openplotter:1983
+#: classes/add_MCP.py:166 openplotter:1908
 msgid "maximum raw value in setting table < 1023"
 msgstr "mahaia ezartzeko gehienezko lehengaia <1023"
 
-#: classes/add_MCP.py:154
+#: classes/add_MCP.py:169
 msgid "no option value "
 msgstr "ez dago aukerarik "
 
-#: classes/add_MCP.py:154
+#: classes/add_MCP.py:169
 msgid " in openplotter.conf"
 msgstr " openplotter.conf"
 
-#: classes/add_NMEA_0183.py:27
+#: classes/add_MCP.py:187 openplotter:1929
+msgid "Failed. Provide name and Signal K values."
+msgstr "Huts egin. Eman izena eta seinalea K balioak."
+
+#: classes/add_MCP.py:191 classes/add_gpio.py:91 openplotter:1934
+msgid "Failed. The name must contain only letters and numbers."
+msgstr "Huts egin. Izena letrak eta zenbakiak bakarrik izan behar ditu."
+
+#: classes/add_NMEA_0183.py:34
 msgid "add NMEA 0183 sentence"
 msgstr "gehitu NMEA 0183 esaldi"
 
-#: classes/add_NMEA_0183.py:42 tools/NMEA_0183_generator.py:45
+#: classes/add_NMEA_0183.py:53
+#: tools/NMEA_0183_generator/NMEA_0183_generator.py:45
 msgid "Sentence"
 msgstr "Esaldien"
 
-#: classes/add_NMEA_0183.py:47 tools/calculate.py:53 tools/calculate.py:61
-#: tools/calculate.py:73 tools/calculate.py:85
+#: classes/add_NMEA_0183.py:58 tools/calculate/calculate.py:53
+#: tools/calculate/calculate.py:61 tools/calculate/calculate.py:73
+#: tools/calculate/calculate.py:85
 msgid "Rate (sec)"
 msgstr "Baloratu (seg.)"
 
-#: classes/add_NMEA_0183.py:51 diagnostic-NMEA.py:65
+#: classes/add_NMEA_0183.py:62 diagnostic-NMEA.py:65
 msgid "NMEA info"
 msgstr "NMEA argibidea"
 
-#: classes/add_NMEA_0183.py:54
+#: classes/add_NMEA_0183.py:65
 msgid "RMC examp"
 msgstr "RMC examp"
 
-#: classes/add_NMEA_0183.py:62
+#: classes/add_NMEA_0183.py:73
 msgid "Field"
 msgstr "Eremua"
 
-#: classes/add_NMEA_0183.py:63 classes/add_trigger.py:63
-#: diagnostic-SK-input.py:70
+#: classes/add_NMEA_0183.py:74 classes/add_trigger.py:63
+#: diagnostic-SK-input.py:74
 msgid "Value"
 msgstr "Balorea"
 
-#: classes/add_NMEA_0183.py:67
+#: classes/add_NMEA_0183.py:78
 msgid "--Select type"
 msgstr "--Aukera mota"
 
-#: classes/add_NMEA_0183.py:67
+#: classes/add_NMEA_0183.py:78
 msgid "Expression"
 msgstr "Adierazpen"
 
-#: classes/add_NMEA_0183.py:67
+#: classes/add_NMEA_0183.py:78
 msgid "Number"
 msgstr "Zenbakia"
 
-#: classes/add_NMEA_0183.py:67 classes/add_NMEA_0183.py:282
+#: classes/add_NMEA_0183.py:78 classes/add_NMEA_0183.py:293
 msgid "String"
 msgstr "Katea"
 
-#: classes/add_NMEA_0183.py:72
+#: classes/add_NMEA_0183.py:83
 msgid "--vessel"
 msgstr "--itxasuntxi"
 
-#: classes/add_NMEA_0183.py:83 classes/add_NMEA_0183.py:206
+#: classes/add_NMEA_0183.py:94 classes/add_NMEA_0183.py:217
 msgid "--group"
 msgstr "--taldea"
 
-#: classes/add_NMEA_0183.py:87 classes/add_NMEA_0183.py:227
-#: classes/add_NMEA_0183.py:429
+#: classes/add_NMEA_0183.py:98 classes/add_NMEA_0183.py:238
+#: classes/add_NMEA_0183.py:440
 msgid "--key"
 msgstr "--pasahitzha"
 
-#: classes/add_NMEA_0183.py:90
+#: classes/add_NMEA_0183.py:101
 msgid "--operator"
 msgstr "--eragilea"
 
-#: classes/add_NMEA_0183.py:95
+#: classes/add_NMEA_0183.py:106
 msgid "="
 msgstr "="
 
-#: classes/add_NMEA_0183.py:100
+#: classes/add_NMEA_0183.py:111
 msgid "Add value"
 msgstr "Balorea gehitu"
 
-#: classes/add_NMEA_0183.py:103
+#: classes/add_NMEA_0183.py:114
 msgid "Delete value"
 msgstr "Balorea ezabatu"
 
-#: classes/add_NMEA_0183.py:284 classes/add_NMEA_0183.py:290
+#: classes/add_NMEA_0183.py:295 classes/add_NMEA_0183.py:301
 msgid "Failed. String must contain only allowed characters."
 msgstr "Huts. Onartutako karaktereak besterik erabil daitezke."
 
-#: classes/add_NMEA_0183.py:302 classes/add_NMEA_0183.py:320
-#: classes/add_NMEA_0183.py:331 classes/add_NMEA_0183.py:344
+#: classes/add_NMEA_0183.py:313 classes/add_NMEA_0183.py:331
+#: classes/add_NMEA_0183.py:342 classes/add_NMEA_0183.py:355
 msgid "FAILED. Fill in all the available fields."
 msgstr "Huts egin du. Eremu eskuragarri guztiak bete."
 
-#: classes/add_NMEA_0183.py:309
+#: classes/add_NMEA_0183.py:320
 msgid "FAILED. This is not a valid expression."
 msgstr "HUTS. Baliorik gabeko adierazpena."
 
-#: classes/add_NMEA_0183.py:336
+#: classes/add_NMEA_0183.py:347
 msgid "FAILED. This field must be a number."
 msgstr "HUTS. Eremu hau zenbaki bat izan behar du."
 
-#: classes/add_USBinst.py:25 classes/add_tool10.py:23
-msgid "Add individual name to serial port"
-msgstr "Gehitu banakako izena serialerako ataka"
+#: classes/add_SK_to_N2K.py:35
+msgid "Generate N2K from Signal K"
+msgstr ""
 
-#: classes/add_USBinst.py:33
-msgid "random name"
-msgstr "ausazko izena"
+#: classes/add_SK_to_N2K.py:75
+msgid "description"
+msgstr ""
 
-#: classes/add_USBinst.py:34 openplotter:2691
-msgid "vendor"
-msgstr "fabrikatzaile"
+#: classes/add_SK_to_N2K.py:76
+msgid "Signal K variable"
+msgstr ""
 
-#: classes/add_USBinst.py:35 openplotter:2692
-msgid "product"
-msgstr "produktua"
-
-#: classes/add_USBinst.py:36 openplotter:2693
-msgid "port"
-msgstr "portua"
-
-#: classes/add_USBinst.py:37 openplotter:2694
-msgid "serial"
-msgstr "serial"
-
-#: classes/add_USBinst.py:41
-msgid "new name"
-msgstr "izen berria"
-
-#: classes/add_USBinst.py:47
-msgid "Remember device (by vendor, product,(serial))"
-msgstr "Gogoan izan gailua (saltzaileak, produktuak, (seriea))"
-
-#: classes/add_USBinst.py:53
-msgid "Remember port (positon on the USB-hub)"
-msgstr "Gogoratu portua (posizioa USB hub-en)"
+#: classes/add_SK_to_N2K.py:79 tools/moitessier_hat/moitessier_hat.py:170
+#: openplotter:1063 openplotter:1292 openplotter:2213
+msgid "Apply changes"
+msgstr "Aldaketak aplikatu"
 
 #: classes/add_action.py:23
 msgid "Add action"
@@ -582,11 +469,11 @@ msgstr "Gehitu ekintza"
 msgid "Edit action"
 msgstr "Editatu ekintza"
 
-#: classes/add_action.py:39 openplotter:2290
+#: classes/add_action.py:39 openplotter:2195
 msgid "action"
 msgstr "ekintza"
 
-#: classes/add_action.py:45 openplotter:2291
+#: classes/add_action.py:45 openplotter:2196
 msgid "data"
 msgstr "datuak"
 
@@ -598,19 +485,19 @@ msgstr "Gehitu seinalea K tekla"
 msgid "repeat after"
 msgstr "errepikatu ondoren"
 
-#: classes/add_action.py:117 openplotter:709
+#: classes/add_action.py:121 openplotter:585
 msgid "Choose a file"
 msgstr "Fitxategia aukeratu"
 
-#: classes/add_action.py:119 openplotter:710
+#: classes/add_action.py:123 openplotter:586
 msgid "Audio files"
 msgstr "Audio fitxategia"
 
-#: classes/add_action.py:119 openplotter:710
+#: classes/add_action.py:123 openplotter:586
 msgid "All files"
 msgstr "Fitxategi guztiak"
 
-#: classes/add_action.py:132
+#: classes/add_action.py:136
 msgid ""
 "\n"
 "\n"
@@ -620,7 +507,15 @@ msgstr ""
 "\n"
 "Seinale K tekla bakoitzaren balioa uneko balioaren artean idatz dezakezu angelu parentesien artean, adibidez: <navigation.position.latitude>"
 
-#: classes/add_deviation_setting.py:26 openplotter:136
+#: classes/add_action.py:170
+msgid "Failed. Select an action."
+msgstr "Huts egin. Hautatu ekintza bat."
+
+#: classes/add_action.py:179
+msgid "Failed. \"Repeat after\" must be a number."
+msgstr ""
+
+#: classes/add_deviation_setting.py:26 openplotter:123
 msgid "Deviation Table"
 msgstr "Desbiderapen taula"
 
@@ -640,8 +535,8 @@ msgstr "desbideraketa"
 msgid "Magnetic Variation"
 msgstr "Aldaketa magnetikoa"
 
-#: classes/add_deviation_setting.py:41 classes/add_deviation_setting.py:136
-#: classes/add_deviation_setting.py:177
+#: classes/add_deviation_setting.py:41 classes/add_deviation_setting.py:137
+#: classes/add_deviation_setting.py:178
 msgid "Fix"
 msgstr "Konpondu"
 
@@ -661,12 +556,15 @@ msgstr "Benetazko norabidea"
 msgid "change"
 msgstr "aldatu"
 
-#: classes/add_deviation_setting.py:56 classes/add_i2c.py:43 openplotter:1211
+#: classes/add_deviation_setting.py:56 classes/add_i2c.py:43 openplotter:1036
 msgid "Reset"
 msgstr "Berrezarri"
 
 #: classes/add_deviation_setting.py:59 classes/add_value_setting.py:49
-#: test_sms.py:51 tools/SDR_AIS_fine_cal.py:58 startup:98
+#: test_sms.py:51 tools/SDR_AIS/SDR_AIS_fine_cal.py:58
+#: tools/moitessier_hat/moitessier_hat.py:85
+#: tools/moitessier_hat/moitessier_hat.py:173
+#: tools/moitessier_hat/moitessier_hat.py:264 startup:81
 msgid "Close"
 msgstr "Itxi"
 
@@ -674,15 +572,16 @@ msgstr "Itxi"
 msgid "graph"
 msgstr "grafikoa"
 
-#: classes/add_deviation_setting.py:142 classes/add_deviation_setting.py:189
+#: classes/add_deviation_setting.py:143 classes/add_deviation_setting.py:190
+#: openplotter:686
 msgid "Set"
 msgstr "Ezarri"
 
-#: classes/add_deviation_setting.py:165 classes/add_deviation_setting.py:183
+#: classes/add_deviation_setting.py:166 classes/add_deviation_setting.py:184
 msgid "This value is not a number."
 msgstr "Sartutako balorea ez da zenbakia."
 
-#: classes/add_deviation_setting.py:178
+#: classes/add_deviation_setting.py:179
 msgid "Deviation table will be calculated with this variation. If you change this value you will have to define the complete table again."
 msgstr "Desbideratze taula kalkulatuko da aldaketarekin. Balioa aldatzen baduzu, mahaia behin betiko definitu beharko duzu."
 
@@ -690,21 +589,21 @@ msgstr "Desbideratze taula kalkulatuko da aldaketarekin. Balioa aldatzen baduzu,
 msgid "Add GPIO sensor"
 msgstr "GPIO sensorea gehitu"
 
-#: classes/add_gpio.py:32 classes/add_gpio.py:51 classes/add_gpio.py:62
-#: openplotter:2096
+#: classes/add_gpio.py:32 classes/add_gpio.py:51 classes/add_gpio.py:66
+#: openplotter:2021
 msgid "input"
 msgstr "sarrera"
 
-#: classes/add_gpio.py:32 classes/add_gpio.py:48 classes/add_gpio.py:63
-#: openplotter:2093 openplotter:2125
+#: classes/add_gpio.py:32 classes/add_gpio.py:48 classes/add_gpio.py:67
+#: classes/add_gpio.py:74 openplotter:2018 openplotter:2052
 msgid "output"
 msgstr "irteera"
 
-#: classes/add_gpio.py:33 openplotter:2043
+#: classes/add_gpio.py:33 openplotter:1968
 msgid "I/O"
 msgstr "S/I"
 
-#: classes/add_gpio.py:37 openplotter:101
+#: classes/add_gpio.py:37 openplotter:95
 msgid "GPIO"
 msgstr "GPIO"
 
@@ -712,15 +611,29 @@ msgstr "GPIO"
 msgid "Pull"
 msgstr "Tira"
 
+#: classes/add_gpio.py:80
+msgid "CAUTION. If you connect a closed switch or some inappropriate circuit, you could short out and damage your board when this output becomes \"High\". Are you sure to enable this output?"
+msgstr "KONTUZ. Konmutadore itxia edo egokitutako zirkuitu bat konektatzen baduzu, laburbildu eta kaltetu egin dezakezu zure irteera \"Alta\" bihurtzen denean. Ziur al zaude irteera hau gaitu nahi duzula?"
+
+#: classes/add_gpio.py:81 classes/add_i2c.py:108 openplotter:449
+#: openplotter:843 openplotter:1220 openplotter:3192 openplotter:3199
+#: openplotter:3898
+msgid "Question"
+msgstr "Galdera"
+
+#: classes/add_gpio.py:88
+msgid "Failed. You must fill in all fields."
+msgstr "Huts. Eremu guztiak bete behar dituzu."
+
 #: classes/add_i2c.py:27
-msgid "Add I2C sensor"
-msgstr "I2C sensorea gehitu"
+msgid "Add I2C sensor without compass"
+msgstr ""
 
 #: classes/add_i2c.py:36
 msgid "detected"
 msgstr "detektatu"
 
-#: classes/add_i2c.py:40 classes/add_kplex.py:60 openplotter:1691
+#: classes/add_i2c.py:40 classes/add_kplex.py:57 openplotter:1615
 msgid "Address"
 msgstr "Helbidea"
 
@@ -742,11 +655,6 @@ msgstr ""
 "\n"
 "Auto detekzioa berriro saiatu nahi al duzu?"
 
-#: classes/add_i2c.py:108 openplotter:488 openplotter:778 openplotter:998
-#: openplotter:1007 openplotter:1290 openplotter:2132 openplotter:3502
-msgid "Question"
-msgstr "Galdera"
-
 #: classes/add_i2c.py:122
 msgid "Detected I2C addresses"
 msgstr "I2C helbideak detektatu"
@@ -756,7 +664,7 @@ msgid "Add/Edit NMEA 0183 (KPLEX)"
 msgstr "NMEA 0183 (KPLEX) gehitu/editatu"
 
 #: classes/add_kplex.py:38 classes/add_topic.py:36 diagnostic-NMEA.py:55
-#: openplotter:1332 openplotter:3261
+#: openplotter:1270 openplotter:3657
 msgid "Type"
 msgstr "Mota"
 
@@ -764,141 +672,136 @@ msgstr "Mota"
 msgid " settings "
 msgstr " ezarpenak "
 
-#: classes/add_kplex.py:50 classes/add_kplex.py:62 openplotter:3246
+#: classes/add_kplex.py:49 classes/add_kplex.py:59 openplotter:3642
 msgid "Port"
 msgstr "Portua"
 
-#: classes/add_kplex.py:56
+#: classes/add_kplex.py:54
 msgid "Bauds"
 msgstr "Baudioak"
 
-#: classes/add_kplex.py:67
+#: classes/add_kplex.py:64
 msgid "in/out"
 msgstr "sarrera/irteera"
 
-#: classes/add_kplex.py:80
+#: classes/add_kplex.py:75
 msgid "in Filter "
 msgstr "sarrera filtroa "
 
-#: classes/add_kplex.py:81 classes/add_kplex.py:98 classes/add_kplex.py:449
-#: classes/add_kplex.py:473
+#: classes/add_kplex.py:76 classes/add_kplex.py:93 classes/add_kplex.py:149
+#: classes/add_kplex.py:157 classes/add_kplex.py:323 classes/add_kplex.py:347
+#: classes/add_kplex.py:416 classes/add_kplex.py:420 classes/add_kplex.py:424
+#: classes/add_kplex.py:448 openplotter:658 openplotter:1465 openplotter:1477
+#: openplotter:1524 openplotter:1526 openplotter:2577 openplotter:2701
+#: openplotter:3016 openplotter:3114 openplotter:3361
+msgid "none"
+msgstr "ezer"
+
+#: classes/add_kplex.py:76 classes/add_kplex.py:93 classes/add_kplex.py:427
+#: classes/add_kplex.py:451
 msgid "Accept only sentences:"
 msgstr "Esaldi onartu:"
 
-#: classes/add_kplex.py:81 classes/add_kplex.py:98 classes/add_kplex.py:460
-#: classes/add_kplex.py:484
+#: classes/add_kplex.py:76 classes/add_kplex.py:93 classes/add_kplex.py:438
+#: classes/add_kplex.py:462
 msgid "Ignore sentences:"
 msgstr "Ezikusi esaldiak:"
 
-#: classes/add_kplex.py:86 classes/add_kplex.py:103
+#: classes/add_kplex.py:81 classes/add_kplex.py:98
 msgid "-"
 msgstr "-"
 
-#: classes/add_kplex.py:89 classes/add_kplex.py:107
+#: classes/add_kplex.py:84 classes/add_kplex.py:102
 msgid "Add sentence"
 msgstr "Esaldia gehitu"
 
-#: classes/add_kplex.py:93 classes/add_kplex.py:111
+#: classes/add_kplex.py:88 classes/add_kplex.py:106
 msgid "Delete"
 msgstr "Ezabatu"
 
-#: classes/add_kplex.py:97
+#: classes/add_kplex.py:92
 msgid "out Filter "
 msgstr "irteera filtroa "
 
-#: classes/add_kplex.py:114 classes/add_kplex.py:118 classes/add_kplex.py:183
-#: classes/add_kplex.py:185 classes/add_kplex.py:212 classes/add_kplex.py:214
-#: classes/add_kplex.py:233 classes/add_kplex.py:236 classes/add_kplex.py:259
-#: classes/add_kplex.py:285 classes/add_kplex.py:344 classes/add_kplex.py:368
-#: classes/add_kplex.py:438 classes/add_kplex.py:442 classes/add_kplex.py:447
-#: classes/add_kplex.py:450 classes/add_kplex.py:461 classes/add_kplex.py:471
-#: classes/add_kplex.py:474 classes/add_kplex.py:485 openplotter:1524
-#: openplotter:1536 openplotter:1581 openplotter:1583
+#: classes/add_kplex.py:109 classes/add_kplex.py:113 classes/add_kplex.py:211
+#: classes/add_kplex.py:214 classes/add_kplex.py:237 classes/add_kplex.py:263
+#: classes/add_kplex.py:322 classes/add_kplex.py:346 classes/add_kplex.py:416
+#: classes/add_kplex.py:420 classes/add_kplex.py:425 classes/add_kplex.py:428
+#: classes/add_kplex.py:439 classes/add_kplex.py:449 classes/add_kplex.py:452
+#: classes/add_kplex.py:463 openplotter:1469 openplotter:1481 openplotter:1524
+#: openplotter:1526
 msgid "nothing"
 msgstr "ezer ez"
 
-#: classes/add_kplex.py:122
-msgid "AP examp"
-msgstr "SP adibidea"
-
-#: classes/add_kplex.py:125
-msgid "GPS examp"
-msgstr "GPS adibidea"
-
-#: classes/add_kplex.py:128
-msgid "gpsd examp"
-msgstr "gpsd adibidea"
-
-#: classes/add_kplex.py:131 tools/NMEA_2000_generator.py:81
-#: tools/calculate.py:91 tools/demo_tool.py:94 openplotter:645
-msgid "OK"
-msgstr "OK"
-
-#: classes/add_kplex.py:158 classes/add_kplex.py:166 openplotter:1521
-#: openplotter:1533
+#: classes/add_kplex.py:150 classes/add_kplex.py:158 openplotter:1466
+#: openplotter:1478
 msgid "accept"
 msgstr "onartu"
 
-#: classes/add_kplex.py:160 classes/add_kplex.py:168 openplotter:1522
-#: openplotter:1534
+#: classes/add_kplex.py:152 classes/add_kplex.py:160 openplotter:1467
+#: openplotter:1479
 msgid "ignore"
 msgstr "ezikusi"
 
-#: classes/add_kplex.py:243 classes/add_kplex.py:269
+#: classes/add_kplex.py:221 classes/add_kplex.py:247
 msgid "Talker must have 2 uppercase characters. The symbol * matches any character."
 msgstr "Hizlaria 2 maiuskulaz karaktere izan behar ditu. Sinboloak * edozein karakterekin dator."
 
-#: classes/add_kplex.py:246 classes/add_kplex.py:272
+#: classes/add_kplex.py:224 classes/add_kplex.py:250
 msgid "Sentence must have 3 uppercase characters. The symbol * matches any character."
 msgstr "Esaldiek 3 maiuskulaz karaktere izan behar dituzte. Sinboloak * edozein karakterekin dator."
 
-#: classes/add_kplex.py:254 classes/add_kplex.py:280
+#: classes/add_kplex.py:232 classes/add_kplex.py:258
 msgid "You must enter 2 uppercase characters for talker or 3 uppercase characters for sentence. The symbol * matches any character."
 msgstr "2 hiztunentzako maiuskulak sartu behar dituzu hizlariari edo 3 maiuskulaz karaktere esaldiari. Sinboloak * edozein karakterekin dator."
 
-#: classes/add_kplex.py:257 classes/add_kplex.py:283
+#: classes/add_kplex.py:235 classes/add_kplex.py:261
 msgid "This sentence already exists."
 msgstr "Sententzia hau jadanik existitzen da."
 
-#: classes/add_kplex.py:391
+#: classes/add_kplex.py:369
 msgid "\"Name\" must be a string between 1 and 13 lowercase letters and/or numbers which is not used as name for another input/output."
 msgstr "\"Izena\" 1 eta 13 letra minuskulen eta / edo zenbakien arteko katea izan behar da, sarrerako / irteerako izen gisa ez baita erabiltzen."
 
-#: classes/add_kplex.py:396
+#: classes/add_kplex.py:374
 msgid "This name is already in use."
 msgstr "Izen hau jadanik existitzen da."
 
-#: classes/add_kplex.py:400
+#: classes/add_kplex.py:378
 msgid "This name is reserved by the system."
 msgstr "Sistemak erretserbatutako izena da."
 
-#: classes/add_kplex.py:407
+#: classes/add_kplex.py:385
 msgid "You must select a Port."
 msgstr "Portu bat aukeratu behar duzu."
 
-#: classes/add_kplex.py:412
+#: classes/add_kplex.py:390
 msgid "This output is already in use."
 msgstr "Sarrera hau jadanik erabiltzen ari da."
 
-#: classes/add_kplex.py:419
+#: classes/add_kplex.py:397
 msgid "You must enter an Address."
 msgstr "Helbidea sartu behar da."
 
-#: classes/add_kplex.py:424
+#: classes/add_kplex.py:402
 msgid "You must enter a Port."
 msgstr "Portua sartu behar da."
 
-#: classes/add_kplex.py:428
+#: classes/add_kplex.py:406
 msgid "Cancelled. Port 10111-10113 are reserved."
 msgstr "Bertan behera. Portua 10111-10113 erreserbatuta dago."
 
-#: classes/add_kplex.py:435
+#: classes/add_kplex.py:413
 msgid "This input is already in use."
 msgstr "Sarrera hau erabilita dago."
 
-#: classes/add_kplex.py:439 classes/add_kplex.py:443
+#: classes/add_kplex.py:417 classes/add_kplex.py:421
 msgid "You must select a Filter type."
 msgstr "Filtro mota aukeratu."
+
+#: classes/add_tool10.py:23
+msgid "Tool"
+msgstr ""
 
 #: classes/add_topic.py:23
 msgid "Add MQTT topic"
@@ -908,22 +811,22 @@ msgstr "MQTT gaia gehitu"
 msgid "Edit MQTT topic"
 msgstr "Editatu MQTT gaia"
 
-#: classes/add_topic.py:31 openplotter:3260
+#: classes/add_topic.py:31 openplotter:3656
 msgid "Topic"
 msgstr "Gaia"
 
-#: classes/add_topic.py:35 classes/add_topic.py:53 openplotter:3373
-#: openplotter:3424
+#: classes/add_topic.py:35 classes/add_topic.py:53 openplotter:3769
+#: openplotter:3820
 msgid "General"
 msgstr "Orokorra"
 
 #: classes/add_topic.py:35 classes/add_topic.py:55 classes/add_topic.py:88
-#: openplotter:3377 openplotter:3427
+#: openplotter:3773 openplotter:3823
 msgid "Signal K key input"
 msgstr "Seinalearen K tekla sarrera"
 
-#: classes/add_topic.py:35 classes/add_topic.py:61 openplotter:3381
-#: openplotter:3435
+#: classes/add_topic.py:35 classes/add_topic.py:61 openplotter:3777
+#: openplotter:3831
 msgid "Signal K delta input"
 msgstr "Signal K delta input"
 
@@ -935,7 +838,7 @@ msgstr "Abiarazlea gehitu"
 msgid "Edit trigger"
 msgstr "Abiarazlea aldatu"
 
-#: classes/add_trigger.py:34 openplotter:2358 openplotter:2408
+#: classes/add_trigger.py:34 openplotter:2263 openplotter:2309
 msgid "Date"
 msgstr "Data"
 
@@ -946,6 +849,14 @@ msgstr "Eragilea"
 #: classes/add_trigger.py:66
 msgid "format: "
 msgstr "formatua: "
+
+#: classes/add_trigger.py:212
+msgid "Failed. Enter a value."
+msgstr "Huts egin. Idatzi balio bat."
+
+#: classes/add_trigger.py:221
+msgid "Failed. Select value, timestamp or source."
+msgstr "Huts egin. Hautatu balioa, denbora-muga edo iturri."
 
 #: classes/add_value_setting.py:28
 msgid "convert analog value to expected value of input "
@@ -967,15 +878,17 @@ msgstr "adc balio gordinak"
 msgid "value in required unit"
 msgstr "balioa behar den unitatean"
 
-#: classes/add_value_setting.py:43 tools/NMEA_0183_generator.py:51
-#: openplotter:1345 openplotter:1698 openplotter:2050 openplotter:2283
-#: openplotter:2296 openplotter:2567 openplotter:2698 openplotter:3266
+#: classes/add_value_setting.py:43
+#: tools/NMEA_0183_generator/NMEA_0183_generator.py:51 openplotter:1622
+#: openplotter:1975 openplotter:2188 openplotter:2201 openplotter:2454
+#: openplotter:3662
 msgid "add"
 msgstr "gehitu"
 
-#: classes/add_value_setting.py:46 tools/NMEA_0183_generator.py:54
-#: openplotter:1347 openplotter:1701 openplotter:2053 openplotter:2286
-#: openplotter:2299 openplotter:2570 openplotter:2701 openplotter:3269
+#: classes/add_value_setting.py:46
+#: tools/NMEA_0183_generator/NMEA_0183_generator.py:54 openplotter:1285
+#: openplotter:1625 openplotter:1978 openplotter:2191 openplotter:2204
+#: openplotter:2457 openplotter:2596 openplotter:3665
 msgid "delete"
 msgstr "ezabatu"
 
@@ -999,7 +912,12 @@ msgstr "Garbitu"
 msgid "Rate (seconds)"
 msgstr "Frekuentzia (segunduetan)"
 
-#: classes/getkeys.py:38 classes/select_key.py:25 classes/select_key.py:90
+#: classes/getkeys.py:33
+msgid "File not found: "
+msgstr ""
+
+#: classes/getkeys.py:46 classes/select_key.py:25 classes/select_key.py:90
+#: classes/show_keys.py:25 classes/show_keys.py:56
 msgid "ungrouped"
 msgstr "taldegabea"
 
@@ -1007,17 +925,21 @@ msgstr "taldegabea"
 msgid "Select Signal K key"
 msgstr "Hautatu Seinalearen K tekla"
 
-#: classes/select_key.py:38
+#: classes/select_key.py:38 classes/show_keys.py:35
 msgid "Groups"
 msgstr "Taldeak"
 
-#: classes/select_key.py:46
+#: classes/select_key.py:46 classes/show_keys.py:43
 msgid "Keys"
 msgstr "Pasahitzak"
 
-#: classes/select_key.py:92
+#: classes/select_key.py:92 classes/show_keys.py:58
 msgid "Ungrouped Signal K keys."
 msgstr "K Seinalearen talderik gabeko pasahitzak."
+
+#: classes/show_keys.py:23
+msgid "Show Signal K keys"
+msgstr ""
 
 #: ctrl_actions.py:67
 msgid "All actions have been stopped."
@@ -1027,30 +949,30 @@ msgstr "Ekintza guztiak gelditu behar dira."
 msgid "All actions have been started."
 msgstr "Ekintza guztiak hasi behar dira."
 
-#: diagnostic-N2K-input.py:66 diagnostic-N2K-output.py:67
-#: diagnostic-SK-input.py:68
+#: diagnostic-N2K-input.py:78 diagnostic-N2K-output.py:67
+#: diagnostic-SK-input.py:72
 msgid "SRC"
 msgstr "SRC"
 
-#: diagnostic-N2K-input.py:67 diagnostic-N2K-output.py:68
+#: diagnostic-N2K-input.py:79 diagnostic-N2K-output.py:68
 msgid "DST"
 msgstr "DST"
 
-#: diagnostic-N2K-input.py:69 diagnostic-N2K-output.py:70 diagnostic-NMEA.py:56
-#: diagnostic-SK-input.py:72
+#: diagnostic-N2K-input.py:81 diagnostic-N2K-output.py:70 diagnostic-NMEA.py:56
+#: diagnostic-SK-input.py:76
 msgid "Interval"
 msgstr "Denbora tartea"
 
-#: diagnostic-N2K-input.py:70 diagnostic-N2K-output.py:71 diagnostic-NMEA.py:57
+#: diagnostic-N2K-input.py:82 diagnostic-N2K-output.py:71 diagnostic-NMEA.py:57
 msgid "Data"
 msgstr "Datua"
 
-#: diagnostic-N2K-input.py:72 diagnostic-N2K-output.py:73
-#: diagnostic-SK-input.py:76
+#: diagnostic-N2K-input.py:84 diagnostic-N2K-output.py:73
+#: diagnostic-SK-input.py:80
 msgid "Sort SRC"
 msgstr "SRC antolatu"
 
-#: diagnostic-N2K-input.py:75 diagnostic-N2K-output.py:76
+#: diagnostic-N2K-input.py:87 diagnostic-N2K-output.py:76
 msgid "Sort PGN"
 msgstr "PGN antolatu"
 
@@ -1082,31 +1004,35 @@ msgstr ""
 msgid "Resume"
 msgstr ""
 
-#: diagnostic-SK-input.py:69
-msgid "SignalK"
-msgstr "K Seinalea"
+#: diagnostic-SK-input.py:73
+msgid "Signal K"
+msgstr ""
 
-#: diagnostic-SK-input.py:71 unit-private.py:57
+#: diagnostic-SK-input.py:75 unit-private.py:56
 msgid "Unit"
 msgstr "Unitatea"
 
-#: diagnostic-SK-input.py:73 openplotter:891
+#: diagnostic-SK-input.py:77 openplotter:716
 msgid "Status"
 msgstr ""
 
-#: diagnostic-SK-input.py:74 unit-private.py:58
+#: diagnostic-SK-input.py:78 unit-private.py:57
 msgid "Description"
 msgstr ""
 
-#: diagnostic-SK-input.py:79 unit-private.py:66
+#: diagnostic-SK-input.py:83 unit-private.py:65
 msgid "Sort SK"
 msgstr ""
 
-#: diagnostic-SK-input.py:82
+#: diagnostic-SK-input.py:86
+msgid "Show All SK keys"
+msgstr ""
+
+#: diagnostic-SK-input.py:89
 msgid "private Unit"
 msgstr ""
 
-#: diagnostic-SK-input.py:86
+#: diagnostic-SK-input.py:93
 msgid "Unit Setting"
 msgstr ""
 
@@ -1136,7 +1062,7 @@ msgstr ""
 msgid "Test SMS"
 msgstr ""
 
-#: test_sms.py:47 tools/SDR_AIS_fine_cal.py:47 openplotter:1271
+#: test_sms.py:47 tools/SDR_AIS/SDR_AIS_fine_cal.py:47 openplotter:1192
 msgid "Error"
 msgstr ""
 
@@ -1174,162 +1100,135 @@ msgstr "Bidaltzen..."
 msgid "\" sent succesfully to "
 msgstr ""
 
-#: test_sms.py:94 tools/SDR_AIS_fine_cal.py:84
+#: test_sms.py:94 tools/SDR_AIS/SDR_AIS_fine_cal.py:84
 msgid "Finished"
 msgstr "Amaituta"
 
-#: time_gps.py:34 time_gps.py:44
-msgid "Failed to connect with localhost:10109."
-msgstr ""
-
-#: time_gps.py:35 time_gps.py:45
-msgid "Error: "
-msgstr ""
-
-#: time_gps.py:70
-msgid "Date and time retrieved from NMEA data successfully."
-msgstr ""
-
-#: time_gps.py:72
-msgid "Unable to retrieve date or time from NMEA data."
-msgstr ""
-
-#: tools/NMEA_0183_generator.py:36 openplotter:142
+#: tools/NMEA_0183_generator/NMEA_0183_generator.py:36 openplotter:129
 msgid "NMEA 0183 generator"
 msgstr ""
 
-#: tools/NMEA_0183_generator.py:43
+#: tools/NMEA_0183_generator/NMEA_0183_generator.py:43
 msgid " NMEA 0183 "
 msgstr " NMEA 0183 "
 
-#: tools/NMEA_0183_generator.py:46 openplotter:1694
+#: tools/NMEA_0183_generator/NMEA_0183_generator.py:46 openplotter:1618
 msgid "Rate"
 msgstr "Baloratu"
 
-#: tools/NMEA_0183_generator.py:47
+#: tools/NMEA_0183_generator/NMEA_0183_generator.py:47
 msgid "Fields"
 msgstr "Eremuak"
 
-#: tools/NMEA_0183_generator.py:57
+#: tools/NMEA_0183_generator/NMEA_0183_generator.py:57
 msgid ""
 "opencpn\n"
 "default"
 msgstr ""
 
-#: tools/NMEA_0183_generator.py:60
+#: tools/NMEA_0183_generator/NMEA_0183_generator.py:60
 msgid "NMEA Diagnostic"
 msgstr ""
 
-#: tools/NMEA_0183_generator.py:63 openplotter:1216 openplotter:1704
-#: openplotter:1914 openplotter:2056 openplotter:2573 openplotter:3009
-#: openplotter:3272
+#: tools/NMEA_0183_generator/NMEA_0183_generator.py:63 openplotter:1076
+#: openplotter:1628 openplotter:1839 openplotter:1981 openplotter:2460
+#: openplotter:3285 openplotter:3668
 msgid "SK Diagnostic"
 msgstr ""
 
-#: tools/NMEA_0183_generator.py:151
+#: tools/NMEA_0183_generator/NMEA_0183_generator.py:151
 msgid "This function is only allowed when the list is empty."
 msgstr ""
 
-#: tools/NMEA_2000_generator.py:38
-msgid "Generate N2K from Signal K"
-msgstr ""
-
-#: tools/NMEA_2000_generator.py:77
-msgid "description"
-msgstr ""
-
-#: tools/NMEA_2000_generator.py:78
-msgid "Signal K variable"
-msgstr ""
-
-#: tools/SDR_AIS.py:35 openplotter:133
+#: tools/SDR_AIS/SDR_AIS.py:35 openplotter:120
 msgid "SDR receiver"
 msgstr ""
 
-#: tools/SDR_AIS.py:44
+#: tools/SDR_AIS/SDR_AIS.py:44
 msgid "Enable AIS reception"
 msgstr ""
 
-#: tools/SDR_AIS.py:48
+#: tools/SDR_AIS/SDR_AIS.py:48
 msgid "Gain"
 msgstr ""
 
-#: tools/SDR_AIS.py:50
+#: tools/SDR_AIS/SDR_AIS.py:50
 msgid "Correction (ppm)"
 msgstr ""
 
-#: tools/SDR_AIS.py:52
+#: tools/SDR_AIS/SDR_AIS.py:52
 msgid "Channel A 161.975Mhz"
 msgstr ""
 
-#: tools/SDR_AIS.py:54
+#: tools/SDR_AIS/SDR_AIS.py:54
 msgid "Channel B 162.025Mhz"
 msgstr ""
 
-#: tools/SDR_AIS.py:59
+#: tools/SDR_AIS/SDR_AIS.py:59
 msgid "Take a look"
 msgstr ""
 
-#: tools/SDR_AIS.py:61 openplotter:1205
+#: tools/SDR_AIS/SDR_AIS.py:61 openplotter:1048
 msgid "Calibration"
 msgstr ""
 
-#: tools/SDR_AIS.py:64
+#: tools/SDR_AIS/SDR_AIS.py:64
 msgid " Fine calibration using GSM "
 msgstr ""
 
-#: tools/SDR_AIS.py:65
+#: tools/SDR_AIS/SDR_AIS.py:65
 msgid "Band"
 msgstr ""
 
-#: tools/SDR_AIS.py:69
+#: tools/SDR_AIS/SDR_AIS.py:69
 msgid "Check band"
 msgstr ""
 
-#: tools/SDR_AIS.py:71 openplotter:865
+#: tools/SDR_AIS/SDR_AIS.py:71 openplotter:703
 msgid "Channel"
 msgstr ""
 
-#: tools/SDR_AIS.py:73 tools/SDR_AIS_fine_cal.py:38
+#: tools/SDR_AIS/SDR_AIS.py:73 tools/SDR_AIS/SDR_AIS_fine_cal.py:38
 msgid "Fine calibration"
 msgstr ""
 
-#: tools/SDR_AIS.py:76
+#: tools/SDR_AIS/SDR_AIS.py:76
 msgid " Radio "
 msgstr ""
 
-#: tools/SDR_AIS.py:167
+#: tools/SDR_AIS/SDR_AIS.py:167
 msgid "SDR-AIS reception enabled"
 msgstr ""
 
-#: tools/SDR_AIS.py:171
+#: tools/SDR_AIS/SDR_AIS.py:171
 msgid "SDR-AIS reception disabled"
 msgstr ""
 
-#: tools/SDR_AIS.py:188 tools/SDR_AIS.py:208 tools/SDR_AIS.py:221
-#: tools/SDR_AIS.py:228
+#: tools/SDR_AIS/SDR_AIS.py:188 tools/SDR_AIS/SDR_AIS.py:208
+#: tools/SDR_AIS/SDR_AIS.py:221 tools/SDR_AIS/SDR_AIS.py:228
 msgid "AIS reception disabled. After closing the new window enable AIS reception again."
 msgstr ""
 
-#: tools/SDR_AIS.py:195
+#: tools/SDR_AIS/SDR_AIS.py:195
 msgid ""
 "SDR-AIS reception disabled.\n"
 "Check the new window. Copy the maximum supported gain value. Wait for ppm value to stabilize and copy it too."
 msgstr ""
 
-#: tools/SDR_AIS_fine_cal.py:53
+#: tools/SDR_AIS/SDR_AIS_fine_cal.py:53
 msgid "gain: "
 msgstr "irabazia: "
 
-#: tools/SDR_AIS_fine_cal.py:54
+#: tools/SDR_AIS/SDR_AIS_fine_cal.py:54
 msgid "ppm: "
 msgstr "ppm: "
 
-#: tools/SDR_AIS_fine_cal.py:61 tools/calculate.py:35 openplotter:139
+#: tools/SDR_AIS/SDR_AIS_fine_cal.py:61 tools/calculate/calculate.py:35
+#: openplotter:126
 msgid "Calculate"
 msgstr "Kalkulatu"
 
-#: tools/SDR_AIS_fine_cal.py:65
+#: tools/SDR_AIS/SDR_AIS_fine_cal.py:65
 msgid ""
 "Press Calculate and wait for the system to calculate the ppm value with\n"
 "the selected channel. Put the obtained value in \"Correction (ppm)\" field\n"
@@ -1339,11 +1238,11 @@ msgstr ""
 "hautatutako kanala. Jarri lortutako balioa \"Zuzenketa (ppm)\" eremuan\n"
 "eta gaitu SDR-AIS irteera. Denbora aurreikusita: 1 min."
 
-#: tools/SDR_AIS_fine_cal.py:66
+#: tools/SDR_AIS/SDR_AIS_fine_cal.py:66
 msgid "channel: "
 msgstr "kanala: "
 
-#: tools/SDR_AIS_fine_cal.py:68
+#: tools/SDR_AIS/SDR_AIS_fine_cal.py:68
 msgid ""
 "Press Calculate and wait for the system to check the band. Write down\n"
 "the strongest channel (power). If you do not find any channel try another\n"
@@ -1353,584 +1252,669 @@ msgstr ""
 "kanal indartsuena (potentzia). Kanalarik ez baduzu saiatu beste bat\n"
 "band. Estimatutako denbora: 5 min."
 
-#: tools/SDR_AIS_fine_cal.py:73
+#: tools/SDR_AIS/SDR_AIS_fine_cal.py:73
 msgid "Working..."
 msgstr "Lan..."
 
-#: tools/SDR_AIS_fine_cal.py:78 tools/SDR_AIS_fine_cal.py:82
+#: tools/SDR_AIS/SDR_AIS_fine_cal.py:78 tools/SDR_AIS/SDR_AIS_fine_cal.py:82
 msgid "error"
 msgstr "errakuntza"
 
-#: tools/autosetup_tty.py:398
-msgid "tty auto setup"
-msgstr "tty auto konfigurazioa"
-
-#: tools/autosetup_tty.py:404
-msgid "setup autostart on every boot"
-msgstr "konfiguratu autostart abio bakoitzean"
-
-#: tools/autosetup_tty.py:444
-msgid "Auto setup detects hardware. Please make sure that all devices are turned on."
-msgstr "Auto konfigurazioak hardwareak detektatzen ditu. Ziurtatu gailu guztiak aktibatuta dagoela."
-
-#: tools/calculate.py:48
+#: tools/calculate/calculate.py:48
 msgid " Magnetic variation "
 msgstr " Aldaketa magnetikoa "
 
-#: tools/calculate.py:49 tools/calculate.py:57 openplotter:2177
-#: openplotter:2190
+#: tools/calculate/calculate.py:49 tools/calculate/calculate.py:57
+#: tools/moitessier_hat/moitessier_hat.py:119 openplotter:2082 openplotter:2095
 msgid "Enable"
 msgstr "Activer"
 
-#: tools/calculate.py:50
+#: tools/calculate/calculate.py:50
 msgid "Requires: position, date."
 msgstr "Beharrezkoak: posizioa, data."
 
-#: tools/calculate.py:51 tools/calculate.py:59 tools/calculate.py:71
-#: tools/calculate.py:83
+#: tools/calculate/calculate.py:51 tools/calculate/calculate.py:59
+#: tools/calculate/calculate.py:71 tools/calculate/calculate.py:83
 msgid "Accuracy (sec)"
 msgstr "Zehaztasuna (seg.)"
 
-#: tools/calculate.py:56
+#: tools/calculate/calculate.py:56
 msgid " Rate of turn "
 msgstr " Txandaka "
 
-#: tools/calculate.py:58
+#: tools/calculate/calculate.py:58
 msgid "Requires: magnetic heading."
 msgstr "Beharrezkoak: goiburu magnetikoa."
 
-#: tools/calculate.py:64
+#: tools/calculate/calculate.py:64
 msgid " True heading "
 msgstr " Benetazko norabidea "
 
-#: tools/calculate.py:65
+#: tools/calculate/calculate.py:65
 msgid "Deviation is included"
 msgstr "Desbiderapen hori barne dago"
 
-#: tools/calculate.py:67
+#: tools/calculate/calculate.py:67
 msgid "Requires: magnetic heading, variation."
 msgstr "Beharrezkoak: epigrafe magnetikoa, aldakuntza."
 
-#: tools/calculate.py:68
+#: tools/calculate/calculate.py:68
 msgid "Add deviation table"
 msgstr "Gehitu desbiderapen taula"
 
-#: tools/calculate.py:70
+#: tools/calculate/calculate.py:70
 msgid "Requires: magnetic heading, variation, deviation."
 msgstr "Behar: epigrafe magnetikoa, aldakuntza, desbiderapena."
 
-#: tools/calculate.py:76
+#: tools/calculate/calculate.py:76
 msgid " True wind speed and direction "
 msgstr " Haize eta abiadura zuzena "
 
-#: tools/calculate.py:77
+#: tools/calculate/calculate.py:77
 msgid "Use Speed Through Water"
 msgstr "Erabili uraren abiadura"
 
-#: tools/calculate.py:79
-msgid "Requires: STW, AWS, AWA."
-msgstr "Beharrezkoak: STW, AWS, AWA."
+#: tools/calculate/calculate.py:79
+msgid "Requires: SignalK STW, AWS, AWA."
+msgstr ""
 
-#: tools/calculate.py:80
+#: tools/calculate/calculate.py:80
 msgid "Use Speed Over Ground"
 msgstr "Erabili Abiadura baino gehiago"
 
-#: tools/calculate.py:82
-msgid "Requires: SOG, COG, HDT, AWS, AWA."
-msgstr "Beharrezkoak: SOG, COG, HDT, AWS, AWA."
+#: tools/calculate/calculate.py:82
+msgid "Requires: SignalK SOG, COG, HDT, AWS, AWA."
+msgstr ""
 
-#: tools/calculate.py:88 tools/demo_tool.py:91
+#: tools/calculate/calculate.py:88 tools/demo_tool/demo_tool.py:93
 msgid "Cancel"
 msgstr "Ezeztatu"
 
-#: tools/calculate.py:193
+#: tools/calculate/calculate.py:192
 msgid "You have to provide rate and accuracy values for magnetic variation"
 msgstr "Balio magnetikoa aldakuntza tasa eta zehaztasuna eman behar duzu"
 
-#: tools/calculate.py:207
+#: tools/calculate/calculate.py:205
 msgid "You have to provide rate and accuracy values for true heading"
 msgstr "Egiazko izenburuaren tasa eta zehaztasun-balioak eman behar dituzu"
 
-#: tools/calculate.py:219
+#: tools/calculate/calculate.py:217
 msgid "You have to provide rate and accuracy values for rate of turn"
 msgstr "Taula-tasa eta zehaztasun-balioak eman behar dituzu"
 
-#: tools/calculate.py:232
+#: tools/calculate/calculate.py:230
 msgid "You have to provide rate and accuracy values for true wind speed and direction"
 msgstr "Balio eta zehaztasun balioak abiadura eta norabidearen benetako balioak eman behar dituzu"
 
-#: tools/demo_tool.py:62
+#: tools/demo_tool/demo_tool.py:62
 msgid "Demo tool"
 msgstr "Demo tresna"
 
-#: tools/demo_tool.py:74
+#: tools/demo_tool/demo_tool.py:73
+msgid "To create tools see ~/.openplotter/tools/README.md."
+msgstr ""
+
+#: tools/demo_tool/demo_tool.py:76
 msgid " OpenPlotter config data "
 msgstr " OpenPlotter datuen konfigurazioa "
 
-#: tools/demo_tool.py:75
+#: tools/demo_tool/demo_tool.py:77
 msgid "OpenPlotter version: "
 msgstr "OpenPlotterraren bertsioa: "
 
-#: tools/demo_tool.py:78
+#: tools/demo_tool/demo_tool.py:80
 msgid " Working with Signal K "
 msgstr " Signal K-rekin lan egitea "
 
-#: tools/demo_tool.py:79
+#: tools/demo_tool/demo_tool.py:81
 msgid "Select a Signal K key"
 msgstr "Hautatu seinalearen K tekla"
 
-#: tools/demo_tool.py:85
+#: tools/demo_tool/demo_tool.py:87
 msgid "Write some text to publish"
 msgstr "Idatzi testu bat argitaratzeko"
 
-#: tools/demo_tool.py:88
+#: tools/demo_tool/demo_tool.py:90
 msgid "Publish"
 msgstr "Argitaratu"
 
-#: unit-private.py:56
+#: tools/moitessier_hat/moitessier_hat.py:36
+msgid "Moitessier HAT Settings"
+msgstr ""
+
+#: tools/moitessier_hat/moitessier_hat.py:52
+msgid "Info"
+msgstr ""
+
+#: tools/moitessier_hat/moitessier_hat.py:53
+msgid "Settings"
+msgstr ""
+
+#: tools/moitessier_hat/moitessier_hat.py:54
+#: tools/moitessier_hat/moitessier_hat.py:259
+msgid "Install"
+msgstr ""
+
+#: tools/moitessier_hat/moitessier_hat.py:61
+msgid " Info "
+msgstr " Argibideak "
+
+#: tools/moitessier_hat/moitessier_hat.py:63
+msgid "HAT info"
+msgstr ""
+
+#: tools/moitessier_hat/moitessier_hat.py:66
+msgid "Statistics"
+msgstr ""
+
+#: tools/moitessier_hat/moitessier_hat.py:69
+msgid "Reset statistics"
+msgstr ""
+
+#: tools/moitessier_hat/moitessier_hat.py:72 openplotter:1610 openplotter:1964
+msgid " Sensors "
+msgstr " Sensoreak "
+
+#: tools/moitessier_hat/moitessier_hat.py:74
+msgid "MPU-9250"
+msgstr ""
+
+#: tools/moitessier_hat/moitessier_hat.py:77
+msgid "MS5607-02BA03"
+msgstr ""
+
+#: tools/moitessier_hat/moitessier_hat.py:80
+msgid "Si7020-A20"
+msgstr ""
+
+#: tools/moitessier_hat/moitessier_hat.py:122
+msgid "Disable"
+msgstr ""
+
+#: tools/moitessier_hat/moitessier_hat.py:125
+msgid " General "
+msgstr ""
+
+#: tools/moitessier_hat/moitessier_hat.py:127
+msgid "Reset HAT"
+msgstr ""
+
+#: tools/moitessier_hat/moitessier_hat.py:130
+msgid "Load defaults"
+msgstr ""
+
+#: tools/moitessier_hat/moitessier_hat.py:135
+msgid "enable simulator"
+msgstr ""
+
+#: tools/moitessier_hat/moitessier_hat.py:137
+msgid "interval (ms)"
+msgstr ""
+
+#: tools/moitessier_hat/moitessier_hat.py:140
+msgid "MMSI boat 1"
+msgstr ""
+
+#: tools/moitessier_hat/moitessier_hat.py:143
+msgid "MMSI boat 2"
+msgstr ""
+
+#: tools/moitessier_hat/moitessier_hat.py:150
+msgid "frequency 1"
+msgstr ""
+
+#: tools/moitessier_hat/moitessier_hat.py:151
+msgid "frequency 2"
+msgstr ""
+
+#: tools/moitessier_hat/moitessier_hat.py:249
+msgid " Current Kernel version "
+msgstr ""
+
+#: tools/moitessier_hat/moitessier_hat.py:253
+msgid " Available packages "
+msgstr ""
+
+#: tools/moitessier_hat/moitessier_hat.py:300
+#: tools/moitessier_hat/moitessier_hat.py:305
+msgid "Moitessier HAT is not attached!"
+msgstr ""
+
+#: tools/moitessier_hat/moitessier_hat.py:308
+msgid "Moitessier HAT is attached.\n"
+msgstr ""
+
+#: tools/moitessier_hat/moitessier_hat.py:311
+msgid "Moitessier HAT package is not installed!"
+msgstr ""
+
+#: tools/moitessier_hat/moitessier_hat.py:315
+msgid "Moitessier HAT package is installed.\n"
+msgstr ""
+
+#: tools/moitessier_hat/moitessier_hat.py:316
+msgid ""
+"All changes will be temporal.\n"
+"Default settings will be loaded after rebooting.\n"
+msgstr ""
+
+#: tools/moitessier_hat/moitessier_hat.py:317
+msgid ""
+"Select the package that matches the current Kernel version.\n"
+"Before installing, be sure the HAT is not being used by any service (kplex, GPSD, OpenCPN ...).\n"
+"If installation fails, you may have to try to install the package several times."
+msgstr ""
+
+#: tools/moitessier_hat/moitessier_hat.py:352
+msgid "Failure reading config.xml file!"
+msgstr ""
+
+#: tools/moitessier_hat/moitessier_hat.py:357
+msgid "Select a package to install."
+msgstr ""
+
+#: tools/moitessier_hat/moitessier_hat.py:360
+msgid "Updating Moitessier Hat modules and firmware..."
+msgstr ""
+
+#: tools/moitessier_hat/moitessier_hat.py:411
+msgid "Defaults loaded.\n"
+msgstr ""
+
+#: tools/moitessier_hat/moitessier_hat.py:448
+msgid "Changes applied.\n"
+msgstr ""
+
+#: tools/moitessier_hat/moitessier_hat.py:449
+msgid "Apply changes failed!\n"
+msgstr ""
+
+#: unit-private.py:55
 msgid "SK Unit"
 msgstr "SK Unitatea"
 
-#: unit-private.py:60
+#: unit-private.py:59
 msgid "Sort SK Unit"
 msgstr "SK Unitatearen bidez antolatu"
 
-#: unit-private.py:63
+#: unit-private.py:62
 msgid "Sort Unit"
 msgstr "Unitatea antolatu"
 
-#: unit-private.py:69
+#: unit-private.py:68
 msgid "change selected"
 msgstr "aukera aldatu"
 
-#: update/update_dependencies.sh:48
-msgid "gpsd"
-msgstr "gpsd"
+#: openplotter:89
+msgid "Serial"
+msgstr ""
+
+#: openplotter:91
+msgid "pypilot"
+msgstr ""
+
+#: openplotter:93
+msgid "Network"
+msgstr ""
 
 #: openplotter:94
-msgid "USB manager"
-msgstr "USB kudeatzailea"
-
-#: openplotter:98
-msgid "WiFi AP"
-msgstr "WiFi SP"
-
-#: openplotter:99
-msgid "Compass"
-msgstr "Iparorratza"
-
-#: openplotter:100
 msgid "Actions"
 msgstr "Ekintzak"
 
-#: openplotter:102
+#: openplotter:96
 msgid "I2C"
 msgstr "I2C"
 
-#: openplotter:106
+#: openplotter:100
 msgid "Accounts"
 msgstr "Kontuak"
 
-#: openplotter:107
+#: openplotter:101
 msgid "SMS"
 msgstr "SMS"
 
-#: openplotter:108
+#: openplotter:102
 msgid "Startup"
 msgstr "Hasi"
 
-#: openplotter:126
-msgid "Set time zone"
-msgstr "Ezarri ordu-zona"
-
-#: openplotter:126 openplotter:292
-msgid "Set time zone in the new window"
-msgstr "Ezarri ordu-zona leiho berrian"
-
-#: openplotter:128 openplotter:658
-msgid "Set time from NMEA"
-msgstr "Ezarri denbora NMEA"
-
-#: openplotter:128
-msgid "Set system time from NMEA data"
-msgstr "Ezarri sistema denbora NMEA datuetatik"
-
-#: openplotter:130
-msgid "Set GPSD"
-msgstr "Ezarri GPSD"
-
-#: openplotter:130 openplotter:306
-msgid "Set GPSD in the new window"
-msgstr "GPSD ezarri leiho berrian"
-
-#: openplotter:134
+#: openplotter:121
 msgid "Set an SDR receiver in the new window"
 msgstr "Ezarri SDR hartzailea leiho berrian"
 
-#: openplotter:137
+#: openplotter:124
 msgid "Create a deviation table for your boat"
 msgstr "Desbideratze taula bat sortu zure itsasontzirako"
 
-#: openplotter:140
+#: openplotter:127
 msgid "Calculate new data from current values"
 msgstr "Kalkulatu uneko balioetatik datuak"
 
-#: openplotter:143
+#: openplotter:130
 msgid "Generate NMEA 0183 from current values"
 msgstr "Sortu NMEA 0183 uneko balioak"
 
-#: openplotter:145
-msgid "NMEA 2000 generator"
-msgstr "NMEA 2000 sortzailea"
-
-#: openplotter:146
-msgid "Generate NMEA 2000 from current values"
-msgstr "Sortu NMEA 2000 uneko balioak"
-
-#: openplotter:172
+#: openplotter:156
 msgid "Tools"
 msgstr "Tresnak"
 
-#: openplotter:175
+#: openplotter:159
 msgid "Basque"
 msgstr "Euskera"
 
-#: openplotter:175
+#: openplotter:159
 msgid "Set Basque language"
 msgstr ""
 
-#: openplotter:177
+#: openplotter:161
 msgid "Catalan"
 msgstr ""
 
-#: openplotter:177
+#: openplotter:161
 msgid "Set Catalan language"
 msgstr ""
 
-#: openplotter:179
+#: openplotter:163
 msgid "Dutch"
 msgstr "Nederlandera"
 
-#: openplotter:179
+#: openplotter:163
 msgid "Set Dutch language"
 msgstr "Hizkuntza Nederlanderaz ezarri"
 
-#: openplotter:181
+#: openplotter:165
 msgid "English"
 msgstr ""
 
-#: openplotter:181
+#: openplotter:165
 msgid "Set English language"
 msgstr ""
 
-#: openplotter:183
+#: openplotter:167
+msgid "Finnish"
+msgstr ""
+
+#: openplotter:167
+msgid "Set Finnish language"
+msgstr ""
+
+#: openplotter:169
 msgid "French"
 msgstr "Frantzesa"
 
-#: openplotter:183
+#: openplotter:169
 msgid "Set French language"
 msgstr "Hizkuntza Frantzeses ezarri"
 
-#: openplotter:185
+#: openplotter:171
 msgid "Galician"
 msgstr ""
 
-#: openplotter:185
+#: openplotter:171
 msgid "Set Galician language"
 msgstr ""
 
-#: openplotter:187
+#: openplotter:173
 msgid "German"
 msgstr "Alemaniera"
 
-#: openplotter:187
+#: openplotter:173
 msgid "Set German language"
 msgstr "Hizkuntza Alemanieraz ezarri"
 
-#: openplotter:189
+#: openplotter:175
 msgid "Italiano"
 msgstr "Italiera"
 
-#: openplotter:189
+#: openplotter:175
 msgid "Set Italian language"
 msgstr "Hizkuntza Italieraz ezarri"
 
-#: openplotter:191
+#: openplotter:177
 msgid "Spanish"
 msgstr "Gaztelera"
 
-#: openplotter:191
+#: openplotter:177
 msgid "Set Spanish language"
 msgstr "Hizkuntza Gazteleraz ezarri"
 
-#: openplotter:193
+#: openplotter:179
 msgid "Language"
 msgstr "Hizkuntza"
 
-#: openplotter:196
+#: openplotter:182
 msgid "Update OpenCPN"
 msgstr "OpenCPN eguneratu"
 
-#: openplotter:196
+#: openplotter:182
 msgid "Update OpenCPN to latest stable release"
 msgstr "OpenCPN azkenengo bertsio establera eguneratu"
 
-#: openplotter:198
+#: openplotter:184
 msgid "Update OpenCPN plugins"
 msgstr "OpenCPNren pluginak eguneratu"
 
-#: openplotter:198
+#: openplotter:184
 msgid "Update OpenCPN plugins to latest stable releases"
 msgstr "OpenCPNeko pluginak azkenengo bertsio establera eguneratu"
 
-#: openplotter:201
+#: openplotter:187
 msgid "Set default OpenPlotter desktop"
 msgstr ""
 
-#: openplotter:201
+#: openplotter:187
 msgid "Run this after a major update"
 msgstr ""
 
-#: openplotter:204
+#: openplotter:190
 msgid "Update OpenPlotter"
 msgstr ""
 
-#: openplotter:204
-msgid "Apply latest changes"
+#: openplotter:190
+msgid "Apply latest changes on OpenPlotter and update the system if necessary"
 msgstr ""
 
-#: openplotter:206
+#: openplotter:192
 msgid "Updates"
 msgstr "Eguneratu"
 
-#: openplotter:209
+#: openplotter:195
 msgid "&About"
 msgstr ""
 
-#: openplotter:209
+#: openplotter:195
 msgid "About OpenPlotter"
 msgstr ""
 
-#: openplotter:211 openplotter:212
+#: openplotter:197
+msgid "Online documentation"
+msgstr ""
+
+#: openplotter:198
 msgid "OpenPlotter online documentation"
 msgstr ""
 
-#: openplotter:214 openplotter:215
-msgid "OpenPlotter offline documentation"
-msgstr ""
-
-#: openplotter:217
+#: openplotter:200
 msgid "&Help"
 msgstr "&Laguntza"
 
-#: openplotter:295
-msgid "Waiting for NMEA time..."
-msgstr "NMEAren ordua itxoiten..."
-
-#: openplotter:362
+#: openplotter:322
 msgid "The selected language will be enabled when you restart"
 msgstr ""
 
-#: openplotter:411 openplotter:415 openplotter:497
+#: openplotter:376 openplotter:380 openplotter:458
 msgid "Follow the instructions of the new window"
 msgstr ""
 
-#: openplotter:432
+#: openplotter:396
 msgid "It was not possible to connect to Github."
 msgstr ""
 
-#: openplotter:444 openplotter:465
+#: openplotter:408 openplotter:426
 msgid "Error reading versions."
 msgstr ""
 
-#: openplotter:470
+#: openplotter:430
 msgid ""
 "You are running a stable version. If you update to a non stable version you will have to keep updating until a stable stage is reached again.\n"
 "\n"
 msgstr ""
 
-#: openplotter:472
-msgid "There is a Raspbian upgrade, it is recommended to download the new OpenPlotter RPI image: v"
+#: openplotter:432
+msgid "There is a major Raspbian upgrade, you have to download the new OpenPlotter image: v"
 msgstr ""
 
-#: openplotter:476
+#: openplotter:436
 msgid "There is a major OpenPlotter update.\n"
 msgstr ""
 
-#: openplotter:477
+#: openplotter:437
 msgid ""
 "Please make a backup image of your system before updating.\n"
 "\n"
 msgstr ""
 
-#: openplotter:480
+#: openplotter:440
 msgid ""
 "There is a minor OpenPlotter update.\n"
 "\n"
 msgstr ""
 
-#: openplotter:483
+#: openplotter:443
 msgid " is up to date.\n"
 msgstr ""
 
-#: openplotter:484
-msgid ""
-"You do not need to update but if you think something was wrong in your last update, you can force a major update.\n"
-"\n"
-msgstr ""
-
-#: openplotter:487
+#: openplotter:446
 msgid "Are you sure you want to update: "
 msgstr ""
 
-#: openplotter:501
+#: openplotter:462
 msgid "OpenPlotter is a DIY, open-source, low-cost, low-consumption, modular and scalable sailing platform to run on ARM boards."
 msgstr ""
 
-#: openplotter:566
-msgid "Warning: You have connected the \""
-msgstr ""
-
-#: openplotter:567
-msgid "\" to the usb port which is reserved for another device"
-msgstr ""
-
-#: openplotter:617
-msgid "Error: USB-Port with vendor product number: \""
-msgstr ""
-
-#: openplotter:643
+#: openplotter:516
 msgid "Delay (seconds)"
 msgstr ""
 
-#: openplotter:651
+#: openplotter:523
 msgid "no OpenGL"
 msgstr ""
 
-#: openplotter:653
+#: openplotter:525
 msgid "fullscreen"
 msgstr "pantaila osoa"
 
-#: openplotter:656
-msgid "NMEA 0183 multiplexer"
-msgstr "NMEA 0183 multiplexorra"
-
-#: openplotter:661
-msgid "VNC remote desktop"
-msgstr ""
-
-#: openplotter:663
-msgid "use password"
-msgstr "pasahitza erabili"
-
-#: openplotter:668
+#: openplotter:528
 msgid "Play sound"
 msgstr "Soinua jo"
 
-#: openplotter:671
+#: openplotter:531
 msgid "File"
 msgstr "Fitxategia"
 
-#: openplotter:674
+#: openplotter:534
 msgid "Maximize OpenPlotter"
 msgstr "Openplotter handitu"
 
-#: openplotter:677
-msgid "Node-Red (Dashboard, Freeboard)"
+#: openplotter:537
+msgid "Node-Red"
 msgstr ""
 
-#: openplotter:721
+#: openplotter:597
 msgid "You can enter only numbers."
 msgstr "Zenbakiak besterik ezin dira sartu."
 
-#: openplotter:726
+#: openplotter:602
 msgid "Startup delay set to "
 msgstr ""
 
-#: openplotter:726
+#: openplotter:602
 msgid " seconds"
 msgstr " segunduak"
 
-#: openplotter:778
-msgid "Do you want to change your VNC-Password?"
-msgstr "VNCko pasahitza aldatu nahi duzu?"
-
-#: openplotter:809
-msgid "Enable access point"
-msgstr "Sarrera puntua piztu"
-
-#: openplotter:812
-msgid "Enable bridge to eth0"
+#: openplotter:669
+msgid "client"
 msgstr ""
 
-#: openplotter:845
-msgid "Access point device"
+#: openplotter:670
+msgid "RPi3: AP/client + bridge eth0"
 msgstr ""
 
-#: openplotter:849
+#: openplotter:671
+msgid "RPi3: AP/client"
+msgstr ""
+
+#: openplotter:672
+msgid "RPi3: AP + client + bridge eth0"
+msgstr ""
+
+#: openplotter:673
+msgid "RPi3: AP + client"
+msgstr ""
+
+#: openplotter:674
+msgid "RPi3+: AP + client + bridge eth0"
+msgstr ""
+
+#: openplotter:675
+msgid "RPi3+: AP 5G + client + bridge eth0"
+msgstr ""
+
+#: openplotter:676
+msgid "RPi3+: AP 5GH + client + bridge eth0"
+msgstr ""
+
+#: openplotter:677
+msgid "RPi3+: AP + client"
+msgstr ""
+
+#: openplotter:683
+msgid "Network mode"
+msgstr ""
+
+#: openplotter:689
 msgid "Sharing Internet device"
 msgstr ""
 
-#: openplotter:853
+#: openplotter:692
 msgid "Access point settings"
 msgstr ""
 
-#: openplotter:856
+#: openplotter:695
 msgid ""
 "SSID \n"
 "maximum 32 characters"
 msgstr "32 karakter gehienez SSIDrentzako"
 
-#: openplotter:859
+#: openplotter:698
 msgid ""
 "Password \n"
 "minimum 8 characters required"
 msgstr "8 karakter gutxienez pasahitzarentzako"
 
-#: openplotter:870
-msgid "Mode"
-msgstr "Modua"
-
-#: openplotter:872 openplotter:909 openplotter:994
-msgid "Both"
-msgstr "Batera"
-
-#: openplotter:875
-msgid "WPA"
-msgstr "WPA"
-
-#: openplotter:877
-msgid "Defaults"
-msgstr ""
-
-#: openplotter:880 openplotter:3253 openplotter:3361 openplotter:3473
-#: openplotter:3512
+#: openplotter:705 openplotter:3649 openplotter:3757 openplotter:3869
+#: openplotter:3908
 msgid "Apply"
 msgstr ""
 
-#: openplotter:883
+#: openplotter:708
 msgid " Addresses "
 msgstr " Helbideak "
 
-#: openplotter:888
+#: openplotter:713
 msgid "Refresh"
 msgstr "Berritu"
 
-#: openplotter:975 openplotter:2142
-msgid "Failed. You must fill in all fields."
-msgstr "Huts. Eremu guztiak bete behar dituzu."
-
-#: openplotter:978
-msgid "\"Access point device\" and \"Sharing Internet device\" must be different"
-msgstr ""
-
-#: openplotter:981
+#: openplotter:830
 msgid "Your SSID must have a maximum of 32 characters and your password a minimum of 8."
 msgstr ""
 
-#: openplotter:1006
+#: openplotter:838
+msgid "The device you want to share is in use (bridge or AP)."
+msgstr ""
+
+#: openplotter:842
 msgid ""
-"Changes will be applied.\n"
+"Changes will be applied after next reboot.\n"
 "\n"
 "If something goes wrong and you are on a headless system,\n"
 "you may not be able to reconnect again.\n"
@@ -1938,31 +1922,11 @@ msgid ""
 "Are you sure?"
 msgstr ""
 
-#: openplotter:1023
-msgid "Configuring WiFi AP, please wait max 3 min..."
-msgstr ""
-
-#: openplotter:1027
-msgid "Shutdown WiFi AP, please wait max 3 min..."
-msgstr ""
-
-#: openplotter:1032
-msgid "WiFi access point failed."
-msgstr ""
-
-#: openplotter:1033
-msgid "WiFi access point started."
-msgstr ""
-
-#: openplotter:1034
-msgid "WiFi access point stopped."
-msgstr ""
-
-#: openplotter:1064
+#: openplotter:894
 msgid " Multiplexed NMEA 0183:\n"
 msgstr " Multiploak NMEA 0183:\n"
 
-#: openplotter:1067
+#: openplotter:897
 msgid ""
 "\n"
 " Signal K Server:\n"
@@ -1970,7 +1934,7 @@ msgstr ""
 "\n"
 "Seinalearen K zerbitzaria:\n"
 
-#: openplotter:1069
+#: openplotter:899
 msgid ""
 "\n"
 " VNC remote desktop:\n"
@@ -1978,15 +1942,7 @@ msgstr ""
 "\n"
 "NC urruneko mahaigaina:\n"
 
-#: openplotter:1071
-msgid ""
-"\n"
-" RDP remote desktop:\n"
-msgstr ""
-"\n"
-"RDP urruneko mahaigaina:\n"
-
-#: openplotter:1073
+#: openplotter:901
 msgid ""
 "\n"
 " node-red:\n"
@@ -1994,7 +1950,7 @@ msgstr ""
 "\n"
 "nodo-gorriak:\n"
 
-#: openplotter:1075
+#: openplotter:903
 msgid ""
 "\n"
 " MQTT local broker:\n"
@@ -2002,44 +1958,101 @@ msgstr ""
 "\n"
 "MQTT tokiko agente:\n"
 
-#: openplotter:1185
+#: openplotter:919
+msgid " is AP"
+msgstr ""
+
+#: openplotter:920
+msgid "no AP"
+msgstr ""
+
+#: openplotter:933
+msgid "up network: "
+msgstr ""
+
+#: openplotter:942 openplotter:953 openplotter:964 openplotter:975
+#: openplotter:979
+msgid "running"
+msgstr ""
+
+#: openplotter:943 openplotter:954 openplotter:965 openplotter:977
+msgid "stopped"
+msgstr ""
+
+#: openplotter:1012
+msgid "IP address\n"
+msgstr ""
+
+#: openplotter:1027
+msgid "pypilot Mode:"
+msgstr ""
+
+#: openplotter:1029
+msgid "disabled"
+msgstr ""
+
+#: openplotter:1029
+msgid "IMU only"
+msgstr ""
+
+#: openplotter:1029
+msgid "basic autopilot"
+msgstr ""
+
+#: openplotter:1032
 msgid " IMU "
 msgstr " IMU "
 
-#: openplotter:1189
+#: openplotter:1033
 msgid "Detected IMU:"
 msgstr "IMU detektatuta:"
 
-#: openplotter:1190
+#: openplotter:1034
 msgid "None"
 msgstr "Bat ere ez"
 
-#: openplotter:1192
-msgid "Rate (secons)"
-msgstr "Frekuentzia (segunduetan)"
+#: openplotter:1039
+msgid " Autopilot "
+msgstr ""
 
-#: openplotter:1196
-msgid "Magnetic heading (navigation.headingMagnetic)"
-msgstr "Izenburu magnetikoa (nabigazioa.Magnetikoa)"
+#: openplotter:1041
+msgid "Serial ports (Controller/Wind/GPS)"
+msgstr ""
 
-#: openplotter:1199
-msgid "Heel (navigation.attitude.roll)"
-msgstr "Heel (navigation.attitude.roll)"
+#: openplotter:1044
+msgid "Enable webapp"
+msgstr ""
 
-#: openplotter:1202
-msgid "Pitch (navigation.attitude.pitch)"
-msgstr "Pitch (navigation.attitude.pitch)"
+#: openplotter:1045
+msgid "port:"
+msgstr ""
 
-#: openplotter:1208
+#: openplotter:1051
 msgid "Scope"
 msgstr "Esparrua"
 
-#: openplotter:1219 openplotter:1350 openplotter:1707 openplotter:1917
-#: openplotter:2059 openplotter:2576 openplotter:3012 openplotter:3275
+#: openplotter:1054
+msgid "Client"
+msgstr ""
+
+#: openplotter:1057
+msgid "Autopilot Control"
+msgstr ""
+
+#: openplotter:1060 openplotter:1288 openplotter:1631 openplotter:1842
+#: openplotter:1984 openplotter:2463 openplotter:3671
 msgid "Restart"
 msgstr "Berrabiarazi"
 
-#: openplotter:1289
+#: openplotter:1065 openplotter:1294 openplotter:2215
+msgid "Cancel changes"
+msgstr "Aldaketak ezeztatu"
+
+#: openplotter:1072
+msgid "Translation Rate (seconds)"
+msgstr ""
+
+#: openplotter:1219
 msgid ""
 "Compass settings will be deleted.\n"
 "\n"
@@ -2053,541 +2066,599 @@ msgstr ""
 "\n"
 "Ziur zaude?"
 
-#: openplotter:1328
-msgid " KPLEX "
-msgstr " KPLEX "
-
-#: openplotter:1333
+#: openplotter:1271
 msgid "io"
 msgstr "io"
 
-#: openplotter:1334
+#: openplotter:1272
 msgid "Port/Address"
 msgstr "Port / Address"
 
-#: openplotter:1335
+#: openplotter:1273
 msgid "Bauds/Port"
 msgstr "Bauds / Port"
 
-#: openplotter:1336
+#: openplotter:1274
 msgid "inFilter"
 msgstr "inFilter"
 
-#: openplotter:1337 openplotter:1339
+#: openplotter:1275 openplotter:1277
 msgid "Filtering"
 msgstr "Iragazketa"
 
-#: openplotter:1338
+#: openplotter:1276
 msgid "outFilter"
 msgstr "outFilter"
 
-#: openplotter:1342
+#: openplotter:1280 openplotter:3262 openplotter:3276
 msgid "Diagnostic"
 msgstr "Diagnostikoa"
 
-#: openplotter:1352
+#: openplotter:1283
+msgid "add network"
+msgstr ""
+
+#: openplotter:1290
 msgid "Advanced"
 msgstr "Aurreratua"
 
-#: openplotter:1354 openplotter:2308 openplotter:2986
-msgid "Apply changes"
-msgstr "Aldaketak aplikatu"
-
-#: openplotter:1356 openplotter:2310
-msgid "Cancel changes"
-msgstr "Aldaketak ezeztatu"
-
-#: openplotter:1386
+#: openplotter:1323
 msgid "OpenPlotter will close. Add manual settings at the end of the configuration file. Open OpenPlotter again and restart multiplexer to apply changes."
 msgstr "OpenPlotter itxi egingo da. Gehitu eskuzko ezarpenak konfigurazio fitxategiaren amaieran. Ireki OpenPlotter berriro eta berrabiatu multiplexerea aldaketak aplikatzeko."
 
-#: openplotter:1391
+#: openplotter:1328
 msgid "Closing Kplex"
 msgstr "Kplex ixten"
 
-#: openplotter:1397
+#: openplotter:1334
 msgid "Kplex restarted"
 msgstr "Kplexa berrerasten"
 
-#: openplotter:1408
+#: openplotter:1353
 msgid "You can not edit this."
 msgstr "Ezin duzu hau aldatu."
 
-#: openplotter:1498
+#: openplotter:1443
 msgid "Multiplexer configuration file does not exist. Add inputs and apply changes."
 msgstr "Ez da multiplexagailuaren konfigurazio fitxategia existitzen. Sartu sarrera eta aplikatu aldaketak."
 
-#: openplotter:1602 openplotter:1639
+#: openplotter:1545 openplotter:1562
 msgid "Select an item."
 msgstr "Hautatu elementu bat."
 
-#: openplotter:1608
-msgid "You can not delete this."
-msgstr "Ezin duzu hau ezabatu."
+#: openplotter:1551
+msgid "You can not delete this"
+msgstr ""
 
-#: openplotter:1686 openplotter:2039
-msgid " Sensors "
-msgstr " Sensoreak "
+#: openplotter:1554
+msgid "Unassign this device on \"Serial ports\" tab"
+msgstr ""
 
-#: openplotter:1692
+#: openplotter:1616
 msgid "Magnitude"
 msgstr "Magnitudea"
 
-#: openplotter:1767
+#: openplotter:1691
 msgid "Failed. You must select a sensor."
 msgstr "Huts. Sensore bat autatu behar duzu."
 
-#: openplotter:1772
+#: openplotter:1696
 msgid "Failed. You must provide an address."
 msgstr "Huts. Helbide bat adierazi behar duzu."
 
-#: openplotter:1850 openplotter:2162 openplotter:2511 openplotter:2521
-#: openplotter:2673 openplotter:2805 openplotter:3458
+#: openplotter:1774 openplotter:2067 openplotter:2398 openplotter:2408
+#: openplotter:2547 openplotter:3854
 msgid "Select an item to delete."
 msgstr "Elementu bat ezabatzeko autatu behar duzu."
 
-#: openplotter:1864
+#: openplotter:1788
 msgid "Sensors restarted"
 msgstr "Sensorea berrerasi"
 
-#: openplotter:1867
+#: openplotter:1791
 msgid "Sensors stopped"
 msgstr "Sensorea gelditu"
 
-#: openplotter:1904
+#: openplotter:1829
 msgid " SPI MCP3008 "
 msgstr " SPI MCP3008 "
 
-#: openplotter:1908
+#: openplotter:1833
 msgid "channel"
 msgstr "kanala"
 
-#: openplotter:1920
+#: openplotter:1845
 msgid "value setting"
 msgstr "balioa ezarpena"
 
-#: openplotter:1989
+#: openplotter:1914
 msgid "convert disabled"
 msgstr "bihurtzeko desgaituta"
 
-#: openplotter:2004
-msgid "Failed. Provide name and Signal K values."
-msgstr "Huts egin. Eman izena eta seinalea K balioak."
-
-#: openplotter:2009 openplotter:2146
-msgid "Failed. The name must contain only letters and numbers."
-msgstr "Huts egin. Izena letrak eta zenbakiak bakarrik izan behar ditu."
-
-#: openplotter:2047 openplotter:2564 openplotter:3263
+#: openplotter:1972 openplotter:2451 openplotter:3659
 msgid "Source"
 msgstr "Jatorria"
 
-#: openplotter:2131
-msgid "CAUTION. If you connect a closed switch or some inappropriate circuit, you could short out and damage your board when this output becomes \"High\". Are you sure to enable this output?"
-msgstr "KONTUZ. Konmutadore itxia edo egokitutako zirkuitu bat konektatzen baduzu, laburbildu eta kaltetu egin dezakezu zure irteera \"Alta\" bihurtzen denean. Ziur al zaude irteera hau gaitu nahi duzula?"
-
-#: openplotter:2176
+#: openplotter:2081
 msgid " Twitter "
 msgstr " Twitter "
 
-#: openplotter:2180
+#: openplotter:2085
 msgid "apiKey"
 msgstr "apiKey"
 
-#: openplotter:2182
+#: openplotter:2087
 msgid "apiSecret"
 msgstr "apiSecret"
 
-#: openplotter:2184
+#: openplotter:2089
 msgid "accessToken"
 msgstr "accessToken"
 
-#: openplotter:2186
+#: openplotter:2091
 msgid "accessTokenSecret"
 msgstr "accessTokenSecret"
 
-#: openplotter:2189
+#: openplotter:2094
 msgid " Gmail "
 msgstr " Gmail "
 
-#: openplotter:2192
+#: openplotter:2097
 msgid "Gmail account"
 msgstr "Gmail kontua"
 
-#: openplotter:2194
+#: openplotter:2099
 msgid "Gmail password"
 msgstr "Gmail pasahitza"
 
-#: openplotter:2196
+#: openplotter:2101
 msgid "Recipient"
 msgstr "Hartzailea"
 
-#: openplotter:2223
+#: openplotter:2128
 msgid "Enter valid Twitter apiKey, apiSecret, accessToken and accessTokenSecret."
 msgstr "Sartu baliozko Twitter apiKey, apiSecret, accessToken eta accessTokenSecret."
 
-#: openplotter:2253
+#: openplotter:2158
 msgid "Enter valid Gmail account, Gmail password and Recipient."
 msgstr "Idatzi baliozko posta elektronikoko kontua, Gmail pasahitza eta hartzailea."
 
-#: openplotter:2273
+#: openplotter:2178
 msgid " Triggers "
 msgstr " Abiarazleak "
 
-#: openplotter:2276
+#: openplotter:2181
 msgid "trigger"
 msgstr "abiarazle"
 
-#: openplotter:2277
+#: openplotter:2182
 msgid "operator"
 msgstr "operadorea"
 
-#: openplotter:2278
+#: openplotter:2183
 msgid "value"
 msgstr "balio"
 
-#: openplotter:2292
+#: openplotter:2197
 msgid "repeat"
 msgstr "errepikatu"
 
-#: openplotter:2302
+#: openplotter:2207
 msgid "Stop all"
 msgstr "Dena gelditu"
 
-#: openplotter:2305
+#: openplotter:2210
 msgid "Start all"
 msgstr "Dena hasi"
 
-#: openplotter:2404
-msgid "Failed. Enter a value."
-msgstr "Huts egin. Idatzi balio bat."
-
-#: openplotter:2415
-msgid "Failed. Select value, timestamp or source."
-msgstr "Huts egin. Hautatu balioa, denbora-muga edo iturri."
-
-#: openplotter:2423 openplotter:2641
-msgid "Failed. Select a Signal K key."
-msgstr "Huts egin. Hautatu seinalearen K tekla."
-
-#: openplotter:2462
+#: openplotter:2355
 msgid "Select a trigger to add actions."
 msgstr "Aukeratu ekintza bat gehitzeko ekintzak gehitzeko."
 
-#: openplotter:2469
-msgid "Failed. Select an action."
-msgstr "Huts egin. Hautatu ekintza bat."
-
-#: openplotter:2479
-msgid "Failed. \"Repeat after\" must be a number."
-msgstr ""
-
-#: openplotter:2539
+#: openplotter:2426
 msgid "Actions changes cancelled"
 msgstr ""
 
-#: openplotter:2543
+#: openplotter:2430
 msgid "Actions stopped"
 msgstr ""
 
-#: openplotter:2550
+#: openplotter:2437
 msgid "Actions started"
 msgstr ""
 
-#: openplotter:2557
+#: openplotter:2444
 msgid " Temperature sensors "
 msgstr ""
 
-#: openplotter:2561
+#: openplotter:2448
 msgid "ID"
 msgstr ""
 
-#: openplotter:2600
+#: openplotter:2487
 msgid "1W sensors restarted"
 msgstr ""
 
-#: openplotter:2603
+#: openplotter:2490
 msgid "1W sensors stopped"
 msgstr ""
 
-#: openplotter:2645
-msgid "Failed. Provide a name."
-msgstr ""
-
-#: openplotter:2649
-msgid "Failed. Name must contain only letters and numbers."
-msgstr ""
-
-#: openplotter:2653
-msgid "Failed. Select sensor ID."
-msgstr ""
-
-#: openplotter:2687
-msgid " USB Serial ports "
-msgstr ""
-
-#: openplotter:2690
+#: openplotter:2562
 msgid "name"
 msgstr "izena"
 
-#: openplotter:2695
+#: openplotter:2563
+msgid "device"
+msgstr ""
+
+#: openplotter:2564
+msgid "vendor"
+msgstr "fabrikatzaile"
+
+#: openplotter:2565
+msgid "product"
+msgstr "produktua"
+
+#: openplotter:2566
+msgid "port"
+msgstr "portua"
+
+#: openplotter:2567
+msgid "serial"
+msgstr "serial"
+
+#: openplotter:2568 openplotter:2576
+msgid "assignment"
+msgstr ""
+
+#: openplotter:2569
 msgid "remember"
 msgstr "oroitzen"
 
-#: openplotter:2763
+#: openplotter:2570 openplotter:2582
+msgid "bauds"
+msgstr ""
+
+#: openplotter:2573
+msgid "name /dev/ttyOP_"
+msgstr ""
+
+#: openplotter:2587
+msgid "Remember device (by vendor, product, serial)"
+msgstr ""
+
+#: openplotter:2588
+msgid "Remember port (positon on the USB-hub)"
+msgstr "Gogoratu portua (posizioa USB hub-en)"
+
+#: openplotter:2593
+msgid "auto"
+msgstr ""
+
+#: openplotter:2599
+msgid "refresh"
+msgstr ""
+
+#: openplotter:2602
+msgid "enable UART"
+msgstr ""
+
+#: openplotter:2605
+msgid "disable UART"
+msgstr ""
+
+#: openplotter:2710
+msgid "Warning: You have connected the \""
+msgstr ""
+
+#: openplotter:2710
+msgid "\" to the usb port which is reserved for another device"
+msgstr ""
+
+#: openplotter:2874 openplotter:2935 openplotter:3006
+msgid "Failed. No port selected"
+msgstr ""
+
+#: openplotter:2881
+msgid "Checking selected device ..."
+msgstr ""
+
+#: openplotter:2893
+msgid "Suitable parameters according to your system settings. Press apply to save."
+msgstr ""
+
+#: openplotter:2895
+msgid "We have not found any recognizable data on your device."
+msgstr ""
+
+#: openplotter:2943
+msgid "Failed. You have to provide a name (between 1 and 8 letters and/or numbers)."
+msgstr ""
+
+#: openplotter:2948
+msgid "Failed. Same name used for multiple devices"
+msgstr ""
+
+#: openplotter:2952
 msgid "Failed. The new name must be a string between 1 and 8 letters and/or numbers."
 msgstr ""
 
-#: openplotter:2834
+#: openplotter:2961
+msgid "Failed. Select bauds."
+msgstr ""
+
+#: openplotter:2984
+msgid "Warning: USB-Port with duplicate vendor product must be set to \"Remember port\"."
+msgstr ""
+
+#: openplotter:2992
+msgid "Warning: This port is already reserved and must be set to \"Remember device\"."
+msgstr ""
+
+#: openplotter:3051
 msgid "Restarting ..."
 msgstr "Berrerasten..."
 
-#: openplotter:2837
-msgid "USB names added and restarted"
+#: openplotter:3115
+msgid "Failed. Same name used for multiple devices: "
 msgstr ""
 
-#: openplotter:2842 openplotter:2983 openplotter:3076
-msgid " Settings "
-msgstr " Ezarpenak "
+#: openplotter:3173
+msgid "Serial port modified and restarted"
+msgstr ""
 
-#: openplotter:2844
-msgid "CAN-USB device"
-msgstr "CAN-USB gailua"
+#: openplotter:3180
+msgid "Failed. You can assign only one "
+msgstr ""
 
-#: openplotter:2850
+#: openplotter:3180
+msgid " device"
+msgstr ""
+
+#: openplotter:3190
+msgid "This action disables Bluetooth and enables UART. OpenPlotter will reboot.\n"
+msgstr ""
+
+#: openplotter:3191 openplotter:3198
+msgid "Are you sure?"
+msgstr ""
+
+#: openplotter:3197
+msgid "This action disables UART and enables Bluetooth. OpenPlotter will reboot.\n"
+msgstr ""
+
+#: openplotter:3254
+msgid "CAN-USB port:"
+msgstr ""
+
+#: openplotter:3257
+msgid " Input "
+msgstr ""
+
+#: openplotter:3259
 msgid "Enable N2K input"
 msgstr ""
 
-#: openplotter:2853
-msgid "Diagnostic input"
+#: openplotter:3265
+msgid " Output "
 msgstr ""
 
-#: openplotter:2856
+#: openplotter:3267
 msgid "Enable N2K output"
 msgstr ""
 
-#: openplotter:2859
-msgid "Diagnostic output"
+#: openplotter:3271
+msgid " Input can0 "
 msgstr ""
 
-#: openplotter:2862
-msgid "Output settings"
-msgstr "Irteerako ezarpenak"
-
-#: openplotter:2865
-msgid " Inputs "
-msgstr " Sarrerak "
-
-#: openplotter:2866
-msgid "PGNs: All"
-msgstr "PGNak: Denak"
-
-#: openplotter:2868
-msgid " Outputs "
-msgstr " Irteerak "
-
-#: openplotter:2895 openplotter:2940 openplotter:2955 openplotter:2966
-#: openplotter:2975
-msgid "You have to select a CAN-USB-CAN device"
+#: openplotter:3273
+msgid "Enable can0 N2K input"
 msgstr ""
 
-#: openplotter:2961
+#: openplotter:3279
+msgid "Device settings"
+msgstr ""
+
+#: openplotter:3282
+msgid "Signal K to N2K converter"
+msgstr ""
+
+#: openplotter:3414
 msgid "Select PGNs to transmit and enable N2K input/output again."
 msgstr ""
 
-#: openplotter:2970
+#: openplotter:3420
 msgid "Show received PGNs."
 msgstr ""
 
-#: openplotter:2979
+#: openplotter:3426
 msgid "Show sent PGNs."
 msgstr ""
 
-#: openplotter:2989
-msgid " Info "
-msgstr " Argibideak "
-
-#: openplotter:2996
-msgid "Version: "
-msgstr "Bertsioa: "
-
-#: openplotter:2998
-msgid "Signal K settings and tools:"
+#: openplotter:3436
+msgid "You have to add a CAN-USB device on Serial ports tab"
 msgstr ""
 
-#: openplotter:3000
-msgid "REST full format output:"
-msgstr ""
-
-#: openplotter:3002
-msgid "Websocket delta format output:"
-msgstr ""
-
-#: openplotter:3004
-msgid "TCP delta format output:"
-msgstr ""
-
-#: openplotter:3006
-msgid "TCP NMEA 0183 format output:"
-msgstr ""
-
-#: openplotter:3015
-msgid "Signal K tools"
-msgstr ""
-
-#: openplotter:3048
+#: openplotter:3444
 msgid "Closing Signal K server ..."
 msgstr ""
 
-#: openplotter:3055
+#: openplotter:3450
 msgid "Signal K server restarted"
 msgstr ""
 
-#: openplotter:3065
-msgid "You have to provide a MMSI."
-msgstr ""
+#: openplotter:3466
+msgid " Settings "
+msgstr " Ezarpenak "
 
-#: openplotter:3077
+#: openplotter:3467
 msgid "Enable settings"
 msgstr ""
 
-#: openplotter:3080
+#: openplotter:3469
 msgid "Serial port"
 msgstr ""
 
-#: openplotter:3089
+#: openplotter:3478
 msgid "Bluetooth address"
 msgstr ""
 
-#: openplotter:3092
+#: openplotter:3481
 msgid "Connection"
 msgstr ""
 
-#: openplotter:3096
+#: openplotter:3485
 msgid "Identify"
 msgstr ""
 
-#: openplotter:3099
+#: openplotter:3488
 msgid " Sending "
 msgstr " Bidaltzen "
 
-#: openplotter:3101
+#: openplotter:3490
 msgid "Enable sending SMS"
 msgstr ""
 
-#: openplotter:3104
+#: openplotter:3493
 msgid "Send to phone"
 msgstr "Telefonora bidali"
 
-#: openplotter:3107
+#: openplotter:3496
 msgid "Text"
 msgstr "Textua"
 
-#: openplotter:3110
+#: openplotter:3499
 msgid "Test"
 msgstr "Test"
 
-#: openplotter:3157
+#: openplotter:3553
 msgid "You have to provide a serial port or a bluetooth address."
 msgstr ""
 
-#: openplotter:3167
+#: openplotter:3563
 msgid "You have to provide a connection type."
 msgstr ""
 
-#: openplotter:3206
+#: openplotter:3602
 msgid "You have to enable settings."
 msgstr ""
 
-#: openplotter:3210
+#: openplotter:3606
 msgid "You have to provide a phone number."
 msgstr ""
 
-#: openplotter:3235
+#: openplotter:3631
 msgid "You have to provide some text to send."
 msgstr ""
 
-#: openplotter:3242
+#: openplotter:3638
 msgid " MQTT "
 msgstr " MQTT "
 
-#: openplotter:3244
+#: openplotter:3640
 msgid "Remote broker"
 msgstr ""
 
-#: openplotter:3248
+#: openplotter:3644
 msgid "Username"
 msgstr "Erabiltzailearen izena"
 
-#: openplotter:3250
+#: openplotter:3646
 msgid "Password"
 msgstr "Pasahitza"
 
-#: openplotter:3256
+#: openplotter:3652
 msgid "Clear"
 msgstr "Garbitu"
 
-#: openplotter:3330
+#: openplotter:3726
 msgid "MQTT restarted"
 msgstr "MQTT berrerazi"
 
-#: openplotter:3333
+#: openplotter:3729
 msgid "MQTT stopped"
 msgstr "MQTT gelditu"
 
-#: openplotter:3382
+#: openplotter:3778
 msgid "multiple keys"
 msgstr ""
 
-#: openplotter:3383
+#: openplotter:3779
 msgid "multiple sources"
 msgstr ""
 
-#: openplotter:3396 openplotter:3454
+#: openplotter:3792 openplotter:3850
 msgid "Failed. Apply settings change."
 msgstr ""
 
-#: openplotter:3405
+#: openplotter:3801
 msgid "Failed. You have to provide a name for the topic."
 msgstr ""
 
-#: openplotter:3409
+#: openplotter:3805
 msgid "Failed. Topics must contain only allowed characters."
 msgstr ""
 
-#: openplotter:3415 openplotter:3421
+#: openplotter:3811 openplotter:3817
 msgid "Failed. Topic name must be unique."
 msgstr ""
 
-#: openplotter:3430
+#: openplotter:3826
 msgid "Failed. You have to provide a Signal K key."
 msgstr ""
 
-#: openplotter:3439
+#: openplotter:3835
 msgid "Failed. You have to select a type for the topic."
 msgstr "Huts egin. Gaiaren mota bat hautatu behar duzu."
 
-#: openplotter:3484
+#: openplotter:3880
 msgid "Enter at least username and password."
 msgstr "Sartu gutxienez erabiltzaile-izena eta pasahitza."
 
-#: openplotter:3502
+#: openplotter:3898
 msgid "Settings and topics will be deleted. Are you sure?"
 msgstr "Ezarpenak eta gaiak ezabatuko dira. Ziur zaude?"
 
-#: startup:82
+#: startup:65
 msgid "Starting OpenPlotter"
 msgstr "OpenPlotter abiaraztea"
 
-#: startup:121
+#: startup:104
 msgid "Starting OpenPlotter. Please wait for all services to start."
 msgstr "OpenPlotter abiaraztea. Mesedez itxaron hasteko zerbitzu guztiak."
 
-#: startup:146
+#: startup:129
 msgid "There are some warnings. Please close this window and check your system."
 msgstr "Abisu batzuk daude. Itxi leiho hau eta egiaztatu zure sistema."
 
-#: startup:228
+#: startup:177
+msgid "Checking Signal K password..."
+msgstr ""
+
+#: startup:182
+msgid ""
+"\n"
+"\n"
+"Security warning: You are using the default password for Signal K server (openplotter).\n"
+"Please change password in Signal K > Security > Users > openplotter."
+msgstr ""
+
+#: startup:183 startup:200 startup:222
+msgid " See warning."
+msgstr ""
+
+#: startup:184 startup:201 startup:224 startup:229 startup:286 startup:315
+#: startup:369 startup:374 startup:379 startup:407
+msgid " Done."
+msgstr " Eginda."
+
+#: startup:186
+msgid ""
+"\n"
+"Checking Signal K defaults..."
+msgstr ""
+
+#: startup:191
 msgid ""
 "\n"
 "Checking pi password..."
@@ -2595,24 +2666,29 @@ msgstr ""
 "\n"
 "Pi pasahitza egiaztatzen..."
 
-#: startup:236
+#: startup:199
 msgid ""
 "\n"
 "\n"
-"Security warning: You are using the default password for \"pi\" user.\n"
+"Security warning: You are using the default password for \"pi\" user (raspberry).\n"
 "Please change password in Menu > Preferences > Raspberry Pi Configuration."
 msgstr ""
+
+#: startup:205
+msgid ""
+"\n"
+"Checking WIFI Access Point password..."
+msgstr ""
+
+#: startup:221
+msgid ""
 "\n"
 "\n"
-"Segurtasun abisua: \"pi\" erabiltzaileentzako pasahitz lehenetsia erabiltzen ari zara.\n"
-"Aldatu pasahitza menuan> Hobespenak> Raspberry Pi konfigurazioa."
+"Security warning: You are using the default WIFI Access Point password.\n"
+"Please change password in OpenPlotter > Network."
+msgstr ""
 
-#: startup:237 startup:242 startup:255 startup:274 startup:279 startup:330
-#: startup:344 startup:356 startup:384 startup:389 startup:394 startup:419
-msgid " Done."
-msgstr " Eginda."
-
-#: startup:240
+#: startup:227
 msgid ""
 "\n"
 "Applying "
@@ -2620,39 +2696,71 @@ msgstr ""
 "\n"
 "Aplikatuz "
 
-#: startup:240
+#: startup:227
 msgid " seconds of delay..."
 msgstr " atzerapen segundotan..."
 
-#: startup:245
+#: startup:232
 msgid ""
 "\n"
-"Starting VNC..."
+"Starting MQTT server..."
 msgstr ""
+
+#: startup:237
+msgid ""
 "\n"
-"VNC hasten..."
+"Starting 1W sensors..."
+msgstr ""
+
+#: startup:244
+msgid ""
+"\n"
+"Starting N2K server..."
+msgstr ""
 
 #: startup:249
 msgid ""
 "\n"
-"Checking VNC password..."
+"Starting actions and NMEA 0183/N2K generators..."
 msgstr ""
-"\n"
-"VNCren pasahitza egiaztatzen..."
 
-#: startup:252 startup:254
+#: startup:256
 msgid ""
 "\n"
-"\n"
-"Security warning: You have not set a password for VNC.\n"
-"Please set a password in OpenPlotter > Startup."
+"Starting Node-RED..."
 msgstr ""
-"\n"
-"\n"
-"Segurtasun abisua: VNCrako pasahitza ez duzu ezarri.\n"
-"Ezarri pasahitza OpenPlotter-en> Abiaraztean."
 
-#: startup:259
+#: startup:263
+msgid ""
+"\n"
+"Starting I2C, SPI, GPIO and Pypilot..."
+msgstr ""
+
+#: startup:269
+msgid ""
+"\n"
+"Starting Pypilot Web App..."
+msgstr ""
+
+#: startup:277
+msgid ""
+"\n"
+"Starting SDR AIS reception..."
+msgstr ""
+
+#: startup:284
+msgid ""
+"\n"
+"Checking 800x480 display..."
+msgstr ""
+
+#: startup:289
+msgid ""
+"\n"
+"Starting NMEA 0183 Multiplexer..."
+msgstr ""
+
+#: startup:295
 msgid ""
 "\n"
 "Starting OpenCPN..."
@@ -2660,162 +2768,58 @@ msgstr ""
 "\n"
 "OpenCPN abiarazten..."
 
-#: startup:268
-msgid ""
-"\n"
-"Starting WIFI Access Point..."
-msgstr ""
-"\n"
-"WIFI sarbide puntua abian..."
-
-#: startup:271
-msgid ""
-"\n"
-"Starting WIFI Client..."
-msgstr ""
-"\n"
-"WIFI bezeroa abiarazten..."
-
-#: startup:276
-msgid ""
-"\n"
-"checking WIFI Access Point password..."
-msgstr ""
-"\n"
-"wIFI Sarbidearen pasahitza pasahitza egiaztatzea..."
-
-#: startup:278
-msgid ""
-"\n"
-"\n"
-"Security warning: You are using the default WIFI Access Point password.\n"
-"Please change password in OpenPlotter > WiFi AP."
-msgstr ""
-"\n"
-"\n"
-"Segurtasun abisua: WIFI sarbide-puntuko pasahitz lehenetsia erabiltzen ari zara.\n"
-"Aldatu pasahitza OpenPlotter-en> WiFi AP-an."
-
-#: startup:288
-msgid ""
-"\n"
-"Starting SignalK Server..."
-msgstr ""
-"\n"
-"SignalK zerbitzaria abiarazten..."
-
-#: startup:297
-msgid ""
-"\n"
-"Start event SK to NMEA and action Server..."
-msgstr ""
-
-#: startup:299
-msgid ""
-"\n"
-"Start 1wire sensor Server (optional)..."
-msgstr ""
-
-#: startup:301
-msgid ""
-"\n"
-"Start mqtt Server (optional)..."
-msgstr ""
-
 #: startup:303
-msgid ""
-"\n"
-"Start N2K send (optional)..."
-msgstr ""
-
-#: startup:308
-msgid ""
-"\n"
-"Starting NMEA 0183 Multiplexer..."
-msgstr ""
-
-#: startup:315
-msgid ""
-"\n"
-"Starting Node-RED..."
-msgstr ""
-
-#: startup:324
-msgid ""
-"\n"
-"Start I2C, SPI and GPIO Server (optional)..."
-msgstr ""
-
-#: startup:328
-msgid ""
-"\n"
-"Getting system time from NMEA 0183..."
-msgstr ""
-
-#: startup:335
-msgid ""
-"\n"
-"Starting SDR AIS reception..."
-msgstr ""
-
-#: startup:342
-msgid ""
-"\n"
-"Check 800x480 display..."
-msgstr ""
-
-#: startup:346
 msgid ""
 "\n"
 "Starting Tools..."
 msgstr ""
 
-#: startup:359
+#: startup:317
 msgid ""
 "\n"
 "Checking OpenPlotter updates..."
 msgstr ""
 
-#: startup:365
+#: startup:333
 msgid " It was not possible to connect to Github."
 msgstr ""
 
-#: startup:381
+#: startup:345 startup:365
 msgid " Error reading versions."
 msgstr ""
 
-#: startup:385
+#: startup:370
 msgid ""
 "\n"
 "\n"
-"There is a Raspbian upgrade, it is recommended to download\n"
-"the new OpenPlotter RPI image: v"
+"There is a major Raspbian upgrade, you have to download\n"
+"the new OpenPlotter image: v"
 msgstr ""
 
-#: startup:386 startup:391 startup:396
+#: startup:371 startup:376 startup:381
 msgid ""
 "\n"
 "See CHANGELOG:"
 msgstr ""
 
-#: startup:390
+#: startup:375
 msgid ""
 "\n"
 "\n"
 "There is a major OpenPlotter update: "
 msgstr ""
 
-#: startup:395
+#: startup:380
 msgid ""
 "\n"
 "\n"
 "There is a minor OpenPlotter update: "
 msgstr ""
 
-#: startup:399
+#: startup:384
 msgid " is up to date."
 msgstr ""
 
-#: startup:421
+#: startup:409
 msgid " Not Started."
 msgstr " Hasigabea."

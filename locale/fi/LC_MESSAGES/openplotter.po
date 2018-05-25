@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: openplotter\n"
-"POT-Creation-Date: 2018-05-10 17:49+0200\n"
-"PO-Revision-Date: 2018-05-17 19:26+0200\n"
+"POT-Creation-Date: 2018-05-20 16:54+0200\n"
+"PO-Revision-Date: 2018-05-25 18:37+0200\n"
 "Last-Translator: sailoog <info@sailoog.com>\n"
 "Language-Team: Finnish\n"
 "Language: fi\n"
@@ -32,19 +32,19 @@ msgstr "info"
 msgid "check"
 msgstr "tarkista"
 
-#: CAN-USB-stick.py:90 openplotter:2580
+#: CAN-USB-stick.py:90 openplotter:2590
 msgid "apply"
 msgstr "käytä"
 
-#: SK-base_d.py:551 openplotter:2240
+#: SK-base_d.py:551 openplotter:2250
 msgid "was not updated in the last (sec.)"
 msgstr "ei ollut päivitetty viimeisen (sek.)"
 
-#: SK-base_d.py:551 openplotter:2240
+#: SK-base_d.py:551 openplotter:2250
 msgid "was updated in the last (sec.)"
 msgstr "oli päivitetty viimeisen (sek.)"
 
-#: SK-base_d.py:552 openplotter:2241
+#: SK-base_d.py:552 openplotter:2251
 msgid "contains"
 msgstr "sisältää"
 
@@ -64,7 +64,7 @@ msgstr "käynnistä"
 msgid "stop"
 msgstr "pysäytä"
 
-#: add_tool10.py:31 classes/add_NMEA_0183.py:64 classes/add_tool10.py:31
+#: add_tool10.py:31 classes/add_NMEA_0183.py:68 classes/add_tool10.py:31
 msgid "cancel"
 msgstr "peruuta"
 
@@ -120,32 +120,11 @@ msgstr "pysäytä NMEA multiplekseri"
 msgid "reset NMEA multiplexer"
 msgstr "palauta NMEA multiplekseri"
 
-#: classes/actions.py:57
-msgid "stop WiFi access point"
-msgstr "pysäytä WiFi yhteys"
-
-#: classes/actions.py:57 openplotter:831
-msgid ""
-"Access point will be disabled.\n"
-"\n"
-"If you are on a headless system, you will not be able to reconnect again.\n"
-"\n"
-"Are you sure?"
-msgstr "Tukiaseman poistetaan käytöstä. Jos järjestelmäsi on päätteetön, et voi kytkeytyä uudelleen. Oletko varma?"
-
-#: classes/actions.py:58
-msgid "start WiFi access point"
-msgstr "käynnistä WiFi yhteys"
-
-#: classes/actions.py:58
-msgid "Be sure you have filled in all fields in \"WiFi AP\" tab."
-msgstr "Varmista, että olet täyttänyt joka kentän ”WiFi AP”-välilehllä."
-
-#: classes/actions.py:61
+#: classes/actions.py:59
 msgid "publish Twitter"
 msgstr "julkaise Twitterissä"
 
-#: classes/actions.py:61
+#: classes/actions.py:59
 msgid ""
 "Be sure you have filled in all fields in \"Accounts\" tab, and enabled Twitter checkbox.\n"
 "\n"
@@ -155,11 +134,11 @@ msgstr ""
 "\n"
 "Kirjoita Julkaistava teksti ”tiedot” lokeroon."
 
-#: classes/actions.py:62
+#: classes/actions.py:60
 msgid "send e-mail"
 msgstr "lähetä sähköposti"
 
-#: classes/actions.py:62
+#: classes/actions.py:60
 msgid ""
 "Be sure you have filled in all fields in \"Accounts\" tab, and enabled Gmail checkbox.\n"
 "\n"
@@ -169,11 +148,11 @@ msgstr ""
 "\n"
 "Kirjoita kohde ”tiedot” lokeroon."
 
-#: classes/actions.py:63
+#: classes/actions.py:61
 msgid "send SMS"
 msgstr "lähetä tekstiviesti"
 
-#: classes/actions.py:63
+#: classes/actions.py:61
 msgid ""
 "Be sure you have enabled sending SMS in \"SMS\" tab.\n"
 "\n"
@@ -183,59 +162,59 @@ msgstr ""
 "\n"
 "Kirjoita viesti ”tiedot” kenttään."
 
-#: classes/actions.py:64
+#: classes/actions.py:62
 msgid "play sound"
 msgstr "toista ääni"
 
-#: classes/actions.py:65
+#: classes/actions.py:63
 msgid "stop all sounds"
 msgstr "lopeta kaikki äänet"
 
-#: classes/actions.py:66
+#: classes/actions.py:64
 msgid "show message"
 msgstr "näytä viesti"
 
-#: classes/actions.py:66
+#: classes/actions.py:64
 msgid "Enter the message in field \"data\"."
 msgstr "Kirjoita viesti kenttään ”tiedot”."
 
-#: classes/actions.py:67
+#: classes/actions.py:65
 msgid "close all messages"
 msgstr "sulje kaikki viestit"
 
-#: classes/actions.py:68
+#: classes/actions.py:66
 msgid "start all actions"
 msgstr "aloita kaikki toimet"
 
-#: classes/actions.py:69
+#: classes/actions.py:67
 msgid "stop all actions"
 msgstr "pysäytä kaikki toimet"
 
-#: classes/actions.py:69
+#: classes/actions.py:67
 msgid "This action will stop all the triggers except the trigger which has an action \"start all actions\" defined."
 msgstr "Tämä toiminto lopettaa kaikki käynnistimet paitsi ”käynnistä kaikki toimet” määrittelyn."
 
-#: classes/actions.py:82
+#: classes/actions.py:80
 msgid ": High"
 msgstr ": Korkea"
 
-#: classes/actions.py:82
+#: classes/actions.py:80
 msgid "ATTENTION! if you set this GPIO output to \"High\" and there is not a resistor or a circuit connected to the selected GPIO pin, YOU CAN DAMAGE YOUR BOARD."
 msgstr "HUOMIO! Jos asetat tämän GPIO asetuksen arvoksi ”High” eikä mitään vastusta tai piiriä ole liitetty valittuun GPIO pinniin, voi KONEESI VAURIOITUA."
 
-#: classes/actions.py:83
+#: classes/actions.py:81
 msgid ": Low"
 msgstr ": Alhainen"
 
-#: classes/actions.py:94
+#: classes/actions.py:92
 msgid "Publish on topic: "
 msgstr "Julkaise aiheesta: "
 
-#: classes/actions.py:97
+#: classes/actions.py:95
 msgid "Set Signal K key value"
 msgstr "Aseta Signal K avaimen arvo"
 
-#: classes/actions.py:159
+#: classes/actions.py:153
 msgid ""
 "\n"
 "source: "
@@ -243,7 +222,7 @@ msgstr ""
 "\n"
 "lähde: "
 
-#: classes/actions.py:159
+#: classes/actions.py:153
 msgid ""
 "\n"
 "timestamp: "
@@ -260,21 +239,21 @@ msgid "Edit 1W temperature sensor"
 msgstr "Muokkaa 1W lämpötila-anturia"
 
 #: classes/add_DS18B20.py:38 classes/add_topic.py:40 classes/add_trigger.py:39
-#: classes/edit_i2c.py:31 openplotter:1607 openplotter:1824 openplotter:1961
-#: openplotter:2440 openplotter:3629
+#: classes/edit_i2c.py:31 openplotter:1617 openplotter:1834 openplotter:1971
+#: openplotter:2450 openplotter:3658
 msgid "Signal K key"
 msgstr "Signal K näppäin"
 
 #: classes/add_DS18B20.py:41 classes/add_topic.py:43 classes/add_trigger.py:42
 #: classes/edit_i2c.py:25 classes/edit_i2c.py:35
-#: tools/demo_tool/demo_tool.py:84 openplotter:3722 openplotter:3849
+#: tools/demo_tool/demo_tool.py:84 openplotter:3751 openplotter:3878
 msgid "Edit"
 msgstr "Muokkaa"
 
 #: classes/add_DS18B20.py:44 classes/add_gpio.py:27 classes/add_i2c.py:39
 #: classes/add_kplex.py:44 diagnostic-N2K-input.py:80
-#: diagnostic-N2K-output.py:69 openplotter:1259 openplotter:1604
-#: openplotter:1957 openplotter:2437
+#: diagnostic-N2K-output.py:69 openplotter:1269 openplotter:1614
+#: openplotter:1967 openplotter:2447
 msgid "Name"
 msgstr "Nimi"
 
@@ -287,15 +266,15 @@ msgstr "sallitut merkkit: 0-9, a-z, A-Z"
 msgid "Sensor ID"
 msgstr "Anturi tunnus"
 
-#: classes/add_DS18B20.py:55 classes/edit_i2c.py:50 openplotter:1609
-#: openplotter:2439
+#: classes/add_DS18B20.py:55 classes/edit_i2c.py:50 openplotter:1619
+#: openplotter:2449
 msgid "Offset"
 msgstr "Siirtymä"
 
 #: classes/add_DS18B20.py:67 classes/add_MCP.py:68 classes/add_action.py:64
 #: classes/add_gpio.py:60 classes/add_kplex.py:117 classes/add_trigger.py:71
 #: tools/calculate/calculate.py:91 tools/demo_tool/demo_tool.py:96
-#: openplotter:509
+#: openplotter:518
 msgid "OK"
 msgstr "OK"
 
@@ -331,15 +310,15 @@ msgstr "Epäonnistui. Valitse anturin tunnus."
 msgid "Edit MCP analog input "
 msgstr "Muokkaa MCP analogista syötettä "
 
-#: classes/add_MCP.py:53 classes/select_key.py:52 openplotter:1825
+#: classes/add_MCP.py:53 classes/select_key.py:52 openplotter:1835
 msgid "*"
 msgstr "*"
 
-#: classes/add_MCP.py:57 openplotter:1822
+#: classes/add_MCP.py:57 openplotter:1832
 msgid "aktiv"
 msgstr "aktivinen"
 
-#: classes/add_MCP.py:58 unit-private.py:84 openplotter:1826
+#: classes/add_MCP.py:58 unit-private.py:84 openplotter:1836
 msgid "convert"
 msgstr "muunna"
 
@@ -347,11 +326,11 @@ msgstr "muunna"
 msgid "clean"
 msgstr "puhdista"
 
-#: classes/add_MCP.py:163 openplotter:1895
+#: classes/add_MCP.py:163 openplotter:1905
 msgid "minimum raw value in setting table > 0"
 msgstr "minimi raw-arvo taulukkoon > 0"
 
-#: classes/add_MCP.py:166 openplotter:1898
+#: classes/add_MCP.py:166 openplotter:1908
 msgid "maximum raw value in setting table < 1023"
 msgstr "maksimi raw-arvo taulukkoon > 1023"
 
@@ -363,11 +342,11 @@ msgstr "eI vaihtoehto arvoa "
 msgid " in openplotter.conf"
 msgstr " openplotter.confissa"
 
-#: classes/add_MCP.py:187 openplotter:1919
+#: classes/add_MCP.py:187 openplotter:1929
 msgid "Failed. Provide name and Signal K values."
 msgstr "Epäonnistui. Anna nimi ja Signal K arvot."
 
-#: classes/add_MCP.py:191 classes/add_gpio.py:91 openplotter:1924
+#: classes/add_MCP.py:191 classes/add_gpio.py:91 openplotter:1934
 msgid "Failed. The name must contain only letters and numbers."
 msgstr "Epäonnistui. Nimessä saa olla vain kirjaimia ja numeroita."
 
@@ -375,93 +354,93 @@ msgstr "Epäonnistui. Nimessä saa olla vain kirjaimia ja numeroita."
 msgid "add NMEA 0183 sentence"
 msgstr "lisää NMEA 0183 lause"
 
-#: classes/add_NMEA_0183.py:49
+#: classes/add_NMEA_0183.py:53
 #: tools/NMEA_0183_generator/NMEA_0183_generator.py:45
 msgid "Sentence"
 msgstr "Lause"
 
-#: classes/add_NMEA_0183.py:54 tools/calculate/calculate.py:53
+#: classes/add_NMEA_0183.py:58 tools/calculate/calculate.py:53
 #: tools/calculate/calculate.py:61 tools/calculate/calculate.py:73
 #: tools/calculate/calculate.py:85
 msgid "Rate (sec)"
 msgstr "Luokitus (sec)"
 
-#: classes/add_NMEA_0183.py:58 diagnostic-NMEA.py:65
+#: classes/add_NMEA_0183.py:62 diagnostic-NMEA.py:65
 msgid "NMEA info"
 msgstr "NMEA-info"
 
-#: classes/add_NMEA_0183.py:61
+#: classes/add_NMEA_0183.py:65
 msgid "RMC examp"
 msgstr "RMC esim."
 
-#: classes/add_NMEA_0183.py:69
+#: classes/add_NMEA_0183.py:73
 msgid "Field"
 msgstr "Kenttä"
 
-#: classes/add_NMEA_0183.py:70 classes/add_trigger.py:63
+#: classes/add_NMEA_0183.py:74 classes/add_trigger.py:63
 #: diagnostic-SK-input.py:74
 msgid "Value"
 msgstr "Arvo"
 
-#: classes/add_NMEA_0183.py:74
+#: classes/add_NMEA_0183.py:78
 msgid "--Select type"
 msgstr "--Valitse tyyppi"
 
-#: classes/add_NMEA_0183.py:74
+#: classes/add_NMEA_0183.py:78
 msgid "Expression"
 msgstr "Lauseke"
 
-#: classes/add_NMEA_0183.py:74
+#: classes/add_NMEA_0183.py:78
 msgid "Number"
 msgstr "Numero"
 
-#: classes/add_NMEA_0183.py:74 classes/add_NMEA_0183.py:289
+#: classes/add_NMEA_0183.py:78 classes/add_NMEA_0183.py:293
 msgid "String"
 msgstr "Merkkijono"
 
-#: classes/add_NMEA_0183.py:79
+#: classes/add_NMEA_0183.py:83
 msgid "--vessel"
 msgstr "--alus"
 
-#: classes/add_NMEA_0183.py:90 classes/add_NMEA_0183.py:213
+#: classes/add_NMEA_0183.py:94 classes/add_NMEA_0183.py:217
 msgid "--group"
 msgstr "--ryhmä"
 
-#: classes/add_NMEA_0183.py:94 classes/add_NMEA_0183.py:234
-#: classes/add_NMEA_0183.py:436
+#: classes/add_NMEA_0183.py:98 classes/add_NMEA_0183.py:238
+#: classes/add_NMEA_0183.py:440
 msgid "--key"
 msgstr "--avain"
 
-#: classes/add_NMEA_0183.py:97
+#: classes/add_NMEA_0183.py:101
 msgid "--operator"
 msgstr "--operaattori"
 
-#: classes/add_NMEA_0183.py:102
+#: classes/add_NMEA_0183.py:106
 msgid "="
 msgstr "="
 
-#: classes/add_NMEA_0183.py:107
+#: classes/add_NMEA_0183.py:111
 msgid "Add value"
 msgstr "Lisää arvo"
 
-#: classes/add_NMEA_0183.py:110
+#: classes/add_NMEA_0183.py:114
 msgid "Delete value"
 msgstr "Poista arvo"
 
-#: classes/add_NMEA_0183.py:291 classes/add_NMEA_0183.py:297
+#: classes/add_NMEA_0183.py:295 classes/add_NMEA_0183.py:301
 msgid "Failed. String must contain only allowed characters."
 msgstr "Epäonnistui. Merkkijonon pitää sisältää vain sallitut merkit."
 
-#: classes/add_NMEA_0183.py:309 classes/add_NMEA_0183.py:327
-#: classes/add_NMEA_0183.py:338 classes/add_NMEA_0183.py:351
+#: classes/add_NMEA_0183.py:313 classes/add_NMEA_0183.py:331
+#: classes/add_NMEA_0183.py:342 classes/add_NMEA_0183.py:355
 msgid "FAILED. Fill in all the available fields."
 msgstr "EPÄONNISTUI. Täytä kaikki kentät."
 
-#: classes/add_NMEA_0183.py:316
+#: classes/add_NMEA_0183.py:320
 msgid "FAILED. This is not a valid expression."
 msgstr "EPÄONNISTUI. Tämä ei ole kelvollinen lauseke."
 
-#: classes/add_NMEA_0183.py:343
+#: classes/add_NMEA_0183.py:347
 msgid "FAILED. This field must be a number."
 msgstr "EPÄONNISTUI. Tässä kentässä on oltava luku."
 
@@ -478,7 +457,7 @@ msgid "Signal K variable"
 msgstr "Signal K muuttuja"
 
 #: classes/add_SK_to_N2K.py:79 tools/moitessier_hat/moitessier_hat.py:170
-#: openplotter:1053 openplotter:1282 openplotter:2203
+#: openplotter:1063 openplotter:1292 openplotter:2213
 msgid "Apply changes"
 msgstr "Lisää muutokset"
 
@@ -490,11 +469,11 @@ msgstr "Lisää toiminto"
 msgid "Edit action"
 msgstr "Muokkaa toimintoa"
 
-#: classes/add_action.py:39 openplotter:2185
+#: classes/add_action.py:39 openplotter:2195
 msgid "action"
 msgstr "toiminta"
 
-#: classes/add_action.py:45 openplotter:2186
+#: classes/add_action.py:45 openplotter:2196
 msgid "data"
 msgstr "tiedot"
 
@@ -506,15 +485,15 @@ msgstr "Lisätä signaalin K-näppäin"
 msgid "repeat after"
 msgstr "toista jälkeen"
 
-#: classes/add_action.py:121 openplotter:576
+#: classes/add_action.py:121 openplotter:585
 msgid "Choose a file"
 msgstr "Valitse tiedosto"
 
-#: classes/add_action.py:123 openplotter:577
+#: classes/add_action.py:123 openplotter:586
 msgid "Audio files"
 msgstr "Audiotiedostot"
 
-#: classes/add_action.py:123 openplotter:577
+#: classes/add_action.py:123 openplotter:586
 msgid "All files"
 msgstr "Kaikki tiedostot"
 
@@ -577,7 +556,7 @@ msgstr "Tosisuunta"
 msgid "change"
 msgstr "muuta"
 
-#: classes/add_deviation_setting.py:56 classes/add_i2c.py:43 openplotter:1026
+#: classes/add_deviation_setting.py:56 classes/add_i2c.py:43 openplotter:1036
 msgid "Reset"
 msgstr "Palauta"
 
@@ -585,7 +564,7 @@ msgstr "Palauta"
 #: test_sms.py:51 tools/SDR_AIS/SDR_AIS_fine_cal.py:58
 #: tools/moitessier_hat/moitessier_hat.py:85
 #: tools/moitessier_hat/moitessier_hat.py:173
-#: tools/moitessier_hat/moitessier_hat.py:263 startup:81
+#: tools/moitessier_hat/moitessier_hat.py:264 startup:81
 msgid "Close"
 msgstr "Sulje"
 
@@ -594,6 +573,7 @@ msgid "graph"
 msgstr "kaavio"
 
 #: classes/add_deviation_setting.py:143 classes/add_deviation_setting.py:190
+#: openplotter:686
 msgid "Set"
 msgstr "Määritä"
 
@@ -610,16 +590,16 @@ msgid "Add GPIO sensor"
 msgstr "Lisää GPIO anturi"
 
 #: classes/add_gpio.py:32 classes/add_gpio.py:51 classes/add_gpio.py:66
-#: openplotter:2011
+#: openplotter:2021
 msgid "input"
 msgstr "syöte"
 
 #: classes/add_gpio.py:32 classes/add_gpio.py:48 classes/add_gpio.py:67
-#: classes/add_gpio.py:74 openplotter:2008 openplotter:2042
+#: classes/add_gpio.py:74 openplotter:2018 openplotter:2052
 msgid "output"
 msgstr "lähtö"
 
-#: classes/add_gpio.py:33 openplotter:1958
+#: classes/add_gpio.py:33 openplotter:1968
 msgid "I/O"
 msgstr "I/O"
 
@@ -635,13 +615,13 @@ msgstr "Vedä"
 msgid "CAUTION. If you connect a closed switch or some inappropriate circuit, you could short out and damage your board when this output becomes \"High\". Are you sure to enable this output?"
 msgstr "VAROITUS. Jos liität suljettun kytkimen tai sopimattoman piirin, teet oikosulun ja vahingoitat korttikoneesi, kun tämä ulostulo on ”korkea”. Oletko varma jotta sallit tämän olostulon?"
 
-#: classes/add_gpio.py:81 classes/add_i2c.py:108 openplotter:440
-#: openplotter:832 openplotter:841 openplotter:1210 openplotter:3183
-#: openplotter:3190 openplotter:3869
+#: classes/add_gpio.py:81 classes/add_i2c.py:108 openplotter:449
+#: openplotter:843 openplotter:1220 openplotter:3192 openplotter:3199
+#: openplotter:3898
 msgid "Question"
 msgstr "Kysymys"
 
-#: classes/add_gpio.py:88 openplotter:809
+#: classes/add_gpio.py:88
 msgid "Failed. You must fill in all fields."
 msgstr "Sinun tulee täyttää kaikki kentät."
 
@@ -653,7 +633,7 @@ msgstr "Lisää I2C anturi ilman kompassia"
 msgid "detected"
 msgstr "havaittu"
 
-#: classes/add_i2c.py:40 classes/add_kplex.py:57 openplotter:1605
+#: classes/add_i2c.py:40 classes/add_kplex.py:57 openplotter:1615
 msgid "Address"
 msgstr "Osoite"
 
@@ -684,7 +664,7 @@ msgid "Add/Edit NMEA 0183 (KPLEX)"
 msgstr "Lisää/Muokkaa NMEA 0183 (KPLEX)"
 
 #: classes/add_kplex.py:38 classes/add_topic.py:36 diagnostic-NMEA.py:55
-#: openplotter:1260 openplotter:3628
+#: openplotter:1270 openplotter:3657
 msgid "Type"
 msgstr "Tyyppi"
 
@@ -692,7 +672,7 @@ msgstr "Tyyppi"
 msgid " settings "
 msgstr " asetukset "
 
-#: classes/add_kplex.py:49 classes/add_kplex.py:59 openplotter:3613
+#: classes/add_kplex.py:49 classes/add_kplex.py:59 openplotter:3642
 msgid "Port"
 msgstr "Portti"
 
@@ -711,10 +691,9 @@ msgstr "sisään suodatin "
 #: classes/add_kplex.py:76 classes/add_kplex.py:93 classes/add_kplex.py:149
 #: classes/add_kplex.py:157 classes/add_kplex.py:323 classes/add_kplex.py:347
 #: classes/add_kplex.py:416 classes/add_kplex.py:420 classes/add_kplex.py:424
-#: classes/add_kplex.py:448 openplotter:668 openplotter:706 openplotter:735
-#: openplotter:740 openplotter:822 openplotter:825 openplotter:1455
-#: openplotter:1467 openplotter:1514 openplotter:1516 openplotter:2567
-#: openplotter:2691 openplotter:3006 openplotter:3105 openplotter:3332
+#: classes/add_kplex.py:448 openplotter:658 openplotter:1465 openplotter:1477
+#: openplotter:1524 openplotter:1526 openplotter:2577 openplotter:2701
+#: openplotter:3016 openplotter:3114 openplotter:3361
 msgid "none"
 msgstr "ei mitään"
 
@@ -749,18 +728,18 @@ msgstr "ulos suodatin "
 #: classes/add_kplex.py:322 classes/add_kplex.py:346 classes/add_kplex.py:416
 #: classes/add_kplex.py:420 classes/add_kplex.py:425 classes/add_kplex.py:428
 #: classes/add_kplex.py:439 classes/add_kplex.py:449 classes/add_kplex.py:452
-#: classes/add_kplex.py:463 openplotter:1459 openplotter:1471 openplotter:1514
-#: openplotter:1516
+#: classes/add_kplex.py:463 openplotter:1469 openplotter:1481 openplotter:1524
+#: openplotter:1526
 msgid "nothing"
 msgstr "ei mitään"
 
-#: classes/add_kplex.py:150 classes/add_kplex.py:158 openplotter:1456
-#: openplotter:1468
+#: classes/add_kplex.py:150 classes/add_kplex.py:158 openplotter:1466
+#: openplotter:1478
 msgid "accept"
 msgstr "hyväksy"
 
-#: classes/add_kplex.py:152 classes/add_kplex.py:160 openplotter:1457
-#: openplotter:1469
+#: classes/add_kplex.py:152 classes/add_kplex.py:160 openplotter:1467
+#: openplotter:1479
 msgid "ignore"
 msgstr "ohita"
 
@@ -832,22 +811,22 @@ msgstr "Lisää MQTT aihe"
 msgid "Edit MQTT topic"
 msgstr "Muokkaa MQTT aihetta"
 
-#: classes/add_topic.py:31 openplotter:3627
+#: classes/add_topic.py:31 openplotter:3656
 msgid "Topic"
 msgstr "Aihe"
 
-#: classes/add_topic.py:35 classes/add_topic.py:53 openplotter:3740
-#: openplotter:3791
+#: classes/add_topic.py:35 classes/add_topic.py:53 openplotter:3769
+#: openplotter:3820
 msgid "General"
 msgstr "Yleistä"
 
 #: classes/add_topic.py:35 classes/add_topic.py:55 classes/add_topic.py:88
-#: openplotter:3744 openplotter:3794
+#: openplotter:3773 openplotter:3823
 msgid "Signal K key input"
 msgstr "Signal K avain tulo"
 
-#: classes/add_topic.py:35 classes/add_topic.py:61 openplotter:3748
-#: openplotter:3802
+#: classes/add_topic.py:35 classes/add_topic.py:61 openplotter:3777
+#: openplotter:3831
 msgid "Signal K delta input"
 msgstr "Signal K delta tulo"
 
@@ -859,7 +838,7 @@ msgstr "Lisää käynnistin"
 msgid "Edit trigger"
 msgstr "Muokkaa käynnistintä"
 
-#: classes/add_trigger.py:34 openplotter:2253 openplotter:2299
+#: classes/add_trigger.py:34 openplotter:2263 openplotter:2309
 msgid "Date"
 msgstr "Päivä"
 
@@ -900,16 +879,16 @@ msgid "value in required unit"
 msgstr "arvo oikeassa yksikössä"
 
 #: classes/add_value_setting.py:43
-#: tools/NMEA_0183_generator/NMEA_0183_generator.py:51 openplotter:1612
-#: openplotter:1965 openplotter:2178 openplotter:2191 openplotter:2444
-#: openplotter:3633
+#: tools/NMEA_0183_generator/NMEA_0183_generator.py:51 openplotter:1622
+#: openplotter:1975 openplotter:2188 openplotter:2201 openplotter:2454
+#: openplotter:3662
 msgid "add"
 msgstr "lisää"
 
 #: classes/add_value_setting.py:46
-#: tools/NMEA_0183_generator/NMEA_0183_generator.py:54 openplotter:1275
-#: openplotter:1615 openplotter:1968 openplotter:2181 openplotter:2194
-#: openplotter:2447 openplotter:2586 openplotter:3636
+#: tools/NMEA_0183_generator/NMEA_0183_generator.py:54 openplotter:1285
+#: openplotter:1625 openplotter:1978 openplotter:2191 openplotter:2204
+#: openplotter:2457 openplotter:2596 openplotter:3665
 msgid "delete"
 msgstr "poista"
 
@@ -1033,7 +1012,7 @@ msgstr "Signal K"
 msgid "Unit"
 msgstr "Yksikkö"
 
-#: diagnostic-SK-input.py:77 openplotter:725
+#: diagnostic-SK-input.py:77 openplotter:716
 msgid "Status"
 msgstr "Tila"
 
@@ -1083,7 +1062,7 @@ msgstr "adc riviarvo"
 msgid "Test SMS"
 msgstr "Testi SMS"
 
-#: test_sms.py:47 tools/SDR_AIS/SDR_AIS_fine_cal.py:47 openplotter:1182
+#: test_sms.py:47 tools/SDR_AIS/SDR_AIS_fine_cal.py:47 openplotter:1192
 msgid "Error"
 msgstr "Virhe"
 
@@ -1135,7 +1114,7 @@ msgstr "NMEA 0183 generaattori"
 msgid " NMEA 0183 "
 msgstr " NMEA 0183 "
 
-#: tools/NMEA_0183_generator/NMEA_0183_generator.py:46 openplotter:1608
+#: tools/NMEA_0183_generator/NMEA_0183_generator.py:46 openplotter:1618
 msgid "Rate"
 msgstr "Taso"
 
@@ -1153,9 +1132,9 @@ msgstr "opencpn oletus"
 msgid "NMEA Diagnostic"
 msgstr "NMEA-diagnostiikka"
 
-#: tools/NMEA_0183_generator/NMEA_0183_generator.py:63 openplotter:1066
-#: openplotter:1618 openplotter:1829 openplotter:1971 openplotter:2450
-#: openplotter:3256 openplotter:3639
+#: tools/NMEA_0183_generator/NMEA_0183_generator.py:63 openplotter:1076
+#: openplotter:1628 openplotter:1839 openplotter:1981 openplotter:2460
+#: openplotter:3285 openplotter:3668
 msgid "SK Diagnostic"
 msgstr "SK diagnostiikka"
 
@@ -1191,7 +1170,7 @@ msgstr "Kanava B 162.025Mhz"
 msgid "Take a look"
 msgstr "Tutustu"
 
-#: tools/SDR_AIS/SDR_AIS.py:61 openplotter:1038
+#: tools/SDR_AIS/SDR_AIS.py:61 openplotter:1048
 msgid "Calibration"
 msgstr "Kalibrointi"
 
@@ -1207,7 +1186,7 @@ msgstr "Taajuus"
 msgid "Check band"
 msgstr "Tarkista taajuus"
 
-#: tools/SDR_AIS/SDR_AIS.py:71 openplotter:699
+#: tools/SDR_AIS/SDR_AIS.py:71 openplotter:703
 msgid "Channel"
 msgstr "Kanava"
 
@@ -1286,7 +1265,7 @@ msgid " Magnetic variation "
 msgstr " Magneettinen vaihtelu "
 
 #: tools/calculate/calculate.py:49 tools/calculate/calculate.py:57
-#: tools/moitessier_hat/moitessier_hat.py:119 openplotter:2072 openplotter:2085
+#: tools/moitessier_hat/moitessier_hat.py:119 openplotter:2082 openplotter:2095
 msgid "Enable"
 msgstr "Ota käyttöön"
 
@@ -1412,7 +1391,7 @@ msgid "Settings"
 msgstr "Asetukset"
 
 #: tools/moitessier_hat/moitessier_hat.py:54
-#: tools/moitessier_hat/moitessier_hat.py:258
+#: tools/moitessier_hat/moitessier_hat.py:259
 msgid "Install"
 msgstr "Asenna"
 
@@ -1432,7 +1411,7 @@ msgstr "Tilastot"
 msgid "Reset statistics"
 msgstr "Nollaa tilastot"
 
-#: tools/moitessier_hat/moitessier_hat.py:72 openplotter:1600 openplotter:1954
+#: tools/moitessier_hat/moitessier_hat.py:72 openplotter:1610 openplotter:1964
 msgid " Sensors "
 msgstr " Anturit "
 
@@ -1496,23 +1475,24 @@ msgstr " Nykyinen ytimen versio "
 msgid " Available packages "
 msgstr " Saatavilla olevat paketit "
 
-#: tools/moitessier_hat/moitessier_hat.py:299
+#: tools/moitessier_hat/moitessier_hat.py:300
+#: tools/moitessier_hat/moitessier_hat.py:305
 msgid "Moitessier HAT is not attached!"
 msgstr "Moitessier HAT ei ole liitetty!"
 
-#: tools/moitessier_hat/moitessier_hat.py:302
+#: tools/moitessier_hat/moitessier_hat.py:308
 msgid "Moitessier HAT is attached.\n"
 msgstr "Moitessier HAT on liitetty.\n"
 
-#: tools/moitessier_hat/moitessier_hat.py:305
+#: tools/moitessier_hat/moitessier_hat.py:311
 msgid "Moitessier HAT package is not installed!"
 msgstr "Moitessier HAT paketti ei ole asennettu!"
 
-#: tools/moitessier_hat/moitessier_hat.py:309
+#: tools/moitessier_hat/moitessier_hat.py:315
 msgid "Moitessier HAT package is installed.\n"
 msgstr "Moitessier HAT paketti on asennettu.\n"
 
-#: tools/moitessier_hat/moitessier_hat.py:310
+#: tools/moitessier_hat/moitessier_hat.py:316
 msgid ""
 "All changes will be temporal.\n"
 "Default settings will be loaded after rebooting.\n"
@@ -1520,7 +1500,7 @@ msgstr ""
 "Kaikki muutokset ovat tilapäisiä.\n"
 " Oletusasetukset ladataan uudelleenkäynnistyksen jälkeen.\n"
 
-#: tools/moitessier_hat/moitessier_hat.py:311
+#: tools/moitessier_hat/moitessier_hat.py:317
 msgid ""
 "Select the package that matches the current Kernel version.\n"
 "Before installing, be sure the HAT is not being used by any service (kplex, GPSD, OpenCPN ...).\n"
@@ -1530,27 +1510,27 @@ msgstr ""
 " Ennen asennusta, varmista, että HAT ei ole minkään palvelun käytössä (kplex, GPSD, OpenCPN...).\n"
 "Jos asennus epäonnistuu, sinun täytyy yrittää asentaa paketti useita kertoja."
 
-#: tools/moitessier_hat/moitessier_hat.py:346
+#: tools/moitessier_hat/moitessier_hat.py:352
 msgid "Failure reading config.xml file!"
 msgstr "Virhe luettaessa config.xml tiedostoa!"
 
-#: tools/moitessier_hat/moitessier_hat.py:351
+#: tools/moitessier_hat/moitessier_hat.py:357
 msgid "Select a package to install."
 msgstr "Valitse asennettava paketti."
 
-#: tools/moitessier_hat/moitessier_hat.py:354
+#: tools/moitessier_hat/moitessier_hat.py:360
 msgid "Updating Moitessier Hat modules and firmware..."
 msgstr "Päivitetään Moitessier Hat moduulit ja firmware..."
 
-#: tools/moitessier_hat/moitessier_hat.py:405
+#: tools/moitessier_hat/moitessier_hat.py:411
 msgid "Defaults loaded.\n"
 msgstr "Oletukset ladattu.\n"
 
-#: tools/moitessier_hat/moitessier_hat.py:442
+#: tools/moitessier_hat/moitessier_hat.py:448
 msgid "Changes applied.\n"
 msgstr "Muutokset lisätty.\n"
 
-#: tools/moitessier_hat/moitessier_hat.py:443
+#: tools/moitessier_hat/moitessier_hat.py:449
 msgid "Apply changes failed!\n"
 msgstr "Muutokset epäonnistui!\n"
 
@@ -1571,16 +1551,16 @@ msgid "change selected"
 msgstr "muutta valittu"
 
 #: openplotter:89
-msgid "Serial ports"
-msgstr "Sarjaportit"
+msgid "Serial"
+msgstr "Sarja"
 
 #: openplotter:91
 msgid "pypilot"
 msgstr "pypilot"
 
 #: openplotter:93
-msgid "WiFi AP"
-msgstr "WiFi AP"
+msgid "Network"
+msgstr "Verkko"
 
 #: openplotter:94
 msgid "Actions"
@@ -1655,122 +1635,130 @@ msgid "Set English language"
 msgstr "Aseta Englannin kieli"
 
 #: openplotter:167
+msgid "Finnish"
+msgstr "Suomi"
+
+#: openplotter:167
+msgid "Set Finnish language"
+msgstr "Aseta Suomen kieli"
+
+#: openplotter:169
 msgid "French"
 msgstr "Ranska"
 
-#: openplotter:167
+#: openplotter:169
 msgid "Set French language"
 msgstr "Aseta Ranskan kieli"
 
-#: openplotter:169
+#: openplotter:171
 msgid "Galician"
 msgstr "Galician"
 
-#: openplotter:169
+#: openplotter:171
 msgid "Set Galician language"
 msgstr "Aseta Calician kieli"
 
-#: openplotter:171
+#: openplotter:173
 msgid "German"
 msgstr "Saksa"
 
-#: openplotter:171
+#: openplotter:173
 msgid "Set German language"
 msgstr "Aseta Saksan kieli"
 
-#: openplotter:173
+#: openplotter:175
 msgid "Italiano"
 msgstr "Italiano"
 
-#: openplotter:173
+#: openplotter:175
 msgid "Set Italian language"
 msgstr "Aseta Italian kieli"
 
-#: openplotter:175
+#: openplotter:177
 msgid "Spanish"
 msgstr "Espanja"
 
-#: openplotter:175
+#: openplotter:177
 msgid "Set Spanish language"
 msgstr "Aseta Espanjan kieli"
 
-#: openplotter:177
+#: openplotter:179
 msgid "Language"
 msgstr "Kieli"
 
-#: openplotter:180
+#: openplotter:182
 msgid "Update OpenCPN"
 msgstr "Päivitä OpenCPN"
 
-#: openplotter:180
+#: openplotter:182
 msgid "Update OpenCPN to latest stable release"
 msgstr "Päivitä OpenCPN Viimeiseen vakaaseen versioon"
 
-#: openplotter:182
+#: openplotter:184
 msgid "Update OpenCPN plugins"
 msgstr "Päivittä OpenCPN pluginit"
 
-#: openplotter:182
+#: openplotter:184
 msgid "Update OpenCPN plugins to latest stable releases"
 msgstr "Päivitä OpenCPN pluginit viimeiseen vakaaseen versioon"
 
-#: openplotter:185
+#: openplotter:187
 msgid "Set default OpenPlotter desktop"
 msgstr "Aseta oletus OpenPlotter desktop"
 
-#: openplotter:185
+#: openplotter:187
 msgid "Run this after a major update"
 msgstr "Suorita tämä pääpäivityksen jälkeen"
 
-#: openplotter:188
+#: openplotter:190
 msgid "Update OpenPlotter"
 msgstr "Päivitä OpenPlotter"
 
-#: openplotter:188
+#: openplotter:190
 msgid "Apply latest changes on OpenPlotter and update the system if necessary"
 msgstr "Lisää viimeisimmät muutokset OpenPlotteriin ja päivitä järjestelmä tarvittaessa"
 
-#: openplotter:190
+#: openplotter:192
 msgid "Updates"
 msgstr "Päivitykset"
 
-#: openplotter:193
+#: openplotter:195
 msgid "&About"
 msgstr "Tietoja"
 
-#: openplotter:193
+#: openplotter:195
 msgid "About OpenPlotter"
 msgstr "Tietoja OpenPlotterista"
 
-#: openplotter:195
+#: openplotter:197
 msgid "Online documentation"
 msgstr "Online-dokumentaatio"
 
-#: openplotter:196
+#: openplotter:198
 msgid "OpenPlotter online documentation"
 msgstr "OpenPlotter online-dokumentaatio"
 
-#: openplotter:198
+#: openplotter:200
 msgid "&Help"
 msgstr "&Apua"
 
-#: openplotter:318
+#: openplotter:322
 msgid "The selected language will be enabled when you restart"
 msgstr "Valittu kieli tulee käyttöön, kun käynnistät"
 
-#: openplotter:367 openplotter:371 openplotter:449
+#: openplotter:376 openplotter:380 openplotter:458
 msgid "Follow the instructions of the new window"
 msgstr "Noudata uuden ikkunan ohjeita"
 
-#: openplotter:387
+#: openplotter:396
 msgid "It was not possible to connect to Github."
 msgstr "Ei voitu yhdistää githubiin."
 
-#: openplotter:399 openplotter:417
+#: openplotter:408 openplotter:426
 msgid "Error reading versions."
 msgstr "Virhe versioiden käsittelyssä."
 
-#: openplotter:421
+#: openplotter:430
 msgid ""
 "You are running a stable version. If you update to a non stable version you will have to keep updating until a stable stage is reached again.\n"
 "\n"
@@ -1778,15 +1766,15 @@ msgstr ""
 "Käytössäsi on vakaa versio. Jos vaihdat kehitysversioon, sitä täytyy päivittää kunnes on tultu vakaaseen versioon jälleen.\n"
 "\n"
 
-#: openplotter:423
+#: openplotter:432
 msgid "There is a major Raspbian upgrade, you have to download the new OpenPlotter image: v"
 msgstr "On Raspbianin versio päivitys, on suositeltavaa ladata uusi OpenPlotter rpi kuva: v"
 
-#: openplotter:427
+#: openplotter:436
 msgid "There is a major OpenPlotter update.\n"
 msgstr "On OpenPlotterin versiopäivitys.\n"
 
-#: openplotter:428
+#: openplotter:437
 msgid ""
 "Please make a backup image of your system before updating.\n"
 "\n"
@@ -1794,7 +1782,7 @@ msgstr ""
 "Teethän täyden backupin systeemistäsi ennen päivitystä.\n"
 "\n"
 
-#: openplotter:431
+#: openplotter:440
 msgid ""
 "There is a minor OpenPlotter update.\n"
 "\n"
@@ -1802,79 +1790,107 @@ msgstr ""
 "On pieni OpenPlotter-päivitys.\n"
 "\n"
 
-#: openplotter:434
+#: openplotter:443
 msgid " is up to date.\n"
 msgstr " on ajan tasalla.\n"
 
-#: openplotter:437
+#: openplotter:446
 msgid "Are you sure you want to update: "
 msgstr "Oletko varma, että haluat päivittää: "
 
-#: openplotter:453
+#: openplotter:462
 msgid "OpenPlotter is a DIY, open-source, low-cost, low-consumption, modular and scalable sailing platform to run on ARM boards."
 msgstr "OpenPlotter on DIY, avoimen lähdekoodin, edullinen, vähään tyytyvä, modulaarinen ja skaalautuva purjehdus alusta ajettavaksi ARM-laudoilla."
 
-#: openplotter:507
+#: openplotter:516
 msgid "Delay (seconds)"
 msgstr "Viive (sekuntia)"
 
-#: openplotter:514
+#: openplotter:523
 msgid "no OpenGL"
 msgstr "ei OpenGLää"
 
-#: openplotter:516
+#: openplotter:525
 msgid "fullscreen"
 msgstr "koko näyttö"
 
-#: openplotter:519
+#: openplotter:528
 msgid "Play sound"
 msgstr "Toista ääni"
 
-#: openplotter:522
+#: openplotter:531
 msgid "File"
 msgstr "Tiedosto"
 
-#: openplotter:525
+#: openplotter:534
 msgid "Maximize OpenPlotter"
 msgstr "Maksimoi OpenPlotter"
 
-#: openplotter:528
+#: openplotter:537
 msgid "Node-Red"
 msgstr "Node-Red"
 
-#: openplotter:588
+#: openplotter:597
 msgid "You can enter only numbers."
 msgstr "Voi syöttää ainoastaan numeroita."
 
-#: openplotter:593
+#: openplotter:602
 msgid "Startup delay set to "
 msgstr "Käynnistys viive asetettu "
 
-#: openplotter:593
+#: openplotter:602
 msgid " seconds"
 msgstr " sekuntia"
 
-#: openplotter:643
-msgid "Enable access point"
-msgstr "Salli tukiasema"
+#: openplotter:669
+msgid "client"
+msgstr "asiakas"
 
-#: openplotter:646
-msgid "Enable bridge to eth0"
-msgstr "Salli yhteys eth0aan"
+#: openplotter:670
+msgid "RPi3: AP/client + bridge eth0"
+msgstr "RPi3: AP/asiakas + bridge eth0"
 
-#: openplotter:679
-msgid "Access point device"
-msgstr "Yhteys toimilaite"
+#: openplotter:671
+msgid "RPi3: AP/client"
+msgstr "RPi3: AP/asiakas"
+
+#: openplotter:672
+msgid "RPi3: AP + client + bridge eth0"
+msgstr "RPi3: AP + asiakas + bridge eth0"
+
+#: openplotter:673
+msgid "RPi3: AP + client"
+msgstr "RPi3: AP + asiakas"
+
+#: openplotter:674
+msgid "RPi3+: AP + client + bridge eth0"
+msgstr "RPi3 +: AP + asiakas + bridge eth0"
+
+#: openplotter:675
+msgid "RPi3+: AP 5G + client + bridge eth0"
+msgstr "RPi3 +: AP 5G + asiakas + bridge eth0"
+
+#: openplotter:676
+msgid "RPi3+: AP 5GH + client + bridge eth0"
+msgstr "RPi3 +: AP 5GH + asiakas + bridge eth0"
+
+#: openplotter:677
+msgid "RPi3+: AP + client"
+msgstr "RPi3 +: AP + asiakas"
 
 #: openplotter:683
+msgid "Network mode"
+msgstr "Verkkotila"
+
+#: openplotter:689
 msgid "Sharing Internet device"
 msgstr "Internetin jakolaite"
 
-#: openplotter:687
+#: openplotter:692
 msgid "Access point settings"
 msgstr "Yhteysosoitteen asetuksia"
 
-#: openplotter:690
+#: openplotter:695
 msgid ""
 "SSID \n"
 "maximum 32 characters"
@@ -1882,7 +1898,7 @@ msgstr ""
 "SSID \n"
 "enintään 32 merkkiä"
 
-#: openplotter:693
+#: openplotter:698
 msgid ""
 "Password \n"
 "minimum 8 characters required"
@@ -1890,81 +1906,47 @@ msgstr ""
 "Salasan \n"
 "pituus vähintäin 8 merkkiä"
 
-#: openplotter:704
-msgid "Mode"
-msgstr "Tila"
-
-#: openplotter:706 openplotter:743 openplotter:828
-msgid "Both"
-msgstr "Molemmat"
-
-#: openplotter:709
-msgid "WPA"
-msgstr "WPA"
-
-#: openplotter:711
-msgid "Defaults"
-msgstr "Oletus"
-
-#: openplotter:714 openplotter:3620 openplotter:3728 openplotter:3840
-#: openplotter:3879
+#: openplotter:705 openplotter:3649 openplotter:3757 openplotter:3869
+#: openplotter:3908
 msgid "Apply"
 msgstr "Käytä"
 
-#: openplotter:717
+#: openplotter:708
 msgid " Addresses "
 msgstr " Osoitteet "
 
-#: openplotter:722
+#: openplotter:713
 msgid "Refresh"
 msgstr "Päivitä"
 
-#: openplotter:812
-msgid "\"Access point device\" and \"Sharing Internet device\" must be different"
-msgstr "\"Yhteyspite laite\" ja \"Netin jakolaite\" pitää olla erillisiä"
-
-#: openplotter:815
+#: openplotter:830
 msgid "Your SSID must have a maximum of 32 characters and your password a minimum of 8."
 msgstr "Sinun SSIDsi täytyy olla enintään 32 merkkiä salasanassasi vähintään 8 merkkiä."
 
-#: openplotter:840
+#: openplotter:838
+msgid "The device you want to share is in use (bridge or AP)."
+msgstr "Laite, jonka haluat jakaa on käytössä (bridge tai AP)."
+
+#: openplotter:842
 msgid ""
-"Changes will be applied.\n"
+"Changes will be applied after next reboot.\n"
 "\n"
 "If something goes wrong and you are on a headless system,\n"
 "you may not be able to reconnect again.\n"
 "\n"
 "Are you sure?"
 msgstr ""
-"Muutokset lisätään.\n"
+"Muutokset lisätään seuraavan käynnistyksen jälkeen.\n"
 "\n"
-"Jos jotakin menee metsään ja olet päätteettömässä systeemissä, et voi enää kytkeytyä uudelleen?"
+"Jos jotain menee pieleen ja olet päätteettömässä järjestelmässä,\n"
+"et välttämättä saa yhteyttä uudelleen.\n"
+"Oletko varma?"
 
-#: openplotter:857
-msgid "Configuring WiFi AP, please wait max 3 min..."
-msgstr "Määritetään WiFi AP, odota max 3 min..."
-
-#: openplotter:861
-msgid "Shutdown WiFi AP, please wait max 3 min..."
-msgstr "Sammutetaan WiFi AP odota max 3 min..."
-
-#: openplotter:866
-msgid "WiFi access point failed."
-msgstr "WiFi-tukiasema tökkäsi."
-
-#: openplotter:867
-msgid "WiFi access point started."
-msgstr "WiFi-tukiaseman käynnistyi."
-
-#: openplotter:868
-msgid "WiFi access point stopped."
-msgstr "WiFi-tukiaseman pysähtyi."
-
-#: openplotter:898
+#: openplotter:894
 msgid " Multiplexed NMEA 0183:\n"
 msgstr " Multipleksattu NMEA 0183:\n"
 
-#: openplotter:901
+#: openplotter:897
 msgid ""
 "\n"
 " Signal K Server:\n"
@@ -1972,7 +1954,7 @@ msgstr ""
 "\n"
 " Signal K Server:\n"
 
-#: openplotter:903
+#: openplotter:899
 msgid ""
 "\n"
 " VNC remote desktop:\n"
@@ -1980,7 +1962,7 @@ msgstr ""
 "\n"
 " VNC Etätyöpöytä:\n"
 
-#: openplotter:905
+#: openplotter:901
 msgid ""
 "\n"
 " node-red:\n"
@@ -1988,7 +1970,7 @@ msgstr ""
 "\n"
 " node-red:\n"
 
-#: openplotter:907
+#: openplotter:903
 msgid ""
 "\n"
 " MQTT local broker:\n"
@@ -1996,76 +1978,101 @@ msgstr ""
 "\n"
 " MQTT paikallinen välittäjä:\n"
 
-#: openplotter:1017
+#: openplotter:919
+msgid " is AP"
+msgstr " on AP"
+
+#: openplotter:920
+msgid "no AP"
+msgstr "ei AP"
+
+#: openplotter:933
+msgid "up network: "
+msgstr "toimiva verkko: "
+
+#: openplotter:942 openplotter:953 openplotter:964 openplotter:975
+#: openplotter:979
+msgid "running"
+msgstr "käynnissä"
+
+#: openplotter:943 openplotter:954 openplotter:965 openplotter:977
+msgid "stopped"
+msgstr "pysäytetty"
+
+#: openplotter:1012
+msgid "IP address\n"
+msgstr "IP osoite\n"
+
+#: openplotter:1027
 msgid "pypilot Mode:"
 msgstr "pypilot tila:"
 
-#: openplotter:1019
+#: openplotter:1029
 msgid "disabled"
 msgstr "pois käytöstä"
 
-#: openplotter:1019
+#: openplotter:1029
 msgid "IMU only"
 msgstr "Vain IMU"
 
-#: openplotter:1019
+#: openplotter:1029
 msgid "basic autopilot"
 msgstr "perus autopilotti"
 
-#: openplotter:1022
+#: openplotter:1032
 msgid " IMU "
 msgstr " IMU "
 
-#: openplotter:1023
+#: openplotter:1033
 msgid "Detected IMU:"
 msgstr "Havaittu IMU:"
 
-#: openplotter:1024
+#: openplotter:1034
 msgid "None"
 msgstr "Ei mitään"
 
-#: openplotter:1029
+#: openplotter:1039
 msgid " Autopilot "
 msgstr " Autopilotti "
 
-#: openplotter:1031
+#: openplotter:1041
 msgid "Serial ports (Controller/Wind/GPS)"
 msgstr "Sarjaportit (Controller/tuuli/GPS)"
 
-#: openplotter:1034
+#: openplotter:1044
 msgid "Enable webapp"
 msgstr "Salli webapp"
 
-#: openplotter:1035
+#: openplotter:1045
 msgid "port:"
 msgstr "portti:"
 
-#: openplotter:1041
+#: openplotter:1051
 msgid "Scope"
 msgstr "Laajuus"
 
-#: openplotter:1044
+#: openplotter:1054
 msgid "Client"
 msgstr "Asiakas"
 
-#: openplotter:1047
+#: openplotter:1057
 msgid "Autopilot Control"
 msgstr "Autopilotti hallinta"
 
-#: openplotter:1050 openplotter:1278 openplotter:1621 openplotter:1832
-#: openplotter:1974 openplotter:2453 openplotter:3642
+#: openplotter:1060 openplotter:1288 openplotter:1631 openplotter:1842
+#: openplotter:1984 openplotter:2463 openplotter:3671
 msgid "Restart"
 msgstr "Aloita alusta"
 
-#: openplotter:1055 openplotter:1284 openplotter:2205
+#: openplotter:1065 openplotter:1294 openplotter:2215
 msgid "Cancel changes"
 msgstr "Peru muutokset"
 
-#: openplotter:1062
+#: openplotter:1072
 msgid "Translation Rate (seconds)"
 msgstr "Käännös aika (sekuntia)"
 
-#: openplotter:1209
+#: openplotter:1219
 msgid ""
 "Compass settings will be deleted.\n"
 "\n"
@@ -2074,556 +2081,556 @@ msgid ""
 "Are you sure?"
 msgstr "Kompassi asetukset poistetaan. Täytyy kalibroida uudelleen. Oletko varma?"
 
-#: openplotter:1261
+#: openplotter:1271
 msgid "io"
 msgstr "io"
 
-#: openplotter:1262
+#: openplotter:1272
 msgid "Port/Address"
 msgstr "Portti/osoite"
 
-#: openplotter:1263
+#: openplotter:1273
 msgid "Bauds/Port"
 msgstr "Baudia/portti"
 
-#: openplotter:1264
+#: openplotter:1274
 msgid "inFilter"
 msgstr "suodatin sisään"
 
-#: openplotter:1265 openplotter:1267
+#: openplotter:1275 openplotter:1277
 msgid "Filtering"
 msgstr "Suodatus"
 
-#: openplotter:1266
+#: openplotter:1276
 msgid "outFilter"
 msgstr "suodatin ulos"
 
-#: openplotter:1270 openplotter:3233 openplotter:3247
+#: openplotter:1280 openplotter:3262 openplotter:3276
 msgid "Diagnostic"
 msgstr "Diagnostiikka"
 
-#: openplotter:1273
+#: openplotter:1283
 msgid "add network"
 msgstr "lisää verkko"
 
-#: openplotter:1280
+#: openplotter:1290
 msgid "Advanced"
 msgstr "Kehittynyt"
 
-#: openplotter:1313
+#: openplotter:1323
 msgid "OpenPlotter will close. Add manual settings at the end of the configuration file. Open OpenPlotter again and restart multiplexer to apply changes."
 msgstr "OpenPlotter sulkeutuu. Lisää manuaaliset asetukset määritykset-tiedoston loppuun. Avaa OpenPlotter uudelleen ja käynnistä multiplekseri tekemään muutokset."
 
-#: openplotter:1318
+#: openplotter:1328
 msgid "Closing Kplex"
 msgstr "Kplex suljetaan"
 
-#: openplotter:1324
+#: openplotter:1334
 msgid "Kplex restarted"
 msgstr "Kplex käynnistetään uudelleen"
 
-#: openplotter:1343
+#: openplotter:1353
 msgid "You can not edit this."
 msgstr "Tätä ei voi muokata."
 
-#: openplotter:1433
+#: openplotter:1443
 msgid "Multiplexer configuration file does not exist. Add inputs and apply changes."
 msgstr "Multiplekseri kokoonpanotiedostoa ei ole olemassa. Lisää syötteet ja muutokset."
 
-#: openplotter:1535 openplotter:1552
+#: openplotter:1545 openplotter:1562
 msgid "Select an item."
 msgstr "Valitse kohde."
 
-#: openplotter:1541
+#: openplotter:1551
 msgid "You can not delete this"
 msgstr "Et voi poistaa tätä"
 
-#: openplotter:1544
+#: openplotter:1554
 msgid "Unassign this device on \"Serial ports\" tab"
 msgstr "Tämän laitteen poistaminen ”sarjaporttit”-välilehdessä"
 
-#: openplotter:1606
+#: openplotter:1616
 msgid "Magnitude"
 msgstr "Laajuus"
 
-#: openplotter:1681
+#: openplotter:1691
 msgid "Failed. You must select a sensor."
 msgstr "Epäonnistui. Valitse tunnistin."
 
-#: openplotter:1686
+#: openplotter:1696
 msgid "Failed. You must provide an address."
 msgstr "Epäonnistui. Anna osoite."
 
-#: openplotter:1764 openplotter:2057 openplotter:2388 openplotter:2398
-#: openplotter:2537 openplotter:3825
+#: openplotter:1774 openplotter:2067 openplotter:2398 openplotter:2408
+#: openplotter:2547 openplotter:3854
 msgid "Select an item to delete."
 msgstr "Valitse poistettava kohde."
 
-#: openplotter:1778
+#: openplotter:1788
 msgid "Sensors restarted"
 msgstr "Anturit käynnistetty"
 
-#: openplotter:1781
+#: openplotter:1791
 msgid "Sensors stopped"
 msgstr "Anturit pysäytetty"
 
-#: openplotter:1819
+#: openplotter:1829
 msgid " SPI MCP3008 "
 msgstr " SPI MCP3008 "
 
-#: openplotter:1823
+#: openplotter:1833
 msgid "channel"
 msgstr "kanava"
 
-#: openplotter:1835
+#: openplotter:1845
 msgid "value setting"
 msgstr "arvon asetus"
 
-#: openplotter:1904
+#: openplotter:1914
 msgid "convert disabled"
 msgstr "muutos estetty"
 
-#: openplotter:1962 openplotter:2441 openplotter:3630
+#: openplotter:1972 openplotter:2451 openplotter:3659
 msgid "Source"
 msgstr "Lähde"
 
-#: openplotter:2071
+#: openplotter:2081
 msgid " Twitter "
 msgstr " Twitter "
 
-#: openplotter:2075
+#: openplotter:2085
 msgid "apiKey"
 msgstr "apiKey"
 
-#: openplotter:2077
+#: openplotter:2087
 msgid "apiSecret"
 msgstr "apiSecret"
 
-#: openplotter:2079
+#: openplotter:2089
 msgid "accessToken"
 msgstr "accessToken"
 
-#: openplotter:2081
+#: openplotter:2091
 msgid "accessTokenSecret"
 msgstr "accessTokenSecret"
 
-#: openplotter:2084
+#: openplotter:2094
 msgid " Gmail "
 msgstr " Gmail "
 
-#: openplotter:2087
+#: openplotter:2097
 msgid "Gmail account"
 msgstr "Gmail-tili"
 
-#: openplotter:2089
+#: openplotter:2099
 msgid "Gmail password"
 msgstr "Gmail-salasana"
 
-#: openplotter:2091
+#: openplotter:2101
 msgid "Recipient"
 msgstr "Vastaanottaja"
 
-#: openplotter:2118
+#: openplotter:2128
 msgid "Enter valid Twitter apiKey, apiSecret, accessToken and accessTokenSecret."
 msgstr "Kirjoita kelvollinen Twitter-apiKey, apiSecret, accessToken ja accessTokenSecret."
 
-#: openplotter:2148
+#: openplotter:2158
 msgid "Enter valid Gmail account, Gmail password and Recipient."
 msgstr "Anna kelvollinen Gmail-tili, Gmail salasana ja vastaanottaja."
 
-#: openplotter:2168
+#: openplotter:2178
 msgid " Triggers "
 msgstr " Käynnistimet "
 
-#: openplotter:2171
+#: openplotter:2181
 msgid "trigger"
 msgstr "liipaisin"
 
-#: openplotter:2172
+#: openplotter:2182
 msgid "operator"
 msgstr "operaattori"
 
-#: openplotter:2173
+#: openplotter:2183
 msgid "value"
 msgstr "arvo"
 
-#: openplotter:2187
+#: openplotter:2197
 msgid "repeat"
 msgstr "toista"
 
-#: openplotter:2197
+#: openplotter:2207
 msgid "Stop all"
 msgstr "Pysäytä kaikki"
 
-#: openplotter:2200
+#: openplotter:2210
 msgid "Start all"
 msgstr "Käynnistä kaikki"
 
-#: openplotter:2345
+#: openplotter:2355
 msgid "Select a trigger to add actions."
 msgstr "Valitse liipasin lisätäksesi toimintoja."
 
-#: openplotter:2416
+#: openplotter:2426
 msgid "Actions changes cancelled"
 msgstr "Toimintojen muutokset peruutettu"
 
-#: openplotter:2420
+#: openplotter:2430
 msgid "Actions stopped"
 msgstr "Toimet pysäytetty"
 
-#: openplotter:2427
+#: openplotter:2437
 msgid "Actions started"
 msgstr "Toimet käynnistetty"
 
-#: openplotter:2434
+#: openplotter:2444
 msgid " Temperature sensors "
 msgstr " Lämpötila-anturit "
 
-#: openplotter:2438
+#: openplotter:2448
 msgid "ID"
 msgstr "ID"
 
-#: openplotter:2477
+#: openplotter:2487
 msgid "1W sensors restarted"
 msgstr "1W anturit käynnistetty"
 
-#: openplotter:2480
+#: openplotter:2490
 msgid "1W sensors stopped"
 msgstr "1W anturit pysäytetty"
 
-#: openplotter:2552
+#: openplotter:2562
 msgid "name"
 msgstr "nimi"
 
-#: openplotter:2553
+#: openplotter:2563
 msgid "device"
 msgstr "laite"
 
-#: openplotter:2554
+#: openplotter:2564
 msgid "vendor"
 msgstr "toimittaja"
 
-#: openplotter:2555
+#: openplotter:2565
 msgid "product"
 msgstr "tuote"
 
-#: openplotter:2556
+#: openplotter:2566
 msgid "port"
 msgstr "portti"
 
-#: openplotter:2557
+#: openplotter:2567
 msgid "serial"
 msgstr "sarja"
 
-#: openplotter:2558 openplotter:2566
+#: openplotter:2568 openplotter:2576
 msgid "assignment"
 msgstr "tehtävä"
 
-#: openplotter:2559
+#: openplotter:2569
 msgid "remember"
 msgstr "muista"
 
-#: openplotter:2560 openplotter:2572
+#: openplotter:2570 openplotter:2582
 msgid "bauds"
 msgstr "baudit"
 
-#: openplotter:2563
+#: openplotter:2573
 msgid "name /dev/ttyOP_"
 msgstr "nimi/dev/ttyOP_"
 
-#: openplotter:2577
+#: openplotter:2587
 msgid "Remember device (by vendor, product, serial)"
 msgstr "Muista laitteen (myyjä, tuote-, sarja-numero)"
 
-#: openplotter:2578
+#: openplotter:2588
 msgid "Remember port (positon on the USB-hub)"
 msgstr "Muista porti (paikka USB-hubissa)"
 
-#: openplotter:2583
+#: openplotter:2593
 msgid "auto"
 msgstr "auto"
 
-#: openplotter:2589
+#: openplotter:2599
 msgid "refresh"
 msgstr "päivitä"
 
-#: openplotter:2592
+#: openplotter:2602
 msgid "enable UART"
 msgstr "salli UART"
 
-#: openplotter:2595
+#: openplotter:2605
 msgid "disable UART"
 msgstr "poista UART"
 
-#: openplotter:2700
+#: openplotter:2710
 msgid "Warning: You have connected the \""
 msgstr "Varoitus: olet liittänyt ”"
 
-#: openplotter:2700
+#: openplotter:2710
 msgid "\" to the usb port which is reserved for another device"
 msgstr "”usb porttiin, joka on varattu toiselle laitteelle"
 
-#: openplotter:2864 openplotter:2925 openplotter:2996
+#: openplotter:2874 openplotter:2935 openplotter:3006
 msgid "Failed. No port selected"
 msgstr "Epäonnistui. Porttia ei ollut valittu"
 
-#: openplotter:2871
+#: openplotter:2881
 msgid "Checking selected device ..."
 msgstr "Tarkistaa valitun laitteen..."
 
-#: openplotter:2883
+#: openplotter:2893
 msgid "Suitable parameters according to your system settings. Press apply to save."
 msgstr "Sopivat parametrien Järjestelmäasetukset. Paina käytä Tallenna."
 
-#: openplotter:2885
+#: openplotter:2895
 msgid "We have not found any recognizable data on your device."
 msgstr "Emme ole löytäneet mitään tunnistettavia tietoja laitteessa."
 
-#: openplotter:2933
+#: openplotter:2943
 msgid "Failed. You have to provide a name (between 1 and 8 letters and/or numbers)."
 msgstr "Epäonnistui. Sinun on annettava nimi (1 - 8 kirjainta ja/tai numeroa)."
 
-#: openplotter:2938
+#: openplotter:2948
 msgid "Failed. Same name used for multiple devices"
 msgstr "Epäonnistui. Samaa nimeä käytetään useilla laitteilla"
 
-#: openplotter:2942
+#: openplotter:2952
 msgid "Failed. The new name must be a string between 1 and 8 letters and/or numbers."
 msgstr "Epäonnistui. Uuden nimen täytyy olla merkkijono 1 - 8 kirjainta ja/tai numeroa."
 
-#: openplotter:2951
+#: openplotter:2961
 msgid "Failed. Select bauds."
 msgstr "Epäonnistui. Valitse baudit."
 
-#: openplotter:2974
+#: openplotter:2984
 msgid "Warning: USB-Port with duplicate vendor product must be set to \"Remember port\"."
 msgstr "Varoitus: USB-portin saman toimittajan tuotteet on määritettävä ”muista portit” kohdassa."
 
-#: openplotter:2982
+#: openplotter:2992
 msgid "Warning: This port is already reserved and must be set to \"Remember device\"."
 msgstr "Varoitus: Tämä portti on jo varattu ja määritettävä ”muista laite” kohdassa."
 
-#: openplotter:3041
+#: openplotter:3051
 msgid "Restarting ..."
 msgstr "Käynnistetään uudelleen..."
 
-#: openplotter:3106
+#: openplotter:3115
 msgid "Failed. Same name used for multiple devices: "
 msgstr "Epäonnistui. Samaa nimeä käytetään useita laitteita: "
 
-#: openplotter:3164
+#: openplotter:3173
 msgid "Serial port modified and restarted"
 msgstr "Sarjaporttia muutettu ja käynnistetty"
 
-#: openplotter:3171
+#: openplotter:3180
 msgid "Failed. You can assign only one "
 msgstr "Epäonnistui. Voit määrittää vain yhden "
 
-#: openplotter:3171
+#: openplotter:3180
 msgid " device"
 msgstr " laite"
 
-#: openplotter:3181
+#: openplotter:3190
 msgid "This action disables Bluetooth and enables UART. OpenPlotter will reboot.\n"
 msgstr "Tämä toiminto estää Bluetoothin ja mahdollistaa UARTin. OpenPlotter käynnistyy uudelleen.\n"
 
-#: openplotter:3182 openplotter:3189
+#: openplotter:3191 openplotter:3198
 msgid "Are you sure?"
 msgstr "Oletko varma?"
 
-#: openplotter:3188
+#: openplotter:3197
 msgid "This action disables UART and enables Bluetooth. OpenPlotter will reboot.\n"
 msgstr "Tämä toiminto poistaa käytöstä UARTin ja mahdollistaa Bluetoothin. OpenPlotter käynnistyy uudelleen.\n"
 
-#: openplotter:3225
+#: openplotter:3254
 msgid "CAN-USB port:"
 msgstr "CAN-USB-portti:"
 
-#: openplotter:3228
+#: openplotter:3257
 msgid " Input "
 msgstr " Syöte "
 
-#: openplotter:3230
+#: openplotter:3259
 msgid "Enable N2K input"
 msgstr "Ota käyttöön N2K syöttö"
 
-#: openplotter:3236
+#: openplotter:3265
 msgid " Output "
 msgstr " Lähtö "
 
-#: openplotter:3238
+#: openplotter:3267
 msgid "Enable N2K output"
 msgstr "Ota käyttöön N2K tulo"
 
-#: openplotter:3242
+#: openplotter:3271
 msgid " Input can0 "
 msgstr " Syöttö can0 "
 
-#: openplotter:3244
+#: openplotter:3273
 msgid "Enable can0 N2K input"
 msgstr "Ota käyttöön can0 N2K syöttö"
 
-#: openplotter:3250
+#: openplotter:3279
 msgid "Device settings"
 msgstr "Laiteasetukset"
 
-#: openplotter:3253
+#: openplotter:3282
 msgid "Signal K to N2K converter"
 msgstr "Signal Ksta N2Kksi muunnin"
 
-#: openplotter:3385
+#: openplotter:3414
 msgid "Select PGNs to transmit and enable N2K input/output again."
 msgstr "Valitse PGNt välittämään ja sallimaan N2K syöttö/lähtö uudelleen."
 
-#: openplotter:3391
+#: openplotter:3420
 msgid "Show received PGNs."
 msgstr "Näytä vastaanotetut PGNt."
 
-#: openplotter:3397
+#: openplotter:3426
 msgid "Show sent PGNs."
 msgstr "Näytä lähetetyt PGNt."
 
-#: openplotter:3407
+#: openplotter:3436
 msgid "You have to add a CAN-USB device on Serial ports tab"
 msgstr "Sinun täytyy lisätä CAN-USB-laite Sarjaportit-välilehdessä"
 
-#: openplotter:3415
+#: openplotter:3444
 msgid "Closing Signal K server ..."
 msgstr "Suljetaan Signal K palvelin..."
 
-#: openplotter:3421
+#: openplotter:3450
 msgid "Signal K server restarted"
 msgstr "Signal K palvelin käynnistetään uudelleen"
 
-#: openplotter:3437
+#: openplotter:3466
 msgid " Settings "
 msgstr " Asetukset "
 
-#: openplotter:3438
+#: openplotter:3467
 msgid "Enable settings"
 msgstr "Aktivoi asetukset"
 
-#: openplotter:3440
+#: openplotter:3469
 msgid "Serial port"
 msgstr "Sarjaportti"
 
-#: openplotter:3449
+#: openplotter:3478
 msgid "Bluetooth address"
 msgstr "Bluetooth-osoite"
 
-#: openplotter:3452
+#: openplotter:3481
 msgid "Connection"
 msgstr "Yhteys"
 
-#: openplotter:3456
+#: openplotter:3485
 msgid "Identify"
 msgstr "Tunnista"
 
-#: openplotter:3459
+#: openplotter:3488
 msgid " Sending "
 msgstr " Lähettää "
 
-#: openplotter:3461
+#: openplotter:3490
 msgid "Enable sending SMS"
 msgstr "Salli SMS lähettäminen"
 
-#: openplotter:3464
+#: openplotter:3493
 msgid "Send to phone"
 msgstr "Lähetä puhelimeen"
 
-#: openplotter:3467
+#: openplotter:3496
 msgid "Text"
 msgstr "Teksti"
 
-#: openplotter:3470
+#: openplotter:3499
 msgid "Test"
 msgstr "Testi"
 
-#: openplotter:3524
+#: openplotter:3553
 msgid "You have to provide a serial port or a bluetooth address."
 msgstr "Sinun on annettava sarjaporti- tai bluetooth-osoite."
 
-#: openplotter:3534
+#: openplotter:3563
 msgid "You have to provide a connection type."
 msgstr "Sinun on annettava yhteystyyppi."
 
-#: openplotter:3573
+#: openplotter:3602
 msgid "You have to enable settings."
 msgstr "Sinun täytyy sallia asetukset."
 
-#: openplotter:3577
+#: openplotter:3606
 msgid "You have to provide a phone number."
 msgstr "Sinun täytyy antaa puhelinnumero."
 
-#: openplotter:3602
+#: openplotter:3631
 msgid "You have to provide some text to send."
 msgstr "Sinun täytyy tehdä tekstiä lähetettäväksi."
 
-#: openplotter:3609
+#: openplotter:3638
 msgid " MQTT "
 msgstr " MQTT "
 
-#: openplotter:3611
+#: openplotter:3640
 msgid "Remote broker"
 msgstr "Etävälittäjä"
 
-#: openplotter:3615
+#: openplotter:3644
 msgid "Username"
 msgstr "Käyttäjänimi"
 
-#: openplotter:3617
+#: openplotter:3646
 msgid "Password"
 msgstr "Salasana"
 
-#: openplotter:3623
+#: openplotter:3652
 msgid "Clear"
 msgstr "Tyhjennä"
 
-#: openplotter:3697
+#: openplotter:3726
 msgid "MQTT restarted"
 msgstr "MQTT käynnistetty uudelleen"
 
-#: openplotter:3700
+#: openplotter:3729
 msgid "MQTT stopped"
 msgstr "MQTT pysäytetty"
 
-#: openplotter:3749
+#: openplotter:3778
 msgid "multiple keys"
 msgstr "useita avaimia"
 
-#: openplotter:3750
+#: openplotter:3779
 msgid "multiple sources"
 msgstr "useita lähteitä"
 
-#: openplotter:3763 openplotter:3821
+#: openplotter:3792 openplotter:3850
 msgid "Failed. Apply settings change."
 msgstr "Epäonnistui. Lisää asetusmuutos."
 
-#: openplotter:3772
+#: openplotter:3801
 msgid "Failed. You have to provide a name for the topic."
 msgstr "Epäonnistui. Sinun on annettava aiheelle nimi."
 
-#: openplotter:3776
+#: openplotter:3805
 msgid "Failed. Topics must contain only allowed characters."
 msgstr "Epäonnistui. Aiheen pitää sisältää vain sallitut merkit."
 
-#: openplotter:3782 openplotter:3788
+#: openplotter:3811 openplotter:3817
 msgid "Failed. Topic name must be unique."
 msgstr "Epäonnistui. Aiheen nimen on oltava yksilöllinen."
 
-#: openplotter:3797
+#: openplotter:3826
 msgid "Failed. You have to provide a Signal K key."
 msgstr "Epäonnistui. Sinun on annettava Signal K-avain."
 
-#: openplotter:3806
+#: openplotter:3835
 msgid "Failed. You have to select a type for the topic."
 msgstr "Epäonnistui. Sinun täytyy valita aiheen tyyppi."
 
-#: openplotter:3851
+#: openplotter:3880
 msgid "Enter at least username and password."
 msgstr "Anna ainakin käyttäjätunnus ja salasana."
 
-#: openplotter:3869
+#: openplotter:3898
 msgid "Settings and topics will be deleted. Are you sure?"
 msgstr "Asetukset ja aiheet poistetaan. Oletko varma?"
 
@@ -2639,11 +2646,11 @@ msgstr "Avaa OpenPlotter. Odota, kunnes kaikki palvelut käynnistyneet."
 msgid "There are some warnings. Please close this window and check your system."
 msgstr "On joitakin varoituksia. Sulje tämä ikkuna ja tarkista järjestelmä."
 
-#: startup:180
+#: startup:177
 msgid "Checking Signal K password..."
 msgstr "Tarkistetaan Signal K salasana..."
 
-#: startup:185
+#: startup:182
 msgid ""
 "\n"
 "\n"
@@ -2655,16 +2662,16 @@ msgstr ""
 "Suojausvaroitus: oletussalasanaa käytetään Signal K serveriin (openplotter).\n"
 "Vaihda salasana kohdassa Signal K > turvallisuus > käyttäjät > openplotter."
 
-#: startup:186 startup:203 startup:223
+#: startup:183 startup:200 startup:222
 msgid " See warning."
 msgstr " Lue varoitus."
 
-#: startup:187 startup:204 startup:209 startup:218 startup:225 startup:282
-#: startup:311 startup:365 startup:370 startup:375 startup:403
+#: startup:184 startup:201 startup:224 startup:229 startup:286 startup:315
+#: startup:369 startup:374 startup:379 startup:407
 msgid " Done."
 msgstr " Tehty."
 
-#: startup:189
+#: startup:186
 msgid ""
 "\n"
 "Checking Signal K defaults..."
@@ -2672,7 +2679,7 @@ msgstr ""
 "\n"
 "Tarkistetaan Signal K oletusasetukset..."
 
-#: startup:194
+#: startup:191
 msgid ""
 "\n"
 "Checking pi password..."
@@ -2680,7 +2687,7 @@ msgstr ""
 "\n"
 "Tarkistaa pi salasanaa..."
 
-#: startup:202
+#: startup:199
 msgid ""
 "\n"
 "\n"
@@ -2692,35 +2699,7 @@ msgstr ""
 "Suojausvaroitus: käytät oletussalasana ”pi” käyttäjälle (raspberry).\n"
 " Vaihda salasana valikosta > Asetukset > Vadelma Pi kokoonpano."
 
-#: startup:207
-msgid ""
-"\n"
-"Applying "
-msgstr ""
-"\n"
-"Otetaan käyttöön "
-
-#: startup:207
-msgid " seconds of delay..."
-msgstr " sekunttien viive..."
-
-#: startup:212
-msgid ""
-"\n"
-"Starting WIFI Access Point..."
-msgstr ""
-"\n"
-"Käynnistetään WIFI yhteys..."
-
-#: startup:215
-msgid ""
-"\n"
-"Starting WIFI Client..."
-msgstr ""
-"\n"
-"WIFI-asiakkaan käynnistäminen..."
-
-#: startup:220
+#: startup:205
 msgid ""
 "\n"
 "Checking WIFI Access Point password..."
@@ -2728,19 +2707,31 @@ msgstr ""
 "\n"
 "Tarkistetaan WIFI-tukiaseman salasana..."
 
-#: startup:222
+#: startup:221
 msgid ""
 "\n"
 "\n"
-"Security warning: You are using the default WIFI Access Point password (12345678).\n"
-"Please change password in OpenPlotter > WiFi AP."
+"Security warning: You are using the default WIFI Access Point password.\n"
+"Please change password in OpenPlotter > Network."
 msgstr ""
 "\n"
 "\n"
-"Suojausvaroitus: käytät WIFI-tukiaseman oletussalasanaa (12345678).\n"
+"Suojausvaroitus: käytät WIFI-tukiaseman oletussalasanaa.\n"
 "Vaihda salasana OpenPlotter > WiFi AP kohdassa."
 
-#: startup:228
+#: startup:227
+msgid ""
+"\n"
+"Applying "
+msgstr ""
+"\n"
+"Otetaan käyttöön "
+
+#: startup:227
+msgid " seconds of delay..."
+msgstr " sekunttien viive..."
+
+#: startup:232
 msgid ""
 "\n"
 "Starting MQTT server..."
@@ -2748,7 +2739,7 @@ msgstr ""
 "\n"
 "Käynnistetään MQTT palvelinta..."
 
-#: startup:233
+#: startup:237
 msgid ""
 "\n"
 "Starting 1W sensors..."
@@ -2756,7 +2747,7 @@ msgstr ""
 "\n"
 "Käynnistetään 1W anturit..."
 
-#: startup:240
+#: startup:244
 msgid ""
 "\n"
 "Starting N2K server..."
@@ -2764,7 +2755,7 @@ msgstr ""
 "\n"
 "Käynnistetään N2K palvelinta..."
 
-#: startup:245
+#: startup:249
 msgid ""
 "\n"
 "Starting actions and NMEA 0183/N2K generators..."
@@ -2772,7 +2763,7 @@ msgstr ""
 "\n"
 "Käynnistetään toimet ja NMEA 0183/N2K generaattorit..."
 
-#: startup:252
+#: startup:256
 msgid ""
 "\n"
 "Starting Node-RED..."
@@ -2780,7 +2771,7 @@ msgstr ""
 "\n"
 "Käynnistetään Node-RED..."
 
-#: startup:259
+#: startup:263
 msgid ""
 "\n"
 "Starting I2C, SPI, GPIO and Pypilot..."
@@ -2788,7 +2779,7 @@ msgstr ""
 "\n"
 "Käynnistetään I2C-, SPI-, GPIO- ja Pypilot..."
 
-#: startup:265
+#: startup:269
 msgid ""
 "\n"
 "Starting Pypilot Web App..."
@@ -2796,7 +2787,7 @@ msgstr ""
 "\n"
 "Käynnistetään Pypilot Web App..."
 
-#: startup:273
+#: startup:277
 msgid ""
 "\n"
 "Starting SDR AIS reception..."
@@ -2804,7 +2795,7 @@ msgstr ""
 "\n"
 "Käynnistetään SDR AIS vastaanotto..."
 
-#: startup:280
+#: startup:284
 msgid ""
 "\n"
 "Checking 800x480 display..."
@@ -2812,7 +2803,7 @@ msgstr ""
 "\n"
 "Tarkistetaan 800 x 480 näytön..."
 
-#: startup:285
+#: startup:289
 msgid ""
 "\n"
 "Starting NMEA 0183 Multiplexer..."
@@ -2820,7 +2811,7 @@ msgstr ""
 "\n"
 "Käynnistä NMEA 0183 multiplekseri..."
 
-#: startup:291
+#: startup:295
 msgid ""
 "\n"
 "Starting OpenCPN..."
@@ -2828,7 +2819,7 @@ msgstr ""
 "\n"
 "Käynnistetään OpenCPN..."
 
-#: startup:299
+#: startup:303
 msgid ""
 "\n"
 "Starting Tools..."
@@ -2836,7 +2827,7 @@ msgstr ""
 "\n"
 "Käynnistetään työkalut..."
 
-#: startup:313
+#: startup:317
 msgid ""
 "\n"
 "Checking OpenPlotter updates..."
@@ -2844,15 +2835,15 @@ msgstr ""
 "\n"
 "Tarkistetaan OpenPlotter päivitykset..."
 
-#: startup:329
+#: startup:333
 msgid " It was not possible to connect to Github."
 msgstr " Ei voitu yhdistää githubiin."
 
-#: startup:341 startup:361
+#: startup:345 startup:365
 msgid " Error reading versions."
 msgstr " Virhe versioiden käsittelyssä."
 
-#: startup:366
+#: startup:370
 msgid ""
 "\n"
 "\n"
@@ -2863,7 +2854,7 @@ msgstr ""
 "\n"
 "On suuri Raspbian päivitys, sinun on ladattava uusi OpenPlotter kuva: v"
 
-#: startup:367 startup:372 startup:377
+#: startup:371 startup:376 startup:381
 msgid ""
 "\n"
 "See CHANGELOG:"
@@ -2871,7 +2862,7 @@ msgstr ""
 "\n"
 "Katso MUUTOSLOKI:"
 
-#: startup:371
+#: startup:375
 msgid ""
 "\n"
 "\n"
@@ -2881,7 +2872,7 @@ msgstr ""
 "\n"
 "On OpenPlotterin versiopäivitys: "
 
-#: startup:376
+#: startup:380
 msgid ""
 "\n"
 "\n"
@@ -2891,10 +2882,10 @@ msgstr ""
 "\n"
 "On pieni OpenPlotter-päivitys: "
 
-#: startup:380
+#: startup:384
 msgid " is up to date."
 msgstr " on ajan tasalla."
 
-#: startup:405
+#: startup:409
 msgid " Not Started."
 msgstr " Ei käynnistetty."
