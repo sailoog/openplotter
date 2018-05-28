@@ -78,6 +78,10 @@ echo
 cd $HOME
 mkdir delete
 
+#cd $HOME/delete
+#git clone https://github.com/$repository/PyWavefront
+#cd PyWavefront
+#sudo python setup.py install
 
 #cd $HOME/delete
 #git clone https://github.com/$repository/rtl_433.git
@@ -154,13 +158,6 @@ sudo python setup.py install
 
 cd $HOME
 sudo rm -rf delete
-
-if grep -Fq "self.shininess = min(128, self.shininess)" /usr/local/lib/python2.7/dist-packages/pywavefront/material.py
-then
-	true
-else
-	sudo sed -i '103 i \\tself.shininess = min(128, self.shininess)' /usr/local/lib/python2.7/dist-packages/pywavefront/material.py
-fi
 
 echo
 echo "UPDATING GQRX..."
