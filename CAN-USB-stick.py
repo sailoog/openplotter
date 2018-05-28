@@ -32,13 +32,26 @@ class MyFrame(wx.Frame):
 			self.ttimer=40
 			self.conf = Conf()
 			self.home = self.conf.home
-			self.currentpath = self.home+self.conf.get('GENERAL', 'op_folder')+'/openplotter'
+			self.currentpath = self.conf.get('GENERAL', 'op_folder')
 			
+			data = self.conf.get('UDEV', 'Serialinst')
 			try:
-				self.ser = serial.Serial(self.conf.get('N2K', 'can_usb'), 115200, timeout=0.5)
+				Serialinst = eval(data)
 			except:
-				print 'failed to start N2K output setting on '+self.conf.get('N2K', 'can_usb')
+				Serialinst = {}
+
+			can_device = ''
+			for name in Serialinst:
+				if Serialinst[name]['assignment'] == 'CAN-USB':
+					can_device = '/dev/ttyOP_'+name
+					break
+					
+			try:
+				self.ser = serial.Serial(can_device, 115200, timeout=0.5)
+			except:
+				print 'failed to start N2K output setting on '+can_device
 				sys.exit(0)
+						
 			Language(self.conf)
 
 			Buf_ = (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
@@ -246,8 +259,7 @@ class MyFrame(wx.Frame):
 						st+=str(lPGN)+' '
 						if ((j)%6)==0 and j>0:
 							st+='\n'
-					self.printing.SetLabel(st)
-					self.conf.set('N2K', 'pgn_output', st)								
+					self.printing.SetLabel(st)						
 					
 		def getCommandfromSerial(self, RXs):
 			crc = 0

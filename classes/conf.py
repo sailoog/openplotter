@@ -18,18 +18,40 @@ import ConfigParser, os
 
 class Conf:
 	def __init__(self):
+
 		self.home = os.path.expanduser('~')
+		self.data_conf = ConfigParser.SafeConfigParser()
+
 		if 'root' in self.home:
 			self.home = '/home/'+os.path.expanduser(os.environ["SUDO_USER"])
+
 		self.conf_folder = self.home+'/.openplotter'
-		self.data_conf = ConfigParser.SafeConfigParser()
+		if not os.path.exists(self.conf_folder):
+			print 'creating configuration directory', self.conf_folder
+			os.mkdir(self.conf_folder)
+
+		self.op_folder = os.path.normpath(os.path.dirname(os.path.abspath(__file__))+'/..')
+
+		self.conf_file = self.conf_folder+'/openplotter.conf'
+		if not os.path.exists(self.conf_file):
+			# setup config if it doesn't exist
+			print 'openplotter.conf not found, copying default'
+			import shutil
+			shutil.copy(self.op_folder+'/openplotter.conf', self.conf_file)
+
 		self.read()
 
+		op_folder2 = self.get('GENERAL', 'op_folder')
+		if op_folder2 != self.op_folder:
+			print 'op_folder:', op_folder2, 'invalid'
+			print 'resetting op_folder to', self.op_folder
+			self.set('GENERAL', 'op_folder', self.op_folder)
+
 	def read(self):
-		self.data_conf.read(self.conf_folder+'/openplotter.conf')
+		self.data_conf.read(self.conf_file)
 
 	def write(self):
-		with open(self.conf_folder+'/openplotter.conf', 'wb') as configfile:
+		with open(self.conf_file, 'wb') as configfile:
 			self.data_conf.write(configfile)
 
 	def get(self, section, item):
@@ -66,11 +88,11 @@ class Conf:
 		return self.data_conf.add_section(section)
 
 class Conf2:
-	def __init__(self, file):
+	def __init__(self, folder, file):
 		self.home = os.path.expanduser('~')
 		if 'root' in self.home:
 			self.home = '/home/'+os.path.expanduser(os.environ["SUDO_USER"])
-		self.conf_file_path = self.home+'/.openplotter/'+file
+		self.conf_file_path = self.home+'/.openplotter/tools/'+folder+'/'+file
 		self.data_conf = ConfigParser.SafeConfigParser()
 		if not os.path.isfile(self.conf_file_path):
 			with open(self.conf_file_path,'w') as f:

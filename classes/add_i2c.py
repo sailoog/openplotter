@@ -24,7 +24,7 @@ if platform.machine()[0:3] == 'arm':
 class addI2c(wx.Dialog):
 	def __init__(self, parent):
 
-		title = _('Add I2C sensor')
+		title = _('Add I2C sensor without compass')
 
 		wx.Dialog.__init__(self, None, title=title, size=(450, 400))
 
@@ -125,7 +125,7 @@ class addI2c(wx.Dialog):
 		if platform.machine()[0:3] == 'arm':		
 			self.list_detected.DeleteAllItems()
 			#RTIMULIB sensors
-			rtimulib = self.parent.check_i2c()
+			rtimulib = self.parent.check_imu()
 			self.printRtimulibResults(rtimulib)
 			#others
 			bus = smbus.SMBus(1)
@@ -134,6 +134,8 @@ class addI2c(wx.Dialog):
 					bus.write_quick(addr)
 					addr = hex(addr)
 					if addr == '0x76': self.list_detected.Append(['BME280', addr])
+					if addr == '0x77': self.list_detected.Append(['MS5607-02BA03', addr])
+					#if addr == '0x40': self.list_detected.Append(['Si7020-A20', addr])
 				except IOError: pass
 
 	def printRtimulibResults(self,rtimulib):

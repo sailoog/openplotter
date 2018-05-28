@@ -1,32 +1,34 @@
 #!/bin/bash
-major=$1
-version=$2
-status=$3
-repository=$4
-op_folder=$(crudini --get ~/.openplotter/openplotter.conf GENERAL op_folder)
-if [ -z $major ]; then
-	major=1
-fi
-if [ -z $status ]; then
-	status="beta"
-fi
-if [ -z $repository ]; then
-	repository="openplotter"
-fi
-if [ -z $op_folder ]; then
-	op_folder="/.config"
+if [ -z "$1" ] || [ -z "$2" ]
+	then
+		echo "No arguments supplied: update_OpenPlotter.sh <type> <branch>"
+		echo "<type>: major or minor"
+		echo "<branch>: stable or beta"
+		exit 1
 fi
 
-cd $HOME$op_folder
+type=$1
+branch=$2
+op_folder=$(crudini --get ~/.openplotter/openplotter.conf GENERAL op_folder)
+master_github_repositories=$(crudini --get ~/.openplotter/openplotter.conf UPDATE master_github_repositories)
+beta_github_repositories=$(crudini --get ~/.openplotter/openplotter.conf UPDATE beta_github_repositories)
+stable=$(crudini --get ~/.openplotter/openplotter.conf UPDATE stable_branch)
+beta=$(crudini --get ~/.openplotter/openplotter.conf UPDATE beta_branch)
+
+cd $op_folder/..
 
 echo
 echo "DOWNLOADING NEW OPENPLOTTER CODE..."
 echo
 rm -rf openplotter_tmp
-if [ $status = "stable" ]; then
-	git clone https://github.com/$repository/openplotter.git openplotter_tmp
+if [ $branch = "stable" ]; then
+	git clone -b $stable https://github.com/$master_github_repositories/openplotter.git openplotter_tmp
+elif [ $branch = "beta" ]; then
+	git clone -b $beta https://github.com/$master_github_repositories/openplotter.git openplotter_tmp
 else
-	git clone -b beta https://github.com/$repository/openplotter.git openplotter_tmp
+	echo
+	read -p "#### WRONG BRANCH. ABORTING, PRESS ENTER TO EXIT ####"
+	exit 1
 fi
 if [ $? -ne 0 ]; then
 	echo
@@ -41,12 +43,24 @@ cp -a openplotter/ $DIRDATE/
 cd $DIRDATE
 find . -name "*.pyc" -type f -delete
 
-cd $HOME$op_folder
+cd $op_folder/..
+
+if [ $type = "major" ]; then
+	source openplotter_tmp/update/update_dependencies.sh
+elif [ $type = "minor" ]; then
+	:
+else
+	echo
+	read -p "#### WRONG UPDATE TYPE. ABORTING, PRESS ENTER TO EXIT ####"
+	exit 1
+fi
+
+cd $op_folder/..
 
 source openplotter_tmp/update/update_settings.sh
-if [ $major = 1 ]; then
-	source openplotter_tmp/update/update_dependencies.sh
-fi
+
+cd $op_folder/..
+
 echo
 echo "COMPRESSING OPENPLOTTER CODE BACKUP INTO HOME..."
 echo

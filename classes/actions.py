@@ -14,12 +14,20 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
-import gammu, platform, subprocess, time, json, requests, socket, re
 
-import paho.mqtt.publish as publish
+try:
+	import gammu
+except:
+        gammu = None
+
+import platform, subprocess, time, json, requests, socket, re
+
+try:	import paho.mqtt.publish as publish
+except:	publish = 'warn'
 
 from classes.gmailbot import GmailBot
-from classes.twitterbot import TwitterBot
+try: from classes.twitterbot import TwitterBot
+except: TwitterBot = None
 
 if platform.machine()[0:3] == 'arm':
 	import RPi.GPIO as GPIO
@@ -46,8 +54,6 @@ class Actions:
 		self.options.append(['startup restart', 0, 0, 'ACT8'])
 		self.options.append([_('stop NMEA multiplexer'), 0, 0, 'ACT5'])
 		self.options.append([_('reset NMEA multiplexer'), 0, 0, 'ACT6'])
-		self.options.append([_('stop WiFi access point'),_('Access point will be disabled.\n\nIf you are on a headless system, you will not be able to reconnect again.\n\nAre you sure?'),0,'ACT9'])
-		self.options.append([_('start WiFi access point'),_('Be sure you have filled in all fields in "WiFi AP" tab.'),0, 'ACT10'])
 		#self.options.append([_('stop SDR-AIS'), 0, 0, 'ACT11'])
 		#self.options.append([_('reset SDR-AIS'), _('Be sure you have filled in Gain and Correction fields in "SDR-AIS" tab and enabled AIS NMEA generation.'),0, 'ACT12'])
 		self.options.append([_('publish Twitter'), _('Be sure you have filled in all fields in "Accounts" tab, and enabled Twitter checkbox.\n\nEnter text to publish in the field "data".'),1, 'ACT13'])
@@ -124,12 +130,8 @@ class Actions:
 			subprocess.Popen(['startup', 'stop'])
 		elif option == 'ACT8':
 			subprocess.Popen(['startup', 'restart'])
-		elif option == 'ACT9':
-			subprocess.Popen(['sudo', 'python', self.currentpath +'/wifi_server.py', '0'])
-			conf.set('WIFI', 'enable', '0')
-		elif option == 'ACT10':
-			subprocess.Popen(['sudo', 'python', self.currentpath+'/wifi_server.py', '1'])
-			conf.set('WIFI', 'enable', '1')
+		#elif option == 'ACT9':
+		#elif option == 'ACT10':
 		#elif option == 'ACT11':
 		#elif option == 'ACT12':
 		elif option == 'ACT13':
@@ -201,5 +203,15 @@ class Actions:
 			topic = option[4:]
 			payload = text
 			auth = {'username': conf.get('MQTT', 'username'), 'password': conf.get('MQTT', 'password')}
+			if publish == 'warn':
+				msg = 'mqtt python module not installed, functionallity not available'
+				print msg
+				app = wx.App(False)
+				wx.Frame( None, title="OpenPlotter", size=(710, 460))
+				wx.MessageBox(msg, 'Warning', wx.OK | wx.ICON_WARNING)
+				publish = None
+			if not publish:
+				return
+
 			publish.single(topic, payload=payload, hostname='127.0.0.1', port='1883', auth=auth)
 			publish.single(topic, payload=payload, hostname=conf.get('MQTT', 'broker'), port=conf.get('MQTT', 'port'), auth=auth)

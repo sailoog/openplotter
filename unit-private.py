@@ -22,8 +22,7 @@ import subprocess
 import os
 from classes.conf import Conf
 from classes.language import Language
-
-
+from classes.getkeys import GetKeys
 
 class MyFrame(wx.Frame):
 	def __init__(self):
@@ -34,7 +33,7 @@ class MyFrame(wx.Frame):
 
 		self.conf = Conf()
 		self.home = self.conf.home
-		self.currentpath = self.home+self.conf.get('GENERAL', 'op_folder')+'/openplotter'
+		self.currentpath = self.conf.get('GENERAL', 'op_folder')
 
 		Language(self.conf)
 
@@ -110,13 +109,8 @@ class MyFrame(wx.Frame):
 	def read(self):
 		self.list_SK = []
 
-		try:
-			with open(self.home+'/.config/signalk-server-node/node_modules/@signalk/signalk-schema/dist/keyswithmetadata.json') as data_file:
-				data = json.load(data_file)
-		except:
-			#old signalk
-			with open(self.home+'/.config/signalk-server-node/node_modules/@signalk/signalk-schema/src/keyswithmetadata.json') as data_file:
-				data = json.load(data_file)
+		self.keys = GetKeys()
+		data = self.keys.data
 
 		self.data_SK_unit_private = []
 		if os.path.isfile(self.home+'/.openplotter/private_unit.json'):

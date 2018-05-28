@@ -26,10 +26,10 @@ class Conf_analog:
 		self.read()
 
 	def read(self):
-		self.data_conf.read(self.conf_folder+'/openplotter_analog.conf')
+		self.data_conf.read(self.conf_folder+'/tools/openplotter_analog.conf')
 
 	def write(self):
-		with open(self.conf_folder+'/openplotter_analog.conf', 'wb') as configfile:
+		with open(self.conf_folder+'/tools/openplotter_analog.conf', 'wb') as configfile:
 			self.data_conf.write(configfile)
 
 	def get(self,section,item):

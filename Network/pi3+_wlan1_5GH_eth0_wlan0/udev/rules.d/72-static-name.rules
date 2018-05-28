@@ -1,0 +1,2 @@
+# ACTION=="add", SUBSYSTEM=="net", DRIVERS=="brcmfmac", NAME="wlan1"
+ACTION=="add", SUBSYSTEM=="net", SUBSYSTEMS=="sdio", KERNELS=="mmc1:0001:1", NAME="wlan1"

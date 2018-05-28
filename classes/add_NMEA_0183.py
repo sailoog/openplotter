@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 import wx, pynmea2, inspect, webbrowser, json, subprocess, requests, re
+from SK_settings import SK_settings
+
 
 class addNMEA_0183(wx.Dialog):
 
@@ -22,7 +24,12 @@ class addNMEA_0183(wx.Dialog):
 
 		self.conf = conf
 		self.home = self.conf.home
-		self.currentpath = self.home+self.conf.get('GENERAL', 'op_folder')+'/openplotter'
+		self.currentpath = self.conf.get('GENERAL', 'op_folder')
+
+		SK_ = SK_settings()
+		self.port = SK_.aktport
+		self.http = SK_.http
+		
 
 		wx.Dialog.__init__(self, None, title=_('add NMEA 0183 sentence'), size=(670,410))
 
@@ -32,12 +39,16 @@ class addNMEA_0183(wx.Dialog):
 		self.sentences=[]
 		self.fields=[]
 
+		#do not allow sentences that SK can parse to avoid loops
+		NMEAtoSK = ['ALK','APB','DBT','DPT','DSC','GGA','GLL','HDG','HDM','HDT','KEP','MTW','MWV','RMB','RMC','ROT','RPM','VDM','VDO','VDR','VHW','VPW','VTG','VWR','ZDA']
 		for name, obj in inspect.getmembers(pynmea2):
 			if inspect.isclass(obj):
 				if 'pynmea2.types.talker.' in str(obj) and 'pynmea2.types.talker.Transducer' not in str(obj):
-					self.list_sentences.append('$--'+obj.__name__)
-					self.sentences.append(obj.__name__)
-					self.fields.append(obj.fields)
+					sentence = obj.__name__
+					if not sentence in NMEAtoSK:
+						self.list_sentences.append('$--'+sentence)
+						self.sentences.append(sentence)
+						self.fields.append(obj.fields)
 
 		wx.StaticText(panel, label=_('Sentence'), pos=(10, 10))
 		self.sentence= wx.ComboBox(panel, choices=self.list_sentences, style=wx.CB_READONLY, size=(120, 30), pos=(10, 35))
@@ -71,7 +82,7 @@ class addNMEA_0183(wx.Dialog):
 
 		self.list_vessels=[_('--vessel'),'self']
 		try:
-			response = requests.get('http://localhost:3000/signalk/v1/api/vessels')
+			response = requests.get(self.http+'localhost:'+str(self.port)+'/signalk/v1/api/vessels')
 			data = response.json()
 		except:data=None
 		if data:

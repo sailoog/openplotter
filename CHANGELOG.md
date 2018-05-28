@@ -1,3 +1,29 @@
+v1.0.0
+* Alpha
+* Major version
+* RPi3B+ compatible
+* Raspbian Stretch
+* New documentation
+* New data flow and used ports
+* Moitessier HAT inplementation
+* Full pypilot integration
+* Improved IMU calibration
+* Improved updating
+* New and simplified Wifi management
+* New serial connections management
+* Improved GPSD integration
+* Add Finnish and Greek languages
+* Improved Signal K server integration
+* Using kplex 1.4
+* Removed RDP and x11vnc. Now RealVNC is the only supported system for remote desktop
+* Replaced some openplotter features by Signal k plugins
+* add MS5607-02BA03 sensor support
+* add enable/disable UART
+* Improved CAN-USB management
+* Add fugawi and pypilot opencpn plugins
+* Fixed MCP3008 support
+* Fixed multiple bugs
+
 v0.17.1
 * Marking as stable
 * Ready for new upgrade v1.x.x
