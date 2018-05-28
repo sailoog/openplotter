@@ -46,7 +46,7 @@ echo
 echo "UPDATING PYTHON PACKAGES..."
 echo
 sudo easy_install pip
-sudo pip install --upgrade paho-mqtt pyudev pyrtlsdr pynmea2 twython websocket-client spidev requests requests_oauthlib PyMata pyglet pywavefront ujson Flask flask-socketio
+sudo pip install --upgrade paho-mqtt pyudev pyrtlsdr pynmea2 twython websocket-client spidev requests requests_oauthlib PyMata pyglet ujson Flask flask-socketio
 if [ $? -ne 0 ]; then
 	echo
 	read -p "#### ERROR. ABORTING, PRESS ENTER TO EXIT ####"
