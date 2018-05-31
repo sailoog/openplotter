@@ -207,7 +207,7 @@ class addTrigger(wx.Dialog):
 	def ok_conf(self,e):
 		operators_ref = self.operators_ref
 		operator = operators_ref[self.operator.GetSelection()]
-		operator0 = self.operators_list[operator]
+		operator0 = self.parent.operators_list[operator]
 		if not self.value.GetValue():
 			self.ShowMessage(_('Failed. Enter a value.'))
 			return
