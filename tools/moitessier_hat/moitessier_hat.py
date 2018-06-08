@@ -469,14 +469,17 @@ class MyFrame(wx.Frame):
 			self.logger2.SetValue(output)
 
 		def on_MPU9250(self, e):
-			subprocess.Popen(['lxterminal', '-e', self.home+'/moitessier/app/sensors/MPU-9250'])
+			output = subprocess.check_output([self.home+'/moitessier/app/sensors/MPU-9250', '/dev/i2c-1'])
+			self.logger.SetValue(output)
 
 		def on_MS560702BA03(self, e):
-			subprocess.Popen(['lxterminal', '-e', self.home+'/moitessier/app/sensors/MS5607-02BA03'])
+			output = subprocess.check_output([self.home+'/moitessier/app/sensors/MS5607-02BA03', '/dev/i2c-1'])
+			self.logger.SetValue(output)
 
 		def on_Si7020A20(self, e):
-			subprocess.Popen(['lxterminal', '-e', self.home+'/moitessier/app/sensors/Si7020-A20'])
-
+			output = subprocess.check_output([self.home+'/moitessier/app/sensors/Si7020-A20', '/dev/i2c-1'])
+			self.logger.SetValue(output)
+			
 		def on_reset(self, e):
 			output = subprocess.check_output([self.home+'/moitessier/app/moitessier_ctrl/moitessier_ctrl','/dev/moitessier.ctrl','2'])
 			self.logger2.SetValue(output)
