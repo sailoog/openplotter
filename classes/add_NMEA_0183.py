@@ -62,8 +62,8 @@ class addNMEA_0183(wx.Dialog):
  		self.button_nmea_info =wx.Button(panel, label=_('NMEA info'), pos=(220, 33))
 		self.Bind(wx.EVT_BUTTON, self.nmea_info, self.button_nmea_info)
 
- 		self.button_rmc_examp =wx.Button(panel, label=_('RMC examp'), pos=(315, 33))
-		self.Bind(wx.EVT_BUTTON, self.rmc_examp, self.button_rmc_examp)
+ 		#self.button_rmc_examp =wx.Button(panel, label=_('RMC examp'), pos=(315, 33))
+		#self.Bind(wx.EVT_BUTTON, self.rmc_examp, self.button_rmc_examp)
 
 		cancelBtn = wx.Button(panel, label=_('cancel'), pos=(475, 33))
 		cancelBtn.Bind(wx.EVT_BUTTON, self.on_cancel)
@@ -366,7 +366,7 @@ class addNMEA_0183(wx.Dialog):
 	def nmea_info(self, e):
 		url = self.currentpath+'/docs/NMEA.html'
 		webbrowser.open(url,new=2)
-		
+	'''	
 	def rmc_examp(self, e):
 		edit = ['', ['RMC', [['navigation.datetime', 'hhmmss.ss', '+', 0.0], 'P', ['navigation.position.latitude', 'ddmm.mm', '+', 0.0], ['navigation.position.latitude', 'N/S', '+', 0.0], ['navigation.position.longitude', 'dddmm.mm', '+', 0.0], ['navigation.position.longitude', 'E/W', '+', 0.0], ['navigation.speedOverGround', 'x.x|kn', '+', 0.0], ['navigation.courseOverGroundTrue', 'x.x|deg', '+', 0.0], ['navigation.datetime', 'ddmmyy', '+', 0.0], '', 'A'], 1.0]]
 		self.rate.SetValue(str(edit[1][2]))
@@ -378,7 +378,7 @@ class addNMEA_0183(wx.Dialog):
 			self.list_fiel.append([index,item[0],self.nmea[1][index]])
 			self.list_fields.InsertStringItem(index,item[0])
 			self.list_fields.SetStringItem(index,1,str(self.nmea[1][index]))
-		
+	'''	
 	def check_value_type(self, e):
 		self.reset_fields()
 		selected=self.value_type.GetValue()
