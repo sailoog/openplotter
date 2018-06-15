@@ -2428,7 +2428,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.triggers[i][0] = 0
 			i += 1
 		self.conf.set('ACTIONS', 'triggers', str(self.triggers))
-		self.restart_SK()
+		subprocess.call(['pkill', '-f', 'SK-base_d.py'])
+		subprocess.Popen(['python', self.currentpath+'/SK-base_d.py'])
 
 	def on_cancel_changes_actions(self, e):
 		self.read_triggers()
