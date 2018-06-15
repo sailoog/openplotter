@@ -1,3 +1,10 @@
+v1.0.1
+* Fix arror in date triggers
+* Fix error applying changes in actions
+* Fix issue in RPI3: AP/client network
+* Update moitessier hat package and modify sensors test
+* Remove unused "TMC example" button in NMEA 0183 generator
+
 v1.0.0
 * Alpha
 * Major version
