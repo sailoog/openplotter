@@ -676,6 +676,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		
 		self.available_net_sys = []
 		self.available_net_sys.append(['default',_('client')])
+		self.available_net_sys.append(['pi2_wlan1',_('RPi2: AP')])
 		self.available_net_sys.append(['pi3_uap0_with_eth0_wlan0',_('RPi3: AP/client + bridge eth0')])
 		self.available_net_sys.append(['pi3_uap0_wlan0',_('RPi3: AP/client')])
 		self.available_net_sys.append(['pi3_wlan1_with_eth0_wlan0',_('RPi3: AP + client + bridge eth0')])
