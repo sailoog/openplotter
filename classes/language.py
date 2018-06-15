@@ -14,16 +14,16 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
-import gettext
+import gettext, os
 
 class Language:
 
 	def __init__(self, conf):
 
 		home = conf.home
-		op_folder = conf.get('GENERAL', 'op_folder')+'/openplotter'
-		locale_folder = home+op_folder+'/locale'
+		op_folder = conf.get('GENERAL', 'op_folder')
 		language = conf.get('GENERAL', 'lang')
+                locale_folder = op_folder+'/locale'
 
 		gettext.install('openplotter', locale_folder, unicode=False)
 		presLan_en = gettext.translation('openplotter', locale_folder, languages=['en'])
@@ -35,6 +35,8 @@ class Language:
 		presLan_it = gettext.translation('openplotter', locale_folder, languages=['it'])
 		presLan_eu = gettext.translation('openplotter', locale_folder, languages=['eu'])
 		presLan_gl = gettext.translation('openplotter', locale_folder, languages=['gl'])
+		presLan_fi = gettext.translation('openplotter', locale_folder, languages=['fi'])
+		presLan_el = gettext.translation('openplotter', locale_folder, languages=['el'])
 
 		if language=='en':presLan_en.install()
 		if language=='ca':presLan_ca.install()
@@ -45,3 +47,5 @@ class Language:
 		if language=='it':presLan_it.install()
 		if language=='eu':presLan_eu.install()
 		if language=='gl':presLan_gl.install()
+		if language=='fi':presLan_fi.install()
+		if language=='el':presLan_el.install()

@@ -43,6 +43,7 @@ class addDS18B20(wx.Dialog):
 
 		wx.StaticText(panel, label=_('Name'), pos=(10, 75))
 		self.name = wx.TextCtrl(panel, size=(150, 30), pos=(10, 100))
+
 		wx.StaticText(panel, label=_('allowed characters: 0-9, a-z, A-Z'), pos=(10, 135))
 
 		list_id = []
@@ -61,7 +62,11 @@ class addDS18B20(wx.Dialog):
 			self.offset.SetValue(edit[4])
 
 		cancelBtn = wx.Button(panel, wx.ID_CANCEL, pos=(115, 175))
-		okBtn = wx.Button(panel, wx.ID_OK, pos=(235, 175))
+		self.okBtn = wx.Button(panel, wx.ID_OK, pos=(235, 175))
+		self.okBtn.Hide()
+		self.ok = wx.Button(panel, label=_('OK'), pos=(235, 175))
+		self.Bind(wx.EVT_BUTTON, self.ok_conf, self.ok)
+										 
 
 	def onEditSkkey(self,e):
 		key = self.SKkey.GetValue()
@@ -83,7 +88,30 @@ class addDS18B20(wx.Dialog):
 					return
 			self.SKkey.SetValue(key)
 		dlg.Destroy()
-			
 
+	def ok_conf(self,e):
+		if not self.SKkey.GetValue():
+			self.ShowMessage(_('Failed. Select a Signal K key.'))
+			return
+			
+		name =self.name.GetValue()
+		if not name:
+			self.ShowMessage(_('Failed. Provide a name.'))
+			return
+		
+		if not re.match('^[0-9a-zA-Z]+$', name):
+			self.ShowMessage(_('Failed. Name must contain only letters and numbers.'))
+			return
+		
+		if self.id_select.GetValue() == '':
+			self.ShowMessage(_('Failed. Select sensor ID.'))
+			return
+		try:
+			float(self.offset.GetValue())
+		except:
+			self.offset.SetValue('0.0')
+		evt = wx.PyCommandEvent(wx.EVT_BUTTON.typeId,self.okBtn.GetId())
+		wx.PostEvent(self, evt)
+		
 	def ShowMessage(self, w_msg):
 		wx.MessageBox(w_msg, 'Info', wx.OK | wx.ICON_INFORMATION)

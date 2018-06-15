@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 import wx
-
+import re
 
 class addGPIO(wx.Dialog):
 	def __init__(self, avalaible_gpio, edit):
@@ -55,9 +55,44 @@ class addGPIO(wx.Dialog):
 			self.pull_select.SetValue(edit[4])
 
 		cancelBtn = wx.Button(panel, wx.ID_CANCEL, pos=(70, 180))
-		okBtn = wx.Button(panel, wx.ID_OK, pos=(180, 180))
+		self.okBtn = wx.Button(panel, wx.ID_OK, pos=(180, 180))
+		self.okBtn.Hide()
+		self.ok = wx.Button(panel, label=_('OK'), pos=(180, 180))
+		self.Bind(wx.EVT_BUTTON, self.ok_conf, self.ok)
+				
 
 	def onSelectIO(self, e):
 		selected = self.io_select.GetValue()
 		if selected == _('input'): self.pull_select.Enable()
 		if selected == _('output'): self.pull_select.Disable()
+
+	def ok_conf(self,e):
+		name = self.name.GetValue()
+		io_selection = self.io_select.GetValue()
+		gpio_selection = self.gpio_select.GetValue()
+		pull_selection = self.pull_select.GetValue()
+		if io_selection == _('output'):
+			io = 'out'
+		else:
+			io = 'in'
+		if io == 'out':
+			dlg2 = wx.MessageDialog(None, _(
+				'CAUTION. If you connect a closed switch or some inappropriate circuit, you could short out and damage your board when this output becomes "High". Are you sure to enable this output?'),
+									_('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_EXCLAMATION)
+			if dlg2.ShowModal() == wx.ID_YES:
+				dlg2.Destroy()
+			else:
+				dlg2.Destroy()
+				return
+		if not name or not io_selection or not gpio_selection or (not pull_selection and io == 'in'):
+			self.ShowMessage(_('Failed. You must fill in all fields.'))
+			return
+		if not re.match('^[0-9a-zA-Z]+$', name):
+			self.ShowMessage(_('Failed. The name must contain only letters and numbers.'))
+			return
+
+		evt = wx.PyCommandEvent(wx.EVT_BUTTON.typeId,self.okBtn.GetId())
+		wx.PostEvent(self, evt)
+		
+	def ShowMessage(self, w_msg):
+		wx.MessageBox(w_msg, 'Info', wx.OK | wx.ICON_INFORMATION)		

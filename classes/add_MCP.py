@@ -17,30 +17,31 @@
 import json
 import subprocess
 import wx
+import re
+from classes.getkeys import GetKeys
 
 class addMCP(wx.Dialog):
 	def __init__(self, edit, parent):
 		self.conf = parent.conf
 		self.edit = edit
+		self.home = self.conf.home
 
 		wx.Dialog.__init__(self, None, title=_('Edit MCP analog input ').decode('utf8') + str(edit[2]), size=(430, 350))
 
 		panel = wx.Panel(self)
 
-		list_tmp = []
+		self.keys = GetKeys()
+		self.data = self.keys.data
 		
-		try:
-			with open(self.home+'/.config/signalk-server-node/node_modules/@signalk/signalk-schema/dist/keyswithmetadata.json') as data_file:
-				data = json.load(data_file)
-		except:
-			#old signalk
-			with open(self.home+'/.config/signalk-server-node/node_modules/@signalk/signalk-schema/src/keyswithmetadata.json') as data_file:
-				data = json.load(data_file)
+		list_tmp = []
+		list_tmp.append('')
+
 		for i in self.data:
 			ii = i.replace('/vessels/*/','')
 			ii = ii.replace('RegExp','*')
 			ii = ii.replace('/','.')
 			list_tmp.append(ii)
+		
 		list_sk_path = sorted(list_tmp)
 
 		titl = wx.StaticText(panel, label='Signal K')
@@ -57,13 +58,21 @@ class addMCP(wx.Dialog):
 		self.convert = wx.CheckBox(panel, label=_('convert'))
 		self.convert.Bind(wx.EVT_CHECKBOX, self.on_convert)
 
-		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
-		okBtn = wx.Button(panel, wx.ID_OK)
+		self.clean = wx.Button(panel, label=_('clean'))
+		self.clean.Bind(wx.EVT_BUTTON, self.on_clean)
 
+		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
+		
+		self.okBtn = wx.Button(panel, wx.ID_OK, pos=(10, 10))
+		self.okBtn.Hide()
+		self.ok = wx.Button(panel, label=_('OK'))
+		self.Bind(wx.EVT_BUTTON, self.ok_conf, self.ok)
+		
 		hbox = wx.BoxSizer(wx.HORIZONTAL)
 		hbox.Add((0, 0), 1, wx.ALL | wx.EXPAND, 5)
+		hbox.Add(self.clean, 0, wx.ALL | wx.EXPAND, 5)
 		hbox.Add(cancelBtn, 0, wx.ALL | wx.EXPAND, 5)
-		hbox.Add(okBtn, 0, wx.ALL | wx.EXPAND, 5)
+		hbox.Add(self.ok, 0, wx.ALL | wx.EXPAND, 5)
 
 		hboxb = wx.BoxSizer(wx.HORIZONTAL)
 		hboxb.Add(self.asterix_t, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 5)
@@ -162,3 +171,27 @@ class addMCP(wx.Dialog):
 				convert = 0
 
 		self.convert.SetValue(convert)
+		
+	def on_clean(self,e):
+		self.SKkey.SetValue('')
+		self.asterix.SetValue('')
+		self.aktiv.SetValue(False)
+		self.convert.SetValue(False)
+
+	def ok_conf(self,e):
+		SKkey = self.SKkey.GetValue()
+		asterix = self.asterix.GetValue()
+		if SKkey <>'':
+			if '*' in SKkey:
+				if asterix =='':
+					self.ShowMessage(_('Failed. Provide name and Signal K values.'))
+					return
+				else: 	
+					if not re.match('^[0-9a-zA-Z]+$', asterix):
+						self.ShowMessage(_('Failed. The name must contain only letters and numbers.'))
+						return
+		evt = wx.PyCommandEvent(wx.EVT_BUTTON.typeId,self.okBtn.GetId())
+		wx.PostEvent(self, evt)
+
+	def ShowMessage(self, w_msg):
+		wx.MessageBox(w_msg, 'Info', wx.OK | wx.ICON_INFORMATION)		

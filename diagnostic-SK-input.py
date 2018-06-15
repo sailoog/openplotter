@@ -22,10 +22,12 @@ import threading
 import os
 import websocket
 import wx
-import time
-
+import time,yaml
+from classes.getkeys import GetKeys
 from classes.conf import Conf
+from classes.SK_settings import SK_settings
 from classes.language import Language
+from classes.show_keys import showKeys
 
 class MyFrame(wx.Frame):
 	def __init__(self):
@@ -47,11 +49,13 @@ class MyFrame(wx.Frame):
 
 		self.conf = Conf()
 		self.home = self.conf.home
-		self.currentpath = self.home+self.conf.get('GENERAL', 'op_folder')+'/openplotter'
+		self.currentpath = self.conf.get('GENERAL', 'op_folder')
+		SK_ = SK_settings()
+		self.ws_name = SK_.ws+SK_.ip+":"+str(SK_.aktport)+"/signalk/v1/stream?subscribe=self"
 
 		Language(self.conf)
 
-		wx.Frame.__init__(self, None, title='diagnostic SignalK input', size=(670, 435))
+		wx.Frame.__init__(self, None, title='diagnostic Signal K input', size=(770, 435))
 		self.Bind(wx.EVT_CLOSE, self.OnClose)
 		panel = wx.Panel(self, wx.ID_ANY)
 
@@ -65,9 +69,9 @@ class MyFrame(wx.Frame):
 		self.SetIcon(self.icon)
 
 		self.list = wx.ListCtrl(panel, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
-		self.list.InsertColumn(0, _('SRC'), width=245)
-		self.list.InsertColumn(1, _('SignalK'), width=300)
-		self.list.InsertColumn(2, _('Value'), wx.LIST_FORMAT_RIGHT, width=100)
+		self.list.InsertColumn(0, _('SRC'), width=200)
+		self.list.InsertColumn(1, _('Signal K'), width=310)
+		self.list.InsertColumn(2, _('Value'), wx.LIST_FORMAT_RIGHT, width=190)
 		self.list.InsertColumn(3, _('Unit'), width=45)
 		self.list.InsertColumn(4, _('Interval'), wx.LIST_FORMAT_RIGHT, width=55)
 		self.list.InsertColumn(5, _('Status'), width=50)
@@ -78,6 +82,9 @@ class MyFrame(wx.Frame):
 
 		sort_SK = wx.Button(panel, label=_('Sort SK'))
 		sort_SK.Bind(wx.EVT_BUTTON, self.on_sort_SK)
+
+		show_keys = wx.Button(panel, label=_('Show All SK keys'))
+		show_keys.Bind(wx.EVT_BUTTON, self.on_show_keys)
 
 		self.private_unit = wx.CheckBox(panel, label=_('private Unit'), pos=(360, 32))
 		self.private_unit.Bind(wx.EVT_CHECKBOX, self.on_private_unit)
@@ -92,6 +99,7 @@ class MyFrame(wx.Frame):
 		hlistbox.Add(self.list, 1, wx.ALL | wx.EXPAND, 5)
 		hbox.Add(sort_SRC, 0, wx.RIGHT | wx.LEFT, 5)
 		hbox.Add(sort_SK, 0, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add(show_keys, 0, wx.RIGHT | wx.LEFT, 5)
 		hbox.Add((0,0), 1, wx.RIGHT | wx.LEFT, 5)
 		hbox.Add(self.private_unit, 0, wx.RIGHT | wx.LEFT, 5)
 		hbox.Add(unit_setting, 0, wx.RIGHT | wx.LEFT, 5)
@@ -144,13 +152,8 @@ class MyFrame(wx.Frame):
 	def read(self):
 		self.list_SK_unit = []
 
-		try:
-			with open(self.home+'/.config/signalk-server-node/node_modules/@signalk/signalk-schema/dist/keyswithmetadata.json') as data_file:
-				data = json.load(data_file)
-		except:
-			#old signalk
-			with open(self.home+'/.config/signalk-server-node/node_modules/@signalk/signalk-schema/src/keyswithmetadata.json') as data_file:
-				data = json.load(data_file)
+		self.keys = GetKeys()
+		data = self.keys.data
 
 		data_sk_unit_private = []
 		if os.path.isfile(self.home+'/.openplotter/private_unit.json'):
@@ -242,7 +245,7 @@ class MyFrame(wx.Frame):
 				elif self.SK_unit_priv == 'mph':
 					self.SK_Faktor_priv = 0.44704
 			elif self.SK_unit == 'm3':
-				if self.SK_unit_priv == 'l':
+				if self.SK_unit_priv == 'dm3':
 					self.SK_Faktor_priv = 0.001
 				elif self.SK_unit_priv == 'gal':
 					self.SK_Faktor_priv = 0.00378541
@@ -279,6 +282,11 @@ class MyFrame(wx.Frame):
 	def on_sort_SK(self, e):
 		self.sortCol = 1
 		self.sorting()
+
+	def on_show_keys(self,e):
+		dlg = showKeys()
+		res = dlg.ShowModal()
+		dlg.Destroy()
 
 	def sorting(self):
 		self.list.DeleteAllItems()
@@ -339,50 +347,60 @@ class MyFrame(wx.Frame):
 			self.ende=True
 			return
 		try:
-			js_up = json.loads(message)['updates'][0]
+			js_up = yaml.load(message)['updates'][0]
 		except:
 			return
-		
+
 		label = ''
 		src = ''
-		if '$source' in js_up:
+		type = ''
+		value = ''
+		
+		if 'source' in js_up:
+			source=js_up['source']
+			label = source['label']
+			if 'type' in source:
+				type = source['type']
+				if type == 'NMEA0183':
+					if 'talker' in source: 
+						src =label+'.'+source['talker']
+						if 'sentence' in source: src =label+'.'+source['sentence']
+				elif type == 'NMEA2000':
+					if 'src' in source: 
+						src =label+'.'+source['src']
+						if 'pgn' in source: src +='.'+str(source['pgn'])
+		if '$source' in js_up and src=='':
 			src = js_up['$source']
-		elif 'source' in js_up:
-			label = js_up['source']['label']
-			src = label
-			if 'type' in js_up['source']: 
-				if js_up['source']['type'] == 'NMEA0183':
-					if 'talker' in js_up['source']: src +='.'+js_up['source']['talker']
-					if 'sentence' in js_up['source']: src +='.'+js_up['source']['sentence']
-				elif js_up['source']['type'] == 'NMEA2000':
-					if 'src' in js_up['source']: src +='.'+js_up['source']['src']
-					if 'pgn' in js_up['source']: src +='.'+str(js_up['source']['pgn'])
-
 		try:
 			timestamp = js_up['timestamp']
 		except:
 			timestamp = '2000-01-01T00:00:00.000Z'
 
 		values_ = js_up['values']
+
 		for values in values_:
 			path = values['path']
 			value = values['value']
 			src2 = src
 			timestamp2 = timestamp
-			if type(value) is dict:
+			
+			if isinstance(value, dict):
 				if 'timestamp' in value: timestamp2 = value['timestamp']
-
-				if '$source' in value:
-					src2 = value['$source']
+				if '$source' in value and src=='':
+					src = value['$source']
 				elif 'source' in value:
-					src2 = label
-					if 'type' in value['source']: 
-						if value['source']['type'] == 'NMEA0183':
-							if 'talker' in value['source']: src2 +='.'+value['source']['talker']
-							if 'sentence' in value['source']: src2 +='.'+value['source']['sentence']
-						elif value['source']['type'] == 'NMEA2000':
-							if 'src' in value['source']: src2 +='.'+value['source']['src']
-							if 'pgn' in value['source']: src2 +='.'+str(value['source']['pgn'])
+					source=value['source']
+					label = source['label']
+					if 'type' in source:
+						type = source['type']
+						if type == 'NMEA0183':
+							if 'talker' in source: 
+								src =label+'.'+source['talker']
+								if 'sentence' in source: src =label+'.'+source['sentence']
+						elif type == 'NMEA2000':
+							if 'src' in source: 
+								src =label+'.'+source['src']
+								if 'pgn' in source: src +='.'+str(source['pgn'])
 
 				for lvalue in value:
 					result = True
@@ -390,9 +408,7 @@ class MyFrame(wx.Frame):
 						result = False
 					elif lvalue == 'timestamp':
 						if 'position' in path and 'RMC' in src2:
-							path2 = 'navigation.datetime'
-							value2 = timestamp2
-							self.update_add(value2, path2, src2, timestamp2)
+							self.update_add(timestamp2, 'navigation.datetime', src2, timestamp2)
 						result = False
 					if result:
 						path2 = path + '.' + lvalue
@@ -401,16 +417,18 @@ class MyFrame(wx.Frame):
 			else:
 				self.update_add(value, path, src, timestamp)
 
+				
 	def update_add(self, value, path, src, timestamp):
 		# SRC SignalK Value Unit Interval Status Description timestamp	private_Unit private_Value priv_Faktor priv_Offset
 		#  0    1      2     3      4        5        6          7           8             9           10          11
 		if type(value) is list: value = value[0]
-
-		if type(value) is float: pass
-		elif type(value) is unicode: value = str(value)
-		elif type(value) is int: value = float(value)
+		
+		if isinstance(value, float): pass
+		elif isinstance(value, basestring): value = str(value)
+		elif isinstance(value, int): value = float(value)
+		elif value is None: value = 'None'
 		else: value=0.0
-
+		
 		index = 0
 		exists = False
 		for i in self.list_SK:
@@ -462,9 +480,11 @@ class MyFrame(wx.Frame):
 		pass
 
 	def run(self):
+		print self.ws_name
+
 		self.endlive=False
 		self.ende=False
-		self.ws = websocket.WebSocketApp("ws://localhost:3000/signalk/v1/stream?subscribe=self",
+		self.ws = websocket.WebSocketApp(self.ws_name,
 										 on_message=lambda ws, msg: self.on_message(ws, msg),
 										 on_error=lambda ws, err: self.on_error(ws, err),
 										 on_close=lambda ws: self.on_close(ws))

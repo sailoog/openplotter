@@ -26,7 +26,7 @@ try:
 	s = RTIMU.Settings(SETTINGS_FILE)
 	imu = RTIMU.RTIMU(s)
 
-	result = [['',''], ['',''], ['','']]
+	result = [['0',''], ['0',''], ['0','']]
 
 	with open(SETTINGS_FILE+'.ini', "r") as infile:
 		for line in infile:
@@ -43,7 +43,7 @@ try:
 		elif IMUType == '4': result[0][0] = 'STM L3GD20 + LSM303DLHC'
 		elif IMUType == '5': result[0][0] = 'STM LSM9DS0'
 		elif IMUType == '6': result[0][0] = 'STM LSM9DS1'
-		elif IMUType == '7': result[0][0] = 'InvenSense MPU-9250'
+		elif IMUType == '7': result[0][0] = 'InvenSense MPU-9250/MPU-9255'
 		elif IMUType == '8': result[0][0] = 'STM L3GD20H + LSM303DLHC'
 		elif IMUType == '9': result[0][0] = 'Bosch BMX055'
 		elif IMUType == '10': result[0][0] = 'Bosch BNX055'
