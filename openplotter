@@ -1151,6 +1151,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.pypilot_control.Enable()
 		self.pypilot_webapp_cb.Enable()
 		self.pypilot_webapp_port.Enable()
+		self.enable_imu()
+		i = 0
+		for name in self.pypilot_translation_names_list:
+			self.pypilot_signalk_translation.Check(i, True)
+			i+=1
+		self.pypilot_signalk_translation.Disable()
+		self.pypilot_translation_rate.Disable()
 
 	def enable_imu(self):
 		self.calibration.Enable()
@@ -1172,12 +1179,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		mode = self.pypilot_modes[self.pypilot_mode.GetSelection()]
 
 		if mode == 'basic autopilot': self.enable_autopilot()
-		else: self.disable_autopilot()
-
-		if mode == 'imu' or mode == 'basic autopilot': self.enable_imu()
-		else: self.disable_imu()
-
-		if mode == 'disabled':
+		elif mode == 'imu': 
+			self.enable_imu()
+			self.disable_autopilot()
+		else:
 			self.disable_autopilot()
 			self.disable_imu()
 
@@ -1263,6 +1268,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.conf.set('PYPILOT', 'webapp_port', str(self.pypilot_webapp_port.GetValue()))
 
 		self.reset_sensors()
+		self.restart_SK()
 
 		subprocess.call(['pkill', '-f', 'pypilot_webapp'])
 		if self.pypilot_webapp_cb.GetValue() and self.pypilot_mode.GetSelection() == 2:
@@ -1270,6 +1276,24 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def on_cancel_changes_pypilot(self,e):
 		self.read_pypilot()
+
+	def start_sensors(self):
+		subprocess.Popen(['python', self.currentpath + '/read_sensors_d.py'], cwd=self.home + '/.pypilot')
+		self.ShowStatusBarGREEN(_('Sensors restarted'))
+
+	def stop_sensors(self):
+		self.ShowStatusBarRED(_('Sensors stopped'))
+		subprocess.call(['pkill', '-f', 'pypilot_calibration'])
+		subprocess.call(['pkill', '-f', 'signalk_scope_wx'])
+		subprocess.call(['pkill', '-f', 'pypilot_control'])
+		subprocess.call(['pkill', '-f', 'read_sensors_d.py'])
+		
+	def reset_sensors(self, e=0):
+		self.stop_sensors()
+		self.read_i2c()
+		self.read_gpio()
+		self.read_pypilot()
+		self.start_sensors()
 		
 			########################################### kplex
 
@@ -1792,24 +1816,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				break
 			c = c + 1
 		self.apply_changes_i2c()
-
-	def start_sensors(self):
-		subprocess.Popen(['python', self.currentpath + '/read_sensors_d.py'], cwd=self.home + '/.pypilot')
-		self.ShowStatusBarGREEN(_('Sensors restarted'))
-
-	def stop_sensors(self):
-		self.ShowStatusBarRED(_('Sensors stopped'))
-		subprocess.call(['pkill', '-f', 'pypilot_calibration'])
-		subprocess.call(['pkill', '-f', 'signalk_scope_wx'])
-		subprocess.call(['pkill', '-f', 'pypilot_control'])
-		subprocess.call(['pkill', '-f', 'read_sensors_d.py'])
-		
-	def reset_sensors(self, e=0):
-		self.stop_sensors()
-		self.read_i2c()
-		self.read_gpio()
-		self.read_pypilot()
-		self.start_sensors()
 
 	def read_i2c(self):
 		self.i2c_sensors = []
