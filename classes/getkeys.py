@@ -43,7 +43,7 @@ class GetKeys:
 				else: units = ''
 				keys.append([key,description,units])
 		list_tmp = []
-		groups = [_('ungrouped')]
+		groups = [_('ungrouped').decode('utf8')]
 		ungrouped = []
 		for i in keys:
 			items=i[0].split('.')
