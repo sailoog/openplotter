@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import socket, time, math, datetime, platform, threading, os
+import socket, time, math, datetime, platform, threading, os, pynmea2
 from classes.conf import Conf
 from signalk.client import SignalKClient
 
@@ -59,26 +59,24 @@ def read_adc(channel):
 
 #translate pypilot signalk -> node signalk
 def Translate(result):
-        translation_table = {'imu.heading' : ['navigation.headingMagnetic', 0.017453293],
-                             'imu.roll' : ['navigation.attitude.roll', 0.017453293],
-                             'imu.pitch' : ['navigation.attitude.pitch', 0.017453293]}
-        Erg = ''
-        for translation in translation_table:
-                if translation in result:
-                        value = result[translation]['value']
-                        tr = translation_table[translation]
-                        Erg += '{"path": "' + tr[0] + '","value":'+str(value*tr[1])+'},'
-        return Erg
+	translation_table = {'imu.roll' : ['navigation.attitude.roll', 0.017453293], 'imu.pitch' : ['navigation.attitude.pitch', 0.017453293]}
+	Erg = ''
+	for translation in translation_table:
+		if translation in result:
+			value = result[translation]['value']
+			tr = translation_table[translation]
+			Erg += '{"path": "' + tr[0] + '","value":'+str(value*tr[1])+'},'
+	return Erg
 
 def work_pypilot():
-        #init compass
-        mode = conf.get('PYPILOT', 'mode')
-        if mode == 'disabled':
-                print 'pypilot disabled  '
-                return
+	#init compass
+	mode = conf.get('PYPILOT', 'mode')
+	if mode == 'disabled':
+		print 'pypilot disabled  '
+		return
         
-        headingSK = conf.get('PYPILOT', 'translation_magnetic_h')
-        attitudeSK = conf.get('PYPILOT', 'translation_attitude')
+	headingSK = conf.get('PYPILOT', 'translation_magnetic_h')
+	attitudeSK = conf.get('PYPILOT', 'translation_attitude')
         
 	SETTINGS_FILE = "RTIMULib"
 	s = RTIMU.Settings(SETTINGS_FILE)
@@ -86,13 +84,13 @@ def work_pypilot():
 	imuName = imu.IMUName()
 	del imu
 	del s
-        if mode == 'imu':
-                cmd = ['pypilot_boatimu', '-q']
-        elif mode == 'basic autopilot':
-                # ensure no serial getty running
-                os.system('sudo systemctl stop serial-getty@ttyAMA0.service')
-                os.system('sudo systemctl stop serial-getty@ttyS0.service')
-                cmd = ['pypilot']
+	if mode == 'imu':
+		cmd = ['pypilot_boatimu', '-q']
+	elif mode == 'basic autopilot':
+		# ensure no serial getty running
+		os.system('sudo systemctl stop serial-getty@ttyAMA0.service')
+		os.system('sudo systemctl stop serial-getty@ttyS0.service')
+		cmd = ['pypilot']
 
 	try:
 		translation_rate = float(conf.get('PYPILOT', 'translation_rate'))
@@ -100,61 +98,75 @@ def work_pypilot():
 		translation_rate = 1
 		conf.set('PYPILOT', 'translation_rate', '1')
 
-        pid = os.fork()
-        try:
-                if pid == 0:
-                        os.execvp(cmd[0], cmd)
-                        print 'failed to launch', cmd
-                        exit(1)
-        except:
-                print 'exception launching pypilot'
-                exit(1)
-        print 'launched pypilot pid', pid
-        time.sleep(3) # wait 3 seconds to launch client
+	pid = os.fork()
+	try:
+		if pid == 0:
+			os.execvp(cmd[0], cmd)
+			print 'failed to launch', cmd
+			exit(1)
+	except:
+		print 'exception launching pypilot'
+		exit(1)
+	print 'launched pypilot pid', pid
+	time.sleep(3) # wait 3 seconds to launch client
 
-        def on_con(client):
-                print 'connected'
-                if headingSK == '1':
-                        client.watch('imu.heading')
-                if attitudeSK == '1':
-                        client.watch('imu.pitch')
-                        client.watch('imu.roll')
+	def on_con(client):
+		print 'connected'
+		if headingSK == '1':
+			client.watch('imu.heading')
+		if attitudeSK == '1':
+			client.watch('imu.pitch')
+			client.watch('imu.roll')
 
-        client = False
+	client = False
 	tick1 = time.time()
-        while read_sensors:
-                ret = os.waitpid(pid, os.WNOHANG)
-                if ret[0] == pid:
-                        # should we respawn pypilot if it crashes?
-                        print 'pypilot exited'
-                        break
+	while read_sensors:
+		ret = os.waitpid(pid, os.WNOHANG)
+		if ret[0] == pid:
+			# should we respawn pypilot if it crashes?
+			print 'pypilot exited'
+			break
 
-                # connect to pypilot if not connected
-                try:
-                        if not client:
-                                client = SignalKClient(on_con, 'localhost')
-                except:
-                        time.sleep(1)
-                        continue # not much to do without connection
+		# connect to pypilot if not connected
+		try:
+			if not client:
+				client = SignalKClient(on_con, 'localhost')
+		except:
+			time.sleep(1)
+			continue # not much to do without connection
                 
-                try:
-                        result = client.receive()
-                except:
-                        print 'disconnected from pypilot'
-                        client = False
-                        continue
+		try:
+			result = client.receive()
+		except:
+			print 'disconnected from pypilot'
+			client = False
+			continue
                 
-                Erg = Translate(result)
-                SignalK='{"updates":[{"$source":"OPsensors.I2C.'+imuName+'","values":['
-                SignalK+=Erg[0:-1]+']}]}\n'		
-                sock.sendto(SignalK, ('127.0.0.1', 55557))
+		Erg = Translate(result)
+		SignalK='{"updates":[{"$source":"OPsensors.I2C.'+imuName+'","values":['
+		SignalK+=Erg[0:-1]+']}]}\n'		
+		sock.sendto(SignalK, ('127.0.0.1', 55557))
 
-                while True:
-                        dt = translation_rate - time.time() + tick1
-                        if dt <= 0:
-                                break
-                        time.sleep(dt)
-                tick1 = time.time()
+		if mode == 'imu':
+			if 'imu.heading' in result:
+				value = result['imu.heading']['value'] 
+				hdm = str(pynmea2.HDM('AP', 'HDM', (str(value),'M')))+'\r\n'
+				sock.sendto(hdm, ('127.0.0.1', 10110))
+			if 'imu.roll' in result:
+				value = result['imu.roll']['value'] 
+				xdr_r = str(pynmea2.XDR('AP', 'XDR', ('A',str(value),'D','ROLL')))+'\r\n'
+				sock.sendto(xdr_r, ('127.0.0.1', 10110))
+			if 'imu.pitch' in result:
+				value = result['imu.pitch']['value'] 
+				xdr_p = str(pynmea2.XDR('AP', 'XDR', ('A',str(value),'D','PTCH')))+'\r\n'
+				sock.sendto(xdr_p, ('127.0.0.1', 10110))
+
+		while True:
+			dt = translation_rate - time.time() + tick1
+			if dt <= 0:
+				break
+			time.sleep(dt)
+		tick1 = time.time()
                 
 
         # cleanup
