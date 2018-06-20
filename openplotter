@@ -3783,17 +3783,17 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.topics.append(ii)
 			topic = ii[0].encode('utf8')
 			if ii[1] == 0: 
-				topic_type = _('General').encode('utf8')
+				topic_type = _('General').decode('utf8')
 				skkey = 'notifications.'+topic
 				source = 'MQTT.'+topic
 			if ii[1] == 1: 
-				topic_type = _('Signal K key input').encode('utf8')
+				topic_type = _('Signal K key input').decode('utf8')
 				skkey = ii[2]
 				source = 'MQTT.'+topic
 			if ii[1] == 2: 
-				topic_type = _('Signal K delta input').encode('utf8')
-				skkey = _('multiple keys').encode('utf8')
-				source = _('multiple sources').encode('utf8')
+				topic_type = _('Signal K delta input').decode('utf8')
+				skkey = _('multiple keys').decode('utf8')
+				source = _('multiple sources').decode('utf8')
 			self.list_topics.Append([topic,topic_type,skkey,source])
 
 	def edit_topic(self, e):
@@ -3834,10 +3834,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 						self.ShowMessage(_('Failed. Topic name must be unique.'))
 						dlg.Destroy()
 						return
-			if topic_type == _('General'): 
+			if topic_type == _('General').decode('utf8'): 
 				topic_type2 = 0
 				skkey2 = ''
-			elif topic_type == _('Signal K key input'): 
+			elif topic_type == _('Signal K key input').decode('utf8'): 
 				topic_type2 = 1
 				if not skkey:
 					self.ShowMessage(_('Failed. You have to provide a Signal K key.'))
@@ -3845,7 +3845,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					return
 				else:
 					skkey2 = skkey
-			elif topic_type == _('Signal K delta input'): 
+			elif topic_type == _('Signal K delta input').decode('utf8'): 
 				topic_type2 = 2
 				skkey2 = ''
 			else:

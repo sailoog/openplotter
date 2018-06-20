@@ -87,7 +87,7 @@ class selectKey(wx.Dialog):
 	def onSelect_group(self,e):
 		selected = self.groups_list.GetValue()
 		self.keys_list.Clear()
-		if selected == _('ungrouped'):
+		if selected == _('ungrouped').decode('utf8'):
 			self.list_sk_keys = self.ungrouped
 			self.group_description.SetValue(_('Ungrouped Signal K keys.'))
 		else:
