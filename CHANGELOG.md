@@ -1,3 +1,9 @@
+v1.0.2
+* Add access point with 1 wlan stick for RPi2
+* Fix IMU data management
+* Fix unicode error in MQTT
+* Update languages
+
 v1.0.1
 * Fix arror in date triggers
 * Fix error applying changes in actions
