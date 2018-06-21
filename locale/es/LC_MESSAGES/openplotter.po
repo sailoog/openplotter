@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openplotter\n"
 "POT-Creation-Date: 2018-05-20 16:54+0200\n"
-"PO-Revision-Date: 2018-05-25 18:35+0200\n"
+"PO-Revision-Date: 2018-06-21 17:29+0200\n"
 "Last-Translator: sailoog <info@sailoog.com>\n"
 "Language-Team: Spanish\n"
 "Language: es\n"
@@ -1683,7 +1683,7 @@ msgstr "Idioma"
 
 #: openplotter:182
 msgid "Update OpenCPN"
-msgstr "OpenCPN eguneratu"
+msgstr "Actualizar OpenCPN"
 
 #: openplotter:182
 msgid "Update OpenCPN to latest stable release"

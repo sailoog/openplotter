@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openplotter\n"
 "POT-Creation-Date: 2018-05-20 16:54+0200\n"
-"PO-Revision-Date: 2018-05-25 18:34+0200\n"
+"PO-Revision-Date: 2018-06-21 17:29+0200\n"
 "Last-Translator: sailoog <info@sailoog.com>\n"
 "Language-Team: Greek\n"
 "Language: el\n"
@@ -232,11 +232,11 @@ msgstr ""
 
 #: classes/add_DS18B20.py:31
 msgid "Add 1W temperature sensor"
-msgstr "Προσθέστε 1W αισθητήρα θερμοκρασίας"
+msgstr "Προσθέστε αισθητήρα θερμοκρασίας 1W"
 
 #: classes/add_DS18B20.py:32
 msgid "Edit 1W temperature sensor"
-msgstr "Επεξεργασία 1W αισθητήρα θερμοκρασίας"
+msgstr "Επεξεργασία αισθητήρα θερμοκρασίας 1W"
 
 #: classes/add_DS18B20.py:38 classes/add_topic.py:40 classes/add_trigger.py:39
 #: classes/edit_i2c.py:31 openplotter:1617 openplotter:1834 openplotter:1971
