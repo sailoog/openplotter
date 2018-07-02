@@ -22,8 +22,11 @@ except:
 
 import platform, subprocess, time, json, requests, socket, re
 
-try:	import paho.mqtt.publish as publish
-except:	publish = 'warn'
+try:	
+	import paho.mqtt.publish as publish
+	check_mqtt = True
+except:	
+	check_mqtt = False
 
 from classes.gmailbot import GmailBot
 try: from classes.twitterbot import TwitterBot
@@ -203,15 +206,12 @@ class Actions:
 			topic = option[4:]
 			payload = text
 			auth = {'username': conf.get('MQTT', 'username'), 'password': conf.get('MQTT', 'password')}
-			if publish == 'warn':
+			if not check_mqtt:
 				msg = 'mqtt python module not installed, functionallity not available'
 				print msg
 				app = wx.App(False)
 				wx.Frame( None, title="OpenPlotter", size=(710, 460))
 				wx.MessageBox(msg, 'Warning', wx.OK | wx.ICON_WARNING)
-				publish = None
-			if not publish:
-				return
-
-			publish.single(topic, payload=payload, hostname='127.0.0.1', port='1883', auth=auth)
-			publish.single(topic, payload=payload, hostname=conf.get('MQTT', 'broker'), port=conf.get('MQTT', 'port'), auth=auth)
+			else:
+				publish.single(topic, payload=payload, hostname='127.0.0.1', port='1883', auth=auth)
+				publish.single(topic, payload=payload, hostname=conf.get('MQTT', 'broker'), port=conf.get('MQTT', 'port'), auth=auth)
