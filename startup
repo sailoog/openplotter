@@ -158,6 +158,11 @@ class MyFrame(wx.Frame):
 		webapp_port=self.conf.get('PYPILOT', 'webapp_port')
 		N2K_output=self.conf.get('N2K', 'output')
 
+		try:
+			Serialinst = eval(self.conf.get('UDEV', 'serialinst'))
+		except:
+			Serialinst = {}
+
 		tools_py=[]
 		if self.conf.has_section('TOOLS'):
 			if self.conf.has_option('TOOLS', 'py'):
@@ -286,9 +291,16 @@ class MyFrame(wx.Frame):
 		self.add_logger_data(_(' Done.'))
 
 		subprocess.call(['pkill', '-9', 'kplex'])
-		self.add_logger_data(_('\nStarting NMEA 0183 Multiplexer...'))
+		self.add_logger_data(_('\nStarting NMEA 0183 Multiplexer Kplex...'))
 		subprocess.Popen('kplex')
 		self.check_start('kplex')
+
+		for name in Serialinst:
+			if Serialinst[name]['assignment'] == 'NMEA 0183 out':
+				self.add_logger_data(_('\nStarting serial NMEA 0183 output...'))
+				subprocess.Popen(['kplex', '-f', self.home+'/.nmea0183out.conf'])
+				self.add_logger_data(_(' Done.'))
+				break
 
 		subprocess.call(['pkill', '-9', 'opencpn'])
 		if opencpn=='1':

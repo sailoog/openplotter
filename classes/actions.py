@@ -55,10 +55,6 @@ class Actions:
 		self.options.append([_('shutdown system'), 0, 0, 'ACT4'])
 		self.options.append(['startup stop', 0, 0, 'ACT7'])
 		self.options.append(['startup restart', 0, 0, 'ACT8'])
-		self.options.append([_('stop NMEA multiplexer'), 0, 0, 'ACT5'])
-		self.options.append([_('reset NMEA multiplexer'), 0, 0, 'ACT6'])
-		#self.options.append([_('stop SDR-AIS'), 0, 0, 'ACT11'])
-		#self.options.append([_('reset SDR-AIS'), _('Be sure you have filled in Gain and Correction fields in "SDR-AIS" tab and enabled AIS NMEA generation.'),0, 'ACT12'])
 		self.options.append([_('publish Twitter'), _('Be sure you have filled in all fields in "Accounts" tab, and enabled Twitter checkbox.\n\nEnter text to publish in the field "data".'),1, 'ACT13'])
 		self.options.append([_('send e-mail'), _('Be sure you have filled in all fields in "Accounts" tab, and enabled Gmail checkbox.\n\nEnter the subject in the field "data".'),1, 'ACT14'])
 		self.options.append([_('send SMS'), _('Be sure you have enabled sending SMS in "SMS" tab.\n\nEnter the text in field "data".'), 1, 'ACT21'])
@@ -124,11 +120,8 @@ class Actions:
 			subprocess.Popen(['sudo', 'reboot'])
 		elif option == 'ACT4':
 			subprocess.Popen(['sudo', 'shutdown', '-h', 'now'])
-		elif option == 'ACT5':
-			subprocess.Popen(['pkill', '-9', 'kplex'])
-		elif option == 'ACT6':
-			subprocess.call(['pkill', '-9', 'kplex'])
-			subprocess.Popen('kplex')
+		#elif option == 'ACT5':
+		#elif option == 'ACT6':
 		elif option == 'ACT7':
 			subprocess.Popen(['startup', 'stop'])
 		elif option == 'ACT8':

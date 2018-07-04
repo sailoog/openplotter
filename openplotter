@@ -1360,21 +1360,26 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def on_restart_kplex(self, event):
 		self.ShowStatusBarRED(_('Closing Kplex'))
-		subprocess.call(["pkill", '-9', "kplex"])
+		subprocess.call(['pkill', '-9', 'kplex'])
 		while self.util_process_exist('kplex'):
 			time.sleep(0.05)
 		time.sleep(0.2)
 		subprocess.Popen('kplex')
+		try:
+			Serialinst = eval(self.conf.get('UDEV', 'serialinst'))
+		except:
+			Serialinst = {}
+		for name in Serialinst:
+			if Serialinst[name]['assignment'] == 'NMEA 0183 out':
+				subprocess.Popen(['kplex', '-f', self.home+'/.nmea0183out.conf'])
+				break
 		self.ShowStatusBarGREEN(_('Kplex restarted'))
 		self.read_kplex_conf()
 
 	def stop_kplex(self):
-		subprocess.call(["pkill", '-9', "kplex"])
+		subprocess.call(['pkill', '-9', 'kplex'])
 		while self.util_process_exist('kplex'):
 			time.sleep(0.05)
-
-	def start_kplex(self):
-		subprocess.Popen('kplex')
 
 	def on_cancel_changes_kplex(self, event):
 		self.read_kplex_conf()
@@ -1616,9 +1621,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					file.write(data)
 					file.close()
 
-					subprocess.call(["pkill", '-9', "kplex"])
-					while self.util_process_exist('kplex'):
-						time.sleep(0.05)
+					self.stop_kplex()
 					time.sleep(0.2)
 					subprocess.Popen(['kplex', '-f', self.home + '/.debugkplex.conf'])
 					time.sleep(0.5)
@@ -1627,7 +1630,15 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 						subprocess.Popen(['python', self.currentpath + '/diagnostic-NMEA.py', '10112', 'diagnostic_input'])
 					if self.kplex[i][3] == 'out' or self.kplex[i][3] == 'both':
 						subprocess.Popen(['python', self.currentpath + '/diagnostic-NMEA.py', '10113', 'diagnostic_output'])
-
+					
+					try:
+						Serialinst = eval(self.conf.get('UDEV', 'serialinst'))
+					except:
+						Serialinst = {}
+					for name in Serialinst:
+						if Serialinst[name]['assignment'] == 'NMEA 0183 out':
+							subprocess.Popen(['kplex', '-f', self.home+'/.nmea0183out.conf'])
+							break
 						###################################### I2C sensors
 
 	def page_i2c(self):
@@ -2591,7 +2602,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.Serial_OPname = wx.TextCtrl(self.p_serial)
 		
 		assignment_label = wx.StaticText(self.p_serial, label=_('assignment'))
-		self.assignment = [_('none'), 'Kplex', 'pypilot', 'CAN-USB', 'GPSD', 'SMS']
+		self.assignment = [_('none'), 'Kplex', 'pypilot', 'CAN-USB', 'GPSD', 'SMS', 'NMEA 0183 out']
 		self.Serial_assignment = wx.Choice(self.p_serial, choices=self.assignment, style=wx.CB_READONLY)
 		self.Serial_assignment.Bind(wx.EVT_CHOICE, self.onSelectAssigment)
 		self.Serial_assignment.SetSelection(0)
@@ -2898,7 +2909,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.ShowStatusBarGREEN(_('Checking selected device ...'))
 		result = self.detect_serial(index)
 		os.system('sudo service gpsd start')
-		self.start_kplex()
+		self.on_restart_kplex(0)
 		self.start_sensors()
 		self.start_n2k()
 		if self.Serial_assignment.GetStringSelection() == 'Kplex':
@@ -2939,7 +2950,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.Serial_assignment.SetStringSelection(self.list_Serialinst.GetItemText(i, 6))
 		self.Serial_baud_select.SetStringSelection(self.list_Serialinst.GetItemText(i, 8))
 
-		if self.Serial_assignment.GetStringSelection() == 'Kplex':
+		if self.Serial_assignment.GetStringSelection() == 'Kplex' or self.Serial_assignment.GetStringSelection() == 'NMEA 0183 out':
 			self.Serial_baud_select.Enable()
 		else:
 			self.Serial_baud_select.SetSelection(0)
@@ -2974,7 +2985,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		assignment = self.Serial_assignment.GetStringSelection()
 		bauds = self.Serial_baud_select.GetStringSelection()
 
-		if assignment == 'Kplex' and bauds == '':
+		if (assignment == 'Kplex' or assignment == 'NMEA 0183 out') and bauds == '':
 			self.ShowMessage(_('Failed. Select bauds.'))
 			return
 
@@ -3149,6 +3160,18 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					del self.kplex[index]
 					break
 
+		#set nmea 0183 out (put this always before clean kplex)
+		nmea0183out_exists = False
+		data = '[tcp]\nname=nmea0183out\ndirection=in\nmode=client\npersist=fromstart\nretry=10\naddress=localhost\nport=10110\n'
+		for name in self.Serialinst:
+			if self.Serialinst[name]['assignment'] == 'NMEA 0183 out':
+				nmea0183out_exists = True
+				data += '\n[serial]\nname='+name+'\ndirection=out\noptional=yes\nfilename=/dev/ttyOP_'+name+'\nbaud='+self.Serialinst[name]['bauds']+'\n'
+		if nmea0183out_exists:
+			file = open(self.home+'/.nmea0183out.conf', 'w')
+			file.write(data)
+			file.close()
+
 		#clean kplex
 		for index, i in enumerate(self.kplex):
 			if i[2] == 'Serial':
@@ -3185,7 +3208,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.conf.set('SMS', 'enable_sending', '0')
 		self.read_sms()
 
-
 		time.sleep(1.5)
 		self.ShowStatusBarGREEN(_('Serial port modified and restarted'))
 
@@ -3196,7 +3218,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				if self.Serialinst[name]['assignment'] == selected:
 					self.ShowMessage(_('Failed. You can assign only one ')+selected+_(' device'))
 					self.Serial_assignment.SetSelection(0)
-		if selected == 'Kplex':
+		if selected == 'Kplex' or selected == 'NMEA 0183 out':
 			self.Serial_baud_select.SetSelection(1)
 			self.Serial_baud_select.Enable()
 		else:
