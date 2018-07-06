@@ -92,11 +92,11 @@ mkdir delete
 #make
 #sudo make install
 
-cd $HOME/delete
-git clone https://github.com/$repository/kplex.git
-cd kplex
-make
-sudo make install
+#cd $HOME/delete
+#git clone https://github.com/$repository/kplex.git
+#cd kplex
+#make
+#sudo make install
 
 #cd $HOME/delete
 #git clone git://github.com/$repository/canboat
@@ -159,14 +159,14 @@ sudo python setup.py install
 cd $HOME
 sudo rm -rf delete
 
-echo
-echo "UPDATING GQRX..."
-echo
-cd ~/.config
-wget https://github.com/csete/gqrx/releases/download/v2.11.5/gqrx-sdr-2.11.5-linux-rpi3.tar.xz
-tar xf gqrx-sdr-2.11.5-linux-rpi3.tar.xz
-rm gqrx-sdr-2.11.5-linux-rpi3.tar.xz
-rm -rf gqrx
-mv gqrx-sdr-2.11.5-linux-rpi3 gqrx
-cd gqrx
-sudo cp udev/*.rules /etc/udev/rules.d/
+#echo
+#echo "UPDATING GQRX..."
+#echo
+#cd ~/.config
+#wget https://github.com/csete/gqrx/releases/download/v2.11.5/gqrx-sdr-2.11.5-linux-rpi3.tar.xz
+#tar xf gqrx-sdr-2.11.5-linux-rpi3.tar.xz
+#rm gqrx-sdr-2.11.5-linux-rpi3.tar.xz
+#rm -rf gqrx
+#mv gqrx-sdr-2.11.5-linux-rpi3 gqrx
+#cd gqrx
+#sudo cp udev/*.rules /etc/udev/rules.d/
