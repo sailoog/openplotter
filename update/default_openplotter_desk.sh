@@ -25,6 +25,7 @@ sudo bash -c 'echo -e "[Desktop Entry]\nName=OpenCPN\nComment=Open source chart 
 sudo rm -rf /usr/share/raspi-ui-overrides/applications/magpi.desktop
 sudo rm -rf /usr/share/raspi-ui-overrides/applications/raspi_resources.desktop
 sudo rm -rf /usr/share/raspi-ui-overrides/applications/help.desktop
+sudo rm -rf /usr/share/raspi-ui-overrides/applications/raspi_getstart.desktop
 echo
 echo "DISABLING SCREENSAVER..."
 echo
