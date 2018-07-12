@@ -1,3 +1,11 @@
+v1.1.0
+* Fix error sending MQTT actions
+* Publish in local MQTT broker when publish in remote broker and vice versa
+* Add NMEA 0183 output to serial assignations
+* Add moitessier packages for kernels 4.14.50 and 4.14.52
+* Update pypilot and Signal K server
+* Minor fixes
+
 v1.0.2
 * Add access point with 1 wlan stick for RPi2
 * Fix IMU data management
