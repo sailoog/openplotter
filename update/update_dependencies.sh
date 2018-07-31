@@ -56,16 +56,8 @@ fi
 echo
 echo "UPDATING NODEJS, NPM AND NODE-RED..."
 echo
-update-nodejs-and-nodered
+bash <(curl -sL https://raw.githubusercontent.com/node-red/raspbian-deb-package/master/resources/update-nodejs-and-nodered)
 sudo rm -rf /usr/share/applications/Node-RED.desktop
-
-echo
-echo "UPDATING NPM PACKAGES..."
-echo
-cd $HOME/.node-red
-npm update node-red-dashboard
-npm update node-red-contrib-jsonpath
-npm update mdns
 
 echo
 echo "UPDATING SIGNAL K..."
