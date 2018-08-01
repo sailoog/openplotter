@@ -37,11 +37,20 @@ class GetKeys:
 				key = i.replace('/vessels/*/','')
 				key = key.replace('RegExp','*')
 				key = key.replace('/','.')
-				if self.data[i].has_key('description'): description = self.data[i]['description']
-				else: description = '[missing]'
-				if self.data[i].has_key('units'): units = self.data[i]['units']
-				else: units = ''
-				keys.append([key,description,units])
+				if self.data[i].has_key('properties'):
+					for ii in self.data[i]['properties']:
+						key2 = key+'.'+ii
+						if self.data[i]['properties'][ii].has_key('description'): description = self.data[i]['properties'][ii]['description']
+						else: description = '[missing]'
+						if self.data[i]['properties'][ii].has_key('units'): units = self.data[i]['properties'][ii]['units']
+						else: units = ''
+						keys.append([key2,description,units])
+				else:
+					if self.data[i].has_key('description'): description = self.data[i]['description']
+					else: description = '[missing]'
+					if self.data[i].has_key('units'): units = self.data[i]['units']
+					else: units = ''
+					keys.append([key,description,units])
 		list_tmp = []
 		groups = [_('ungrouped').decode('utf8')]
 		ungrouped = []
