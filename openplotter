@@ -2977,8 +2977,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.ShowMessage(_('Failed. Same name used for multiple devices'))
 				return
 
-		if not re.match('^[0-9a-zA-Z]{1,8}$', name):
-			self.ShowMessage(_('Failed. The new name must be a string between 1 and 8 letters and/or numbers.'))
+		if not re.match('^[0-9a-z]{1,8}$', name):
+			self.ShowMessage(_('Failed. The new name must be a lowercase string between 1 and 8 letters and/or numbers.'))
 			return
 
 
