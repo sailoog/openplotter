@@ -22,7 +22,7 @@ try:
 except:
         addDS18B20 = None
 from classes.actions import Actions
-from classes.add_MCP import addMCP
+from classes.edit_MCP import editMCP
 from classes.add_i2c import addI2c
 from classes.edit_i2c import editI2c
 from classes.add_action import addAction
@@ -1495,10 +1495,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				index = self.list_kplex.InsertStringItem(sys.maxint, i[1])
 
 			if i[2]: self.list_kplex.SetStringItem(index, 1, i[2])
-			if i[3]:
-				self.list_kplex.SetStringItem(index, 2, i[3])
-			else:
-				self.list_kplex.SetStringItem(index, 2, '127.0.0.1')
+			if i[3]: self.list_kplex.SetStringItem(index, 2, i[3])
+			else:    self.list_kplex.SetStringItem(index, 2, '127.0.0.1')
 			if i[4]: self.list_kplex.SetStringItem(index, 3, i[4])
 			if i[5]: self.list_kplex.SetStringItem(index, 4, i[5])
 			if i[6]:
@@ -1856,14 +1854,15 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def page_spi(self):
 		title = wx.StaticText(self.p_spi, label=_(' SPI MCP3008 '))
 
-		self.list_MCP = wx.ListCtrl(self.p_spi, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
-		self.list_MCP.InsertColumn(0, _('aktiv'), width=40)
+		self.list_MCP = CheckListCtrl(self.p_spi, 100)
+		#self.list_MCP = wx.ListCtrl(self.p_spi, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
+		self.list_MCP.InsertColumn(0, _('aktiv'), width=45)
 		self.list_MCP.InsertColumn(1, _('channel'), width=65)
-		self.list_MCP.InsertColumn(2, _('Signal K key'), width=310)
-		self.list_MCP.InsertColumn(3, _('*'), width=120)
-		self.list_MCP.InsertColumn(4, _('convert'), width=55)
+		self.list_MCP.InsertColumn(2, _('Signal K key'), width=380)
+		self.list_MCP.InsertColumn(3, _('convert'), width=55)
 		self.list_MCP.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit_MCP)
-
+		self.list_MCP.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_edit_MCP)
+		self.list_MCP.Bind(wx.EVT_LEFT_DOWN, self.on_checkbox_MCP)
 		diagnostic = wx.Button(self.p_spi, label=_('SK Diagnostic'))
 		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
 
@@ -1899,11 +1898,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			temp_list = []
 		for ii in temp_list:
 			self.MCP.append(ii)
-			if '.*.' in ii[2]:
-				SKkey2 = ii[2].replace('*', ii[3])
-			else:
-				SKkey2 = ii[2]
-			self.list_MCP.Append([str(ii[0]), str(ii[1]), SKkey2, ii[3], ii[4]])
+			self.list_MCP.Append(['', ii[1], ii[2], ii[4]])
+			if ii[0] == 1:
+				last = self.list_MCP.GetItemCount() - 1
+				self.list_MCP.CheckItem(last)
+				
+	def on_checkbox_MCP(self, e):
+		pass
 
 	def on_restart_MCP(self, e):
 		self.stop_sensors()
@@ -1942,50 +1943,37 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				wx.MessageBox(_('convert disabled'), 'info', wx.OK | wx.ICON_INFORMATION)
 
 	def on_edit_MCP(self, e):
-		selected_MCP = e.GetIndex()
-		edit = [selected_MCP, self.MCP[selected_MCP][0], self.MCP[selected_MCP][1], self.MCP[selected_MCP][2],
-				self.MCP[selected_MCP][3], self.MCP[selected_MCP][4]]
-
-		dlg = addMCP(edit, self)
+		t = e.GetIndex()
+			
+		aktiv = self.MCP[t][0]
+		channel = self.MCP[t][1]
+		SKkey = self.MCP[t][2]
+		convert = self.MCP[t][4]
+		dlg = editMCP(aktiv, channel, SKkey, convert,self)
 		res = dlg.ShowModal()
 		if res == wx.ID_OK:
-			aktiv = dlg.aktiv.GetValue()
-			convert = dlg.convert.GetValue()
 			SKkey = dlg.SKkey.GetValue().encode('utf8')
-			asterix = dlg.asterix.GetValue().encode('utf8')
-			if aktiv and not SKkey:
-				self.ShowStatusBarRED(_('Failed. Provide name and Signal K values.'))
-				dlg.Destroy()
-				return
-			if '*' in SKkey:
-				if not re.match('^[0-9a-zA-Z]+$', asterix):
-					self.ShowStatusBarRED(_('Failed. The name must contain only letters and numbers.'))
-					dlg.Destroy()
-					return
-				SKkey2 = SKkey.replace('*', asterix)
-			else:
-				SKkey2 = SKkey
-
+			aktiv = dlg.aktiv.GetValue()
 			if aktiv:
 				aktiv = 1
 			else:
 				aktiv = 0
+			convert = dlg.convert.GetValue()
 			if convert:
 				convert = 1
 			else:
 				convert = 0
-			self.list_MCP.SetStringItem(edit[0], 0, str(aktiv))
-			self.list_MCP.SetStringItem(edit[0], 2, SKkey2)
-			self.list_MCP.SetStringItem(edit[0], 3, asterix)
-			self.list_MCP.SetStringItem(edit[0], 4, str(convert))
-			self.MCP[edit[0]][0] = aktiv
-			self.MCP[edit[0]][2] = SKkey
-			self.MCP[edit[0]][3] = asterix
-			self.MCP[edit[0]][4] = convert
+				
+			self.MCP[t][0] = aktiv
+			self.MCP[t][1] = channel
+			self.MCP[t][2] = SKkey
+			self.MCP[t][3] = ""
+			self.MCP[t][4] = convert
 			self.conf.set('SPI', 'mcp', str(self.MCP))
 		dlg.Destroy()
 		self.conf.read()
-
+		self.read_MCP()
+		
 	###################################### GPIO
 
 	def page_gpio(self):
