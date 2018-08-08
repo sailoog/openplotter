@@ -26,7 +26,7 @@ from classes.getkeys import GetKeys
 
 class MyFrame(wx.Frame):
 	def __init__(self):
-		self.list_SK = []
+		self.list_SK_unit = []
 		self.data_SK_unit_private = []
 		self.SK_unit = ''
 		self.SK_description = ''
@@ -107,32 +107,25 @@ class MyFrame(wx.Frame):
 		self.Show(True)
 
 	def read(self):
-		self.list_SK = []
+		self.list_SK_unit = []
 
 		self.keys = GetKeys()
-		data = self.keys.data
+		data = self.keys.keys
 
-		self.data_SK_unit_private = []
+		data_sk_unit_private = []
 		if os.path.isfile(self.home+'/.openplotter/private_unit.json'):
 			with open(self.home+'/.openplotter/private_unit.json') as data_file:
-				self.data_SK_unit_private = json.load(data_file)
-
+				data_sk_unit_private = json.load(data_file)
 		for i in data:
-			if 'units' in data[i].keys():
-				if 'description' in data[i].keys():
-					ii = i.replace('/vessels/*/','')
-					ii = ii.replace('RegExp','*')
-					ii = ii.replace('/','.')
-					self.list_SK.append([str(ii), str(data[i]['units']), '', str(data[i]['description'])])
-				else:
-					self.list_SK.append([str(ii), str(data[i]['units']), '', ''])
-		for j in self.data_SK_unit_private:
-			for i in self.list_SK:
+			self.list_SK_unit.append([str(i[0]), str(i[2]), '', str(i[1])])
+		for j in data_sk_unit_private:
+			for i in self.list_SK_unit:
 				if j[0] == i[0]:
 					i[2] = j[2]
-
-		self.list_SK.sort(key=lambda tup: tup[0])
-		self.list_SK.sort(key=lambda tup: tup[1])
+					break					
+					
+		self.list_SK_unit.sort(key=lambda tup: tup[0])
+		self.list_SK_unit.sort(key=lambda tup: tup[1])
 
 	def lookup_star(self, name):
 		skip = -1
@@ -155,7 +148,7 @@ class MyFrame(wx.Frame):
 		self.SK_unit = ''
 		self.SK_description = ''
 		exist = False
-		for j in self.list_SK:
+		for j in self.list_SK_unit:
 			if j[2] == st:
 				self.SK_unit = j[0]
 				self.SK_description = j[3]
@@ -185,13 +178,13 @@ class MyFrame(wx.Frame):
 			item = self.list.GetFirstSelected()
 			while item != -1:
 				# do something with the item
-				self.list_SK[item][2] = orig_unit[1]
+				self.list_SK_unit[item][2] = orig_unit[1]
 
 				list_select.append(self.get_by_index(item))
 				item = self.list.GetNextSelected(item)
 
 			self.data_SK_unit_private = []
-			for i in self.list_SK:
+			for i in self.list_SK_unit:
 				if i[2] != '':
 					self.data_SK_unit_private.append([i[0], i[1], i[2]])
 			with open(self.home+'/.openplotter/private_unit.json', 'w') as data_file:
@@ -205,7 +198,7 @@ class MyFrame(wx.Frame):
 
 	def get_by_index(self, item):
 		index = 0
-		for i in self.list_SK:
+		for i in self.list_SK_unit:
 			if index == item:
 				return i
 			index += 1
@@ -213,9 +206,9 @@ class MyFrame(wx.Frame):
 
 	def sorting(self):
 		self.list.DeleteAllItems()
-		self.list_SK.sort(key=lambda tup: tup[self.sortCol])
+		self.list_SK_unit.sort(key=lambda tup: tup[self.sortCol])
 		index = 0
-		for i in self.list_SK:
+		for i in self.list_SK_unit:
 			self.list.InsertStringItem(index, i[0])
 			self.list.SetStringItem(index, 1, i[1])
 			self.list.SetStringItem(index, 2, i[2])
@@ -224,8 +217,8 @@ class MyFrame(wx.Frame):
 
 	def OnClose(self, e):
 		self.Destroy()
-
-
+	
+	
 app = wx.App()
 MyFrame().Show()
 app.MainLoop()

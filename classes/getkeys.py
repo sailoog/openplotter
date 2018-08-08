@@ -44,13 +44,13 @@ class GetKeys:
 						else: description = '[missing]'
 						if self.data[i]['properties'][ii].has_key('units'): units = self.data[i]['properties'][ii]['units']
 						else: units = ''
-						keys.append([key2,description,units])
+						keys.append([str(key2),description,units])
 				else:
 					if self.data[i].has_key('description'): description = self.data[i]['description']
 					else: description = '[missing]'
 					if self.data[i].has_key('units'): units = self.data[i]['units']
 					else: units = ''
-					keys.append([key,description,units])
+					keys.append([str(key),description,units])
 		list_tmp = []
 		groups = [_('ungrouped').decode('utf8')]
 		ungrouped = []

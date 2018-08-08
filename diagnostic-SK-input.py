@@ -153,7 +153,7 @@ class MyFrame(wx.Frame):
 		self.list_SK_unit = []
 
 		self.keys = GetKeys()
-		data = self.keys.data
+		data = self.keys.keys
 
 		data_sk_unit_private = []
 		if os.path.isfile(self.home+'/.openplotter/private_unit.json'):
@@ -161,22 +161,16 @@ class MyFrame(wx.Frame):
 				data_sk_unit_private = json.load(data_file)
 
 		for i in data:
-			if 'units' in data[i].keys():
-				if 'description' in data[i].keys():
-					ii = i.replace('/vessels/*/','')
-					ii = ii.replace('RegExp','*')
-					ii = ii.replace('/','.')
-					self.list_SK_unit.append([str(ii), str(data[i]['units']), '', str(data[i]['description'])])
-				else:
-					self.list_SK_unit.append([str(ii), str(data[i]['units']), '', ''])
+			self.list_SK_unit.append([str(i[0]), str(i[2]), '', str(i[1])])
 		for j in data_sk_unit_private:
 			for i in self.list_SK_unit:
 				if j[0] == i[0]:
 					i[2] = j[2]
-					break
-
+					break					
+					
 		self.list_SK_unit.sort(key=lambda tup: tup[0])
 		self.list_SK_unit.sort(key=lambda tup: tup[1])
+		
 
 	def lookup_star(self, name):
 		skip = -1
