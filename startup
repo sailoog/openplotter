@@ -149,6 +149,7 @@ class MyFrame(wx.Frame):
 		play=self.conf.get('STARTUP', 'play')
 		sound=self.conf.get('STARTUP', 'sound')
 		node_red=self.conf.get('STARTUP', 'node_red')
+		d800x480=self.conf.get('STARTUP', '800x480')
 		enable=self.conf.get('AIS-SDR', 'enable')
 		gain=self.conf.get('AIS-SDR', 'gain')
 		ppm=self.conf.get('AIS-SDR', 'ppm')
@@ -286,9 +287,10 @@ class MyFrame(wx.Frame):
 			aisdecoder=subprocess.Popen(['aisdecoder', '-h', '127.0.0.1', '-p', '10110', '-a', 'file', '-c', 'mono', '-d', '-f', '/dev/stdin'], stdin = rtl_fm.stdout)
 			self.check_start('aisdecoder')
 
-		self.add_logger_data(_('\nChecking 800x480 display...'))
-		subprocess.call(['sudo', 'python', self.op_folder+'/display800x480.py'])
-		self.add_logger_data(_(' Done.'))
+		if d800x480=='1':
+			self.add_logger_data(_('\nChecking 800x480 display...'))
+			subprocess.call(['sudo', 'python', self.op_folder+'/display800x480.py'])
+			self.add_logger_data(_(' Done.'))
 
 		subprocess.call(['pkill', '-9', 'kplex'])
 		self.add_logger_data(_('\nStarting NMEA 0183 Multiplexer Kplex...'))

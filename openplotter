@@ -546,6 +546,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.node_red = wx.CheckBox(self.p_startup, label=_('Node-Red'))
 		self.node_red.Bind(wx.EVT_CHECKBOX, self.startup)
 
+		self.d800x480 = wx.CheckBox(self.p_startup, label=_('Check 800x480 display'))
+		self.d800x480.Bind(wx.EVT_CHECKBOX, self.startup)
+
 		h_delay = wx.BoxSizer(wx.HORIZONTAL)
 		h_delay.Add(delay_label, 0, wx.RIGHT | wx.UP |wx.EXPAND, 10)
 		h_delay.Add(self.delay, 0, wx.RIGHT | wx.EXPAND, 10)
@@ -569,6 +572,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		final.Add(self.op_maximize, 0, wx.LEFT | wx.EXPAND, 10)
 		final.AddSpacer(15)
 		final.Add(self.node_red, 0, wx.LEFT | wx.EXPAND, 10)
+		final.AddSpacer(15)
+		final.Add(self.d800x480, 0, wx.LEFT | wx.EXPAND, 10)
 
 		self.p_startup.SetSizer(final)
 
@@ -586,6 +591,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.op_maximize.SetValue(True)
 			self.Maximize()
 		if self.conf.get('STARTUP', 'node_red') == '1': self.node_red.SetValue(True)
+		if self.conf.get('STARTUP', '800x480') == '1': self.d800x480.SetValue(True)
 		self.startup_path_sound.SetValue(self.conf.get('STARTUP', 'sound'))
 		if self.conf.get('STARTUP', 'play') == '1':
 			self.startup_play_sound.SetValue(True)
@@ -652,6 +658,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.conf.set('STARTUP', 'node_red', '1')
 			else:
 				self.conf.set('STARTUP', 'node_red', '0')
+
+		if sender == self.d800x480:
+			if self.d800x480.GetValue():
+				self.conf.set('STARTUP', '800x480', '1')
+			else:
+				self.conf.set('STARTUP', '800x480', '0')
 
 				########################################### Network
 
