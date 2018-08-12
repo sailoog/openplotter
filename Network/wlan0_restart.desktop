@@ -1,0 +1,8 @@
+[Desktop Entry]
+Exec=bash /home/pi/.config/openplotter/Network/restart_wlan0.sh
+StartupNotify=true
+Categories=OpenPlotter
+Terminal=true
+Type=Application
+Version=1.0
+Name=restart wlan0
