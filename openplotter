@@ -1677,6 +1677,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.list_i2c.InsertColumn(5, _('Rate'), width=40)
 		self.list_i2c.InsertColumn(6, _('Offset'), width=50)
 		self.list_i2c.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_i2c)
+		self.list_i2c.Bind(wx.EVT_LIST_ITEM_SELECTED, self.edit_i2c)
 
 		add = wx.Button(self.p_i2c, label=_('add'))
 		add.Bind(wx.EVT_BUTTON, self.on_add_i2c)
@@ -2002,6 +2003,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.list_gpio.InsertColumn(4, _('Signal K key'), width=180)
 		self.list_gpio.InsertColumn(5, _('Source'), width=100)
 		self.list_gpio.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_gpio)
+		self.list_gpio.Bind(wx.EVT_LIST_ITEM_SELECTED, self.edit_gpio)
+
 
 		add = wx.Button(self.p_gpio, label=_('add'))
 		add.Bind(wx.EVT_BUTTON, self.on_add_gpio)
@@ -2226,6 +2229,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.list_actions.InsertColumn(0, _('action'), width=200)
 		self.list_actions.InsertColumn(1, _('data'), width=260)
 		self.list_actions.InsertColumn(2, _('repeat'), width=130)
+		self.list_actions.Bind(wx.EVT_LIST_ITEM_SELECTED, self.edit_actions)
 		self.list_actions.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_actions)
 		self.list_actions.SetMinSize((10, 10))
 
@@ -2481,6 +2485,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.list_DS18B20.InsertColumn(2, _('Offset'), width=50)
 		self.list_DS18B20.InsertColumn(3, _('Signal K key'), width=215)
 		self.list_DS18B20.InsertColumn(4, _('Source'), width=120)
+		self.list_DS18B20.Bind(wx.EVT_LIST_ITEM_SELECTED, self.edit_DS18B20)
 		self.list_DS18B20.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_DS18B20)
 
 		add = wx.Button(self.p_1w, label=_('add'))
@@ -3968,7 +3973,8 @@ if __name__ == "__main__":
 	conf = Conf()
 	currentpath = conf.get('GENERAL', 'op_folder')
 	app = wx.App()
-	bitmap = wx.Bitmap(currentpath+'/openplotter.ico', wx.BITMAP_TYPE_ICO)
+	bitmap = wx.Image(currentpath+'/openplotter.png')
+	bitmap = wx.BitmapFromImage(bitmap)
 	splash = wx.SplashScreen(bitmap, wx.SPLASH_CENTRE_ON_SCREEN | wx.SPLASH_TIMEOUT, 500, None, style=wx.SIMPLE_BORDER | wx.STAY_ON_TOP)
 	wx.Yield()
 	MainFrame().Show()
