@@ -67,12 +67,10 @@ class SK_settings:
 		if 'pipedProviders' in self.data:
 			try:
 				for i in self.data['pipedProviders']:
-					if i['id'] == 'OPcan': OPcan = True
+					if i['id'] == 'OPcan': 
+						OPcan = True
 					elif i['id'] == 'OPpypilot': 
 						OPpypilot = True
-						if not i['enabled']: 
-							i['enabled'] = True
-							write = True
 					elif i['id'] == 'OPkplex': 
 						OPkplex = True
 						if not i['enabled']: 
@@ -128,6 +126,9 @@ class SK_settings:
 						self.canbus_enabled=i['enabled']
 						self.canbus=count
 						self.canbus_interface=i['pipeElements'][0]['options']['subOptions']['interface']
+					elif i['id'] == 'OPpypilot':
+						self.pypilot_enabled=i['enabled']
+						self.pypilot=count
 					count+=1
 			except:
 				print 'Error parsing setting.json'
@@ -145,6 +146,14 @@ class SK_settings:
 				self.data['pipedProviders'][self.ngt1]['enabled']=True
 			elif enable == 0:
 				self.data['pipedProviders'][self.ngt1]['enabled']=False
+			self.write_settings()
+
+	def set_pypilot_enable(self,enable):
+		if self.pypilot_enabled != -1:
+			if enable == 1:
+				self.data['pipedProviders'][self.pypilot]['enabled']=True
+			elif enable == 0:
+				self.data['pipedProviders'][self.pypilot]['enabled']=False
 			self.write_settings()
 
 	def set_canbus_enable(self,enable):

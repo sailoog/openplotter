@@ -1190,13 +1190,16 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def select_pypilot(self,e=0):
 		mode = self.pypilot_modes[self.pypilot_mode.GetSelection()]
 
-		if mode == 'basic autopilot': self.enable_autopilot()
-		elif mode == 'imu': 
-			self.enable_imu()
-			self.disable_autopilot()
+		if mode == 'basic autopilot': 
+			self.enable_autopilot()
+			self.SK_settings.set_pypilot_enable(True)
 		else:
 			self.disable_autopilot()
-			self.disable_imu()
+			self.SK_settings.set_pypilot_enable(False)
+			if mode == 'imu': 
+				self.enable_imu()
+			else:
+				self.disable_imu()
 
 	def read_pypilot(self, e=0):
 		mode = self.conf.get('PYPILOT', 'mode')
