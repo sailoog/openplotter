@@ -1192,10 +1192,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		if mode == 'basic autopilot': 
 			self.enable_autopilot()
-			self.SK_settings.set_pypilot_enable(True)
+			if self.SK_settings.pypilot_enabled!=1:
+				self.SK_settings.set_pypilot_enable(True)
 		else:
 			self.disable_autopilot()
-			self.SK_settings.set_pypilot_enable(False)
+			if self.SK_settings.pypilot_enabled==1:
+				self.SK_settings.set_pypilot_enable(False)
 			if mode == 'imu': 
 				self.enable_imu()
 			else:
@@ -3215,7 +3217,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			if self.Serialinst[name]['assignment'] == 'CAN-USB':
 				can_device = '/dev/ttyOP_'+name
 				break
-		self.SK_settings.set_ngt1_device(can_device)
+		
+		if self.SK_settings.ngt1_device != can_device:
+			self.SK_settings.set_ngt1_device(can_device)
 		if can_device: self.n2k_enable.SetValue(True)
 		self.on_n2k_enable(self.n2k_enable.GetValue())
 		self.on_n2k_output(self.n2k_out_enable.GetValue())
@@ -3313,10 +3317,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		else: os.system('rm -f '+self.home+'/cmdline.txt')
 
 		if reset == True : os.system('sudo shutdown -r now')
-	###################################### N2K
 
-	def page_n2k(self):
-	
+	###################################### N2K
+	def page_n2k(self):	
 		CANUSB_label = wx.StaticText(self.p_n2k, label=_('CAN-USB port:'))
 		self.can_usb = wx.StaticText(self.p_n2k)
 
@@ -3333,12 +3336,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.n2k_out_enable = wx.CheckBox(self.p_n2k, label=_('Enable N2K output'))
 		self.n2k_out_enable.Bind(wx.EVT_CHECKBOX, self.on_n2k_output)
 
-		if self.SK_settings.canbus_enabled != -1:		
-			n2k_can0_input_box = wx.StaticBox(self.p_n2k, label=_(' Input can0 ')) 
-
-			self.n2k_can0_enable = wx.CheckBox(self.p_n2k, label=_('Enable can0 N2K input'))
-			self.n2k_can0_enable.Bind(wx.EVT_CHECKBOX, self.on_n2k_can0_enable)		
-		
 		self.N2K_diagnostic_out_b = wx.Button(self.p_n2k, label=_('Diagnostic'))
 		self.N2K_diagnostic_out_b.Bind(wx.EVT_BUTTON, self.on_N2K_diagnostic_out)
 	
@@ -3351,6 +3348,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		diagnostic = wx.Button(self.p_n2k, label=_('SK Diagnostic'))
 		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
 
+		n2k_canboatjs_box = wx.StaticBox(self.p_n2k, label=_(' Input/Output canboatjs ')) 
+		
+		self.ngt1js_enabled = wx.CheckBox(self.p_n2k, label=_('Enable CAN-USB N2K'))
+		self.ngt1js_enabled.Bind(wx.EVT_CHECKBOX, self.on_ngt1js_enabled)		
+		self.n2k_can0_enable = wx.CheckBox(self.p_n2k, label=_('Enable can0 N2K'))
+		self.n2k_can0_enable.Bind(wx.EVT_CHECKBOX, self.on_n2k_can0_enable)			
+		
 		hbox = wx.BoxSizer(wx.HORIZONTAL) 
 		hbox.Add(CANUSB_label, 0, wx.ALL | wx.EXPAND, 5) 
 		hbox.Add(self.can_usb, 0, wx.ALL | wx.EXPAND, 5)
@@ -3365,16 +3369,15 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		v_boxSizer2.Add(self.button_N2K_setting, 0, wx.ALL | wx.EXPAND, 5)
 		v_boxSizer2.Add(self.N2K_diagnostic_out_b, 0, wx.ALL | wx.EXPAND, 5)
 
-		if self.SK_settings.canbus_enabled != -1:
-			v_boxSizer3 = wx.StaticBoxSizer(n2k_can0_input_box, wx.HORIZONTAL) 
-			v_boxSizer3.Add(self.n2k_can0_enable, 0, wx.ALL | wx.EXPAND, 5)
-
+		v_boxSizer3 = wx.StaticBoxSizer(n2k_canboatjs_box, wx.HORIZONTAL) 
+		v_boxSizer3.Add(self.ngt1js_enabled, 0, wx.ALL | wx.EXPAND, 5)
+		v_boxSizer3.Add(self.n2k_can0_enable, 0, wx.ALL | wx.EXPAND, 5)
+		
 		vbox = wx.BoxSizer(wx.VERTICAL) 
 		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 5) 
 		vbox.Add(v_boxSizer1, 0, wx.ALL | wx.EXPAND, 5)
 		vbox.Add(v_boxSizer2, 0, wx.ALL | wx.EXPAND, 5)
-		if self.SK_settings.canbus_enabled != -1:
-			vbox.Add(v_boxSizer3, 0, wx.ALL | wx.EXPAND, 5)
+		vbox.Add(v_boxSizer3, 0, wx.ALL | wx.EXPAND, 5)
 		vbox.Add((0,0), 1, wx.ALL | wx.EXPAND, 5)
 		vbox.Add(diagnostic, 0, wx.ALL, 5) 
 		self.p_n2k.SetSizer(vbox) 
@@ -3383,9 +3386,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		dlg = addSKtoN2K()
 		res = dlg.ShowModal()
 		dlg.Destroy()
-	
-		#subprocess.call(['pkill', '-f', 'SK_to_N2K.py'])
-		#subprocess.Popen(['python', self.currentpath + '/SK_to_N2K.py'])
 
 	def set_n2k_enable(self,enable):
 		if enable:
@@ -3414,44 +3414,65 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.n2k_out_enable.SetValue(False)
 			subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
 
-	def update_form(self):
+	def enable_js(self):
 		self.can_device = ''
 		for name in self.Serialinst:
 			if self.Serialinst[name]['assignment'] == 'CAN-USB':
 				self.can_device = '/dev/ttyOP_'+name
 				break
-	
-		if not self.can_device:
-			self.set_n2k_enable(False)
-			self.set_n2k_out_enable(False)
-			self.can_usb.SetLabel(_('none')) 
+		self.can_usb.SetLabel(self.can_device)
+		enable = self.SK_settings.ngt1_enabled != 1 and self.conf.get('N2K', 'output') != '1'
+		self.ngt1js_enabled.SetValue(self.SK_settings.ngt1js_enabled == 1)
+		self.n2k_can0_enable.SetValue(self.SK_settings.canbus_enabled == 1)
+		if enable:
+			if self.SK_settings.ngt1js_enabled == 1 and self.can_device!='':
+				self.ngt1js_enabled.Enable()
+				self.n2k_can0_enable.Disable()
+			elif self.SK_settings.canbus_enabled == 1:
+				self.ngt1js_enabled.Disable()
+				self.n2k_can0_enable.Enable()
+			else:
+				self.ngt1js_enabled.Enable()
+				self.n2k_can0_enable.Enable()
+		else:
+			self.ngt1js_enabled.Disable()
+			self.n2k_can0_enable.Disable()
+			
+	def enable_input(self):
+		self.n2k_enable.SetValue(self.SK_settings.ngt1_enabled==1)
+		if self.SK_settings.ngt1js_enabled == 1 or self.SK_settings.canbus_enabled == 1 or self.can_device=='':
 			self.n2k_enable.Disable()
-			self.n2k_out_enable.Disable()
-			self.button_N2K_setting.Disable()
 			self.N2K_diagnostic_b.Disable()
+		else:
+			if self.can_device!='' and self.SK_settings.ngt1_enabled != 1:
+				self.N2K_diagnostic_b.Enable()
+			self.n2k_enable.Enable()
+
+	def enable_output(self):
+		N2Koutput = self.conf.get('N2K', 'output') == '1'
+		self.n2k_out_enable.SetValue(N2Koutput)
+		if self.SK_settings.ngt1js_enabled == 1 or self.SK_settings.canbus_enabled == 1 or self.can_device=='':
+			self.n2k_out_enable.Disable()
+		else:
+			self.n2k_out_enable.Enable()
+
+		if self.SK_settings.ngt1js_enabled == 1 or self.SK_settings.canbus_enabled == 1 or N2Koutput:
+			self.SK_to_N2K.Disable()
 			self.N2K_diagnostic_out_b.Disable()
 		else:
-			self.n2k_enable.Enable()
-			self.n2k_out_enable.Enable()
-			self.can_usb.SetLabel(self.can_device)		
-			self.n2k_enable.SetValue(self.SK_settings.ngt1_enabled==1)
-			if self.SK_settings.ngt1_enabled == 0:
-				self.button_N2K_setting.Enable()
-				self.N2K_diagnostic_b.Enable()
-			else:
-				self.button_N2K_setting.Disable()
-				self.N2K_diagnostic_b.Disable()
-			if self.conf.get('N2K', 'output') == '1':
-				self.n2k_out_enable.SetValue(True)
-				self.button_N2K_setting.Disable()
-				self.N2K_diagnostic_out_b.Disable()
-			else:
-				self.n2k_out_enable.SetValue(False)
-				self.N2K_diagnostic_out_b.Enable()
-	
-		if self.SK_settings.canbus_enabled != -1:
-			self.n2k_can0_enable.SetValue(self.SK_settings.canbus_enabled == 1)
-				
+			self.SK_to_N2K.Enable()
+			self.N2K_diagnostic_out_b.Enable()
+
+		if self.SK_settings.ngt1js_enabled == 1 or self.SK_settings.canbus_enabled == 1 or self.SK_settings.ngt1_enabled == 1 or N2Koutput:
+			self.button_N2K_setting.Disable()
+		else:
+			self.button_N2K_setting.Enable()
+
+	def update_form(self):
+		self.enable_js()
+		self.enable_input()
+		self.enable_output()
+							
 	def read_n2k(self):
 		self.update_form()
 
@@ -3466,9 +3487,29 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.set_n2k_out_enable(self.n2k_out_enable.GetValue())
 
 	def on_n2k_enable(self, e):
-		self.set_n2k_enable(self.n2k_enable.GetValue())
-		self.update_form()
-
+		if self.SK_settings.ngt1_enabled != self.n2k_enable.GetValue():
+			if not self.SK_settings.ngt1_enabled==1:
+				if not self.SK_settings.ngt1js_enabled==1:
+					self.SK_settings.set_ngt1_enable(True,self.can_device)
+				else:
+					self.ShowStatusBarBLACK(_('You have not disabled the other checkboxes'))
+					self.n2k_enable.SetValue(not self.n2k_enable.GetValue())					
+			else:			
+				self.SK_settings.set_ngt1_enable(False,self.can_device)
+			self.update_form()	
+			
+	def on_ngt1js_enabled(self, e):
+		if self.SK_settings.ngt1js_enabled != self.ngt1js_enabled.GetValue():
+			if not self.SK_settings.ngt1js_enabled:
+				if not self.SK_settings.ngt1_enabled==1 and self.n2k_out_enable.GetValue()==False:
+					self.SK_settings.set_ngt1js_enable(True,self.can_device)
+				else:
+					self.ShowStatusBarBLACK(_('You have not disabled the other checkboxes'))
+					self.ngt1js_enabled.SetValue(not self.ngt1js_enabled.GetValue())					
+			else:				
+				self.SK_settings.set_ngt1js_enable(False,self.can_device)
+			self.update_form()	
+		
 	def on_n2k_output(self, e):
 		self.set_n2k_out_enable(self.n2k_out_enable.GetValue())
 		self.update_form()
@@ -3490,10 +3531,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			subprocess.call(['pkill', '-f', 'diagnostic-N2K-output.py'])
 			subprocess.Popen(['python', self.currentpath + '/diagnostic-N2K-output.py'])
 			self.ShowStatusBarBLACK(_('Show sent PGNs.'))
-
+					
 	def on_n2k_can0_enable(self, e):
 		if self.SK_settings.canbus_enabled != self.n2k_can0_enable.GetValue():
 			self.SK_settings.set_canbus_enable(self.n2k_can0_enable.GetValue())
+			self.update_form()
 			
 	def check_can_device(self):
 		if not self.SK_settings.ngt1_device:
@@ -3504,17 +3546,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		else: return True
 
 	###################################### Signal K
-
-	def restart_SK(self):
-		# stopping sk server
-		self.ShowStatusBarRED(_('Closing Signal K server ...'))
-		subprocess.call(['sudo', 'systemctl', 'stop', 'signalk.service'])
-		subprocess.call(['sudo', 'systemctl', 'stop', 'signalk.socket'])
-		# restarting sk server
-		subprocess.call(['sudo', 'systemctl', 'start', 'signalk.socket'])
-		subprocess.call(['sudo', 'systemctl', 'start', 'signalk.service'])
-		self.ShowStatusBarGREEN(_('Signal K server restarted'))
-
 	def start_SK(self):
 		subprocess.call(['sudo', 'systemctl', 'start', 'signalk.socket'])
 		subprocess.call(['sudo', 'systemctl', 'start', 'signalk.service'])
@@ -3522,6 +3553,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def stop_SK(self):
 		subprocess.call(['sudo', 'systemctl', 'stop', 'signalk.service'])
 		subprocess.call(['sudo', 'systemctl', 'stop', 'signalk.socket'])
+		
+	def restart_SK(self):
+		# stopping sk server
+		self.ShowStatusBarRED(_('Closing Signal K server ...'))
+		self.stop_SK()
+		# restarting sk server
+		self.start_SK()
+		self.ShowStatusBarGREEN(_('Signal K server restarted'))
 
 	def on_diagnostic_SK(self, e):
 		subprocess.call(['pkill', '-f', 'diagnostic-SK-input.py'])

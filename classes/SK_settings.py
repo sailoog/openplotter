@@ -108,23 +108,28 @@ class SK_settings:
 		if not OPsensors: self.data['pipedProviders'].append({'pipeElements': [{'type': 'providers/simple', 'options': {'logging': False, 'type': 'SignalK', 'subOptions': {'type': 'udp', 'port': '55557'}}}], 'enabled': True, 'id': 'OPsensors'})
 
 		#check can devices
-		self.ngt1=''
+		self.OPcan=''
 		self.ngt1_enabled=-1
 		self.ngt1_device=''
-		self.canbus=''
+		self.ngt1js_enabled=-1
 		self.canbus_enabled=-1
 		self.canbus_interface=''
+		self.pypilot_enabled=-1
 		count = 0
 		if 'pipedProviders' in self.data:
 			try:
 				for i in self.data['pipedProviders']:
 					if i['pipeElements'][0]['options']['subOptions']['type'] == 'ngt-1':
 						self.ngt1_enabled=i['enabled']
-						self.ngt1=count
+						self.OPcan=count
 						self.ngt1_device=i['pipeElements'][0]['options']['subOptions']['device']
-					elif i['pipeElements'][0]['options']['subOptions']['type'] == 'canbus':
+					elif i['pipeElements'][0]['options']['subOptions']['type'] == 'ngt-1-canboatjs':
+						self.ngt1js_enabled=i['enabled']
+						self.OPcan=count
+						self.ngt1_device=i['pipeElements'][0]['options']['subOptions']['device']
+					elif i['pipeElements'][0]['options']['subOptions']['type'][0:6] == 'canbus':
 						self.canbus_enabled=i['enabled']
-						self.canbus=count
+						self.OPcan=count
 						self.canbus_interface=i['pipeElements'][0]['options']['subOptions']['interface']
 					elif i['id'] == 'OPpypilot':
 						self.pypilot_enabled=i['enabled']
@@ -136,17 +141,30 @@ class SK_settings:
 		if write or not OPcan or not OPpypilot or not OPkplex or not OPwifi or not OPserial or not OPnotifications or not OPsensors: self.write_settings()
 				
 	def set_ngt1_device(self,device):
-		if self.ngt1_enabled != -1:
-			self.data['pipedProviders'][self.ngt1]['pipeElements'][0]['options']['subOptions']['device'] = device
-			self.write_settings()
+		self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['device'] = device
+		self.write_settings()
 
-	def set_ngt1_enable(self,enable):
-		if self.ngt1_enabled != -1:
-			if enable == 1:
-				self.data['pipedProviders'][self.ngt1]['enabled']=True
-			elif enable == 0:
-				self.data['pipedProviders'][self.ngt1]['enabled']=False
-			self.write_settings()
+	def set_ngt1_enable(self,enable,device):
+		if self.ngt1_enabled == -1:
+			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['type'] = 'ngt-1'
+			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['device'] = device
+
+		if enable == 1:
+			self.data['pipedProviders'][self.OPcan]['enabled']=True
+		elif enable == 0:
+			self.data['pipedProviders'][self.OPcan]['enabled']=False
+		self.write_settings()
+
+	def set_ngt1js_enable(self,enable,device):
+		if self.ngt1js_enabled == -1:
+			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['type'] = 'ngt-1-canboatjs'
+			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['device'] = device
+
+		if enable == 1:
+			self.data['pipedProviders'][self.OPcan]['enabled']=True
+		elif enable == 0:
+			self.data['pipedProviders'][self.OPcan]['enabled']=False
+		self.write_settings()
 
 	def set_pypilot_enable(self,enable):
 		if self.pypilot_enabled != -1:
@@ -157,12 +175,15 @@ class SK_settings:
 			self.write_settings()
 
 	def set_canbus_enable(self,enable):
-		if self.canbus_enabled != -1:
-			if enable == 1:
-				self.data['pipedProviders'][self.canbus]['enabled']=True
-			elif enable == 0:
-				self.data['pipedProviders'][self.canbus]['enabled']=False
-			self.write_settings()
+		if self.canbus_enabled == -1:
+			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['type'] = 'canbus-canboatjs'
+			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['interface'] = 'can0'
+
+		if enable == 1:
+			self.data['pipedProviders'][self.OPcan]['enabled']=True
+		elif enable == 0:
+			self.data['pipedProviders'][self.OPcan]['enabled']=False
+		self.write_settings()
 			
 	def write_settings(self):
 		data = json.dumps(self.data, indent=4, sort_keys=True)
