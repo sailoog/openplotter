@@ -1,7 +1,10 @@
 59392,ISO Acknowledgement
 59904,ISO Request
+60160,ISO Transport Protocol, Data Transfer
+60416,ISO Transport Protocol, Connection Management - Abort
 60928,ISO Address Claim
-61184,ISO: Manu. Proprietary single-frame addressed
+61184,Manufacturer Proprietary single-frame addressed
+61440,Unknown single-frame non-addressed
 65001,Bus #1 Phase C Basic AC Quantities
 65002,Bus #1 Phase B Basic AC Quantities
 65003,Bus #1 Phase A Basic AC Quantities
@@ -33,26 +36,46 @@
 65029,Generator Total AC Power
 65030,Generator Average Basic AC Quantities
 65240,ISO Commanded Address
-65280,ISO: Manu. Proprietary single-frame non-addressed
-65285,Boot State Acknowledgment
-65286,Boot State Request
-65287,Access Level
-65289,Trim Tab Sensor Calibration
-65290,Paddle Wheel Speed Configuration
-65292,Clear Fluid Level Warnings
-65293,LGC-2000 Configuration
-65325,Reprogram Status
-65341,Autopilot Mode
-65408,Depth Quality Factor
-65410,Device Information
-65480,Autopilot Mode
-126208,NMEA - Request/Command/Ack group function
-126270,Slave Response
+65280,Manufacturer Proprietary single-frame non-addressed
+65285,Lowrance: Temperature
+65286,Airmar: Boot State Request
+65287,Simnet: Configure Temperature Sensor
+65288,Seatalk: Alarm
+65289,Simnet: Trim Tab Sensor Calibration
+65290,Simnet: Paddle Wheel Speed Configuration
+65292,Simnet: Clear Fluid Level Warnings
+65293,Simnet: LGC-2000 Configuration
+65309,Navico: Wireless Battery Status
+65312,Navico: Wireless Signal Status
+65325,Simnet: Reprogram Status
+65341,Simnet: Autopilot Mode
+65345,Seatalk: Pilot Wind Datum
+65359,Seatalk: Pilot Heading
+65360,Seatalk: Pilot Locked Heading
+65361,Seatalk: Silence Alarm
+65371,Seatalk: Keypad Message
+65374,SeaTalk: Keypad Heartbeat
+65379,Seatalk: Pilot Mode
+65408,Airmar: Depth Quality Factor
+65410,Airmar: Device Information
+65480,Simnet: Autopilot Mode
+65536,Unknown fast-packet addressed
+126208,NMEA - Write Fields reply group function
+126270,Maretron: Slave Response
 126464,PGN List (Transmit and Receive)
-126720,NMEA 2000 options
+126720,Manufacturer Proprietary fast-packet addressed
+126976,Unknown fast-packet non-addressed
+126983,Alert
+126984,Alert Response
+126985,Alert Text
+126986,Alert Configuration
+126987,Alert Threshold
+126988,Alert Value
 126992,System Time
+126993,Heartbeat
 126996,Product Information
 126998,Configuration Information
+127233,Man Overboard Notification
 127237,Heading/Track control
 127245,Rudder
 127250,Vessel Heading
@@ -79,6 +102,7 @@
 127512,AGS Configuration Status
 127513,Battery Configuration Status
 127514,AGS Status
+128000,Leeway Angle
 128259,Speed
 128267,Water Depth
 128275,Distance Log
@@ -92,6 +116,7 @@
 129038,AIS Class A Position Report
 129039,AIS Class B Position Report
 129040,AIS Class B Extended Position Report
+129041,AIS Aids to Navigation (AtoN) Report
 129044,Datum
 129045,User Datum
 129283,Cross Track Error
@@ -131,6 +156,8 @@
 129808,DSC Call Information
 129809,AIS Class B static data (msg 24 Part A)
 129810,AIS Class B static data (msg 24 Part B)
+130060,Label
+130061,Channel Source Configuration
 130064,Route and WP Service - Database List
 130065,Route and WP Service - Route List
 130066,Route and WP Service - Route/WP-List Attributes
@@ -155,15 +182,31 @@
 130322,Current Station Data
 130323,Meteorological Station Data
 130324,Moored Buoy Station Data
+130560,Payload Mass
+130567,Watermaker Input Setting and Status
+130570,Library Data File
+130571,Library Data Group
+130572,Library Data Search
+130573,Supported Source Data
+130574,Supported Zone Data
 130576,Small Craft Status
 130577,Direction Data
 130578,Vessel Speed Components
-130816,SonicHub
+130579,System Configuration
+130580,System Configuration (deprecated)
+130581,Zone Configuration (deprecated)
+130582,Zone Volume
+130583,Available Audio EQ presets
+130584,Available Bluetooth addresses
+130585,Bluetooth source status
+130586,Zone Configuration
+130816,Manufacturer Proprietary fast-packet non-addressed
 130817,Navico: Product Information
 130818,Simnet: Reprogram Data
 130819,Simnet: Request Reprogram
-130820,Fusion
+130820,Fusion: SiriusXM Genre
 130821,Furuno: Unknown
+130824,Maretron: Annunciator
 130827,Lowrance: unknown
 130828,Simnet: Set Serial Number
 130831,Suzuki: Engine and Storage Device Config
@@ -175,16 +218,13 @@
 130838,Simnet: Fluid Level Warning
 130839,Simnet: Pressure Sensor Configuration
 130840,Simnet: Data User Group Configuration
-130842,Simnet: AIS Class B static data
+130842,Simnet: AIS Class B static data (msg 24 Part B)
 130843,Simnet: Sonar Status, Frequency and DSP Voltage
 130845,Simnet: Parameter Handle
-130850,Simnet: Event Command: AP command
+130847,SeaTalk: Node Statistics
+130850,Simnet: Event Command: Unknown
 130851,Simnet: Event Reply: AP command
 130856,Simnet: Alarm Message
 130880,Airmar: Additional Weather Data
 130881,Airmar: Heater Control
 130944,Airmar: POST
-262161,Actisense: Operating mode
-262384,Actisense: Startup status
-262386,Actisense: System status
-262388,Actisense: ?

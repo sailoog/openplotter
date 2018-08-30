@@ -241,11 +241,11 @@ class MySK_to_N2K:
 					self.tank_holding_level = self.setlist(['tanks.blackWater.standard.currentLevel', [0, 0, 0, 0]])
 				elif i == '127508':
 					self.DC_Electrical_Properties_dcSource_voltage = self.setlist(
-						['DC Electrical Properties.dcSource.voltage', [0, 0, 0, 0]])
+						['electrical.batteries.service.voltage', [0, 0, 0, 0]])
 					self.DC_Electrical_Properties_dcSource_current = self.setlist(
-						['DC Electrical Properties.dcSource.current', [0, 0, 0, 0]])
+						['electrical.batteries.service.current', [0, 0, 0, 0]])
 					self.DC_Electrical_Properties_dcSource_temperature = self.setlist(
-						['DC Electrical Properties.dcSource.temperature', [0, 0, 0, 0]])
+						['electrical.batteries.service.temperature', [0, 0, 0, 0]])
 				elif i == '128259':
 					self.navigation_speedOverGround = self.setlist(['navigation.speedOverGround', [0, 0, 0, 0]])
 					self.navigation_speedThroughWater = self.setlist(['navigation.speedThroughWater', [0, 0, 0, 0]])
