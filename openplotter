@@ -3390,14 +3390,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def set_n2k_enable(self,enable):
 		if enable:
 			if self.SK_settings.ngt1_enabled != 1:
-				self.SK_settings.set_ngt1_enable(1)
+				self.SK_settings.set_ngt1_enable(1,self.can_device)
 				if self.SK_settings.ngt1_device <> self.can_device:
 					self.SK_settings.set_ngt1_device(self.can_device)
-				self.SK_settings.set_ngt1_enable(1)
+				self.SK_settings.set_ngt1_enable(1,self.can_device)
 			self.n2k_enable.SetValue(True)
 		else:
 			if self.SK_settings.ngt1_enabled != 0:
-				self.SK_settings.set_ngt1_enable(0)			
+				self.SK_settings.set_ngt1_enable(0,self.can_device)			
 			self.n2k_enable.SetValue(False)
 
 	def set_n2k_out_enable(self,enable):
@@ -3480,7 +3480,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		subprocess.call(['pkill', '-f', 'CAN-USB-stick.py'])
 		subprocess.call(['pkill', '-f', 'diagnostic-N2K-input.py'])
 		subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
-		self.SK_settings.set_ngt1_enable(0)
+		self.SK_settings.set_ngt1_enable(0,self.can_device)
 
 	def start_n2k(self):
 		self.set_n2k_enable(self.n2k_enable.GetValue())
