@@ -15,8 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, socket, threading, time, webbrowser, serial, codecs, datetime, sys,os
-from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
+import wx, time, serial, sys, os
 from classes.conf import Conf
 from classes.language import Language
 

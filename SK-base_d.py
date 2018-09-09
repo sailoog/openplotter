@@ -15,21 +15,38 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import json
+import ujson
 import subprocess
 import threading
-import os
 import websocket
-import wx
-import time,yaml
-
+import time,platform
 import datetime,operator,signal,socket,sys,math,re,geomag
+
 from dateutil import tz
 from classes.N2K_send import N2K_send
-from classes.actions import Actions
 from classes.conf import Conf
-from classes.language import Language
 from classes.SK_settings import SK_settings
+
+from classes.gmailbot import GmailBot
+try: from classes.twitterbot import TwitterBot
+except: TwitterBot = None
+
+try:	
+	import paho.mqtt.publish as publish
+	check_mqtt = True
+except:	
+	check_mqtt = False
+
+try:
+	import gammu
+except:
+        gammu = None
+
+
+if platform.machine()[0:3] == 'arm':
+	import RPi.GPIO as GPIO
+else:
+	import emulator.GPIO as GPIO
 
 
 class MySK:
@@ -44,7 +61,6 @@ class MySK:
 
 		SK_ = SK_settings()
 		self.ws_name = SK_.ws+SK_.ip+":"+str(SK_.aktport)+"/signalk/v1/stream?subscribe=self"
-		Language(self.conf)
 
 		self.data = []
 		self.start()
@@ -62,17 +78,16 @@ class MySK:
 		self.stop()
 	
 	def on_message(self, ws, message):
-		try:
-			js_up = yaml.load(message)['updates'][0]
-		except:
+		js_up = ujson.loads(message)
+		if 'updates' not in js_up:
 			return
-			
+		js_up = js_up['updates'][0]
 		label = ''
 		src = ''
 		type = ''
 		value = ''
 		
-		if 'source' in js_up:
+		if 'source' in js_up.keys():
 			source=js_up['source']
 			label = source['label']
 			if 'type' in source:
@@ -88,9 +103,9 @@ class MySK:
 		if '$source' in js_up and src=='':
 			src = js_up['$source']
 
-		try:
+		if 'timestamp' in js_up.keys():
 			timestamp = js_up['timestamp']
-		except:
+		else:
 			timestamp = '2000-01-01T00:00:00.000Z'
 
 		values_ = js_up['values']
@@ -171,7 +186,11 @@ class MySK:
 		print error
 
 	def on_close(self, ws):
-		ws.close()
+		time.sleep(1)
+		if self.ws is not None:
+			self.ws.close()
+		time.sleep(5)
+		self.start()
 
 	def on_open(self, ws):
 		pass
@@ -548,18 +567,27 @@ class MySK_to_NMEA:
 
 class MySK_to_Action_Calc:
 	def __init__(self, SK_):
-		self.operators_list = [_('was not updated in the last (sec.)'), _('was updated in the last (sec.)'), '=',
-							   '<', '<=', '>', '>=', _('contains')]
-
 		self.triggers = []
-		self.actions = Actions(SK)
-
 		self.SK = SK_
 		self.SKc = []
 
-		self.cycle10 = time.time() + 0.01
 		self.read_Action()
 		self.read_Calc()
+		self.read_Twitter()
+		self.read_Mail()
+		self.read_MQTT_SMS_language()
+		
+		try:
+			x=self.SK.conf.get('GPIO', 'sensors')
+			if x: self.out_list=eval(x)
+			else: self.out_list=[]
+			if self.out_list:
+				GPIO.setmode(GPIO.BCM)
+				GPIO.setwarnings(False)
+				for i in self.out_list:
+					if i[1] == 'out':
+						GPIO.setup(int(i[2]), GPIO.OUT)
+		except Exception,e: print 'ERROR setting GPIO actions: '+str(e)
 
 	def read_Action(self):
 		self.SK.static_list.append([])
@@ -649,21 +677,41 @@ class MySK_to_Action_Calc:
 		if self.calcWindTrueWater:
 			self.navigation_speedThroughWater = self.setlist(['navigation.speedThroughWater', [0, 0, 0, 0]])
 			self.environment_wind_angleApparent = self.setlist(['environment.wind.angleApparent', [0, 0, 0, 0]])
-			self.environment_wind_speedApparent = self.setlist(['environment.wind.speedApparent', [0, 0, 0, 0]])		
+			self.environment_wind_speedApparent = self.setlist(['environment.wind.speedApparent', [0, 0, 0, 0]])
 		if self.calcWindTrueGround:
 			self.environment_wind_angleApparent = self.setlist(['environment.wind.angleApparent', [0, 0, 0, 0]])
-			self.environment_wind_speedApparent = self.setlist(['environment.wind.speedApparent', [0, 0, 0, 0]])		
+			self.environment_wind_speedApparent = self.setlist(['environment.wind.speedApparent', [0, 0, 0, 0]])
 			self.navigation_courseOverGroundTrue = self.setlist(['navigation.courseOverGroundTrue', [0, 0, 0, 0]])
 			self.navigation_speedOverGround = self.setlist(['navigation.speedOverGround', [0, 0, 0, 0]])
 			self.navigation_headingMagnetic = self.setlist(['navigation.headingMagnetic', [0, 0, 0, 0]])
-							
+			
+	def read_Twitter(self):
+		self.apiKey = self.SK.conf.get('TWITTER', 'apiKey')
+		self.apiSecret = self.SK.conf.get('TWITTER', 'apiSecret')
+		self.accessToken = self.SK.conf.get('TWITTER', 'accessToken')
+		self.accessTokenSecret = self.SK.conf.get('TWITTER', 'accessTokenSecret')
+
+	def read_Mail(self):
+		self.GMAIL_USERNAME = self.SK.conf.get('GMAIL', 'gmail')
+		self.GMAIL_PASSWORD = self.SK.conf.get('GMAIL', 'password')
+		self.GMAIL_recipient = self.SK.conf.get('GMAIL', 'recipient')
+
+	def read_MQTT_SMS_language(self):
+		self.language=self.SK.conf.get('GENERAL', 'lang')
+		self.SMS_phone=self.SK.conf.get('SMS', 'phone'),
+
+		self.MQTT_username=self.SK.conf.get('MQTT', 'username') 
+		self.MQTT_password=self.SK.conf.get('MQTT', 'password')
+		self.MQTT_hostname=self.SK.conf.get('MQTT', 'broker') 
+		self.MQTT_port=self.SK.conf.get('MQTT', 'port')
+		
 	def Action_set(self, item, cond):
 		if cond:
 			now = time.time()
 			for i in item[4]:
 				if item[5] == False:
 					try:
-						self.actions.run_action(i[0], self.getSKValues(i[1]))
+						self.run_action(i[0], self.getSKValues(i[1]))
 						i[4] = now
 					except Exception, e: print str(e)
 				else:
@@ -671,7 +719,7 @@ class MySK_to_Action_Calc:
 					else:
 						if now - i[4] > i[2]:
 							try:
-								self.actions.run_action(i[0], self.getSKValues(i[1]))
+								self.run_action(i[0], self.getSKValues(i[1]))
 								i[4] = now
 							except Exception, e: print str(e)			
 			item[5] = True
@@ -783,7 +831,6 @@ class MySK_to_Action_Calc:
 								self.Action_set(item, data_value in str(trigger_value))
 					except Exception, e: print str(e)
 					#except: pass
-		
 		Erg = ''
 
 		if self.calcMagneticVariation:
@@ -924,6 +971,108 @@ class MySK_to_Action_Calc:
 			SignalK='{"updates":[{"$source":"OPcalculations","values":['
 			SignalK+=Erg[0:-1]+']}]}\n'		
 			self.sock.sendto(SignalK, ('127.0.0.1', 55557))	
+
+	def run_action(self, option, text):
+		if option[0] == 'H':
+			channel = int(option[1:])
+			GPIO.output(channel, 1)
+		elif option[0] == 'L':
+			channel = int(option[1:])
+			GPIO.output(channel, 0)
+		elif option == 'ACT1':
+			try:
+				wait = float(text)
+				time.sleep(wait)
+			except Exception,e: print 'ERROR wait action: '+str(e)
+		elif option == 'ACT2':
+			if text:
+				try:
+					text = text.split(' ')
+					subprocess.Popen(text)
+				except Exception,e: print 'ERROR command action: '+str(e)
+		elif option == 'ACT3':
+			subprocess.Popen(['sudo', 'reboot'])
+		elif option == 'ACT4':
+			subprocess.Popen(['sudo', 'shutdown', '-h', 'now'])
+		#elif option == 'ACT5':
+		#elif option == 'ACT6':
+		elif option == 'ACT7':
+			subprocess.Popen(['startup', 'stop'])
+		elif option == 'ACT8':
+			subprocess.Popen(['startup', 'restart'])
+		#elif option == 'ACT9':
+		#elif option == 'ACT10':
+		#elif option == 'ACT11':
+		#elif option == 'ACT12':
+		elif option == 'ACT13':
+			now = time.strftime("%H:%M:%S")
+			tweetStr = now + ' ' + text
+			if len(tweetStr) > 140: tweetStr = tweetStr[0:140]
+			try:
+				msg = TwitterBot(self.apiKey, self.apiSecret, self.accessToken, self.accessTokenSecret)
+				msg.send(tweetStr)
+			except Exception,e: print 'ERROR Twitter action: '+str(e)
+		elif option == 'ACT14':
+			subject = text
+			body = ''
+			for i in self.SK.list_SK:
+				body += i[1]+': '+str(i[2])+'\nsource: '+i[0]+'\ntimestamp: '+i[7]+'\n\n'
+			if not body: body = time.strftime("%H:%M:%S") + ' ' + subject
+			try:
+				msg = GmailBot(self.GMAIL_USERNAME, self.GMAIL_PASSWORD, self.GMAIL_recipient)
+				msg.send(subject, body)
+			except Exception,e: print 'ERROR gmail action: '+str(e)
+		elif option == 'ACT15':
+			subprocess.Popen(['mpg123', '-q', text])
+		elif option == 'ACT16':
+			subprocess.Popen(['pkill', '-9', 'mpg123'])
+		elif option == 'ACT17':
+			subprocess.Popen(['python', self.currentpath + '/message.py', text, self.language])
+		elif option == 'ACT18':
+			subprocess.Popen(['pkill', '-f', 'message.py'])
+		elif option == 'ACT19':
+			subprocess.Popen(['python', self.currentpath+'/ctrl_actions.py', '1'])
+		elif option == 'ACT20':
+			subprocess.Popen(['python', self.currentpath + '/ctrl_actions.py', '0'])
+		elif option == 'ACT21':
+			try:
+				sm = gammu.StateMachine()
+				sm.ReadConfig()
+				sm.Init()
+				message = {
+					'Text': text,
+					'SMSC': {'Location': 1},
+					'Number': self.SMS_phone,
+				}
+				sm.SendSMS(message)
+			except Exception,e: print 'ERROR SMS action: '+str(e)
+		elif option == 'ACT22':
+			pairs_list = text.split('\n\n')
+			Erg=''
+			if pairs_list:
+				for i in pairs_list:
+					try:
+						pairs = i.split('\n')
+						skkey = pairs[0].strip('\n')
+						value = pairs[1].strip('\n')
+						if re.match('^[0-9a-zA-Z\.]+$', skkey) and value:
+							Erg += '{"path": "'+skkey+'","value":"'+str(value)+'"},'
+					except Exception,e: print 'ERROR parsing Signal K key action: '+str(e)
+				if Erg:		
+					SignalK='{"updates":[{"$source":"OPactions","values":['
+					SignalK+=Erg[0:-1]+']}]}\n'		
+					self.sock.sendto(SignalK, ('127.0.0.1', 55557))
+		elif option[:4] == 'MQTT':
+			topic = option[4:]
+			payload = text
+			auth = {'username': self.MQTT_username, 'password': self.MQTT_password}
+			if not check_mqtt:
+				msg = 'mqtt python module not installed, functionallity not available'
+				print msg
+				subprocess.Popen(['python', self.currentpath + '/message.py', msg, self.language])
+			else:
+				publish.single(topic, payload=payload, hostname='127.0.0.1', port='1883', auth=auth)
+				publish.single(topic, payload=payload, hostname=self.MQTT_hostname, port=self.MQTT_port, auth=auth)
 
 def signal_handler(signal_, frame):
 	print 'You pressed Ctrl+C!'

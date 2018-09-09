@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, sys, socket, threading, time, serial
+import wx, sys, time, serial
 from classes.conf import Conf
 from classes.language import Language
 
@@ -112,7 +112,6 @@ class MyFrame(wx.Frame):
 		
 	def timer_act(self, event):
 		if self.ser: 
-			frase_nmea=''
 			self.getCharfromSerial()
 		
 	def on_sort_PGN(self, e):
@@ -190,7 +189,6 @@ class MyFrame(wx.Frame):
 		return (crc == 0)
 
 	def output(self):
-		k = 0
 		if self.Buffer[0] == 0x93 and self.Buffer[1] == self.p - 3:				
 			nPriority = self.Buffer[2]
 			lPGN=self.Buffer[3]+self.Buffer[4]*256+self.Buffer[5]*256*256

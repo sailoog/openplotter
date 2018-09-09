@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, socket, threading, time, webbrowser, serial, codecs, datetime, sys, subprocess
+import wx, time, serial, codecs, sys, subprocess
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 from classes.conf import Conf
 from classes.language import Language
@@ -311,7 +311,6 @@ class MyFrame(wx.Frame):
 			return (crc == 0)
 
 		def output(self):
-			k = 0
 			if self.Buffer[0] == 0x93 and self.Buffer[1] == self.p - 3:
 				#i=0
 				#while i < 10:

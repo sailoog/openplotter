@@ -19,7 +19,6 @@ import shlex
 
 op_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../..')
 sys.path.append(op_folder+'/classes')
-from conf_analog import Conf_analog
 
 sen_frequenz = '433967780'
 sen_type = '03'
@@ -31,39 +30,11 @@ sen_humi_SK = 'environment.inside.humidity'
 # This is totally optional.
 def signal_handler(sig, frame):
 	print('You pressed Ctrl+C!!!!')
-	if board is not None:
-		board.reset()
 	sys.exit(0)
 
-def interpolread(idx,erg):
-	if adjust_point_active[idx]:
-		lin = -999999
-		for index,item in enumerate(adjust_point[idx]):
-			if index==0:
-				if erg <= item[0]:
-					lin = item[1]
-					#print 'under range'
-					return lin
-				save = item
-			else:					
-				if erg <= item[0]:
-					a = (item[1]-save[1])/(item[0]-save[0])
-					b = item[1]-a*item[0]
-					lin = a*erg +b
-					return lin
-				save = item
-				
-		if lin == -999999:
-			#print 'over range'
-			lin = save[1]
-		return lin
-	else:
-		return erg
 		
 def init():	
 	signal.signal(signal.SIGINT, signal_handler)
-
-	conf_analog = Conf_analog()
 
 	SK_name.append(sen_temp_SK);
 	SK_name.append(sen_humi_SK);

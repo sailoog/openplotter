@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import socket, time, math, datetime, platform, threading, os, pynmea2
+import socket, time, platform, threading, os, pynmea2
 from classes.conf import Conf
 from signalk.client import SignalKClient
 
@@ -71,7 +71,6 @@ def oldTranslate(result):
 #translate pypilot signalk -> node signalk
 def Translate(result):
 	translation_table = {'imu.roll' : ['navigation.attitude.roll', 0.017453293], 'imu.pitch' : ['navigation.attitude.pitch', 0.017453293]}
-	format_to_rad = 0.017453293
 	Erg = '{"path": "navigation.attitude","value":{'
 	for translation in translation_table:
 		if translation in result:
