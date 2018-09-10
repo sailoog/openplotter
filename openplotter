@@ -3217,12 +3217,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			if self.Serialinst[name]['assignment'] == 'CAN-USB':
 				can_device = '/dev/ttyOP_'+name
 				break
-		
-		if self.SK_settings.ngt1_device != can_device:
-			self.SK_settings.set_ngt1_device(can_device)
-		if can_device: self.n2k_enable.SetValue(True)
-		self.on_n2k_enable(self.n2k_enable.GetValue())
-		self.on_n2k_output(self.n2k_out_enable.GetValue())
+		if not can_device:
+			self.conf.set('N2K', 'output', '0')
+			self.SK_settings.enable_disable_all(0)
+		else:
+			if self.SK_settings.ngt1_device != can_device:
+				self.SK_settings.set_ngt1_device(can_device)
+		self.read_n2k()
 
 		#set SMS device
 		sms_device = ''
@@ -3320,63 +3321,70 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	###################################### N2K
 	def page_n2k(self):	
-		CANUSB_label = wx.StaticText(self.p_n2k, label=_('CAN-USB port:'))
+		CANUSB_label = wx.StaticText(self.p_n2k, label=_('CAN-USB device:'))
 		self.can_usb = wx.StaticText(self.p_n2k)
 
-		n2k_input_box = wx.StaticBox(self.p_n2k, label=_(' Input ')) 
+		canboat_box = wx.StaticBox(self.p_n2k, label=_(' Managed by OpenPlotter (canboat) ')) 
 
-		self.n2k_enable = wx.CheckBox(self.p_n2k, label=_('Enable N2K input'))
+		self.n2k_enable = wx.CheckBox(self.p_n2k, label=_('Input CAN-USB'))
 		self.n2k_enable.Bind(wx.EVT_CHECKBOX, self.on_n2k_enable)
 
 		self.N2K_diagnostic_b = wx.Button(self.p_n2k, label=_('Diagnostic'))
 		self.N2K_diagnostic_b.Bind(wx.EVT_BUTTON, self.on_N2K_diagnostic)
 
-		n2k_output_box = wx.StaticBox(self.p_n2k, label=_(' Output ')) 
-
-		self.n2k_out_enable = wx.CheckBox(self.p_n2k, label=_('Enable N2K output'))
+		self.n2k_out_enable = wx.CheckBox(self.p_n2k, label=_('Output CAN-USB'))
 		self.n2k_out_enable.Bind(wx.EVT_CHECKBOX, self.on_n2k_output)
 
 		self.N2K_diagnostic_out_b = wx.Button(self.p_n2k, label=_('Diagnostic'))
 		self.N2K_diagnostic_out_b.Bind(wx.EVT_BUTTON, self.on_N2K_diagnostic_out)
 	
-		self.button_N2K_setting = wx.Button(self.p_n2k, label=_('Device settings'))
+		self.button_N2K_setting = wx.Button(self.p_n2k, label=_('TX PGN enable list'))
 		self.button_N2K_setting.Bind(wx.EVT_BUTTON, self.on_N2K_setting)
 	
-		self.SK_to_N2K = wx.Button(self.p_n2k, label=_('Signal K to N2K converter'))
+		self.SK_to_N2K = wx.Button(self.p_n2k, label=_('Signal K to N2K'))
 		self.SK_to_N2K.Bind(wx.EVT_BUTTON, self.on_SK_to_N2K)
 
 		diagnostic = wx.Button(self.p_n2k, label=_('SK Diagnostic'))
 		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
 
-		n2k_canboatjs_box = wx.StaticBox(self.p_n2k, label=_(' Input/Output canboatjs ')) 
+		canboatjs_box = wx.StaticBox(self.p_n2k, label=_(' Managed by Signal K (canboatjs) ')) 
 		
-		self.ngt1js_enabled = wx.CheckBox(self.p_n2k, label=_('Enable CAN-USB N2K'))
+		self.ngt1js_enabled = wx.CheckBox(self.p_n2k, label=_('Input/Output CAN-USB'))
 		self.ngt1js_enabled.Bind(wx.EVT_CHECKBOX, self.on_ngt1js_enabled)		
-		self.n2k_can0_enable = wx.CheckBox(self.p_n2k, label=_('Enable can0 N2K'))
-		self.n2k_can0_enable.Bind(wx.EVT_CHECKBOX, self.on_n2k_can0_enable)			
+		self.n2k_can0_enable = wx.CheckBox(self.p_n2k, label=_('Input/Output can0'))
+		self.n2k_can0_enable.Bind(wx.EVT_CHECKBOX, self.on_n2k_can0_enable)	
+
+		self.SK_to_N2K2 = wx.Button(self.p_n2k, label=_('Signal K to N2K'))
+		self.SK_to_N2K2.Bind(wx.EVT_BUTTON, self.on_SK_to_N2K2)	
 		
 		hbox = wx.BoxSizer(wx.HORIZONTAL) 
-		hbox.Add(CANUSB_label, 0, wx.ALL | wx.EXPAND, 5) 
-		hbox.Add(self.can_usb, 0, wx.ALL | wx.EXPAND, 5)
+		hbox.Add(CANUSB_label, 0, wx.ALL | wx.EXPAND, 10) 
+		hbox.Add(self.can_usb, 0, wx.ALL | wx.EXPAND, 10)
+		hbox.Add((0,0), 1, wx.ALL | wx.EXPAND, 5)
+		hbox.Add(self.button_N2K_setting, 0, wx.ALL | wx.EXPAND, 5)
 
-		v_boxSizer1 = wx.StaticBoxSizer(n2k_input_box, wx.HORIZONTAL) 
+		v_boxSizer1 = wx.BoxSizer(wx.HORIZONTAL)
 		v_boxSizer1.Add(self.n2k_enable, 0, wx.ALL | wx.EXPAND, 5)
 		v_boxSizer1.Add(self.N2K_diagnostic_b, 0, wx.ALL | wx.EXPAND, 5)
 
-		v_boxSizer2 = wx.StaticBoxSizer(n2k_output_box, wx.HORIZONTAL) 
+		v_boxSizer2 = wx.BoxSizer(wx.HORIZONTAL)
 		v_boxSizer2.Add(self.n2k_out_enable, 0, wx.ALL | wx.EXPAND, 5)
-		v_boxSizer2.Add(self.SK_to_N2K, 0, wx.ALL | wx.EXPAND, 5)
-		v_boxSizer2.Add(self.button_N2K_setting, 0, wx.ALL | wx.EXPAND, 5)
 		v_boxSizer2.Add(self.N2K_diagnostic_out_b, 0, wx.ALL | wx.EXPAND, 5)
+		v_boxSizer2.Add(self.SK_to_N2K, 0, wx.ALL | wx.EXPAND, 5)
 
-		v_boxSizer3 = wx.StaticBoxSizer(n2k_canboatjs_box, wx.HORIZONTAL) 
+		v_boxSizer0 = wx.StaticBoxSizer(canboat_box, wx.VERTICAL)
+		v_boxSizer0.Add(v_boxSizer1, 0, wx.ALL | wx.EXPAND, 5)
+		v_boxSizer0.Add(v_boxSizer2, 0, wx.ALL | wx.EXPAND, 5)
+
+		v_boxSizer3 = wx.StaticBoxSizer(canboatjs_box, wx.HORIZONTAL) 
 		v_boxSizer3.Add(self.ngt1js_enabled, 0, wx.ALL | wx.EXPAND, 5)
 		v_boxSizer3.Add(self.n2k_can0_enable, 0, wx.ALL | wx.EXPAND, 5)
+		v_boxSizer3.Add(self.SK_to_N2K2, 0, wx.ALL | wx.EXPAND, 5)
 		
 		vbox = wx.BoxSizer(wx.VERTICAL) 
 		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 5) 
-		vbox.Add(v_boxSizer1, 0, wx.ALL | wx.EXPAND, 5)
-		vbox.Add(v_boxSizer2, 0, wx.ALL | wx.EXPAND, 5)
+		vbox.Add(v_boxSizer0, 0, wx.ALL | wx.EXPAND, 5)
+		vbox.AddSpacer(10)
 		vbox.Add(v_boxSizer3, 0, wx.ALL | wx.EXPAND, 5)
 		vbox.Add((0,0), 1, wx.ALL | wx.EXPAND, 5)
 		vbox.Add(diagnostic, 0, wx.ALL, 5) 
@@ -3386,6 +3394,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		dlg = addSKtoN2K()
 		res = dlg.ShowModal()
 		dlg.Destroy()
+
+	def on_SK_to_N2K2(self, event):
+		url = "http://localhost:3000/@signalk/server-admin-ui/#/serverConfiguration/plugins"
+		webbrowser.open(url, new=2)
 
 	def set_n2k_enable(self,enable):
 		if enable:
@@ -3413,68 +3425,56 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.conf.set('N2K', 'output', '0')
 			self.n2k_out_enable.SetValue(False)
 			subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
-
-	def enable_js(self):
+				
+	def read_n2k(self):
 		self.can_device = ''
 		for name in self.Serialinst:
 			if self.Serialinst[name]['assignment'] == 'CAN-USB':
 				self.can_device = '/dev/ttyOP_'+name
 				break
-		self.can_usb.SetLabel(self.can_device)
-		enable = self.SK_settings.ngt1_enabled != 1 and self.conf.get('N2K', 'output') != '1'
+		self.n2k_enable.SetValue(self.SK_settings.ngt1_enabled == 1)
+		self.n2k_out_enable.SetValue(self.conf.get('N2K', 'output') == '1')
 		self.ngt1js_enabled.SetValue(self.SK_settings.ngt1js_enabled == 1)
 		self.n2k_can0_enable.SetValue(self.SK_settings.canbus_enabled == 1)
-		if enable:
-			if self.SK_settings.ngt1js_enabled == 1 and self.can_device!='':
-				self.ngt1js_enabled.Enable()
-				self.n2k_can0_enable.Disable()
-			elif self.SK_settings.canbus_enabled == 1:
+		if self.can_device:	
+			self.can_usb.SetLabel(self.can_device)
+			if self.n2k_enable.GetValue() or self.n2k_out_enable.GetValue() or self.ngt1js_enabled.GetValue():
+				self.button_N2K_setting.Disable()
+				self.N2K_diagnostic_b.Disable()
+				self.N2K_diagnostic_out_b.Disable()
+			else:
+				self.button_N2K_setting.Enable()
+				self.N2K_diagnostic_b.Enable()
+				self.N2K_diagnostic_out_b.Enable()
+			if self.n2k_enable.GetValue() or self.n2k_out_enable.GetValue():
 				self.ngt1js_enabled.Disable()
-				self.n2k_can0_enable.Enable()
+				self.n2k_can0_enable.Disable()
 			else:
 				self.ngt1js_enabled.Enable()
 				self.n2k_can0_enable.Enable()
+			if self.ngt1js_enabled.GetValue() or self.n2k_can0_enable.GetValue():
+				self.n2k_enable.Disable()
+				self.n2k_out_enable.Disable()
+			else:
+				self.n2k_enable.Enable()
+				self.n2k_out_enable.Enable()
+			if self.ngt1js_enabled.GetValue() or self.n2k_enable.GetValue() or self.n2k_out_enable.GetValue():
+				self.n2k_can0_enable.Disable()
+			else:
+				self.n2k_can0_enable.Enable()	
+			if self.n2k_can0_enable.GetValue() or self.n2k_enable.GetValue() or self.n2k_out_enable.GetValue():
+				self.ngt1js_enabled.Disable()
+			else:
+				self.ngt1js_enabled.Enable()
 		else:
-			self.ngt1js_enabled.Disable()
-			self.n2k_can0_enable.Disable()
-			
-	def enable_input(self):
-		self.n2k_enable.SetValue(self.SK_settings.ngt1_enabled==1)
-		if self.SK_settings.ngt1js_enabled == 1 or self.SK_settings.canbus_enabled == 1 or self.can_device=='':
+			self.can_usb.SetLabel(_('none'))
+			self.button_N2K_setting.Disable()
 			self.n2k_enable.Disable()
 			self.N2K_diagnostic_b.Disable()
-		else:
-			if self.can_device!='' and self.SK_settings.ngt1_enabled != 1:
-				self.N2K_diagnostic_b.Enable()
-			self.n2k_enable.Enable()
-
-	def enable_output(self):
-		N2Koutput = self.conf.get('N2K', 'output') == '1'
-		self.n2k_out_enable.SetValue(N2Koutput)
-		if self.SK_settings.ngt1js_enabled == 1 or self.SK_settings.canbus_enabled == 1 or self.can_device=='':
 			self.n2k_out_enable.Disable()
-		else:
-			self.n2k_out_enable.Enable()
-
-		if self.SK_settings.ngt1js_enabled == 1 or self.SK_settings.canbus_enabled == 1 or N2Koutput:
-			self.SK_to_N2K.Disable()
 			self.N2K_diagnostic_out_b.Disable()
-		else:
-			self.SK_to_N2K.Enable()
-			self.N2K_diagnostic_out_b.Enable()
-
-		if self.SK_settings.ngt1js_enabled == 1 or self.SK_settings.canbus_enabled == 1 or self.SK_settings.ngt1_enabled == 1 or N2Koutput:
-			self.button_N2K_setting.Disable()
-		else:
-			self.button_N2K_setting.Enable()
-
-	def update_form(self):
-		self.enable_js()
-		self.enable_input()
-		self.enable_output()
-							
-	def read_n2k(self):
-		self.update_form()
+			self.ngt1js_enabled.Disable()	
+			self.n2k_can0_enable.Enable()
 
 	def stop_n2k(self):
 		subprocess.call(['pkill', '-f', 'CAN-USB-stick.py'])
@@ -3496,23 +3496,18 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					self.n2k_enable.SetValue(not self.n2k_enable.GetValue())					
 			else:			
 				self.SK_settings.set_ngt1_enable(False,self.can_device)
-			self.update_form()	
+			self.read_n2k()	
 			
 	def on_ngt1js_enabled(self, e):
-		if self.SK_settings.ngt1js_enabled != self.ngt1js_enabled.GetValue():
-			if not self.SK_settings.ngt1js_enabled:
-				if not self.SK_settings.ngt1_enabled==1 and self.n2k_out_enable.GetValue()==False:
-					self.SK_settings.set_ngt1js_enable(True,self.can_device)
-				else:
-					self.ShowStatusBarBLACK(_('You have not disabled the other checkboxes'))
-					self.ngt1js_enabled.SetValue(not self.ngt1js_enabled.GetValue())					
-			else:				
-				self.SK_settings.set_ngt1js_enable(False,self.can_device)
-			self.update_form()	
-		
+		if self.ngt1js_enabled.GetValue():
+			self.SK_settings.set_ngt1js_enable(True,self.can_device)
+		else:
+			self.SK_settings.set_ngt1js_enable(False,self.can_device)
+		self.read_n2k()	
+
 	def on_n2k_output(self, e):
 		self.set_n2k_out_enable(self.n2k_out_enable.GetValue())
-		self.update_form()
+		self.read_n2k()
 
 	def on_N2K_setting(self, e):
 		if self.check_can_device():
@@ -3535,7 +3530,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def on_n2k_can0_enable(self, e):
 		if self.SK_settings.canbus_enabled != self.n2k_can0_enable.GetValue():
 			self.SK_settings.set_canbus_enable(self.n2k_can0_enable.GetValue())
-			self.update_form()
+			self.read_n2k()
 			
 	def check_can_device(self):
 		if not self.SK_settings.ngt1_device:
