@@ -18,7 +18,6 @@
 import json
 import logging
 import wx
-import subprocess
 import os
 from classes.conf import Conf
 from classes.language import Language

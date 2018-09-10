@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, socket, threading, time, webbrowser, serial, codecs, datetime, sys
+import wx, time, serial, codecs, sys, subprocess
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 from classes.conf import Conf
 from classes.language import Language
@@ -29,7 +29,7 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 class MyFrame(wx.Frame):
 		
 		def __init__(self):
-			self.ttimer=40
+			self.ttimer=100
 			self.conf = Conf()
 			self.home = self.conf.home
 			self.currentpath = self.conf.get('GENERAL', 'op_folder')
@@ -40,16 +40,16 @@ class MyFrame(wx.Frame):
 			except:
 				Serialinst = {}
 
-			can_device = ''
+			self.can_device = ''
 			for name in Serialinst:
 				if Serialinst[name]['assignment'] == 'CAN-USB':
-					can_device = '/dev/ttyOP_'+name
+					self.can_device = '/dev/ttyOP_'+name
 					break
 					
 			try:
-				self.ser = serial.Serial(can_device, 115200, timeout=0.5)
+				self.ser = serial.Serial(self.can_device, 115200, timeout=0.5)
 			except:
-				print 'failed to start N2K output setting on '+can_device
+				print 'failed to start N2K output setting on '+self.can_device
 				sys.exit(0)
 						
 			Language(self.conf)
@@ -63,7 +63,7 @@ class MyFrame(wx.Frame):
 			self.list_count=[]
 			self.p=0
 
-			wx.Frame.__init__(self, None, title="N2K setting", size=(650,435))
+			wx.Frame.__init__(self, None, title="N2K setting", size=(650,445))
 			self.Bind(wx.EVT_CLOSE, self.OnClose)
 		
 			self.timer = wx.Timer(self)
@@ -76,7 +76,7 @@ class MyFrame(wx.Frame):
 			
 			panel = wx.Panel(self, 100)
 			wx.StaticText(panel, wx.ID_ANY, label="TX PGN", style=wx.ALIGN_CENTER, pos=(10,5))
-			self.list_N2K = CheckListCtrl(panel, 400,260)
+			self.list_N2K = CheckListCtrl(panel, 400,290)
 			self.list_N2K.SetBackgroundColour((230,230,230))
 			self.list_N2K.SetPosition((10, 25))
 			self.list_N2K.InsertColumn(0, _('PGN'), width=90)
@@ -84,24 +84,50 @@ class MyFrame(wx.Frame):
 			wx.StaticText(panel, wx.ID_ANY, label="enabled transmit PGN:", style=wx.ALIGN_CENTER, pos=(10,300))
 			self.printing = wx.StaticText(panel, size=(600, 70), pos=(10, 320))
 			
-			self.check_b = wx.Button(panel, label=_('check'),size=(70, 32), pos=(550, 20))
+			self.check_b = wx.Button(panel, label=_('check'),size=(130, 32), pos=(500, 20))
 			self.Bind(wx.EVT_BUTTON, self.check, self.check_b)
 			
-			self.apply_b = wx.Button(panel, label=_('apply'),size=(70, 32), pos=(550, 60))
+			self.apply_b = wx.Button(panel, label=_('apply'),size=(130, 32), pos=(500, 60))
 			self.Bind(wx.EVT_BUTTON, self.apply, self.apply_b)
+
+			self.baud115200_b = wx.Button(panel, label=_('baud to 115200'),size=(130, 32), pos=(500, 100))
+			self.Bind(wx.EVT_BUTTON, self.baud115200, self.baud115200_b)
 			
+			self.baud230400_b = wx.Button(panel, label=_('baud to 230400'),size=(130, 32), pos=(500, 140))
+			self.Bind(wx.EVT_BUTTON, self.baud230400, self.baud230400_b)
+
+			self.baud460800_b = wx.Button(panel, label=_('baud to 460800\nngt-1 57600'),size=(130, 52), pos=(500, 180))
+			self.Bind(wx.EVT_BUTTON, self.baud460800, self.baud460800_b)
+			
+			self.resetCANUSB_b = wx.Button(panel, label=_('reset CAN-USB'),size=(130, 32), pos=(500, 370))
+			self.Bind(wx.EVT_BUTTON, self.resetCANUSB, self.resetCANUSB_b)		
+
 			self.Centre()
 			self.read_N2K()
 
-			self.timer.Start(self.ttimer)
-
 			self.check(0)
+			self.timer.Start(self.ttimer)
 			
 			self.Show(True)
 			
 		def check(self,e):
+			self.printing.SetLabel('')
+
+			counter=0
+			for ii in self.list_N2K_txt:
+				self.list_N2K.CheckItem(counter,False)
+				counter+=1
+
+			self.PGN_list=[]
+			self.work = True
 			self.Send_Command(1, 0x49, 0)
-			time.sleep(0.2)
+			i=0
+			while (self.work):
+				self.getCharfromSerial()
+				time.sleep(0.01)
+				i+=1
+				if i>200:
+					self.work = False
 			self.read_stick_check()
 		
 		def apply(self,e):
@@ -115,10 +141,12 @@ class MyFrame(wx.Frame):
 							exist=1
 					if exist==0:
 						st+=ii[0]+' '
-						if len(self.PGN_list)<36:
+						if len(self.PGN_list)<31:
 							self.sendTX_PGN(int(ii[0]),1)
 							self.PGN_list.append(ii[0])
 							time.sleep(0.2)
+						else:
+							print "You can't activate more than 30 PGNs"
 							
 				counter+=1		
 			print 'new PGNs=',st
@@ -138,8 +166,54 @@ class MyFrame(wx.Frame):
 					counter+=1		
 			print 'del PGNs=',st
 			self.Send_Command(1, 0x01, 0)
+			self.check(0)
 
+		def baud115200(self,e):
+			data_ = (2,5,7)
+			data = bytearray(data_)
+			self.baud(data)	
 
+		def baud230400(self,e):
+			data_ = (2,5,8)
+			data = bytearray(data_)
+			self.baud(data)	
+
+		def baud460800(self,e):
+			data_ = (2,5,6)
+			data = bytearray(data_)
+			self.baud(data)	
+			
+		def baud(self,data):
+			self.timer.Stop()	
+			baudlist=[57600,115200,230400,460800]
+			
+			for baud_ in baudlist: 		
+				try:
+					self.ser = serial.Serial(self.can_device, baud_, timeout=0.5)
+				except:
+					print 'failed to start N2K output setting on '+self.can_device
+					sys.exit(0)
+				time.sleep(1)
+
+				self.Send_Command(4, 0x12, data)
+				time.sleep(0.2)
+				self.Send_Command(4, 0x16, data)
+				time.sleep(0.2)
+			
+			wx.MessageBox(_('You have to restart this application'), 'Info', wx.OK | wx.ICON_INFORMATION)
+			self.timer.Start(self.ttimer)		
+
+		def resetCANUSB(self,e):
+			self.ser.close()
+			subprocess.call(['pkill', '-f', 'CAN-USB-firmware.py'])
+			subprocess.call(['python', self.currentpath + '/CAN-USB-firmware.py'])
+			try:
+				self.ser = serial.Serial(self.can_device, 115200, timeout=0.5)
+			except:
+				print 'failed to start N2K output setting on '+self.can_device
+				sys.exit(0)
+			sys.exit(0)
+			
 		def sendTX_PGN(self,lPGN,add):
 			if add:
 				data_ = (0,0,0,0,1,0xFE,0xFF,0xFF,0xFF,0xFE,0xFF,0xFF,0xFF)
@@ -189,7 +263,6 @@ class MyFrame(wx.Frame):
 			self.ser.write(chr(start[1]))
 			while i < TXs[1] + 3:
 				self.ser.write(chr(TXs[i]))
-				#print format(TXs[i], '02x')
 				if TXs[i] == 0x10:
 					self.ser.write(chr(TXs[i]))
 				i += 1
@@ -238,7 +311,6 @@ class MyFrame(wx.Frame):
 			return (crc == 0)
 
 		def output(self):
-			k = 0
 			if self.Buffer[0] == 0x93 and self.Buffer[1] == self.p - 3:
 				#i=0
 				#while i < 10:
@@ -254,12 +326,19 @@ class MyFrame(wx.Frame):
 					while j < self.Buffer[14]:
 						i=j*4
 						lPGN=self.Buffer[15+i]+self.Buffer[16+i]*256+self.Buffer[17+i]*256*256
-						self.PGN_list.append(lPGN)
+						if lPGN in self.PGN_list:
+							print lPGN,'already exists'
+						else:
+							self.PGN_list.append(lPGN)
+							if lPGN<100000:
+								st+='  '
+							st+=str(lPGN)+' '
+							
 						j+=1
-						st+=str(lPGN)+' '
 						if ((j)%6)==0 and j>0:
 							st+='\n'
-					self.printing.SetLabel(st)						
+					self.printing.SetLabel(st)
+					self.work = False
 					
 		def getCommandfromSerial(self, RXs):
 			crc = 0
@@ -298,11 +377,13 @@ class MyFrame(wx.Frame):
 
 		def read_stick_check(self):		
 			counter=0
+			self.list_N2K.CheckItem(0,False)
 			for ii in self.list_N2K_txt:
 				for jj in self.PGN_list:
 					if ii[0]==str(jj):
-						self.list_N2K.CheckItem(counter)
+						self.list_N2K.CheckItem(counter)					
 				counter+=1
+			self.list_N2K.Update()
 			
 app = wx.App()
 MyFrame().Show()

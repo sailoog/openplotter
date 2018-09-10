@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
-import wx, os, sys, subprocess
+import wx, subprocess
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 from classes.conf import Conf
 from classes.language import Language

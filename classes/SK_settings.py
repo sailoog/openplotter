@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
-import ConfigParser, os, yaml, json, subprocess
+import os, ujson, subprocess
 from conf import Conf
 
 
@@ -31,7 +31,7 @@ class SK_settings:
 		
 		if os.path.isfile(self.setting_file):
 			with open(self.setting_file) as data_file:
-				self.data = yaml.load(data_file)
+				self.data = ujson.load(data_file)
 		else: self.data = {}
 
 		self.sslport = -1
@@ -186,10 +186,10 @@ class SK_settings:
 		self.write_settings()
 			
 	def write_settings(self):
-		data = json.dumps(self.data, indent=4, sort_keys=True)
+		data = ujson.dumps(self.data, indent=4, sort_keys=True)
 		try:
 			wififile = open(self.setting_file, 'w')
-			wififile.write(data)
+			wififile.write(data.replace('\/','/'))
 			wififile.close()
 			# stopping sk server
 			subprocess.call(['sudo', 'systemctl', 'stop', 'signalk.service'])
@@ -200,7 +200,4 @@ class SK_settings:
 			self.load()
 		except:
 			print 'Error saving setting.json'
-
-					
-					
-		
+			
