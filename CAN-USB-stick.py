@@ -96,8 +96,8 @@ class MyFrame(wx.Frame):
 			self.baud230400_b = wx.Button(panel, label=_('baud to 230400'),size=(130, 32), pos=(500, 140))
 			self.Bind(wx.EVT_BUTTON, self.baud230400, self.baud230400_b)
 
-			self.baud460800_b = wx.Button(panel, label=_('baud to 460800\nngt-1 57600'),size=(130, 52), pos=(500, 180))
-			self.Bind(wx.EVT_BUTTON, self.baud460800, self.baud460800_b)
+			#self.baud460800_b = wx.Button(panel, label=_('baud to 460800\nngt-1 57600'),size=(130, 52), pos=(500, 180))
+			#self.Bind(wx.EVT_BUTTON, self.baud460800, self.baud460800_b)
 			
 			self.resetCANUSB_b = wx.Button(panel, label=_('reset CAN-USB'),size=(130, 32), pos=(500, 370))
 			self.Bind(wx.EVT_BUTTON, self.resetCANUSB, self.resetCANUSB_b)		
