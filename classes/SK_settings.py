@@ -148,23 +148,13 @@ class SK_settings:
 		if self.ngt1_enabled == -1:
 			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['type'] = 'ngt-1'
 			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['device'] = device
-
-		if enable == 1:
-			self.data['pipedProviders'][self.OPcan]['enabled']=True
-		elif enable == 0:
-			self.data['pipedProviders'][self.OPcan]['enabled']=False
-		self.write_settings()
+		self.enable_disable_all(enable)
 
 	def set_ngt1js_enable(self,enable,device):
 		if self.ngt1js_enabled == -1:
 			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['type'] = 'ngt-1-canboatjs'
 			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['device'] = device
-
-		if enable == 1:
-			self.data['pipedProviders'][self.OPcan]['enabled']=True
-		elif enable == 0:
-			self.data['pipedProviders'][self.OPcan]['enabled']=False
-		self.write_settings()
+		self.enable_disable_all(enable)
 
 	def set_pypilot_enable(self,enable):
 		if self.pypilot_enabled != -1:
@@ -178,13 +168,15 @@ class SK_settings:
 		if self.canbus_enabled == -1:
 			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['type'] = 'canbus-canboatjs'
 			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['interface'] = 'can0'
+		self.enable_disable_all(enable)
 
+	def enable_disable_all(self,enable):
 		if enable == 1:
 			self.data['pipedProviders'][self.OPcan]['enabled']=True
 		elif enable == 0:
 			self.data['pipedProviders'][self.OPcan]['enabled']=False
 		self.write_settings()
-			
+
 	def write_settings(self):
 		data = ujson.dumps(self.data, indent=4, sort_keys=True)
 		try:
