@@ -118,9 +118,9 @@ mkdir delete
 #python setup.py build
 #sudo python setup.py install
 
-#cd $HOME/delete
-#git clone https://github.com/$repository/RTIMULib2.git
-#cd RTIMULib2/Linux
+cd $HOME/delete
+git clone https://github.com/$repository/RTIMULib2.git
+cd RTIMULib2/Linux
 #mkdir build
 #cd build
 #cmake ..
@@ -136,9 +136,9 @@ mkdir delete
 #make -j4
 #sudo make install
 #cd ..
-#cd python
-#python setup.py build
-#sudo python setup.py install
+cd python
+python setup.py build
+sudo python setup.py install
 
 cd $HOME/delete
 git clone https://github.com/$repository/pypilot
