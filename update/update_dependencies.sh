@@ -151,6 +151,14 @@ sudo python setup.py install
 cd $HOME
 sudo rm -rf delete
 
+echo
+echo "Adding support for wifi modules using the rtl8188eu, rtl8192eu, rtl8812au, 8822bu, mt7610 and mt7612 drivers..."
+echo
+cd $HOME
+sudo wget http://www.fars-robotics.net/install-wifi -O /usr/bin/install-wifi
+sudo chmod +x /usr/bin/install-wifi
+sudo install-wifi
+
 #echo
 #echo "UPDATING GQRX..."
 #echo
