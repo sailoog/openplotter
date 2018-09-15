@@ -668,7 +668,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				########################################### Network
 
 	def page_wifi(self):
-		wx.StaticBox(self.p_wifi, size=(370, 315), pos=(10, 10))
+		wx.StaticBox(self.p_wifi, size=(370, 330), pos=(10, 10))
 
 		self.available_wireless = []
 		output = subprocess.check_output('ifconfig')
@@ -724,18 +724,21 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 										size=(120, 32), pos=(20, 253))
 		self.wifi_channel_label = wx.StaticText(self.p_wifi, label=_('Channel'), pos=(160, 260))
 
-		self.wifi_button_apply = wx.Button(self.p_wifi, label=_('Apply'), pos=(275, 280))
+		self.drivers_button = wx.Button(self.p_wifi, label=_('Install drivers'), pos=(20, 300))
+		self.drivers_button.Bind(wx.EVT_BUTTON, self.on_drivers_button)	
+
+		self.wifi_button_apply = wx.Button(self.p_wifi, label=_('Apply'), pos=(275, 300))
 		self.wifi_button_apply.Bind(wx.EVT_BUTTON, self.onwifi_apply)
 
-		wx.StaticBox(self.p_wifi, label=_(' Addresses '), size=(290, 315), pos=(385, 10))
-		self.ip_info = wx.TextCtrl(self.p_wifi, -1, style=wx.TE_MULTILINE | wx.TE_READONLY, size=(270, 245),
+		wx.StaticBox(self.p_wifi, label=_(' Addresses '), size=(290, 330), pos=(385, 10))
+		self.ip_info = wx.TextCtrl(self.p_wifi, -1, style=wx.TE_MULTILINE | wx.TE_READONLY, size=(270, 265),
 								   pos=(395, 30))
 		self.ip_info.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_INACTIVECAPTION))
 
-		self.button_refresh_ip = wx.Button(self.p_wifi, label=_('Refresh'), pos=(565, 280))
+		self.button_refresh_ip = wx.Button(self.p_wifi, label=_('Refresh'), pos=(565, 300))
 		self.button_refresh_ip.Bind(wx.EVT_BUTTON, self.on_show_ip_info)
 
-		self.check_net_b = wx.Button(self.p_wifi, label=_('Status'), pos=(465, 280))
+		self.check_net_b = wx.Button(self.p_wifi, label=_('Status'), pos=(465, 300))
 		self.check_net_b.Bind(wx.EVT_BUTTON, self.on_check_net)
 
 	def read_wifi_conf(self):		
@@ -1042,6 +1045,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			if i[1] == j:
 				shutil.copytree(self.currentpath+'/Network/'+i[0], self.conf_folder+'/Network/'+i[0]) 
 		self.read_wifi_conf()
+
+	def on_drivers_button(self,e):
+		subprocess.Popen(['lxterminal', '-e', 'bash', self.currentpath+'/classes/install-wifi.sh'])
 		
 				########################################### PYPILOT
 
