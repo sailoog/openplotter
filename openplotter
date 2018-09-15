@@ -2934,13 +2934,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.stop_sensors()
 		self.stop_kplex()
 		os.system('sudo service gpsd stop')
-		self.stop_n2k()
+		self.stop_SK()
 		self.ShowStatusBarGREEN(_('Checking selected device ...'))
 		result = self.detect_serial(index)
 		os.system('sudo service gpsd start')
 		self.on_restart_kplex(0)
 		self.start_sensors()
-		self.start_n2k()
+		self.start_SK()
 		if self.Serial_assignment.GetStringSelection() == 'Kplex':
 			self.Serial_baud_select.Enable()
 		else:
@@ -3398,33 +3398,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def on_SK_to_N2K2(self, event):
 		url = "http://localhost:3000/@signalk/server-admin-ui/#/serverConfiguration/plugins"
 		webbrowser.open(url, new=2)
-
-	def set_n2k_enable(self,enable):
-		if enable:
-			if self.SK_settings.ngt1_enabled != 1:
-				self.SK_settings.set_ngt1_enable(1,self.can_device)
-				if self.SK_settings.ngt1_device <> self.can_device:
-					self.SK_settings.set_ngt1_device(self.can_device)
-				self.SK_settings.set_ngt1_enable(1,self.can_device)
-			self.n2k_enable.SetValue(True)
-		else:
-			if self.SK_settings.ngt1_enabled != 0:
-				self.SK_settings.set_ngt1_enable(0,self.can_device)			
-			self.n2k_enable.SetValue(False)
-
-	def set_n2k_out_enable(self,enable):
-		if enable:
-			if self.conf.get('N2K', 'output') != '1':
-				self.conf.set('N2K', 'output', '1')
-			self.n2k_out_enable.SetValue(True)
-			subprocess.call(['pkill', '-f', 'diagnostic-N2K-output.py'])
-			subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
-			subprocess.Popen(['python', self.currentpath + '/N2K-server_d.py'])			
-		else:
-			if self.conf.get('N2K', 'output') != '0':
-				self.conf.set('N2K', 'output', '0')
-			self.n2k_out_enable.SetValue(False)
-			subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
 				
 	def read_n2k(self):
 		self.can_device = ''
@@ -3476,27 +3449,24 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.ngt1js_enabled.Disable()	
 			self.n2k_can0_enable.Enable()
 
-	def stop_n2k(self):
-		subprocess.call(['pkill', '-f', 'CAN-USB-stick.py'])
-		subprocess.call(['pkill', '-f', 'diagnostic-N2K-input.py'])
-		subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
-		self.SK_settings.set_ngt1_enable(0,self.can_device)
-
-	def start_n2k(self):
-		self.set_n2k_enable(self.n2k_enable.GetValue())
-		self.set_n2k_out_enable(self.n2k_out_enable.GetValue())
-
 	def on_n2k_enable(self, e):
-		if self.SK_settings.ngt1_enabled != self.n2k_enable.GetValue():
-			if not self.SK_settings.ngt1_enabled==1:
-				if not self.SK_settings.ngt1js_enabled==1:
-					self.SK_settings.set_ngt1_enable(True,self.can_device)
-				else:
-					self.ShowStatusBarBLACK(_('You have not disabled the other checkboxes'))
-					self.n2k_enable.SetValue(not self.n2k_enable.GetValue())					
-			else:			
-				self.SK_settings.set_ngt1_enable(False,self.can_device)
-			self.read_n2k()	
+		if self.n2k_enable.GetValue():
+			self.SK_settings.set_ngt1_enable(True,self.can_device)
+		else:
+			self.SK_settings.set_ngt1_enable(False,self.can_device)
+		self.read_n2k()
+
+	def on_n2k_output(self, e):
+		if self.n2k_out_enable.GetValue():
+			self.conf.set('N2K', 'output', '1')
+			subprocess.call(['pkill', '-f', 'diagnostic-N2K-output.py'])
+			subprocess.call(['pkill', '-f', 'diagnostic-N2K-input.py'])
+			subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
+			subprocess.Popen(['python', self.currentpath + '/N2K-server_d.py'])
+		else:
+			self.conf.set('N2K', 'output', '0')
+			subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
+		self.read_n2k()
 			
 	def on_ngt1js_enabled(self, e):
 		if self.ngt1js_enabled.GetValue():
@@ -3505,40 +3475,27 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.SK_settings.set_ngt1js_enable(False,self.can_device)
 		self.read_n2k()	
 
-	def on_n2k_output(self, e):
-		self.set_n2k_out_enable(self.n2k_out_enable.GetValue())
-		self.read_n2k()
-
 	def on_N2K_setting(self, e):
-		if self.check_can_device():
-			subprocess.call(['pkill', '-f', 'CAN-USB-stick.py'])
-			subprocess.Popen(['python', self.currentpath + '/CAN-USB-stick.py'])
-			self.ShowStatusBarBLACK(_('Select PGNs to transmit and enable N2K input/output again.'))
+		subprocess.call(['pkill', '-f', 'CAN-USB-stick.py'])
+		subprocess.Popen(['python', self.currentpath + '/CAN-USB-stick.py'])
+		self.ShowStatusBarBLACK(_('Enable PGNs to transmit in your device.'))
 
 	def on_N2K_diagnostic(self, e):
-		if self.check_can_device():
-			subprocess.call(['pkill', '-f', 'diagnostic-N2K-input.py'])
-			subprocess.Popen(['python', self.currentpath + '/diagnostic-N2K-input.py'])
-			self.ShowStatusBarBLACK(_('Show received PGNs.'))
+		subprocess.call(['pkill', '-f', 'diagnostic-N2K-input.py'])
+		subprocess.Popen(['python', self.currentpath + '/diagnostic-N2K-input.py'])
+		self.ShowStatusBarBLACK(_('Show received PGNs.'))
 
 	def on_N2K_diagnostic_out(self, e):
-		if self.check_can_device():
-			subprocess.call(['pkill', '-f', 'diagnostic-N2K-output.py'])
-			subprocess.Popen(['python', self.currentpath + '/diagnostic-N2K-output.py'])
-			self.ShowStatusBarBLACK(_('Show sent PGNs.'))
+		subprocess.call(['pkill', '-f', 'diagnostic-N2K-output.py'])
+		subprocess.Popen(['python', self.currentpath + '/diagnostic-N2K-output.py'])
+		self.ShowStatusBarBLACK(_('Show sent PGNs.'))
 					
 	def on_n2k_can0_enable(self, e):
-		if self.SK_settings.canbus_enabled != self.n2k_can0_enable.GetValue():
-			self.SK_settings.set_canbus_enable(self.n2k_can0_enable.GetValue())
-			self.read_n2k()
-			
-	def check_can_device(self):
-		if not self.SK_settings.ngt1_device:
-			self.n2k_enable.SetValue(False)
-			self.n2k_out_enable.SetValue(False)
-			self.ShowStatusBarBLACK(_('You have to add a CAN-USB device on Serial ports tab'))
-			return False
-		else: return True
+		if self.n2k_can0_enable.GetValue():
+			self.SK_settings.set_canbus_enable(True)
+		else:
+			self.SK_settings.set_canbus_enable(False)
+		self.read_n2k()
 
 	###################################### Signal K
 	def start_SK(self):
