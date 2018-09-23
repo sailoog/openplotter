@@ -1,3 +1,18 @@
+v1.2.0
+* Fix node, node-red updating
+* Adapt to new keyswithmetadata.json file structure
+* Fix SPI
+* Make checking display 800x480 optional
+* Fix logfile issue
+* Network update for USB tethering and added readme
+* PGN list updated
+* Add filters to default kplex settings
+* Improve CAN management
+* Update moitessier hat packages
+* Update pypilot
+* Add support for non included wifi drivers
+* Multiple major and minor fixes
+
 v1.1.0
 * Fix error sending MQTT actions
 * Publish in local MQTT broker when publish in remote broker and vice versa
