@@ -31,7 +31,6 @@ from classes.add_kplex import addkplex
 from classes.add_tool10 import addTool10
 from classes.add_topic import addTopic
 from classes.add_trigger import addTrigger
-from classes.add_value_setting import addvaluesetting
 from classes.add_deviation_setting import adddeviationsetting
 from classes.add_SK_to_N2K import addSKtoN2K
 from classes.conf import Conf
@@ -1911,9 +1910,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		restart = wx.Button(self.p_spi, label=_('Restart'))
 		restart.Bind(wx.EVT_BUTTON, self.on_restart_MCP)
 
-		value_setting = wx.Button(self.p_spi, label=_('value setting'))
-		value_setting.Bind(wx.EVT_BUTTON, self.on_value_setting)
-
 		hlistbox = wx.BoxSizer(wx.HORIZONTAL)
 		hlistbox.Add(self.list_MCP, 1, wx.ALL | wx.EXPAND, 5)
 
@@ -1921,7 +1917,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		hbox.Add(diagnostic, 0, wx.RIGHT | wx.LEFT, 5)
 		hbox.Add(restart, 0, wx.RIGHT | wx.LEFT, 5)
 		hbox.Add((0, 0), 1, wx.RIGHT | wx.EXPAND, 5)
-		hbox.Add(value_setting, 0, wx.RIGHT | wx.LEFT, 5)
 
 		vbox = wx.BoxSizer(wx.VERTICAL)
 		vbox.Add(title, 0, wx.ALL | wx.EXPAND, 5)
@@ -1951,38 +1946,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def on_restart_MCP(self, e):
 		self.stop_sensors()
 		self.start_sensors()
-
-	def on_value_setting(self, e):
-		edit = self.list_MCP.GetFirstSelected()
-		if edit == -1:
-			return
-		dlg = addvaluesetting(edit, self)
-		dlg.ShowModal()
-
-		if self.MCP[edit][4] == 1:
-			convert = 1
-			self.conf.read()
-			data = self.conf.get('SPI', 'value_' + str(edit))
-			try:
-				temp_list = eval(data)
-			except:
-				temp_list = []
-			min = 1023
-			max = 0
-			for ii in temp_list:
-				if ii[0] > max: max = ii[0]
-				if ii[0] < min: min = ii[0]
-			if min > 0:
-				wx.MessageBox(_('minimum raw value in setting table > 0'), 'info', wx.OK | wx.ICON_INFORMATION)
-				convert = 0
-			if max < 1023:
-				wx.MessageBox(_('maximum raw value in setting table < 1023'), 'info', wx.OK | wx.ICON_INFORMATION)
-				convert = 0
-			if convert == 0:
-				self.MCP[edit][4] = convert
-				self.conf.set('SPI', 'mcp', str(self.MCP))
-				self.read_MCP()
-				wx.MessageBox(_('convert disabled'), 'info', wx.OK | wx.ICON_INFORMATION)
 
 	def on_edit_MCP(self, e):
 		t = e.GetIndex()
