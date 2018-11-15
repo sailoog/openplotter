@@ -1027,13 +1027,13 @@ class MySK_to_Action_Calc:
 		elif option == 'ACT16':
 			subprocess.Popen(['pkill', '-9', 'mpg123'])
 		elif option == 'ACT17':
-			subprocess.Popen(['python', self.currentpath + '/message.py', text, self.language])
+			subprocess.Popen(['python', SK.currentpath + '/message.py', text, self.language])
 		elif option == 'ACT18':
 			subprocess.Popen(['pkill', '-f', 'message.py'])
 		elif option == 'ACT19':
-			subprocess.Popen(['python', self.currentpath+'/ctrl_actions.py', '1'])
+			subprocess.Popen(['python', SK.currentpath+'/ctrl_actions.py', '1'])
 		elif option == 'ACT20':
-			subprocess.Popen(['python', self.currentpath + '/ctrl_actions.py', '0'])
+			subprocess.Popen(['python', SK.currentpath + '/ctrl_actions.py', '0'])
 		elif option == 'ACT21':
 			try:
 				sm = gammu.StateMachine()
@@ -1069,7 +1069,7 @@ class MySK_to_Action_Calc:
 			if not check_mqtt:
 				msg = 'mqtt python module not installed, functionallity not available'
 				print msg
-				subprocess.Popen(['python', self.currentpath + '/message.py', msg, self.language])
+				subprocess.Popen(['python', SK.currentpath + '/message.py', msg, self.language])
 			else:
 				publish.single(topic, payload=payload, hostname='127.0.0.1', port='1883', auth=auth)
 				publish.single(topic, payload=payload, hostname=self.MQTT_hostname, port=self.MQTT_port, auth=auth)
