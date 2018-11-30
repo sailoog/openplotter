@@ -38,10 +38,16 @@ class MyFrame(wx.Frame):
 		for name in Serialinst:
 			if Serialinst[name]['assignment'] == 'CAN-USB':
 				can_device = '/dev/ttyOP_'+name
+				self.baud_=Serialinst[name]['bauds']
 				break
+
+		if self.baud_ != '':
+			self.baud_=self.baud_*1
+		else:
+			self.baud_=115200			
 				
 		try:
-			self.ser = serial.Serial(can_device, 115200, timeout=0.5)
+			self.ser = serial.Serial(can_device, self.baud_, timeout=0.5)
 		except:
 			print 'failed to start N2K input diagnostic on '+can_device
 			sys.exit(0)

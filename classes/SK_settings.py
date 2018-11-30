@@ -119,41 +119,45 @@ class SK_settings:
 		if 'pipedProviders' in self.data:
 			try:
 				for i in self.data['pipedProviders']:
-					if i['pipeElements'][0]['options']['subOptions']['type'] == 'ngt-1':
-						self.ngt1_enabled=i['enabled']
-						self.OPcan=count
-						self.ngt1_device=i['pipeElements'][0]['options']['subOptions']['device']
-					elif i['pipeElements'][0]['options']['subOptions']['type'] == 'ngt-1-canboatjs':
-						self.ngt1js_enabled=i['enabled']
-						self.OPcan=count
-						self.ngt1_device=i['pipeElements'][0]['options']['subOptions']['device']
-					elif i['pipeElements'][0]['options']['subOptions']['type'][0:6] == 'canbus':
-						self.canbus_enabled=i['enabled']
-						self.OPcan=count
-						self.canbus_interface=i['pipeElements'][0]['options']['subOptions']['interface']
-					elif i['id'] == 'OPpypilot':
-						self.pypilot_enabled=i['enabled']
-						self.pypilot=count
+					if 'type' in i['pipeElements'][0]['options']['subOptions']:
+						if i['pipeElements'][0]['options']['subOptions']['type'] == 'ngt-1':
+							self.ngt1_enabled=i['enabled']
+							self.OPcan=count
+							self.ngt1_device=i['pipeElements'][0]['options']['subOptions']['device']
+						elif i['pipeElements'][0]['options']['subOptions']['type'] == 'ngt-1-canboatjs':
+							self.ngt1js_enabled=i['enabled']
+							self.OPcan=count
+							self.ngt1_device=i['pipeElements'][0]['options']['subOptions']['device']
+						elif i['pipeElements'][0]['options']['subOptions']['type'][0:6] == 'canbus':
+							self.canbus_enabled=i['enabled']
+							self.OPcan=count
+							self.canbus_interface=i['pipeElements'][0]['options']['subOptions']['interface']
+						elif i['id'] == 'OPpypilot':
+							self.pypilot_enabled=i['enabled']
+							self.pypilot=count
 					count+=1
 			except:
 				print 'Error parsing setting.json'
 
 		if write or not OPcan or not OPpypilot or not OPkplex or not OPwifi or not OPserial or not OPnotifications or not OPsensors: self.write_settings()
 				
-	def set_ngt1_device(self,device):
+	def set_ngt1_device(self,device,speed):
 		self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['device'] = device
+		self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['baudrate'] = speed*1
 		self.write_settings()
 
-	def set_ngt1_enable(self,enable,device):
+	def set_ngt1_enable(self,enable,device,speed):
 		if self.ngt1_enabled == -1:
 			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['type'] = 'ngt-1'
 			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['device'] = device
+			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['baudrate'] = speed*1
 		self.enable_disable_all(enable)
 
-	def set_ngt1js_enable(self,enable,device):
+	def set_ngt1js_enable(self,enable,device,speed):
 		if self.ngt1js_enabled == -1:
 			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['type'] = 'ngt-1-canboatjs'
 			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['device'] = device
+			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['baudrate'] = speed*1
 		self.enable_disable_all(enable)
 
 	def set_pypilot_enable(self,enable):

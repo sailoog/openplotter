@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, time, serial, codecs, sys, subprocess
+import wx, time, serial, codecs, sys, subprocess,json
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 from classes.conf import Conf
 from classes.language import Language
@@ -36,18 +36,24 @@ class MyFrame(wx.Frame):
 			
 			data = self.conf.get('UDEV', 'Serialinst')
 			try:
-				Serialinst = eval(data)
+				self.Serialinst = eval(data)
 			except:
-				Serialinst = {}
+				self.Serialinst = {}
 
 			self.can_device = ''
-			for name in Serialinst:
-				if Serialinst[name]['assignment'] == 'CAN-USB':
+			for name in self.Serialinst:
+				if self.Serialinst[name]['assignment'] == 'CAN-USB':
 					self.can_device = '/dev/ttyOP_'+name
+					self.baud_=self.Serialinst[name]['bauds']
 					break
+
+			if self.baud_ != '':
+				self.baud_=self.baud_*1
+			else:
+				self.baud_=115200			
 					
 			try:
-				self.ser = serial.Serial(self.can_device, 115200, timeout=0.5)
+				self.ser = serial.Serial(self.can_device, self.baud_, timeout=0.5)
 			except:
 				print 'failed to start N2K output setting on '+self.can_device
 				sys.exit(0)
@@ -99,7 +105,7 @@ class MyFrame(wx.Frame):
 			#self.baud460800_b = wx.Button(panel, label=_('baud to 460800\nngt-1 57600'),size=(130, 52), pos=(500, 180))
 			#self.Bind(wx.EVT_BUTTON, self.baud460800, self.baud460800_b)
 			
-			self.resetCANUSB_b = wx.Button(panel, label=_('reset CAN-USB'),size=(130, 32), pos=(500, 370))
+			self.resetCANUSB_b = wx.Button(panel, label=_('basic setup\nCAN-USB'),size=(130, 60), pos=(500, 340))
 			self.Bind(wx.EVT_BUTTON, self.resetCANUSB, self.resetCANUSB_b)		
 
 			self.Centre()
@@ -171,23 +177,18 @@ class MyFrame(wx.Frame):
 		def baud115200(self,e):
 			data_ = (2,5,7)
 			data = bytearray(data_)
-			self.baud(data)	
+			self.baud(data)
 
 		def baud230400(self,e):
 			data_ = (2,5,8)
 			data = bytearray(data_)
 			self.baud(data)	
 
-		def baud460800(self,e):
-			data_ = (2,5,6)
-			data = bytearray(data_)
-			self.baud(data)	
-			
 		def baud(self,data):
 			self.timer.Stop()	
-			baudlist=[57600,115200,230400,460800]
+			baudlist=[57600,115200,230400,460800,921600]
 			
-			for baud_ in baudlist: 		
+			for baud_ in baudlist:
 				try:
 					self.ser = serial.Serial(self.can_device, baud_, timeout=0.5)
 				except:
@@ -200,13 +201,20 @@ class MyFrame(wx.Frame):
 				self.Send_Command(4, 0x16, data)
 				time.sleep(0.2)
 			
+			if data[2]==8:
+				self.Serialinst[self.can_device[11:]]['bauds']='230400'
+			if data[2]==7:
+				self.Serialinst[self.can_device[11:]]['bauds']='115200'
+			
+			self.conf.set('UDEV', 'Serialinst', json.dumps( self.Serialinst, ensure_ascii=False, encoding='utf8'))
+			
 			wx.MessageBox(_('You have to restart this application'), 'Info', wx.OK | wx.ICON_INFORMATION)
 			self.timer.Start(self.ttimer)		
 
 		def resetCANUSB(self,e):
 			self.ser.close()
 			subprocess.call(['pkill', '-f', 'CAN-USB-firmware.py'])
-			subprocess.call(['python', self.currentpath + '/CAN-USB-firmware.py'])
+			subprocess.call(['lxterminal','-e','python', self.currentpath + '/CAN-USB-firmware.py'])
 			try:
 				self.ser = serial.Serial(self.can_device, 115200, timeout=0.5)
 			except:
