@@ -143,21 +143,33 @@ class SK_settings:
 				
 	def set_ngt1_device(self,device,speed):
 		self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['device'] = device
-		self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['baudrate'] = speed*1
+		self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['baudrate'] = long(speed)
+		try:
+			del self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['interface']
+		except:
+			pass
 		self.write_settings()
 
 	def set_ngt1_enable(self,enable,device,speed):
-		if self.ngt1_enabled == -1:
+		if enable == True:
 			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['type'] = 'ngt-1'
 			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['device'] = device
-			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['baudrate'] = speed*1
+			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['baudrate'] = long(speed)
+			try:
+				del self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['interface']
+			except:
+				pass
 		self.enable_disable_all(enable)
 
 	def set_ngt1js_enable(self,enable,device,speed):
-		if self.ngt1js_enabled == -1:
+		if enable == True:
 			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['type'] = 'ngt-1-canboatjs'
 			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['device'] = device
-			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['baudrate'] = speed*1
+			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['baudrate'] = long(speed)
+			try:
+				del self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['interface']
+			except:
+				pass
 		self.enable_disable_all(enable)
 
 	def set_pypilot_enable(self,enable):
@@ -172,6 +184,11 @@ class SK_settings:
 		if self.canbus_enabled == -1:
 			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['type'] = 'canbus-canboatjs'
 			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['interface'] = 'can0'
+			try:
+				del self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['device']
+				del self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['baudrate']
+			except:
+				pass
 		self.enable_disable_all(enable)
 
 	def enable_disable_all(self,enable):

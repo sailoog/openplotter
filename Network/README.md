@@ -24,4 +24,4 @@ Start realvnc on android with ip address 192.168.42.100.
 The raspbian standard wifi settings (in the upper right corner) often don't want to change from one marina to the next one.
 If you don't get the connection symbol you can "Turn Off Wifi" and "Turn On Wifi". To get it to work.
 If you are connected over the AP use the
-bash file /home/pi/.openplotter/Network/restart_wlan0.sh
+bash file /home/pi/.config/openplotter/Network/restart_wlan0.sh
