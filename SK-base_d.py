@@ -1082,12 +1082,15 @@ def signal_handler(signal_, frame):
 
 signal.signal(signal.SIGINT, signal_handler)
 SK = MySK()
-SKN2K = MySK_to_N2K(SK)
+if SK.conf.get('N2K', 'output') != '1':
+	SKN2K = MySK_to_N2K(SK)
+	aktiv_N2K = False
+else:
+	aktiv_N2K = True
 SKNMEA = MySK_to_NMEA(SK)
 SKAction = MySK_to_Action_Calc(SK)
 
 timedif = (datetime.datetime.utcnow() - datetime.datetime.now()).total_seconds()
-aktiv_N2K = True
 aktiv_NMEA = True
 aktiv_Action = False
 if not SKN2K.PGN_list: aktiv_N2K = False
