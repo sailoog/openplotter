@@ -251,7 +251,7 @@ class MyFrame(wx.Frame):
 			self.check_start('N2K-server_d.py')
 
 		subprocess.call(['pkill', '-f', 'SK-base_d.py'])
-		self.add_logger_data(_('\nStarting actions and NMEA 0183/N2K generators...'))
+		self.add_logger_data(_('\nStarting NMEA 0183/N2K generators...'))
 		subprocess.Popen(['python', self.op_folder+'/SK-base_d.py'])
 		self.check_start('SK-base_d.py')
 

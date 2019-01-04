@@ -21,16 +21,13 @@ try:
 	from classes.add_DS18B20 import addDS18B20
 except:
         addDS18B20 = None
-from classes.actions import Actions
 from classes.edit_MCP import editMCP
 from classes.add_i2c import addI2c
 from classes.edit_i2c import editI2c
-from classes.add_action import addAction
 from classes.add_gpio import addGPIO
 from classes.add_kplex import addkplex
 from classes.add_tool10 import addTool10
 from classes.add_topic import addTopic
-from classes.add_trigger import addTrigger
 from classes.add_value_setting import addvaluesetting
 from classes.add_deviation_setting import adddeviationsetting
 from classes.add_SK_to_N2K import addSKtoN2K
@@ -2292,198 +2289,46 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.p_action.SetSizer(vbox)
 
 	def read_triggers(self):
-		self.operators_list = [_('was not updated in the last (sec.)'), _('was updated in the last (sec.)'), '=',
-							   '<', '<=', '>', '>=', _('contains')]
-
-		self.triggers = []
-		self.list_triggers.DeleteAllItems()
-		data = self.conf.get('ACTIONS', 'triggers')
-		try:
-			temp_list = eval(data)
-		except:
-			temp_list = []
-		for ii in temp_list:
-			self.triggers.append(ii)
-			if ii[1] == -1: 
-				sk = _('Date')
-				op = self.operators_list[ii[2]]
-			else: 
-				sk = ii[1]
-				op = self.operators_list[ii[2]]
-			self.list_triggers.Append([sk, op.decode('utf8'), ii[3].decode('utf8')])
-			if ii[0] == 1:
-				last = self.list_triggers.GetItemCount() - 1
-				self.list_triggers.CheckItem(last)
+		pass
 
 	def on_print_actions(self, e):
-		self.actions = Actions(self)
-		selected_trigger = e.GetIndex()
-		self.list_actions.DeleteAllItems()
-		for i in self.triggers[selected_trigger][4]:
-			if i[3] == 0.0:
-				repeat = ''
-			else:
-				repeat = str(i[2])
-			time_units = self.actions.time_units[i[3]]
-			repeat2 = repeat + ' ' + time_units
-			self.list_actions.Append(
-				[self.actions.options[self.actions.getOptionsListIndex(i[0])][0].decode('utf8'), i[1].decode('utf8'), repeat2])
+		pass
 
 	def on_edit_triggers(self, e):
-		t = e.GetIndex()
-		SKkey = self.triggers[t][1]
-		operator = self.triggers[t][2]
-		value = self.triggers[t][3]
-		edit = [t, SKkey, operator, value]
-		self.edit_add_trigger(edit)
+		pass
 
 	def on_add_trigger(self, e):
-		self.edit_add_trigger(0)
+		pass
 
 	def edit_add_trigger(self, edit):
-		dlg = addTrigger(self, edit)
-		res = dlg.ShowModal()
-		if res == wx.ID_OK:
-			operators_ref = dlg.operators_ref
-			operator = operators_ref[dlg.operator.GetSelection()]
-			operator0 = self.operators_list[operator]
-			value = dlg.value.GetValue()
-			if value:
-				value = value.encode('utf8')
-			if dlg.always.GetValue():
-				SKkey0 = _('Date')
-				SKkey = -1
-			else:
-				if dlg.skvalue.GetValue(): magnitude = 'value'
-				elif dlg.sktimestamp.GetValue(): magnitude = 'timestamp'
-				elif dlg.sksource.GetValue(): magnitude = 'source'
-				SKkey0 = dlg.SKkey.GetValue().encode('utf8')
-				if SKkey0: 
-					SKkey0 = SKkey0+'.'+magnitude
-					SKkey = SKkey0
-			if edit == 0:
-				self.list_triggers.Append([SKkey0, operator0.decode('utf8'), value.decode('utf8')])
-				tmp = [1, SKkey, operator, value, []]
-				self.triggers.append(tmp)
-				total = self.list_triggers.GetItemCount()
-				for x in xrange(0, total, 1):
-					self.list_triggers.Select(x, on=0)
-				self.list_triggers.Select(total - 1, on=1)
-				self.list_triggers.CheckItem(total - 1)
-			else:
-				self.list_triggers.SetStringItem(edit[0], 0, SKkey0)
-				self.list_triggers.SetStringItem(edit[0], 1, operator0)
-				self.list_triggers.SetStringItem(edit[0], 2, value)
-				self.triggers[edit[0]][1] = SKkey
-				self.triggers[edit[0]][2] = operator
-				self.triggers[edit[0]][3] = value
-		dlg.Destroy()
+		pass
 
 	def edit_actions(self, e):
-		self.actions = Actions(self)
-		a = e.GetIndex()
-		t = self.list_triggers.GetFirstSelected()
-		action = self.actions.getOptionsListIndex(self.triggers[t][4][a][0])
-		data = self.triggers[t][4][a][1]
-		repeat = self.triggers[t][4][a][2]
-		unit = self.triggers[t][4][a][3]
-		edit = [a, action, data, repeat, unit]
-		self.edit_add_action(edit)
+		pass
 
 	def on_add_action(self, e):
-		self.edit_add_action(0)
+		pass
 
 	def edit_add_action(self, edit):
-		self.actions = Actions(self)
-		selected_trigger_position = self.list_triggers.GetFirstSelected()
-		if selected_trigger_position == -1:
-			self.ShowStatusBarBLACK(_('Select a trigger to add actions.'))
-			return
-		dlg = addAction(self, self.actions.options, self.actions.time_units, edit)
-		res = dlg.ShowModal()
-		if res == wx.ID_OK:
-			action_selection = dlg.action_select.GetCurrentSelection()
-			if dlg.repeat.GetValue():
-				repeat = dlg.repeat.GetValue()
-			else:
-				repeat = '0'
-			try:
-				repeat = float(repeat)
-			except:
-				repeat = 0.0
-			action = self.actions.options[action_selection][0]
-			data = dlg.data.GetValue().encode('utf8')
-			time_units_selection = dlg.repeat_unit.GetCurrentSelection()
-			time_units = self.actions.time_units[time_units_selection]
-			if repeat == 0.0:
-				repeat2 = time_units
-			else:
-				repeat2 = str(repeat) + ' ' + time_units
-			if edit == 0:
-				self.list_actions.Append([action.decode('utf8'), data.decode('utf8'), repeat2])
-				tmp = []
-				tmp.append(self.actions.options[action_selection][3].encode('utf8'))
-				tmp.append(data)
-				tmp.append(repeat)
-				tmp.append(time_units_selection)
-				self.triggers[selected_trigger_position][4].append(tmp)
-			else:
-				self.list_actions.SetStringItem(edit[0], 0, action.decode('utf8'))
-				self.list_actions.SetStringItem(edit[0], 1, data.decode('utf8'))
-				self.list_actions.SetStringItem(edit[0], 2, repeat2)
-				self.triggers[selected_trigger_position][4][edit[0]][0] = self.actions.options[action_selection][3].encode('utf8')
-				self.triggers[selected_trigger_position][4][edit[0]][1] = data
-				self.triggers[selected_trigger_position][4][edit[0]][2] = repeat
-				self.triggers[selected_trigger_position][4][edit[0]][3] = time_units_selection
-		dlg.Destroy()
+		pass
 
 	def on_delete_trigger(self, e):
-		selected = self.list_triggers.GetFirstSelected()
-		if selected == -1:
-			self.ShowStatusBarBLACK(_('Select an item to delete.'))
-		else:
-			del self.triggers[selected]
-			self.list_triggers.DeleteItem(selected)
-			self.list_actions.DeleteAllItems()
+		pass
 
 	def on_delete_action(self, e):
-		selected_trigger = self.list_triggers.GetFirstSelected()
-		selected_action = self.list_actions.GetFirstSelected()
-		if selected_action == -1:
-			self.ShowStatusBarBLACK(_('Select an item to delete.'))
-		else:
-			del self.triggers[selected_trigger][4][selected_action]
-			self.list_actions.DeleteItem(selected_action)
+		pass
 
 	def on_apply_changes_actions(self, e):
-		i = 0
-		for ii in self.triggers:
-			if self.list_triggers.IsChecked(i):
-				self.triggers[i][0] = 1
-			else:
-				self.triggers[i][0] = 0
-			i += 1
-		self.conf.set('ACTIONS', 'triggers', str(self.triggers))
-		subprocess.call(['pkill', '-f', 'SK-base_d.py'])
-		subprocess.Popen(['python', self.currentpath+'/SK-base_d.py'])
+		pass
 
 	def on_cancel_changes_actions(self, e):
-		self.read_triggers()
-		self.ShowStatusBarBLACK(_('Actions changes cancelled'))
+		pass
 
 	def on_stop_actions(self, e):
-		subprocess.call(['python', self.currentpath + '/ctrl_actions.py', '0'])
-		self.ShowStatusBarBLACK(_('Actions stopped'))
-		self.conf.read()
-		self.read_triggers()
-		self.list_actions.DeleteAllItems()
+		pass
 
 	def on_start_actions(self, e):
-		subprocess.call(['python', self.currentpath + '/ctrl_actions.py', '1'])
-		self.ShowStatusBarBLACK(_('Actions started'))
-		self.conf.read()
-		self.read_triggers()
-		self.list_actions.DeleteAllItems()
+		pass
 
 	####################### 1W sensors
 	def page_1w(self):
