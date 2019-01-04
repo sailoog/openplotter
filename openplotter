@@ -84,7 +84,6 @@ class MainFrame(wx.Frame):
 		self.p_spi = wx.Panel(self.nb)
 		self.p_account = wx.Panel(self.nb)
 		self.p_mqtt = wx.Panel(self.nb)
-		self.p_sms = wx.Panel(self.nb)
 		self.p_startup = wx.Panel(self.nb)
 		self.nb.AddPage(self.p_serial, _('Serial'))
 		self.nb.AddPage(self.p_kplex, 'Kplex')
@@ -98,7 +97,6 @@ class MainFrame(wx.Frame):
 		self.nb.AddPage(self.p_spi, 'SPI')
 		self.nb.AddPage(self.p_mqtt, 'MQTT')
 		self.nb.AddPage(self.p_account, _('Accounts'))
-		self.nb.AddPage(self.p_sms, _('SMS'))
 		self.nb.AddPage(self.p_startup, _('Startup'))
 		sizer = wx.BoxSizer()
 		sizer.Add(self.nb, 1, wx.EXPAND)
@@ -215,7 +213,6 @@ class MainFrame(wx.Frame):
 		self.page_spi()
 		self.page_account()
 		self.page_mqtt()
-		self.page_sms()
 		self.page_startup()
 
 		self.manual_settings = ''
@@ -223,7 +220,6 @@ class MainFrame(wx.Frame):
 		self.read_language()
 
 		self.read_account()
-		self.read_sms()
 		self.read_startup()
 		self.read_wifi_conf()
 		self.read_triggers()
@@ -2625,7 +2621,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.Serial_OPname = wx.TextCtrl(self.p_serial)
 		
 		assignment_label = wx.StaticText(self.p_serial, label=_('assignment'))
-		self.assignment = [_('none'), 'Kplex', 'pypilot', 'CAN-USB', 'GPSD', 'SMS', 'NMEA 0183 out']
+		self.assignment = [_('none'), 'Kplex', 'pypilot', 'CAN-USB', 'GPSD', 'NMEA 0183 out']
 		self.Serial_assignment = wx.Choice(self.p_serial, choices=self.assignment, style=wx.CB_READONLY)
 		self.Serial_assignment.Bind(wx.EVT_CHOICE, self.onSelectAssigment)
 		self.Serial_assignment.SetSelection(0)
@@ -3219,27 +3215,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.SK_settings.set_ngt1_device(can_device)
 		self.read_n2k()
 
-		#set SMS device
-		sms_device = ''
-		sms_exists = False
-		for name in self.Serialinst:
-			if self.Serialinst[name]['assignment'] == 'SMS':
-				sms_device = '/dev/ttyOP_'+name
-				sms_exists = True
-				break
-		if sms_exists: self.conf.set('SMS', 'serial', sms_device)
-		else: 
-			self.conf.set('SMS', 'serial', '')
-			self.conf.set('SMS', 'enable', '0')
-			self.conf.set('SMS', 'enable_sending', '0')
-		self.read_sms()
-
 		time.sleep(1.5)
 		self.ShowStatusBarGREEN(_('Serial port modified and restarted'))
 
 	def onSelectAssigment(self, e):
 		selected = self.Serial_assignment.GetStringSelection()
-		if selected == 'CAN-USB' or selected == 'SMS':
+		if selected == 'CAN-USB':
 			for name in self.Serialinst:
 				if self.Serialinst[name]['assignment'] == selected:
 					self.ShowMessage(_('Failed. You can assign only one ')+selected+_(' device'))
@@ -3512,177 +3493,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		subprocess.call(['pkill', '-f', 'diagnostic-SK-input.py'])
 		subprocess.Popen(['python', self.currentpath + '/diagnostic-SK-input.py'])
 
-	####################### SMS
-	def page_sms(self):
-		wx.StaticBox(self.p_sms, label=_(' Settings '), size=(330, 180), pos=(10, 10))
-		self.sms_enable = wx.CheckBox(self.p_sms, label=_('Enable settings'), pos=(20, 30))
-		self.sms_enable.Bind(wx.EVT_CHECKBOX, self.onsms_enable)
-		self.sms_dev_label = wx.StaticText(self.p_sms, label=_('Serial port'), pos=(20, 60))
-		self.sms_dev = wx.TextCtrl(self.p_sms, style=wx.CB_READONLY, size=(150, 32), pos=(20, 80))
-
-		sms_con_list = ['at', 'at19200', 'at115200', 'blueat', 'bluephonet', 'bluefbus', 'blueobex', 'bluerfgnapbus',
-						'bluerfat', 'blues60', 'dlr3', 'dku2', 'dku2at', 'dku2phonet', 'dku5', 'dku5fbus', 'fbus',
-						'fbusdlr3', 'fbusdku5', 'fbusblue', 'fbuspl2303', 'irdaphonet', 'irdaat', 'irdaobex',
-						'irdagnapbus', 'phonetblue', 'proxyphonet', 'proxyfbus', 'proxyat', 'proxyobex', 'proxygnapbus',
-						'proxys60', 'mbus']
-
-		self.sms_bt_label = wx.StaticText(self.p_sms, label=_('Bluetooth address'), pos=(180, 60))
-		self.sms_bt = wx.TextCtrl(self.p_sms, -1, size=(150, 32), pos=(180, 80))
-
-		self.sms_con_label = wx.StaticText(self.p_sms, label=_('Connection'), pos=(20, 120))
-		self.sms_con = wx.ComboBox(self.p_sms, choices=sms_con_list, style=wx.CB_READONLY, size=(150, 32),
-								   pos=(20, 140))
-
-		self.button_sms_identify = wx.Button(self.p_sms, label=_('Identify'), pos=(180, 140))
-		self.button_sms_identify.Bind(wx.EVT_BUTTON, self.on_sms_identify)
-
-		wx.StaticBox(self.p_sms, label=_(' Sending '), size=(330, 180), pos=(350, 10))
-
-		self.sms_enable_send = wx.CheckBox(self.p_sms, label=_('Enable sending SMS'), pos=(360, 30))
-		self.sms_enable_send.Bind(wx.EVT_CHECKBOX, self.onsms_enable_send)
-
-		self.phone_number_label = wx.StaticText(self.p_sms, label=_('Send to phone'), pos=(360, 60))
-		self.phone_number = wx.TextCtrl(self.p_sms, -1, size=(150, 32), pos=(360, 80))
-
-		self.sms_text_label = wx.StaticText(self.p_sms, label=_('Text'), pos=(360, 120))
-		self.sms_text = wx.TextCtrl(self.p_sms, -1, size=(150, 32), pos=(360, 140))
-
-		self.button_sms_test = wx.Button(self.p_sms, label=_('Test'), pos=(520, 140))
-		self.button_sms_test.Bind(wx.EVT_BUTTON, self.on_sms_test)
-
-	def read_sms(self):
-		self.sms_dev.SetValue(self.conf.get('SMS', 'serial'))
-		self.sms_bt.SetValue(self.conf.get('SMS', 'bluetooth'))
-		self.sms_con.SetValue(self.conf.get('SMS', 'connection'))
-		if self.conf.get('SMS', 'enable') == '1':
-			self.sms_enable.SetValue(True)
-			self.sms_dev_label.Disable()
-			self.sms_dev.Disable()
-			self.sms_bt_label.Disable()
-			self.sms_bt.Disable()
-			self.sms_con_label.Disable()
-			self.sms_con.Disable()
-			self.button_sms_identify.Enable()
-		else:
-			self.sms_enable.SetValue(False)
-			self.sms_dev_label.Enable()
-			self.sms_dev.Enable()
-			self.sms_bt_label.Enable()
-			self.sms_bt.Enable()
-			self.sms_con_label.Enable()
-			self.sms_con.Enable()
-			self.button_sms_identify.Disable()
-
-		self.phone_number.SetValue(self.conf.get('SMS', 'phone'))
-		if self.conf.get('SMS', 'enable_sending') == '1':
-			self.sms_enable_send.SetValue(True)
-			self.phone_number_label.Disable()
-			self.phone_number.Disable()
-			self.button_sms_test.Enable()
-			self.sms_text.Enable()
-			self.sms_text_label.Enable()
-		else:
-			self.phone_number_label.Enable()
-			self.phone_number.Enable()
-			self.button_sms_test.Disable()
-			self.sms_text.Disable()
-			self.sms_text_label.Disable()
-
-	def save_gammu_settings(self, port, con):
-		gammu_conf = ConfigParser.SafeConfigParser()
-		gammu_conf.read(self.home + '/.gammurc')
-		gammu_conf.set('gammu', 'port', port)
-		gammu_conf.set('gammu', 'connection', con)
-		with open(self.home + '/.gammurc', 'wb') as configfile:
-			gammu_conf.write(configfile)
-
-	def onsms_enable(self, e):
-		isChecked = self.sms_enable.GetValue()
-		if isChecked:
-			if self.sms_dev.GetValue() == '':
-				if self.sms_bt.GetValue() == '':
-					self.ShowStatusBarRED(_('You have to provide a serial port or a bluetooth address.'))
-					self.sms_enable.SetValue(False)
-					return
-				else:
-					bluetooth = self.sms_bt.GetValue()
-			else:
-				bluetooth = ''
-				self.sms_bt.SetValue(bluetooth)
-				serial = self.sms_dev.GetValue()
-			if self.sms_con.GetValue() == '':
-				self.ShowStatusBarRED(_('You have to provide a connection type.'))
-				self.sms_enable.SetValue(False)
-				return
-			else:
-				connection = self.sms_con.GetValue()
-			self.conf.set('SMS', 'enable', '1')
-			if self.sms_dev.GetValue() == '':
-				self.conf.set('SMS', 'serial', '')
-				port = bluetooth
-			else:
-				self.conf.set('SMS', 'serial', serial)
-				port = serial
-			self.conf.set('SMS', 'bluetooth', bluetooth)
-			self.conf.set('SMS', 'connection', connection)
-			self.sms_dev_label.Disable()
-			self.sms_dev.Disable()
-			self.sms_bt_label.Disable()
-			self.sms_bt.Disable()
-			self.sms_con_label.Disable()
-			self.sms_con.Disable()
-			self.button_sms_identify.Enable()
-			self.save_gammu_settings(port, connection)
-		else:
-			self.conf.set('SMS', 'enable', '0')
-			self.sms_dev_label.Enable()
-			self.sms_dev.Enable()
-			self.sms_bt_label.Enable()
-			self.sms_bt.Enable()
-			self.sms_con_label.Enable()
-			self.sms_con.Enable()
-			self.button_sms_identify.Disable()
-			self.save_gammu_settings('', '')
-			self.sms_enable_send.SetValue(False)
-			self.onsms_enable_send(0)
-
-	def onsms_enable_send(self, e):
-		isChecked = self.sms_enable_send.GetValue()
-		if isChecked:
-			if not self.sms_enable.GetValue():
-				self.ShowStatusBarBLACK(_('You have to enable settings.'))
-				self.sms_enable_send.SetValue(False)
-				return
-			if self.phone_number.GetValue() == '':
-				self.ShowStatusBarRED(_('You have to provide a phone number.'))
-				self.sms_enable_send.SetValue(False)
-				return
-			self.conf.set('SMS', 'enable_sending', '1')
-			self.conf.set('SMS', 'phone', self.phone_number.GetValue())
-			self.phone_number_label.Disable()
-			self.phone_number.Disable()
-			self.sms_text_label.Enable()
-			self.sms_text.Enable()
-			self.button_sms_test.Enable()
-		else:
-			self.conf.set('SMS', 'enable_sending', '0')
-			self.phone_number_label.Enable()
-			self.phone_number.Enable()
-			self.sms_text_label.Disable()
-			self.sms_text.Disable()
-			self.button_sms_test.Disable()
-
-	def on_sms_identify(self, e):
-		subprocess.call(['pkill', '-f', 'test_sms.py'])
-		subprocess.Popen(['python', self.currentpath + '/test_sms.py', 'i', '0', '0'])
-
-	def on_sms_test(self, e):
-		text = self.sms_text.GetValue()
-		if text == '':
-			self.ShowStatusBarRED(_('You have to provide some text to send.'))
-			return
-		subprocess.call(['pkill', '-f', 'test_sms.py'])
-		subprocess.Popen(['python', self.currentpath + '/test_sms.py', 't', text, self.phone_number.GetValue()])
 
 	####################### MQTT
 	def page_mqtt(self):

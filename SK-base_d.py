@@ -37,12 +37,6 @@ try:
 except:	
 	check_mqtt = False
 
-try:
-	import gammu
-except:
-        gammu = None
-
-
 if platform.machine()[0:3] == 'arm':
 	import RPi.GPIO as GPIO
 else:
@@ -698,7 +692,6 @@ class MySK_to_Action_Calc:
 
 	def read_MQTT_SMS_language(self):
 		self.language=self.SK.conf.get('GENERAL', 'lang')
-		self.SMS_phone=self.SK.conf.get('SMS', 'phone'),
 
 		self.MQTT_username=self.SK.conf.get('MQTT', 'username') 
 		self.MQTT_password=self.SK.conf.get('MQTT', 'password')
@@ -1034,18 +1027,6 @@ class MySK_to_Action_Calc:
 			subprocess.Popen(['python', self.currentpath+'/ctrl_actions.py', '1'])
 		elif option == 'ACT20':
 			subprocess.Popen(['python', self.currentpath + '/ctrl_actions.py', '0'])
-		elif option == 'ACT21':
-			try:
-				sm = gammu.StateMachine()
-				sm.ReadConfig()
-				sm.Init()
-				message = {
-					'Text': text,
-					'SMSC': {'Location': 1},
-					'Number': self.SMS_phone,
-				}
-				sm.SendSMS(message)
-			except Exception,e: print 'ERROR SMS action: '+str(e)
 		elif option == 'ACT22':
 			pairs_list = text.split('\n\n')
 			Erg=''

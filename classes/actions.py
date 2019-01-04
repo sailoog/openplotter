@@ -40,7 +40,6 @@ class Actions:
 		self.options.append(['startup restart', 0, 0, 'ACT8'])
 		self.options.append([_('publish Twitter'), _('Be sure you have filled in all fields in "Accounts" tab, and enabled Twitter checkbox.\n\nEnter text to publish in the field "data".'),1, 'ACT13'])
 		self.options.append([_('send e-mail'), _('Be sure you have filled in all fields in "Accounts" tab, and enabled Gmail checkbox.\n\nEnter the subject in the field "data".'),1, 'ACT14'])
-		self.options.append([_('send SMS'), _('Be sure you have enabled sending SMS in "SMS" tab.\n\nEnter the text in field "data".'), 1, 'ACT21'])
 		self.options.append([_('play sound'), 'OpenFileDialog', 1, 'ACT15'])
 		self.options.append([_('stop all sounds'), 0, 0, 'ACT16'])
 		self.options.append([_('show message'), _('Enter the message in field "data".'), 1, 'ACT17'])
