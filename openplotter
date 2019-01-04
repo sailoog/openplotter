@@ -118,9 +118,7 @@ class MainFrame(wx.Frame):
 		self.deviation_table = self.settings.Append(wx.ID_ANY, _('Deviation Table'),
 													_('Create a deviation table for your boat'))
 		self.Bind(wx.EVT_MENU, self.on_deviation_table, self.deviation_table)
-		self.calculate_item1 = self.settings.Append(wx.ID_ANY, _('Calculate'),
-													_('Calculate new data from current values'))
-		self.Bind(wx.EVT_MENU, self.open_calculate, self.calculate_item1)
+
 		self.nmea_0183_item1 = self.settings.Append(wx.ID_ANY, _('NMEA 0183 generator'),
 													_('Generate NMEA 0183 from current values'))
 		self.Bind(wx.EVT_MENU, self.open_nmea_0183, self.nmea_0183_item1)
@@ -270,10 +268,6 @@ class MainFrame(wx.Frame):
 		dlg = adddeviationsetting(self)
 		dlg.ShowModal()
 		dlg.Destroy()
-
-	def open_calculate(self, event):
-		subprocess.call(['pkill', '-f', 'calculate.py'])
-		subprocess.Popen(['python', self.currentpath + '/tools/calculate/calculate.py'])
 
 	def open_nmea_0183(self, event):
 		subprocess.call(['pkill', '-f', 'NMEA_0183_generator.py'])
