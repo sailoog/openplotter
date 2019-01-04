@@ -148,7 +148,6 @@ class MyFrame(wx.Frame):
 		opencpn_fullscreen=self.conf.get('STARTUP', 'opencpn_fullscreen')
 		play=self.conf.get('STARTUP', 'play')
 		sound=self.conf.get('STARTUP', 'sound')
-		node_red=self.conf.get('STARTUP', 'node_red')
 		d800x480=self.conf.get('STARTUP', '800x480')
 		enable=self.conf.get('AIS-SDR', 'enable')
 		gain=self.conf.get('AIS-SDR', 'gain')
@@ -255,15 +254,6 @@ class MyFrame(wx.Frame):
 		self.add_logger_data(_('\nStarting actions and NMEA 0183/N2K generators...'))
 		subprocess.Popen(['python', self.op_folder+'/SK-base_d.py'])
 		self.check_start('SK-base_d.py')
-
-		if util_process_exist('node-red'):
-			subprocess.call('node-red-stop')
-		if node_red=='1':
-			self.add_logger_data(_('\nStarting Node-RED...'))
-			try: 
-				subprocess.Popen('node-red-start')
-				self.check_start('node-red')
-			except: pass
 
 		subprocess.call(['pkill', '-f', 'read_sensors_d.py'])
 		self.add_logger_data(_('\nStarting I2C, SPI, GPIO and Pypilot...'))
