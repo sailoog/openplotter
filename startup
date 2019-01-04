@@ -387,10 +387,10 @@ class MyFrame(wx.Frame):
 				else:
 					self.add_logger_data(' OpenPlotter '+vl+' '+sl+_(' is up to date.').decode('utf8'))
 
-		subprocess.call(['pkill', '-9', 'mpg123'])
+		subprocess.call(['pkill', '-9', 'omxplayer'])
 		if play=='1':
 			if sound:
-				try: subprocess.Popen(['mpg123', '-q', sound])
+				try: subprocess.Popen(['omxplayer', sound])
 				except: pass
 
 		self.autoclose=time.time() + 60

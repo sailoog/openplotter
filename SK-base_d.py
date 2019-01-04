@@ -1023,9 +1023,9 @@ class MySK_to_Action_Calc:
 				msg.send(subject, body)
 			except Exception,e: print 'ERROR gmail action: '+str(e)
 		elif option == 'ACT15':
-			subprocess.Popen(['mpg123', '-q', text])
+			subprocess.Popen(['omxplayer', text])
 		elif option == 'ACT16':
-			subprocess.Popen(['pkill', '-9', 'mpg123'])
+			subprocess.Popen(['pkill', '-9', 'omxplayer'])
 		elif option == 'ACT17':
 			subprocess.Popen(['python', self.currentpath + '/message.py', text, self.language])
 		elif option == 'ACT18':

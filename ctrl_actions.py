@@ -48,7 +48,7 @@ if action=='0':
 		i=i+1
 	conf.set('ACTIONS', 'triggers', str(triggers))
 	subprocess.call(['pkill', '-f', 'SK-base_d.py'])
-	subprocess.Popen(['pkill', '-9', 'mpg123'])
+	subprocess.Popen(['pkill', '-9', 'omxplayer'])
 	subprocess.Popen(['python', currentpath + '/SK-base_d.py'])
 
 #start all
