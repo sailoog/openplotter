@@ -189,8 +189,8 @@ class MainFrame(wx.Frame):
 		self.helpm = wx.Menu()
 		self.helpm_item1 = self.helpm.Append(wx.ID_ANY, _('&About'), _('About OpenPlotter'))
 		self.Bind(wx.EVT_MENU, self.OnAboutBox, self.helpm_item1)
-		self.helpm_item2 = self.helpm.Append(wx.ID_ANY, _('Online documentation'),
-											 _('OpenPlotter online documentation'))
+		self.helpm_item2 = self.helpm.Append(wx.ID_ANY, _('Documentation'),
+											 _('OpenPlotter documentation'))
 		self.Bind(wx.EVT_MENU, self.op_doc, self.helpm_item2)
 		self.menubar.Append(self.helpm, _('&Help'))
 
@@ -483,7 +483,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		wx.AboutBox(info)
 
 	def op_doc(self, e):
-		url = "https://docs.sailoog.com/openplotter-v1-x-x"
+		url = self.currentpath+"/docs/html/index.html"
 		webbrowser.open(url, new=2)
 
 	def Changingpage(self, e):
