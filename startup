@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, subprocess, time, os, threading, sys, platform, requests, ConfigParser, io, json
+import wx, subprocess, time, os, threading, sys, platform, requests, ConfigParser, io
 from shutil import copyfile
 from classes.conf import Conf
 from classes.language import Language
@@ -178,15 +178,6 @@ class MyFrame(wx.Frame):
 		#######################################################
 		
 		subprocess.call(['pkill', '-f', '/openplotter/openplotter'])
-
-		self.add_logger_data(_('Checking Signal K password...'))
-		with open(self.home+'/.signalk/security.json') as data_file:
-			data = json.load(data_file)
-		for i in data['users']:
-			if i['username'] == 'openplotter' and i['password'] == '$2a$10$quNPtJWG7r1wpEKTHPEjqeiCPXNl3dCTS/D235x92sS2lAgcGCH0O':
-				self.add_warnings_data(_('\n\nSecurity warning: You are using the default password for Signal K server (openplotter).\nPlease change password in Signal K > Security > Users > openplotter.'))
-				self.add_logger_data(_(' See warning.'))
-			else: self.add_logger_data(_(' Done.'))
 
 		self.add_logger_data(_('\nChecking Signal K defaults...'))
 		self.SK_settings = SK_settings()
