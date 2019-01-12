@@ -23,7 +23,6 @@ from signalk.client import SignalKClient
 if platform.machine()[0:3]!='arm':
 	print 'This is not a Raspberry Pi -> no GPIO, I2C and SPI'
 else:
-	import RPi.GPIO as GPIO
 	import spidev,RTIMU
 	from classes.bme280 import Bme280
 	from classes.MS5607 import ms5607
@@ -375,29 +374,7 @@ def work_analog():
 	if send:
 		SignalK +=Erg[0:-1]+']}]}\n'
 		sock.sendto(SignalK, ('127.0.0.1', 55557))	
-	
-# read gpio and GENERATE SK
-def work_gpio():
-        if read_sensors:
-                threading.Timer(rate_gpio, work_gpio).start()
-	c=0
-	for i in gpio_list:
-		channel=int(i[2])
-		name = i[0]
-		current_state = GPIO.input(channel)
-		last_state=gpio_list[c][4]
-		if current_state!=last_state:
-			gpio_list[c][4]=current_state
-			publish_sk(i[1],channel,current_state, name)
-		c+=1
 
-def publish_sk(io,channel,current_state,name):
-	if io=='in':io='input'
-	else: io='output'
-	if current_state: current_state='1'
-	else: current_state='0'
-	SignalK='{"updates":[{"$source":"OPnotifications.GPIO.'+io+'.'+str(channel)+'","values":[{"path":"sensors.'+name+'","value":'+current_state+'}]}]}\n'
-	sock.sendto(SignalK, ('127.0.0.1', 55558))
 
 conf = Conf()
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -439,29 +416,6 @@ if analog_:
 	except:
 		analog_=False
 		print 'spi is disabled in raspberry-pi-configuration device tab'
-		
-#init GPIO
-rate_gpio=0.1
-gpio_=False
-try:
-	gpio_list=eval(conf.get('GPIO', 'sensors'))
-except: gpio_list=[]
-if gpio_list:
-	gpio_=True
-	GPIO.setmode(GPIO.BCM)
-	GPIO.setwarnings(False)
-	c=0
-	for i in gpio_list:
-		channel=int(i[2])
-		if i[1]=='out':
-			GPIO.setup(channel, GPIO.OUT)
-			GPIO.output(channel, 0)
-		if i[1]=='in':
-			pull_up_down=GPIO.PUD_DOWN
-			if i[3]=='up': pull_up_down=GPIO.PUD_UP
-			GPIO.setup(channel, GPIO.IN, pull_up_down)
-		gpio_list[c].append('')
-		c=c+1
 
 #init I2C
 bme280 = False
@@ -499,7 +453,6 @@ def add_thread(func):
 
 # launch threads
 if analog_: work_analog()
-if gpio_: work_gpio()
 if bme280:
 	add_thread(work_bme280)
 if MS5607:

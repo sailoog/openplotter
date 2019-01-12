@@ -24,7 +24,6 @@ except:
 from classes.edit_MCP import editMCP
 from classes.add_i2c import addI2c
 from classes.edit_i2c import editI2c
-from classes.add_gpio import addGPIO
 from classes.add_kplex import addkplex
 from classes.add_tool10 import addTool10
 from classes.add_topic import addTopic
@@ -75,7 +74,6 @@ class MainFrame(wx.Frame):
 		self.p_wifi = wx.Panel(self.nb)
 		self.p_pypilot = wx.Panel(self.nb)
 		self.p_action = wx.Panel(self.nb)
-		self.p_gpio = wx.Panel(self.nb)
 		self.p_i2c = wx.Panel(self.nb)
 		self.p_1w = wx.Panel(self.nb)
 		self.p_spi = wx.Panel(self.nb)
@@ -88,7 +86,6 @@ class MainFrame(wx.Frame):
 		self.nb.AddPage(self.p_n2k, 'CAN')
 		self.nb.AddPage(self.p_wifi, _('Network'))
 		self.nb.AddPage(self.p_action, _('Actions'))
-		self.nb.AddPage(self.p_gpio, _('GPIO'))
 		self.nb.AddPage(self.p_i2c, _('I2C'))
 		self.nb.AddPage(self.p_1w, '1W')
 		self.nb.AddPage(self.p_spi, 'SPI')
@@ -202,7 +199,6 @@ class MainFrame(wx.Frame):
 		self.page_wifi()
 		self.page_pypilot()
 		self.page_action()
-		self.page_gpio()
 		self.page_i2c()
 		self.page_1w()
 		self.page_spi()
@@ -220,7 +216,6 @@ class MainFrame(wx.Frame):
 		self.read_triggers()
 		self.read_DS18B20()
 		self.read_Serialinst()
-		self.read_gpio()
 		self.read_mqtt()
 		self.read_MCP()
 		self.read_i2c()
@@ -1290,7 +1285,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def reset_sensors(self, e=0):
 		self.stop_sensors()
 		self.read_i2c()
-		self.read_gpio()
 		self.read_pypilot()
 		self.start_sensors()
 		
@@ -1990,126 +1984,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		dlg.Destroy()
 		self.conf.read()
 		self.read_MCP()
-		
-	###################################### GPIO
-
-	def page_gpio(self):
-		title = wx.StaticText(self.p_gpio, label=_(' Sensors '))
-
-		self.list_gpio = wx.ListCtrl(self.p_gpio, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
-		self.list_gpio.InsertColumn(0, _('Name'), width=130)
-		self.list_gpio.InsertColumn(1, _('I/O'), width=60)
-		self.list_gpio.InsertColumn(2, 'GPIO', width=40)
-		self.list_gpio.InsertColumn(3, 'Pull', width=80)
-		self.list_gpio.InsertColumn(4, _('Signal K key'), width=180)
-		self.list_gpio.InsertColumn(5, _('Source'), width=100)
-		self.list_gpio.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_gpio)
-		self.list_gpio.Bind(wx.EVT_LIST_ITEM_SELECTED, self.edit_gpio)
-
-
-		add = wx.Button(self.p_gpio, label=_('add'))
-		add.Bind(wx.EVT_BUTTON, self.on_add_gpio)
-
-		delete = wx.Button(self.p_gpio, label=_('delete'))
-		delete.Bind(wx.EVT_BUTTON, self.on_delete_gpio)
-
-		diagnostic = wx.Button(self.p_gpio, label=_('SK Diagnostic'))
-		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
-
-		reset_gpio = wx.Button(self.p_gpio, label=_('Restart'))
-		reset_gpio.Bind(wx.EVT_BUTTON, self.reset_sensors)
-
-		hlistbox_but = wx.BoxSizer(wx.VERTICAL)
-		hlistbox_but.Add(add, 0, wx.ALL, 5)
-		hlistbox_but.Add(delete, 0, wx.ALL, 5)
-
-		hlistbox = wx.BoxSizer(wx.HORIZONTAL)
-		hlistbox.Add(self.list_gpio, 1, wx.ALL | wx.EXPAND, 5)
-		hlistbox.Add(hlistbox_but, 0, wx.RIGHT | wx.LEFT, 0)
-
-		hbox = wx.BoxSizer(wx.HORIZONTAL)
-		hbox.Add(diagnostic, 0, wx.RIGHT | wx.LEFT, 5)
-		hbox.Add(reset_gpio, 0, wx.RIGHT | wx.LEFT, 5)
-
-		vbox = wx.BoxSizer(wx.VERTICAL)
-		vbox.Add(title, 0, wx.ALL | wx.EXPAND, 5)
-		vbox.Add(hlistbox, 1, wx.ALL | wx.EXPAND, 0)
-		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 5)
-
-		self.p_gpio.SetSizer(vbox)
-
-	def read_gpio(self):
-		self.gpio = []
-		self.list_gpio.DeleteAllItems()
-		data = self.conf.get('GPIO', 'sensors')
-		try:
-			temp_list = eval(data)
-		except:
-			temp_list = []
-		for ii in temp_list:
-			self.gpio.append(ii)
-			# name, io, GPIO, pull
-			if ii[1] == 'out':
-				io = _('output')
-				source = 'output'
-			else:
-				io = _('input')
-				source = 'input'
-			self.list_gpio.Append([ii[0], io, ii[2], ii[3], 'sensors.'+ii[0],'GPIO.'+source+'.'+ii[2]])
-
-	def edit_gpio(self, e):
-		selected_gpio = e.GetIndex()
-		edit = [selected_gpio, self.gpio[selected_gpio][0], self.gpio[selected_gpio][1], self.gpio[selected_gpio][2],
-				self.gpio[selected_gpio][3]]
-		self.edit_add_gpio(edit)
-
-	def on_add_gpio(self, e):
-		self.edit_add_gpio(0)
-
-	def edit_add_gpio(self, edit):
-		selected_gpio = 0
-		if edit != 0: selected_gpio = edit[3]
-		avalaible_gpio = ['5', '6', '12', '13', '16', '19', '20', '21', '25', '26']
-		tmp_list1 = []
-		tmp_list2 = []
-		for i in self.gpio:
-			tmp_list1.append(i[2])
-		for i in avalaible_gpio:
-			if i not in tmp_list1 or i == selected_gpio: tmp_list2.append(i)
-		avalaible_gpio = tmp_list2
-		dlg = addGPIO(avalaible_gpio, edit)
-		res = dlg.ShowModal()
-		if res == wx.ID_OK:
-			gpio_selection = dlg.gpio_select.GetValue().encode('utf8')
-			pull_selection = dlg.pull_select.GetValue().encode('utf8')
-			name = dlg.name.GetValue().encode('utf8')
-			io_selection = dlg.io_select.GetValue()
-			if io_selection == _('output'):
-				io = 'out'
-			else:
-				io = 'in'
-			gpioTmp = [name, io, gpio_selection, pull_selection]
-			if edit == 0:
-				self.gpio.append(gpioTmp)
-			else:
-				self.gpio[edit[0]] = gpioTmp
-			self.apply_changes_gpio()
-		dlg.Destroy()
-
-	def on_delete_gpio(self, e):
-		selected_gpio = self.list_gpio.GetFirstSelected()
-		if selected_gpio == -1:
-			self.ShowStatusBarBLACK(_('Select an item to delete.'))
-			return
-		del self.gpio[selected_gpio]
-		self.list_gpio.DeleteItem(selected_gpio)
-		self.apply_changes_gpio()
-
-	def apply_changes_gpio(self):
-		self.conf.set('GPIO', 'sensors', str(self.gpio))
-		self.stop_sensors()
-		self.start_sensors()
-		self.read_gpio()
 
 	####################### Accounts
 	def page_account(self):
