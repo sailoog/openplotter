@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 # This file is part of Openplotter.
-# Copyright (C) 2015 by sailoog <https://github.com/sailoog/openplotter>
+# Copyright (C) 2019 by sailoog <https://github.com/sailoog/openplotter>
 #
 # Openplotter is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -542,8 +542,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.op_maximize = wx.CheckBox(self.p_startup, label=_('Maximize OpenPlotter'))
 		self.op_maximize.Bind(wx.EVT_CHECKBOX, self.startup)
 
-		self.node_red = wx.CheckBox(self.p_startup, label=_('Node-Red'))
-		self.node_red.Bind(wx.EVT_CHECKBOX, self.startup)
+		#self.node_red = wx.CheckBox(self.p_startup, label=_('Node-Red'))
+		#self.node_red.Bind(wx.EVT_CHECKBOX, self.startup)
 
 		self.d800x480 = wx.CheckBox(self.p_startup, label=_('Check 800x480 display'))
 		self.d800x480.Bind(wx.EVT_CHECKBOX, self.startup)
@@ -569,8 +569,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		final.Add(h_sound, 0, wx.LEFT | wx.EXPAND, 10)
 		final.AddSpacer(15)
 		final.Add(self.op_maximize, 0, wx.LEFT | wx.EXPAND, 10)
-		final.AddSpacer(15)
-		final.Add(self.node_red, 0, wx.LEFT | wx.EXPAND, 10)
+		#final.AddSpacer(15)
+		#final.Add(self.node_red, 0, wx.LEFT | wx.EXPAND, 10)
 		final.AddSpacer(15)
 		final.Add(self.d800x480, 0, wx.LEFT | wx.EXPAND, 10)
 
@@ -589,7 +589,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if self.conf.get('STARTUP', 'maximize') == '1':
 			self.op_maximize.SetValue(True)
 			self.Maximize()
-		if self.conf.get('STARTUP', 'node_red') == '1': self.node_red.SetValue(True)
+		#if self.conf.get('STARTUP', 'node_red') == '1': self.node_red.SetValue(True)
 		if self.conf.get('STARTUP', '800x480') == '1': self.d800x480.SetValue(True)
 		self.startup_path_sound.SetValue(self.conf.get('STARTUP', 'sound'))
 		if self.conf.get('STARTUP', 'play') == '1':
@@ -652,11 +652,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			else:
 				self.conf.set('STARTUP', 'play', '0')
 
-		if sender == self.node_red:
-			if self.node_red.GetValue():
-				self.conf.set('STARTUP', 'node_red', '1')
-			else:
-				self.conf.set('STARTUP', 'node_red', '0')
+		#if sender == self.node_red:
+		#	if self.node_red.GetValue():
+		#		self.conf.set('STARTUP', 'node_red', '1')
+		#	else:
+		#		self.conf.set('STARTUP', 'node_red', '0')
 
 		if sender == self.d800x480:
 			if self.d800x480.GetValue():
@@ -922,8 +922,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		out += self.on_show_ip_info_txt('3000',ips,ip_hostname)
 		out += _('\n VNC remote desktop:\n')
 		out += self.on_show_ip_info_txt('5900',ips,ip_hostname)
-		out += _('\n node-red:\n')
-		out += self.on_show_ip_info_txt('1880',ips,ip_hostname)
+		#out += _('\n node-red:\n')
+		#out += self.on_show_ip_info_txt('1880',ips,ip_hostname)
 		out += _('\n MQTT local broker:\n')
 		out += self.on_show_ip_info_txt('1883',ips,ip_hostname)
 		self.ip_info.SetValue(out)
@@ -2038,10 +2038,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.gpio.append(ii)
 			# name, io, GPIO, pull
 			if ii[1] == 'out':
-				io = _('output')
+				io = _('output').decode('utf8')
 				source = 'output'
 			else:
-				io = _('input')
+				io = _('input').decode('utf8')
 				source = 'input'
 			self.list_gpio.Append([ii[0], io, ii[2], ii[3], 'sensors.'+ii[0],'GPIO.'+source+'.'+ii[2]])
 
@@ -2306,7 +2306,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			time_units = self.actions.time_units[i[3]]
 			repeat2 = repeat + ' ' + time_units
 			self.list_actions.Append(
-				[self.actions.options[self.actions.getOptionsListIndex(i[0])][0].decode('utf8'), i[1].decode('utf8'), repeat2])
+				[self.actions.options[self.actions.getOptionsListIndex(i[0])][0].decode('utf8'), i[1].decode('utf8'), repeat2.decode('utf8')])
 
 	def on_edit_triggers(self, e):
 		t = e.GetIndex()
@@ -2399,7 +2399,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			else:
 				repeat2 = str(repeat) + ' ' + time_units
 			if edit == 0:
-				self.list_actions.Append([action.decode('utf8'), data.decode('utf8'), repeat2])
+				self.list_actions.Append([action.decode('utf8'), data.decode('utf8'), repeat2.decode('utf8')])
 				tmp = []
 				tmp.append(self.actions.options[action_selection][3].encode('utf8'))
 				tmp.append(data)
@@ -2409,7 +2409,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			else:
 				self.list_actions.SetStringItem(edit[0], 0, action.decode('utf8'))
 				self.list_actions.SetStringItem(edit[0], 1, data.decode('utf8'))
-				self.list_actions.SetStringItem(edit[0], 2, repeat2)
+				self.list_actions.SetStringItem(edit[0], 2, repeat2.decode('utf8'))
 				self.triggers[selected_trigger_position][4][edit[0]][0] = self.actions.options[action_selection][3].encode('utf8')
 				self.triggers[selected_trigger_position][4][edit[0]][1] = data
 				self.triggers[selected_trigger_position][4][edit[0]][2] = repeat
@@ -3808,13 +3808,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.mqtt_port.Disable()
 			self.mqtt_user.Disable()
 			self.mqtt_pass.Disable()
-			self.button_apply_changes_mqtt.SetLabel(_('Edit'))
+			self.button_apply_changes_mqtt.SetLabel(_('Edit').decode('utf8'))
 		else:
 			self.mqtt_broker.Enable()
 			self.mqtt_port.Enable()
 			self.mqtt_user.Enable()
 			self.mqtt_pass.Enable()
-			self.button_apply_changes_mqtt.SetLabel(_('Apply'))
+			self.button_apply_changes_mqtt.SetLabel(_('Apply').decode('utf8'))
 		self.topics = []
 		self.list_topics.DeleteAllItems()
 		data = self.conf.get('MQTT', 'topics')
@@ -3896,9 +3896,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				dlg.Destroy()
 				return
 			if edit == 0:
-				self.topics.append([topic,topic_type2,skkey2])
+				self.topics.append([topic.encode('utf8'),topic_type2,skkey2.encode('utf8')])
 			else:
-				self.topics[edit[0]] = [topic,topic_type2,skkey2]
+				self.topics[edit[0]] = [topic.encode('utf8'),topic_type2,skkey2.encode('utf8')]
 			self.conf.set('MQTT', 'topics', str(self.topics))
 			self.stop_mqtt()
 			self.start_mqtt()

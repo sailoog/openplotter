@@ -35,6 +35,7 @@ class GetKeys:
 			if '/vessels/*/' in i:
 				key = i.replace('/vessels/*/','')
 				key = key.replace('RegExp','*')
+				key = key.replace('[A-Za-z0-9]+','*')
 				key = key.replace('/','.')
 				if self.data[i].has_key('properties'):
 					for ii in self.data[i]['properties']:

@@ -20,7 +20,7 @@ import subprocess
 import threading
 import websocket
 import time,platform
-import datetime,operator,signal,socket,sys,math,re,geomag
+import datetime,operator,signal,socket,sys,math,re
 
 from dateutil import tz
 from classes.N2K_send import N2K_send
@@ -1083,17 +1083,18 @@ def signal_handler(signal_, frame):
 signal.signal(signal.SIGINT, signal_handler)
 SK = MySK()
 if SK.conf.get('N2K', 'output') != '1':
-	SKN2K = MySK_to_N2K(SK)
 	aktiv_N2K = False
 else:
 	aktiv_N2K = True
+	SKN2K = MySK_to_N2K(SK)
 SKNMEA = MySK_to_NMEA(SK)
 SKAction = MySK_to_Action_Calc(SK)
 
 timedif = (datetime.datetime.utcnow() - datetime.datetime.now()).total_seconds()
 aktiv_NMEA = True
 aktiv_Action = False
-if not SKN2K.PGN_list: aktiv_N2K = False
+if aktiv_N2K:
+	if not SKN2K.PGN_list: aktiv_N2K = False
 if not SKNMEA.nmea_list: aktiv_NMEA = False
 if SKAction.triggers: aktiv_Action = True
 if SKAction.calcMagneticVariation: aktiv_Action = True
