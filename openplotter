@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import ConfigParser, json, os, io, pyudev, re, requests, subprocess, sys, time, webbrowser, wx, wx.lib.scrolledpanel, serial, shutil
+import ConfigParser, ujson, os, io, pyudev, re, requests, subprocess, sys, time, webbrowser, wx, wx.lib.scrolledpanel, serial, shutil
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 try:
 	from classes.add_DS18B20 import addDS18B20
@@ -33,6 +33,7 @@ from classes.add_SK_to_N2K import addSKtoN2K
 from classes.conf import Conf
 from classes.SK_settings import SK_settings
 from classes.language import Language
+from classes.nodes import Nodes, TriggerSK, Condition
 
 class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 	def __init__(self, parent, height):
@@ -95,6 +96,7 @@ class MainFrame(wx.Frame):
 		sizer = wx.BoxSizer()
 		sizer.Add(self.nb, 1, wx.EXPAND)
 		self.p.SetSizer(sizer)
+		self.help_bmp = wx.Bitmap("help.png", wx.BITMAP_TYPE_ANY)
 		self.icon = wx.Icon(self.currentpath + '/openplotter.ico', wx.BITMAP_TYPE_ICO)
 		self.SetIcon(self.icon)
 		self.CreateStatusBar()
@@ -213,7 +215,6 @@ class MainFrame(wx.Frame):
 		self.read_account()
 		self.read_startup()
 		self.read_wifi_conf()
-		self.read_triggers()
 		self.read_DS18B20()
 		self.read_Serialinst()
 		self.read_mqtt()
@@ -2084,15 +2085,16 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	####################### Actions
 	def page_action(self):
-		title = wx.StaticText(self.p_action, label=_(' Triggers '))
 
-		self.list_triggers = CheckListCtrl(self.p_action, 100)
-		self.list_triggers.InsertColumn(0, _('trigger'), width=300)
-		self.list_triggers.InsertColumn(1, _('operator'), width=150)
-		self.list_triggers.InsertColumn(2, _('value'))
-		self.list_triggers.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_print_actions)
+		self.list_triggers = wx.ListCtrl(self.p_action, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(-1,90))
+		self.list_triggers.InsertColumn(0, _('Triggers'), width= -1)
+		self.list_triggers.InsertColumn(1, _(' '), width= -1)
+		self.list_triggers.InsertColumn(2, _(' '), width= -1)
+		self.list_triggers.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_print_conditions)
 		self.list_triggers.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit_triggers)
-		self.list_triggers.SetMinSize((10, 10))
+
+		self.available_triggers = ['Signal K','GPIO','MQTT','Telegram',_('Time')]
+		self.available_triggers_select = wx.Choice(self.p_action, choices=self.available_triggers, style=wx.CB_READONLY)
 
 		add_trigger = wx.Button(self.p_action, label=_('add'))
 		add_trigger.Bind(wx.EVT_BUTTON, self.on_add_trigger)
@@ -2100,76 +2102,236 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		delete_trigger = wx.Button(self.p_action, label=_('delete'))
 		delete_trigger.Bind(wx.EVT_BUTTON, self.on_delete_trigger)
 
-		self.list_actions = wx.ListCtrl(self.p_action, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
-		self.list_actions.InsertColumn(0, _('action'), width=200)
-		self.list_actions.InsertColumn(1, _('data'), width=260)
-		self.list_actions.InsertColumn(2, _('repeat'), width=130)
-		self.list_actions.Bind(wx.EVT_LIST_ITEM_SELECTED, self.edit_actions)
-		self.list_actions.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_actions)
-		self.list_actions.SetMinSize((10, 10))
+		self.available_conditions = ['=', '!=', '<', '<=', '>', '>=', _('is between'), _('contains'), _('is true'), ('is false'), _('is null'), _('is not null'), _('is empty'), _('is not empty')]
+		self.available_operators_select = wx.Choice(self.p_action, choices=self.available_conditions, style=wx.CB_READONLY)
 
+		self.list_conditions = wx.ListCtrl(self.p_action, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(-1,90))
+		self.list_conditions.InsertColumn(0, _('Conditions'), width= -1)
+		self.list_conditions.InsertColumn(1, _(' '), width= -1)
+		self.list_conditions.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_print_actions)
+		self.list_conditions.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_conditions)
+
+		add_condition = wx.Button(self.p_action, label=_('add'))
+		add_condition.Bind(wx.EVT_BUTTON, self.on_add_condition)
+
+		delete_condition = wx.Button(self.p_action, label=_('delete'))
+		delete_condition.Bind(wx.EVT_BUTTON, self.on_delete_condition)
+
+		self.list_actions = wx.ListCtrl(self.p_action, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(-1,90))
+		self.list_actions.InsertColumn(0, _('Actions'), width= -1)
+		self.list_actions.InsertColumn(1, _(' '), width= -1)
+		self.list_actions.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_select_actions)
+		self.list_actions.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_actions)
+
+		self.available_actions = [_('Send value to Signal K'),
+		_('Send delta to Signal K'),
+		_('Set GPIO output to 0'),
+		_('Set GPIO output to 1'),
+		_('Publish to local MQTT'),
+		_('Publish to remote MQTT'),
+		_('Play sound')]
+
+		self.available_actions_select = wx.Choice(self.p_action, choices=self.available_actions, style=wx.CB_READONLY)
 		add_action = wx.Button(self.p_action, label=_('add'))
 		add_action.Bind(wx.EVT_BUTTON, self.on_add_action)
 
 		delete_action = wx.Button(self.p_action, label=_('delete'))
 		delete_action.Bind(wx.EVT_BUTTON, self.on_delete_action)
 
-		stop_all = wx.Button(self.p_action, label=_('Stop all'))
-		stop_all.Bind(wx.EVT_BUTTON, self.on_stop_actions)
-
-		start_all = wx.Button(self.p_action, label=_('Start all'))
-		start_all.Bind(wx.EVT_BUTTON, self.on_start_actions)
+		help_button = wx.BitmapButton(self.p_action, bitmap=self.help_bmp, size=(self.help_bmp.GetWidth()+20, self.help_bmp.GetHeight()))
+		help_button.Bind(wx.EVT_BUTTON, self.on_help_action)
 
 		apply_changes = wx.Button(self.p_action, label=_('Apply changes'))
 		apply_changes.Bind(wx.EVT_BUTTON, self.on_apply_changes_actions)
 		cancel_changes = wx.Button(self.p_action, label=_('Cancel changes'))
 		cancel_changes.Bind(wx.EVT_BUTTON, self.on_cancel_changes_actions)
 
-		hlistbox_but = wx.BoxSizer(wx.VERTICAL)
+		hlistbox_but = wx.BoxSizer(wx.HORIZONTAL)
 		hlistbox_but.Add(add_trigger, 0, wx.ALL, 5)
 		hlistbox_but.Add(delete_trigger, 0, wx.ALL, 5)
 
+		vlistbox_trig = wx.BoxSizer(wx.VERTICAL)
+		vlistbox_trig.Add(self.available_triggers_select, 0, wx.ALL | wx.EXPAND, 5)
+		vlistbox_trig.Add(hlistbox_but, 0, wx.ALL, 0)
+
 		hlistbox = wx.BoxSizer(wx.HORIZONTAL)
 		hlistbox.Add(self.list_triggers, 1, wx.ALL | wx.EXPAND, 5)
-		hlistbox.Add(hlistbox_but, 0, wx.RIGHT | wx.LEFT, 0)
+		hlistbox.Add(vlistbox_trig, 0, wx.RIGHT | wx.LEFT, 0)
 
-		hlistbox_butb10 = wx.BoxSizer(wx.VERTICAL)
-		hlistbox_butb10.Add(add_action, 0, wx.ALL, 5)
-		hlistbox_butb10.Add(delete_action, 0, wx.ALL, 5)
+		hlistbox_but2 = wx.BoxSizer(wx.HORIZONTAL)
+		hlistbox_but2.Add(add_condition, 0, wx.ALL, 5)
+		hlistbox_but2.Add(delete_condition, 0, wx.ALL, 5)
 
-		hlistboxb = wx.BoxSizer(wx.HORIZONTAL)
-		hlistboxb.Add(self.list_actions, 1, wx.ALL | wx.EXPAND, 5)
-		hlistboxb.Add(hlistbox_butb10, 0, wx.RIGHT | wx.LEFT, 0)
+		vlistbox_cond = wx.BoxSizer(wx.VERTICAL)
+		vlistbox_cond.Add(self.available_operators_select, 0, wx.ALL | wx.EXPAND, 5)
+		vlistbox_cond.Add(hlistbox_but2, 0, wx.ALL, 0)
+
+		hlistbox2 = wx.BoxSizer(wx.HORIZONTAL)
+		hlistbox2.Add(self.list_conditions, 1, wx.ALL | wx.EXPAND, 5)
+		hlistbox2.Add(vlistbox_cond, 0, wx.RIGHT | wx.LEFT, 0)
+
+		hlistbox_but3 = wx.BoxSizer(wx.HORIZONTAL)
+		hlistbox_but3.Add(add_action, 0, wx.ALL, 5)
+		hlistbox_but3.Add(delete_action, 0, wx.ALL, 5)
+
+		vlistbox_act = wx.BoxSizer(wx.VERTICAL)
+		vlistbox_act.Add(self.available_actions_select, 0, wx.ALL | wx.EXPAND, 5)
+		vlistbox_act.Add(hlistbox_but3, 0, wx.ALL, 0)
+
+		hlistbox3 = wx.BoxSizer(wx.HORIZONTAL)
+		hlistbox3.Add(self.list_actions, 1, wx.ALL | wx.EXPAND, 5)
+		hlistbox3.Add(vlistbox_act, 0, wx.RIGHT | wx.LEFT, 0)
 
 		hbox = wx.BoxSizer(wx.HORIZONTAL)
-		hbox.Add(stop_all, 0, wx.RIGHT | wx.LEFT, 5)
-		hbox.Add(start_all, 0, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add(help_button, 0, wx.ALL, 0)
 		hbox.Add((0, 0), 1, wx.RIGHT | wx.LEFT, 5)
 		hbox.Add(apply_changes, 0, wx.RIGHT | wx.LEFT, 5)
 		hbox.Add(cancel_changes, 0, wx.RIGHT | wx.LEFT, 5)
 
 		vbox = wx.BoxSizer(wx.VERTICAL)
-		vbox.Add(title, 0, wx.ALL | wx.EXPAND, 5)
 		vbox.Add(hlistbox, 1, wx.ALL | wx.EXPAND, 0)
-		vbox.Add(hlistboxb, 1, wx.ALL | wx.EXPAND, 0)
+		vbox.Add(hlistbox2, 1, wx.ALL | wx.EXPAND, 0)
+		vbox.Add(hlistbox3, 1, wx.ALL | wx.EXPAND, 0)
 		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 5)
 
 		self.p_action.SetSizer(vbox)
 
 	def read_triggers(self):
-		pass
+		self.selected_trigger = -1
+		self.selected_condition = -1
+		self.selected_action = -1
+		self.nodes = Nodes()
+		result = self.nodes.read_flow(self.nodes.actions_flow_id)
+		self.actions_flow_data = self.nodes.get_actions_flow_data()
+		self.actions_flow_tree = result[0]
+		self.triggers_flow_nodes = result[1]
+		self.conditions_flow_nodes = result[2]
+		self.actions_flow_nodes = result[3]
+		self.no_actions_nodes = result[4]
+		self.on_print_triggers()
+
+	def on_print_triggers(self):	
+		self.list_triggers.DeleteAllItems()
+		for trigger in self.actions_flow_tree:
+			name = "t|"+trigger["trigger_node_out_id"]+"|"+trigger["type"]
+			field2 = ''
+			field3 = ''
+			path = ''
+			path_property = ''
+			for node in self.triggers_flow_nodes:
+				if 'name' in node and name == node["name"]:
+					if trigger["type"] == '0':
+						if node['type'] == 'signalk-subscribe': 
+							path = node['path']
+							field3 = node['source']
+						if node['type'] == 'function':
+							items = node['func'].split(';')
+							items2 = items[0].split('.')
+							path_property = ':'+items2[-1]
+						field2 = path+path_property
+					if trigger["type"] == '1' and node['type'] == 'rpi-gpio in': 
+						field2 = node['pin']
+						field3 = node['intype']			
+			self.list_triggers.Append([self.available_triggers[int(trigger["type"])], field2, field3])
+			self.list_triggers.SetColumnWidth(0,-1)
+			self.list_triggers.SetColumnWidth(1,-1)
+			self.list_triggers.SetColumnWidth(2,-1)
+
+	def on_print_conditions(self, e):
+		self.selected_trigger = self.list_triggers.GetFirstSelected()
+		if self.selected_trigger != -1:
+			conditions = self.actions_flow_tree[self.selected_trigger]["conditions"]
+			self.list_conditions.DeleteAllItems()
+			self.list_actions.DeleteAllItems()
+			for condition in conditions:
+				name = "c|"+condition["condition_node_out_id"]+"|"+condition["operator"]
+				field2 = ''
+				for node in self.conditions_flow_nodes:
+					if 'name' in node and name == node["name"]:
+						if node['type'] == 'switch':
+							if 'v' in node['rules'][0]: field2 = node['rules'][0]['v']
+				self.list_conditions.Append([self.available_conditions[int(condition["operator"])], field2])
+				self.list_conditions.SetColumnWidth(0,-1)
+				self.list_conditions.SetColumnWidth(1,-1)
 
 	def on_print_actions(self, e):
-		pass
+		self.selected_condition = self.list_conditions.GetFirstSelected()
+		if self.selected_condition != -1:
+			actions = self.actions_flow_tree[self.selected_trigger]["conditions"][self.selected_condition]["actions"]
+			self.list_actions.DeleteAllItems()
+			for action in actions:
+				name = "a|"+action["action_node_out_id"]+"|"+action["type"]
+				field2 = ''
+				for node in self.actions_flow_nodes:
+					if 'name' in node and name == node["name"]:
+						if action["type"] == '0' and node['type'] == 'change': field2 = node['rules'][0]['to']
+						if action["type"] == '6' and node['type'] == 'exec': field2 = node['append']
+				self.list_actions.Append([self.available_actions[int(action["type"])], field2])
+				self.list_actions.SetColumnWidth(0,-1)
+				self.list_actions.SetColumnWidth(1,-1)
+
+	def on_select_actions(self, e):
+		self.selected_action = self.list_actions.GetFirstSelected()
 
 	def on_edit_triggers(self, e):
 		pass
-
+		'''
+		selected_trigger = e.GetIndex()
+		edit = 1
+		self.edit_add_trigger(edit)
+		'''
 	def on_add_trigger(self, e):
-		pass
+		self.edit_add_trigger(0)
+
 
 	def edit_add_trigger(self, edit):
+		if self.available_triggers_select.GetSelection() == 0: dlg = TriggerSK(edit)
+		else:
+			self.ShowStatusBarRED(_('Select a trigger type.'))
+			return
+		res = dlg.ShowModal()
+		if res == wx.OK:
+			if not edit:
+				for i in dlg.TriggerSKnodes:
+					self.triggers_flow_nodes.append(i)
+					items = i['name'].split('|')
+				self.actions_flow_tree.append({"trigger_node_out_id": items[1],"type": items[2],"conditions": []})
+				self.on_print_triggers()
+				self.list_triggers.Select(len(self.actions_flow_tree)-1)
+			else:
+				pass
+		dlg.Destroy()
+
+	def edit_conditions(self, e):
 		pass
+
+	def on_add_condition(self, e):
+		self.edit_add_condition(0)
+
+	def edit_add_condition(self, edit):
+		if self.selected_trigger == -1:
+			self.ShowStatusBarRED(_('Select a trigger.'))
+			return
+		operator = self.available_operators_select.GetSelection()
+		if operator != -1: dlg = Condition(edit,operator)
+		else:
+			self.ShowStatusBarRED(_('Select an operator.'))
+			return
+		res = dlg.ShowModal()
+		if res == wx.OK:
+			if not edit:
+				self.conditions_flow_nodes.append(dlg.ConditionNode)
+				items = dlg.ConditionNode['name'].split('|')
+				self.actions_flow_tree[self.selected_trigger]['conditions'].append({"condition_node_out_id": items[1],"operator": items[2],"actions": []})
+				trigger_id = self.actions_flow_tree[self.selected_trigger]['trigger_node_out_id']
+				for i in self.triggers_flow_nodes:
+					if 'id' in i and i['id'] == trigger_id:
+						i['wires'] = [[dlg.connector_id]]
+				self.on_print_conditions(0)
+				self.list_conditions.Select(len(self.actions_flow_tree[self.selected_trigger]['conditions'])-1)
+			else:
+				pass
+		dlg.Destroy()
 
 	def edit_actions(self, e):
 		pass
@@ -2183,19 +2345,33 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def on_delete_trigger(self, e):
 		pass
 
+	def on_delete_condition(self, e):
+		pass
+
 	def on_delete_action(self, e):
 		pass
 
 	def on_apply_changes_actions(self, e):
-		pass
+		all_flows = []
+		for i in self.no_actions_nodes:
+			all_flows.append(i)
+		for i in self.actions_flow_data:
+			all_flows.append(i)
+		for i in self.triggers_flow_nodes:
+			all_flows.append(i)
+		for i in self.conditions_flow_nodes:
+			all_flows.append(i)
+		for i in self.actions_flow_nodes:
+			all_flows.append(i)
+		data = ujson.dumps(all_flows, indent=4)
+		with open(self.nodes.flows_file, "w") as outfile:
+			outfile.write(data)
+		self.restart_SK()
 
 	def on_cancel_changes_actions(self, e):
-		pass
+		self.read_triggers()
 
-	def on_stop_actions(self, e):
-		pass
-
-	def on_start_actions(self, e):
+	def on_help_action(self, e):
 		pass
 
 	####################### 1W sensors
