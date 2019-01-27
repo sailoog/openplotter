@@ -2201,11 +2201,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.p_action.SetSizer(vbox)
 
 	def read_triggers(self):
+		self.actions_flow_id = 'openplot.actio'
 		self.selected_trigger = -1
 		self.selected_condition = -1
 		self.selected_action = -1
-		self.nodes = Nodes()
-		result = self.nodes.read_flow(self.nodes.actions_flow_id)
+		self.nodes = Nodes(self,self.actions_flow_id)
+		result = self.nodes.read_flow()
 		self.actions_flow_data = self.nodes.get_actions_flow_data()
 		self.actions_flow_tree = result[0]
 		self.triggers_flow_nodes = result[1]
@@ -2269,7 +2270,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				for node in self.actions_flow_nodes:
 					if 'name' in node and name == node["name"]:
 						if action["type"] == '0' and node['type'] == 'change': field2 = node['rules'][0]['to']
-						if action["type"] == '6' and node['type'] == 'exec': field2 = node['append']
+						if action["type"] == '5' and node['type'] == 'exec': field2 = node['append']
 				self.list_actions.Append([self.available_actions[int(action["type"])], field2])
 				self.list_actions.SetColumnWidth(0,-1)
 				self.list_actions.SetColumnWidth(1,-1)
@@ -2285,7 +2286,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 
 	def edit_add_trigger(self, edit):
-		if self.available_triggers_select.GetSelection() == 0: dlg = TriggerSK(edit)
+		if self.available_triggers_select.GetSelection() == 0: dlg = TriggerSK(self,edit)
 		else:
 			self.ShowStatusBarRED(_('Select a trigger type.'))
 			return
@@ -2313,7 +2314,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.ShowStatusBarRED(_('Select a trigger.'))
 			return
 		operator = self.available_operators_select.GetSelection()
-		if operator != -1: dlg = Condition(edit,operator)
+		if operator != -1: dlg = Condition(self,edit)
 		else:
 			self.ShowStatusBarRED(_('Select an operator.'))
 			return
@@ -2344,26 +2345,25 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.ShowStatusBarRED(_('Select a condition.'))
 			return
 		action = self.available_actions_select.GetSelection()
-		if action == 5: dlg = ActionPlaySound(edit)
+		if action == 5: dlg = ActionPlaySound(self,edit)
 		else:
 			self.ShowStatusBarRED(_('Select an action.'))
 			return
 		res = dlg.ShowModal()
 		if res == wx.OK:
-			'''
 			if not edit:
-				self.conditions_flow_nodes.append(dlg.ConditionNode)
-				items = dlg.ConditionNode['name'].split('|')
-				self.actions_flow_tree[self.selected_trigger]['conditions'].append({"condition_node_out_id": items[1],"operator": items[2],"actions": []})
-				trigger_id = self.actions_flow_tree[self.selected_trigger]['trigger_node_out_id']
-				for i in self.triggers_flow_nodes:
-					if 'id' in i and i['id'] == trigger_id:
+				for i in dlg.ActionNodes:
+					self.actions_flow_nodes.append(i)
+					items = i['name'].split('|')
+				self.actions_flow_tree[self.selected_trigger]['conditions'][self.selected_condition]['actions'].append({"action_node_out_id": items[1],"type": items[2]})
+				condition_id = self.actions_flow_tree[self.selected_trigger]['conditions'][self.selected_condition]['condition_node_out_id']
+				for i in self.conditions_flow_nodes:
+					if 'id' in i and i['id'] == condition_id:
 						i['wires'][0].append(dlg.connector_id)
-				self.on_print_conditions(0)
-				self.list_conditions.Select(len(self.actions_flow_tree[self.selected_trigger]['conditions'])-1)
+				self.on_print_actions(0)
+				self.list_actions.Select(len(self.actions_flow_tree[self.selected_trigger]['conditions'][self.selected_condition]['actions'])-1)
 			else:
 				pass
-			'''
 		dlg.Destroy()
 
 	def on_delete_trigger(self, e):
@@ -3401,7 +3401,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.stop_SK()
 		# restarting sk server
 		self.start_SK()
-		time.sleep(3)
+		time.sleep(5)
 		self.ShowStatusBarGREEN(_('Signal K server restarted'))
 
 	def on_diagnostic_SK(self, e):

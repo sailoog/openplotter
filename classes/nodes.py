@@ -15,15 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 import ujson, uuid, os, wx, re
-from conf import Conf
 from select_key import selectKey
 
 class Nodes:
-	def __init__(self):
-		conf = Conf()
-		self.home = conf.home
-		self.flows_file = self.home+'/.signalk/red/flows_openplotter.json'
-		self.actions_flow_id = 'openplot.actio'
+	def __init__(self,parent,actions_flow_id):
+		home = parent.home
+		self.flows_file = home+'/.signalk/red/flows_openplotter.json'
+		self.actions_flow_id = actions_flow_id
 	
 	def get_node_id(self):
 		uuid_tmp = str(uuid.uuid4())
@@ -64,7 +62,7 @@ class Nodes:
 				i['id'] = self.get_node_id()
 		return actions_flow_data
 
-	def read_flow(self, flow_id):
+	def read_flow(self):
 		tree = []
 		triggers_flow_nodes = []
 		conditions_flow_nodes = []
@@ -77,9 +75,9 @@ class Nodes:
 		else: data = {}
 		flow_nodes = []
 		for i in data:
-			if 'z' in i and i['z'] == flow_id: 
+			if 'z' in i and i['z'] == self.actions_flow_id: 
 				if 'type' in i and i['type'] != 'comment': flow_nodes.append(i)
-			elif 'id' in i and i['id'] == flow_id: pass
+			elif 'id' in i and i['id'] == self.actions_flow_id: pass
 			else: no_actions_nodes.append(i)
 			
 		for node in flow_nodes:
@@ -131,21 +129,24 @@ class Nodes:
 		return (tree, triggers_flow_nodes, conditions_flow_nodes, actions_flow_nodes, no_actions_nodes)
 
 class TriggerSK(wx.Dialog):
-	def __init__(self, edit):
-		self.nodes = Nodes()
+	def __init__(self,parent,edit):
+		self.nodes = parent.nodes
+		self.actions_flow_id = parent.actions_flow_id
+		self.trigger_type = parent.available_triggers_select.GetSelection()
+
 		if edit == 0: title = _('Add Signal K trigger')
 		else: title = _('Edit Signal K trigger')
 
 		wx.Dialog.__init__(self, None, title = title, size=(430, 300))
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 
-		self.trigger_type = '0'
+		
 
 		self.subscribtion_node_template = '''
 		    {
 		        "id": "",
 		        "type": "signalk-subscribe",
-		        "z": "openplot.actio",
+		        "z": "",
 		        "name": "",
 		        "mode": "sendChanges",
 		        "flatten": true,
@@ -166,7 +167,7 @@ class TriggerSK(wx.Dialog):
 		    {
 		        "id": "",
 		        "type": "function",
-		        "z": "openplot.actio",
+		        "z": "",
 		        "name": "",
 		        "func": "",
 		        "outputs": 1,
@@ -241,11 +242,13 @@ class TriggerSK(wx.Dialog):
 		else:
 			subscribe_node = ujson.loads(self.subscribtion_node_template)
 			subscribe_node['id'] = self.nodes.get_node_id()
+			subscribe_node['z'] = self.actions_flow_id
 			subscribe_node['source'] = source
 			if ':' in skkey:
 				function_node = ujson.loads(self.function_node_template)
 				function_node['id'] = self.nodes.get_node_id()
-				subscribe_node['name'] = 't|'+function_node['id']+'|'+self.trigger_type
+				function_node['z'] = self.actions_flow_id
+				subscribe_node['name'] = 't|'+function_node['id']+'|'+str(self.trigger_type)
 				path = skkey.split(':')
 				subscribe_node['path'] = path[0]
 				subscribe_node['wires'] = [[function_node['id']]]
@@ -254,7 +257,7 @@ class TriggerSK(wx.Dialog):
 				function_node['func'] = function
 				self.TriggerNodes = [subscribe_node,function_node]
 			else:
-				subscribe_node['name'] = 't|'+subscribe_node['id']+'|'+self.trigger_type
+				subscribe_node['name'] = 't|'+subscribe_node['id']+'|'+str(self.trigger_type)
 				subscribe_node['path'] = skkey
 				self.TriggerNodes = [subscribe_node]
 		self.EndModal(wx.OK)
@@ -262,16 +265,17 @@ class TriggerSK(wx.Dialog):
 
 
 class Condition(wx.Dialog):
-	def __init__(self, edit,operator):
-		self.nodes = Nodes()
+	def __init__(self,parent,edit):
+		self.nodes = parent.nodes
+		self.actions_flow_id = parent.actions_flow_id
 		self.available_operators = ['eq', 'neq', 'lt', 'lte', 'gt', 'gte','btwn', 'cont', 'true', 'false', 'null', 'nnull', 'empty', 'nempty']
-		self.operator_id = operator
-		self.operator = self.available_operators[operator]
+		self.operator_id = parent.available_operators_select.GetSelection()
+		self.operator = self.available_operators[self.operator_id]
 		self.condition_node_template = '''
 		    {
 		        "id": "",
 		        "type": "switch",
-		        "z": "openplot.actio",
+		        "z": "",
 		        "name": "",
 		        "property": "payload",
 		        "propertyType": "msg",
@@ -299,8 +303,7 @@ class Condition(wx.Dialog):
 
 			panel = wx.Panel(self)
 
-			available_operators = ['=', '!=', '<', '<=', '>', '>=', _('is between'), _('contains'), _('is true'), ('is false'), _('is null'), _('is not null'), _('is empty'), _('is not empty')]
-			operatorlabel = wx.StaticText(panel, label=_('Operator: ')+available_operators[operator])
+			operatorlabel = wx.StaticText(panel, label=_('Operator: ')+parent.available_conditions[self.operator_id])
 
 			type_list = [_('Number'), _('String'), _('Signal K key')]
 			self.type_list = ['num', 'str', 'flow']
@@ -391,6 +394,7 @@ class Condition(wx.Dialog):
 	def OnOk(self,e):
 		condition_node = ujson.loads(self.condition_node_template)
 		condition_node['id'] = self.nodes.get_node_id()
+		condition_node['z'] = self.actions_flow_id
 		self.connector_id = condition_node['id']
 		condition_node['name'] = 'c|'+condition_node['id']+'|'+str(self.operator_id)
 		if self.operator == 'true' or self.operator == 'false' or self.operator == 'null' or self.operator == 'nnull' or self.operator == 'empty' or self.operator == 'nempty':
@@ -419,5 +423,84 @@ class Condition(wx.Dialog):
 		self.EndModal(wx.OK)
 
 class ActionPlaySound(wx.Dialog):
-	def __init__(self, edit):
-		self.nodes = Nodes()
+	def __init__(self, parent, edit):
+		self.currentpath = parent.currentpath
+		self.nodes = parent.nodes
+		self.actions_flow_id = parent.actions_flow_id
+		self.action_id = parent.available_actions_select.GetSelection()
+		self.play_sound_node_template = '''
+		    {
+		        "id": "",
+		        "type": "exec",
+		        "z": "",
+		        "command": "omxplayer",
+		        "addpay": false,
+		        "append": "",
+		        "useSpawn": "false",
+		        "timer": "",
+		        "oldrc": false,
+		        "name": "",
+		        "x": 380,
+		        "y": 120,
+		        "wires": [
+		            [],
+		            [],
+		            []
+		        ]
+		    }'''
+
+		if edit == 0: title = _('Add sound file')
+		else: title = _('Edit sound file')
+
+		wx.Dialog.__init__(self, None, title = title, size=(500, 140))
+		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
+
+		panel = wx.Panel(self)
+
+		self.path_sound = wx.TextCtrl(panel)
+		self.button_select_sound = wx.Button(panel, label=_('File'))
+		self.button_select_sound.Bind(wx.EVT_BUTTON, self.on_select_sound)
+
+		okBtn = wx.Button(panel, wx.ID_OK)
+		okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
+		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
+
+		file = wx.BoxSizer(wx.HORIZONTAL)
+		file.Add(self.path_sound, 1, wx.ALL, 5)
+		file.Add(self.button_select_sound, 0, wx.ALL, 5)
+
+		ok_cancel = wx.BoxSizer(wx.HORIZONTAL)
+		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
+		ok_cancel.Add(okBtn, 0, wx.RIGHT | wx.LEFT, 10)
+		ok_cancel.Add(cancelBtn, 0, wx.RIGHT | wx.LEFT, 10)
+		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
+
+		main = wx.BoxSizer(wx.VERTICAL)
+		main.Add(file, 1, wx.ALL | wx.EXPAND, 0)
+		main.Add((0, 0), 1, wx.ALL, 0)
+		main.Add(ok_cancel, 0, wx.ALL | wx.EXPAND, 10)
+
+		panel.SetSizer(main)
+
+	def on_select_sound(self, e):
+		dlg = wx.FileDialog(self, message=_('Choose a file'), defaultDir=self.currentpath + '/sounds', defaultFile='',
+							wildcard=_('Audio files').decode('utf8') + ' (*.mp3)|*.mp3|' + _('All files').decode('utf8') + ' (*.*)|*.*',
+							style=wx.OPEN | wx.CHANGE_DIR)
+		if dlg.ShowModal() == wx.ID_OK:
+			file_path = dlg.GetPath()
+			self.path_sound.SetValue(file_path)
+		dlg.Destroy()
+
+	def OnOk(self,e):
+		file = self.path_sound.GetValue()
+		if not file:
+			wx.MessageBox(_('You have to select a sound file.'), 'Info', wx.OK | wx.ICON_INFORMATION)
+			return
+		action_node = ujson.loads(self.play_sound_node_template)
+		action_node['id'] = self.nodes.get_node_id()
+		action_node['z'] = self.actions_flow_id
+		action_node['name'] = 'a|'+action_node['id']+'|'+str(self.action_id)
+		action_node['append'] = file
+		self.connector_id = action_node['id']
+		self.ActionNodes = [action_node]
+		self.EndModal(wx.OK)
