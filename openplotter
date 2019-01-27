@@ -33,7 +33,7 @@ from classes.add_SK_to_N2K import addSKtoN2K
 from classes.conf import Conf
 from classes.SK_settings import SK_settings
 from classes.language import Language
-from classes.nodes import Nodes, TriggerSK, Condition
+from classes.nodes import Nodes, TriggerSK, Condition, ActionPlaySound
 
 class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 	def __init__(self, parent, height):
@@ -96,7 +96,7 @@ class MainFrame(wx.Frame):
 		sizer = wx.BoxSizer()
 		sizer.Add(self.nb, 1, wx.EXPAND)
 		self.p.SetSizer(sizer)
-		self.help_bmp = wx.Bitmap("help.png", wx.BITMAP_TYPE_ANY)
+		self.help_bmp = wx.Bitmap("/usr/share/icons/PiX/24x24/apps/help-browser.png", wx.BITMAP_TYPE_ANY)
 		self.icon = wx.Icon(self.currentpath + '/openplotter.ico', wx.BITMAP_TYPE_ICO)
 		self.SetIcon(self.icon)
 		self.CreateStatusBar()
@@ -2123,13 +2123,17 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.list_actions.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_select_actions)
 		self.list_actions.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_actions)
 
-		self.available_actions = [_('Send value to Signal K'),
-		_('Send delta to Signal K'),
-		_('Set GPIO output to 0'),
-		_('Set GPIO output to 1'),
-		_('Publish to local MQTT'),
-		_('Publish to remote MQTT'),
-		_('Play sound')]
+		self.available_actions = [_('Send to Signal K'),
+		_('Set GPIO output'),
+		_('Send to MQTT topic'),
+		_('Publish Twitter'),
+		_('Send e-mail'),
+		_('Play sound'),
+		_('Run command'),
+		_('Reset system'),
+		_('Shutdown system'),
+		_('Telegram: get Signal K key'),
+		_('Telegram: subscribe to Signal K key')]
 
 		self.available_actions_select = wx.Choice(self.p_action, choices=self.available_actions, style=wx.CB_READONLY)
 		add_action = wx.Button(self.p_action, label=_('add'))
@@ -2138,7 +2142,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		delete_action = wx.Button(self.p_action, label=_('delete'))
 		delete_action.Bind(wx.EVT_BUTTON, self.on_delete_action)
 
-		help_button = wx.BitmapButton(self.p_action, bitmap=self.help_bmp, size=(self.help_bmp.GetWidth()+20, self.help_bmp.GetHeight()))
+		help_button = wx.BitmapButton(self.p_action, bitmap=self.help_bmp, size=(self.help_bmp.GetWidth()+40, self.help_bmp.GetHeight()+10))
 		help_button.Bind(wx.EVT_BUTTON, self.on_help_action)
 
 		apply_changes = wx.Button(self.p_action, label=_('Apply changes'))
@@ -2275,11 +2279,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def on_edit_triggers(self, e):
 		pass
-		'''
-		selected_trigger = e.GetIndex()
-		edit = 1
-		self.edit_add_trigger(edit)
-		'''
+
 	def on_add_trigger(self, e):
 		self.edit_add_trigger(0)
 
@@ -2292,7 +2292,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		res = dlg.ShowModal()
 		if res == wx.OK:
 			if not edit:
-				for i in dlg.TriggerSKnodes:
+				for i in dlg.TriggerNodes:
 					self.triggers_flow_nodes.append(i)
 					items = i['name'].split('|')
 				self.actions_flow_tree.append({"trigger_node_out_id": items[1],"type": items[2],"conditions": []})
@@ -2326,7 +2326,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				trigger_id = self.actions_flow_tree[self.selected_trigger]['trigger_node_out_id']
 				for i in self.triggers_flow_nodes:
 					if 'id' in i and i['id'] == trigger_id:
-						i['wires'] = [[dlg.connector_id]]
+						i['wires'][0].append(dlg.connector_id)
 				self.on_print_conditions(0)
 				self.list_conditions.Select(len(self.actions_flow_tree[self.selected_trigger]['conditions'])-1)
 			else:
@@ -2337,10 +2337,34 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		pass
 
 	def on_add_action(self, e):
-		pass
+		self.edit_add_action(0)
 
 	def edit_add_action(self, edit):
-		pass
+		if self.selected_condition == -1:
+			self.ShowStatusBarRED(_('Select a condition.'))
+			return
+		action = self.available_actions_select.GetSelection()
+		if action == 5: dlg = ActionPlaySound(edit)
+		else:
+			self.ShowStatusBarRED(_('Select an action.'))
+			return
+		res = dlg.ShowModal()
+		if res == wx.OK:
+			'''
+			if not edit:
+				self.conditions_flow_nodes.append(dlg.ConditionNode)
+				items = dlg.ConditionNode['name'].split('|')
+				self.actions_flow_tree[self.selected_trigger]['conditions'].append({"condition_node_out_id": items[1],"operator": items[2],"actions": []})
+				trigger_id = self.actions_flow_tree[self.selected_trigger]['trigger_node_out_id']
+				for i in self.triggers_flow_nodes:
+					if 'id' in i and i['id'] == trigger_id:
+						i['wires'][0].append(dlg.connector_id)
+				self.on_print_conditions(0)
+				self.list_conditions.Select(len(self.actions_flow_tree[self.selected_trigger]['conditions'])-1)
+			else:
+				pass
+			'''
+		dlg.Destroy()
 
 	def on_delete_trigger(self, e):
 		pass
@@ -2372,7 +2396,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.read_triggers()
 
 	def on_help_action(self, e):
-		pass
+		url = self.currentpath+"/docs/html/actions.html"
+		webbrowser.open(url, new=2)
 
 	####################### 1W sensors
 	def page_1w(self):
@@ -3372,10 +3397,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		
 	def restart_SK(self):
 		# stopping sk server
-		self.ShowStatusBarRED(_('Closing Signal K server ...'))
+		self.ShowStatusBarRED(_('Restarting Signal K server...'))
 		self.stop_SK()
 		# restarting sk server
 		self.start_SK()
+		time.sleep(3)
 		self.ShowStatusBarGREEN(_('Signal K server restarted'))
 
 	def on_diagnostic_SK(self, e):

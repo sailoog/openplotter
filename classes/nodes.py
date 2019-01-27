@@ -252,11 +252,11 @@ class TriggerSK(wx.Dialog):
 				function_node['name'] = 't|'+function_node['id']+'|'+self.trigger_type
 				function = 'msg.payload=msg.payload.'+path[1]+';msg.topic=msg.topic+".'+path[1]+'";return msg;'
 				function_node['func'] = function
-				self.TriggerSKnodes = [subscribe_node,function_node]
+				self.TriggerNodes = [subscribe_node,function_node]
 			else:
 				subscribe_node['name'] = 't|'+subscribe_node['id']+'|'+self.trigger_type
 				subscribe_node['path'] = skkey
-				self.TriggerSKnodes = [subscribe_node]
+				self.TriggerNodes = [subscribe_node]
 		self.EndModal(wx.OK)
 
 
@@ -417,3 +417,7 @@ class Condition(wx.Dialog):
 			condition_node['rules'].append({"t": self.operator, "v": value1, "vt": self.type_list[type1]})
 		self.ConditionNode = condition_node
 		self.EndModal(wx.OK)
+
+class ActionPlaySound(wx.Dialog):
+	def __init__(self, edit):
+		self.nodes = Nodes()

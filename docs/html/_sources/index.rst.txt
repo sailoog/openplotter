@@ -8,3 +8,4 @@ Welcome to OpenPlotter's documentation!
 
    what_is_openplotter
    getting_started
+   actions
