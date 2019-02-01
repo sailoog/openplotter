@@ -14,8 +14,9 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
-import wx, ujson, re
+import wx, ujson, re, requests
 from conf import Conf
+from SK_settings import SK_settings
 
 class selectKey(wx.Dialog):
 	def __init__(self, oldkey):
@@ -30,6 +31,17 @@ class selectKey(wx.Dialog):
 			with open(sk_folder+'/node_modules/@signalk/signalk-schema/dist/keyswithmetadata.json') as data_file:
 				data = ujson.load(data_file)
 		except: self.ShowMessage(_('Error. File not found: ')+'keyswithmetadata.json')
+
+		SK_ = SK_settings()
+		self.port = SK_.aktport
+		self.http = SK_.http
+
+		self.list_vessels = ['self']
+		skvesselslabel = wx.StaticText(panel, label=_('Vessel'))
+		self.skvessels = wx.ComboBox(panel, choices=self.list_vessels)
+		refreshBtn = wx.Button(panel, label=_('Refresh'))
+		refreshBtn.Bind(wx.EVT_BUTTON, self.OnRefreshBtn)
+		self.OnRefreshBtn(0)
 
 		self.list_groups = wx.ListCtrl(panel, style=wx.LC_REPORT)
 		self.list_groups.InsertColumn(0, _('Groups'), width=200)
@@ -58,6 +70,10 @@ class selectKey(wx.Dialog):
 		okBtn = wx.Button(panel, wx.ID_OK)
 		okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
 
+		vessels = wx.BoxSizer(wx.HORIZONTAL)
+		vessels.Add(skvesselslabel, 0, wx.ALL, 5)
+		vessels.Add(self.skvessels, 1, wx.ALL | wx.EXPAND, 5)
+		vessels.Add(refreshBtn, 0, wx.ALL, 5)
 
 		lists = wx.BoxSizer(wx.HORIZONTAL)
 		lists.Add(self.list_groups, 0, wx.ALL | wx.EXPAND, 0)
@@ -79,6 +95,7 @@ class selectKey(wx.Dialog):
 		okcancel.Add(cancelBtn, 0, wx.ALL, 5)
 
 		main = wx.BoxSizer(wx.VERTICAL)
+		main.Add(vessels, 0, wx.ALL | wx.EXPAND, 0)
 		main.Add(lists, 2, wx.ALL | wx.EXPAND, 0)
 		main.Add(self.key_description, 1, wx.ALL | wx.EXPAND, 0)
 		main.AddSpacer(10)
@@ -142,6 +159,19 @@ class selectKey(wx.Dialog):
 
 		if oldkey: 
 			self.SKkey.SetValue(oldkey)
+
+	def OnRefreshBtn(self,e):
+		self.list_vessels = ['self']
+		try:
+			response = requests.get(self.http+'localhost:'+str(self.port)+'/signalk/v1/api/vessels')
+			data = response.json()
+		except:data = None
+		if data:
+			for i in data:
+				self.list_vessels.append(i)
+		self.skvessels.Clear()
+		self.skvessels.AppendItems(self.list_vessels)
+		self.skvessels.SetSelection(0)
 
 	def OnSelectGroup(self,e):
 		self.selected_group = e.GetIndex()
@@ -210,6 +240,7 @@ class selectKey(wx.Dialog):
 
 	def OnOk(self,e):
 		self.selected_key = self.SKkey.GetValue()
+		self.selected_vessel = self.skvessels.GetValue()
 		if '*' in self.selected_key:
 			self.ShowMessage(_('Failed. Replace * by some text.'))
 			return

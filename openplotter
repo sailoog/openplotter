@@ -2090,6 +2090,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.list_triggers.InsertColumn(0, _('Triggers'), width= -1)
 		self.list_triggers.InsertColumn(1, _(' '), width= -1)
 		self.list_triggers.InsertColumn(2, _(' '), width= -1)
+		self.list_triggers.InsertColumn(3, _(' '), width= -1)
 		self.list_triggers.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_print_conditions)
 		self.list_triggers.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit_triggers)
 
@@ -2221,6 +2222,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			name = "t|"+trigger["trigger_node_out_id"]+"|"+trigger["type"]
 			field2 = ''
 			field3 = ''
+			field4 = ''
 			path = ''
 			path_property = ''
 			for node in self.triggers_flow_nodes:
@@ -2228,16 +2230,17 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					if trigger["type"] == '0':
 						if node['type'] == 'signalk-subscribe': 
 							path = node['path']
-							field3 = node['source']
+							field2 = node['context']
+							field4 = node['source']
 						if node['type'] == 'function':
 							items = node['func'].split(';')
 							items2 = items[0].split('.')
 							path_property = ':'+items2[-1]
-						field2 = path+path_property
+						field3 = path+path_property
 					if trigger["type"] == '1' and node['type'] == 'rpi-gpio in': 
 						field2 = node['pin']
 						field3 = node['intype']			
-			self.list_triggers.Append([self.available_triggers[int(trigger["type"])], field2, field3])
+			self.list_triggers.Append([self.available_triggers[int(trigger["type"])], field2, field3, field4])
 			self.list_triggers.SetColumnWidth(0,-1)
 			self.list_triggers.SetColumnWidth(1,-1)
 			self.list_triggers.SetColumnWidth(2,-1)
@@ -3401,7 +3404,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.stop_SK()
 		# restarting sk server
 		self.start_SK()
-		time.sleep(5)
+		time.sleep(8)
 		self.ShowStatusBarGREEN(_('Signal K server restarted'))
 
 	def on_diagnostic_SK(self, e):

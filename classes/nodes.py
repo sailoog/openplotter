@@ -137,10 +137,8 @@ class TriggerSK(wx.Dialog):
 		if edit == 0: title = _('Add Signal K trigger')
 		else: title = _('Edit Signal K trigger')
 
-		wx.Dialog.__init__(self, None, title = title, size=(430, 300))
+		wx.Dialog.__init__(self, None, title = title, size=(500, 350))
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
-
-		
 
 		self.subscribtion_node_template = '''
 		    {
@@ -150,10 +148,10 @@ class TriggerSK(wx.Dialog):
 		        "name": "",
 		        "mode": "sendChanges",
 		        "flatten": true,
-		        "context": "vessels.self",
+		        "context": "",
 		        "path": "",
 		        "source": "",
-		        "period": "500",
+		        "period": "",
 		        "x": 380,
 		        "y": 120,
 		        "wires": [
@@ -181,44 +179,65 @@ class TriggerSK(wx.Dialog):
 		        ]
 		    }'''
 
-
 		panel = wx.Panel(self)
 
+		periodlabel = wx.StaticText(panel, label=_('Checking period (ms)'))
+		self.period = wx.SpinCtrl(panel, min=100, max=100000000, initial=1000)
+
+		vessellabel = wx.StaticText(panel, label=_('Vessel'))
+		self.vessel = wx.TextCtrl(panel)
+
 		skkeylabel = wx.StaticText(panel, label=_('Signal K key'))
-		self.skkey = wx.TextCtrl(panel, style=wx.CB_READONLY)
+		self.skkey = wx.TextCtrl(panel)
 		edit_skkey = wx.Button(panel, label=_('Edit'))
 		edit_skkey.Bind(wx.EVT_BUTTON, self.onEditSkkey)
 
 		sourcelabel = wx.StaticText(panel, label=_('Source'))
 		self.source = wx.TextCtrl(panel)
 		sourcetext = wx.StaticText(panel, label=_('Leave blank to listen to any source.\nAllowed characters: . 0-9 a-z A-Z'))
-		
 
 		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
 		okBtn = wx.Button(panel, wx.ID_OK)
 		okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
 
+		period = wx.BoxSizer(wx.HORIZONTAL)
+		period.Add(periodlabel, 0, wx.ALL, 5)
+		period.Add(self.period, 0, wx.ALL, 5)
+
+		vessel = wx.BoxSizer(wx.HORIZONTAL)
+		vessel.Add(vessellabel, 0, wx.ALL, 5)
+		vessel.Add(self.vessel, 1, wx.ALL, 5)
+
+		skkey = wx.BoxSizer(wx.HORIZONTAL)
+		skkey.Add(skkeylabel, 0, wx.ALL, 5)
+		skkey.Add(self.skkey, 1, wx.ALL, 5)
+
+		editskkey = wx.BoxSizer(wx.HORIZONTAL)
+		editskkey.Add((0, 0), 1, wx.ALL, 5)
+		editskkey.Add(edit_skkey, 0, wx.ALL, 5)
+
+		source = wx.BoxSizer(wx.HORIZONTAL)
+		source.Add(sourcelabel, 0, wx.ALL, 5)
+		source.Add(self.source, 1, wx.ALL, 5)
+
 		hbox = wx.BoxSizer(wx.HORIZONTAL)
 		hbox.Add((0, 0), 1, wx.ALL, 0)
-		hbox.Add(okBtn, 0, wx.RIGHT | wx.LEFT, 10)
-		hbox.Add(cancelBtn, 0, wx.RIGHT | wx.LEFT, 10)
+		hbox.Add(okBtn, 0, wx.ALL, 10)
+		hbox.Add(cancelBtn, 0, wx.ALL, 10)
 		hbox.Add((0, 0), 1, wx.ALL, 0)
 
-		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox1.Add(self.skkey, 1, wx.RIGHT | wx.LEFT, 10)
-		hbox1.Add(edit_skkey, 0, wx.RIGHT | wx.LEFT, 10)
-
 		vbox = wx.BoxSizer(wx.VERTICAL)
-		vbox.AddSpacer(10)
-		vbox.Add(skkeylabel, 0, wx.ALL, 10)
-		vbox.Add(hbox1, 0, wx.ALL | wx.EXPAND, 0)
-		vbox.AddSpacer(10)
-		vbox.Add(sourcelabel, 0, wx.ALL, 10)
-		vbox.Add(self.source, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 10)
-		vbox.Add(sourcetext, 0, wx.ALL, 10)
+		vbox.AddSpacer(5)
+		vbox.Add(period, 0, wx.ALL, 0)
+		vbox.AddSpacer(15)
+		vbox.Add(vessel, 0, wx.ALL | wx.EXPAND, 0)
+		vbox.Add(skkey, 0, wx.ALL | wx.EXPAND, 0)
+		vbox.Add(editskkey, 0, wx.ALL | wx.EXPAND, 0)
+		vbox.AddSpacer(15)
+		vbox.Add(source, 0, wx.ALL | wx.EXPAND, 0)
+		vbox.Add(sourcetext, 0, wx.ALL, 0)
 		vbox.Add((0, 0), 1, wx.ALL, 0)
 		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 0)
-		vbox.AddSpacer(10)
 
 		panel.SetSizer(vbox)
 
@@ -227,7 +246,9 @@ class TriggerSK(wx.Dialog):
 		if self.skkey.GetValue(): oldkey = self.skkey.GetValue()
 		dlg = selectKey(oldkey)
 		res = dlg.ShowModal()
-		if res == wx.OK: self.skkey.SetValue(dlg.selected_key)
+		if res == wx.OK: 
+			self.skkey.SetValue(dlg.selected_key)
+			self.vessel.SetValue(dlg.selected_vessel)
 		dlg.Destroy()
 
 	def OnOk(self,e):
@@ -243,7 +264,9 @@ class TriggerSK(wx.Dialog):
 			subscribe_node = ujson.loads(self.subscribtion_node_template)
 			subscribe_node['id'] = self.nodes.get_node_id()
 			subscribe_node['z'] = self.actions_flow_id
+			subscribe_node['context'] = 'vessels.'+self.vessel.GetValue()
 			subscribe_node['source'] = source
+			subscribe_node['period'] = str(self.period.GetValue())
 			if ':' in skkey:
 				function_node = ujson.loads(self.function_node_template)
 				function_node['id'] = self.nodes.get_node_id()
@@ -252,7 +275,7 @@ class TriggerSK(wx.Dialog):
 				path = skkey.split(':')
 				subscribe_node['path'] = path[0]
 				subscribe_node['wires'] = [[function_node['id']]]
-				function_node['name'] = 't|'+function_node['id']+'|'+self.trigger_type
+				function_node['name'] = 't|'+function_node['id']+'|'+str(self.trigger_type)
 				function = 'msg.payload=msg.payload.'+path[1]+';msg.topic=msg.topic+".'+path[1]+'";return msg;'
 				function_node['func'] = function
 				self.TriggerNodes = [subscribe_node,function_node]
@@ -261,8 +284,6 @@ class TriggerSK(wx.Dialog):
 				subscribe_node['path'] = skkey
 				self.TriggerNodes = [subscribe_node]
 		self.EndModal(wx.OK)
-
-
 
 class Condition(wx.Dialog):
 	def __init__(self,parent,edit):
@@ -421,6 +442,55 @@ class Condition(wx.Dialog):
 			condition_node['rules'].append({"t": self.operator, "v": value1, "vt": self.type_list[type1]})
 		self.ConditionNode = condition_node
 		self.EndModal(wx.OK)
+
+class RepeatOptions():
+	def __init__(self):
+		self.rate_limit_template = '''
+		    {
+		        "id": "",
+		        "type": "delay",
+		        "z": "",
+		        "name": "",
+		        "pauseType": "rate",
+		        "timeout": "5",
+		        "timeoutUnits": "seconds",
+		        "rate": "",
+		        "nbRateUnits": "",
+		        "rateUnits": "",
+		        "randomFirst": "1",
+		        "randomLast": "5",
+		        "randomUnits": "seconds",
+		        "drop": true,
+		        "x": 380,
+		        "y": 120,
+		        "wires": [
+		            [
+		                ""
+		            ]
+		        ]
+		    }'''
+		self.repeat_template = '''
+		    {
+		        "id": "",
+		        "type": "msg-resend",
+		        "z": "",
+		        "interval": ,
+		        "intervalUnit": "",
+		        "maximum": ,
+		        "bytopic": false,
+		        "clone": false,
+		        "firstDelayed": false,
+		        "addCounters": false,
+		        "highRate": false,
+		        "outputCountField": "",
+		        "outputMaxField": "",
+		        "name": "",
+		        "x": 380,
+		        "y": 120,
+		        "wires": [
+		            []
+		        ]
+		    }'''
 
 class ActionPlaySound(wx.Dialog):
 	def __init__(self, parent, edit):
