@@ -2244,6 +2244,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.list_triggers.SetColumnWidth(0,-1)
 			self.list_triggers.SetColumnWidth(1,-1)
 			self.list_triggers.SetColumnWidth(2,-1)
+			self.list_triggers.SetColumnWidth(3,-1)
 
 	def on_print_conditions(self, e):
 		self.selected_trigger = self.list_triggers.GetFirstSelected()
@@ -2388,8 +2389,28 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			all_flows.append(i)
 		for i in self.conditions_flow_nodes:
 			all_flows.append(i)
+			if i["type"] == "switch":
+				result = []
+				if 'vt' in i['rules'][0] and i['rules'][0]['vt'] == 'flow':
+					result = self.nodes.get_subscription(i['rules'][0]['v'])
+					name = result[0]['name']
+					exists = False
+					for ii in all_flows:
+						if 'name' in ii and ii['name'] == name: exists = True
+					if not exists:
+						for iii in result: all_flows.append(iii)
+				if 'v2t' in i['rules'][0] and i['rules'][0]['v2t'] == 'flow':
+					result = self.nodes.get_subscription(i['rules'][0]['v2'])
+					name = result[0]['name']
+					exists = False
+					for ii in all_flows:
+						if 'name' in ii and ii['name'] == name: exists = True
+					if not exists:
+						for iii in result: all_flows.append(iii)
+
 		for i in self.actions_flow_nodes:
 			all_flows.append(i)
+
 		data = ujson.dumps(all_flows, indent=4)
 		with open(self.nodes.flows_file, "w") as outfile:
 			outfile.write(data)

@@ -128,6 +128,72 @@ class Nodes:
 										condition["actions"].append(action)
 		return (tree, triggers_flow_nodes, conditions_flow_nodes, actions_flow_nodes, no_actions_nodes)
 
+	def get_subscription(self, value):
+		self.subscribtion_node_template = '''
+		    {
+		        "id": "",
+		        "type": "signalk-subscribe",
+		        "z": "",
+		        "name": "",
+		        "mode": "sendChanges",
+		        "flatten": true,
+		        "context": "",
+		        "path": "",
+		        "source": "",
+		        "period": "1000",
+		        "x": 380,
+		        "y": 120,
+		        "wires": [
+		            [
+		                ""
+		            ]
+		        ]
+		    }'''
+		self.function_node_template = '''
+		    {
+		        "id": "",
+		        "type": "function",
+		        "z": "",
+		        "name": "",
+		        "func": "",
+		        "outputs": 1,
+		        "noerr": 0,
+		        "x": 380,
+		        "y": 120,
+		        "wires": [
+		            [
+		                ""
+		            ]
+		        ]
+		    }'''
+
+		value_list = value.split('.')
+		vessel = value_list[0]
+		value_list.pop(0)
+		skkey = '.'.join(value_list)
+
+		subscribe_node = ujson.loads(self.subscribtion_node_template)
+		subscribe_node['id'] = self.get_node_id()
+		subscribe_node['z'] = self.actions_flow_id
+		subscribe_node['context'] = 'vessels.'+vessel
+		function_node = ujson.loads(self.function_node_template)
+		function_node['id'] = self.get_node_id()
+		function_node['z'] = self.actions_flow_id
+		subscribe_node['wires'] = [[function_node['id']]]
+		subscribe_node['name'] = value
+		function_node['name'] = value
+		if ':' in skkey:
+			path = skkey.split(':')
+			subscribe_node['path'] = path[0]
+			function = 'msg.payload=msg.payload.'+path[1]+';msg.topic="'+vessel+'.'+skkey+'";flow.set(msg.topic, msg.payload);'
+			function_node['func'] = function
+		else:
+			subscribe_node['path'] = skkey
+			function = 'msg.topic="'+vessel+'.'+skkey+'";flow.set(msg.topic, msg.payload);'
+			function_node['func'] = function
+
+		return [subscribe_node,function_node]
+
 class TriggerSK(wx.Dialog):
 	def __init__(self,parent,edit):
 		self.nodes = parent.nodes
@@ -391,7 +457,7 @@ class Condition(wx.Dialog):
 		if self.value1.GetValue(): oldkey = self.value1.GetValue()
 		dlg = selectKey(oldkey)
 		res = dlg.ShowModal()
-		if res == wx.OK: self.value1.SetValue(dlg.selected_key)
+		if res == wx.OK: self.value1.SetValue(dlg.selected_vessel+'.'+dlg.selected_key)
 		dlg.Destroy()
 
 	def onEditSkkey2(self,e):
@@ -399,7 +465,7 @@ class Condition(wx.Dialog):
 		if self.value2.GetValue(): oldkey = self.value2.GetValue()
 		dlg = selectKey(oldkey)
 		res = dlg.ShowModal()
-		if res == wx.OK: self.value2.SetValue(dlg.selected_key)
+		if res == wx.OK: self.value2.SetValue(dlg.selected_vessel+'.'+dlg.selected_key)
 		dlg.Destroy()
 
 	def on_select_type1(self,e):
@@ -439,7 +505,7 @@ class Condition(wx.Dialog):
 			if not value2:
 				wx.MessageBox(_('You have to provide a value.'), 'Info', wx.OK | wx.ICON_INFORMATION)
 				return
-			condition_node['rules'].append({"t": self.operator, "v": value1, "vt": self.type_list[type1]})
+			condition_node['rules'].append({"t": self.operator, "v": value1, "vt": self.type_list[type1], "v2": value2, "v2t": self.type_list[type2]})
 		self.ConditionNode = condition_node
 		self.EndModal(wx.OK)
 
