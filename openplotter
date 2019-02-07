@@ -33,7 +33,7 @@ from classes.add_SK_to_N2K import addSKtoN2K
 from classes.conf import Conf
 from classes.SK_settings import SK_settings
 from classes.language import Language
-from classes.nodes import Nodes, TriggerSK, Condition, ActionPlaySound
+from classes.nodes import Nodes, TriggerSK, TriggerGPIO, Condition, ActionPlaySound
 
 class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 	def __init__(self, parent, height):
@@ -2087,14 +2087,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def page_action(self):
 
 		self.list_triggers = wx.ListCtrl(self.p_action, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(-1,90))
-		self.list_triggers.InsertColumn(0, _('Triggers'), width= -1)
-		self.list_triggers.InsertColumn(1, _(' '), width= -1)
-		self.list_triggers.InsertColumn(2, _(' '), width= -1)
-		self.list_triggers.InsertColumn(3, _(' '), width= -1)
+		self.list_triggers.InsertColumn(0, _('Triggers'), width=80)
+		self.list_triggers.InsertColumn(1, _(' '), width= 140)
+		self.list_triggers.InsertColumn(2, _(' '), width= 140)
+		self.list_triggers.InsertColumn(3, _(' '), width= 130)
 		self.list_triggers.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_print_conditions)
 		self.list_triggers.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit_triggers)
 
-		self.available_triggers = ['Signal K','GPIO','MQTT','Telegram',_('Time')]
+		self.available_triggers = ['Signal K key', _('Geofence'), 'GPIO','MQTT topic',_('Telegram command'),_('Time')]
 		self.available_triggers_select = wx.Choice(self.p_action, choices=self.available_triggers, style=wx.CB_READONLY)
 
 		add_trigger = wx.Button(self.p_action, label=_('add'))
@@ -2107,8 +2107,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.available_operators_select = wx.Choice(self.p_action, choices=self.available_conditions, style=wx.CB_READONLY)
 
 		self.list_conditions = wx.ListCtrl(self.p_action, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(-1,90))
-		self.list_conditions.InsertColumn(0, _('Conditions'), width= -1)
-		self.list_conditions.InsertColumn(1, _(' '), width= -1)
+		self.list_conditions.InsertColumn(0, _('Conditions'), width= 150)
+		self.list_conditions.InsertColumn(1, _(' '), width= 250)
 		self.list_conditions.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_print_actions)
 		self.list_conditions.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_conditions)
 
@@ -2119,14 +2119,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		delete_condition.Bind(wx.EVT_BUTTON, self.on_delete_condition)
 
 		self.list_actions = wx.ListCtrl(self.p_action, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(-1,90))
-		self.list_actions.InsertColumn(0, _('Actions'), width= -1)
-		self.list_actions.InsertColumn(1, _(' '), width= -1)
+		self.list_actions.InsertColumn(0, _('Actions'), width= 150)
+		self.list_actions.InsertColumn(1, _(' '), width= 250)
 		self.list_actions.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_select_actions)
 		self.list_actions.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_actions)
 
-		self.available_actions = [_('Send to Signal K'),
+		self.available_actions = [_('Set Signal K key'),
 		_('Set GPIO output'),
-		_('Send to MQTT topic'),
+		_('Set MQTT topic'),
 		_('Publish Twitter'),
 		_('Send e-mail'),
 		_('Play sound'),
@@ -2237,14 +2237,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 							items2 = items[0].split('.')
 							path_property = ':'+items2[-1]
 						field3 = path+path_property
-					if trigger["type"] == '1' and node['type'] == 'rpi-gpio in': 
+					if trigger["type"] == '2' and node['type'] == 'rpi-gpio in': 
 						field2 = node['pin']
-						field3 = node['intype']			
+						field3 = node['intype']
+						field4 = node['read']				
 			self.list_triggers.Append([self.available_triggers[int(trigger["type"])], field2, field3, field4])
-			self.list_triggers.SetColumnWidth(0,-1)
-			self.list_triggers.SetColumnWidth(1,-1)
-			self.list_triggers.SetColumnWidth(2,-1)
-			self.list_triggers.SetColumnWidth(3,-1)
 
 	def on_print_conditions(self, e):
 		self.selected_trigger = self.list_triggers.GetFirstSelected()
@@ -2260,8 +2257,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 						if node['type'] == 'switch':
 							if 'v' in node['rules'][0]: field2 = node['rules'][0]['v']
 				self.list_conditions.Append([self.available_conditions[int(condition["operator"])], field2])
-				self.list_conditions.SetColumnWidth(0,-1)
-				self.list_conditions.SetColumnWidth(1,-1)
 
 	def on_print_actions(self, e):
 		self.selected_condition = self.list_conditions.GetFirstSelected()
@@ -2276,8 +2271,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 						if action["type"] == '0' and node['type'] == 'change': field2 = node['rules'][0]['to']
 						if action["type"] == '5' and node['type'] == 'exec': field2 = node['append']
 				self.list_actions.Append([self.available_actions[int(action["type"])], field2])
-				self.list_actions.SetColumnWidth(0,-1)
-				self.list_actions.SetColumnWidth(1,-1)
 
 	def on_select_actions(self, e):
 		self.selected_action = self.list_actions.GetFirstSelected()
@@ -2291,6 +2284,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def edit_add_trigger(self, edit):
 		if self.available_triggers_select.GetSelection() == 0: dlg = TriggerSK(self,edit)
+		elif self.available_triggers_select.GetSelection() == 2: dlg = TriggerGPIO(self,edit)
 		else:
 			self.ShowStatusBarRED(_('Select a trigger type.'))
 			return

@@ -351,6 +351,113 @@ class TriggerSK(wx.Dialog):
 				self.TriggerNodes = [subscribe_node]
 		self.EndModal(wx.OK)
 
+class TriggerGPIO(wx.Dialog):
+	def __init__(self,parent,edit):
+		self.nodes = parent.nodes
+		self.actions_flow_id = parent.actions_flow_id
+		self.trigger_type = parent.available_triggers_select.GetSelection()
+
+		if edit == 0: title = _('Add GPIO trigger')
+		else: title = _('Edit GPIO trigger')
+
+		wx.Dialog.__init__(self, None, title = title, size=(400, 180))
+		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
+
+		self.gpio_node_template = '''
+		    {
+		        "id": "",
+		        "type": "rpi-gpio in",
+		        "z": "",
+		        "name": "",
+		        "pin": "",
+		        "intype": "",
+		        "debounce": "25",
+		        "read": false,
+		        "x": 380,
+		        "y": 120,
+		        "wires": [
+		            []
+		        ]
+		    }'''
+
+		panel = wx.Panel(self)
+
+		allowed_pins = ['22','29','31','32','33','35','36','37','38','40']
+		in_use_pins =[]
+		for i in parent.no_actions_nodes:
+			if 'type' in i:
+			 if i['type'] == 'rpi-gpio in' or i['type'] == 'rpi-gpio out':
+			 	if 'pin' in i: in_use_pins.append(i['pin'])
+		for i in parent.triggers_flow_nodes:
+			if 'type' in i:
+			 if i['type'] == 'rpi-gpio in' or i['type'] == 'rpi-gpio out':
+			 	if 'pin' in i: in_use_pins.append(i['pin'])
+		for i in parent.actions_flow_nodes:
+			if 'type' in i:
+			 if i['type'] == 'rpi-gpio in' or i['type'] == 'rpi-gpio out':
+			 	if 'pin' in i: in_use_pins.append(i['pin'])
+		self.avalaible_gpio = []
+		for i in allowed_pins:
+			if not i in in_use_pins: self.avalaible_gpio.append(i)
+			
+		pinlabel = wx.StaticText(panel, label=_('Pin'))
+		self.pin = wx.Choice(panel, choices=self.avalaible_gpio, style=wx.CB_READONLY)
+
+		self.resistor_select = [_('none'),_('pullup'),_('pulldown')]
+		self.resistor_select2 = ['tri','up','down']
+
+		resitorlabel = wx.StaticText(panel, label=_('Resistor'))
+		self.resistor = wx.Choice(panel, choices=self.resistor_select, style=wx.CB_READONLY)
+
+		self.read = wx.CheckBox(panel, label=_('Read initial state of pin on restart?'))
+
+		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
+		okBtn = wx.Button(panel, wx.ID_OK)
+		okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
+
+		pinh = wx.BoxSizer(wx.HORIZONTAL)
+		pinh.Add(pinlabel, 0, wx.ALL, 5)
+		pinh.Add(self.pin, 0, wx.ALL, 10)
+		pinh.Add(resitorlabel, 0, wx.ALL, 5)
+		pinh.Add(self.resistor, 0, wx.ALL, 10)
+
+		okcancel = wx.BoxSizer(wx.HORIZONTAL)
+		okcancel.Add((0, 0), 1, wx.ALL, 0)
+		okcancel.Add(okBtn, 0, wx.ALL, 10)
+		okcancel.Add(cancelBtn, 0, wx.ALL, 10)
+		okcancel.Add((0, 0), 1, wx.ALL, 0)
+
+		main = wx.BoxSizer(wx.VERTICAL)
+		main.Add(pinh, 0, wx.ALL, 0)
+		main.Add(self.read, 0, wx.ALL, 10)
+		main.Add((0, 0), 1, wx.ALL, 0)
+		main.Add(okcancel, 0, wx.ALL | wx.EXPAND, 0)
+
+		panel.SetSizer(main)
+
+	def OnOk(self,e):
+		
+		pin = self.pin.GetStringSelection()
+		resistor = self.resistor.GetStringSelection()
+		read = self.read.GetValue()
+
+		if not pin:
+			wx.MessageBox(_('Select a pin.'), 'Info', wx.OK | wx.ICON_INFORMATION)
+			return
+		elif not resistor:
+			wx.MessageBox(_('Select a resistor.'), 'Info', wx.OK | wx.ICON_INFORMATION)
+			return
+		else:
+			gpio_node = ujson.loads(self.gpio_node_template)
+			gpio_node['id'] = self.nodes.get_node_id()
+			gpio_node['z'] = self.actions_flow_id
+			gpio_node['name'] = 't|'+gpio_node['id']+'|'+str(self.trigger_type)
+			gpio_node['pin'] = pin
+			gpio_node['intype'] = self.resistor_select2[self.resistor.GetSelection()]
+			gpio_node['read'] = read
+			self.TriggerNodes = [gpio_node]
+			self.EndModal(wx.OK)
+
 class Condition(wx.Dialog):
 	def __init__(self,parent,edit):
 		self.nodes = parent.nodes
