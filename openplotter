@@ -2120,7 +2120,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		self.list_actions = wx.ListCtrl(self.p_action, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(-1,90))
 		self.list_actions.InsertColumn(0, _('Actions'), width= 150)
-		self.list_actions.InsertColumn(1, _(' '), width= 250)
+		self.list_actions.InsertColumn(1, _(' '), width= 170)
+		self.list_actions.InsertColumn(2, _(' '), width= 100)
 		self.list_actions.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_select_actions)
 		self.list_actions.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_actions)
 
@@ -2266,11 +2267,15 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			for action in actions:
 				name = "a|"+action["action_node_out_id"]+"|"+action["type"]
 				field2 = ''
+				field3 = ''
 				for node in self.actions_flow_nodes:
 					if 'name' in node and name == node["name"]:
 						if action["type"] == '0' and node['type'] == 'change': field2 = node['rules'][0]['to']
-						if action["type"] == '5' and node['type'] == 'exec': field2 = node['append']
-				self.list_actions.Append([self.available_actions[int(action["type"])], field2])
+						if action["type"] == '5':
+							if node['type'] == 'exec': field2 = node['append']
+							if node['type'] == 'msg-resend': field3 = _('repeat')
+							if node['type'] == 'delay': field3 = _('rate limit')
+				self.list_actions.Append([self.available_actions[int(action["type"])], field2, field3])
 
 	def on_select_actions(self, e):
 		self.selected_action = self.list_actions.GetFirstSelected()
