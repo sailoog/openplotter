@@ -33,7 +33,7 @@ from classes.add_SK_to_N2K import addSKtoN2K
 from classes.conf import Conf
 from classes.SK_settings import SK_settings
 from classes.language import Language
-from classes.nodes import Nodes, TriggerSK, TriggerGPIO, Condition, ActionPlaySound
+from classes.nodes import Nodes, TriggerSK, TriggerGPIO, Condition, ActionSetSignalkKey, ActionPlaySound
 
 class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 	def __init__(self, parent, height):
@@ -2270,7 +2270,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				field3 = ''
 				for node in self.actions_flow_nodes:
 					if 'name' in node and name == node["name"]:
-						if action["type"] == '0' and node['type'] == 'change': field2 = node['rules'][0]['to']
+						if action["type"] == '0' and node['type'] == 'change': 
+							field2 = node['rules'][0]['to']
+							field3 = node['rules'][1]['to']
 						if action["type"] == '5':
 							if node['type'] == 'exec': field2 = node['append']
 							if node['type'] == 'msg-resend': field3 = _('repeat')
@@ -2348,7 +2350,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.ShowStatusBarRED(_('Select a condition.'))
 			return
 		action = self.available_actions_select.GetSelection()
-		if action == 5: dlg = ActionPlaySound(self,edit)
+		if action == 0: dlg = ActionSetSignalkKey(self,edit)
+		elif action == 5: dlg = ActionPlaySound(self,edit)
 		else:
 			self.ShowStatusBarRED(_('Select an action.'))
 			return
@@ -2409,6 +2412,16 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		for i in self.actions_flow_nodes:
 			all_flows.append(i)
+			if i["type"] == "change":
+				result = []
+				if 'tot' in i['rules'][1] and i['rules'][1]['tot'] == 'flow':
+					result = self.nodes.get_subscription(i['rules'][1]['to'])
+					name = result[0]['name']
+					exists = False
+					for ii in all_flows:
+						if 'name' in ii and ii['name'] == name: exists = True
+					if not exists:
+						for iii in result: all_flows.append(iii)
 
 		data = ujson.dumps(all_flows, indent=4)
 		with open(self.nodes.flows_file, "w") as outfile:

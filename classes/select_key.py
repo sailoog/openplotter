@@ -19,7 +19,7 @@ from conf import Conf
 from SK_settings import SK_settings
 
 class selectKey(wx.Dialog):
-	def __init__(self, oldkey):
+	def __init__(self, oldkey, selectvessels):
 		wx.Dialog.__init__(self, None, title=_('Select Signal K key'), size=(710, 460))
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 		panel = wx.Panel(self)
@@ -39,9 +39,9 @@ class selectKey(wx.Dialog):
 		self.list_vessels = ['self']
 		skvesselslabel = wx.StaticText(panel, label=_('Vessel'))
 		self.skvessels = wx.ComboBox(panel, choices=self.list_vessels)
-		refreshBtn = wx.Button(panel, label=_('Refresh'))
-		refreshBtn.Bind(wx.EVT_BUTTON, self.OnRefreshBtn)
-		self.OnRefreshBtn(0)
+		self.refreshBtn = wx.Button(panel, label=_('Refresh'))
+		self.refreshBtn.Bind(wx.EVT_BUTTON, self.OnRefreshBtn)
+		self.skvessels.SetSelection(0)
 
 		self.list_groups = wx.ListCtrl(panel, style=wx.LC_REPORT)
 		self.list_groups.InsertColumn(0, _('Groups'), width=200)
@@ -73,7 +73,7 @@ class selectKey(wx.Dialog):
 		vessels = wx.BoxSizer(wx.HORIZONTAL)
 		vessels.Add(skvesselslabel, 0, wx.ALL, 5)
 		vessels.Add(self.skvessels, 1, wx.ALL | wx.EXPAND, 5)
-		vessels.Add(refreshBtn, 0, wx.ALL, 5)
+		vessels.Add(self.refreshBtn, 0, wx.ALL, 5)
 
 		lists = wx.BoxSizer(wx.HORIZONTAL)
 		lists.Add(self.list_groups, 0, wx.ALL | wx.EXPAND, 0)
@@ -159,6 +159,11 @@ class selectKey(wx.Dialog):
 
 		if oldkey: 
 			self.SKkey.SetValue(oldkey)
+
+		if not selectvessels:
+			self.skvessels.Disable()
+			self.refreshBtn.Disable()
+		else: self.OnRefreshBtn(0)
 
 	def OnRefreshBtn(self,e):
 		self.list_vessels = ['self']

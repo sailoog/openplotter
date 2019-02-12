@@ -194,6 +194,7 @@ class Nodes:
 
 		return [subscribe_node,function_node]
 
+# triggers
 class TriggerSK(wx.Dialog):
 	def __init__(self,parent,edit):
 		self.nodes = parent.nodes
@@ -310,7 +311,7 @@ class TriggerSK(wx.Dialog):
 	def onEditSkkey(self,e):
 		oldkey = False
 		if self.skkey.GetValue(): oldkey = self.skkey.GetValue()
-		dlg = selectKey(oldkey)
+		dlg = selectKey(oldkey,1)
 		res = dlg.ShowModal()
 		if res == wx.OK: 
 			self.skkey.SetValue(dlg.selected_key)
@@ -458,6 +459,7 @@ class TriggerGPIO(wx.Dialog):
 			self.TriggerNodes = [gpio_node]
 			self.EndModal(wx.OK)
 
+# conditions
 class Condition(wx.Dialog):
 	def __init__(self,parent,edit):
 		self.nodes = parent.nodes
@@ -562,7 +564,7 @@ class Condition(wx.Dialog):
 	def onEditSkkey1(self,e):
 		oldkey = False
 		if self.value1.GetValue(): oldkey = self.value1.GetValue()
-		dlg = selectKey(oldkey)
+		dlg = selectKey(oldkey,1)
 		res = dlg.ShowModal()
 		if res == wx.OK: self.value1.SetValue(dlg.selected_vessel+'.'+dlg.selected_key)
 		dlg.Destroy()
@@ -570,7 +572,7 @@ class Condition(wx.Dialog):
 	def onEditSkkey2(self,e):
 		oldkey = False
 		if self.value2.GetValue(): oldkey = self.value2.GetValue()
-		dlg = selectKey(oldkey)
+		dlg = selectKey(oldkey,1)
 		res = dlg.ShowModal()
 		if res == wx.OK: self.value2.SetValue(dlg.selected_vessel+'.'+dlg.selected_key)
 		dlg.Destroy()
@@ -668,6 +670,184 @@ class RepeatOptions():
 		            []
 		        ]
 		    }'''
+
+# actions
+class ActionSetSignalkKey(wx.Dialog):
+	def __init__(self, parent, edit):
+		self.nodes = parent.nodes
+		self.actions_flow_id = parent.actions_flow_id
+		self.action_id = parent.available_actions_select.GetSelection()
+		self.sk_node_template = '''
+		    {
+		        "id": "",
+		        "type": "signalk-send-pathvalue",
+		        "z": "",
+		        "name": "",
+		        "source": "openplotter.actions",
+		        "x": 380,
+		        "y": 120,
+		        "wires": []
+		    }'''
+		self.change_node_template = '''
+			{
+		        "id": "",
+		        "type": "change",
+		        "z": "",
+		        "name": "",
+		        "rules": [
+		            {
+		                "t": "set",
+		                "p": "topic",
+		                "pt": "msg",
+		                "to": "",
+		                "tot": "str"
+		            },
+		            {
+		                "t": "set",
+		                "p": "payload",
+		                "pt": "msg",
+		                "to": "",
+		                "tot": ""
+		            }
+		        ],
+		        "action": "",
+		        "property": "",
+		        "from": "",
+		        "to": "",
+		        "reg": false,
+		        "x": 380,
+		        "y": 120,
+		        "wires": [
+		            [
+		                ""
+		            ]
+		        ]
+		    }'''
+
+		if edit == 0: title = _('Set Signal K key')
+		else: title = _('Edit Signal K key')
+
+		wx.Dialog.__init__(self, None, title = title, size=(550, 180))
+		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
+
+		panel = wx.Panel(self)
+
+		skkeylabel = wx.StaticText(panel, label=_('Set Signal K key'))
+		self.skkey1 = wx.TextCtrl(panel)
+		self.edit_skkey1 = wx.Button(panel, label=_('Edit'))
+		self.edit_skkey1.Bind(wx.EVT_BUTTON, self.onEditSkkey1)
+
+		self.type_list = [_('Trigger value'), _('Number'), _('String'), _('Signal K key value')]
+
+		tolabel = wx.StaticText(panel, label=_('to'))
+		self.type = wx.Choice(panel, choices=self.type_list, style=wx.CB_READONLY)
+		self.type.Bind(wx.EVT_CHOICE, self.on_select_type)
+		self.value = wx.TextCtrl(panel)
+		self.edit_skkey2 = wx.Button(panel, label=_('Edit'))
+		self.edit_skkey2.Bind(wx.EVT_BUTTON, self.onEditSkkey2)
+
+		okBtn = wx.Button(panel, wx.ID_OK)
+		okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
+		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
+
+		skkey1 = wx.BoxSizer(wx.HORIZONTAL)
+		skkey1.Add(skkeylabel, 0, wx.ALL, 5)
+		skkey1.Add(self.skkey1, 1, wx.ALL, 5)
+		skkey1.Add(self.edit_skkey1, 0, wx.ALL, 5)
+
+		value = wx.BoxSizer(wx.HORIZONTAL)
+		value.Add(tolabel, 0, wx.ALL, 5)
+		value.Add(self.type, 0, wx.ALL, 5)
+		value.Add(self.value, 1, wx.ALL, 5)
+		value.Add(self.edit_skkey2, 0, wx.ALL, 5)
+
+		ok_cancel = wx.BoxSizer(wx.HORIZONTAL)
+		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
+		ok_cancel.Add(okBtn, 0, wx.RIGHT | wx.LEFT, 10)
+		ok_cancel.Add(cancelBtn, 0, wx.RIGHT | wx.LEFT, 10)
+		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
+
+		main = wx.BoxSizer(wx.VERTICAL)
+		main.Add(skkey1, 1, wx.ALL | wx.EXPAND, 0)
+		main.AddSpacer(5)
+		main.Add(value, 1, wx.ALL | wx.EXPAND, 0)
+		main.Add((0, 0), 1, wx.ALL, 0)
+		main.Add(ok_cancel, 0, wx.ALL | wx.EXPAND, 10)
+
+		panel.SetSizer(main)
+
+		self.type.SetSelection(1)
+		self.edit_skkey2.Disable()
+
+	def on_select_type(self,e):
+		selected = self.type.GetSelection()
+		if selected == 0:
+			self.value.Disable()
+			self.edit_skkey2.Disable()
+		elif selected == 1 or selected == 2:
+			self.value.Enable()
+			self.edit_skkey2.Disable()
+		elif selected == 3:
+			self.value.Enable()
+			self.edit_skkey2.Enable()
+		self.value.SetValue('')
+
+	def onEditSkkey1(self,e):
+		oldkey = False
+		if self.skkey1.GetValue(): oldkey = self.skkey1.GetValue()
+		dlg = selectKey(oldkey,0)
+		res = dlg.ShowModal()
+		if res == wx.OK:
+			selected_key = dlg.selected_key.replace(':','.')
+			self.skkey1.SetValue(selected_key)
+		dlg.Destroy()
+
+	def onEditSkkey2(self,e):
+		oldkey = False
+		if self.value.GetValue(): oldkey = self.value.GetValue()
+		dlg = selectKey(oldkey,1)
+		res = dlg.ShowModal()
+		if res == wx.OK:
+			self.value.SetValue(dlg.selected_vessel+'.'+dlg.selected_key)
+		dlg.Destroy()
+
+	def OnOk(self,e):
+		skkey1 = self.skkey1.GetValue()
+		value = self.value.GetValue()
+		selected_type = self.type.GetSelection()
+		if not skkey1:
+			wx.MessageBox(_('Provide a Signal K key.'), 'Info', wx.OK | wx.ICON_INFORMATION)
+			return
+		if not value and selected_type != 0:
+			wx.MessageBox(_('Provide a value.'), 'Info', wx.OK | wx.ICON_INFORMATION)
+			return
+		self.ActionNodes = []
+		sk_node = ujson.loads(self.sk_node_template)
+		sk_node['id'] = self.nodes.get_node_id()
+		sk_node['z'] = self.actions_flow_id
+		sk_node['name'] = 'a|'+sk_node['id']+'|'+str(self.action_id)
+		self.ActionNodes.append(sk_node)
+		change_node = ujson.loads(self.change_node_template)
+		change_node['id'] = self.nodes.get_node_id()
+		change_node['z'] = self.actions_flow_id
+		change_node['name'] = sk_node['name']
+		change_node['rules'][0]['to'] = skkey1
+		if selected_type == 0:
+			change_node['rules'][1]['to'] = "payload"
+			change_node['rules'][1]['tot'] = "msg"
+		if selected_type == 1:
+			change_node['rules'][1]['to'] = value
+			change_node['rules'][1]['tot'] = "num"
+		if selected_type == 2:
+			change_node['rules'][1]['to'] = value
+			change_node['rules'][1]['tot'] = "str"
+		if selected_type == 3:
+			change_node['rules'][1]['to'] = value
+			change_node['rules'][1]['tot'] = "flow"
+		change_node['wires'] = [[sk_node['id']]]
+		self.ActionNodes.append(change_node)
+		self.connector_id = change_node['id']
+		self.EndModal(wx.OK)
 
 class ActionPlaySound(wx.Dialog):
 	def __init__(self, parent, edit):
