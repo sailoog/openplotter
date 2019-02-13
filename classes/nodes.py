@@ -22,6 +22,7 @@ class Nodes:
 		home = parent.home
 		self.flows_file = home+'/.signalk/red/flows_openplotter.json'
 		self.actions_flow_id = actions_flow_id
+		self.allowed_pins = ['22','29','31','32','33','35','36','37','38','40']
 	
 	def get_node_id(self):
 		uuid_tmp = str(uuid.uuid4())
@@ -361,7 +362,7 @@ class TriggerGPIO(wx.Dialog):
 		if edit == 0: title = _('Add GPIO trigger')
 		else: title = _('Edit GPIO trigger')
 
-		wx.Dialog.__init__(self, None, title = title, size=(400, 180))
+		wx.Dialog.__init__(self, None, title = title, size=(400, 220))
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 
 		self.gpio_node_template = '''
@@ -383,26 +384,23 @@ class TriggerGPIO(wx.Dialog):
 
 		panel = wx.Panel(self)
 
-		allowed_pins = ['22','29','31','32','33','35','36','37','38','40']
 		in_use_pins =[]
 		for i in parent.no_actions_nodes:
 			if 'type' in i:
 			 if i['type'] == 'rpi-gpio in' or i['type'] == 'rpi-gpio out':
-			 	if 'pin' in i: in_use_pins.append(i['pin'])
+			 	if 'pin' in i and not i['pin'] in in_use_pins: in_use_pins.append(i['pin'])
 		for i in parent.triggers_flow_nodes:
 			if 'type' in i:
-			 if i['type'] == 'rpi-gpio in' or i['type'] == 'rpi-gpio out':
-			 	if 'pin' in i: in_use_pins.append(i['pin'])
+			 if i['type'] == 'rpi-gpio in':
+			 	if 'pin' in i and not i['pin'] in in_use_pins: in_use_pins.append(i['pin'])
 		for i in parent.actions_flow_nodes:
 			if 'type' in i:
-			 if i['type'] == 'rpi-gpio in' or i['type'] == 'rpi-gpio out':
-			 	if 'pin' in i: in_use_pins.append(i['pin'])
-		self.avalaible_gpio = []
-		for i in allowed_pins:
-			if not i in in_use_pins: self.avalaible_gpio.append(i)
+			 if i['type'] == 'rpi-gpio out':
+			 	if 'pin' in i and not i['pin'] in in_use_pins: in_use_pins.append(i['pin'])
 
+		pinsinuse = wx.StaticText(panel, label=_('Pins in use: ')+str([x.encode('UTF8') for x in in_use_pins]))
 		pinlabel = wx.StaticText(panel, label=_('Pin'))
-		self.pin = wx.Choice(panel, choices=self.avalaible_gpio, style=wx.CB_READONLY)
+		self.pin = wx.Choice(panel, choices=self.nodes.allowed_pins, style=wx.CB_READONLY)
 
 		self.resistor_select = [_('none'),_('pullup'),_('pulldown')]
 		self.resistor_select2 = ['tri','up','down']
@@ -417,9 +415,9 @@ class TriggerGPIO(wx.Dialog):
 		okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
 
 		pinh = wx.BoxSizer(wx.HORIZONTAL)
-		pinh.Add(pinlabel, 0, wx.ALL, 5)
+		pinh.Add(pinlabel, 0, wx.ALL, 10)
 		pinh.Add(self.pin, 0, wx.ALL, 10)
-		pinh.Add(resitorlabel, 0, wx.ALL, 5)
+		pinh.Add(resitorlabel, 0, wx.ALL, 10)
 		pinh.Add(self.resistor, 0, wx.ALL, 10)
 
 		okcancel = wx.BoxSizer(wx.HORIZONTAL)
@@ -429,6 +427,7 @@ class TriggerGPIO(wx.Dialog):
 		okcancel.Add((0, 0), 1, wx.ALL, 0)
 
 		main = wx.BoxSizer(wx.VERTICAL)
+		main.Add(pinsinuse, 0, wx.ALL, 10)
 		main.Add(pinh, 0, wx.ALL, 0)
 		main.Add(self.read, 0, wx.ALL, 10)
 		main.Add((0, 0), 1, wx.ALL, 0)
@@ -845,6 +844,184 @@ class ActionSetSignalkKey(wx.Dialog):
 			change_node['rules'][1]['to'] = value
 			change_node['rules'][1]['tot'] = "flow"
 		change_node['wires'] = [[sk_node['id']]]
+		self.ActionNodes.append(change_node)
+		self.connector_id = change_node['id']
+		self.EndModal(wx.OK)
+
+class ActionSetGPIO(wx.Dialog):
+	def __init__(self, parent, edit):
+		self.nodes = parent.nodes
+		self.actions_flow_id = parent.actions_flow_id
+		self.action_id = parent.available_actions_select.GetSelection()
+		self.gpio_node_template = '''
+		    {
+		        "id": "",
+		        "type": "rpi-gpio out",
+		        "z": "",
+		        "name": "",
+		        "pin": "",
+		        "set": true,
+		        "level": "0",
+		        "freq": "",
+		        "out": "out",
+		        "x": 380,
+		        "y": 120,
+		        "wires": []
+		    }'''
+		self.change_node_template = '''
+		    {
+		        "id": "",
+		        "type": "change",
+		        "z": "",
+		        "name": "",
+		        "rules": [
+		            {
+		                "t": "set",
+		                "p": "payload",
+		                "pt": "msg",
+		                "to": "",
+		                "tot": "num"
+		            }
+		        ],
+		        "action": "",
+		        "property": "",
+		        "from": "",
+		        "to": "",
+		        "reg": false,
+		        "x": 380,
+		        "y": 120,
+		        "wires": [
+		            [
+		                ""
+		            ]
+		        ]
+		    }'''
+		if edit == 0: title = _('Set GPIO output')
+		else: title = _('Edit GPIO output')
+
+		wx.Dialog.__init__(self, None, title = title, size=(320, 330))
+		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
+
+		panel = wx.Panel(self)
+
+		in_use_pins =[]
+		for i in parent.no_actions_nodes:
+			if 'type' in i:
+			 if i['type'] == 'rpi-gpio in' or i['type'] == 'rpi-gpio out':
+			 	if 'pin' in i and not i['pin'] in in_use_pins: in_use_pins.append(i['pin'])
+		for i in parent.triggers_flow_nodes:
+			if 'type' in i:
+			 if i['type'] == 'rpi-gpio in':
+			 	if 'pin' in i and not i['pin'] in in_use_pins: in_use_pins.append(i['pin'])
+		for i in parent.actions_flow_nodes:
+			if 'type' in i:
+			 if i['type'] == 'rpi-gpio out':
+			 	if 'pin' in i and not i['pin'] in in_use_pins: in_use_pins.append(i['pin'])
+
+		pinsinuse = wx.StaticText(panel, label=_('Pins in use: ')+str([x.encode('UTF8') for x in in_use_pins]))
+		pinlabel = wx.StaticText(panel, label=_('Pin'))
+		self.pin = wx.Choice(panel, choices=self.nodes.allowed_pins, style=wx.CB_READONLY)
+
+		self.low = wx.CheckBox(panel, label=_('Set pin to 0'))
+		self.low.Bind(wx.EVT_CHECKBOX, self.on_low)
+		self.high = wx.CheckBox(panel, label=_('Set pin to 1'))
+		self.high.Bind(wx.EVT_CHECKBOX, self.on_high)
+
+		self.init = wx.CheckBox(panel, label=_('Set initial state'))
+		self.init.Bind(wx.EVT_CHECKBOX, self.on_init)
+		self.initlow = wx.CheckBox(panel, label='0')
+		self.initlow.Bind(wx.EVT_CHECKBOX, self.on_initlow)
+		self.inithigh = wx.CheckBox(panel, label='1')
+		self.inithigh.Bind(wx.EVT_CHECKBOX, self.on_inithigh)
+
+		okBtn = wx.Button(panel, wx.ID_OK)
+		okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
+		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
+
+		pin = wx.BoxSizer(wx.HORIZONTAL)
+		pin.Add(pinlabel, 0, wx.LEFT, 10)
+		pin.Add(self.pin, 0, wx.LEFT, 10)
+
+		ok_cancel = wx.BoxSizer(wx.HORIZONTAL)
+		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
+		ok_cancel.Add(okBtn, 0, wx.RIGHT | wx.LEFT, 10)
+		ok_cancel.Add(cancelBtn, 0, wx.RIGHT | wx.LEFT, 10)
+		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
+
+		main = wx.BoxSizer(wx.VERTICAL)
+		main.AddSpacer(10)
+		main.Add(pinsinuse, 0, wx.LEFT, 10)
+		main.AddSpacer(5)
+		main.Add(pin, 0, wx.ALL, 0)
+		main.AddSpacer(15)
+		main.Add(self.low, 0, wx.LEFT, 10)
+		main.AddSpacer(5)
+		main.Add(self.high, 0, wx.LEFT, 10)
+		main.AddSpacer(15)
+		main.Add(self.init, 0, wx.LEFT, 10)
+		main.AddSpacer(5)
+		main.Add(self.initlow, 0, wx.LEFT, 20)
+		main.AddSpacer(5)
+		main.Add(self.inithigh, 0, wx.LEFT, 20)
+		main.Add((0, 0), 1, wx.ALL, 0)
+		main.Add(ok_cancel, 0, wx.ALL | wx.EXPAND, 10)
+
+		panel.SetSizer(main)
+
+		self.on_low(0)
+		self.init.SetValue(True)
+		self.initlow.SetValue(True)
+
+	def on_low(self, e):
+		self.low.SetValue(True)
+		self.high.SetValue(False)
+
+	def on_high(self, e):
+		self.low.SetValue(False)
+		self.high.SetValue(True)
+
+	def on_init(self, e):
+		if self.init.GetValue():
+			self.initlow.Enable()
+			self.inithigh.Enable()
+		else:
+			self.initlow.Disable()
+			self.inithigh.Disable()
+
+	def on_initlow(self, e):
+		self.initlow.SetValue(True)
+		self.inithigh.SetValue(False)
+
+	def on_inithigh(self, e):
+		self.initlow.SetValue(False)
+		self.inithigh.SetValue(True)
+
+	def OnOk(self,e):
+		pin = self.pin.GetStringSelection()
+		if not pin:
+			wx.MessageBox(_('Select a pin.'), 'Info', wx.OK | wx.ICON_INFORMATION)
+			return
+		self.ActionNodes = []
+		gpio_node = ujson.loads(self.gpio_node_template)
+		gpio_node['id'] = self.nodes.get_node_id()
+		gpio_node['z'] = self.actions_flow_id
+		gpio_node['name'] = 'a|'+gpio_node['id']+'|'+str(self.action_id)
+		gpio_node['pin'] = pin
+		if self.init.GetValue():
+			gpio_node['set'] = True
+			if self.initlow.GetValue(): gpio_node['level'] = '0'
+			if self.inithigh.GetValue(): gpio_node['level'] = '1'
+		else: 
+			gpio_node['set'] = False
+			gpio_node['level'] = ''
+		self.ActionNodes.append(gpio_node)
+		change_node = ujson.loads(self.change_node_template)
+		change_node['id'] = self.nodes.get_node_id()
+		change_node['z'] = self.actions_flow_id
+		change_node['name'] = 'a|'+gpio_node['id']+'|'+str(self.action_id)
+		if self.low.GetValue(): change_node['rules'][0]['to'] = '0'
+		if self.high.GetValue(): change_node['rules'][0]['to'] = '1'
+		change_node['wires'] = [[gpio_node['id']]]
 		self.ActionNodes.append(change_node)
 		self.connector_id = change_node['id']
 		self.EndModal(wx.OK)

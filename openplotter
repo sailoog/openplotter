@@ -33,7 +33,7 @@ from classes.add_SK_to_N2K import addSKtoN2K
 from classes.conf import Conf
 from classes.SK_settings import SK_settings
 from classes.language import Language
-from classes.nodes import Nodes, TriggerSK, TriggerGPIO, Condition, ActionSetSignalkKey, ActionPlaySound
+from classes.nodes import Nodes, TriggerSK, TriggerGPIO, Condition, ActionSetSignalkKey, ActionSetGPIO, ActionPlaySound
 
 class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 	def __init__(self, parent, height):
@@ -2273,6 +2273,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 						if action["type"] == '0' and node['type'] == 'change': 
 							field2 = node['rules'][0]['to']
 							field3 = node['rules'][1]['to']
+						if action["type"] == '1': 
+							if node['type'] == 'rpi-gpio out': field2 = node['pin']
+							if node['type'] == 'change': field3 = node['rules'][0]['to']
 						if action["type"] == '5':
 							if node['type'] == 'exec': field2 = node['append']
 							if node['type'] == 'msg-resend': field3 = _('repeat')
@@ -2351,6 +2354,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			return
 		action = self.available_actions_select.GetSelection()
 		if action == 0: dlg = ActionSetSignalkKey(self,edit)
+		elif action == 1: dlg = ActionSetGPIO(self,edit)
 		elif action == 5: dlg = ActionPlaySound(self,edit)
 		else:
 			self.ShowStatusBarRED(_('Select an action.'))
@@ -2414,7 +2418,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			all_flows.append(i)
 			if i["type"] == "change":
 				result = []
-				if 'tot' in i['rules'][1] and i['rules'][1]['tot'] == 'flow':
+				if len(i['rules']) > 1 and 'tot' in i['rules'][1] and i['rules'][1]['tot'] == 'flow':
 					result = self.nodes.get_subscription(i['rules'][1]['to'])
 					name = result[0]['name']
 					exists = False
