@@ -295,15 +295,15 @@ class TriggerSK(wx.Dialog):
 		hbox.Add((0, 0), 1, wx.ALL, 0)
 
 		vbox = wx.BoxSizer(wx.VERTICAL)
-		vbox.AddSpacer(5)
-		vbox.Add(period, 0, wx.ALL, 0)
-		vbox.AddSpacer(15)
-		vbox.Add(vessel, 0, wx.ALL | wx.EXPAND, 0)
-		vbox.Add(skkey, 0, wx.ALL | wx.EXPAND, 0)
+		vbox.AddSpacer(10)
+		vbox.Add(period, 0, wx.LEFT, 5)
+		vbox.AddSpacer(10)
+		vbox.Add(vessel, 0, wx.LEFT | wx.EXPAND, 5)
+		vbox.Add(skkey, 0, wx.LEFT | wx.EXPAND, 5)
 		vbox.Add(editskkey, 0, wx.ALL | wx.EXPAND, 0)
-		vbox.AddSpacer(15)
-		vbox.Add(source, 0, wx.ALL | wx.EXPAND, 0)
-		vbox.Add(sourcetext, 0, wx.ALL, 0)
+		vbox.AddSpacer(10)
+		vbox.Add(source, 0, wx.LEFT | wx.EXPAND, 5)
+		vbox.Add(sourcetext, 0, wx.LEFT, 10)
 		vbox.Add((0, 0), 1, wx.ALL, 0)
 		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 0)
 
@@ -321,9 +321,13 @@ class TriggerSK(wx.Dialog):
 
 	def OnOk(self,e):
 		skkey = self.skkey.GetValue()
+		vessel = self.vessel.GetValue()
 		source = self.source.GetValue()
 		if not skkey:
 			wx.MessageBox(_('You have to provide a Signal K key.'), 'Info', wx.OK | wx.ICON_INFORMATION)
+			return
+		elif not vessel:
+			wx.MessageBox(_('You have to provide a vessel ID.'), 'Info', wx.OK | wx.ICON_INFORMATION)
 			return
 		elif source and not re.match('^[.0-9a-zA-Z]+$', source):
 			wx.MessageBox(_('Failed. Characters not allowed.'), 'Info', wx.OK | wx.ICON_INFORMATION)
@@ -487,78 +491,80 @@ class Condition(wx.Dialog):
 		        ]
 		    }'''
 
+		if edit == 0: title = _('Add condition')
+		else: title = _('Edit condition')
+
+		wx.Dialog.__init__(self, None, title = title, size=(600, 200))
+		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
+
+		panel = wx.Panel(self)
+
+		operatorlabel = wx.StaticText(panel, label=_('Operator: ')+parent.available_conditions[self.operator_id])
+
+		type_list = [_('Number'), _('String'), _('Signal K key')]
+		self.type_list = ['num', 'str', 'flow']
+
+		type1label = wx.StaticText(panel, label=_('Type'))
+		self.type1 = wx.Choice(panel, choices=type_list, style=wx.CB_READONLY)
+		self.type1.Bind(wx.EVT_CHOICE, self.on_select_type1)
+
+		value1label = wx.StaticText(panel, label=_('Value'))
+		self.value1 = wx.TextCtrl(panel)
+		self.edit_value1 = wx.Button(panel, label=_('Edit'))
+		self.edit_value1.Bind(wx.EVT_BUTTON, self.onEditSkkey1)
+
+		type2label = wx.StaticText(panel, label=_('Type'))
+		self.type2 = wx.Choice(panel, choices=type_list, style=wx.CB_READONLY)
+		self.type2.Bind(wx.EVT_CHOICE, self.on_select_type2)
+
+		value2label = wx.StaticText(panel, label=_('Value'))
+		self.value2 = wx.TextCtrl(panel)
+		self.edit_value2 = wx.Button(panel, label=_('Edit'))
+		self.edit_value2.Bind(wx.EVT_BUTTON, self.onEditSkkey2)
+		
+		okBtn = wx.Button(panel, wx.ID_OK)
+		okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
+		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
+
+		value1 = wx.BoxSizer(wx.HORIZONTAL)
+		value1.Add(type1label, 0, wx.ALL, 5)
+		value1.Add(self.type1, 0, wx.ALL, 5)
+		value1.Add(value1label, 0, wx.ALL, 5)
+		value1.Add(self.value1, 1, wx.ALL, 5)
+		value1.Add(self.edit_value1, 0, wx.ALL, 5)
+
+		value2 = wx.BoxSizer(wx.HORIZONTAL)
+		value2.Add(type2label, 0, wx.ALL, 5)
+		value2.Add(self.type2, 0, wx.ALL, 5)
+		value2.Add(value2label, 0, wx.ALL, 5)
+		value2.Add(self.value2, 1, wx.ALL, 5)
+		value2.Add(self.edit_value2, 0, wx.ALL, 5)
+
+		ok_cancel = wx.BoxSizer(wx.HORIZONTAL)
+		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
+		ok_cancel.Add(okBtn, 0, wx.RIGHT | wx.LEFT, 10)
+		ok_cancel.Add(cancelBtn, 0, wx.RIGHT | wx.LEFT, 10)
+		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
+
+		main = wx.BoxSizer(wx.VERTICAL)
+		main.Add(operatorlabel, 0, wx.ALL, 5)
+		main.Add(value1, 0, wx.ALL | wx.EXPAND, 0)
+		main.Add(value2, 0, wx.ALL | wx.EXPAND, 0)
+		main.Add((0, 0), 1, wx.ALL, 0)
+		main.Add(ok_cancel, 0, wx.ALL | wx.EXPAND, 0)
+
+		panel.SetSizer(main)
+
+		self.edit_value1.Disable()
+		self.edit_value2.Disable()
 		if self.operator == 'true' or self.operator == 'false' or self.operator == 'null' or self.operator == 'nnull' or self.operator == 'empty' or self.operator == 'nempty':
-			self.OnOk()
-		else:
-			if edit == 0: title = _('Add condition')
-			else: title = _('Edit condition')
-
-			wx.Dialog.__init__(self, None, title = title, size=(600, 200))
-			self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
-
-			panel = wx.Panel(self)
-
-			operatorlabel = wx.StaticText(panel, label=_('Operator: ')+parent.available_conditions[self.operator_id])
-
-			type_list = [_('Number'), _('String'), _('Signal K key')]
-			self.type_list = ['num', 'str', 'flow']
-
-			type1label = wx.StaticText(panel, label=_('Type'))
-			self.type1 = wx.Choice(panel, choices=type_list, style=wx.CB_READONLY)
-			self.type1.Bind(wx.EVT_CHOICE, self.on_select_type1)
-
-			value1label = wx.StaticText(panel, label=_('Value'))
-			self.value1 = wx.TextCtrl(panel)
-			self.edit_value1 = wx.Button(panel, label=_('Edit'))
-			self.edit_value1.Bind(wx.EVT_BUTTON, self.onEditSkkey1)
-
-			type2label = wx.StaticText(panel, label=_('Type'))
-			self.type2 = wx.Choice(panel, choices=type_list, style=wx.CB_READONLY)
-			self.type2.Bind(wx.EVT_CHOICE, self.on_select_type2)
-
-			value2label = wx.StaticText(panel, label=_('Value'))
-			self.value2 = wx.TextCtrl(panel)
-			self.edit_value2 = wx.Button(panel, label=_('Edit'))
-			self.edit_value2.Bind(wx.EVT_BUTTON, self.onEditSkkey2)
-			
-			okBtn = wx.Button(panel, wx.ID_OK)
-			okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
-			cancelBtn = wx.Button(panel, wx.ID_CANCEL)
-
-			value1 = wx.BoxSizer(wx.HORIZONTAL)
-			value1.Add(type1label, 0, wx.ALL, 5)
-			value1.Add(self.type1, 0, wx.ALL, 5)
-			value1.Add(value1label, 0, wx.ALL, 5)
-			value1.Add(self.value1, 1, wx.ALL, 5)
-			value1.Add(self.edit_value1, 0, wx.ALL, 5)
-
-			value2 = wx.BoxSizer(wx.HORIZONTAL)
-			value2.Add(type2label, 0, wx.ALL, 5)
-			value2.Add(self.type2, 0, wx.ALL, 5)
-			value2.Add(value2label, 0, wx.ALL, 5)
-			value2.Add(self.value2, 1, wx.ALL, 5)
-			value2.Add(self.edit_value2, 0, wx.ALL, 5)
-
-			ok_cancel = wx.BoxSizer(wx.HORIZONTAL)
-			ok_cancel.Add((0, 0), 1, wx.ALL, 0)
-			ok_cancel.Add(okBtn, 0, wx.RIGHT | wx.LEFT, 10)
-			ok_cancel.Add(cancelBtn, 0, wx.RIGHT | wx.LEFT, 10)
-			ok_cancel.Add((0, 0), 1, wx.ALL, 0)
-
-			main = wx.BoxSizer(wx.VERTICAL)
-			main.Add(operatorlabel, 0, wx.ALL, 5)
-			main.Add(value1, 0, wx.ALL | wx.EXPAND, 0)
-			main.Add(value2, 0, wx.ALL | wx.EXPAND, 0)
-			main.Add((0, 0), 1, wx.ALL, 0)
-			main.Add(ok_cancel, 0, wx.ALL | wx.EXPAND, 0)
-
-			panel.SetSizer(main)
-
-			self.edit_value1.Disable()
-			self.edit_value2.Disable()
-			if self.operator != 'btwn':			
-				self.type2.Disable()
-				self.value2.Disable()
+			self.type1.Disable()
+			self.value1.Disable()
+			self.type2.Disable()
+			self.value2.Disable()
+		elif self.operator != 'btwn':			
+			self.type2.Disable()
+			self.value2.Disable()
 
 	def onEditSkkey1(self,e):
 		oldkey = False
@@ -594,26 +600,27 @@ class Condition(wx.Dialog):
 		condition_node['name'] = 'c|'+condition_node['id']+'|'+str(self.operator_id)
 		if self.operator == 'true' or self.operator == 'false' or self.operator == 'null' or self.operator == 'nnull' or self.operator == 'empty' or self.operator == 'nempty':
 			condition_node['rules'].append({"t": self.operator})
-		type1 = self.type1.GetSelection()
-		value1 = self.value1.GetValue()
-		if type1 == -1:
-			wx.MessageBox(_('You have to select a value type.'), 'Info', wx.OK | wx.ICON_INFORMATION)
-			return
-		if not value1:
-			wx.MessageBox(_('You have to provide a value.'), 'Info', wx.OK | wx.ICON_INFORMATION)
-			return
-		if self.operator == 'eq' or self.operator == 'neq' or self.operator == 'lt' or self.operator == 'lte' or self.operator == 'gt' or self.operator == 'gte' or self.operator == 'cont':
-			condition_node['rules'].append({"t": self.operator, "v": value1, "vt": self.type_list[type1]})
-		if self.operator == 'btwn':
-			type2 = self.type2.GetSelection()
-			value2 = self.value2.GetValue()
-			if type2 == -1:
+		else:
+			type1 = self.type1.GetSelection()
+			value1 = self.value1.GetValue()
+			if type1 == -1:
 				wx.MessageBox(_('You have to select a value type.'), 'Info', wx.OK | wx.ICON_INFORMATION)
 				return
-			if not value2:
+			if not value1:
 				wx.MessageBox(_('You have to provide a value.'), 'Info', wx.OK | wx.ICON_INFORMATION)
 				return
-			condition_node['rules'].append({"t": self.operator, "v": value1, "vt": self.type_list[type1], "v2": value2, "v2t": self.type_list[type2]})
+			if self.operator == 'eq' or self.operator == 'neq' or self.operator == 'lt' or self.operator == 'lte' or self.operator == 'gt' or self.operator == 'gte' or self.operator == 'cont':
+				condition_node['rules'].append({"t": self.operator, "v": value1, "vt": self.type_list[type1]})
+			if self.operator == 'btwn':
+				type2 = self.type2.GetSelection()
+				value2 = self.value2.GetValue()
+				if type2 == -1:
+					wx.MessageBox(_('You have to select a value type.'), 'Info', wx.OK | wx.ICON_INFORMATION)
+					return
+				if not value2:
+					wx.MessageBox(_('You have to provide a value.'), 'Info', wx.OK | wx.ICON_INFORMATION)
+					return
+				condition_node['rules'].append({"t": self.operator, "v": value1, "vt": self.type_list[type1], "v2": value2, "v2t": self.type_list[type2]})
 		self.ConditionNode = condition_node
 		self.EndModal(wx.OK)
 
@@ -1204,6 +1211,190 @@ class ActionPlaySound(wx.Dialog):
 			rate_node['nbRateUnits'] = str(self.time.GetValue())
 			rate_node['rateUnits'] = self.RepeatOptions.rateUnit2[self.timeunit.GetSelection()]
 			rate_node['wires'] = [[action_node['id']]]
+			self.connector_id = rate_node['id']
+			self.ActionNodes.append(rate_node)
+		self.EndModal(wx.OK)
+
+class ActionRunCommand(wx.Dialog):
+	def __init__(self, parent, edit):
+		self.currentpath = parent.currentpath
+		self.nodes = parent.nodes
+		self.actions_flow_id = parent.actions_flow_id
+		self.action_id = parent.available_actions_select.GetSelection()
+		self.RepeatOptions = RepeatOptions()
+		self.run_command_node_template = '''
+		    {
+		        "id": "",
+		        "type": "exec",
+		        "z": "",
+		        "command": "",
+		        "addpay": false,
+		        "append": "",
+		        "useSpawn": "false",
+		        "timer": "",
+		        "oldrc": false,
+		        "name": "",
+		        "x": 380,
+		        "y": 120,
+		        "wires": [
+		            [],
+		            [],
+		            []
+		        ]
+		    }'''
+
+		if edit == 0: title = _('Add command')
+		else: title = _('Edit command')
+
+		wx.Dialog.__init__(self, None, title = title, size=(550, 350))
+		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
+
+		panel = wx.Panel(self)
+
+		commandlabel = wx.StaticText(panel, label=_('Command'))
+		self.command = wx.TextCtrl(panel)
+		argumentslabel = wx.StaticText(panel, label=_('Arguments'))
+		self.arguments = wx.TextCtrl(panel)
+
+		self.repeat = wx.CheckBox(panel, label=_('Repeat'))
+		self.repeat.Bind(wx.EVT_CHECKBOX, self.on_repeat)
+		intervallabel = wx.StaticText(panel, label=_('Interval'))
+		self.interval = wx.SpinCtrl(panel, min=1, max=100000, initial=1)
+		self.unit = wx.Choice(panel, choices=self.RepeatOptions.intervalUnit, style=wx.CB_READONLY)
+		self.unit.SetSelection(1)
+		maxlabel = wx.StaticText(panel, label=_('Max.'))
+		self.max = wx.SpinCtrl(panel, min=1, max=100000, initial=1)
+
+		self.rate = wx.CheckBox(panel, label=_('Rate limit'))
+		self.rate.Bind(wx.EVT_CHECKBOX, self.on_rate)
+		ratelabel = wx.StaticText(panel, label=_('Rate'))
+		self.amount = wx.SpinCtrl(panel, min=1, max=100000, initial=1)
+		ratelabel2 = wx.StaticText(panel, label=_('time(s) per'))
+		self.time = wx.SpinCtrl(panel, min=1, max=100000, initial=1)
+		self.timeunit = wx.Choice(panel, choices=self.RepeatOptions.rateUnit, style=wx.CB_READONLY)
+		self.timeunit.SetSelection(2)
+
+		okBtn = wx.Button(panel, wx.ID_OK)
+		okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
+		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
+
+		command = wx.BoxSizer(wx.HORIZONTAL)
+		command.Add(commandlabel, 0, wx.ALL, 5)
+		command.Add(self.command, 1, wx.ALL, 5)
+
+		arguments = wx.BoxSizer(wx.HORIZONTAL)
+		arguments.Add(argumentslabel, 0, wx.ALL, 5)
+		arguments.Add(self.arguments, 1, wx.ALL, 5)
+
+		repeath = wx.BoxSizer(wx.HORIZONTAL)
+		repeath.Add(intervallabel, 0, wx.ALL, 5)
+		repeath.Add(self.interval, 0, wx.ALL, 5)
+		repeath.Add(self.unit, 0, wx.ALL, 5)
+		repeath.Add(maxlabel, 0, wx.ALL, 5)
+		repeath.Add(self.max, 0, wx.ALL, 5)
+
+		rate = wx.BoxSizer(wx.HORIZONTAL)
+		rate.Add(ratelabel, 0, wx.ALL, 5)
+		rate.Add(self.amount, 0, wx.ALL, 5)
+		rate.Add(ratelabel2, 0, wx.ALL, 5)
+		rate.Add(self.time, 0, wx.ALL, 5)
+		rate.Add(self.timeunit, 0, wx.ALL, 5)
+
+		ok_cancel = wx.BoxSizer(wx.HORIZONTAL)
+		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
+		ok_cancel.Add(okBtn, 0, wx.RIGHT | wx.LEFT, 10)
+		ok_cancel.Add(cancelBtn, 0, wx.RIGHT | wx.LEFT, 10)
+		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
+
+		main = wx.BoxSizer(wx.VERTICAL)
+		main.Add(command, 1, wx.ALL | wx.EXPAND, 10)
+		main.Add(arguments, 1, wx.ALL | wx.EXPAND, 10)
+		main.AddSpacer(15)
+		main.Add(self.repeat, 1, wx.RIGHT | wx.LEFT, 5)
+		main.Add(repeath, 1, wx.RIGHT | wx.LEFT, 5)
+		main.AddSpacer(10)
+		main.Add(self.rate, 1, wx.RIGHT | wx.LEFT, 5)
+		main.Add(rate, 1, wx.RIGHT | wx.LEFT, 5)
+		main.Add((0, 0), 1, wx.ALL, 0)
+		main.Add(ok_cancel, 0, wx.ALL | wx.EXPAND, 10)
+
+		panel.SetSizer(main)
+
+		if edit != 0:
+			self.command.SetValue(edit[0])
+			if edit[1] != 0: self.arguments.SetValue(edit[1])
+
+		self.interval.Disable()
+		self.unit.Disable()
+		self.max.Disable()
+		self.amount.Disable()
+		self.time.Disable()
+		self.timeunit.Disable()
+
+	def on_repeat(self, e):
+		if self.repeat.GetValue():
+			self.interval.Enable()
+			self.unit.Enable()
+			self.max.Enable()
+			self.rate.SetValue(False)
+			self.amount.Disable()
+			self.time.Disable()
+			self.timeunit.Disable()
+		else:
+			self.interval.Disable()
+			self.unit.Disable()
+			self.max.Disable()
+
+	def on_rate(self, e):
+		if self.rate.GetValue():
+			self.amount.Enable()
+			self.time.Enable()
+			self.timeunit.Enable()
+			self.repeat.SetValue(False)
+			self.interval.Disable()
+			self.unit.Disable()
+			self.max.Disable()
+		else:
+			self.amount.Disable()
+			self.time.Disable()
+			self.timeunit.Disable()
+
+	def OnOk(self,e):
+		command = self.command.GetValue()
+		arguments = self.arguments.GetValue()
+		if not command:
+			wx.MessageBox(_('You have to provide a command.'), 'Info', wx.OK | wx.ICON_INFORMATION)
+			return
+		self.ActionNodes = []
+		run_command_node = ujson.loads(self.run_command_node_template)
+		run_command_node['id'] = self.nodes.get_node_id()
+		run_command_node['z'] = self.actions_flow_id
+		run_command_node['name'] = 'a|'+run_command_node['id']+'|'+str(self.action_id)
+		run_command_node['command'] = command
+		run_command_node['append'] = arguments
+		self.ActionNodes.append(run_command_node)
+		if not self.repeat.GetValue() and not self.rate.GetValue():
+			self.connector_id = run_command_node['id']
+		elif self.repeat.GetValue():
+			repeat_node = ujson.loads(self.RepeatOptions.repeat_template)
+			repeat_node['id'] = self.nodes.get_node_id()
+			repeat_node['z'] = self.actions_flow_id
+			repeat_node['name'] = run_command_node['name']
+			repeat_node['interval'] = str(self.interval.GetValue())
+			repeat_node['intervalUnit'] = self.RepeatOptions.intervalUnit2[self.unit.GetSelection()]
+			repeat_node['maximum'] = str(self.max.GetValue())
+			repeat_node['wires'] = [[run_command_node['id']]]
+			self.connector_id = repeat_node['id']
+			self.ActionNodes.append(repeat_node)
+		elif self.rate.GetValue():
+			rate_node = ujson.loads(self.RepeatOptions.rate_limit_template)
+			rate_node['id'] = self.nodes.get_node_id()
+			rate_node['z'] = self.actions_flow_id
+			rate_node['name'] = run_command_node['name']
+			rate_node['rate'] = str(self.amount.GetValue())
+			rate_node['nbRateUnits'] = str(self.time.GetValue())
+			rate_node['rateUnits'] = self.RepeatOptions.rateUnit2[self.timeunit.GetSelection()]
+			rate_node['wires'] = [[run_command_node['id']]]
 			self.connector_id = rate_node['id']
 			self.ActionNodes.append(rate_node)
 		self.EndModal(wx.OK)

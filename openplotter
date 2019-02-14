@@ -33,7 +33,7 @@ from classes.add_SK_to_N2K import addSKtoN2K
 from classes.conf import Conf
 from classes.SK_settings import SK_settings
 from classes.language import Language
-from classes.nodes import Nodes, TriggerSK, TriggerGPIO, Condition, ActionSetSignalkKey, ActionSetGPIO, ActionPlaySound
+from classes.nodes import Nodes, TriggerSK, TriggerGPIO, Condition, ActionSetSignalkKey, ActionSetGPIO, ActionPlaySound, ActionRunCommand
 
 class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 	def __init__(self, parent, height):
@@ -2280,6 +2280,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 							if node['type'] == 'exec': field2 = node['append']
 							if node['type'] == 'msg-resend': field3 = _('repeat')
 							if node['type'] == 'delay': field3 = _('rate limit')
+						if action["type"] == '6' or action["type"] == '7' or action["type"] == '8':
+							if node['type'] == 'exec': 
+								field2 = node['command']
+								field2 += ' '+node['append']
+							if node['type'] == 'msg-resend': field3 = _('repeat')
+							if node['type'] == 'delay': field3 = _('rate limit')
 				self.list_actions.Append([self.available_actions[int(action["type"])], field2, field3])
 
 	def on_select_actions(self, e):
@@ -2356,6 +2362,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if action == 0: dlg = ActionSetSignalkKey(self,edit)
 		elif action == 1: dlg = ActionSetGPIO(self,edit)
 		elif action == 5: dlg = ActionPlaySound(self,edit)
+		elif action == 6: dlg = ActionRunCommand(self,edit)
+		elif action == 7: dlg = ActionRunCommand(self,['sudo','reboot',0])
+		elif action == 8: dlg = ActionRunCommand(self,['sudo', 'shutdown -h now',0])
 		else:
 			self.ShowStatusBarRED(_('Select an action.'))
 			return
