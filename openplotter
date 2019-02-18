@@ -33,7 +33,7 @@ from classes.add_SK_to_N2K import addSKtoN2K
 from classes.conf import Conf
 from classes.SK_settings import SK_settings
 from classes.language import Language
-from classes.nodes import Nodes, TriggerSK, TriggerGPIO, Condition, ActionSetSignalkKey, ActionSetGPIO, ActionPlaySound, ActionRunCommand
+from classes.nodes import Nodes, TriggerSK, TriggerGeofence, TriggerGPIO, Condition, ActionSetSignalkKey, ActionSetGPIO, ActionPlaySound, ActionRunCommand
 
 class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 	def __init__(self, parent, height):
@@ -2238,11 +2238,17 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 							items2 = items[0].split('.')
 							path_property = ':'+items2[-1]
 						field3 = path+path_property
+					if trigger["type"] == '1':
+						if node['type'] == 'signalk-geofence': 
+							field2 = node['context']
+							if node['myposition']: field3 = _('Use My Position')
+							else: field3 = node['lat']+', '+node['lon']
+							field4 = node['distance']
 					if trigger["type"] == '2' and node['type'] == 'rpi-gpio in': 
 						field2 = node['pin']
 						field3 = node['intype']
 						field4 = node['read']				
-			self.list_triggers.Append([self.available_triggers[int(trigger["type"])], field2, field3, field4])
+			self.list_triggers.Append([self.available_triggers[int(trigger["type"])].decode('utf8'), field2.decode('utf8'), field3.decode('utf8'), field4.decode('utf8')])
 
 	def on_print_conditions(self, e):
 		self.selected_trigger = self.list_triggers.GetFirstSelected()
@@ -2257,7 +2263,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					if 'name' in node and name == node["name"]:
 						if node['type'] == 'switch':
 							if 'v' in node['rules'][0]: field2 = node['rules'][0]['v']
-				self.list_conditions.Append([self.available_conditions[int(condition["operator"])], field2])
+				self.list_conditions.Append([self.available_conditions[int(condition["operator"])].decode('utf8'), field2.decode('utf8')])
 
 	def on_print_actions(self, e):
 		self.selected_condition = self.list_conditions.GetFirstSelected()
@@ -2286,7 +2292,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 								field2 += ' '+node['append']
 							if node['type'] == 'msg-resend': field3 = _('repeat')
 							if node['type'] == 'delay': field3 = _('rate limit')
-				self.list_actions.Append([self.available_actions[int(action["type"])], field2, field3])
+				self.list_actions.Append([self.available_actions[int(action["type"])].decode('utf8'), field2.decode('utf8'), field3.decode('utf8')])
 
 	def on_select_actions(self, e):
 		self.selected_action = self.list_actions.GetFirstSelected()
@@ -2300,6 +2306,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def edit_add_trigger(self, edit):
 		if self.available_triggers_select.GetSelection() == 0: dlg = TriggerSK(self,edit)
+		elif self.available_triggers_select.GetSelection() == 1: dlg = TriggerGeofence(self,edit)
 		elif self.available_triggers_select.GetSelection() == 2: dlg = TriggerGPIO(self,edit)
 		else:
 			self.ShowStatusBarRED(_('Select a trigger type.'))
@@ -2339,9 +2346,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				items = dlg.ConditionNode['name'].split('|')
 				self.actions_flow_tree[self.selected_trigger]['conditions'].append({"condition_node_out_id": items[1],"operator": items[2],"actions": []})
 				trigger_id = self.actions_flow_tree[self.selected_trigger]['trigger_node_out_id']
+				trigger_type = self.actions_flow_tree[self.selected_trigger]['type']
 				for i in self.triggers_flow_nodes:
 					if 'id' in i and i['id'] == trigger_id:
-						i['wires'][0].append(dlg.connector_id)
+						if trigger_type == '1': i['wires'][2].append(dlg.connector_id)
+						else: i['wires'][0].append(dlg.connector_id)
 				self.on_print_conditions(0)
 				self.list_conditions.Select(len(self.actions_flow_tree[self.selected_trigger]['conditions'])-1)
 			else:

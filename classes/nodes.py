@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
-import ujson, uuid, os, wx, re
+import ujson, uuid, os, wx, re, requests
 from select_key import selectKey
 
 class Nodes:
@@ -355,6 +355,149 @@ class TriggerSK(wx.Dialog):
 				subscribe_node['name'] = 't|'+subscribe_node['id']+'|'+str(self.trigger_type)
 				subscribe_node['path'] = skkey
 				self.TriggerNodes = [subscribe_node]
+		self.EndModal(wx.OK)
+
+class TriggerGeofence(wx.Dialog):
+	def __init__(self,parent,edit):
+		self.nodes = parent.nodes
+		self.actions_flow_id = parent.actions_flow_id
+		self.trigger_type = parent.available_triggers_select.GetSelection()
+
+		SK_ = parent.SK_settings
+		self.port = SK_.aktport
+		self.http = SK_.http
+
+		if edit == 0: title = _('Add Geofence trigger')
+		else: title = _('Edit Geofence trigger')
+
+		wx.Dialog.__init__(self, None, title = title, size=(500, 300))
+		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
+
+		self.geofence_node_template = '''
+		    {
+		        "id": "",
+		        "type": "signalk-geofence",
+		        "z": "",
+		        "name": "",
+		        "mode": "sendAll",
+		        "context": "",
+		        "period": 10000,
+		        "myposition": false,
+		        "lat": 0,
+		        "lon": 0,
+		        "distance": 10,
+		        "x": 380,
+		        "y": 120,
+		        "wires": [
+		            [],
+		            [],
+		            []
+		        ]
+		    }'''
+
+		panel = wx.Panel(self)
+
+		periodlabel = wx.StaticText(panel, label=_('Checking period (ms)'))
+		self.period = wx.SpinCtrl(panel, min=100, max=100000000, initial=10000)
+
+		self.list_vessels = []
+		vessellabel = wx.StaticText(panel, label=_('Vessel'))
+		self.vessel = wx.ComboBox(panel, choices=self.list_vessels)
+		self.refreshBtn = wx.Button(panel, label=_('Refresh'))
+		self.refreshBtn.Bind(wx.EVT_BUTTON, self.OnRefreshBtn)
+
+		distancelabel = wx.StaticText(panel, label=_('Distance (m)'))
+		self.distance = wx.SpinCtrl(panel, min=1, max=100000, initial=10)
+
+		self.mypos = wx.CheckBox(panel, label=_('Use My Position'))
+		self.mypos.Bind(wx.EVT_CHECKBOX, self.on_mypos)
+
+		latlabel = wx.StaticText(panel, label=_('Latitude'))
+		self.lat = wx.SpinCtrlDouble(panel, min=-90, max=90, initial=0)
+		self.lat.SetDigits(10)
+
+		lonlabel = wx.StaticText(panel, label=_('Longitude'))
+		self.lon = wx.SpinCtrlDouble(panel, min=-180, max=180, initial=0)
+		self.lon.SetDigits(10)
+
+		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
+		okBtn = wx.Button(panel, wx.ID_OK)
+		okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
+
+		period = wx.BoxSizer(wx.HORIZONTAL)
+		period.Add(periodlabel, 0, wx.ALL, 5)
+		period.Add(self.period, 0, wx.ALL, 5)
+
+		vessel = wx.BoxSizer(wx.HORIZONTAL)
+		vessel.Add(vessellabel, 0, wx.ALL, 5)
+		vessel.Add(self.vessel, 1, wx.ALL, 5)
+		vessel.Add(self.refreshBtn, 0, wx.ALL, 5)
+
+		distance = wx.BoxSizer(wx.HORIZONTAL)
+		distance.Add(distancelabel, 0, wx.ALL, 5)
+		distance.Add(self.distance, 0, wx.ALL, 5)
+
+		latlon = wx.BoxSizer(wx.HORIZONTAL)
+		latlon.Add(latlabel, 0, wx.ALL, 5)
+		latlon.Add(self.lat, 1, wx.ALL, 5)
+		latlon.Add(lonlabel, 0, wx.ALL, 5)
+		latlon.Add(self.lon, 1, wx.ALL, 5)
+
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add((0, 0), 1, wx.ALL, 0)
+		hbox.Add(okBtn, 0, wx.ALL, 10)
+		hbox.Add(cancelBtn, 0, wx.ALL, 10)
+		hbox.Add((0, 0), 1, wx.ALL, 0)
+
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		vbox.AddSpacer(10)
+		vbox.Add(period, 0, wx.LEFT, 5)
+		vbox.Add(vessel, 0, wx.LEFT | wx.EXPAND, 5)
+		vbox.AddSpacer(5)
+		vbox.Add(self.mypos, 0, wx.LEFT, 10)
+		vbox.AddSpacer(5)
+		vbox.Add(latlon, 0, wx.LEFT | wx.EXPAND, 5)
+		vbox.Add(distance, 0, wx.LEFT, 5)
+		vbox.Add((0, 0), 1, wx.ALL, 0)
+		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 0)
+
+		panel.SetSizer(vbox)
+
+		self.OnRefreshBtn(0)
+
+	def OnRefreshBtn(self,e):
+		self.list_vessels = ['self']
+		try:
+			response = requests.get(self.http+'localhost:'+str(self.port)+'/signalk/v1/api/vessels')
+			data = response.json()
+		except:data = None
+		if data:
+			for i in data:
+				self.list_vessels.append(i)
+		self.vessel.Clear()
+		self.vessel.AppendItems(self.list_vessels)
+		self.vessel.SetSelection(0)
+
+	def on_mypos(self,e):
+		if self.mypos.GetValue():
+			self.lat.Disable()
+			self.lon.Disable()
+		else:
+			self.lat.Enable()
+			self.lon.Enable()
+
+	def OnOk(self,e):
+		geofence_node = ujson.loads(self.geofence_node_template)
+		geofence_node['id'] = self.nodes.get_node_id()
+		geofence_node['z'] = self.actions_flow_id
+		geofence_node['name'] = 't|'+geofence_node['id']+'|'+str(self.trigger_type)
+		geofence_node['context'] = 'vessels.'+self.vessel.GetValue()
+		geofence_node['period'] = str(self.period.GetValue())
+		geofence_node['myposition'] = self.mypos.GetValue()
+		geofence_node['lat'] = str(self.lat.GetValue())
+		geofence_node['lon'] = str(self.lon.GetValue())
+		geofence_node['distance'] = str(self.distance.GetValue())
+		self.TriggerNodes = [geofence_node]
 		self.EndModal(wx.OK)
 
 class TriggerGPIO(wx.Dialog):
