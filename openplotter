@@ -33,7 +33,7 @@ from classes.add_SK_to_N2K import addSKtoN2K
 from classes.conf import Conf
 from classes.SK_settings import SK_settings
 from classes.language import Language
-from classes.nodes import Nodes, TriggerSK, TriggerGeofence, TriggerGPIO, Condition, ActionSetSignalkKey, ActionSetGPIO, ActionPlaySound, ActionRunCommand
+from classes.nodes import Nodes, TriggerSK, TriggerGeofence, TriggerGPIO, Condition, ActionSetSignalkKey, ActionSetGPIO, ActionSendEmail, ActionPlaySound, ActionRunCommand
 
 class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 	def __init__(self, parent, height):
@@ -78,7 +78,7 @@ class MainFrame(wx.Frame):
 		self.p_i2c = wx.Panel(self.nb)
 		self.p_1w = wx.Panel(self.nb)
 		self.p_spi = wx.Panel(self.nb)
-		self.p_account = wx.Panel(self.nb)
+		self.p_credentials = wx.Panel(self.nb)
 		self.p_mqtt = wx.Panel(self.nb)
 		self.p_startup = wx.Panel(self.nb)
 		self.nb.AddPage(self.p_serial, _('Serial'))
@@ -91,7 +91,7 @@ class MainFrame(wx.Frame):
 		self.nb.AddPage(self.p_1w, '1W')
 		self.nb.AddPage(self.p_spi, 'SPI')
 		self.nb.AddPage(self.p_mqtt, 'MQTT')
-		self.nb.AddPage(self.p_account, _('Accounts'))
+		self.nb.AddPage(self.p_credentials, _('Credentials'))
 		self.nb.AddPage(self.p_startup, _('Startup'))
 		sizer = wx.BoxSizer()
 		sizer.Add(self.nb, 1, wx.EXPAND)
@@ -204,7 +204,7 @@ class MainFrame(wx.Frame):
 		self.page_i2c()
 		self.page_1w()
 		self.page_spi()
-		self.page_account()
+		self.page_credentials()
 		self.page_mqtt()
 		self.page_startup()
 
@@ -212,7 +212,6 @@ class MainFrame(wx.Frame):
 		self.read_kplex_conf()
 		self.read_language()
 
-		self.read_account()
 		self.read_startup()
 		self.read_wifi_conf()
 		self.read_DS18B20()
@@ -223,6 +222,7 @@ class MainFrame(wx.Frame):
 		self.read_pypilot()
 		self.read_n2k()
 		self.read_triggers()
+		self.read_credentials()
 		#self.when_closed(0x001)
 
 	###########################################	general functions
@@ -1986,8 +1986,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.conf.read()
 		self.read_MCP()
 
-	####################### Accounts
-	def page_account(self):
+	####################### Credentials
+	
+	def page_credentials(self):
+		pass
+		'''
 		wx.StaticBox(self.p_account, label=_(' Twitter '), size=(330, 205), pos=(10, 10))
 		self.twitter_enable = wx.CheckBox(self.p_account, label=_('Enable'), pos=(20, 32))
 		self.twitter_enable.Bind(wx.EVT_CHECKBOX, self.on_twitter_enable)
@@ -2010,7 +2013,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.Gmail_password = wx.TextCtrl(self.p_account, -1, size=(180, 32), pos=(490, 100))
 		wx.StaticText(self.p_account, label=_('Recipient'), pos=(360, 140))
 		self.Recipient = wx.TextCtrl(self.p_account, -1, size=(180, 32), pos=(490, 135))
-
+		'''
+	'''
 	def read_account(self):
 		if self.conf.get('TWITTER', 'apiKey'): self.apiKey.SetValue('********************')
 		if self.conf.get('TWITTER', 'apiSecret'): self.apiSecret.SetValue('********************')
@@ -2082,10 +2086,35 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.Gmail_account.Enable()
 			self.Gmail_password.Enable()
 			self.Recipient.Enable()
+	'''
+
+	def read_credentials(self):
+		self.credentials = {}
+		self.cred_file = self.home+'/.signalk/red/flows_openplotter_cred.json'
+		try:
+			with open(self.cred_file) as data_file:
+				self.credentials = ujson.load(data_file)
+		except:
+			self.credentials = {}
+			print "ERROR reading credentials file"
+
+	def edit_credentials(self, credentials):
+		for i in credentials:
+			self.credentials[i] = credentials[i]
+		self.write_credentials()
+
+	#TODO delete credential
+
+	def write_credentials(self):
+		try:
+			data = ujson.dumps(self.credentials, indent=4)
+			with open(self.cred_file, "w") as outfile:
+				outfile.write(data)
+		except: print "ERROR writing credentials file"
 
 	####################### Actions
-	def page_action(self):
 
+	def page_action(self):
 		self.list_triggers = wx.ListCtrl(self.p_action, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(-1,90))
 		self.list_triggers.InsertColumn(0, _('Triggers'), width=80)
 		self.list_triggers.InsertColumn(1, _(' '), width= 140)
@@ -2219,6 +2248,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def on_print_triggers(self):	
 		self.list_triggers.DeleteAllItems()
+		self.list_conditions.DeleteAllItems()
+		self.list_actions.DeleteAllItems()
 		for trigger in self.actions_flow_tree:
 			name = "t|"+trigger["trigger_node_out_id"]+"|"+trigger["type"]
 			field2 = ''
@@ -2227,7 +2258,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			path = ''
 			path_property = ''
 			for node in self.triggers_flow_nodes:
-				if 'name' in node and name == node["name"]:
+				if 'name' in node and name == node['name']:
 					if trigger["type"] == '0':
 						if node['type'] == 'signalk-subscribe': 
 							path = node['path']
@@ -2260,7 +2291,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				name = "c|"+condition["condition_node_out_id"]+"|"+condition["operator"]
 				field2 = ''
 				for node in self.conditions_flow_nodes:
-					if 'name' in node and name == node["name"]:
+					if 'name' in node and name == node['name']:
 						if node['type'] == 'switch':
 							if 'v' in node['rules'][0]: field2 = node['rules'][0]['v']
 				self.list_conditions.Append([self.available_conditions[int(condition["operator"])].decode('utf8'), field2.decode('utf8')])
@@ -2275,13 +2306,19 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				field2 = ''
 				field3 = ''
 				for node in self.actions_flow_nodes:
-					if 'name' in node and name == node["name"]:
+					if 'dname' in node: namenode = node['dname']
+					elif 'name' in node: namenode = node['name']
+					if name == namenode:
 						if action["type"] == '0' and node['type'] == 'change': 
 							field2 = node['rules'][0]['to']
 							field3 = node['rules'][1]['to']
 						if action["type"] == '1': 
 							if node['type'] == 'rpi-gpio out': field2 = node['pin']
 							if node['type'] == 'change': field3 = node['rules'][0]['to']
+						if action["type"] == '4':
+							if node['type'] == 'template' and node['field'] == 'topic': field2 = node['template']
+							if node['type'] == 'msg-resend': field3 = _('repeat')
+							if node['type'] == 'delay': field3 = _('rate limit')
 						if action["type"] == '5':
 							if node['type'] == 'exec': field2 = node['append']
 							if node['type'] == 'msg-resend': field3 = _('repeat')
@@ -2370,6 +2407,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		action = self.available_actions_select.GetSelection()
 		if action == 0: dlg = ActionSetSignalkKey(self,edit)
 		elif action == 1: dlg = ActionSetGPIO(self,edit)
+		elif action == 4: dlg = ActionSendEmail(self,edit)
 		elif action == 5: dlg = ActionPlaySound(self,edit)
 		elif action == 6: dlg = ActionRunCommand(self,edit)
 		elif action == 7: dlg = ActionRunCommand(self,['sudo','reboot',0])
@@ -2382,7 +2420,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			if not edit:
 				for i in dlg.ActionNodes:
 					self.actions_flow_nodes.append(i)
-					items = i['name'].split('|')
+					if 'dname' in i: items = i['dname'].split('|')
+					elif 'name' in i: items = i['name'].split('|')
 				self.actions_flow_tree[self.selected_trigger]['conditions'][self.selected_condition]['actions'].append({"action_node_out_id": items[1],"type": items[2]})
 				condition_id = self.actions_flow_tree[self.selected_trigger]['conditions'][self.selected_condition]['condition_node_out_id']
 				for i in self.conditions_flow_nodes:
@@ -2392,6 +2431,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.list_actions.Select(len(self.actions_flow_tree[self.selected_trigger]['conditions'][self.selected_condition]['actions'])-1)
 			else:
 				pass
+			if dlg.credentials: self.edit_credentials(dlg.credentials)
 		dlg.Destroy()
 
 	def on_delete_trigger(self, e):
@@ -2444,11 +2484,27 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 						if 'name' in ii and ii['name'] == name: exists = True
 					if not exists:
 						for iii in result: all_flows.append(iii)
-
-		data = ujson.dumps(all_flows, indent=4)
-		with open(self.nodes.flows_file, "w") as outfile:
-			outfile.write(data)
-		self.restart_SK()
+			if i["type"] == "template":
+				result = []
+				if 'template' in i: 
+					matches = re.findall("{{(.*?)}}", i['template'])
+					for ii in matches:
+						value_list = ii.split('.')
+						value_list.pop(0)
+						skkey = '.'.join(value_list)
+						result = self.nodes.get_subscription(skkey)
+						name = result[0]['name']
+						exists = False
+						for iii in all_flows:
+							if 'name' in iii and iii['name'] == name: exists = True
+						if not exists:
+							for iiii in result: all_flows.append(iiii)
+		try:
+			data = ujson.dumps(all_flows, indent=4)
+			with open(self.nodes.flows_file, "w") as outfile:
+				outfile.write(data)
+			self.restart_SK()
+		except: print "ERROR writing flows file"
 
 	def on_cancel_changes_actions(self, e):
 		self.read_triggers()

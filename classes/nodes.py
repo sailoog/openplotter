@@ -70,10 +70,12 @@ class Nodes:
 		actions_flow_nodes = []
 		no_actions_nodes = []
 
-		if os.path.isfile(self.flows_file):
+		try:
 			with open(self.flows_file) as data_file:
 				data = ujson.load(data_file)
-		else: data = {}
+		except:
+			print "ERROR reading flows file"
+			data = {}
 		flow_nodes = []
 		for i in data:
 			if 'z' in i and i['z'] == self.actions_flow_id: 
@@ -127,6 +129,7 @@ class Nodes:
 									if not exist:
 										action = {"action_node_out_id": name[1],"type": name[2]}
 										condition["actions"].append(action)
+
 		return (tree, triggers_flow_nodes, conditions_flow_nodes, actions_flow_nodes, no_actions_nodes)
 
 	def get_subscription(self, value):
@@ -823,6 +826,7 @@ class RepeatOptions():
 # actions
 class ActionSetSignalkKey(wx.Dialog):
 	def __init__(self, parent, edit):
+		self.credentials = ''
 		self.nodes = parent.nodes
 		self.actions_flow_id = parent.actions_flow_id
 		self.action_id = parent.available_actions_select.GetSelection()
@@ -1000,6 +1004,7 @@ class ActionSetSignalkKey(wx.Dialog):
 
 class ActionSetGPIO(wx.Dialog):
 	def __init__(self, parent, edit):
+		self.credentials = ''
 		self.nodes = parent.nodes
 		self.actions_flow_id = parent.actions_flow_id
 		self.action_id = parent.available_actions_select.GetSelection()
@@ -1176,8 +1181,304 @@ class ActionSetGPIO(wx.Dialog):
 		self.connector_id = change_node['id']
 		self.EndModal(wx.OK)
 
+class ActionSendEmail(wx.Dialog):
+	def __init__(self, parent, edit):
+		self.credentials = ''
+		self.nodes = parent.nodes
+		self.actions_flow_id = parent.actions_flow_id
+		self.action_id = parent.available_actions_select.GetSelection()
+		self.RepeatOptions = RepeatOptions()
+		self.email_node_template = '''
+		    {
+		        "id": "",
+		        "type": "e-mail",
+		        "z": "",
+		        "server": "",
+		        "port": "",
+		        "secure": true,
+		        "name": "",
+		        "dname": "",
+		        "x": 380,
+		        "y": 120,
+		        "wires": []
+		    }'''
+		self.payload_node_template = '''
+		    {
+		        "id": "",
+		        "type": "template",
+		        "z": "",
+		        "name": "",
+		        "field": "payload",
+		        "fieldType": "msg",
+		        "format": "handlebars",
+		        "syntax": "mustache",
+		        "template": "",
+		        "output": "str",
+		        "x": 380,
+		        "y": 120,
+		        "wires": [
+		            []
+		        ]
+		    }'''
+		self.topic_node_template = '''
+		    {
+		        "id": "",
+		        "type": "template",
+		        "z": "",
+		        "name": "",
+		        "field": "topic",
+		        "fieldType": "msg",
+		        "format": "handlebars",
+		        "syntax": "mustache",
+		        "template": "",
+		        "output": "str",
+		        "x": 380,
+		        "y": 120,
+		        "wires": [
+		            []
+		        ]
+		    }'''
+		if edit == 0: title = _('Add email action')
+		else: title = _('Edit email action')
+
+		wx.Dialog.__init__(self, None, title = title, size=(710, 460))
+		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
+
+		panel = wx.Panel(self)
+
+		tolabel = wx.StaticText(panel, label=_('To'))
+		self.to = wx.TextCtrl(panel)
+
+		serverlabel = wx.StaticText(panel, label=_('Server'))
+		self.server = wx.TextCtrl(panel)
+
+		portlabel = wx.StaticText(panel, label=_('Port'))
+		self.port = wx.SpinCtrl(panel, min=1, max=65000, initial=465)
+
+		self.secure = wx.CheckBox(panel, label=_('secure connection'))
+
+		useridlabel = wx.StaticText(panel, label=_('User ID'))
+		self.userid = wx.TextCtrl(panel)
+
+		passwordlabel = wx.StaticText(panel, label=_('Password'))
+		self.password = wx.TextCtrl(panel, style=wx.TE_PASSWORD)
+
+		subjectlabel = wx.StaticText(panel, label=_('Subject'))
+		self.subject = wx.TextCtrl(panel)
+
+		bodylabel = wx.StaticText(panel, label=_('Body'))
+		self.body = wx.TextCtrl(panel, style=wx.TE_MULTILINE, size=(-1,60))
+
+		self.addsk = wx.Button(panel, label=_('Add Signal K key value'))
+		self.addsk.Bind(wx.EVT_BUTTON, self.on_addsk)
+
+		self.repeat = wx.CheckBox(panel, label=_('Repeat'))
+		self.repeat.Bind(wx.EVT_CHECKBOX, self.on_repeat)
+		intervallabel = wx.StaticText(panel, label=_('Interval'))
+		self.interval = wx.SpinCtrl(panel, min=1, max=100000, initial=1)
+		self.unit = wx.Choice(panel, choices=self.RepeatOptions.intervalUnit, style=wx.CB_READONLY)
+		self.unit.SetSelection(1)
+		maxlabel = wx.StaticText(panel, label=_('Max.'))
+		self.max = wx.SpinCtrl(panel, min=1, max=100000, initial=1)
+
+		self.rate = wx.CheckBox(panel, label=_('Rate limit'))
+		self.rate.Bind(wx.EVT_CHECKBOX, self.on_rate)
+		ratelabel = wx.StaticText(panel, label=_('Rate'))
+		self.amount = wx.SpinCtrl(panel, min=1, max=100000, initial=1)
+		ratelabel2 = wx.StaticText(panel, label=_('time(s) per'))
+		self.time = wx.SpinCtrl(panel, min=1, max=100000, initial=1)
+		self.timeunit = wx.Choice(panel, choices=self.RepeatOptions.rateUnit, style=wx.CB_READONLY)
+		self.timeunit.SetSelection(2)
+		
+		self.interval.Disable()
+		self.unit.Disable()
+		self.max.Disable()
+		self.amount.Disable()
+		self.time.Disable()
+		self.timeunit.Disable()
+
+		okBtn = wx.Button(panel, wx.ID_OK)
+		okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
+		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
+
+		toserver = wx.BoxSizer(wx.HORIZONTAL)
+		toserver.Add(tolabel, 0, wx.ALL, 5)
+		toserver.Add(self.to, 1, wx.ALL, 5)
+		toserver.Add(serverlabel, 0, wx.ALL, 5)
+		toserver.Add(self.server, 1, wx.ALL, 5)
+		toserver.Add(portlabel, 0, wx.ALL, 5)
+		toserver.Add(self.port, 0, wx.ALL, 5)
+
+		userpass = wx.BoxSizer(wx.HORIZONTAL)
+		userpass.Add(useridlabel, 0, wx.ALL, 5)
+		userpass.Add(self.userid, 1, wx.ALL, 5)
+		userpass.Add(passwordlabel, 0, wx.ALL, 5)
+		userpass.Add(self.password, 1, wx.ALL, 5)
+		userpass.Add(self.secure, 0, wx.ALL, 5)
+
+		subject = wx.BoxSizer(wx.HORIZONTAL)
+		subject.Add(subjectlabel, 0, wx.ALL, 5)
+		subject.Add(self.subject, 1, wx.ALL, 5)
+
+		body = wx.BoxSizer(wx.HORIZONTAL)
+		body.Add(bodylabel, 0, wx.ALL, 5)
+		body.Add(self.body, 1, wx.ALL, 5)
+
+		addsk = wx.BoxSizer(wx.HORIZONTAL)
+		addsk.Add((0, 0), 1, wx.ALL, 5)
+		addsk.Add(self.addsk, 1, wx.ALL, 5)
+
+		repeath = wx.BoxSizer(wx.HORIZONTAL)
+		repeath.Add(intervallabel, 0, wx.ALL, 5)
+		repeath.Add(self.interval, 0, wx.ALL, 5)
+		repeath.Add(self.unit, 0, wx.ALL, 5)
+		repeath.Add(maxlabel, 0, wx.ALL, 5)
+		repeath.Add(self.max, 0, wx.ALL, 5)
+
+		rate = wx.BoxSizer(wx.HORIZONTAL)
+		rate.Add(ratelabel, 0, wx.ALL, 5)
+		rate.Add(self.amount, 0, wx.ALL, 5)
+		rate.Add(ratelabel2, 0, wx.ALL, 5)
+		rate.Add(self.time, 0, wx.ALL, 5)
+		rate.Add(self.timeunit, 0, wx.ALL, 5)
+
+		ok_cancel = wx.BoxSizer(wx.HORIZONTAL)
+		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
+		ok_cancel.Add(okBtn, 0, wx.RIGHT | wx.LEFT, 10)
+		ok_cancel.Add(cancelBtn, 0, wx.RIGHT | wx.LEFT, 10)
+		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
+
+		main = wx.BoxSizer(wx.VERTICAL)
+		main.Add(toserver, 1, wx.ALL | wx.EXPAND, 0)
+		main.Add(userpass, 1, wx.ALL | wx.EXPAND, 0)
+		main.Add(subject, 1, wx.ALL | wx.EXPAND, 0)
+		main.Add(body, 1, wx.ALL | wx.EXPAND, 0)
+		main.Add(addsk, 1, wx.ALL | wx.EXPAND, 0)
+		main.AddSpacer(10)
+		main.Add(self.repeat, 1, wx.RIGHT | wx.LEFT, 5)
+		main.Add(repeath, 1, wx.RIGHT | wx.LEFT, 5)
+		main.AddSpacer(10)
+		main.Add(self.rate, 1, wx.RIGHT | wx.LEFT, 5)
+		main.Add(rate, 1, wx.RIGHT | wx.LEFT, 5)
+		main.Add((0, 0), 1, wx.ALL, 0)
+		main.Add(ok_cancel, 0, wx.ALL | wx.EXPAND, 10)
+
+		panel.SetSizer(main)
+		self.Centre()
+
+		self.server.SetValue('smtp.gmail.com')
+		self.secure.SetValue(True)
+
+	def on_addsk(self, e):
+		oldkey = False
+		dlg = selectKey(oldkey,1)
+		res = dlg.ShowModal()
+		if res == wx.OK:
+			self.body.AppendText('{{flow.'+dlg.selected_vessel+'.'+dlg.selected_key+'}}')
+		dlg.Destroy()
+
+	def on_repeat(self, e):
+		if self.repeat.GetValue():
+			self.interval.Enable()
+			self.unit.Enable()
+			self.max.Enable()
+			self.rate.SetValue(False)
+			self.amount.Disable()
+			self.time.Disable()
+			self.timeunit.Disable()
+		else:
+			self.interval.Disable()
+			self.unit.Disable()
+			self.max.Disable()
+
+	def on_rate(self, e):
+		if self.rate.GetValue():
+			self.amount.Enable()
+			self.time.Enable()
+			self.timeunit.Enable()
+			self.repeat.SetValue(False)
+			self.interval.Disable()
+			self.unit.Disable()
+			self.max.Disable()
+
+		else:
+			self.amount.Disable()
+			self.time.Disable()
+			self.timeunit.Disable()
+
+	def OnOk(self,e):
+		to = self.to.GetValue()
+		if not to:
+			wx.MessageBox(_('You must provide an email address to send your message to.'), 'Info', wx.OK | wx.ICON_INFORMATION)
+			return
+		server = self.server.GetValue()
+		if not server:
+			wx.MessageBox(_('You must provide a SMTP server.'), 'Info', wx.OK | wx.ICON_INFORMATION)
+			return
+		userid = self.userid.GetValue()
+		password = self.password.GetValue()
+		if not userid or not password:
+			wx.MessageBox(_('You must provide user ID and password for your server.'), 'Info', wx.OK | wx.ICON_INFORMATION)
+			return
+		subject = self.subject.GetValue()
+		body = self.body.GetValue()
+		if not subject or not body:
+			wx.MessageBox(_('You must provide subject and body of your email.'), 'Info', wx.OK | wx.ICON_INFORMATION)
+			return
+		self.ActionNodes = []
+		email_node = ujson.loads(self.email_node_template)
+		email_node['id'] = self.nodes.get_node_id()
+		email_node['z'] = self.actions_flow_id
+		email_node['server'] = server
+		email_node['port'] = str(self.port.GetValue())
+		email_node['secure'] = self.secure.GetValue()
+		email_node['name'] = to
+		email_node['dname'] = 'a|'+email_node['id']+'|'+str(self.action_id)
+		self.ActionNodes.append(email_node)
+		payload_node = ujson.loads(self.payload_node_template)
+		payload_node['id'] = self.nodes.get_node_id()
+		payload_node['z'] = self.actions_flow_id
+		payload_node['name'] = email_node['dname']
+		payload_node['template'] = body
+		payload_node['wires'] = [[email_node['id']]]
+		self.ActionNodes.append(payload_node)
+		topic_node = ujson.loads(self.topic_node_template)
+		topic_node['id'] = self.nodes.get_node_id()
+		topic_node['z'] = self.actions_flow_id
+		topic_node['name'] = email_node['dname']
+		topic_node['template'] = subject
+		topic_node['wires'] = [[payload_node['id']]]
+		self.ActionNodes.append(topic_node)
+		if not self.repeat.GetValue() and not self.rate.GetValue():
+			self.connector_id = topic_node['id']
+		elif self.repeat.GetValue():
+			repeat_node = ujson.loads(self.RepeatOptions.repeat_template)
+			repeat_node['id'] = self.nodes.get_node_id()
+			repeat_node['z'] = self.actions_flow_id
+			repeat_node['name'] = email_node['dname']
+			repeat_node['interval'] = str(self.interval.GetValue())
+			repeat_node['intervalUnit'] = self.RepeatOptions.intervalUnit2[self.unit.GetSelection()]
+			repeat_node['maximum'] = str(self.max.GetValue())
+			repeat_node['wires'] = [[topic_node['id']]]
+			self.connector_id = repeat_node['id']
+			self.ActionNodes.append(repeat_node)
+		elif self.rate.GetValue():
+			rate_node = ujson.loads(self.RepeatOptions.rate_limit_template)
+			rate_node['id'] = self.nodes.get_node_id()
+			rate_node['z'] = self.actions_flow_id
+			rate_node['name'] = email_node['dname']
+			rate_node['rate'] = str(self.amount.GetValue())
+			rate_node['nbRateUnits'] = str(self.time.GetValue())
+			rate_node['rateUnits'] = self.RepeatOptions.rateUnit2[self.timeunit.GetSelection()]
+			rate_node['wires'] = [[topic_node['id']]]
+			self.connector_id = rate_node['id']
+			self.ActionNodes.append(rate_node)
+		self.credentials = {email_node['id']:{"userid":userid,"password":password}}
+		self.EndModal(wx.OK)
+
 class ActionPlaySound(wx.Dialog):
 	def __init__(self, parent, edit):
+		self.credentials = ''
 		self.currentpath = parent.currentpath
 		self.nodes = parent.nodes
 		self.actions_flow_id = parent.actions_flow_id
@@ -1360,6 +1661,7 @@ class ActionPlaySound(wx.Dialog):
 
 class ActionRunCommand(wx.Dialog):
 	def __init__(self, parent, edit):
+		self.credentials = ''
 		self.currentpath = parent.currentpath
 		self.nodes = parent.nodes
 		self.actions_flow_id = parent.actions_flow_id

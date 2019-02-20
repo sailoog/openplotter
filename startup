@@ -176,13 +176,15 @@ class MyFrame(wx.Frame):
 					tools_py.append(ii)
 		
 		#######################################################
-		
+
 		subprocess.call(['pkill', '-f', '/openplotter/openplotter'])
 
 		self.add_logger_data(_('\nChecking Signal K defaults...'))
 		self.SK_settings = SK_settings()
 		self.check_start('signalk-server')
 		
+		#TODO cada vegada comprovem que existeixen tots els nodes de les credencials
+
 		if platform.machine()[0:3]=='arm':
 			self.add_logger_data(_('\nChecking pi password...'))
 			out = subprocess.check_output(['sudo', '-n', 'grep', '-E', '^pi:', '/etc/shadow'])
