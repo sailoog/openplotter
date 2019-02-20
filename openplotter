@@ -26,7 +26,6 @@ from classes.add_i2c import addI2c
 from classes.edit_i2c import editI2c
 from classes.add_kplex import addkplex
 from classes.add_tool10 import addTool10
-from classes.add_topic import addTopic
 from classes.add_value_setting import addvaluesetting
 from classes.add_deviation_setting import adddeviationsetting
 from classes.add_SK_to_N2K import addSKtoN2K
@@ -90,7 +89,6 @@ class MainFrame(wx.Frame):
 		self.nb.AddPage(self.p_i2c, _('I2C'))
 		self.nb.AddPage(self.p_1w, '1W')
 		self.nb.AddPage(self.p_spi, 'SPI')
-		self.nb.AddPage(self.p_mqtt, 'MQTT')
 		self.nb.AddPage(self.p_credentials, _('Credentials'))
 		self.nb.AddPage(self.p_startup, _('Startup'))
 		sizer = wx.BoxSizer()
@@ -205,7 +203,6 @@ class MainFrame(wx.Frame):
 		self.page_1w()
 		self.page_spi()
 		self.page_credentials()
-		self.page_mqtt()
 		self.page_startup()
 
 		self.manual_settings = ''
@@ -216,7 +213,6 @@ class MainFrame(wx.Frame):
 		self.read_wifi_conf()
 		self.read_DS18B20()
 		self.read_Serialinst()
-		self.read_mqtt()
 		self.read_MCP()
 		self.read_i2c()
 		self.read_pypilot()
@@ -2088,6 +2084,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.Recipient.Enable()
 	'''
 
+		#subprocess.call(['sudo', 'sh', '-c', 'echo "' + username + ':' + passw + '" > /etc/mosquitto/passwd.pw'])
+		#subprocess.call(['sudo', 'mosquitto_passwd', '-U', '/etc/mosquitto/passwd.pw'])
+		#subprocess.call(['sudo', 'service', 'mosquitto', 'restart'])
+
 	def read_credentials(self):
 		self.credentials = {}
 		self.cred_file = self.home+'/.signalk/red/flows_openplotter_cred.json'
@@ -3521,294 +3521,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def on_diagnostic_SK(self, e):
 		subprocess.call(['pkill', '-f', 'diagnostic-SK-input.py'])
 		subprocess.Popen(['python', self.currentpath + '/diagnostic-SK-input.py'])
-
-
-	####################### MQTT
-	def page_mqtt(self):
-		title = wx.StaticText(self.p_mqtt, label=_(' MQTT '))
-
-		self.mqtt_broker_t = wx.StaticText(self.p_mqtt, label=_('Remote broker'))
-		self.mqtt_broker = wx.TextCtrl(self.p_mqtt, size=(190, -1))
-		self.mqtt_port_t = wx.StaticText(self.p_mqtt, label=_('Port'))
-		self.mqtt_port = wx.TextCtrl(self.p_mqtt, size=(50, -1))
-		self.mqtt_user_t = wx.StaticText(self.p_mqtt, label=_('Username'))
-		self.mqtt_user = wx.TextCtrl(self.p_mqtt, size=(120, -1))
-		self.mqtt_pass_t = wx.StaticText(self.p_mqtt, label=_('Password'))
-		self.mqtt_pass = wx.TextCtrl(self.p_mqtt, size=(120, -1))
-
-		self.button_apply_changes_mqtt = wx.Button(self.p_mqtt, label=_('Apply'))
-		self.button_apply_changes_mqtt.Bind(wx.EVT_BUTTON, self.on_apply_changes_mqtt)
-
-		clear = wx.Button(self.p_mqtt, label=_('Clear'))
-		clear.Bind(wx.EVT_BUTTON, self.on_clear_mqtt)
-
-		self.list_topics = wx.ListCtrl(self.p_mqtt, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
-		self.list_topics.InsertColumn(0, _('Topic'), width=145)
-		self.list_topics.InsertColumn(1, _('Type'), width=100)
-		self.list_topics.InsertColumn(2, _('Signal K key'), width=200)
-		self.list_topics.InsertColumn(3, _('Source'), width=145)
-		self.list_topics.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_topic)
-
-		add = wx.Button(self.p_mqtt, label=_('add'))
-		add.Bind(wx.EVT_BUTTON, self.on_add_topic)
-
-		delete = wx.Button(self.p_mqtt, label=_('delete'))
-		delete.Bind(wx.EVT_BUTTON, self.delete_topic)
-
-		diagnostic = wx.Button(self.p_mqtt, label=_('SK Diagnostic'))
-		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
-
-		reset_mqtt = wx.Button(self.p_mqtt, label=_('Restart'))
-		reset_mqtt.Bind(wx.EVT_BUTTON, self.on_reset_mqtt)
-
-		vboxc1 = wx.BoxSizer(wx.VERTICAL)
-		vboxc1.Add(self.mqtt_broker_t, 0, wx.RIGHT | wx.LEFT, 5)
-		vboxc1.Add(self.mqtt_broker, 0, wx.RIGHT | wx.LEFT, 5)
-
-		vboxc2 = wx.BoxSizer(wx.VERTICAL)
-		vboxc2.Add(self.mqtt_port_t, 0, wx.RIGHT | wx.LEFT, 5)
-		vboxc2.Add(self.mqtt_port, 0, wx.RIGHT | wx.LEFT, 5)
-
-		vboxc3 = wx.BoxSizer(wx.VERTICAL)
-		vboxc3.Add(self.mqtt_user_t, 0, wx.RIGHT | wx.LEFT, 5)
-		vboxc3.Add(self.mqtt_user, 0, wx.RIGHT | wx.LEFT, 5)
-
-		vboxc4 = wx.BoxSizer(wx.VERTICAL)
-		vboxc4.Add(self.mqtt_pass_t, 0, wx.RIGHT | wx.LEFT, 5)
-		vboxc4.Add(self.mqtt_pass, 0, wx.RIGHT | wx.LEFT, 5)
-
-		vboxc5but = wx.BoxSizer(wx.VERTICAL)
-		vboxc5but.Add(self.button_apply_changes_mqtt, 0, wx.ALL | wx.EXPAND, 5)
-		vboxc5but.Add(clear, 0, wx.ALL | wx.EXPAND, 5)
-
-		hinputbox = wx.BoxSizer(wx.HORIZONTAL)
-		hinputbox.Add(vboxc1, 0, wx.ALL | wx.EXPAND, 5)
-		hinputbox.Add(vboxc2, 0, wx.ALL | wx.EXPAND, 5)
-		hinputbox.Add(vboxc3, 0, wx.ALL | wx.EXPAND, 5)
-		hinputbox.Add(vboxc4, 0, wx.ALL | wx.EXPAND, 5)
-		hinputbox.Add((0, 0), 1, wx.EXPAND)
-		hinputbox.Add(vboxc5but, 0, wx.RIGHT | wx.LEFT, 0)
-
-		hlistbox_but = wx.BoxSizer(wx.VERTICAL)
-		hlistbox_but.Add(add, 0, wx.ALL, 5)
-		hlistbox_but.Add(delete, 0, wx.ALL, 5)
-
-		hlistbox = wx.BoxSizer(wx.HORIZONTAL)
-		hlistbox.Add(self.list_topics, 1, wx.ALL | wx.EXPAND, 5)
-		hlistbox.Add(hlistbox_but, 0, wx.RIGHT | wx.LEFT, 0)
-
-		hbox = wx.BoxSizer(wx.HORIZONTAL)
-		hbox.Add(diagnostic, 0, wx.RIGHT | wx.LEFT, 5)
-		hbox.Add(reset_mqtt, 0, wx.RIGHT | wx.LEFT, 5)
-
-		vbox = wx.BoxSizer(wx.VERTICAL)
-		vbox.Add(title, 0, wx.ALL | wx.EXPAND, 5)
-		vbox.Add(hinputbox, 0, wx.ALL | wx.EXPAND, 0)
-		vbox.AddSpacer(5)
-		vbox.Add(hlistbox, 1, wx.ALL | wx.EXPAND, 0)
-		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 5)
-
-		self.p_mqtt.SetSizer(vbox)
-
-
-	def start_mqtt(self):
-		subprocess.Popen(['python', self.currentpath + '/mqtt_d.py'])
-		self.ShowStatusBarGREEN(_('MQTT restarted'))
-
-	def stop_mqtt(self):
-		self.ShowStatusBarRED(_('MQTT stopped'))
-		subprocess.call(['pkill', '-f', 'mqtt_d.py'])
-
-	def on_reset_mqtt(self, e):
-		self.stop_mqtt()
-		self.read_mqtt()
-		self.start_mqtt()
-
-	def read_mqtt(self):
-		broker = self.conf.get('MQTT', 'broker')
-		port = self.conf.get('MQTT', 'port')
-		username = self.conf.get('MQTT', 'username')
-		password = self.conf.get('MQTT', 'password')
-		if broker: self.mqtt_broker.SetValue(broker)
-		if port: self.mqtt_port.SetValue(port)
-		if username: self.mqtt_user.SetValue(username)
-		if password: self.mqtt_pass.SetValue('***************')
-		if username and password:
-			self.mqtt_broker.Disable()
-			self.mqtt_port.Disable()
-			self.mqtt_user.Disable()
-			self.mqtt_pass.Disable()
-			self.button_apply_changes_mqtt.SetLabel(_('Edit'))
-		else:
-			self.mqtt_broker.Enable()
-			self.mqtt_port.Enable()
-			self.mqtt_user.Enable()
-			self.mqtt_pass.Enable()
-			self.button_apply_changes_mqtt.SetLabel(_('Apply'))
-		self.topics = []
-		self.list_topics.DeleteAllItems()
-		data = self.conf.get('MQTT', 'topics')
-		try:
-			temp_list = eval(data)
-		except:
-			temp_list = []
-		for ii in temp_list:
-			self.topics.append(ii)
-			topic = ii[0].encode('utf8')
-			if ii[1] == 0: 
-				topic_type = _('General').decode('utf8')
-				skkey = 'notifications.'+topic
-				source = 'MQTT.'+topic
-			if ii[1] == 1: 
-				topic_type = _('Signal K key input').decode('utf8')
-				skkey = ii[2]
-				source = 'MQTT.'+topic
-			if ii[1] == 2: 
-				topic_type = _('Signal K delta input').decode('utf8')
-				skkey = _('multiple keys').decode('utf8')
-				source = _('multiple sources').decode('utf8')
-			self.list_topics.Append([topic,topic_type,skkey,source])
-
-	def edit_topic(self, e):
-		selected_topic = e.GetIndex()
-		edit = [selected_topic, self.topics[selected_topic]]
-		self.edit_add_topic(edit)
-
-	def on_add_topic(self, e):
-		self.edit_add_topic(0)
-
-	def edit_add_topic(self, edit):
-		if self.mqtt_user.IsEnabled():
-			self.ShowStatusBarRED(_('Failed. Apply settings change.'))
-			return
-		dlg = addTopic(edit)
-		res = dlg.ShowModal()
-		if res == wx.ID_OK:
-			topic = dlg.topic.GetValue()
-			topic_type = dlg.type.GetValue()
-			skkey = dlg.skkey.GetValue()
-			if not topic:
-				self.ShowMessage(_('Failed. You have to provide a name for the topic.'))
-				dlg.Destroy()
-				return
-			if not re.match('^[0-9a-zA-Z]+$', topic):
-				self.ShowMessage(_('Failed. Topics must contain only allowed characters.'))
-				dlg.Destroy()
-				return
-			if edit == 0:
-				for i in self.topics:
-					if i[0] == topic:
-						self.ShowMessage(_('Failed. Topic name must be unique.'))
-						dlg.Destroy()
-						return
-			else:
-				for i in self.topics:
-					if i[0] == topic and edit[1][0] != topic:
-						self.ShowMessage(_('Failed. Topic name must be unique.'))
-						dlg.Destroy()
-						return
-			if topic_type == _('General').decode('utf8'): 
-				topic_type2 = 0
-				skkey2 = ''
-			elif topic_type == _('Signal K key input').decode('utf8'): 
-				topic_type2 = 1
-				if not skkey:
-					self.ShowMessage(_('Failed. You have to provide a Signal K key.'))
-					dlg.Destroy()
-					return
-				else:
-					skkey2 = skkey
-			elif topic_type == _('Signal K delta input').decode('utf8'): 
-				topic_type2 = 2
-				skkey2 = ''
-			else:
-				self.ShowMessage(_('Failed. You have to select a type for the topic.'))
-				dlg.Destroy()
-				return
-			if edit == 0:
-				self.topics.append([topic,topic_type2,skkey2])
-			else:
-				self.topics[edit[0]] = [topic,topic_type2,skkey2]
-			self.conf.set('MQTT', 'topics', str(self.topics))
-			self.stop_mqtt()
-			self.start_mqtt()
-			self.read_mqtt()
-		dlg.Destroy()
-
-	def delete_topic(self, e):
-		if self.mqtt_user.IsEnabled():
-			self.ShowStatusBarRED(_('Failed. Apply settings change.'))
-			return
-		selected_topic = self.list_topics.GetFirstSelected()
-		if selected_topic == -1:
-			self.ShowStatusBarBLACK(_('Select an item to delete.'))
-			return
-		del self.topics[selected_topic]
-		self.list_topics.DeleteItem(selected_topic)
-		self.conf.set('MQTT', 'topics', str(self.topics))
-		self.stop_mqtt()
-		self.start_mqtt()
-		self.read_mqtt()
-
-	def on_apply_changes_mqtt(self, e):
-		if not self.mqtt_user.IsEnabled():
-			self.mqtt_broker.Enable()
-			self.mqtt_port.Enable()
-			self.mqtt_user.Enable()
-			self.mqtt_pass.Enable()
-			self.button_apply_changes_mqtt.SetLabel(_('Apply'))
-			return
-		username = self.mqtt_user.GetValue()
-		passw = self.mqtt_pass.GetValue()
-		if username and passw:
-			self.mqtt_broker.Disable()
-			self.mqtt_port.Disable()
-			self.mqtt_user.Disable()
-			self.mqtt_pass.Disable()
-			self.button_apply_changes_mqtt.SetLabel(_('Edit'))
-		else:
-			self.ShowStatusBarRED(_('Enter at least username and password.'))
-			return
-		self.conf.set('MQTT', 'broker', self.mqtt_broker.GetValue())
-		self.conf.set('MQTT', 'port', self.mqtt_port.GetValue())
-		self.conf.set('MQTT', 'username', username)
-		if not '*******' in passw:
-			self.mqtt_pass.SetValue('***************')
-			self.conf.set('MQTT', 'password', passw)
-		else:
-			passw = self.conf.get('MQTT', 'password')
-		subprocess.call(['sudo', 'sh', '-c', 'echo "' + username + ':' + passw + '" > /etc/mosquitto/passwd.pw'])
-		subprocess.call(['sudo', 'mosquitto_passwd', '-U', '/etc/mosquitto/passwd.pw'])
-		subprocess.call(['sudo', 'service', 'mosquitto', 'restart'])
-		self.stop_mqtt()
-		self.start_mqtt()
-		self.read_mqtt()
-
-	def on_clear_mqtt(self, e):
-		dlg = wx.MessageDialog(None, _('Settings and topics will be deleted. Are you sure?'), _('Question'),
-							   wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
-		if dlg.ShowModal() != wx.ID_YES:
-			dlg.Destroy()
-			return
-		dlg.Destroy()
-		self.mqtt_broker.Enable()
-		self.mqtt_port.Enable()
-		self.mqtt_user.Enable()
-		self.mqtt_pass.Enable()
-		self.button_apply_changes_mqtt.SetLabel(_('Apply'))
-		self.mqtt_broker.SetValue('')
-		self.mqtt_port.SetValue('')
-		self.mqtt_user.SetValue('')
-		self.mqtt_pass.SetValue('')
-		self.list_topics.DeleteAllItems()
-		self.topics = []
-		self.conf.set('MQTT', 'broker', '')
-		self.conf.set('MQTT', 'port', '')
-		self.conf.set('MQTT', 'username', '')
-		self.conf.set('MQTT', 'password', '')
-		self.conf.set('MQTT', 'topics', '')
-		self.stop_mqtt()
-
 
 ############################## Main
 if __name__ == "__main__":

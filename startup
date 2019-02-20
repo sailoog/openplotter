@@ -142,7 +142,6 @@ class MyFrame(wx.Frame):
 	def starting(self):
 
 		delay=int(self.conf.get('STARTUP', 'delay'))
-
 		opencpn=self.conf.get('STARTUP', 'opencpn')
 		opencpn_no=self.conf.get('STARTUP', 'opencpn_no_opengl')
 		opencpn_fullscreen=self.conf.get('STARTUP', 'opencpn_fullscreen')
@@ -225,11 +224,6 @@ class MyFrame(wx.Frame):
 			self.add_logger_data(_('\nApplying ').decode('utf8')+str(delay)+_(' seconds of delay...').decode('utf8'))
 			time.sleep(delay)
 			self.add_logger_data(_(' Done.'))		
-		
-		subprocess.call(['pkill', '-f', 'mqtt_d.py'])
-		self.add_logger_data(_('\nStarting MQTT server...'))
-		subprocess.Popen(['python', self.op_folder+'/mqtt_d.py'])
-		self.check_start('mqtt_d.py')
 
 		subprocess.call(['pkill', '-f', '1w_d.py'])
 		self.add_logger_data(_('\nStarting 1W sensors...'))
@@ -439,7 +433,6 @@ if len(sys.argv)>1:
 		subprocess.call(['pkill', '-f', '1w_d.py'])
 		subprocess.call(['pkill', '-f', 'read_sensors_d.py'])
 		subprocess.call(['pkill', '-f', 'pypilot_webapp'])
-		subprocess.call(['pkill', '-f', 'mqtt_d.py'])
 		subprocess.call(['pkill', '-f', 'SK-base_d.py'])
 		subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
 		subprocess.call(['pkill', '-f', '/openplotter/openplotter'])
