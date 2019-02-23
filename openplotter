@@ -86,10 +86,10 @@ class MainFrame(wx.Frame):
 		self.nb.AddPage(self.p_n2k, 'CAN')
 		self.nb.AddPage(self.p_wifi, _('Network'))
 		self.nb.AddPage(self.p_action, _('Actions'))
+		self.nb.AddPage(self.p_credentials, _('Credentials'))
 		self.nb.AddPage(self.p_i2c, _('I2C'))
 		self.nb.AddPage(self.p_1w, '1W')
 		self.nb.AddPage(self.p_spi, 'SPI')
-		self.nb.AddPage(self.p_credentials, _('Credentials'))
 		self.nb.AddPage(self.p_startup, _('Startup'))
 		sizer = wx.BoxSizer()
 		sizer.Add(self.nb, 1, wx.EXPAND)
@@ -218,7 +218,7 @@ class MainFrame(wx.Frame):
 		self.read_pypilot()
 		self.read_n2k()
 		self.read_triggers()
-		self.read_credentials()
+		self.print_credentials()
 		#self.when_closed(0x001)
 
 	###########################################	general functions
@@ -1985,132 +1985,252 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	####################### Credentials
 	
 	def page_credentials(self):
-		pass
-		'''
-		wx.StaticBox(self.p_account, label=_(' Twitter '), size=(330, 205), pos=(10, 10))
-		self.twitter_enable = wx.CheckBox(self.p_account, label=_('Enable'), pos=(20, 32))
-		self.twitter_enable.Bind(wx.EVT_CHECKBOX, self.on_twitter_enable)
+		
+		self.localmqtt = wx.CheckBox(self.p_credentials, label=_('Enable local MQTT broker'))
+		self.localmqtt.Bind(wx.EVT_CHECKBOX, self.on_localmqtt)
+		userlocalmqttlabel = wx.StaticText(self.p_credentials, label=_('Username'))
+		self.userlocalmqtt = wx.TextCtrl(self.p_credentials)
+		passlocalmqttlabel = wx.StaticText(self.p_credentials, label=_('Password'))
+		self.passlocalmqtt = wx.TextCtrl(self.p_credentials, style=wx.TE_PASSWORD)
 
-		wx.StaticText(self.p_account, label=_('apiKey'), pos=(20, 70))
-		self.apiKey = wx.TextCtrl(self.p_account, -1, size=(180, 32), pos=(150, 65))
-		wx.StaticText(self.p_account, label=_('apiSecret'), pos=(20, 105))
-		self.apiSecret = wx.TextCtrl(self.p_account, -1, size=(180, 32), pos=(150, 100))
-		wx.StaticText(self.p_account, label=_('accessToken'), pos=(20, 140))
-		self.accessToken = wx.TextCtrl(self.p_account, -1, size=(180, 32), pos=(150, 135))
-		wx.StaticText(self.p_account, label=_('accessTokenSecret'), pos=(20, 175))
-		self.accessTokenSecret = wx.TextCtrl(self.p_account, -1, size=(180, 32), pos=(150, 170))
+		self.remotemqtt = wx.CheckBox(self.p_credentials, label=_('Enable remote MQTT broker'))
+		self.remotemqtt.Bind(wx.EVT_CHECKBOX, self.on_remotemqtt)
+		serverremotemqttlabel = wx.StaticText(self.p_credentials, label=_('Server'))
+		self.serverremotemqtt = wx.TextCtrl(self.p_credentials)
+		portremotemqttlabel = wx.StaticText(self.p_credentials, label=_('Port'))
+		self.portremotemqtt = wx.SpinCtrl(self.p_credentials, min=1, max=65000, initial=1883)
+		userremotemqttlabel = wx.StaticText(self.p_credentials, label=_('Username'))
+		self.userremotemqtt = wx.TextCtrl(self.p_credentials)
+		passremotemqttlabel = wx.StaticText(self.p_credentials, label=_('Password'))
+		self.passremotemqtt = wx.TextCtrl(self.p_credentials, style=wx.TE_PASSWORD)
 
-		wx.StaticBox(self.p_account, label=_(' Gmail '), size=(330, 205), pos=(350, 10))
-		self.gmail_enable = wx.CheckBox(self.p_account, label=_('Enable'), pos=(360, 32))
-		self.gmail_enable.Bind(wx.EVT_CHECKBOX, self.on_gmail_enable)
-		wx.StaticText(self.p_account, label=_('Gmail account'), pos=(360, 70))
-		self.Gmail_account = wx.TextCtrl(self.p_account, -1, size=(180, 32), pos=(490, 65))
-		wx.StaticText(self.p_account, label=_('Gmail password'), pos=(360, 105))
-		self.Gmail_password = wx.TextCtrl(self.p_account, -1, size=(180, 32), pos=(490, 100))
-		wx.StaticText(self.p_account, label=_('Recipient'), pos=(360, 140))
-		self.Recipient = wx.TextCtrl(self.p_account, -1, size=(180, 32), pos=(490, 135))
-		'''
-	'''
-	def read_account(self):
-		if self.conf.get('TWITTER', 'apiKey'): self.apiKey.SetValue('********************')
-		if self.conf.get('TWITTER', 'apiSecret'): self.apiSecret.SetValue('********************')
-		if self.conf.get('TWITTER', 'accessToken'): self.accessToken.SetValue('********************')
-		if self.conf.get('TWITTER', 'accessTokenSecret'): self.accessTokenSecret.SetValue('********************')
-		if self.conf.get('TWITTER', 'enable') == '1':
-			self.twitter_enable.SetValue(True)
-			self.apiKey.Disable()
-			self.apiSecret.Disable()
-			self.accessToken.Disable()
-			self.accessTokenSecret.Disable()
+		help_button = wx.BitmapButton(self.p_credentials, bitmap=self.help_bmp, size=(self.help_bmp.GetWidth()+40, self.help_bmp.GetHeight()+10))
+		help_button.Bind(wx.EVT_BUTTON, self.on_help_credentials)
 
-		if self.conf.get('GMAIL', 'gmail'): self.Gmail_account.SetValue(self.conf.get('GMAIL', 'gmail'))
-		if self.conf.get('GMAIL', 'password'): self.Gmail_password.SetValue('********************')
-		if self.conf.get('GMAIL', 'recipient'): self.Recipient.SetValue(self.conf.get('GMAIL', 'recipient'))
-		if self.conf.get('GMAIL', 'enable') == '1':
-			self.gmail_enable.SetValue(True)
-			self.Gmail_account.Disable()
-			self.Gmail_password.Disable()
-			self.Recipient.Disable()	
+		apply_changes = wx.Button(self.p_credentials, label=_('Apply changes'))
+		apply_changes.Bind(wx.EVT_BUTTON, self.on_apply_changes_credentials)
+		cancel_changes = wx.Button(self.p_credentials, label=_('Cancel changes'))
+		cancel_changes.Bind(wx.EVT_BUTTON, self.on_cancel_changes_credentials)
 
-	def on_twitter_enable(self, e):
-		if not self.apiKey.GetValue() or not self.apiSecret.GetValue() or not self.accessToken.GetValue() or not self.accessTokenSecret.GetValue():
-			self.twitter_enable.SetValue(False)
-			self.ShowStatusBarRED(_('Enter valid Twitter apiKey, apiSecret, accessToken and accessTokenSecret.'))
-			return
-		if self.twitter_enable.GetValue():
-			self.apiKey.Disable()
-			self.apiSecret.Disable()
-			self.accessToken.Disable()
-			self.accessTokenSecret.Disable()
-			self.conf.set('TWITTER', 'enable', '1')
-			if not '*****' in self.apiKey.GetValue():
-				self.conf.set('TWITTER', 'apiKey', self.apiKey.GetValue())
-				self.apiKey.SetValue('********************')
-			if not '*****' in self.apiSecret.GetValue():
-				self.conf.set('TWITTER', 'apiSecret', self.apiSecret.GetValue())
-				self.apiSecret.SetValue('********************')
-			if not '*****' in self.accessToken.GetValue():
-				self.conf.set('TWITTER', 'accessToken', self.accessToken.GetValue())
-				self.accessToken.SetValue('********************')
-			if not '*****' in self.accessTokenSecret.GetValue():
-				self.conf.set('TWITTER', 'accessTokenSecret', self.accessTokenSecret.GetValue())
-				self.accessTokenSecret.SetValue('********************')
-		else:
-			self.conf.set('TWITTER', 'enable', '0')
-			self.apiKey.Enable()
-			self.apiSecret.Enable()
-			self.accessToken.Enable()
-			self.accessTokenSecret.Enable()
+		localmqtt = wx.BoxSizer(wx.HORIZONTAL)
+		localmqtt.Add(userlocalmqttlabel, 0, wx.ALL | wx.EXPAND, 5)
+		localmqtt.Add(self.userlocalmqtt, 1, wx.ALL | wx.EXPAND, 5)
+		localmqtt.Add(passlocalmqttlabel, 0, wx.ALL | wx.EXPAND, 5)
+		localmqtt.Add(self.passlocalmqtt, 1, wx.ALL | wx.EXPAND, 5)
 
-	def on_gmail_enable(self, e):
-		if not self.Gmail_account.GetValue() or not self.Gmail_password.GetValue() or not self.Recipient.GetValue():
-			self.gmail_enable.SetValue(False)
-			self.ShowStatusBarRED(_('Enter valid Gmail account, Gmail password and Recipient.'))
-			return
-		if self.gmail_enable.GetValue():
-			self.Gmail_account.Disable()
-			self.Gmail_password.Disable()
-			self.Recipient.Disable()
-			self.conf.set('GMAIL', 'enable', '1')
-			self.conf.set('GMAIL', 'gmail', self.Gmail_account.GetValue())
-			if not '*****' in self.Gmail_password.GetValue():
-				self.conf.set('GMAIL', 'password', self.Gmail_password.GetValue())
-				self.Gmail_password.SetValue('********************')
-			self.conf.set('GMAIL', 'recipient', self.Recipient.GetValue())
-		else:
-			self.conf.set('GMAIL', 'enable', '0')
-			self.Gmail_account.Enable()
-			self.Gmail_password.Enable()
-			self.Recipient.Enable()
-	'''
+		remotemqtt0 = wx.BoxSizer(wx.HORIZONTAL)
+		remotemqtt0.Add(self.remotemqtt, 0, wx.ALL | wx.EXPAND, 5)
+		remotemqtt0.Add(serverremotemqttlabel, 0, wx.ALL | wx.EXPAND, 5)
+		remotemqtt0.Add(self.serverremotemqtt, 1, wx.ALL | wx.EXPAND, 5)
+		remotemqtt0.Add(portremotemqttlabel, 0, wx.ALL | wx.EXPAND, 5)
+		remotemqtt0.Add(self.portremotemqtt, 0, wx.ALL | wx.EXPAND, 5)
 
-		#subprocess.call(['sudo', 'sh', '-c', 'echo "' + username + ':' + passw + '" > /etc/mosquitto/passwd.pw'])
-		#subprocess.call(['sudo', 'mosquitto_passwd', '-U', '/etc/mosquitto/passwd.pw'])
-		#subprocess.call(['sudo', 'service', 'mosquitto', 'restart'])
+		remotemqtt = wx.BoxSizer(wx.HORIZONTAL)
+		remotemqtt.Add(userremotemqttlabel, 0, wx.ALL | wx.EXPAND, 5)
+		remotemqtt.Add(self.userremotemqtt, 1, wx.ALL | wx.EXPAND, 5)
+		remotemqtt.Add(passremotemqttlabel, 0, wx.ALL | wx.EXPAND, 5)
+		remotemqtt.Add(self.passremotemqtt, 1, wx.ALL | wx.EXPAND, 5)
+
+		buttons = wx.BoxSizer(wx.HORIZONTAL)
+		buttons.Add(help_button, 0, wx.ALL, 0)
+		buttons.Add((0, 0), 1, wx.RIGHT | wx.LEFT, 5)
+		buttons.Add(apply_changes, 0, wx.RIGHT | wx.LEFT, 5)
+		buttons.Add(cancel_changes, 0, wx.RIGHT | wx.LEFT, 5)
+
+		main = wx.BoxSizer(wx.VERTICAL)
+		main.Add(self.localmqtt, 0, wx.ALL | wx.EXPAND, 5)
+		main.Add(localmqtt, 0, wx.ALL | wx.EXPAND, 0)
+		main.Add(remotemqtt0, 0, wx.ALL | wx.EXPAND, 0)
+		main.Add(remotemqtt, 0, wx.ALL | wx.EXPAND, 0)
+		main.Add((0, 0), 1, wx.ALL, 0)
+		main.Add(buttons, 0, wx.ALL | wx.EXPAND, 5)
+
+		self.p_credentials.SetSizer(main)
 
 	def read_credentials(self):
-		self.credentials = {}
+		self.localbrokerid = 'openplot.lmqtt'
+		self.remotebrokerid = 'openplot.rmqtt'
 		self.cred_file = self.home+'/.signalk/red/flows_openplotter_cred.json'
 		try:
 			with open(self.cred_file) as data_file:
-				self.credentials = ujson.load(data_file)
+				credentials = ujson.load(data_file)
+			return credentials
 		except:
-			self.credentials = {}
+			return {}
 			print "ERROR reading credentials file"
 
-	def edit_credentials(self, credentials):
-		for i in credentials:
-			self.credentials[i] = credentials[i]
-		self.write_credentials()
+	def print_credentials(self):
+		credentials = self.read_credentials()
+		if self.conf.get('CREDENTIALS', 'local_mqtt') == '1':
+			self.localmqtt.SetValue(True)
+			self.userlocalmqtt.SetValue(credentials[self.localbrokerid]['user'])
+			self.passlocalmqtt.SetValue(credentials[self.localbrokerid]['password'])
+		else:
+			self.localmqtt.SetValue(False)
+			self.userlocalmqtt.SetValue('')
+			self.passlocalmqtt.SetValue('')
+		if self.conf.get('CREDENTIALS', 'remote_mqtt') == '1':
+			self.remotemqtt.SetValue(True)
+			self.userremotemqtt.SetValue(credentials[self.remotebrokerid]['user'])
+			self.passremotemqtt.SetValue(credentials[self.remotebrokerid]['password'])
+			for i in self.no_actions_nodes:
+				if i['id'] == self.remotebrokerid: 
+					self.serverremotemqtt.SetValue(i['broker'])
+					self.portremotemqtt.SetValue(int(i['port']))
+		else:
+			self.remotemqtt.SetValue(False)
+			self.userremotemqtt.SetValue('')
+			self.passremotemqtt.SetValue('')
+			self.serverremotemqtt.SetValue('')
+			self.portremotemqtt.SetValue(1883)
 
-	#TODO delete credential
+	def edit_credentials(self, add, remove):
+		save = False
+		credentials = self.read_credentials()
+		if add:
+			for i in add:
+				credentials[i] = add[i]
+				save = True
+		if remove:
+			credentials2 = {}
+			for i in credentials:
+				if i in remove: save = True
+				else: credentials2[i] = credentials[i]
+		else: credentials2 = credentials
+		if save: self.write_credentials(credentials2)
 
-	def write_credentials(self):
+	def write_credentials(self, credentials):
 		try:
-			data = ujson.dumps(self.credentials, indent=4)
+			data = ujson.dumps(credentials, indent=4)
 			with open(self.cred_file, "w") as outfile:
 				outfile.write(data)
 		except: print "ERROR writing credentials file"
+
+	def on_localmqtt(self, e):
+		if self.localmqtt.GetValue():
+			if self.userlocalmqtt.GetValue() and self.passlocalmqtt.GetValue():
+				self.userlocalmqtt.Disable()
+				self.passlocalmqtt.Disable()
+			else:
+				self.ShowStatusBarRED(_('Fill in all the fields.'))
+				self.localmqtt.SetValue(False)
+		else:
+			self.userlocalmqtt.Enable()
+			self.passlocalmqtt.Enable()
+
+	def on_remotemqtt(self, e):
+		if self.remotemqtt.GetValue():
+			if self.serverremotemqtt.GetValue() and self.userremotemqtt.GetValue() and self.passremotemqtt.GetValue():
+				self.serverremotemqtt.Disable()
+				self.portremotemqtt.Disable()
+				self.userremotemqtt.Disable()
+				self.passremotemqtt.Disable()
+			else:
+				self.ShowStatusBarRED(_('Fill in all the fields.'))
+				self.remotemqtt.SetValue(False)
+		else:
+			self.serverremotemqtt.Enable()
+			self.portremotemqtt.Enable()
+			self.userremotemqtt.Enable()
+			self.passremotemqtt.Enable()
+
+	def on_apply_changes_credentials(self, e):
+		add_nodes = []
+		remove_ids = []
+		add_credentials = {}
+		remove_credentials = []
+		if self.localmqtt.GetValue():
+			subprocess.call(['sudo', 'sh', '-c', 'echo "' + self.userlocalmqtt.GetValue() + ':' + self.passlocalmqtt.GetValue() + '" > /etc/mosquitto/passwd.pw'])
+			subprocess.call(['sudo', 'mosquitto_passwd', '-U', '/etc/mosquitto/passwd.pw'])
+			subprocess.call(['sudo', 'service', 'mosquitto', 'restart'])
+
+			localbroker_node_template = '''
+		    {
+		        "id": "",
+		        "type": "mqtt-broker",
+		        "z": "",
+		        "name": "configuration|localbroker",
+		        "broker": "localhost",
+		        "port": "1883",
+		        "clientid": "",
+		        "usetls": false,
+		        "compatmode": true,
+		        "keepalive": "60",
+		        "cleansession": true,
+		        "birthTopic": "",
+		        "birthQos": "0",
+		        "birthPayload": "",
+		        "closeTopic": "",
+		        "closeQos": "0",
+		        "closePayload": "",
+		        "willTopic": "",
+		        "willQos": "0",
+		        "willPayload": ""
+		    }'''
+			localbroker_node = ujson.loads(localbroker_node_template)
+			localbroker_node['id'] = self.localbrokerid
+			add_credentials[self.localbrokerid] = {"user":self.userlocalmqtt.GetValue(),"password":self.passlocalmqtt.GetValue()}
+			add_nodes.append(localbroker_node)
+			self.conf.set('CREDENTIALS', 'local_mqtt', '1')
+		else: 
+			remove_ids.append(self.localbrokerid)
+			remove_credentials.append(self.localbrokerid)
+			self.conf.set('CREDENTIALS', 'local_mqtt', '0')
+
+		if self.remotemqtt.GetValue():
+			remotebroker_node_template = '''
+		    {
+		        "id": "",
+		        "type": "mqtt-broker",
+		        "z": "",
+		        "name": "configuration|remotebroker",
+		        "broker": "",
+		        "port": "",
+		        "clientid": "",
+		        "usetls": false,
+		        "compatmode": true,
+		        "keepalive": "60",
+		        "cleansession": true,
+		        "birthTopic": "",
+		        "birthQos": "0",
+		        "birthPayload": "",
+		        "closeTopic": "",
+		        "closeQos": "0",
+		        "closePayload": "",
+		        "willTopic": "",
+		        "willQos": "0",
+		        "willPayload": ""
+		    }'''
+			remotebroker_node = ujson.loads(remotebroker_node_template)
+			remotebroker_node['id'] = self.remotebrokerid
+			remotebroker_node['broker'] = self.serverremotemqtt.GetValue()
+			remotebroker_node['port'] = str(self.portremotemqtt.GetValue())
+			add_credentials[self.remotebrokerid] = {"user":self.userremotemqtt.GetValue(),"password":self.passremotemqtt.GetValue()}
+			add_nodes.append(remotebroker_node)
+			self.conf.set('CREDENTIALS', 'remote_mqtt', '1')
+		else: 
+			remove_ids.append(self.remotebrokerid)
+			remove_credentials.append(self.remotebrokerid)
+			self.conf.set('CREDENTIALS', 'remote_mqtt', '0')
+
+		self.edit_credentials(add_credentials, remove_credentials)
+		self.nodes.edit_flow(add_nodes, remove_ids)
+		self.print_credentials()
+		self.restart_SK()
+		seconds = 15
+		for i in range(seconds, 0, -1):
+			self.ShowStatusBarGREEN(_('Signal K server restarted')+' | '+_('Starting Node-Red... ')+str(i))
+			time.sleep(1)
+		self.ShowStatusBarGREEN(_('Signal K server restarted')+' | '+_('Node-Red restarted'))
+
+	def on_cancel_changes_credentials(self, e):
+		pass
+
+	def on_help_credentials(self, e):
+		pass
+		#TODO
+		#url = self.currentpath+"/docs/html/actions.html"
+		#webbrowser.open(url, new=2)
 
 	####################### Actions
 
@@ -2237,13 +2357,15 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.selected_condition = -1
 		self.selected_action = -1
 		self.nodes = Nodes(self,self.actions_flow_id)
-		result = self.nodes.read_flow()
+		result = self.nodes.get_flow()
 		self.actions_flow_data = self.nodes.get_actions_flow_data()
 		self.actions_flow_tree = result[0]
 		self.triggers_flow_nodes = result[1]
 		self.conditions_flow_nodes = result[2]
 		self.actions_flow_nodes = result[3]
 		self.no_actions_nodes = result[4]
+		self.add_credentials = {}
+		self.remove_credentials = {}
 		self.on_print_triggers()
 
 	def on_print_triggers(self):	
@@ -2431,7 +2553,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.list_actions.Select(len(self.actions_flow_tree[self.selected_trigger]['conditions'][self.selected_condition]['actions'])-1)
 			else:
 				pass
-			if dlg.credentials: self.edit_credentials(dlg.credentials)
+			if dlg.credentials:
+				for i in dlg.credentials:
+					self.add_credentials[i] = dlg.credentials[i]
 		dlg.Destroy()
 
 	def on_delete_trigger(self, e):
@@ -2445,6 +2569,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def on_apply_changes_actions(self, e):
 		all_flows = []
+		result = self.nodes.get_flow()
+		self.no_actions_nodes = result[4]
+
 		for i in self.no_actions_nodes:
 			all_flows.append(i)
 		for i in self.actions_flow_data:
@@ -2499,12 +2626,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 							if 'name' in iii and iii['name'] == name: exists = True
 						if not exists:
 							for iiii in result: all_flows.append(iiii)
-		try:
-			data = ujson.dumps(all_flows, indent=4)
-			with open(self.nodes.flows_file, "w") as outfile:
-				outfile.write(data)
-			self.restart_SK()
-		except: print "ERROR writing flows file"
+		self.nodes.write_flow(all_flows)
+		self.edit_credentials(self.add_credentials, self.remove_credentials)
+		self.restart_SK()
+		seconds = 15
+		for i in range(seconds, 0, -1):
+			self.ShowStatusBarGREEN(_('Signal K server restarted')+' | '+_('Starting Node-Red... ')+str(i))
+			time.sleep(1)
+		self.ShowStatusBarGREEN(_('Signal K server restarted')+' | '+_('Node-Red restarted'))
 
 	def on_cancel_changes_actions(self, e):
 		self.read_triggers()
@@ -3510,12 +3639,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		subprocess.call(['sudo', 'systemctl', 'stop', 'signalk.socket'])
 		
 	def restart_SK(self):
+		seconds = 12
 		# stopping sk server
-		self.ShowStatusBarRED(_('Restarting Signal K server...'))
 		self.stop_SK()
 		# restarting sk server
 		self.start_SK()
-		time.sleep(8)
+		for i in range(seconds, 0, -1):
+			self.ShowStatusBarRED(_('Restarting Signal K server... ')+str(i))
+			time.sleep(1)
 		self.ShowStatusBarGREEN(_('Signal K server restarted'))
 
 	def on_diagnostic_SK(self, e):

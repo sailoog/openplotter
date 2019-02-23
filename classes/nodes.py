@@ -63,19 +63,13 @@ class Nodes:
 				i['id'] = self.get_node_id()
 		return actions_flow_data
 
-	def read_flow(self):
+	def get_flow(self):
 		tree = []
 		triggers_flow_nodes = []
 		conditions_flow_nodes = []
 		actions_flow_nodes = []
 		no_actions_nodes = []
-
-		try:
-			with open(self.flows_file) as data_file:
-				data = ujson.load(data_file)
-		except:
-			print "ERROR reading flows file"
-			data = {}
+		data = self.read_flow()
 		flow_nodes = []
 		for i in data:
 			if 'z' in i and i['z'] == self.actions_flow_id: 
@@ -131,7 +125,45 @@ class Nodes:
 										condition["actions"].append(action)
 
 		return (tree, triggers_flow_nodes, conditions_flow_nodes, actions_flow_nodes, no_actions_nodes)
+	
+	def read_flow(self):
+		try:
+			with open(self.flows_file) as data_file:
+				data = ujson.load(data_file)
+			return data
+		except:
+			print "ERROR reading flows file"
+			return []
+			
+	def write_flow(self, all_flows):
+		try:
+			data = ujson.dumps(all_flows, indent=4)
+			with open(self.flows_file, "w") as outfile:
+				outfile.write(data)
+		except: print "ERROR writing flows file"
 
+	def edit_flow(self, add, remove):
+		save = False
+		data = self.read_flow()
+		if add:
+			for i in add:
+				exist = False
+				for ii in data: 
+					if ii['id'] == i['id']:
+						ii = i
+						exist = True
+						save = True
+				if not exist: 
+					data.append(i)
+					save = True
+		if remove:
+			data2 = []
+			for i in data:
+				if i['id'] in remove: save = True
+				else: data2.append(i)
+		else: data2 = data
+		if save: self.write_flow(data2)
+	
 	def get_subscription(self, value):
 		self.subscribtion_node_template = '''
 		    {
