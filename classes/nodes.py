@@ -618,11 +618,9 @@ class TriggerGPIO(wx.Dialog):
 		panel.SetSizer(main)
 
 	def OnOk(self,e):
-		
 		pin = self.pin.GetStringSelection()
 		resistor = self.resistor.GetStringSelection()
 		read = self.read.GetValue()
-
 		if not pin:
 			wx.MessageBox(_('Select a pin.'), 'Info', wx.OK | wx.ICON_INFORMATION)
 			return
@@ -638,6 +636,102 @@ class TriggerGPIO(wx.Dialog):
 			gpio_node['intype'] = self.resistor_select2[self.resistor.GetSelection()]
 			gpio_node['read'] = read
 			self.TriggerNodes = [gpio_node]
+			self.EndModal(wx.OK)
+
+class TriggerMQTT(wx.Dialog):
+	def __init__(self,parent,edit,local,remote):
+		self.nodes = parent.nodes
+		self.localbrokerid = parent.localbrokerid
+		self.remotebrokerid = parent.remotebrokerid
+		self.actions_flow_id = parent.actions_flow_id
+		self.trigger_type = parent.available_triggers_select.GetSelection()
+
+		if edit == 0: title = _('Add MQTT topic')
+		else: title = _('Edit MQTT topic')
+
+		wx.Dialog.__init__(self, None, title = title, size=(450, 240))
+		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
+
+		self.mqtt_node_template = '''
+		    {
+		        "id": "",
+		        "type": "mqtt in",
+		        "z": "",
+		        "name": "",
+		        "topic": "topic1",
+		        "qos": "2",
+		        "broker": "",
+		        "x": 180,
+		        "y": 300,
+		        "wires": [
+		            []
+		        ]
+		    }'''
+
+		panel = wx.Panel(self)
+
+		self.local = wx.CheckBox(panel, label=_('Local MQTT broker'))
+		self.local.Bind(wx.EVT_CHECKBOX, self.on_local)
+		self.remote = wx.CheckBox(panel, label=_('Remote MQTT broker'))
+		self.remote.Bind(wx.EVT_CHECKBOX, self.on_remote)
+
+		topiclabel = wx.StaticText(panel, label=_('Topic'))
+		self.topic = wx.TextCtrl(panel)
+		
+		okBtn = wx.Button(panel, wx.ID_OK)
+		okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
+		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
+
+		topic = wx.BoxSizer(wx.HORIZONTAL)
+		topic.Add(topiclabel, 0, wx.ALL, 10)
+		topic.Add(self.topic, 1, wx.ALL, 10)
+
+		ok_cancel = wx.BoxSizer(wx.HORIZONTAL)
+		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
+		ok_cancel.Add(okBtn, 0, wx.ALL, 10)
+		ok_cancel.Add(cancelBtn, 0, wx.ALL, 10)
+		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
+
+		main = wx.BoxSizer(wx.VERTICAL)
+		main.Add(self.local, 0, wx.ALL, 10)
+		main.Add(self.remote, 0, wx.ALL, 10)
+		main.Add(topic, 0, wx.ALL | wx.EXPAND, 0)
+		main.Add((0, 0), 1, wx.ALL, 0)
+		main.Add(ok_cancel, 0, wx.ALL | wx.EXPAND, 0)
+
+		panel.SetSizer(main)
+
+		if not local: self.local.Disable()
+		if not remote: self.remote.Disable()
+
+
+	def on_local(self, e):
+		self.local.SetValue(True)
+		self.remote.SetValue(False)
+
+	def on_remote(self, e):
+		self.local.SetValue(False)
+		self.remote.SetValue(True)
+
+	def OnOk(self,e):
+		local = self.local.GetValue()
+		remote = self.remote.GetValue()
+		topic = self.topic.GetValue()
+		if not local and not remote:
+			wx.MessageBox(_('Select a MQTT broker'), 'Info', wx.OK | wx.ICON_INFORMATION)
+			return
+		elif not topic:
+			wx.MessageBox(_('Provide a topic'), 'Info', wx.OK | wx.ICON_INFORMATION)
+			return
+		else:
+			mqtt_node = ujson.loads(self.mqtt_node_template)
+			mqtt_node['id'] = self.nodes.get_node_id()
+			mqtt_node['z'] = self.actions_flow_id
+			mqtt_node['name'] = 't|'+mqtt_node['id']+'|'+str(self.trigger_type)
+			mqtt_node['topic'] = topic
+			if local: mqtt_node['broker'] = self.localbrokerid
+			elif remote: mqtt_node['broker'] = self.remotebrokerid
+			self.TriggerNodes = [mqtt_node]
 			self.EndModal(wx.OK)
 
 # conditions
