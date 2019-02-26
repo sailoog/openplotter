@@ -32,7 +32,7 @@ from classes.add_SK_to_N2K import addSKtoN2K
 from classes.conf import Conf
 from classes.SK_settings import SK_settings
 from classes.language import Language
-from classes.nodes import Nodes, TriggerSK, TriggerGeofence, TriggerGPIO, TriggerMQTT, Condition, ActionSetSignalkKey, ActionSetGPIO, ActionSendEmail, ActionPlaySound, ActionRunCommand
+from classes.nodes import Nodes, TriggerSK, TriggerGeofence, TriggerGPIO, TriggerMQTT, Condition, ActionSetSignalkKey, ActionSetGPIO, ActionSetMQTT, ActionSendEmail, ActionPlaySound, ActionRunCommand
 
 class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 	def __init__(self, parent, height):
@@ -1985,6 +1985,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	####################### Credentials
 	
 	def page_credentials(self):
+
+		self.localbrokerid = 'openplot.lmqtt'
+		self.remotebrokerid = 'openplot.rmqtt'
 		
 		self.localmqtt = wx.CheckBox(self.p_credentials, label=_('Enable local MQTT broker'))
 		self.localmqtt.Bind(wx.EVT_CHECKBOX, self.on_localmqtt)
@@ -2048,8 +2051,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.p_credentials.SetSizer(main)
 
 	def read_credentials(self):
-		self.localbrokerid = 'openplot.lmqtt'
-		self.remotebrokerid = 'openplot.rmqtt'
 		self.cred_file = self.home+'/.signalk/red/flows_openplotter_cred.json'
 		try:
 			with open(self.cred_file) as data_file:
@@ -2065,10 +2066,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.localmqtt.SetValue(True)
 			self.userlocalmqtt.SetValue(credentials[self.localbrokerid]['user'])
 			self.passlocalmqtt.SetValue(credentials[self.localbrokerid]['password'])
+			self.userlocalmqtt.Disable()
+			self.passlocalmqtt.Disable()
 		else:
 			self.localmqtt.SetValue(False)
 			self.userlocalmqtt.SetValue('')
 			self.passlocalmqtt.SetValue('')
+			self.userlocalmqtt.Enable()
+			self.passlocalmqtt.Enable()
 		if self.conf.get('CREDENTIALS', 'remote_mqtt') == '1':
 			self.remotemqtt.SetValue(True)
 			self.userremotemqtt.SetValue(credentials[self.remotebrokerid]['user'])
@@ -2077,12 +2082,20 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				if i['id'] == self.remotebrokerid: 
 					self.serverremotemqtt.SetValue(i['broker'])
 					self.portremotemqtt.SetValue(int(i['port']))
+			self.serverremotemqtt.Disable()
+			self.portremotemqtt.Disable()
+			self.userremotemqtt.Disable()
+			self.passremotemqtt.Disable()
 		else:
 			self.remotemqtt.SetValue(False)
 			self.userremotemqtt.SetValue('')
 			self.passremotemqtt.SetValue('')
 			self.serverremotemqtt.SetValue('')
 			self.portremotemqtt.SetValue(1883)
+			self.serverremotemqtt.Enable()
+			self.portremotemqtt.Enable()
+			self.userremotemqtt.Enable()
+			self.passremotemqtt.Enable()
 
 	def edit_credentials(self, add, remove):
 		save = False
@@ -2227,10 +2240,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		pass
 
 	def on_help_credentials(self, e):
-		pass
-		#TODO
-		#url = self.currentpath+"/docs/html/actions.html"
-		#webbrowser.open(url, new=2)
+		url = self.currentpath+"/docs/html/credentials/what_are_credentials.html"
+		webbrowser.open(url, new=2)
 
 	####################### Actions
 
@@ -2243,7 +2254,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.list_triggers.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_print_conditions)
 		self.list_triggers.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit_triggers)
 
-		self.available_triggers = ['Signal K key', _('Geofence'), 'GPIO','MQTT topic',_('Telegram command'),_('Time')]
+		self.available_triggers = ['Signal K key', _('Geofence'), 'GPIO','MQTT topic', _('Time'), _('Telegram command')]
 		self.available_triggers_select = wx.Choice(self.p_action, choices=self.available_triggers, style=wx.CB_READONLY)
 
 		add_trigger = wx.Button(self.p_action, label=_('add'))
@@ -2401,7 +2412,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 						field3 = node['intype']
 						field4 = node['read']
 					if trigger["type"] == '3' and node['type'] == 'mqtt in':
-						field2 = node['broker']
+						if node['broker'] == self.localbrokerid: field2 = _('local broker')
+						elif node['broker'] == self.remotebrokerid: field2 = _('remote broker')
 						field3 = node['topic']			
 			self.list_triggers.Append([self.available_triggers[int(trigger["type"])].decode('utf8'), field2.decode('utf8'), field3.decode('utf8'), field4.decode('utf8')])
 
@@ -2439,6 +2451,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 						if action["type"] == '1': 
 							if node['type'] == 'rpi-gpio out': field2 = node['pin']
 							if node['type'] == 'change': field3 = node['rules'][0]['to']
+						if action["type"] == '2':
+							pass
 						if action["type"] == '4':
 							if node['type'] == 'template' and node['field'] == 'topic': field2 = node['template']
 							if node['type'] == 'msg-resend': field3 = _('repeat')
@@ -2466,10 +2480,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 
 	def edit_add_trigger(self, edit):
-		if self.available_triggers_select.GetSelection() == 0: dlg = TriggerSK(self,edit)
-		elif self.available_triggers_select.GetSelection() == 1: dlg = TriggerGeofence(self,edit)
-		elif self.available_triggers_select.GetSelection() == 2: dlg = TriggerGPIO(self,edit)
-		elif self.available_triggers_select.GetSelection() == 3:
+		trigger = self.available_triggers_select.GetSelection()
+		if trigger == 0: dlg = TriggerSK(self,edit)
+		elif trigger == 1: dlg = TriggerGeofence(self,edit)
+		elif trigger == 2: dlg = TriggerGPIO(self,edit)
+		elif trigger == 3:
 			local =  int(self.conf.get('CREDENTIALS', 'local_mqtt'))
 			remote =  int(self.conf.get('CREDENTIALS', 'remote_mqtt'))
 			if not local and not remote:
@@ -2538,6 +2553,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		action = self.available_actions_select.GetSelection()
 		if action == 0: dlg = ActionSetSignalkKey(self,edit)
 		elif action == 1: dlg = ActionSetGPIO(self,edit)
+		elif action == 2:
+			local =  int(self.conf.get('CREDENTIALS', 'local_mqtt'))
+			remote =  int(self.conf.get('CREDENTIALS', 'remote_mqtt'))
+			if not local and not remote:
+				self.ShowStatusBarRED(_('Go to the Credentials tab and enable at least one MQTT broker'))
+				return
+			else: dlg = ActionSetMQTT(self,edit,local,remote)
 		elif action == 4: dlg = ActionSendEmail(self,edit)
 		elif action == 5: dlg = ActionPlaySound(self,edit)
 		elif action == 6: dlg = ActionRunCommand(self,edit)
@@ -2648,7 +2670,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.read_triggers()
 
 	def on_help_action(self, e):
-		url = self.currentpath+"/docs/html/actions.html"
+		url = self.currentpath+"/docs/html/actions/what_are_actions.html"
 		webbrowser.open(url, new=2)
 
 	####################### 1W sensors

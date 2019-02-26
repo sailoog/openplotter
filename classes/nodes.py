@@ -1307,6 +1307,27 @@ class ActionSetGPIO(wx.Dialog):
 		self.connector_id = change_node['id']
 		self.EndModal(wx.OK)
 
+class ActionSetMQTT(wx.Dialog):
+	def __init__(self, parent, edit, local, remote):
+		self.credentials = ''
+		self.nodes = parent.nodes
+		self.actions_flow_id = parent.actions_flow_id
+		self.action_id = parent.available_actions_select.GetSelection()
+		self.mqtt_node_template = '''
+		    {
+		        "id": "",
+		        "type": "mqtt out",
+		        "z": "",
+		        "name": "",
+		        "topic": "",
+		        "qos": "",
+		        "retain": "",
+		        "broker": "",
+		        "x": 380,
+		        "y": 120,
+		        "wires": []
+		    }'''
+
 class ActionSendEmail(wx.Dialog):
 	def __init__(self, parent, edit):
 		self.credentials = ''

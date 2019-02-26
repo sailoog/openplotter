@@ -1,0 +1,269 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Backup &mdash; OpenPlotter 2.x.x documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Recovery system" href="recovery_system.html" />
+    <link rel="prev" title="Updating" href="updating.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> OpenPlotter
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.x.x
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">General</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../general/what_is_openplotter.html">What is OpenPlotter?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/features.html">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/what_do_you_need.html">What do you need?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/how_does_it_work.html">How does it work?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/how_to_collaborate.html">How to collaborate</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Getting started</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="downloading.html">Downloading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installing.html">Installing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="first_boot.html">First boot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="updating.html">Updating</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="updating.html#version-numbering">Version numbering</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Backup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="recovery_system.html">Recovery system</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Actions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../actions/what_are_actions.html">What are actions?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../actions/triggers.html">Triggers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../actions/triggers.html#signal-k-key">Signal K key</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../actions/triggers.html#geofence">Geofence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../actions/triggers.html#gpio">GPIO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../actions/triggers.html#mqtt-topic">MQTT topic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../actions/triggers.html#time">Time</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../actions/triggers.html#telegram-command">Telegram command</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../actions/conditions.html">Conditions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../actions/actions.html">Actions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../actions/actions.html#set-signal-k-key">Set Signal K key</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../actions/actions.html#set-gpio-output">Set GPIO output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../actions/actions.html#set-mqtt-topic">Set MQTT topic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../actions/actions.html#publish-twitter">Publish Twitter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../actions/actions.html#send-e-mail">Send e-mail</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../actions/actions.html#play-sound">Play sound</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../actions/actions.html#run-command">Run command</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../actions/actions.html#reset-system">Reset system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../actions/actions.html#shutdown-system">Shutdown system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../actions/actions.html#telegram-get-signal-k-key">Telegram: get Signal K key</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../actions/actions.html#telegram-subscribe-to-signal-k-key">Telegram: subscribe to Signal K key</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../actions/examples.html">Examples</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Credentials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../credentials/what_are_credentials.html">What are credentials?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../credentials/mqtt.html">MQTT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../credentials/twitter.html">Twitter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../credentials/telegram.html">Telegram</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../credentials/encrypt.html">Encrypt</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OpenPlotter</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Backup</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/getting_started/backup.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="backup">
+<h1>Backup<a class="headerlink" href="#backup" title="Permalink to this headline">¶</a></h1>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="recovery_system.html" class="btn btn-neutral float-right" title="Recovery system" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="updating.html" class="btn btn-neutral" title="Updating" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Sailoog
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
