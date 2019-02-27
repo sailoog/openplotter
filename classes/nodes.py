@@ -1311,6 +1311,8 @@ class ActionSetMQTT(wx.Dialog):
 	def __init__(self, parent, edit, local, remote):
 		self.credentials = ''
 		self.nodes = parent.nodes
+		self.localbrokerid = parent.localbrokerid
+		self.remotebrokerid = parent.remotebrokerid
 		self.actions_flow_id = parent.actions_flow_id
 		self.action_id = parent.available_actions_select.GetSelection()
 		self.mqtt_node_template = '''
@@ -1327,6 +1329,165 @@ class ActionSetMQTT(wx.Dialog):
 		        "y": 120,
 		        "wires": []
 		    }'''
+		self.change_node_template = '''
+			{
+		        "id": "",
+		        "type": "change",
+		        "z": "",
+		        "name": "",
+		        "rules": [
+		            {
+		                "t": "set",
+		                "p": "payload",
+		                "pt": "msg",
+		                "to": "",
+		                "tot": ""
+		            }
+		        ],
+		        "action": "",
+		        "property": "",
+		        "from": "",
+		        "to": "",
+		        "reg": false,
+		        "x": 380,
+		        "y": 120,
+		        "wires": [
+		            [
+		                ""
+		            ]
+		        ]
+		    }'''
+
+		if edit == 0: title = _('Add MQTT action')
+		else: title = _('Edit MQTT action')
+
+		wx.Dialog.__init__(self, None, title = title, size=(550, 280))
+		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
+
+		panel = wx.Panel(self)
+
+		self.local = wx.CheckBox(panel, label=_('Local MQTT broker'))
+		self.local.Bind(wx.EVT_CHECKBOX, self.on_local)
+		self.remote = wx.CheckBox(panel, label=_('Remote MQTT broker'))
+		self.remote.Bind(wx.EVT_CHECKBOX, self.on_remote)
+
+		topiclabel = wx.StaticText(panel, label=_('Set topic'))
+		self.topic = wx.TextCtrl(panel)
+
+		self.type_list = [_('Trigger value'), _('Fix value'), _('Signal K key value')]
+
+		tolabel = wx.StaticText(panel, label=_('to'))
+		self.type = wx.Choice(panel, choices=self.type_list, style=wx.CB_READONLY)
+		self.type.Bind(wx.EVT_CHOICE, self.on_select_type)
+		self.value = wx.TextCtrl(panel)
+		self.edit_skkey2 = wx.Button(panel, label=_('Edit'))
+		self.edit_skkey2.Bind(wx.EVT_BUTTON, self.onEditSkkey2)
+
+		value = wx.BoxSizer(wx.HORIZONTAL)
+		value.Add(tolabel, 0, wx.ALL, 5)
+		value.Add(self.type, 0, wx.ALL, 5)
+		value.Add(self.value, 1, wx.ALL, 5)
+		value.Add(self.edit_skkey2, 0, wx.ALL, 5)
+	
+		okBtn = wx.Button(panel, wx.ID_OK)
+		okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
+		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
+
+		topic = wx.BoxSizer(wx.HORIZONTAL)
+		topic.Add(topiclabel, 0, wx.ALL, 10)
+		topic.Add(self.topic, 1, wx.ALL, 10)
+
+		ok_cancel = wx.BoxSizer(wx.HORIZONTAL)
+		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
+		ok_cancel.Add(okBtn, 0, wx.ALL, 10)
+		ok_cancel.Add(cancelBtn, 0, wx.ALL, 10)
+		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
+
+		main = wx.BoxSizer(wx.VERTICAL)
+		main.Add(self.local, 0, wx.ALL, 10)
+		main.Add(self.remote, 0, wx.ALL, 10)
+		main.Add(topic, 0, wx.ALL | wx.EXPAND, 0)
+		main.Add(value, 0, wx.ALL | wx.EXPAND, 0)
+		main.Add((0, 0), 1, wx.ALL, 0)
+		main.Add(ok_cancel, 0, wx.ALL | wx.EXPAND, 0)
+
+		panel.SetSizer(main)
+
+		if not local: self.local.Disable()
+		if not remote: self.remote.Disable()
+		self.edit_skkey2.Disable()
+
+	def on_local(self, e):
+		self.local.SetValue(True)
+		self.remote.SetValue(False)
+
+	def on_remote(self, e):
+		self.local.SetValue(False)
+		self.remote.SetValue(True)
+
+	def on_select_type(self,e):
+		selected = self.type.GetSelection()
+		if selected == 0:
+			self.value.Disable()
+			self.edit_skkey2.Disable()
+		elif selected == 1:
+			self.value.Enable()
+			self.edit_skkey2.Disable()
+		elif selected == 2:
+			self.value.Enable()
+			self.edit_skkey2.Enable()
+		self.value.SetValue('')
+
+	def onEditSkkey2(self,e):
+		oldkey = False
+		if self.value.GetValue(): oldkey = self.value.GetValue()
+		dlg = selectKey(oldkey,1)
+		res = dlg.ShowModal()
+		if res == wx.OK:
+			self.value.SetValue(dlg.selected_vessel+'.'+dlg.selected_key)
+		dlg.Destroy()
+
+	def OnOk(self,e):
+		local = self.local.GetValue()
+		remote = self.remote.GetValue()
+		topic = self.topic.GetValue()
+		value = self.value.GetValue()
+		selected_type = self.type.GetSelection()
+		if not local and not remote:
+			wx.MessageBox(_('Select a MQTT broker'), 'Info', wx.OK | wx.ICON_INFORMATION)
+			return
+		elif not topic:
+			wx.MessageBox(_('Provide a topic'), 'Info', wx.OK | wx.ICON_INFORMATION)
+			return
+		elif not value and selected_type != 0:
+			wx.MessageBox(_('Provide a value.'), 'Info', wx.OK | wx.ICON_INFORMATION)
+			return
+		self.ActionNodes = []
+		mqtt_node = ujson.loads(self.mqtt_node_template)
+		mqtt_node['id'] = self.nodes.get_node_id()
+		mqtt_node['z'] = self.actions_flow_id
+		mqtt_node['name'] = 'a|'+mqtt_node['id']+'|'+str(self.action_id)
+		mqtt_node['topic'] = topic
+		if local: mqtt_node['broker'] = self.localbrokerid
+		elif remote: mqtt_node['broker'] = self.remotebrokerid
+		self.ActionNodes.append(mqtt_node)
+		change_node = ujson.loads(self.change_node_template)
+		change_node['id'] = self.nodes.get_node_id()
+		change_node['z'] = self.actions_flow_id
+		change_node['name'] = mqtt_node['name']
+		if selected_type == 0:
+			change_node['rules'][0]['to'] = "payload"
+			change_node['rules'][0]['tot'] = "msg"
+		if selected_type == 1:
+			change_node['rules'][0]['to'] = value
+			change_node['rules'][0]['tot'] = "str"
+		if selected_type == 2:
+			change_node['rules'][0]['to'] = value
+			change_node['rules'][0]['tot'] = "flow"
+		change_node['wires'] = [[mqtt_node['id']]]
+		self.ActionNodes.append(change_node)
+		self.connector_id = change_node['id']
+		self.EndModal(wx.OK)
 
 class ActionSendEmail(wx.Dialog):
 	def __init__(self, parent, edit):

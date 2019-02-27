@@ -2064,8 +2064,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		credentials = self.read_credentials()
 		if self.conf.get('CREDENTIALS', 'local_mqtt') == '1':
 			self.localmqtt.SetValue(True)
-			self.userlocalmqtt.SetValue(credentials[self.localbrokerid]['user'])
-			self.passlocalmqtt.SetValue(credentials[self.localbrokerid]['password'])
+			try:
+				self.userlocalmqtt.SetValue(credentials[self.localbrokerid]['user'])
+				self.passlocalmqtt.SetValue(credentials[self.localbrokerid]['password'])
+			except: pass
 			self.userlocalmqtt.Disable()
 			self.passlocalmqtt.Disable()
 		else:
@@ -2076,8 +2078,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.passlocalmqtt.Enable()
 		if self.conf.get('CREDENTIALS', 'remote_mqtt') == '1':
 			self.remotemqtt.SetValue(True)
-			self.userremotemqtt.SetValue(credentials[self.remotebrokerid]['user'])
-			self.passremotemqtt.SetValue(credentials[self.remotebrokerid]['password'])
+			try:
+				self.userremotemqtt.SetValue(credentials[self.remotebrokerid]['user'])
+				self.passremotemqtt.SetValue(credentials[self.remotebrokerid]['password'])
+			except: pass
 			for i in self.no_actions_nodes:
 				if i['id'] == self.remotebrokerid: 
 					self.serverremotemqtt.SetValue(i['broker'])
@@ -2452,7 +2456,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 							if node['type'] == 'rpi-gpio out': field2 = node['pin']
 							if node['type'] == 'change': field3 = node['rules'][0]['to']
 						if action["type"] == '2':
-							pass
+							if node['type'] == 'mqtt out':
+								if node['broker'] == self.localbrokerid: field2 = _('local broker')
+								elif node['broker'] == self.remotebrokerid: field2 = _('remote broker')
+								field3 = node['topic']	
 						if action["type"] == '4':
 							if node['type'] == 'template' and node['field'] == 'topic': field2 = node['template']
 							if node['type'] == 'msg-resend': field3 = _('repeat')
@@ -2634,8 +2641,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			all_flows.append(i)
 			if i["type"] == "change":
 				result = []
-				if len(i['rules']) > 1 and 'tot' in i['rules'][1] and i['rules'][1]['tot'] == 'flow':
+				c = len(i['rules'])
+				if c == 1 and 'tot' in i['rules'][0] and i['rules'][0]['tot'] == 'flow':
+					result = self.nodes.get_subscription(i['rules'][0]['to'])
+				if c > 1 and 'tot' in i['rules'][1] and i['rules'][1]['tot'] == 'flow':
 					result = self.nodes.get_subscription(i['rules'][1]['to'])
+				if result:
 					name = result[0]['name']
 					exists = False
 					for ii in all_flows:
