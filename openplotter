@@ -32,7 +32,7 @@ from classes.add_SK_to_N2K import addSKtoN2K
 from classes.conf import Conf
 from classes.SK_settings import SK_settings
 from classes.language import Language
-from classes.nodes import Nodes, TriggerSK, TriggerGeofence, TriggerGPIO, TriggerMQTT, Condition, ActionSetSignalkKey, ActionSetGPIO, ActionSetMQTT, ActionSendEmail, ActionPlaySound, ActionRunCommand
+from classes.nodes import Nodes, TriggerSK, TriggerGeofence, TriggerGPIO, TriggerMQTT, Condition, ActionSetSignalkKey, ActionSetGPIO, ActionSetMQTT, ActionPublishTwitter, ActionSendEmail, ActionPlaySound, ActionRunCommand
 
 class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 	def __init__(self, parent, height):
@@ -1988,6 +1988,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		self.localbrokerid = 'openplot.lmqtt'
 		self.remotebrokerid = 'openplot.rmqtt'
+		self.twitterid = 'openplot.twitt'
 		
 		self.localmqtt = wx.CheckBox(self.p_credentials, label=_('Enable local MQTT broker'))
 		self.localmqtt.Bind(wx.EVT_CHECKBOX, self.on_localmqtt)
@@ -2006,6 +2007,19 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.userremotemqtt = wx.TextCtrl(self.p_credentials)
 		passremotemqttlabel = wx.StaticText(self.p_credentials, label=_('Password'))
 		self.passremotemqtt = wx.TextCtrl(self.p_credentials, style=wx.TE_PASSWORD)
+
+		self.twitter = wx.CheckBox(self.p_credentials, label=_('Enable Twitter account'))
+		self.twitter.Bind(wx.EVT_CHECKBOX, self.on_twitter)
+		twitteraccountlabel = wx.StaticText(self.p_credentials, label=_('Twitter ID'))
+		self.twitteraccount = wx.TextCtrl(self.p_credentials)
+		apikeylabel = wx.StaticText(self.p_credentials, label=_('API key'))
+		self.apikey = wx.TextCtrl(self.p_credentials, style=wx.TE_PASSWORD)
+		apisecretkeylabel = wx.StaticText(self.p_credentials, label=_('API secret key'))
+		self.apisecretkey = wx.TextCtrl(self.p_credentials, style=wx.TE_PASSWORD)
+		accesstokenlabel = wx.StaticText(self.p_credentials, label=_('Access token'))
+		self.accesstoken = wx.TextCtrl(self.p_credentials, style=wx.TE_PASSWORD)
+		accesstokensecretlabel = wx.StaticText(self.p_credentials, label=_('Access token secret'))
+		self.accesstokensecret = wx.TextCtrl(self.p_credentials, style=wx.TE_PASSWORD)
 
 		help_button = wx.BitmapButton(self.p_credentials, bitmap=self.help_bmp, size=(self.help_bmp.GetWidth()+40, self.help_bmp.GetHeight()+10))
 		help_button.Bind(wx.EVT_BUTTON, self.on_help_credentials)
@@ -2034,6 +2048,23 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		remotemqtt.Add(passremotemqttlabel, 0, wx.ALL | wx.EXPAND, 5)
 		remotemqtt.Add(self.passremotemqtt, 1, wx.ALL | wx.EXPAND, 5)
 
+		twitter0 = wx.BoxSizer(wx.HORIZONTAL)
+		twitter0.Add(self.twitter, 0, wx.ALL, 5)
+		twitter0.Add(twitteraccountlabel, 0, wx.ALL, 5)
+		twitter0.Add(self.twitteraccount, 1, wx.ALL | wx.EXPAND, 5)
+
+		twitter1 = wx.BoxSizer(wx.HORIZONTAL)
+		twitter1.Add(apikeylabel, 0, wx.ALL, 5)
+		twitter1.Add(self.apikey, 1, wx.ALL | wx.EXPAND, 5)
+		twitter1.Add(apisecretkeylabel, 0, wx.ALL, 5)
+		twitter1.Add(self.apisecretkey, 1, wx.ALL | wx.EXPAND, 5)
+
+		twitter2 = wx.BoxSizer(wx.HORIZONTAL)
+		twitter2.Add(accesstokenlabel, 0, wx.ALL, 5)
+		twitter2.Add(self.accesstoken, 1, wx.ALL | wx.EXPAND, 5)
+		twitter2.Add(accesstokensecretlabel, 0, wx.ALL, 5)
+		twitter2.Add(self.accesstokensecret, 1, wx.ALL | wx.EXPAND, 5)
+
 		buttons = wx.BoxSizer(wx.HORIZONTAL)
 		buttons.Add(help_button, 0, wx.ALL, 0)
 		buttons.Add((0, 0), 1, wx.RIGHT | wx.LEFT, 5)
@@ -2045,6 +2076,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		main.Add(localmqtt, 0, wx.ALL | wx.EXPAND, 0)
 		main.Add(remotemqtt0, 0, wx.ALL | wx.EXPAND, 0)
 		main.Add(remotemqtt, 0, wx.ALL | wx.EXPAND, 0)
+		main.Add(twitter0, 0, wx.ALL | wx.EXPAND, 0)
+		main.Add(twitter1, 0, wx.ALL | wx.EXPAND, 0)
+		main.Add(twitter2, 0, wx.ALL | wx.EXPAND, 0)
 		main.Add((0, 0), 1, wx.ALL, 0)
 		main.Add(buttons, 0, wx.ALL | wx.EXPAND, 5)
 
@@ -2101,6 +2135,35 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.userremotemqtt.Enable()
 			self.passremotemqtt.Enable()
 
+		if self.conf.get('CREDENTIALS', 'twitter') == '1':
+			self.twitter.SetValue(True)
+			try:
+				self.apikey.SetValue(credentials[self.twitterid]['consumer_key'])
+				self.apisecretkey.SetValue(credentials[self.twitterid]['consumer_secret'])
+				self.accesstoken.SetValue(credentials[self.twitterid]['access_token'])
+				self.accesstokensecret.SetValue(credentials[self.twitterid]['access_token_secret'])
+			except: pass
+			for i in self.no_actions_nodes:
+				if i['id'] == self.twitterid: 
+					self.twitteraccount.SetValue(i['screen_name'])
+			self.twitteraccount.Disable()
+			self.apikey.Disable()
+			self.apisecretkey.Disable()
+			self.accesstoken.Disable()
+			self.accesstokensecret.Disable()
+		else:
+			self.twitter.SetValue(False)
+			self.twitteraccount.SetValue('')
+			self.apikey.SetValue('')
+			self.apisecretkey.SetValue('')
+			self.accesstoken.SetValue('')
+			self.accesstokensecret.SetValue('')
+			self.twitteraccount.Enable()
+			self.apikey.Enable()
+			self.apisecretkey.Enable()
+			self.accesstoken.Enable()
+			self.accesstokensecret.Enable()
+
 	def edit_credentials(self, add, remove):
 		save = False
 		credentials = self.read_credentials()
@@ -2150,6 +2213,24 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.portremotemqtt.Enable()
 			self.userremotemqtt.Enable()
 			self.passremotemqtt.Enable()
+
+	def on_twitter(self, e):
+		if self.twitter.GetValue():
+			if self.twitteraccount.GetValue() and self.apikey.GetValue() and self.apisecretkey.GetValue() and self.accesstoken.GetValue() and self.accesstokensecret.GetValue():
+				self.twitteraccount.Disable()
+				self.apikey.Disable()
+				self.apisecretkey.Disable()
+				self.accesstoken.Disable()
+				self.accesstokensecret.Disable()
+			else:
+				self.ShowStatusBarRED(_('Fill in all the fields.'))
+				self.twitter.SetValue(False)
+		else:
+			self.twitteraccount.Enable()
+			self.apikey.Enable()
+			self.apisecretkey.Enable()
+			self.accesstoken.Enable()
+			self.accesstokensecret.Enable()
 
 	def on_apply_changes_credentials(self, e):
 		add_nodes = []
@@ -2229,6 +2310,25 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			remove_ids.append(self.remotebrokerid)
 			remove_credentials.append(self.remotebrokerid)
 			self.conf.set('CREDENTIALS', 'remote_mqtt', '0')
+
+		if self.twitter.GetValue():
+			twitter_node_template = '''
+		        {
+			        "id":"",
+			        "type":"twitter-credentials",
+			        "z":"",
+			        "screen_name":""
+			    }'''
+			twitter_node = ujson.loads(twitter_node_template)
+			twitter_node['id'] = self.twitterid
+			twitter_node['screen_name'] = self.twitteraccount.GetValue()
+			add_credentials[self.twitterid] = {"consumer_key":self.apikey.GetValue(),"consumer_secret":self.apisecretkey.GetValue(),"access_token":self.accesstoken.GetValue(),"access_token_secret":self.accesstokensecret.GetValue()}
+			add_nodes.append(twitter_node)
+			self.conf.set('CREDENTIALS', 'twitter', '1')
+		else: 
+			remove_ids.append(self.twitterid)
+			remove_credentials.append(self.twitterid)
+			self.conf.set('CREDENTIALS', 'twitter', '0')
 
 		self.edit_credentials(add_credentials, remove_credentials)
 		self.nodes.edit_flow(add_nodes, remove_ids)
@@ -2459,7 +2559,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 							if node['type'] == 'mqtt out':
 								if node['broker'] == self.localbrokerid: field2 = _('local broker')
 								elif node['broker'] == self.remotebrokerid: field2 = _('remote broker')
-								field3 = node['topic']	
+								field3 = node['topic']
+						if action["type"] == '3':
+							if node['type'] == 'template': field2 = node['template']
+							if node['type'] == 'msg-resend': field3 = _('repeat')
+							if node['type'] == 'delay': field3 = _('rate limit')
 						if action["type"] == '4':
 							if node['type'] == 'template' and node['field'] == 'topic': field2 = node['template']
 							if node['type'] == 'msg-resend': field3 = _('repeat')
@@ -2567,6 +2671,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.ShowStatusBarRED(_('Go to the Credentials tab and enable at least one MQTT broker'))
 				return
 			else: dlg = ActionSetMQTT(self,edit,local,remote)
+		elif action == 3:
+			twitter =  int(self.conf.get('CREDENTIALS', 'twitter'))
+			if not twitter:
+				self.ShowStatusBarRED(_('Go to the Credentials tab and enable the Twitter account '))
+				return
+			else: dlg = ActionPublishTwitter(self,edit)
 		elif action == 4: dlg = ActionSendEmail(self,edit)
 		elif action == 5: dlg = ActionPlaySound(self,edit)
 		elif action == 6: dlg = ActionRunCommand(self,edit)
