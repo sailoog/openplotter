@@ -1989,6 +1989,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.localbrokerid = 'openplot.lmqtt'
 		self.remotebrokerid = 'openplot.rmqtt'
 		self.twitterid = 'openplot.twitt'
+		self.telegramid = 'openplot.teleg'
 		
 		self.localmqtt = wx.CheckBox(self.p_credentials, label=_('Enable local MQTT broker'))
 		self.localmqtt.Bind(wx.EVT_CHECKBOX, self.on_localmqtt)
@@ -2021,6 +2022,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		accesstokensecretlabel = wx.StaticText(self.p_credentials, label=_('Access token secret'))
 		self.accesstokensecret = wx.TextCtrl(self.p_credentials, style=wx.TE_PASSWORD)
 
+		self.telegram = wx.CheckBox(self.p_credentials, label=_('Enable Telegram bot'))
+		self.telegram.Bind(wx.EVT_CHECKBOX, self.on_telegram)
+		tokenlabel = wx.StaticText(self.p_credentials, label=_('Token'))
+		self.token = wx.TextCtrl(self.p_credentials, style=wx.TE_PASSWORD)
+		userslabel = wx.StaticText(self.p_credentials, label=_('Users'))
+		self.users = wx.TextCtrl(self.p_credentials)
+
 		help_button = wx.BitmapButton(self.p_credentials, bitmap=self.help_bmp, size=(self.help_bmp.GetWidth()+40, self.help_bmp.GetHeight()+10))
 		help_button.Bind(wx.EVT_BUTTON, self.on_help_credentials)
 
@@ -2030,55 +2038,66 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		cancel_changes.Bind(wx.EVT_BUTTON, self.on_cancel_changes_credentials)
 
 		localmqtt = wx.BoxSizer(wx.HORIZONTAL)
-		localmqtt.Add(userlocalmqttlabel, 0, wx.ALL | wx.EXPAND, 5)
-		localmqtt.Add(self.userlocalmqtt, 1, wx.ALL | wx.EXPAND, 5)
-		localmqtt.Add(passlocalmqttlabel, 0, wx.ALL | wx.EXPAND, 5)
-		localmqtt.Add(self.passlocalmqtt, 1, wx.ALL | wx.EXPAND, 5)
+		localmqtt.Add(userlocalmqttlabel, 0, wx.ALL | wx.EXPAND, 3)
+		localmqtt.Add(self.userlocalmqtt, 1, wx.ALL | wx.EXPAND, 3)
+		localmqtt.Add(passlocalmqttlabel, 0, wx.ALL | wx.EXPAND, 3)
+		localmqtt.Add(self.passlocalmqtt, 1, wx.ALL | wx.EXPAND, 3)
 
 		remotemqtt0 = wx.BoxSizer(wx.HORIZONTAL)
-		remotemqtt0.Add(self.remotemqtt, 0, wx.ALL | wx.EXPAND, 5)
-		remotemqtt0.Add(serverremotemqttlabel, 0, wx.ALL | wx.EXPAND, 5)
-		remotemqtt0.Add(self.serverremotemqtt, 1, wx.ALL | wx.EXPAND, 5)
-		remotemqtt0.Add(portremotemqttlabel, 0, wx.ALL | wx.EXPAND, 5)
-		remotemqtt0.Add(self.portremotemqtt, 0, wx.ALL | wx.EXPAND, 5)
+		remotemqtt0.Add(self.remotemqtt, 0, wx.ALL | wx.EXPAND, 3)
+		remotemqtt0.Add(serverremotemqttlabel, 0, wx.ALL | wx.EXPAND, 3)
+		remotemqtt0.Add(self.serverremotemqtt, 1, wx.ALL | wx.EXPAND, 3)
+		remotemqtt0.Add(portremotemqttlabel, 0, wx.ALL | wx.EXPAND, 3)
+		remotemqtt0.Add(self.portremotemqtt, 0, wx.ALL | wx.EXPAND, 3)
 
 		remotemqtt = wx.BoxSizer(wx.HORIZONTAL)
-		remotemqtt.Add(userremotemqttlabel, 0, wx.ALL | wx.EXPAND, 5)
-		remotemqtt.Add(self.userremotemqtt, 1, wx.ALL | wx.EXPAND, 5)
-		remotemqtt.Add(passremotemqttlabel, 0, wx.ALL | wx.EXPAND, 5)
-		remotemqtt.Add(self.passremotemqtt, 1, wx.ALL | wx.EXPAND, 5)
+		remotemqtt.Add(userremotemqttlabel, 0, wx.ALL | wx.EXPAND, 3)
+		remotemqtt.Add(self.userremotemqtt, 1, wx.ALL | wx.EXPAND, 3)
+		remotemqtt.Add(passremotemqttlabel, 0, wx.ALL | wx.EXPAND, 3)
+		remotemqtt.Add(self.passremotemqtt, 1, wx.ALL | wx.EXPAND, 3)
 
 		twitter0 = wx.BoxSizer(wx.HORIZONTAL)
-		twitter0.Add(self.twitter, 0, wx.ALL, 5)
-		twitter0.Add(twitteraccountlabel, 0, wx.ALL, 5)
-		twitter0.Add(self.twitteraccount, 1, wx.ALL | wx.EXPAND, 5)
+		twitter0.Add(self.twitter, 0, wx.ALL, 3)
+		twitter0.Add(twitteraccountlabel, 0, wx.ALL, 3)
+		twitter0.Add(self.twitteraccount, 1, wx.ALL | wx.EXPAND, 3)
 
 		twitter1 = wx.BoxSizer(wx.HORIZONTAL)
-		twitter1.Add(apikeylabel, 0, wx.ALL, 5)
-		twitter1.Add(self.apikey, 1, wx.ALL | wx.EXPAND, 5)
-		twitter1.Add(apisecretkeylabel, 0, wx.ALL, 5)
-		twitter1.Add(self.apisecretkey, 1, wx.ALL | wx.EXPAND, 5)
+		twitter1.Add(apikeylabel, 0, wx.ALL, 3)
+		twitter1.Add(self.apikey, 1, wx.ALL | wx.EXPAND, 3)
+		twitter1.Add(apisecretkeylabel, 0, wx.ALL, 3)
+		twitter1.Add(self.apisecretkey, 1, wx.ALL | wx.EXPAND, 3)
 
 		twitter2 = wx.BoxSizer(wx.HORIZONTAL)
-		twitter2.Add(accesstokenlabel, 0, wx.ALL, 5)
-		twitter2.Add(self.accesstoken, 1, wx.ALL | wx.EXPAND, 5)
-		twitter2.Add(accesstokensecretlabel, 0, wx.ALL, 5)
-		twitter2.Add(self.accesstokensecret, 1, wx.ALL | wx.EXPAND, 5)
+		twitter2.Add(accesstokenlabel, 0, wx.ALL, 3)
+		twitter2.Add(self.accesstoken, 1, wx.ALL | wx.EXPAND, 3)
+		twitter2.Add(accesstokensecretlabel, 0, wx.ALL, 3)
+		twitter2.Add(self.accesstokensecret, 1, wx.ALL | wx.EXPAND, 3)
+
+		telegram0 = wx.BoxSizer(wx.HORIZONTAL)
+		telegram0.Add(self.telegram, 0, wx.ALL, 3)
+		telegram0.Add(tokenlabel, 0, wx.ALL, 3)
+		telegram0.Add(self.token, 1, wx.ALL | wx.EXPAND, 3)
+
+		telegram1 = wx.BoxSizer(wx.HORIZONTAL)
+		telegram1.Add(userslabel, 0, wx.ALL, 3)
+		telegram1.Add(self.users, 1, wx.ALL | wx.EXPAND, 3)
 
 		buttons = wx.BoxSizer(wx.HORIZONTAL)
 		buttons.Add(help_button, 0, wx.ALL, 0)
-		buttons.Add((0, 0), 1, wx.RIGHT | wx.LEFT, 5)
-		buttons.Add(apply_changes, 0, wx.RIGHT | wx.LEFT, 5)
-		buttons.Add(cancel_changes, 0, wx.RIGHT | wx.LEFT, 5)
+		buttons.Add((0, 0), 1, wx.RIGHT | wx.LEFT, 3)
+		buttons.Add(apply_changes, 0, wx.RIGHT | wx.LEFT, 3)
+		buttons.Add(cancel_changes, 0, wx.RIGHT | wx.LEFT, 3)
 
 		main = wx.BoxSizer(wx.VERTICAL)
-		main.Add(self.localmqtt, 0, wx.ALL | wx.EXPAND, 5)
+		main.Add(self.localmqtt, 0, wx.ALL | wx.EXPAND, 3)
 		main.Add(localmqtt, 0, wx.ALL | wx.EXPAND, 0)
 		main.Add(remotemqtt0, 0, wx.ALL | wx.EXPAND, 0)
 		main.Add(remotemqtt, 0, wx.ALL | wx.EXPAND, 0)
 		main.Add(twitter0, 0, wx.ALL | wx.EXPAND, 0)
 		main.Add(twitter1, 0, wx.ALL | wx.EXPAND, 0)
 		main.Add(twitter2, 0, wx.ALL | wx.EXPAND, 0)
+		main.Add(telegram0, 0, wx.ALL | wx.EXPAND, 0)
+		main.Add(telegram1, 0, wx.ALL | wx.EXPAND, 0)
 		main.Add((0, 0), 1, wx.ALL, 0)
 		main.Add(buttons, 0, wx.ALL | wx.EXPAND, 5)
 
@@ -2164,6 +2183,23 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.accesstoken.Enable()
 			self.accesstokensecret.Enable()
 
+		if self.conf.get('CREDENTIALS', 'telegram') == '1':
+			self.telegram.SetValue(True)
+			try:
+				self.token.SetValue(credentials[self.telegramid]['token'])
+			except: pass
+			for i in self.no_actions_nodes:
+				if i['id'] == self.telegramid: 
+					self.users.SetValue(i['usernames'])
+			self.token.Disable()
+			self.users.Disable()
+		else:
+			self.telegram.SetValue(False)
+			self.token.SetValue('')
+			self.users.SetValue('')
+			self.token.Enable()
+			self.users.Enable()
+
 	def edit_credentials(self, add, remove):
 		save = False
 		credentials = self.read_credentials()
@@ -2231,6 +2267,18 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.apisecretkey.Enable()
 			self.accesstoken.Enable()
 			self.accesstokensecret.Enable()
+
+	def on_telegram(self, e):
+		if self.telegram.GetValue():
+			if self.token.GetValue() and self.users.GetValue():
+				self.token.Disable()
+				self.users.Disable()
+			else:
+				self.ShowStatusBarRED(_('Fill in all the fields.'))
+				self.telegram.SetValue(False)
+		else:
+			self.token.Enable()
+			self.users.Enable()
 
 	def on_apply_changes_credentials(self, e):
 		add_nodes = []
@@ -2330,6 +2378,105 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			remove_credentials.append(self.twitterid)
 			self.conf.set('CREDENTIALS', 'twitter', '0')
 
+		if self.telegram.GetValue():
+			telegram_node_template = '''
+				{
+				    "id":"",
+				    "type":"chatbot-telegram-node",
+				    "z":"",
+				    "usernames":"",
+				    "botname":"",
+				    "parseMode":"",
+				    "providerToken":"",
+				    "log":"",
+				    "polling":"1000",
+				    "debug":false,
+				    "store":""
+				}'''
+			start1_node_template = '''
+			    {
+			        "id": "",
+			        "type": "chatbot-telegram-receive",
+			        "z": "",
+			        "bot": "",
+			        "botProduction": "",
+			        "x": 380,
+			        "y": 120,
+			        "wires": [[]]
+			    }'''
+			start2_node_template = '''
+			    {
+			        "id": "",
+			        "type": "chatbot-authorized",
+			        "z": "",
+			        "x": 380,
+			        "y": 120,
+			        "wires": [[],[]]
+			    }'''
+			start3_node_template = '''
+			    {
+			        "id": "",
+			        "type": "function",
+			        "z": "",
+			        "name": "",
+			        "func": "if (msg.payload.content=='/start'){msg.payload.content='Chat ID: '+msg.payload.chatId;return msg;}",
+			        "outputs": 1,
+			        "noerr": 0,
+			        "x": 380,
+			        "y": 120,
+			        "wires": [[]]
+			    }'''
+			start4_node_template = '''
+			    {
+			        "id": "",
+			        "type": "chatbot-telegram-send",
+			        "z": "",
+			        "bot": "",
+			        "botProduction": "",
+			        "track": false,
+			        "passThrough": false,
+			        "outputs": 0,
+			        "x": 380,
+			        "y": 120,
+			        "wires": []
+			    }'''
+			telegram_node = ujson.loads(telegram_node_template)
+			telegram_node['id'] = self.telegramid
+			telegram_node['botname'] = 'telegrambot'
+			telegram_node['usernames'] = self.users.GetValue()
+			add_credentials[self.telegramid] = {"token":self.token.GetValue()}
+			add_nodes.append(telegram_node)
+			start4_node = ujson.loads(start4_node_template)
+			start4_node['id'] = self.telegramid+'4'
+			start4_node['z'] = self.actions_flow_id
+			start4_node['bot'] = self.telegramid
+			add_nodes.append(start4_node)
+			start3_node = ujson.loads(start3_node_template)
+			start3_node['id'] = self.telegramid+'3'
+			start3_node['z'] = self.actions_flow_id
+			start3_node['wires'] = [[start4_node['id']]]
+			add_nodes.append(start3_node)
+			start2_node = ujson.loads(start2_node_template)
+			start2_node['id'] = self.telegramid+'2'
+			start2_node['z'] = self.actions_flow_id
+			start2_node['wires'] = [[start3_node['id']],[]]
+			add_nodes.append(start2_node)
+			start1_node = ujson.loads(start1_node_template)
+			start1_node['id'] = self.telegramid+'1'
+			start1_node['z'] = self.actions_flow_id
+			start1_node['bot'] = self.telegramid
+			start1_node['wires'] = [[start2_node['id']]]
+			add_nodes.append(start1_node)
+			self.conf.set('CREDENTIALS', 'telegram', '1')
+		else: 
+			remove_ids.append(self.telegramid)
+			remove_ids.append(self.telegramid+'1')
+			remove_ids.append(self.telegramid+'2')
+			remove_ids.append(self.telegramid+'3')
+			remove_ids.append(self.telegramid+'4')
+			remove_credentials.append(self.telegramid)
+			self.conf.set('CREDENTIALS', 'telegram', '0')
+
 		self.edit_credentials(add_credentials, remove_credentials)
 		self.nodes.edit_flow(add_nodes, remove_ids)
 		self.print_credentials()
@@ -2358,7 +2505,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.list_triggers.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_print_conditions)
 		self.list_triggers.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit_triggers)
 
-		self.available_triggers = ['Signal K key', _('Geofence'), 'GPIO','MQTT topic', _('Time'), _('Telegram command')]
+		self.available_triggers = ['Signal K key', _('Geofence'), 'GPIO','MQTT topic', _('Time'), _('Telegram message')]
 		self.available_triggers_select = wx.Choice(self.p_action, choices=self.available_triggers, style=wx.CB_READONLY)
 
 		add_trigger = wx.Button(self.p_action, label=_('add'))
@@ -2398,8 +2545,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		_('Run command'),
 		_('Reset system'),
 		_('Shutdown system'),
-		_('Telegram: get Signal K key'),
-		_('Telegram: subscribe to Signal K key')]
+		_('Telegram: send message')]
 
 		self.available_actions_select = wx.Choice(self.p_action, choices=self.available_actions, style=wx.CB_READONLY)
 		add_action = wx.Button(self.p_action, label=_('add'))
@@ -2473,7 +2619,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.selected_action = -1
 		self.nodes = Nodes(self,self.actions_flow_id)
 		result = self.nodes.get_flow()
-		self.actions_flow_data = self.nodes.get_actions_flow_data()
 		self.actions_flow_tree = result[0]
 		self.triggers_flow_nodes = result[1]
 		self.conditions_flow_nodes = result[2]
@@ -2721,8 +2866,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.no_actions_nodes = result[4]
 
 		for i in self.no_actions_nodes:
-			all_flows.append(i)
-		for i in self.actions_flow_data:
 			all_flows.append(i)
 		for i in self.triggers_flow_nodes:
 			all_flows.append(i)

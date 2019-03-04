@@ -29,7 +29,8 @@ class Nodes:
 		node_id = uuid_tmp[:8]+'.'+uuid_tmp[-6:]
 		return node_id
 
-	def get_actions_flow_data(self):		
+	def get_actions_flow_data(self):
+		self.commentnodeid = 'openplot.comme'		
 		actions_flow_template = '''
 			[
 				{
@@ -60,7 +61,7 @@ class Nodes:
 			elif i['type'] == 'comment':
 				i['z'] = self.actions_flow_id
 				i['name'] = actions_flow_comment
-				i['id'] = self.get_node_id()
+				i['id'] = self.commentnodeid
 		return actions_flow_data
 
 	def get_flow(self):
@@ -136,6 +137,15 @@ class Nodes:
 			return []
 			
 	def write_flow(self, all_flows):
+		actions_flow_data = self.get_actions_flow_data()
+		tab = False
+		comment = False
+		for i in all_flows:
+			if i['id'] == self.actions_flow_id: tab = True
+			if i['id'] == self.commentnodeid: comment = True
+		if not tab: all_flows.append(actions_flow_data[0])
+		if not comment: all_flows.append(actions_flow_data[1])
+
 		try:
 			data = ujson.dumps(all_flows, indent=4)
 			with open(self.flows_file, "w") as outfile:
