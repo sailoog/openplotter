@@ -24,9 +24,10 @@ class Nodes:
 		self.actions_flow_id = actions_flow_id
 		self.allowed_pins = ['22','29','31','32','33','35','36','37','38','40']
 	
-	def get_node_id(self):
+	def get_node_id(self, subid=0):
 		uuid_tmp = str(uuid.uuid4())
-		node_id = uuid_tmp[:8]+'.'+uuid_tmp[-6:]
+		if subid: node_id = subid+'.'+uuid_tmp[-6:]
+		else: node_id = uuid_tmp[:8]+'.'+uuid_tmp[-6:]
 		return node_id
 
 	def get_actions_flow_data(self):
@@ -69,6 +70,7 @@ class Nodes:
 		triggers_flow_nodes = []
 		conditions_flow_nodes = []
 		actions_flow_nodes = []
+		others_flow_nodes = []
 		no_actions_nodes = []
 		data = self.read_flow()
 		flow_nodes = []
@@ -79,20 +81,31 @@ class Nodes:
 			else: no_actions_nodes.append(i)
 			
 		for node in flow_nodes:
-			if "name" in node:
-				name = node['name'].split('|')
+			name = ''
+			if 'dname' in node and node['dname']: name = node['dname'].split('|')
+			elif 'name' in node and node['name']: name = node['name'].split('|')
+			elif 'openplot.' in node['id']: name = ['o']
+			elif not 'name' in node:
+				subid0 = node['id'].split('.')
+				subid = subid0[0]
+				for i in flow_nodes:
+					subidi = i['id'].split('.')
+					if 'name' in i and subid == subidi[0]: name = i['name'].split('|')
+			if name:
 				if name[0] == 't': triggers_flow_nodes.append(node)
 				if name[0] == 'c': conditions_flow_nodes.append(node)
 				if name[0] == 'a': actions_flow_nodes.append(node)
+				if name[0] == 'o': others_flow_nodes.append(node)
 
 		for node in triggers_flow_nodes:
-			name = node['name'].split('|')
-			exist = False
-			for i in tree:
-				if i["trigger_node_out_id"] == name[1]: exist = True
-			if not exist:
-				trigger = {"trigger_node_out_id": name[1],"type": name[2],"conditions": []}
-				tree.append(trigger)
+			if "name" in node: 
+				name = node['name'].split('|')
+				exist = False
+				for i in tree:
+					if i["trigger_node_out_id"] == name[1]: exist = True
+				if not exist:
+					trigger = {"trigger_node_out_id": name[1],"type": name[2],"conditions": []}
+					tree.append(trigger)
 
 		for trigger in tree:
 			for node in triggers_flow_nodes:
@@ -101,13 +114,14 @@ class Nodes:
 					for wire in wires:
 						for node2 in conditions_flow_nodes:
 							if wire == node2["id"]:
-								name = node2['name'].split('|')
-								exist = False
-								for i in trigger["conditions"]:
-									if i["condition_node_out_id"] == name[1]: exist = True
-								if not exist:
-									condition = {"condition_node_out_id": name[1],"operator": name[2],"actions": []}
-									trigger["conditions"].append(condition)
+								if 'name' in node2: 
+									name = node2['name'].split('|')
+									exist = False
+									for i in trigger["conditions"]:
+										if i["condition_node_out_id"] == name[1]: exist = True
+									if not exist:
+										condition = {"condition_node_out_id": name[1],"operator": name[2],"actions": []}
+										trigger["conditions"].append(condition)
 
 		for trigger in tree:
 			for condition in trigger["conditions"]:
@@ -117,15 +131,16 @@ class Nodes:
 						for wire in wires:
 							for node2 in actions_flow_nodes:
 								if wire == node2["id"]:
-									name = node2['name'].split('|')
-									exist = False
-									for i in condition["actions"]:
-										if i["action_node_out_id"] == name[1]: exist = True
-									if not exist:
-										action = {"action_node_out_id": name[1],"type": name[2]}
-										condition["actions"].append(action)
+									if 'name' in node2: 
+										name = node2['name'].split('|')
+										exist = False
+										for i in condition["actions"]:
+											if i["action_node_out_id"] == name[1]: exist = True
+										if not exist:
+											action = {"action_node_out_id": name[1],"type": name[2]}
+											condition["actions"].append(action)
 
-		return (tree, triggers_flow_nodes, conditions_flow_nodes, actions_flow_nodes, no_actions_nodes)
+		return (tree, triggers_flow_nodes, conditions_flow_nodes, actions_flow_nodes, no_actions_nodes, others_flow_nodes)
 	
 	def read_flow(self):
 		try:
@@ -656,8 +671,8 @@ class TriggerMQTT(wx.Dialog):
 		self.actions_flow_id = parent.actions_flow_id
 		self.trigger_type = parent.available_triggers_select.GetSelection()
 
-		if edit == 0: title = _('Add MQTT topic')
-		else: title = _('Edit MQTT topic')
+		if edit == 0: title = _('Add MQTT trigger')
+		else: title = _('Edit MQTT trigger')
 
 		wx.Dialog.__init__(self, None, title = title, size=(450, 240))
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
@@ -671,8 +686,8 @@ class TriggerMQTT(wx.Dialog):
 		        "topic": "topic1",
 		        "qos": "2",
 		        "broker": "",
-		        "x": 180,
-		        "y": 300,
+		        "x": 380,
+		        "y": 120,
 		        "wires": [
 		            []
 		        ]
@@ -743,6 +758,122 @@ class TriggerMQTT(wx.Dialog):
 			elif remote: mqtt_node['broker'] = self.remotebrokerid
 			self.TriggerNodes = [mqtt_node]
 			self.EndModal(wx.OK)
+
+class TriggerTelegram(wx.Dialog):
+	def __init__(self,parent):
+		self.nodes = parent.nodes
+		self.actions_flow_id = parent.actions_flow_id
+		self.trigger_type = parent.available_triggers_select.GetSelection()
+		self.telegramid = parent.telegramid
+		
+		title = _('Add Telegram trigger')
+
+		wx.Dialog.__init__(self, None, title = title, size=(350, 80))
+		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
+
+		self.telegram_node_template = '''
+		    {
+		        "id": "",
+		        "type": "chatbot-telegram-receive",
+		        "z": "",
+		        "bot": "",
+		        "botProduction": "",
+		        "x": 380,
+		        "y": 120,
+		        "wires": [[]]
+		    }'''
+		self.authorized_node_template = '''
+		    {
+		        "id": "",
+		        "type": "chatbot-authorized",
+		        "z": "",
+		        "x": 380,
+		        "y": 120,
+		        "wires": [[],[]]
+		    }'''
+		self.function_node_template = '''
+		    {
+		        "id": "",
+		        "type": "function",
+		        "z": "",
+		        "name": "",
+		        "func": "if (msg.payload.content!='/start'){return msg;}",
+		        "outputs": 1,
+		        "noerr": 0,
+		        "x": 380,
+		        "y": 120,
+		        "wires": [[]]
+		    }'''
+		self.change_node_template = '''
+		    {
+		        "id": "",
+		        "type": "change",
+		        "z": "",
+		        "name": "",
+		        "rules": [
+		            {
+		                "t": "set",
+		                "p": "payload",
+		                "pt": "msg",
+		                "to": "payload.content",
+		                "tot": "msg"
+		            }
+		        ],
+		        "action": "",
+		        "property": "",
+		        "from": "",
+		        "to": "",
+		        "reg": false,
+		        "x": 380,
+		        "y": 120,
+		        "wires": [[]]
+    }'''
+
+		panel = wx.Panel(self)
+		
+		okBtn = wx.Button(panel, wx.ID_OK)
+		okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
+		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
+
+		ok_cancel = wx.BoxSizer(wx.HORIZONTAL)
+		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
+		ok_cancel.Add(okBtn, 0, wx.ALL, 10)
+		ok_cancel.Add(cancelBtn, 0, wx.ALL, 10)
+		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
+
+		main = wx.BoxSizer(wx.VERTICAL)
+		main.Add((0, 0), 1, wx.ALL, 0)
+		main.Add(ok_cancel, 0, wx.ALL | wx.EXPAND, 0)
+
+		panel.SetSizer(main)
+
+	def OnOk(self,e):
+		self.TriggerNodes = []
+		change_node = ujson.loads(self.change_node_template)
+		change_node['id'] = self.nodes.get_node_id()
+		change_node['z'] = self.actions_flow_id
+		change_node['name'] = 't|'+change_node['id']+'|'+str(self.trigger_type)
+		subid0 = change_node['id'].split('.')
+		subid = subid0[0]
+		self.TriggerNodes.append(change_node)
+		function_node = ujson.loads(self.function_node_template)
+		function_node['id'] = self.nodes.get_node_id()
+		function_node['z'] = self.actions_flow_id
+		function_node['name'] = change_node['name']
+		function_node['wires'] = [[change_node['id']]]
+		self.TriggerNodes.append(function_node)
+		authorized_node = ujson.loads(self.authorized_node_template)
+		authorized_node['id'] = self.nodes.get_node_id(subid)
+		authorized_node['z'] = self.actions_flow_id
+		authorized_node['wires'] = [[function_node['id']],[]]
+		self.TriggerNodes.append(authorized_node)
+		telegram_node = ujson.loads(self.telegram_node_template)
+		telegram_node['id'] = self.nodes.get_node_id(subid)
+		telegram_node['z'] = self.actions_flow_id
+		telegram_node['bot'] = self.telegramid
+		telegram_node['wires'] = [[authorized_node['id']]]
+		self.TriggerNodes.append(telegram_node)
+		self.EndModal(wx.OK)
 
 # conditions
 class Condition(wx.Dialog):

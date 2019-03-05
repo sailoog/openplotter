@@ -32,7 +32,7 @@ from classes.add_SK_to_N2K import addSKtoN2K
 from classes.conf import Conf
 from classes.SK_settings import SK_settings
 from classes.language import Language
-from classes.nodes import Nodes, TriggerSK, TriggerGeofence, TriggerGPIO, TriggerMQTT, Condition, ActionSetSignalkKey, ActionSetGPIO, ActionSetMQTT, ActionPublishTwitter, ActionSendEmail, ActionPlaySound, ActionRunCommand
+from classes.nodes import Nodes, TriggerSK, TriggerGeofence, TriggerGPIO, TriggerMQTT, TriggerTelegram, Condition, ActionSetSignalkKey, ActionSetGPIO, ActionSetMQTT, ActionPublishTwitter, ActionSendEmail, ActionPlaySound, ActionRunCommand
 
 class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 	def __init__(self, parent, height):
@@ -2419,7 +2419,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			        "type": "function",
 			        "z": "",
 			        "name": "",
-			        "func": "if (msg.payload.content=='/start'){msg.payload.content='Chat ID: '+msg.payload.chatId;return msg;}",
+			        "func": "if (msg.payload.content=='/start'){return msg;}",
 			        "outputs": 1,
 			        "noerr": 0,
 			        "x": 380,
@@ -2427,6 +2427,30 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			        "wires": [[]]
 			    }'''
 			start4_node_template = '''
+			    {
+			        "id": "",
+			        "type": "change",
+			        "z": "",
+			        "name": "",
+			        "rules": [
+			            {
+			                "t": "set",
+			                "p": "payload.content",
+			                "pt": "msg",
+			                "to": "'Chat ID: ' & $string(payload.chatId)",
+			                "tot": "jsonata"
+			            }
+			        ],
+			        "action": "",
+			        "property": "",
+			        "from": "",
+			        "to": "",
+			        "reg": false,
+			        "x": 380,
+			        "y": 120,
+			        "wires": [[]]
+			    }'''
+			start5_node_template = '''
 			    {
 			        "id": "",
 			        "type": "chatbot-telegram-send",
@@ -2446,10 +2470,15 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			telegram_node['usernames'] = self.users.GetValue()
 			add_credentials[self.telegramid] = {"token":self.token.GetValue()}
 			add_nodes.append(telegram_node)
+			start5_node = ujson.loads(start5_node_template)
+			start5_node['id'] = self.telegramid+'5'
+			start5_node['z'] = self.actions_flow_id
+			start5_node['bot'] = self.telegramid
+			add_nodes.append(start5_node)
 			start4_node = ujson.loads(start4_node_template)
 			start4_node['id'] = self.telegramid+'4'
 			start4_node['z'] = self.actions_flow_id
-			start4_node['bot'] = self.telegramid
+			start4_node['wires'] = [[start5_node['id']]]
 			add_nodes.append(start4_node)
 			start3_node = ujson.loads(start3_node_template)
 			start3_node['id'] = self.telegramid+'3'
@@ -2474,6 +2503,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			remove_ids.append(self.telegramid+'2')
 			remove_ids.append(self.telegramid+'3')
 			remove_ids.append(self.telegramid+'4')
+			remove_ids.append(self.telegramid+'5')
 			remove_credentials.append(self.telegramid)
 			self.conf.set('CREDENTIALS', 'telegram', '0')
 
@@ -2505,7 +2535,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.list_triggers.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_print_conditions)
 		self.list_triggers.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit_triggers)
 
-		self.available_triggers = ['Signal K key', _('Geofence'), 'GPIO','MQTT topic', _('Time'), _('Telegram message')]
+		self.available_triggers = [
+		_('Signal K key'), 
+		_('Geofence'), 
+		'GPIO', 
+		'MQTT topic', 
+		_('Telegram message'), 
+		_('Time')]
+
 		self.available_triggers_select = wx.Choice(self.p_action, choices=self.available_triggers, style=wx.CB_READONLY)
 
 		add_trigger = wx.Button(self.p_action, label=_('add'))
@@ -2536,7 +2573,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.list_actions.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_select_actions)
 		self.list_actions.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_actions)
 
-		self.available_actions = [_('Set Signal K key'),
+		self.available_actions = [
+		_('Set Signal K key'),
 		_('Set GPIO output'),
 		_('Set MQTT topic'),
 		_('Publish Twitter'),
@@ -2545,7 +2583,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		_('Run command'),
 		_('Reset system'),
 		_('Shutdown system'),
-		_('Telegram: send message')]
+		_('Send Telegram message')]
 
 		self.available_actions_select = wx.Choice(self.p_action, choices=self.available_actions, style=wx.CB_READONLY)
 		add_action = wx.Button(self.p_action, label=_('add'))
@@ -2747,6 +2785,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.ShowStatusBarRED(_('Go to the Credentials tab and enable at least one MQTT broker'))
 				return
 			else: dlg = TriggerMQTT(self,edit,local,remote)
+		elif trigger == 4:
+			telegram =  int(self.conf.get('CREDENTIALS', 'telegram'))
+			if not telegram:
+				self.ShowStatusBarRED(_('Go to the Credentials tab and enable a Telegram bot'))
+				return
+			else: dlg = TriggerTelegram(self)
 		else:
 			self.ShowStatusBarRED(_('Select a trigger type.'))
 			return
@@ -2755,7 +2799,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			if not edit:
 				for i in dlg.TriggerNodes:
 					self.triggers_flow_nodes.append(i)
-					items = i['name'].split('|')
+					if 'name' in i: items = i['name'].split('|')
 				self.actions_flow_tree.append({"trigger_node_out_id": items[1],"type": items[2],"conditions": []})
 				self.on_print_triggers()
 				self.list_triggers.Select(len(self.actions_flow_tree)-1)
@@ -2863,9 +2907,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def on_apply_changes_actions(self, e):
 		all_flows = []
 		result = self.nodes.get_flow()
-		self.no_actions_nodes = result[4]
+		no_actions_nodes = result[4]
+		others_flow_nodes = result[5]
 
-		for i in self.no_actions_nodes:
+		for i in no_actions_nodes:
+			all_flows.append(i)
+		for i in others_flow_nodes:
 			all_flows.append(i)
 		for i in self.triggers_flow_nodes:
 			all_flows.append(i)
