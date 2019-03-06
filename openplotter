@@ -32,7 +32,7 @@ from classes.add_SK_to_N2K import addSKtoN2K
 from classes.conf import Conf
 from classes.SK_settings import SK_settings
 from classes.language import Language
-from classes.nodes import Nodes, TriggerSK, TriggerGeofence, TriggerGPIO, TriggerMQTT, TriggerTelegram, Condition, ActionSetSignalkKey, ActionSetGPIO, ActionSetMQTT, ActionPublishTwitter, ActionSendEmail, ActionPlaySound, ActionRunCommand
+from classes.nodes import Nodes, TriggerSK, TriggerGeofence, TriggerGPIO, TriggerMQTT, TriggerTelegram, Condition, ActionSetSignalkKey, ActionSetGPIO, ActionSetMQTT, ActionPublishTwitter, ActionSendEmail, ActionPlaySound, ActionRunCommand, ActionSendTelegram
 
 class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 	def __init__(self, parent, height):
@@ -2729,6 +2729,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				field2 = ''
 				field3 = ''
 				for node in self.actions_flow_nodes:
+					namenode = ''
 					if 'dname' in node: namenode = node['dname']
 					elif 'name' in node: namenode = node['name']
 					if name == namenode:
@@ -2759,6 +2760,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 							if node['type'] == 'exec': 
 								field2 = node['command']
 								field2 += ' '+node['append']
+							if node['type'] == 'msg-resend': field3 = _('repeat')
+							if node['type'] == 'delay': field3 = _('rate limit')
+						if action["type"] == '9':
+							if node['type'] == 'template': field2 = node['template']
 							if node['type'] == 'msg-resend': field3 = _('repeat')
 							if node['type'] == 'delay': field3 = _('rate limit')
 				self.list_actions.Append([self.available_actions[int(action["type"])].decode('utf8'), field2.decode('utf8'), field3.decode('utf8')])
@@ -2863,7 +2868,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		elif action == 3:
 			twitter =  int(self.conf.get('CREDENTIALS', 'twitter'))
 			if not twitter:
-				self.ShowStatusBarRED(_('Go to the Credentials tab and enable the Twitter account '))
+				self.ShowStatusBarRED(_('Go to the Credentials tab and enable the Twitter account'))
 				return
 			else: dlg = ActionPublishTwitter(self,edit)
 		elif action == 4: dlg = ActionSendEmail(self,edit)
@@ -2871,6 +2876,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		elif action == 6: dlg = ActionRunCommand(self,edit)
 		elif action == 7: dlg = ActionRunCommand(self,['sudo','reboot',0])
 		elif action == 8: dlg = ActionRunCommand(self,['sudo', 'shutdown -h now',0])
+		elif action == 9:
+			telegram =  int(self.conf.get('CREDENTIALS', 'telegram'))
+			if not telegram:
+				self.ShowStatusBarRED(_('Go to the Credentials tab and enable a Telegram bot'))
+				return
+			else: dlg = ActionSendTelegram(self,edit)
 		else:
 			self.ShowStatusBarRED(_('Select an action.'))
 			return

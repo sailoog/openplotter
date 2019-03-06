@@ -2497,3 +2497,283 @@ class ActionRunCommand(wx.Dialog):
 			self.connector_id = rate_node['id']
 			self.ActionNodes.append(rate_node)
 		self.EndModal(wx.OK)
+
+class ActionSendTelegram(wx.Dialog):
+	def __init__(self, parent, edit):
+		self.credentials = ''
+		self.nodes = parent.nodes
+		self.actions_flow_id = parent.actions_flow_id
+		self.telegramid = parent.telegramid
+		self.action_id = parent.available_actions_select.GetSelection()
+		self.RepeatOptions = RepeatOptions()
+		self.telegram_node_template = '''
+		    {
+		        "id": "",
+		        "type": "chatbot-telegram-send",
+		        "z": "",
+		        "bot": "",
+		        "botProduction": "",
+		        "track": false,
+		        "passThrough": false,
+		        "outputs": 0,
+		        "x": 380,
+		        "y": 120,
+		        "wires": []
+		    }'''
+		self.text_node_template = '''
+		    {
+		        "id": "",
+		        "type": "chatbot-message",
+		        "z": "",
+		        "name": "",
+		        "message": [
+		            {
+		                "message": ""
+		            }
+		        ],
+		        "answer": false,
+		        "silent": false,
+		        "x": 380,
+		        "y": 120,
+		        "wires": [[]]
+		    }'''
+		self.conversation_node_template = '''
+		    {
+		        "id": "",
+		        "type": "chatbot-conversation",
+		        "z": "",
+		        "name": "",
+		        "botTelegram": "",
+		        "botTelegramProduction": "",
+		        "botSlack": "",
+		        "botSlackProduction": "",
+		        "botFacebook": "",
+		        "botFacebookProduction": "",
+		        "botViber": "",
+		        "botViberProduction": "",
+		        "botUniversal": "",
+		        "botUniversalProduction": "",
+		        "botTwilio": "",
+		        "botTwilioProduction": "",
+		        "chatId": "",
+		        "transport": "telegram",
+		        "messageId": "",
+		        "contextMessageId": false,
+		        "store": "",
+		        "x": 380,
+		        "y": 120,
+		        "wires": [[]]
+		    }'''
+		self.payload_node_template = '''
+		    {
+		        "id": "",
+		        "type": "template",
+		        "z": "",
+		        "name": "",
+		        "field": "payload",
+		        "fieldType": "msg",
+		        "format": "handlebars",
+		        "syntax": "mustache",
+		        "template": "",
+		        "output": "str",
+		        "x": 380,
+		        "y": 120,
+		        "wires": [
+		            []
+		        ]
+		    }'''
+
+		if edit == 0: title = _('Add Telegram action')
+		else: title = _('Edit Telegram action')
+
+		wx.Dialog.__init__(self, None, title = title, size=(710, 420))
+		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
+
+		panel = wx.Panel(self)
+
+		chatidlabel = wx.StaticText(panel, label=_('Chat ID'))
+		self.chatid = wx.TextCtrl(panel)
+
+		msglabel = wx.StaticText(panel, label=_('Message'))
+		self.msg = wx.TextCtrl(panel, style=wx.TE_MULTILINE, size=(-1,60))
+
+		self.addsk = wx.Button(panel, label=_('Add Signal K key value'))
+		self.addsk.Bind(wx.EVT_BUTTON, self.on_addsk)
+
+		self.repeat = wx.CheckBox(panel, label=_('Repeat'))
+		self.repeat.Bind(wx.EVT_CHECKBOX, self.on_repeat)
+		intervallabel = wx.StaticText(panel, label=_('Interval'))
+		self.interval = wx.SpinCtrl(panel, min=1, max=100000, initial=1)
+		self.unit = wx.Choice(panel, choices=self.RepeatOptions.intervalUnit, style=wx.CB_READONLY)
+		self.unit.SetSelection(1)
+		maxlabel = wx.StaticText(panel, label=_('Max.'))
+		self.max = wx.SpinCtrl(panel, min=1, max=100000, initial=1)
+
+		self.rate = wx.CheckBox(panel, label=_('Rate limit'))
+		self.rate.Bind(wx.EVT_CHECKBOX, self.on_rate)
+		ratelabel = wx.StaticText(panel, label=_('Rate'))
+		self.amount = wx.SpinCtrl(panel, min=1, max=100000, initial=1)
+		ratelabel2 = wx.StaticText(panel, label=_('time(s) per'))
+		self.time = wx.SpinCtrl(panel, min=1, max=100000, initial=1)
+		self.timeunit = wx.Choice(panel, choices=self.RepeatOptions.rateUnit, style=wx.CB_READONLY)
+		self.timeunit.SetSelection(2)
+		
+		self.interval.Disable()
+		self.unit.Disable()
+		self.max.Disable()
+		self.amount.Disable()
+		self.time.Disable()
+		self.timeunit.Disable()
+
+		okBtn = wx.Button(panel, wx.ID_OK)
+		okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
+		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
+
+		subject = wx.BoxSizer(wx.HORIZONTAL)
+		subject.Add(chatidlabel, 0, wx.ALL, 5)
+		subject.Add(self.chatid, 0, wx.ALL, 5)
+
+		body = wx.BoxSizer(wx.HORIZONTAL)
+		body.Add(msglabel, 0, wx.ALL, 5)
+		body.Add(self.msg, 1, wx.ALL, 5)
+
+		addsk = wx.BoxSizer(wx.HORIZONTAL)
+		addsk.Add((0, 0), 1, wx.ALL, 5)
+		addsk.Add(self.addsk, 1, wx.ALL, 5)
+
+		repeath = wx.BoxSizer(wx.HORIZONTAL)
+		repeath.Add(intervallabel, 0, wx.ALL, 5)
+		repeath.Add(self.interval, 0, wx.ALL, 5)
+		repeath.Add(self.unit, 0, wx.ALL, 5)
+		repeath.Add(maxlabel, 0, wx.ALL, 5)
+		repeath.Add(self.max, 0, wx.ALL, 5)
+
+		rate = wx.BoxSizer(wx.HORIZONTAL)
+		rate.Add(ratelabel, 0, wx.ALL, 5)
+		rate.Add(self.amount, 0, wx.ALL, 5)
+		rate.Add(ratelabel2, 0, wx.ALL, 5)
+		rate.Add(self.time, 0, wx.ALL, 5)
+		rate.Add(self.timeunit, 0, wx.ALL, 5)
+
+		ok_cancel = wx.BoxSizer(wx.HORIZONTAL)
+		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
+		ok_cancel.Add(okBtn, 0, wx.RIGHT | wx.LEFT, 10)
+		ok_cancel.Add(cancelBtn, 0, wx.RIGHT | wx.LEFT, 10)
+		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
+
+		main = wx.BoxSizer(wx.VERTICAL)
+		main.Add(subject, 1, wx.ALL, 5)
+		main.Add(body, 1, wx.ALL | wx.EXPAND, 5)
+		main.Add(addsk, 1, wx.RIGHT | wx.LEFT | wx.EXPAND, 5)
+		main.AddSpacer(15)
+		main.Add(self.repeat, 1, wx.RIGHT | wx.LEFT, 5)
+		main.Add(repeath, 1, wx.RIGHT | wx.LEFT, 5)
+		main.AddSpacer(10)
+		main.Add(self.rate, 1, wx.RIGHT | wx.LEFT, 5)
+		main.Add(rate, 1, wx.RIGHT | wx.LEFT, 5)
+		main.Add((0, 0), 1, wx.ALL, 0)
+		main.Add(ok_cancel, 0, wx.ALL | wx.EXPAND, 10)
+
+		panel.SetSizer(main)
+		self.Centre()
+
+	def on_addsk(self, e):
+		oldkey = False
+		dlg = selectKey(oldkey,1)
+		res = dlg.ShowModal()
+		if res == wx.OK:
+			self.msg.AppendText('{{flow.'+dlg.selected_vessel+'.'+dlg.selected_key+'}}')
+		dlg.Destroy()
+
+	def on_repeat(self, e):
+		if self.repeat.GetValue():
+			self.interval.Enable()
+			self.unit.Enable()
+			self.max.Enable()
+			self.rate.SetValue(False)
+			self.amount.Disable()
+			self.time.Disable()
+			self.timeunit.Disable()
+		else:
+			self.interval.Disable()
+			self.unit.Disable()
+			self.max.Disable()
+
+	def on_rate(self, e):
+		if self.rate.GetValue():
+			self.amount.Enable()
+			self.time.Enable()
+			self.timeunit.Enable()
+			self.repeat.SetValue(False)
+			self.interval.Disable()
+			self.unit.Disable()
+			self.max.Disable()
+
+		else:
+			self.amount.Disable()
+			self.time.Disable()
+			self.timeunit.Disable()
+
+	def OnOk(self,e):
+		chatid = self.chatid.GetValue()
+		if not chatid:
+			wx.MessageBox(_('Send "/start" from your bot and you will get your chat ID.'), 'Info', wx.OK | wx.ICON_INFORMATION)
+			return
+		msg = self.msg.GetValue()
+		if not msg:
+			wx.MessageBox(_('Write a message to send.'), 'Info', wx.OK | wx.ICON_INFORMATION)
+			return
+		self.ActionNodes = []
+		telegram_node = ujson.loads(self.telegram_node_template)
+		telegram_node['z'] = self.actions_flow_id
+		telegram_node['bot'] = self.telegramid
+		text_node = ujson.loads(self.text_node_template)
+		text_node['z'] = self.actions_flow_id
+		text_node['id'] = self.nodes.get_node_id()
+		subid0 = text_node['id'].split('.')
+		subid = subid0[0]
+		telegram_node['id'] = self.nodes.get_node_id(subid)
+		text_node['name'] = 'a|'+telegram_node['id']+'|'+str(self.action_id)
+		text_node['wires'] = [[telegram_node['id']]]
+		self.ActionNodes.append(telegram_node)
+		self.ActionNodes.append(text_node)
+		conversation_node = ujson.loads(self.conversation_node_template)
+		conversation_node['id'] = self.nodes.get_node_id()
+		conversation_node['z'] = self.actions_flow_id
+		conversation_node['name'] = text_node['name']
+		conversation_node['botTelegram'] = self.telegramid
+		conversation_node['chatId'] = chatid
+		conversation_node['wires'] = [[text_node['id']]]
+		self.ActionNodes.append(conversation_node)
+		payload_node = ujson.loads(self.payload_node_template)
+		payload_node['id'] = self.nodes.get_node_id()
+		payload_node['z'] = self.actions_flow_id
+		payload_node['name'] = text_node['name']
+		payload_node['template'] = msg
+		payload_node['wires'] = [[conversation_node['id']]]
+		self.ActionNodes.append(payload_node)
+		if not self.repeat.GetValue() and not self.rate.GetValue():
+			self.connector_id = payload_node['id']
+		elif self.repeat.GetValue():
+			repeat_node = ujson.loads(self.RepeatOptions.repeat_template)
+			repeat_node['id'] = self.nodes.get_node_id()
+			repeat_node['z'] = self.actions_flow_id
+			repeat_node['name'] = text_node['name']
+			repeat_node['interval'] = str(self.interval.GetValue())
+			repeat_node['intervalUnit'] = self.RepeatOptions.intervalUnit2[self.unit.GetSelection()]
+			repeat_node['maximum'] = str(self.max.GetValue())
+			repeat_node['wires'] = [[payload_node['id']]]
+			self.connector_id = repeat_node['id']
+			self.ActionNodes.append(repeat_node)
+		elif self.rate.GetValue():
+			rate_node = ujson.loads(self.RepeatOptions.rate_limit_template)
+			rate_node['id'] = self.nodes.get_node_id()
+			rate_node['z'] = self.actions_flow_id
+			rate_node['name'] = text_node['name']
+			rate_node['rate'] = str(self.amount.GetValue())
+			rate_node['nbRateUnits'] = str(self.time.GetValue())
+			rate_node['rateUnits'] = self.RepeatOptions.rateUnit2[self.timeunit.GetSelection()]
+			rate_node['wires'] = [[payload_node['id']]]
+			self.connector_id = rate_node['id']
+			self.ActionNodes.append(rate_node)
+		self.EndModal(wx.OK)
