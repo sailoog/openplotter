@@ -23,6 +23,19 @@ class Nodes:
 		self.flows_file = home+'/.signalk/red/flows_openplotter.json'
 		self.actions_flow_id = actions_flow_id
 		self.allowed_pins = ['22','29','31','32','33','35','36','37','38','40']
+		self.enable_node_template = '''
+		    {
+		        "id": "",
+		        "type": "function",
+		        "z": "",
+		        "name": "",
+		        "func": "return msg;",
+		        "outputs": 1,
+		        "noerr": 0,
+		        "x": 380,
+		        "y": 120,
+		        "wires": [[]]
+		    }'''
 	
 	def get_node_id(self, subid=0):
 		uuid_tmp = str(uuid.uuid4())
@@ -74,6 +87,29 @@ class Nodes:
 		no_actions_nodes = []
 		data = self.read_flow()
 		flow_nodes = []
+		'''
+		triggers: t|node_out_id|type
+		conditions: c|node_out_id|operator
+		actions: a|node_out_id|type
+		[
+			{
+				"trigger_node_out_id": "xxx",
+				"type": "0",
+				"conditions": [
+					{
+						"condition_node_out_id": "xxx",
+						"operator": "=",
+						"actions": [
+							{
+								"action_node_out_id": "xxx",
+								"type": "0"
+							}
+						]
+					}
+				]
+			}
+		]
+		'''
 		for i in data:
 			if 'z' in i and i['z'] == self.actions_flow_id: 
 				if 'type' in i and i['type'] != 'comment': flow_nodes.append(i)
@@ -282,13 +318,8 @@ class TriggerSK(wx.Dialog):
 		        "period": "",
 		        "x": 380,
 		        "y": 120,
-		        "wires": [
-		            [
-		                ""
-		            ]
-		        ]
+		        "wires": [[]]
 		    }'''
-
 		self.function_node_template = '''
 		    {
 		        "id": "",
@@ -300,11 +331,7 @@ class TriggerSK(wx.Dialog):
 		        "noerr": 0,
 		        "x": 380,
 		        "y": 120,
-		        "wires": [
-		            [
-		                ""
-		            ]
-		        ]
+		        "wires": [[]]
 		    }'''
 
 		panel = wx.Panel(self)
@@ -392,29 +419,38 @@ class TriggerSK(wx.Dialog):
 		elif source and not re.match('^[.0-9a-zA-Z]+$', source):
 			wx.MessageBox(_('Failed. Characters not allowed.'), 'Info', wx.OK | wx.ICON_INFORMATION)
 			return
+		self.TriggerNodes = []
+		enable_node = ujson.loads(self.nodes.enable_node_template)
+		enable_node['id'] = self.nodes.get_node_id()
+		enable_node['z'] = self.actions_flow_id
+		enable_node['func'] = 'return msg;'
+		enable_node['name'] = 't|'+enable_node['id']+'|'+str(self.trigger_type)
+		self.TriggerNodes.append(enable_node)
+		if ':' in skkey:
+			function_node = ujson.loads(self.function_node_template)
+			function_node['id'] = self.nodes.get_node_id()
+			function_node['z'] = self.actions_flow_id
+			function_node['name'] = enable_node['name']
+			path = skkey.split(':')
+			function = 'msg.payload=msg.payload.'+path[1]+';msg.topic=msg.topic+".'+path[1]+'";return msg;'
+			function_node['func'] = function
+			function_node['wires'] = [[enable_node['id']]]
+			self.TriggerNodes.append(function_node)
+		subscribe_node = ujson.loads(self.subscribtion_node_template)
+		subscribe_node['id'] = self.nodes.get_node_id()
+		subscribe_node['z'] = self.actions_flow_id
+		subscribe_node['name'] = enable_node['name']
+		if ':' in skkey:
+			path = skkey.split(':')
+			subscribe_node['path'] = path[0]
+			subscribe_node['wires'] = [[function_node['id']]]
 		else:
-			subscribe_node = ujson.loads(self.subscribtion_node_template)
-			subscribe_node['id'] = self.nodes.get_node_id()
-			subscribe_node['z'] = self.actions_flow_id
-			subscribe_node['context'] = 'vessels.'+self.vessel.GetValue()
-			subscribe_node['source'] = source
-			subscribe_node['period'] = str(self.period.GetValue())
-			if ':' in skkey:
-				function_node = ujson.loads(self.function_node_template)
-				function_node['id'] = self.nodes.get_node_id()
-				function_node['z'] = self.actions_flow_id
-				subscribe_node['name'] = 't|'+function_node['id']+'|'+str(self.trigger_type)
-				path = skkey.split(':')
-				subscribe_node['path'] = path[0]
-				subscribe_node['wires'] = [[function_node['id']]]
-				function_node['name'] = 't|'+function_node['id']+'|'+str(self.trigger_type)
-				function = 'msg.payload=msg.payload.'+path[1]+';msg.topic=msg.topic+".'+path[1]+'";return msg;'
-				function_node['func'] = function
-				self.TriggerNodes = [subscribe_node,function_node]
-			else:
-				subscribe_node['name'] = 't|'+subscribe_node['id']+'|'+str(self.trigger_type)
-				subscribe_node['path'] = skkey
-				self.TriggerNodes = [subscribe_node]
+			subscribe_node['path'] = skkey
+			subscribe_node['wires'] = [[enable_node['id']]]
+		subscribe_node['context'] = 'vessels.'+self.vessel.GetValue()
+		subscribe_node['source'] = source
+		subscribe_node['period'] = str(self.period.GetValue())
+		self.TriggerNodes.append(subscribe_node)
 		self.EndModal(wx.OK)
 
 class TriggerGeofence(wx.Dialog):
@@ -448,11 +484,7 @@ class TriggerGeofence(wx.Dialog):
 		        "distance": 10,
 		        "x": 380,
 		        "y": 120,
-		        "wires": [
-		            [],
-		            [],
-		            []
-		        ]
+		        "wires": [[],[],[]]
 		    }'''
 
 		panel = wx.Panel(self)
@@ -547,17 +579,25 @@ class TriggerGeofence(wx.Dialog):
 			self.lon.Enable()
 
 	def OnOk(self,e):
+		self.TriggerNodes = []
+		enable_node = ujson.loads(self.nodes.enable_node_template)
+		enable_node['id'] = self.nodes.get_node_id()
+		enable_node['z'] = self.actions_flow_id
+		enable_node['func'] = 'return msg;'
+		enable_node['name'] = 't|'+enable_node['id']+'|'+str(self.trigger_type)
+		self.TriggerNodes.append(enable_node)
 		geofence_node = ujson.loads(self.geofence_node_template)
 		geofence_node['id'] = self.nodes.get_node_id()
 		geofence_node['z'] = self.actions_flow_id
-		geofence_node['name'] = 't|'+geofence_node['id']+'|'+str(self.trigger_type)
+		geofence_node['name'] = enable_node['name']
 		geofence_node['context'] = 'vessels.'+self.vessel.GetValue()
 		geofence_node['period'] = str(self.period.GetValue())
 		geofence_node['myposition'] = self.mypos.GetValue()
 		geofence_node['lat'] = str(self.lat.GetValue())
 		geofence_node['lon'] = str(self.lon.GetValue())
 		geofence_node['distance'] = str(self.distance.GetValue())
-		self.TriggerNodes = [geofence_node]
+		geofence_node['wires'] = [[],[],[enable_node['id']]]
+		self.TriggerNodes.append(geofence_node)
 		self.EndModal(wx.OK)
 
 class TriggerGPIO(wx.Dialog):
@@ -584,9 +624,7 @@ class TriggerGPIO(wx.Dialog):
 		        "read": false,
 		        "x": 380,
 		        "y": 120,
-		        "wires": [
-		            []
-		        ]
+		        "wires": [[]]
 		    }'''
 
 		panel = wx.Panel(self)
@@ -652,16 +690,23 @@ class TriggerGPIO(wx.Dialog):
 		elif not resistor:
 			wx.MessageBox(_('Select a resistor.'), 'Info', wx.OK | wx.ICON_INFORMATION)
 			return
-		else:
-			gpio_node = ujson.loads(self.gpio_node_template)
-			gpio_node['id'] = self.nodes.get_node_id()
-			gpio_node['z'] = self.actions_flow_id
-			gpio_node['name'] = 't|'+gpio_node['id']+'|'+str(self.trigger_type)
-			gpio_node['pin'] = pin
-			gpio_node['intype'] = self.resistor_select2[self.resistor.GetSelection()]
-			gpio_node['read'] = read
-			self.TriggerNodes = [gpio_node]
-			self.EndModal(wx.OK)
+		self.TriggerNodes = []
+		enable_node = ujson.loads(self.nodes.enable_node_template)
+		enable_node['id'] = self.nodes.get_node_id()
+		enable_node['z'] = self.actions_flow_id
+		enable_node['func'] = 'return msg;'
+		enable_node['name'] = 't|'+enable_node['id']+'|'+str(self.trigger_type)
+		self.TriggerNodes.append(enable_node)
+		gpio_node = ujson.loads(self.gpio_node_template)
+		gpio_node['id'] = self.nodes.get_node_id()
+		gpio_node['z'] = self.actions_flow_id
+		gpio_node['name'] = enable_node['name']
+		gpio_node['pin'] = pin
+		gpio_node['intype'] = self.resistor_select2[self.resistor.GetSelection()]
+		gpio_node['read'] = read
+		gpio_node['wires'] = [[enable_node['id']]]
+		self.TriggerNodes.append(gpio_node)
+		self.EndModal(wx.OK)
 
 class TriggerMQTT(wx.Dialog):
 	def __init__(self,parent,edit,local,remote):
@@ -688,9 +733,7 @@ class TriggerMQTT(wx.Dialog):
 		        "broker": "",
 		        "x": 380,
 		        "y": 120,
-		        "wires": [
-		            []
-		        ]
+		        "wires": [[]]
 		    }'''
 
 		panel = wx.Panel(self)
@@ -748,16 +791,23 @@ class TriggerMQTT(wx.Dialog):
 		elif not topic:
 			wx.MessageBox(_('Provide a topic'), 'Info', wx.OK | wx.ICON_INFORMATION)
 			return
-		else:
-			mqtt_node = ujson.loads(self.mqtt_node_template)
-			mqtt_node['id'] = self.nodes.get_node_id()
-			mqtt_node['z'] = self.actions_flow_id
-			mqtt_node['name'] = 't|'+mqtt_node['id']+'|'+str(self.trigger_type)
-			mqtt_node['topic'] = topic
-			if local: mqtt_node['broker'] = self.localbrokerid
-			elif remote: mqtt_node['broker'] = self.remotebrokerid
-			self.TriggerNodes = [mqtt_node]
-			self.EndModal(wx.OK)
+		self.TriggerNodes = []
+		enable_node = ujson.loads(self.nodes.enable_node_template)
+		enable_node['id'] = self.nodes.get_node_id()
+		enable_node['z'] = self.actions_flow_id
+		enable_node['func'] = 'return msg;'
+		enable_node['name'] = 't|'+enable_node['id']+'|'+str(self.trigger_type)
+		self.TriggerNodes.append(enable_node)
+		mqtt_node = ujson.loads(self.mqtt_node_template)
+		mqtt_node['id'] = self.nodes.get_node_id()
+		mqtt_node['z'] = self.actions_flow_id
+		mqtt_node['name'] = enable_node['name']
+		mqtt_node['topic'] = topic
+		if local: mqtt_node['broker'] = self.localbrokerid
+		elif remote: mqtt_node['broker'] = self.remotebrokerid
+		mqtt_node['wires'] = [[enable_node['id']]]
+		self.TriggerNodes.append(mqtt_node)
+		self.EndModal(wx.OK)
 
 class TriggerTelegram(wx.Dialog):
 	def __init__(self,parent):
@@ -849,17 +899,24 @@ class TriggerTelegram(wx.Dialog):
 
 	def OnOk(self,e):
 		self.TriggerNodes = []
+		enable_node = ujson.loads(self.nodes.enable_node_template)
+		enable_node['id'] = self.nodes.get_node_id()
+		enable_node['z'] = self.actions_flow_id
+		enable_node['func'] = 'return msg;'
+		enable_node['name'] = 't|'+enable_node['id']+'|'+str(self.trigger_type)
+		subid0 = enable_node['id'].split('.')
+		subid = subid0[0]
+		self.TriggerNodes.append(enable_node)
 		change_node = ujson.loads(self.change_node_template)
 		change_node['id'] = self.nodes.get_node_id()
 		change_node['z'] = self.actions_flow_id
-		change_node['name'] = 't|'+change_node['id']+'|'+str(self.trigger_type)
-		subid0 = change_node['id'].split('.')
-		subid = subid0[0]
+		change_node['name'] = enable_node['name']
+		change_node['wires'] = [[enable_node['id']]]
 		self.TriggerNodes.append(change_node)
 		function_node = ujson.loads(self.function_node_template)
 		function_node['id'] = self.nodes.get_node_id()
 		function_node['z'] = self.actions_flow_id
-		function_node['name'] = change_node['name']
+		function_node['name'] = enable_node['name']
 		function_node['wires'] = [[change_node['id']]]
 		self.TriggerNodes.append(function_node)
 		authorized_node = ujson.loads(self.authorized_node_template)

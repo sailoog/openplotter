@@ -35,18 +35,10 @@ from classes.language import Language
 from classes.nodes import Nodes, TriggerSK, TriggerGeofence, TriggerGPIO, TriggerMQTT, TriggerTelegram, Condition, ActionSetSignalkKey, ActionSetGPIO, ActionSetMQTT, ActionPublishTwitter, ActionSendEmail, ActionPlaySound, ActionRunCommand, ActionSendTelegram
 
 class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
-	def __init__(self, parent, height):
-		wx.ListCtrl.__init__(self, parent, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(565, height))
+	def __init__(self, parent, width, height):
+		wx.ListCtrl.__init__(self, parent, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(width, height))
 		CheckListCtrlMixin.__init__(self)
 		ListCtrlAutoWidthMixin.__init__(self)
-
-
-class CheckListCtrl2(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
-	def __init__(self, parent, height):
-		wx.ListCtrl.__init__(self, parent, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(650, height))
-		CheckListCtrlMixin.__init__(self)
-		ListCtrlAutoWidthMixin.__init__(self)
-
 
 class MainFrame(wx.Frame):
 	def __init__(self):
@@ -1289,7 +1281,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def page_kplex(self):
 
-		self.list_kplex = CheckListCtrl2(self.p_kplex, 152)
+		self.list_kplex = CheckListCtrl(self.p_kplex, 650, 152)
 		self.list_kplex.InsertColumn(0, _('Name'), width=130)
 		self.list_kplex.InsertColumn(1, _('Type'), width=45)
 		self.list_kplex.InsertColumn(2, _('io'), width=45)
@@ -1862,7 +1854,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def page_spi(self):
 		title = wx.StaticText(self.p_spi, label=_(' SPI MCP3008 '))
 
-		self.list_MCP = CheckListCtrl(self.p_spi, 100)
+		self.list_MCP = CheckListCtrl(self.p_spi, 565, 100)
 		#self.list_MCP = wx.ListCtrl(self.p_spi, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
 		self.list_MCP.InsertColumn(0, _('aktiv'), width=45)
 		self.list_MCP.InsertColumn(1, _('channel'), width=65)
@@ -2527,13 +2519,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	####################### Actions
 
 	def page_action(self):
-		self.list_triggers = wx.ListCtrl(self.p_action, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(-1,90))
-		self.list_triggers.InsertColumn(0, _('Triggers'), width=80)
-		self.list_triggers.InsertColumn(1, _(' '), width= 140)
-		self.list_triggers.InsertColumn(2, _(' '), width= 140)
+		self.list_triggers = CheckListCtrl(self.p_action, -1,90)
+		self.list_triggers.InsertColumn(0, _('Triggers'), width=100)
+		self.list_triggers.InsertColumn(1, _(' '), width= 130)
+		self.list_triggers.InsertColumn(2, _(' '), width= 130)
 		self.list_triggers.InsertColumn(3, _(' '), width= 130)
 		self.list_triggers.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_print_conditions)
 		self.list_triggers.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit_triggers)
+		self.list_triggers.OnCheckItem = self.on_check_item
 
 		self.available_triggers = [
 		_('Signal K key'), 
@@ -2671,6 +2664,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.list_conditions.DeleteAllItems()
 		self.list_actions.DeleteAllItems()
 		for trigger in self.actions_flow_tree:
+			enabled = False
 			name = "t|"+trigger["trigger_node_out_id"]+"|"+trigger["type"]
 			field2 = ''
 			field3 = ''
@@ -2684,7 +2678,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 							path = node['path']
 							field2 = node['context']
 							field4 = node['source']
-						if node['type'] == 'function':
+						if node['type'] == 'function' and node['func'] and node['func'] != 'return msg;':
 							items = node['func'].split(';')
 							items2 = items[0].split('.')
 							path_property = ':'+items2[-1]
@@ -2697,12 +2691,24 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					if trigger["type"] == '2' and node['type'] == 'rpi-gpio in': 
 						field2 = node['pin']
 						field3 = node['intype']
-						field4 = node['read']
+						if node['read']: field4 = _('initial state')
 					if trigger["type"] == '3' and node['type'] == 'mqtt in':
 						if node['broker'] == self.localbrokerid: field2 = _('local broker')
 						elif node['broker'] == self.remotebrokerid: field2 = _('remote broker')
-						field3 = node['topic']			
+						field3 = node['topic']
+
+				if node['id'] == trigger["trigger_node_out_id"]: 
+					if 	node['func'] == 'return msg;': enabled = True
 			self.list_triggers.Append([self.available_triggers[int(trigger["type"])].decode('utf8'), field2.decode('utf8'), field3.decode('utf8'), field4.decode('utf8')])
+			last = self.list_triggers.GetItemCount()-1
+			if enabled: self.list_triggers.CheckItem(last)
+
+	def on_check_item(self, index, flag):
+		trigger_node_out_id = self.actions_flow_tree[index]['trigger_node_out_id']
+		for node in self.triggers_flow_nodes:
+			if node['id'] == trigger_node_out_id:
+				if flag: node['func'] = 'return msg;'
+				else: node['func'] = ''
 
 	def on_print_conditions(self, e):
 		self.selected_trigger = self.list_triggers.GetFirstSelected()
@@ -2807,7 +2813,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					if 'name' in i: items = i['name'].split('|')
 				self.actions_flow_tree.append({"trigger_node_out_id": items[1],"type": items[2],"conditions": []})
 				self.on_print_triggers()
-				self.list_triggers.Select(len(self.actions_flow_tree)-1)
+				last = self.list_triggers.GetItemCount()-1
+				self.list_triggers.Select(last)
 			else:
 				pass
 		dlg.Destroy()
@@ -2834,13 +2841,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				items = dlg.ConditionNode['name'].split('|')
 				self.actions_flow_tree[self.selected_trigger]['conditions'].append({"condition_node_out_id": items[1],"operator": items[2],"actions": []})
 				trigger_id = self.actions_flow_tree[self.selected_trigger]['trigger_node_out_id']
-				trigger_type = self.actions_flow_tree[self.selected_trigger]['type']
 				for i in self.triggers_flow_nodes:
-					if 'id' in i and i['id'] == trigger_id:
-						if trigger_type == '1': i['wires'][2].append(dlg.connector_id)
-						else: i['wires'][0].append(dlg.connector_id)
+					if i['id'] == trigger_id: i['wires'][0].append(dlg.connector_id)
 				self.on_print_conditions(0)
-				self.list_conditions.Select(len(self.actions_flow_tree[self.selected_trigger]['conditions'])-1)
+				last = self.list_conditions.GetItemCount()-1
+				self.list_conditions.Select(last)
 			else:
 				pass
 		dlg.Destroy()
@@ -2895,10 +2900,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.actions_flow_tree[self.selected_trigger]['conditions'][self.selected_condition]['actions'].append({"action_node_out_id": items[1],"type": items[2]})
 				condition_id = self.actions_flow_tree[self.selected_trigger]['conditions'][self.selected_condition]['condition_node_out_id']
 				for i in self.conditions_flow_nodes:
-					if 'id' in i and i['id'] == condition_id:
-						i['wires'][0].append(dlg.connector_id)
+					if i['id'] == condition_id: i['wires'][0].append(dlg.connector_id)
 				self.on_print_actions(0)
-				self.list_actions.Select(len(self.actions_flow_tree[self.selected_trigger]['conditions'][self.selected_condition]['actions'])-1)
+				last = self.list_actions.GetItemCount()-1
+				self.list_actions.Select(last)
 			else:
 				pass
 			if dlg.credentials:
