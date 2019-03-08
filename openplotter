@@ -16,6 +16,7 @@
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
 import ConfigParser, ujson, os, io, pyudev, re, requests, subprocess, sys, time, webbrowser, wx, wx.lib.scrolledpanel, serial, shutil
+from datetime import datetime
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 try:
 	from classes.add_DS18B20 import addDS18B20
@@ -32,7 +33,7 @@ from classes.add_SK_to_N2K import addSKtoN2K
 from classes.conf import Conf
 from classes.SK_settings import SK_settings
 from classes.language import Language
-from classes.nodes import Nodes, TriggerSK, TriggerGeofence, TriggerGPIO, TriggerMQTT, TriggerTelegram, Condition, ActionSetSignalkKey, ActionSetGPIO, ActionSetMQTT, ActionPublishTwitter, ActionSendEmail, ActionPlaySound, ActionRunCommand, ActionSendTelegram
+from classes.nodes import Nodes, TriggerSK, TriggerGeofence, TriggerGPIO, TriggerMQTT, TriggerTelegram, TriggerTime, Condition, ActionSetSignalkKey, ActionSetGPIO, ActionSetMQTT, ActionPublishTwitter, ActionSendEmail, ActionPlaySound, ActionRunCommand, ActionSendTelegram
 
 class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 	def __init__(self, parent, width, height):
@@ -2548,8 +2549,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.available_operators_select = wx.Choice(self.p_action, choices=self.available_conditions, style=wx.CB_READONLY)
 
 		self.list_conditions = wx.ListCtrl(self.p_action, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(-1,90))
-		self.list_conditions.InsertColumn(0, _('Conditions'), width= 150)
-		self.list_conditions.InsertColumn(1, _(' '), width= 250)
+		self.list_conditions.InsertColumn(0, _('Conditions'), width= 100)
+		self.list_conditions.InsertColumn(1, _(' '), width= 150)
+		self.list_conditions.InsertColumn(2, _(' '), width= 150)
 		self.list_conditions.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_print_actions)
 		self.list_conditions.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_conditions)
 
@@ -2696,7 +2698,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 						if node['broker'] == self.localbrokerid: field2 = _('local broker')
 						elif node['broker'] == self.remotebrokerid: field2 = _('remote broker')
 						field3 = node['topic']
-
+					if trigger["type"] == '5' and node['type'] == 'inject':
+						field2 = node['repeat']
+						field3 = _('Seconds')
 				if node['id'] == trigger["trigger_node_out_id"]: 
 					if 	node['func'] == 'return msg;': enabled = True
 			self.list_triggers.Append([self.available_triggers[int(trigger["type"])].decode('utf8'), field2.decode('utf8'), field3.decode('utf8'), field4.decode('utf8')])
@@ -2714,16 +2718,34 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.selected_trigger = self.list_triggers.GetFirstSelected()
 		if self.selected_trigger != -1:
 			conditions = self.actions_flow_tree[self.selected_trigger]["conditions"]
+			triggertype = self.actions_flow_tree[self.selected_trigger]["type"]
 			self.list_conditions.DeleteAllItems()
 			self.list_actions.DeleteAllItems()
 			for condition in conditions:
 				name = "c|"+condition["condition_node_out_id"]+"|"+condition["operator"]
 				field2 = ''
+				field3 = ''
 				for node in self.conditions_flow_nodes:
 					if 'name' in node and name == node['name']:
 						if node['type'] == 'switch':
-							if 'v' in node['rules'][0]: field2 = node['rules'][0]['v']
-				self.list_conditions.Append([self.available_conditions[int(condition["operator"])].decode('utf8'), field2.decode('utf8')])
+							if 'v' in node['rules'][0]:
+								if triggertype == '5':
+									try:
+										seconds = float(node['rules'][0]['v'])/1000
+										local_time = datetime.fromtimestamp(seconds)
+										field2 = local_time.strftime("%Y-%m-%d %H:%M:%S")
+									except: pass
+								else: field2 = node['rules'][0]['v']
+							if 't' in node['rules'][0] and node['rules'][0]['t'] == 'btwn':
+								if 'v2' in node['rules'][0]:
+									if triggertype == '5':
+										try:
+											seconds = float(node['rules'][0]['v2'])/1000
+											local_time = datetime.fromtimestamp(seconds)
+											field3 = local_time.strftime("%Y-%m-%d %H:%M:%S")
+										except: pass
+									else: field3 = node['rules'][0]['v2']
+				self.list_conditions.Append([self.available_conditions[int(condition["operator"])].decode('utf8'), field2.decode('utf8'), field3.decode('utf8')])
 
 	def on_print_actions(self, e):
 		self.selected_condition = self.list_conditions.GetFirstSelected()
@@ -2802,6 +2824,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.ShowStatusBarRED(_('Go to the Credentials tab and enable a Telegram bot'))
 				return
 			else: dlg = TriggerTelegram(self)
+		elif trigger == 5: dlg = TriggerTime(self,edit)
 		else:
 			self.ShowStatusBarRED(_('Select a trigger type.'))
 			return

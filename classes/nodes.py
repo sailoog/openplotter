@@ -14,8 +14,9 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
-import ujson, uuid, os, wx, re, requests
+import ujson, uuid, os, wx, re, requests, time
 from select_key import selectKey
+from datetime import datetime
 
 class Nodes:
 	def __init__(self,parent,actions_flow_id):
@@ -932,6 +933,88 @@ class TriggerTelegram(wx.Dialog):
 		self.TriggerNodes.append(telegram_node)
 		self.EndModal(wx.OK)
 
+class TriggerTime(wx.Dialog):
+	def __init__(self,parent,edit):
+		self.nodes = parent.nodes
+		self.actions_flow_id = parent.actions_flow_id
+		self.trigger_type = parent.available_triggers_select.GetSelection()
+		self.telegramid = parent.telegramid
+		
+		if edit == 0: title = _('Add Time trigger')
+		else: title = _('Edit Time trigger')
+
+		wx.Dialog.__init__(self, None, title = title, size=(450, 150))
+		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
+
+		self.time_node_template = '''
+		    {
+		        "id": "",
+		        "type": "inject",
+		        "z": "",
+		        "name": "",
+		        "topic": "",
+		        "payload": "",
+		        "payloadType": "date",
+		        "repeat": "",
+		        "crontab": "",
+		        "once": true,
+		        "onceDelay": 0.1,
+		        "x": 380,
+		        "y": 120,
+		        "wires": [[]]
+		    }'''
+
+		panel = wx.Panel(self)
+		
+		periodlabel = wx.StaticText(panel, label=_('Checking period'))
+		self.period = wx.SpinCtrl(panel, min=1, max=100000000, initial=1)
+
+		periodunits = [_('Seconds'),_('Minutes'),_('Hours')]
+		self.periodunit = wx.Choice(panel, choices=periodunits, style=wx.CB_READONLY)
+		self.periodunit.SetSelection(0)
+
+		okBtn = wx.Button(panel, wx.ID_OK)
+		okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
+		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
+
+		period = wx.BoxSizer(wx.HORIZONTAL)
+		period.Add(periodlabel, 0, wx.ALL, 5)
+		period.Add(self.period, 0, wx.ALL, 5)
+		period.Add(self.periodunit, 0, wx.ALL, 5)
+
+		ok_cancel = wx.BoxSizer(wx.HORIZONTAL)
+		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
+		ok_cancel.Add(okBtn, 0, wx.ALL, 10)
+		ok_cancel.Add(cancelBtn, 0, wx.ALL, 10)
+		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
+
+		main = wx.BoxSizer(wx.VERTICAL)
+		main.AddSpacer(10)
+		main.Add(period, 0, wx.RIGHT | wx.LEFT, 5)
+		main.Add((0, 0), 1, wx.ALL, 0)
+		main.Add(ok_cancel, 0, wx.ALL | wx.EXPAND, 0)
+
+		panel.SetSizer(main)
+
+	def OnOk(self,e):
+		self.TriggerNodes = []
+		enable_node = ujson.loads(self.nodes.enable_node_template)
+		enable_node['id'] = self.nodes.get_node_id()
+		enable_node['z'] = self.actions_flow_id
+		enable_node['func'] = 'return msg;'
+		enable_node['name'] = 't|'+enable_node['id']+'|'+str(self.trigger_type)
+		self.TriggerNodes.append(enable_node)
+		time_node = ujson.loads(self.time_node_template)
+		time_node['id'] = self.nodes.get_node_id()
+		time_node['z'] = self.actions_flow_id
+		time_node['name'] = enable_node['name']
+		if self.periodunit.GetSelection() == 0: time_node['repeat'] = str(self.period.GetValue())
+		elif self.periodunit.GetSelection() == 1: time_node['repeat'] = str(self.period.GetValue()*60)
+		elif self.periodunit.GetSelection() == 2: time_node['repeat'] = str(self.period.GetValue()*60*60)
+		time_node['wires'] = [[enable_node['id']]]
+		self.TriggerNodes.append(time_node)
+		self.EndModal(wx.OK)
+
 # conditions
 class Condition(wx.Dialog):
 	def __init__(self,parent,edit):
@@ -954,25 +1037,21 @@ class Condition(wx.Dialog):
 		        "outputs": 1,
 		        "x": 380,
 		        "y": 120,
-		        "wires": [
-		            [
-		                ""
-		            ]
-		        ]
+		        "wires": [[]]
 		    }'''
 
 		if edit == 0: title = _('Add condition')
 		else: title = _('Edit condition')
 
-		wx.Dialog.__init__(self, None, title = title, size=(600, 200))
+		wx.Dialog.__init__(self, None, title = title, size=(600, 250))
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 
 		panel = wx.Panel(self)
 
 		operatorlabel = wx.StaticText(panel, label=_('Operator: ')+parent.available_conditions[self.operator_id])
 
-		type_list = [_('Number'), _('String'), _('Signal K key')]
-		self.type_list = ['num', 'str', 'flow']
+		type_list = [_('Number'), _('String'), _('Signal K key'), _('Date and time')]
+		self.type_list = ['num', 'str', 'flow', 'num']
 
 		type1label = wx.StaticText(panel, label=_('Type'))
 		self.type1 = wx.Choice(panel, choices=type_list, style=wx.CB_READONLY)
@@ -980,44 +1059,41 @@ class Condition(wx.Dialog):
 
 		value1label = wx.StaticText(panel, label=_('Value'))
 		self.value1 = wx.TextCtrl(panel)
-		self.edit_value1 = wx.Button(panel, label=_('Edit'))
+		self.edit_value1 = wx.Button(panel, label=_('Add'))
 		self.edit_value1.Bind(wx.EVT_BUTTON, self.onEditSkkey1)
-
-		type2label = wx.StaticText(panel, label=_('Type'))
-		self.type2 = wx.Choice(panel, choices=type_list, style=wx.CB_READONLY)
-		self.type2.Bind(wx.EVT_CHOICE, self.on_select_type2)
 
 		value2label = wx.StaticText(panel, label=_('Value'))
 		self.value2 = wx.TextCtrl(panel)
-		self.edit_value2 = wx.Button(panel, label=_('Edit'))
+		self.edit_value2 = wx.Button(panel, label=_('Add'))
 		self.edit_value2.Bind(wx.EVT_BUTTON, self.onEditSkkey2)
 		
 		okBtn = wx.Button(panel, wx.ID_OK)
 		okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
 		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
 
+		typevalue = wx.BoxSizer(wx.HORIZONTAL)
+		typevalue.Add(type1label, 0, wx.ALL, 5)
+		typevalue.Add(self.type1, 0, wx.ALL, 5)
+
 		value1 = wx.BoxSizer(wx.HORIZONTAL)
-		value1.Add(type1label, 0, wx.ALL, 5)
-		value1.Add(self.type1, 0, wx.ALL, 5)
 		value1.Add(value1label, 0, wx.ALL, 5)
 		value1.Add(self.value1, 1, wx.ALL, 5)
 		value1.Add(self.edit_value1, 0, wx.ALL, 5)
 
 		value2 = wx.BoxSizer(wx.HORIZONTAL)
-		value2.Add(type2label, 0, wx.ALL, 5)
-		value2.Add(self.type2, 0, wx.ALL, 5)
 		value2.Add(value2label, 0, wx.ALL, 5)
 		value2.Add(self.value2, 1, wx.ALL, 5)
 		value2.Add(self.edit_value2, 0, wx.ALL, 5)
 
 		ok_cancel = wx.BoxSizer(wx.HORIZONTAL)
 		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
-		ok_cancel.Add(okBtn, 0, wx.RIGHT | wx.LEFT, 10)
-		ok_cancel.Add(cancelBtn, 0, wx.RIGHT | wx.LEFT, 10)
+		ok_cancel.Add(okBtn, 0, wx.ALL, 10)
+		ok_cancel.Add(cancelBtn, 0, wx.ALL, 10)
 		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
 
 		main = wx.BoxSizer(wx.VERTICAL)
-		main.Add(operatorlabel, 0, wx.ALL, 5)
+		main.Add(operatorlabel, 0, wx.ALL, 10)
+		main.Add(typevalue, 0, wx.ALL, 0)
 		main.Add(value1, 0, wx.ALL | wx.EXPAND, 0)
 		main.Add(value2, 0, wx.ALL | wx.EXPAND, 0)
 		main.Add((0, 0), 1, wx.ALL, 0)
@@ -1030,10 +1106,8 @@ class Condition(wx.Dialog):
 		if self.operator == 'true' or self.operator == 'false' or self.operator == 'null' or self.operator == 'nnull' or self.operator == 'empty' or self.operator == 'nempty':
 			self.type1.Disable()
 			self.value1.Disable()
-			self.type2.Disable()
 			self.value2.Disable()
 		elif self.operator != 'btwn':			
-			self.type2.Disable()
 			self.value2.Disable()
 
 	def onEditSkkey1(self,e):
@@ -1053,14 +1127,19 @@ class Condition(wx.Dialog):
 		dlg.Destroy()
 
 	def on_select_type1(self,e):
-		type1 = self.type_list[self.type1.GetSelection()]
-		if type1 == 'flow': self.edit_value1.Enable()
-		else: self.edit_value1.Disable()
-
-	def on_select_type2(self,e):
-		type2 = self.type_list[self.type2.GetSelection()]
-		if type2 == 'flow': self.edit_value2.Enable()
-		else: self.edit_value2.Disable()
+		if self.type1.GetSelection() == 2: 
+			self.edit_value1.Enable()
+			if self.operator == 'btwn': self.edit_value2.Enable()
+		else: 
+			self.edit_value1.Disable()
+			self.edit_value2.Disable()
+		if self.type1.GetSelection() == 3:
+			now = datetime.now()
+			self.value1.SetValue(now.strftime("%Y-%m-%d %H:%M:%S"))
+			if self.operator == 'btwn': self.value2.SetValue(now.strftime("%Y-%m-%d %H:%M:%S"))
+		else: 
+			self.value1.SetValue('')
+			self.value2.SetValue('')
 
 	def OnOk(self,e):
 		condition_node = ujson.loads(self.condition_node_template)
@@ -1079,18 +1158,28 @@ class Condition(wx.Dialog):
 			if not value1:
 				wx.MessageBox(_('You have to provide a value.'), 'Info', wx.OK | wx.ICON_INFORMATION)
 				return
+			if type1 == 3:
+				try:
+					timestamp = time.mktime(time.strptime(value1, '%Y-%m-%d %H:%M:%S'))
+					value1 = str(timestamp*1000)
+				except:
+					wx.MessageBox(_('Use this date and time format: YYYY-MM-DD HH:MM:SS'), 'Info', wx.OK | wx.ICON_INFORMATION)
+					return
 			if self.operator == 'eq' or self.operator == 'neq' or self.operator == 'lt' or self.operator == 'lte' or self.operator == 'gt' or self.operator == 'gte' or self.operator == 'cont':
 				condition_node['rules'].append({"t": self.operator, "v": value1, "vt": self.type_list[type1]})
 			if self.operator == 'btwn':
-				type2 = self.type2.GetSelection()
 				value2 = self.value2.GetValue()
-				if type2 == -1:
-					wx.MessageBox(_('You have to select a value type.'), 'Info', wx.OK | wx.ICON_INFORMATION)
-					return
 				if not value2:
-					wx.MessageBox(_('You have to provide a value.'), 'Info', wx.OK | wx.ICON_INFORMATION)
+					wx.MessageBox(_('You have to provide 2 values.'), 'Info', wx.OK | wx.ICON_INFORMATION)
 					return
-				condition_node['rules'].append({"t": self.operator, "v": value1, "vt": self.type_list[type1], "v2": value2, "v2t": self.type_list[type2]})
+				if type1 == 3:
+					try: 
+						timestamp = time.mktime(time.strptime(value2, '%Y-%m-%d %H:%M:%S'))
+						value2 = str(timestamp*1000)
+					except:
+						wx.MessageBox(_('Use this date and time format: YYYY-MM-DD HH:MM:SS'), 'Info', wx.OK | wx.ICON_INFORMATION)
+						return
+				condition_node['rules'].append({"t": self.operator, "v": value1, "vt": self.type_list[type1], "v2": value2, "v2t": self.type_list[type1]})
 		self.ConditionNode = condition_node
 		self.EndModal(wx.OK)
 
