@@ -241,11 +241,7 @@ class Nodes:
 		        "period": "1000",
 		        "x": 380,
 		        "y": 120,
-		        "wires": [
-		            [
-		                ""
-		            ]
-		        ]
+		        "wires": [[]]
 		    }'''
 		self.function_node_template = '''
 		    {
@@ -258,11 +254,7 @@ class Nodes:
 		        "noerr": 0,
 		        "x": 380,
 		        "y": 120,
-		        "wires": [
-		            [
-		                ""
-		            ]
-		        ]
+		        "wires": [[]]
 		    }'''
 
 		value_list = value.split('.')

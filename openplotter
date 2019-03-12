@@ -2526,6 +2526,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.list_triggers.InsertColumn(2, _(' '), width= 130)
 		self.list_triggers.InsertColumn(3, _(' '), width= 130)
 		self.list_triggers.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_print_conditions)
+		self.list_triggers.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.on_deselected_triggers)
 		self.list_triggers.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit_triggers)
 		self.list_triggers.OnCheckItem = self.on_check_item
 
@@ -2553,7 +2554,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.list_conditions.InsertColumn(1, _(' '), width= 150)
 		self.list_conditions.InsertColumn(2, _(' '), width= 150)
 		self.list_conditions.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_print_actions)
+		self.list_conditions.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.on_deselected_conditions)
 		self.list_conditions.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_conditions)
+
 
 		add_condition = wx.Button(self.p_action, label=_('add'))
 		add_condition.Bind(wx.EVT_BUTTON, self.on_add_condition)
@@ -2566,13 +2569,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.list_actions.InsertColumn(1, _(' '), width= 170)
 		self.list_actions.InsertColumn(2, _(' '), width= 100)
 		self.list_actions.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_select_actions)
+		self.list_actions.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.on_deselected_actions)
 		self.list_actions.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_actions)
 
 		self.available_actions = [
 		_('Set Signal K key'),
 		_('Set GPIO output'),
 		_('Set MQTT topic'),
-		_('Publish Twitter'),
+		_('Publish on Twitter'),
 		_('Send e-mail'),
 		_('Play sound'),
 		_('Run command'),
@@ -2658,13 +2662,16 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.actions_flow_nodes = result[3]
 		self.no_actions_nodes = result[4]
 		self.add_credentials = {}
-		self.remove_credentials = {}
+		self.remove_credentials = []
 		self.on_print_triggers()
 
 	def on_print_triggers(self):	
 		self.list_triggers.DeleteAllItems()
 		self.list_conditions.DeleteAllItems()
 		self.list_actions.DeleteAllItems()
+		self.selected_trigger = -1
+		self.selected_condition = -1
+		self.selected_action = -1
 		for trigger in self.actions_flow_tree:
 			enabled = False
 			name = "t|"+trigger["trigger_node_out_id"]+"|"+trigger["type"]
@@ -2715,89 +2722,101 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				else: node['func'] = ''
 
 	def on_print_conditions(self, e):
+		self.list_conditions.DeleteAllItems()
+		self.list_actions.DeleteAllItems()
+		self.selected_condition = -1
+		self.selected_action = -1
 		self.selected_trigger = self.list_triggers.GetFirstSelected()
-		if self.selected_trigger != -1:
-			conditions = self.actions_flow_tree[self.selected_trigger]["conditions"]
-			triggertype = self.actions_flow_tree[self.selected_trigger]["type"]
-			self.list_conditions.DeleteAllItems()
-			self.list_actions.DeleteAllItems()
-			for condition in conditions:
-				name = "c|"+condition["condition_node_out_id"]+"|"+condition["operator"]
-				field2 = ''
-				field3 = ''
-				for node in self.conditions_flow_nodes:
-					if 'name' in node and name == node['name']:
-						if node['type'] == 'switch':
-							if 'v' in node['rules'][0]:
+		if self.selected_trigger == -1: return
+		conditions = self.actions_flow_tree[self.selected_trigger]["conditions"]
+		triggertype = self.actions_flow_tree[self.selected_trigger]["type"]
+		for condition in conditions:
+			name = "c|"+condition["condition_node_out_id"]+"|"+condition["operator"]
+			field2 = ''
+			field3 = ''
+			for node in self.conditions_flow_nodes:
+				if 'name' in node and name == node['name']:
+					if node['type'] == 'switch':
+						if 'v' in node['rules'][0]:
+							if triggertype == '5':
+								try:
+									seconds = float(node['rules'][0]['v'])/1000
+									local_time = datetime.fromtimestamp(seconds)
+									field2 = local_time.strftime("%Y-%m-%d %H:%M:%S")
+								except: pass
+							else: field2 = node['rules'][0]['v']
+						if 't' in node['rules'][0] and node['rules'][0]['t'] == 'btwn':
+							if 'v2' in node['rules'][0]:
 								if triggertype == '5':
 									try:
-										seconds = float(node['rules'][0]['v'])/1000
+										seconds = float(node['rules'][0]['v2'])/1000
 										local_time = datetime.fromtimestamp(seconds)
-										field2 = local_time.strftime("%Y-%m-%d %H:%M:%S")
+										field3 = local_time.strftime("%Y-%m-%d %H:%M:%S")
 									except: pass
-								else: field2 = node['rules'][0]['v']
-							if 't' in node['rules'][0] and node['rules'][0]['t'] == 'btwn':
-								if 'v2' in node['rules'][0]:
-									if triggertype == '5':
-										try:
-											seconds = float(node['rules'][0]['v2'])/1000
-											local_time = datetime.fromtimestamp(seconds)
-											field3 = local_time.strftime("%Y-%m-%d %H:%M:%S")
-										except: pass
-									else: field3 = node['rules'][0]['v2']
-				self.list_conditions.Append([self.available_conditions[int(condition["operator"])].decode('utf8'), field2.decode('utf8'), field3.decode('utf8')])
+								else: field3 = node['rules'][0]['v2']
+			self.list_conditions.Append([self.available_conditions[int(condition["operator"])].decode('utf8'), field2.decode('utf8'), field3.decode('utf8')])
 
 	def on_print_actions(self, e):
+		self.list_actions.DeleteAllItems()
+		self.selected_action = -1
 		self.selected_condition = self.list_conditions.GetFirstSelected()
-		if self.selected_condition != -1:
-			actions = self.actions_flow_tree[self.selected_trigger]["conditions"][self.selected_condition]["actions"]
-			self.list_actions.DeleteAllItems()
-			for action in actions:
-				name = "a|"+action["action_node_out_id"]+"|"+action["type"]
-				field2 = ''
-				field3 = ''
-				for node in self.actions_flow_nodes:
-					namenode = ''
-					if 'dname' in node: namenode = node['dname']
-					elif 'name' in node: namenode = node['name']
-					if name == namenode:
-						if action["type"] == '0' and node['type'] == 'change': 
-							field2 = node['rules'][0]['to']
-							field3 = node['rules'][1]['to']
-						if action["type"] == '1': 
-							if node['type'] == 'rpi-gpio out': field2 = node['pin']
-							if node['type'] == 'change': field3 = node['rules'][0]['to']
-						if action["type"] == '2':
-							if node['type'] == 'mqtt out':
-								if node['broker'] == self.localbrokerid: field2 = _('local broker')
-								elif node['broker'] == self.remotebrokerid: field2 = _('remote broker')
-								field3 = node['topic']
-						if action["type"] == '3':
-							if node['type'] == 'template': field2 = node['template']
-							if node['type'] == 'msg-resend': field3 = _('repeat')
-							if node['type'] == 'delay': field3 = _('rate limit')
-						if action["type"] == '4':
-							if node['type'] == 'template' and node['field'] == 'topic': field2 = node['template']
-							if node['type'] == 'msg-resend': field3 = _('repeat')
-							if node['type'] == 'delay': field3 = _('rate limit')
-						if action["type"] == '5':
-							if node['type'] == 'exec': field2 = node['append']
-							if node['type'] == 'msg-resend': field3 = _('repeat')
-							if node['type'] == 'delay': field3 = _('rate limit')
-						if action["type"] == '6' or action["type"] == '7' or action["type"] == '8':
-							if node['type'] == 'exec': 
-								field2 = node['command']
-								field2 += ' '+node['append']
-							if node['type'] == 'msg-resend': field3 = _('repeat')
-							if node['type'] == 'delay': field3 = _('rate limit')
-						if action["type"] == '9':
-							if node['type'] == 'template': field2 = node['template']
-							if node['type'] == 'msg-resend': field3 = _('repeat')
-							if node['type'] == 'delay': field3 = _('rate limit')
-				self.list_actions.Append([self.available_actions[int(action["type"])].decode('utf8'), field2.decode('utf8'), field3.decode('utf8')])
+		if self.selected_condition == -1: return
+		actions = self.actions_flow_tree[self.selected_trigger]["conditions"][self.selected_condition]["actions"]
+		for action in actions:
+			name = "a|"+action["action_node_out_id"]+"|"+action["type"]
+			field2 = ''
+			field3 = ''
+			for node in self.actions_flow_nodes:
+				namenode = ''
+				if 'dname' in node: namenode = node['dname']
+				elif 'name' in node: namenode = node['name']
+				if name == namenode:
+					if action["type"] == '0' and node['type'] == 'change': 
+						field2 = node['rules'][0]['to']
+						field3 = node['rules'][1]['to']
+					if action["type"] == '1': 
+						if node['type'] == 'rpi-gpio out': field2 = node['pin']
+						if node['type'] == 'change': field3 = node['rules'][0]['to']
+					if action["type"] == '2':
+						if node['type'] == 'mqtt out':
+							if node['broker'] == self.localbrokerid: field2 = _('local broker')
+							elif node['broker'] == self.remotebrokerid: field2 = _('remote broker')
+							field3 = node['topic']
+					if action["type"] == '3':
+						if node['type'] == 'template': field2 = node['template']
+						if node['type'] == 'msg-resend': field3 = _('repeat')
+						if node['type'] == 'delay': field3 = _('rate limit')
+					if action["type"] == '4':
+						if node['type'] == 'template' and node['field'] == 'topic': field2 = node['template']
+						if node['type'] == 'msg-resend': field3 = _('repeat')
+						if node['type'] == 'delay': field3 = _('rate limit')
+					if action["type"] == '5':
+						if node['type'] == 'exec': field2 = node['append']
+						if node['type'] == 'msg-resend': field3 = _('repeat')
+						if node['type'] == 'delay': field3 = _('rate limit')
+					if action["type"] == '6' or action["type"] == '7' or action["type"] == '8':
+						if node['type'] == 'exec': 
+							field2 = node['command']
+							field2 += ' '+node['append']
+						if node['type'] == 'msg-resend': field3 = _('repeat')
+						if node['type'] == 'delay': field3 = _('rate limit')
+					if action["type"] == '9':
+						if node['type'] == 'template': field2 = node['template']
+						if node['type'] == 'msg-resend': field3 = _('repeat')
+						if node['type'] == 'delay': field3 = _('rate limit')
+			self.list_actions.Append([self.available_actions[int(action["type"])].decode('utf8'), field2.decode('utf8'), field3.decode('utf8')])
 
 	def on_select_actions(self, e):
 		self.selected_action = self.list_actions.GetFirstSelected()
+
+	def on_deselected_triggers(self, e):
+		self.on_print_triggers()
+
+	def on_deselected_conditions(self, e):
+		self.on_print_conditions(0)
+
+	def on_deselected_actions(self, e):
+		self.selected_action = -1
 
 	def on_edit_triggers(self, e):
 		pass
@@ -2941,7 +2960,41 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		pass
 
 	def on_delete_action(self, e):
-		pass
+		if self.selected_action == -1:
+			self.ShowStatusBarRED(_('Select an action to delete'))
+			return
+		node = self.actions_flow_tree[self.selected_trigger]['conditions'][self.selected_condition]['actions'][self.selected_action]['action_node_out_id']
+		actiontype = self.actions_flow_tree[self.selected_trigger]['conditions'][self.selected_condition]['actions'][self.selected_action]['type']
+		name = ['a|'+node+'|'+actiontype]
+		conditionnode = self.actions_flow_tree[self.selected_trigger]['conditions'][self.selected_condition]['condition_node_out_id']
+
+		self.delete_action_nodes(name,actiontype,conditionnode)
+
+		del self.actions_flow_tree[self.selected_trigger]['conditions'][self.selected_condition]['actions'][self.selected_action]
+
+		self.on_print_actions(0)
+		
+	def delete_action_nodes(self,name,actiontype,conditionnode):
+		for action in name:
+			tmplist = []
+			for i in self.actions_flow_nodes:
+				name2 = ''
+				if 'dname' in i: name2 = i['dname']
+				elif 'name' in i: name2 = i['name']
+				elif not 'name' in i:
+					subid0 = i['id'].split('.')
+					subid = subid0[0]
+					for ii in self.actions_flow_nodes:
+						subidii = ii['id'].split('.')
+						if 'name' in ii and subid == subidii[0]: name2 = ii['name']
+				if action != name2: tmplist.append(i)
+				else:
+					for ii in self.conditions_flow_nodes:
+						if ii['id'] == conditionnode:
+							if i['id'] in ii['wires'][0]: ii['wires'][0].remove(i['id'])
+					if actiontype == '4' and 'type' in i:
+						if i['type'] == 'e-mail': self.remove_credentials.append(i['id'])
+			self.actions_flow_nodes = tmplist
 
 	def on_apply_changes_actions(self, e):
 		all_flows = []
