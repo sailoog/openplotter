@@ -99,7 +99,7 @@ class Nodes:
 				"conditions": [
 					{
 						"condition_node_out_id": "xxx",
-						"operator": "=",
+						"operator": "0",
 						"actions": [
 							{
 								"action_node_out_id": "xxx",

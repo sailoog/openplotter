@@ -2957,7 +2957,32 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		pass
 
 	def on_delete_condition(self, e):
-		pass
+		if self.selected_condition == -1:
+			self.ShowStatusBarRED(_('Select a condition to delete'))
+			return
+		node = self.actions_flow_tree[self.selected_trigger]['conditions'][self.selected_condition]['condition_node_out_id']
+		operatortype = self.actions_flow_tree[self.selected_trigger]['conditions'][self.selected_condition]['operator']
+		name = 'c|'+node+'|'+operatortype
+		triggernode = self.actions_flow_tree[self.selected_trigger]['trigger_node_out_id']
+		actions = self.actions_flow_tree[self.selected_trigger]['conditions'][self.selected_condition]['actions']
+		for i in actions:
+			nameaction = 'a|'+i['action_node_out_id']+'|'+i['type']
+			self.delete_action_nodes(nameaction,i['type'],node)
+		self.delete_condition_nodes(name,triggernode)
+		del self.actions_flow_tree[self.selected_trigger]['conditions'][self.selected_condition]
+		self.on_print_conditions(0)
+
+	def delete_condition_nodes(self,name,triggernode):
+		tmplist = []
+		for i in self.conditions_flow_nodes:
+			name2 = ''
+			if 'name' in i: name2 = i['name']
+			if name != name2: tmplist.append(i)
+			else:
+				for ii in self.triggers_flow_nodes:
+					if ii['id'] == triggernode:
+						if i['id'] in ii['wires'][0]: ii['wires'][0].remove(i['id'])
+		self.conditions_flow_nodes = tmplist
 
 	def on_delete_action(self, e):
 		if self.selected_action == -1:
@@ -2965,36 +2990,32 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			return
 		node = self.actions_flow_tree[self.selected_trigger]['conditions'][self.selected_condition]['actions'][self.selected_action]['action_node_out_id']
 		actiontype = self.actions_flow_tree[self.selected_trigger]['conditions'][self.selected_condition]['actions'][self.selected_action]['type']
-		name = ['a|'+node+'|'+actiontype]
+		name = 'a|'+node+'|'+actiontype
 		conditionnode = self.actions_flow_tree[self.selected_trigger]['conditions'][self.selected_condition]['condition_node_out_id']
-
 		self.delete_action_nodes(name,actiontype,conditionnode)
-
 		del self.actions_flow_tree[self.selected_trigger]['conditions'][self.selected_condition]['actions'][self.selected_action]
-
 		self.on_print_actions(0)
 		
 	def delete_action_nodes(self,name,actiontype,conditionnode):
-		for action in name:
-			tmplist = []
-			for i in self.actions_flow_nodes:
-				name2 = ''
-				if 'dname' in i: name2 = i['dname']
-				elif 'name' in i: name2 = i['name']
-				elif not 'name' in i:
-					subid0 = i['id'].split('.')
-					subid = subid0[0]
-					for ii in self.actions_flow_nodes:
-						subidii = ii['id'].split('.')
-						if 'name' in ii and subid == subidii[0]: name2 = ii['name']
-				if action != name2: tmplist.append(i)
-				else:
-					for ii in self.conditions_flow_nodes:
-						if ii['id'] == conditionnode:
-							if i['id'] in ii['wires'][0]: ii['wires'][0].remove(i['id'])
-					if actiontype == '4' and 'type' in i:
-						if i['type'] == 'e-mail': self.remove_credentials.append(i['id'])
-			self.actions_flow_nodes = tmplist
+		tmplist = []
+		for i in self.actions_flow_nodes:
+			name2 = ''
+			if 'dname' in i: name2 = i['dname']
+			elif 'name' in i: name2 = i['name']
+			elif not 'name' in i:
+				subid0 = i['id'].split('.')
+				subid = subid0[0]
+				for ii in self.actions_flow_nodes:
+					subidii = ii['id'].split('.')
+					if 'name' in ii and subid == subidii[0]: name2 = ii['name']
+			if name != name2: tmplist.append(i)
+			else:
+				for ii in self.conditions_flow_nodes:
+					if ii['id'] == conditionnode:
+						if i['id'] in ii['wires'][0]: ii['wires'][0].remove(i['id'])
+				if actiontype == '4' and 'type' in i:
+					if i['type'] == 'e-mail': self.remove_credentials.append(i['id'])
+		self.actions_flow_nodes = tmplist
 
 	def on_apply_changes_actions(self, e):
 		all_flows = []
