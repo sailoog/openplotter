@@ -2954,11 +2954,45 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		dlg.Destroy()
 
 	def on_delete_trigger(self, e):
-		pass
+		if self.selected_trigger == -1:
+			self.ShowStatusBarRED(_('Select an item to delete'))
+			return
+		node = self.actions_flow_tree[self.selected_trigger]['trigger_node_out_id']
+		triggertype = self.actions_flow_tree[self.selected_trigger]['type']
+		name = 't|'+node+'|'+triggertype
+		conditions = self.actions_flow_tree[self.selected_trigger]['conditions']
+
+		for condition in conditions:
+			nodec = condition['condition_node_out_id']
+			operatortype = condition['operator']
+			namec = 'c|'+nodec+'|'+operatortype
+			actions = condition['actions']
+			for action in actions:
+				nameaction = 'a|'+action['action_node_out_id']+'|'+action['type']
+				self.delete_action_nodes(nameaction,action['type'],nodec)
+			self.delete_condition_nodes(namec,node)
+
+		self.delete_trigger_nodes(name)
+		del self.actions_flow_tree[self.selected_trigger]
+		self.on_print_triggers()
+
+	def delete_trigger_nodes(self,name):
+		tmplist = []
+		for i in self.triggers_flow_nodes:
+			name2 = ''
+			if 'name' in i: name2 = i['name']
+			elif not 'name' in i:
+				subid0 = i['id'].split('.')
+				subid = subid0[0]
+				for ii in self.triggers_flow_nodes:
+					subidii = ii['id'].split('.')
+					if 'name' in ii and subid == subidii[0]: name2 = ii['name']
+			if name != name2: tmplist.append(i)
+		self.triggers_flow_nodes = tmplist
 
 	def on_delete_condition(self, e):
 		if self.selected_condition == -1:
-			self.ShowStatusBarRED(_('Select a condition to delete'))
+			self.ShowStatusBarRED(_('Select an item to delete'))
 			return
 		node = self.actions_flow_tree[self.selected_trigger]['conditions'][self.selected_condition]['condition_node_out_id']
 		operatortype = self.actions_flow_tree[self.selected_trigger]['conditions'][self.selected_condition]['operator']
@@ -2986,7 +3020,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def on_delete_action(self, e):
 		if self.selected_action == -1:
-			self.ShowStatusBarRED(_('Select an action to delete'))
+			self.ShowStatusBarRED(_('Select an item to delete'))
 			return
 		node = self.actions_flow_tree[self.selected_trigger]['conditions'][self.selected_condition]['actions'][self.selected_action]['action_node_out_id']
 		actiontype = self.actions_flow_tree[self.selected_trigger]['conditions'][self.selected_condition]['actions'][self.selected_action]['type']
