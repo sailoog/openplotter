@@ -32,7 +32,7 @@ class addkplex(wx.Dialog):
 
 		panel = wx.Panel(self)
 
-		self.icon = wx.Icon(self.currentpath + '/openplotter.ico', wx.BITMAP_TYPE_ICO)
+		self.icon = wx.Icon(self.currentpath + '/static/icons/openplotter.ico', wx.BITMAP_TYPE_ICO)
 		self.SetIcon(self.icon)
 
 		wx.StaticText(panel, label=_('Type'), pos=(20, 30))
