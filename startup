@@ -415,7 +415,7 @@ def print_help():
 	print('This is a part of OpenPlotter software') 
 	print('It starts all needed server/services/background processes') 
 	print('Options are:') 
-	print('startup            (does only run on X display desktop)') 
+	print('startup start      (does only run on X display desktop)')
 	print('startup restart    (does only run on X display desktop)') 
 	print('startup stop') 
 	print('this: startup -h')
