@@ -30,50 +30,50 @@ conf_analog=Conf_analog()
 home = conf_analog.home
 
 if len(sys.argv)>1:
-	if sys.argv[1]=='settings':
-		print home+'/.openplotter/tools/openplotter_analog.conf'
-		subprocess.Popen(['leafpad',home+'/.openplotter/tools/openplotter_analog.conf'])
-	exit
+    if sys.argv[1]=='settings':
+        print home+'/.openplotter/tools/openplotter_analog.conf'
+        subprocess.Popen(['leafpad',home+'/.openplotter/tools/openplotter_analog.conf'])
+    exit
 else:
 
-	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-	poll_interval = 1
-	rate_analog = 1
+    poll_interval = 1
+    rate_analog = 1
 
-	tick_analog=time.time()
-	ina = INA219(SHUNT_OHMS,1.0,0x41)
-	ina.configure()
+    tick_analog=time.time()
+    ina = INA219(SHUNT_OHMS,1.0,0x41)
+    ina.configure()
 
-	try:
-		inaV = ina.voltage()
-		inaA = ina.current()/1000
-		inaW = inaV*inaA
-	except DeviceRangeError as e:
-		print e
-	
-	while True:
-		tick2=time.time()
-		time.sleep(poll_interval*1.0/1000.0)
-		#GENERATE	
+    try:
+        inaV = ina.voltage()
+        inaA = ina.current()/1000
+        inaW = inaV*inaA
+    except DeviceRangeError as e:
+        print e
 
-		if tick2-tick_analog > rate_analog:
-			tick_analog=time.time()
+    while True:
+        tick2=time.time()
+        time.sleep(poll_interval*1.0/1000.0)
+        #GENERATE
 
-			list_signalk_path1=[]
-			list_signalk1=[]
+        if tick2-tick_analog > rate_analog:
+            tick_analog=time.time()
 
-			try:
-				inaV = inaV*0.8 +ina.voltage()*0.2
-				inaA = inaA*0.8 +ina.current()/1000*0.2
-				inaW = inaV*inaA
-			except DeviceRangeError as e:
-				print e
+            list_signalk_path1=[]
+            list_signalk1=[]
 
-			SignalK = '{"updates": [{"$source": "OPsensors.I2C.ina219","values":[ '
-			Erg=''
-			Erg += '{"path": "electrical.batteries.rpi.current","value":'+str(inaA)+'},'
-			Erg += '{"path": "electrical.batteries.rpi.voltage","value":'+str(inaV)+'},'
-			Erg += '{"path": "electrical.batteries.rpi.power","value":'+str(inaW)+'},'			
-			SignalK +=Erg[0:-1]+']}]}\n'
-			sock.sendto(SignalK, ('127.0.0.1', 55557))
+            try:
+                inaV = inaV*0.8 +ina.voltage()*0.2
+                inaA = inaA*0.8 +ina.current()/1000*0.2
+                inaW = inaV*inaA
+            except DeviceRangeError as e:
+                print e
+
+            SignalK = '{"updates": [{"$source": "OPsensors.I2C.ina219","values":[ '
+            Erg=''
+            Erg += '{"path": "electrical.batteries.rpi.current","value":'+str(inaA)+'},'
+            Erg += '{"path": "electrical.batteries.rpi.voltage","value":'+str(inaV)+'},'
+            Erg += '{"path": "electrical.batteries.rpi.power","value":'+str(inaW)+'},'
+            SignalK +=Erg[0:-1]+']}]}\n'
+            sock.sendto(SignalK, ('127.0.0.1', 55557))

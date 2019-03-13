@@ -30,471 +30,471 @@ from classes.language import Language
 from classes.show_keys import showKeys
 
 class MyFrame(wx.Frame):
-	def __init__(self):
-		self.SK_unit = ''
-		self.SK_description = ''
-		self.SK_unit_priv = 0
-		self.SK_Faktor_priv = 1
-		self.SK_Offset_priv = 0
-		self.ws = None
+    def __init__(self):
+        self.SK_unit = ''
+        self.SK_description = ''
+        self.SK_unit_priv = 0
+        self.SK_Faktor_priv = 1
+        self.SK_Offset_priv = 0
+        self.ws = None
 
-		self.thread = threading._DummyThread
+        self.thread = threading._DummyThread
 
-		self.private_unit_s = 1
-		logging.basicConfig()
-		self.buffer = []
-		self.list_SK = []
-		self.list_SK_unit = []
-		self.sortCol = 0
+        self.private_unit_s = 1
+        logging.basicConfig()
+        self.buffer = []
+        self.list_SK = []
+        self.list_SK_unit = []
+        self.sortCol = 0
 
-		self.conf = Conf()
-		self.home = self.conf.home
-		self.currentpath = self.conf.get('GENERAL', 'op_folder')
-		SK_ = SK_settings()
-		self.ws_name = SK_.ws+SK_.ip+":"+str(SK_.aktport)+"/signalk/v1/stream?subscribe=self"
+        self.conf = Conf()
+        self.home = self.conf.home
+        self.currentpath = self.conf.get('GENERAL', 'op_folder')
+        SK_ = SK_settings()
+        self.ws_name = SK_.ws+SK_.ip+":"+str(SK_.aktport)+"/signalk/v1/stream?subscribe=self"
 
-		Language(self.conf)
+        Language(self.conf)
 
-		wx.Frame.__init__(self, None, title='diagnostic Signal K input', size=(770, 435))
-		self.Bind(wx.EVT_CLOSE, self.OnClose)
-		panel = wx.Panel(self, wx.ID_ANY)
+        wx.Frame.__init__(self, None, title='diagnostic Signal K input', size=(770, 435))
+        self.Bind(wx.EVT_CLOSE, self.OnClose)
+        panel = wx.Panel(self, wx.ID_ANY)
 
-		self.ttimer = 100
-		self.timer = wx.Timer(self)
-		self.Bind(wx.EVT_TIMER, self.timer_act, self.timer)
+        self.ttimer = 100
+        self.timer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self.timer_act, self.timer)
 
-		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
+        self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 
-		self.icon = wx.Icon(self.currentpath + '/openplotter.ico', wx.BITMAP_TYPE_ICO)
-		self.SetIcon(self.icon)
+        self.icon = wx.Icon(self.currentpath + '/openplotter.ico', wx.BITMAP_TYPE_ICO)
+        self.SetIcon(self.icon)
 
-		self.list = wx.ListCtrl(panel, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
-		self.list.InsertColumn(0, _('SRC'), width=200)
-		self.list.InsertColumn(1, _('Signal K'), width=310)
-		self.list.InsertColumn(2, _('Value'), wx.LIST_FORMAT_RIGHT, width=190)
-		self.list.InsertColumn(3, _('Unit'), width=45)
-		self.list.InsertColumn(4, _('Interval'), wx.LIST_FORMAT_RIGHT, width=55)
-		self.list.InsertColumn(5, _('Status'), width=50)
-		self.list.InsertColumn(6, _('Description'), width=500)
+        self.list = wx.ListCtrl(panel, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
+        self.list.InsertColumn(0, _('SRC'), width=200)
+        self.list.InsertColumn(1, _('Signal K'), width=310)
+        self.list.InsertColumn(2, _('Value'), wx.LIST_FORMAT_RIGHT, width=190)
+        self.list.InsertColumn(3, _('Unit'), width=45)
+        self.list.InsertColumn(4, _('Interval'), wx.LIST_FORMAT_RIGHT, width=55)
+        self.list.InsertColumn(5, _('Status'), width=50)
+        self.list.InsertColumn(6, _('Description'), width=500)
 
-		sort_SRC = wx.Button(panel, label=_('Sort SRC'))
-		sort_SRC.Bind(wx.EVT_BUTTON, self.on_sort_SRC)
+        sort_SRC = wx.Button(panel, label=_('Sort SRC'))
+        sort_SRC.Bind(wx.EVT_BUTTON, self.on_sort_SRC)
 
-		sort_SK = wx.Button(panel, label=_('Sort SK'))
-		sort_SK.Bind(wx.EVT_BUTTON, self.on_sort_SK)
+        sort_SK = wx.Button(panel, label=_('Sort SK'))
+        sort_SK.Bind(wx.EVT_BUTTON, self.on_sort_SK)
 
-		show_keys = wx.Button(panel, label=_('Show All SK keys'))
-		show_keys.Bind(wx.EVT_BUTTON, self.on_show_keys)
+        show_keys = wx.Button(panel, label=_('Show All SK keys'))
+        show_keys.Bind(wx.EVT_BUTTON, self.on_show_keys)
 
-		self.private_unit = wx.CheckBox(panel, label=_('private Unit'), pos=(360, 32))
-		self.private_unit.Bind(wx.EVT_CHECKBOX, self.on_private_unit)
-		self.private_unit.SetValue(self.private_unit_s)
+        self.private_unit = wx.CheckBox(panel, label=_('private Unit'), pos=(360, 32))
+        self.private_unit.Bind(wx.EVT_CHECKBOX, self.on_private_unit)
+        self.private_unit.SetValue(self.private_unit_s)
 
-		unit_setting = wx.Button(panel, label=_('Unit Setting'))
-		unit_setting.Bind(wx.EVT_BUTTON, self.on_unit_setting)
+        unit_setting = wx.Button(panel, label=_('Unit Setting'))
+        unit_setting.Bind(wx.EVT_BUTTON, self.on_unit_setting)
 
-		vbox = wx.BoxSizer(wx.VERTICAL)
-		hlistbox = wx.BoxSizer(wx.HORIZONTAL)
-		hbox = wx.BoxSizer(wx.HORIZONTAL)
-		hlistbox.Add(self.list, 1, wx.ALL | wx.EXPAND, 5)
-		hbox.Add(sort_SRC, 0, wx.RIGHT | wx.LEFT, 5)
-		hbox.Add(sort_SK, 0, wx.RIGHT | wx.LEFT, 5)
-		hbox.Add(show_keys, 0, wx.RIGHT | wx.LEFT, 5)
-		hbox.Add((0,0), 1, wx.RIGHT | wx.LEFT, 5)
-		hbox.Add(self.private_unit, 0, wx.RIGHT | wx.LEFT, 5)
-		hbox.Add(unit_setting, 0, wx.RIGHT | wx.LEFT, 5)
-		vbox.Add(hlistbox, 1, wx.ALL | wx.EXPAND, 0)
-		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 0)
-		panel.SetSizer(vbox)
+        vbox = wx.BoxSizer(wx.VERTICAL)
+        hlistbox = wx.BoxSizer(wx.HORIZONTAL)
+        hbox = wx.BoxSizer(wx.HORIZONTAL)
+        hlistbox.Add(self.list, 1, wx.ALL | wx.EXPAND, 5)
+        hbox.Add(sort_SRC, 0, wx.RIGHT | wx.LEFT, 5)
+        hbox.Add(sort_SK, 0, wx.RIGHT | wx.LEFT, 5)
+        hbox.Add(show_keys, 0, wx.RIGHT | wx.LEFT, 5)
+        hbox.Add((0,0), 1, wx.RIGHT | wx.LEFT, 5)
+        hbox.Add(self.private_unit, 0, wx.RIGHT | wx.LEFT, 5)
+        hbox.Add(unit_setting, 0, wx.RIGHT | wx.LEFT, 5)
+        vbox.Add(hlistbox, 1, wx.ALL | wx.EXPAND, 0)
+        vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 0)
+        panel.SetSizer(vbox)
 
-		self.CreateStatusBar()
+        self.CreateStatusBar()
 
-		self.read()
-		self.start()
+        self.read()
+        self.start()
 
-		self.Show(True)
+        self.Show(True)
 
-		self.status = ''
-		self.data = []
-		self.baudc = 0
-		self.baud = 0
+        self.status = ''
+        self.data = []
+        self.baudc = 0
+        self.baud = 0
 
-		self.timer.Start(self.ttimer)
-		self.no_action = 0
-		self.no_action_limit = 5000 / self.ttimer
+        self.timer.Start(self.ttimer)
+        self.no_action = 0
+        self.no_action_limit = 5000 / self.ttimer
 
-	def timer_act(self, e):
-		if len(self.buffer) > 0:
-			self.no_action = 0
-			for ii in self.buffer:
-				if 0 <= ii[0] < self.list.GetItemCount():
-					self.list.SetStringItem(ii[0], ii[1], ii[2])
-				else:
-					self.sorting()
-			self.buffer = []
-		else:
-			self.no_action += 1
-			if self.no_action > self.no_action_limit:
-				if self.ws:
-					self.ws.close()
-				self.start()
-				self.no_action = 0
+    def timer_act(self, e):
+        if len(self.buffer) > 0:
+            self.no_action = 0
+            for ii in self.buffer:
+                if 0 <= ii[0] < self.list.GetItemCount():
+                    self.list.SetStringItem(ii[0], ii[1], ii[2])
+                else:
+                    self.sorting()
+            self.buffer = []
+        else:
+            self.no_action += 1
+            if self.no_action > self.no_action_limit:
+                if self.ws:
+                    self.ws.close()
+                self.start()
+                self.no_action = 0
 
-	def json_interval(self, time_old, time_new):
-		sek_n = float(time_new[17:22])
-		sek_o = float(time_old[17:22])
-		if sek_n >= sek_o:
-			dif = sek_n - sek_o
-		else:
-			dif = sek_n + 60 - sek_o
-		return dif
+    def json_interval(self, time_old, time_new):
+        sek_n = float(time_new[17:22])
+        sek_o = float(time_old[17:22])
+        if sek_n >= sek_o:
+            dif = sek_n - sek_o
+        else:
+            dif = sek_n + 60 - sek_o
+        return dif
 
-	def read(self):
-		self.list_SK_unit = []
+    def read(self):
+        self.list_SK_unit = []
 
-		self.keys = GetKeys()
-		data = self.keys.keys
+        self.keys = GetKeys()
+        data = self.keys.keys
 
-		data_sk_unit_private = []
-		if os.path.isfile(self.home+'/.openplotter/private_unit.json'):
-			with open(self.home+'/.openplotter/private_unit.json') as data_file:
-				data_sk_unit_private = ujson.load(data_file)
+        data_sk_unit_private = []
+        if os.path.isfile(self.home+'/.openplotter/private_unit.json'):
+            with open(self.home+'/.openplotter/private_unit.json') as data_file:
+                data_sk_unit_private = ujson.load(data_file)
 
-		for i in data:
-			self.list_SK_unit.append([str(i[0]), str(i[2]), '', str(i[1])])
-		for j in data_sk_unit_private:
-			for i in self.list_SK_unit:
-				if j[0] == i[0]:
-					i[2] = j[2]
-					break					
-					
-		self.list_SK_unit.sort(key=lambda tup: tup[0])
-		self.list_SK_unit.sort(key=lambda tup: tup[1])
-		
+        for i in data:
+            self.list_SK_unit.append([str(i[0]), str(i[2]), '', str(i[1])])
+        for j in data_sk_unit_private:
+            for i in self.list_SK_unit:
+                if j[0] == i[0]:
+                    i[2] = j[2]
+                    break
 
-	def lookup_star(self, name):
-		skip = -1
-		index = 0
-		st = ''
-		for i in name.split('.'):
-			if index > -1:
-				if skip == 0:
-					st += '.*'
-				else:
-					if i in ['propulsion', 'sensors']:
-						skip = 1
-					elif i in ['electrical', 'registrations','tanks']:
-						skip = 2
-					st += '.' + i
-			index += 1
-			skip -= 1
+        self.list_SK_unit.sort(key=lambda tup: tup[0])
+        self.list_SK_unit.sort(key=lambda tup: tup[1])
 
-		st = st[1:]
-		self.SK_unit = ''
-		self.SK_unit_priv = ''
-		self.SK_description = ''
-		for j in self.list_SK_unit:
-			exist = False
-			if j[0] == st:
-				exist = True
-				self.SK_unit = j[1]
-				self.SK_description = j[3]
-				if j[2] != '':
-					self.SK_unit_priv = j[2]
-				else:
-					self.SK_unit_priv = j[1]
-				break
-		if not exist:
-			print 'no unit for ', st
 
-		self.SK_Faktor_priv = 1
-		self.SK_Offset_priv = 0
-		if self.SK_unit_priv != self.SK_unit:
-			if self.SK_unit == 'Hz':
-				if self.SK_unit_priv == 'RPM':
-					self.SK_Faktor_priv = 0.0166666666
-			elif self.SK_unit == 'K':
-				if self.SK_unit_priv == 'C':
-					self.SK_Offset_priv = -273.15
-				elif self.SK_unit_priv == 'F':
-					self.SK_Faktor_priv = 1.8
-					self.SK_Offset_priv = -459.67
-			elif self.SK_unit == 'J':
-				if self.SK_unit_priv == 'Ah(12V)':
-					self.SK_Faktor_priv = 43200.
-				if self.SK_unit_priv == 'Ah(24V)':
-					self.SK_Faktor_priv = 86400
-			elif self.SK_unit == 'm':
-				if self.SK_unit_priv == 'ft':
-					self.SK_Faktor_priv = 0.3048
-				elif self.SK_unit_priv == 'nm':
-					self.SK_Faktor_priv = 1852
-				elif self.SK_unit_priv == 'km':
-					self.SK_Faktor_priv = 1000
-			elif self.SK_unit == 'm/s':
-				if self.SK_unit_priv == 'kn':
-					self.SK_Faktor_priv = 0.514444444
-				elif self.SK_unit_priv == 'kmh':
-					self.SK_Faktor_priv = 0, 277778
-				elif self.SK_unit_priv == 'mph':
-					self.SK_Faktor_priv = 0.44704
-			elif self.SK_unit == 'm3':
-				if self.SK_unit_priv == 'dm3':
-					self.SK_Faktor_priv = 0.001
-				elif self.SK_unit_priv == 'gal':
-					self.SK_Faktor_priv = 0.00378541
-			elif self.SK_unit == 'm3/s':
-				if self.SK_unit_priv == 'l/h':
-					self.SK_Faktor_priv = 2.777778E-7
-				elif self.SK_unit_priv == 'gal/h':
-					self.SK_Faktor_priv = 0.0000010515
-			elif self.SK_unit == 'Pa':
-				if self.SK_unit_priv == 'hPa':
-					self.SK_Faktor_priv = 100
-				elif self.SK_unit_priv == 'Bar':
-					self.SK_Faktor_priv = 100000
-			elif self.SK_unit == 'rad' and self.SK_unit_priv == 'deg':
-				self.SK_Faktor_priv = 0.0174533
-			elif self.SK_unit == 's':
-				if self.SK_unit_priv == 'h':
-					self.SK_Faktor_priv = 3600
-				elif self.SK_unit_priv == 'd':
-					self.SK_Faktor_priv = 86400
-				elif self.SK_unit_priv == 'y':
-					self.SK_Faktor_priv = 31536000
-			elif self.SK_unit == 'ratio':
-				if self.SK_unit_priv == '%':
-					self.SK_Faktor_priv = 0.01
-		else:
-			self.SK_Faktor_priv = 1
-			self.SK_Offset_priv = 0
-		
-	def on_sort_SRC(self, e):
-		self.sortCol = 0
-		self.sorting()
+    def lookup_star(self, name):
+        skip = -1
+        index = 0
+        st = ''
+        for i in name.split('.'):
+            if index > -1:
+                if skip == 0:
+                    st += '.*'
+                else:
+                    if i in ['propulsion', 'sensors']:
+                        skip = 1
+                    elif i in ['electrical', 'registrations','tanks']:
+                        skip = 2
+                    st += '.' + i
+            index += 1
+            skip -= 1
 
-	def on_sort_SK(self, e):
-		self.sortCol = 1
-		self.sorting()
+        st = st[1:]
+        self.SK_unit = ''
+        self.SK_unit_priv = ''
+        self.SK_description = ''
+        for j in self.list_SK_unit:
+            exist = False
+            if j[0] == st:
+                exist = True
+                self.SK_unit = j[1]
+                self.SK_description = j[3]
+                if j[2] != '':
+                    self.SK_unit_priv = j[2]
+                else:
+                    self.SK_unit_priv = j[1]
+                break
+        if not exist:
+            print 'no unit for ', st
 
-	def on_show_keys(self,e):
-		dlg = showKeys()
-		res = dlg.ShowModal()
-		dlg.Destroy()
+        self.SK_Faktor_priv = 1
+        self.SK_Offset_priv = 0
+        if self.SK_unit_priv != self.SK_unit:
+            if self.SK_unit == 'Hz':
+                if self.SK_unit_priv == 'RPM':
+                    self.SK_Faktor_priv = 0.0166666666
+            elif self.SK_unit == 'K':
+                if self.SK_unit_priv == 'C':
+                    self.SK_Offset_priv = -273.15
+                elif self.SK_unit_priv == 'F':
+                    self.SK_Faktor_priv = 1.8
+                    self.SK_Offset_priv = -459.67
+            elif self.SK_unit == 'J':
+                if self.SK_unit_priv == 'Ah(12V)':
+                    self.SK_Faktor_priv = 43200.
+                if self.SK_unit_priv == 'Ah(24V)':
+                    self.SK_Faktor_priv = 86400
+            elif self.SK_unit == 'm':
+                if self.SK_unit_priv == 'ft':
+                    self.SK_Faktor_priv = 0.3048
+                elif self.SK_unit_priv == 'nm':
+                    self.SK_Faktor_priv = 1852
+                elif self.SK_unit_priv == 'km':
+                    self.SK_Faktor_priv = 1000
+            elif self.SK_unit == 'm/s':
+                if self.SK_unit_priv == 'kn':
+                    self.SK_Faktor_priv = 0.514444444
+                elif self.SK_unit_priv == 'kmh':
+                    self.SK_Faktor_priv = 0, 277778
+                elif self.SK_unit_priv == 'mph':
+                    self.SK_Faktor_priv = 0.44704
+            elif self.SK_unit == 'm3':
+                if self.SK_unit_priv == 'dm3':
+                    self.SK_Faktor_priv = 0.001
+                elif self.SK_unit_priv == 'gal':
+                    self.SK_Faktor_priv = 0.00378541
+            elif self.SK_unit == 'm3/s':
+                if self.SK_unit_priv == 'l/h':
+                    self.SK_Faktor_priv = 2.777778E-7
+                elif self.SK_unit_priv == 'gal/h':
+                    self.SK_Faktor_priv = 0.0000010515
+            elif self.SK_unit == 'Pa':
+                if self.SK_unit_priv == 'hPa':
+                    self.SK_Faktor_priv = 100
+                elif self.SK_unit_priv == 'Bar':
+                    self.SK_Faktor_priv = 100000
+            elif self.SK_unit == 'rad' and self.SK_unit_priv == 'deg':
+                self.SK_Faktor_priv = 0.0174533
+            elif self.SK_unit == 's':
+                if self.SK_unit_priv == 'h':
+                    self.SK_Faktor_priv = 3600
+                elif self.SK_unit_priv == 'd':
+                    self.SK_Faktor_priv = 86400
+                elif self.SK_unit_priv == 'y':
+                    self.SK_Faktor_priv = 31536000
+            elif self.SK_unit == 'ratio':
+                if self.SK_unit_priv == '%':
+                    self.SK_Faktor_priv = 0.01
+        else:
+            self.SK_Faktor_priv = 1
+            self.SK_Offset_priv = 0
 
-	def sorting(self):
-		self.list.DeleteAllItems()
-		list_new = []
-		for i in sorted(self.list_SK, key=lambda item: (item[self.sortCol])):
-			list_new.append(i)
-		self.list_SK = list_new
-		self.init2()
+    def on_sort_SRC(self, e):
+        self.sortCol = 0
+        self.sorting()
 
-	def init2(self):
-		index = 0
-		for i in self.list_SK:
-			if type(i[2]) is float:
-				pass
-			elif type(i[2]) is str:
-				pass
-			else:
-				i[2] = 0.0
-			self.list.InsertStringItem(index, str(i[0]))
-			self.list.SetStringItem(index, 1, str(i[1]))
-			
-			if not self.private_unit_s:
-				if type(i[2]) is str:
-					self.buffer.append([index, 2, i[2]])
-				else:
-					self.buffer.append([index, 2, str('%.3f' % i[2])])
-				self.buffer.append([index, 3, i[3]])
-			else:
-				if type(i[2]) is str:
-					self.buffer.append([index, 2, i[2]])				
-				else:
-					i[9] = i[2] / i[10] + i[11]
-					self.buffer.append([index, 2, str('%.3f' % i[9])])
-				self.buffer.append([index, 3, i[8]])
-			self.list.SetStringItem(index, 4, str('%.1f' % i[4]))
-			self.list.SetStringItem(index, 5, str(i[5]))
-			self.list.SetStringItem(index, 6, str(i[6]))
-			index += 1
+    def on_sort_SK(self, e):
+        self.sortCol = 1
+        self.sorting()
 
-	def on_unit_setting(self, e):
-		subprocess.Popen(['python', self.currentpath + '/unit-private.py'])
+    def on_show_keys(self,e):
+        dlg = showKeys()
+        res = dlg.ShowModal()
+        dlg.Destroy()
 
-	def OnClose(self, e):
-		self.endlive=True
-		qx=0
-		while not self.ende and qx<50:
-			time.sleep(0.1)
-			qx+=1
-		 
-		if self.ws:
-			self.ws.close()
-		self.timer.Stop()
-		self.Destroy()
+    def sorting(self):
+        self.list.DeleteAllItems()
+        list_new = []
+        for i in sorted(self.list_SK, key=lambda item: (item[self.sortCol])):
+            list_new.append(i)
+        self.list_SK = list_new
+        self.init2()
 
-	def on_message(self, ws, message):
-		if self.endlive:
-			self.on_close(ws)
-			self.ende=True
-			return
-			js_upb=''
-		try:
-			js_upb = ujson.loads(message)
-			if 'updates' not in js_upb:
-				return
-			js_up = js_upb['updates'][0]
-			label = ''
-			src = ''
-			type = ''
-			value = ''
-			
-			if 'source' in js_up.keys():
-				source=js_up['source']
-				label = source['label']
-				if 'type' in source:
-					type = source['type']
-					if type == 'NMEA0183':
-						if 'talker' in source: 
-							src =label+'.'+source['talker']
-							if 'sentence' in source: src =label+'.'+source['sentence']
-					elif type == 'NMEA2000':
-						if 'src' in source: 
-							src =label+'.'+source['src']
-							if 'pgn' in source: src +='.'+str(source['pgn'])
-			if '$source' in js_up and src=='':
-				src = js_up['$source']
-			if 'timestamp' in js_up.keys():
-				timestamp = js_up['timestamp']
-			else:
-				timestamp = '2000-01-01T00:00:00.000Z'
-			values_ = js_up['values']
+    def init2(self):
+        index = 0
+        for i in self.list_SK:
+            if type(i[2]) is float:
+                pass
+            elif type(i[2]) is str:
+                pass
+            else:
+                i[2] = 0.0
+            self.list.InsertStringItem(index, str(i[0]))
+            self.list.SetStringItem(index, 1, str(i[1]))
 
-			for values in values_:
-				path = values['path']
-				value = values['value']
-				src2 = src
-				timestamp2 = timestamp
-				
-				if isinstance(value, dict):
-					if 'timestamp' in value: timestamp2 = value['timestamp']
-					if '$source' in value and src=='':
-						src = value['$source']
-					elif 'source' in value:
-						source=value['source']
-						label = source['label']
-						if 'type' in source:
-							type = source['type']
-							if type == 'NMEA0183':
-								if 'talker' in source: 
-									src =label+'.'+source['talker']
-									if 'sentence' in source: src =label+'.'+source['sentence']
-							elif type == 'NMEA2000':
-								if 'src' in source: 
-									src =label+'.'+source['src']
-									if 'pgn' in source: src +='.'+str(source['pgn'])
+            if not self.private_unit_s:
+                if type(i[2]) is str:
+                    self.buffer.append([index, 2, i[2]])
+                else:
+                    self.buffer.append([index, 2, str('%.3f' % i[2])])
+                self.buffer.append([index, 3, i[3]])
+            else:
+                if type(i[2]) is str:
+                    self.buffer.append([index, 2, i[2]])
+                else:
+                    i[9] = i[2] / i[10] + i[11]
+                    self.buffer.append([index, 2, str('%.3f' % i[9])])
+                self.buffer.append([index, 3, i[8]])
+            self.list.SetStringItem(index, 4, str('%.1f' % i[4]))
+            self.list.SetStringItem(index, 5, str(i[5]))
+            self.list.SetStringItem(index, 6, str(i[6]))
+            index += 1
 
-					for lvalue in value:
-						result = True
-						if lvalue in ['source', '$source']:
-							result = False
-						elif lvalue == 'timestamp':
-							if 'position' in path and 'RMC' in src2:
-								self.update_add(timestamp2, 'navigation.datetime', src2, timestamp2)
-							result = False
-						if result:
-							path2 = path + '.' + lvalue
-							value2 = value[lvalue]
-							self.update_add(value2, path2, src2, timestamp2)
-				else:
-					self.update_add(value, path, src, timestamp)
-		except:
-			print 'Error when parsing this sentence:'
-			print js_upb
+    def on_unit_setting(self, e):
+        subprocess.Popen(['python', self.currentpath + '/unit-private.py'])
 
-				
-	def update_add(self, value, path, src, timestamp):
-		# SRC SignalK Value Unit Interval Status Description timestamp	private_Unit private_Value priv_Faktor priv_Offset
-		#  0    1      2     3      4        5        6          7           8             9           10          11
-		if type(value) is list: value = value[0]
-		
-		if isinstance(value, float): pass
-		elif isinstance(value, basestring): value = str(value)
-		elif isinstance(value, int): value = float(value)
-		elif value is None: value = 'None'
-		else: value=0.0
-		
-		index = 0
-		exists = False
-		for i in self.list_SK:
-			if path == i[1] and i[0] == src:
-				exists = True
-				i[0] = src
-				i[2] = value
-				if i[4] == 0.0:
-					i[4] = self.json_interval(i[7], timestamp)
-				else:
-					i[4] = i[4] * .8 + 0.2 * self.json_interval(i[7], timestamp)
-				i[7] = timestamp
-				self.buffer.append([index, 0, i[0]])
-				self.buffer.append([index, 4, str('%.2f' % i[4])])
-				if type(i[2]) is str:
-					self.buffer.append([index, 2, i[2]])
-					self.buffer.append([index, 3, i[3]])
-					break
-				elif type(i[2]) is float:
-					pass
-				else:
-					i[2] = 0.0
-				if not self.private_unit_s:
-					self.buffer.append([index, 2, str('%.3f' % i[2])])
-					self.buffer.append([index, 3, i[3]])
-				else:
-					i[9] = i[2] / i[10] + i[11]
-					self.buffer.append([index, 2, str('%.3f' % i[9])])
-					self.buffer.append([index, 3, i[8]])
-				break
-			index += 1
-		if not exists:
-			self.lookup_star(path)
-			self.list_SK.append(
-				[src, path, value, str(self.SK_unit), 0.0, 1, self.SK_description, timestamp, str(self.SK_unit_priv), 0,
-				 self.SK_Faktor_priv, self.SK_Offset_priv])
-			self.buffer.append([-1, 0, ''])
+    def OnClose(self, e):
+        self.endlive=True
+        qx=0
+        while not self.ende and qx<50:
+            time.sleep(0.1)
+            qx+=1
 
-	def on_private_unit(self, e):
-		self.private_unit_s = self.private_unit.GetValue()
+        if self.ws:
+            self.ws.close()
+        self.timer.Stop()
+        self.Destroy()
 
-	def on_error(self, ws, error):
-		print error
+    def on_message(self, ws, message):
+        if self.endlive:
+            self.on_close(ws)
+            self.ende=True
+            return
+            js_upb=''
+        try:
+            js_upb = ujson.loads(message)
+            if 'updates' not in js_upb:
+                return
+            js_up = js_upb['updates'][0]
+            label = ''
+            src = ''
+            type = ''
+            value = ''
 
-	def on_close(self, ws):
-		ws.close()
+            if 'source' in js_up.keys():
+                source=js_up['source']
+                label = source['label']
+                if 'type' in source:
+                    type = source['type']
+                    if type == 'NMEA0183':
+                        if 'talker' in source:
+                            src =label+'.'+source['talker']
+                            if 'sentence' in source: src =label+'.'+source['sentence']
+                    elif type == 'NMEA2000':
+                        if 'src' in source:
+                            src =label+'.'+source['src']
+                            if 'pgn' in source: src +='.'+str(source['pgn'])
+            if '$source' in js_up and src=='':
+                src = js_up['$source']
+            if 'timestamp' in js_up.keys():
+                timestamp = js_up['timestamp']
+            else:
+                timestamp = '2000-01-01T00:00:00.000Z'
+            values_ = js_up['values']
 
-	def on_open(self, ws):
-		pass
+            for values in values_:
+                path = values['path']
+                value = values['value']
+                src2 = src
+                timestamp2 = timestamp
 
-	def run(self):
-		print self.ws_name
+                if isinstance(value, dict):
+                    if 'timestamp' in value: timestamp2 = value['timestamp']
+                    if '$source' in value and src=='':
+                        src = value['$source']
+                    elif 'source' in value:
+                        source=value['source']
+                        label = source['label']
+                        if 'type' in source:
+                            type = source['type']
+                            if type == 'NMEA0183':
+                                if 'talker' in source:
+                                    src =label+'.'+source['talker']
+                                    if 'sentence' in source: src =label+'.'+source['sentence']
+                            elif type == 'NMEA2000':
+                                if 'src' in source:
+                                    src =label+'.'+source['src']
+                                    if 'pgn' in source: src +='.'+str(source['pgn'])
 
-		self.endlive=False
-		self.ende=False
-		self.ws = websocket.WebSocketApp(self.ws_name,
-										 on_message=lambda ws, msg: self.on_message(ws, msg),
-										 on_error=lambda ws, err: self.on_error(ws, err),
-										 on_close=lambda ws: self.on_close(ws))
-		self.ws.on_open = lambda ws: self.on_open(ws)
-		self.ws.run_forever()
-		self.ws = None
+                    for lvalue in value:
+                        result = True
+                        if lvalue in ['source', '$source']:
+                            result = False
+                        elif lvalue == 'timestamp':
+                            if 'position' in path and 'RMC' in src2:
+                                self.update_add(timestamp2, 'navigation.datetime', src2, timestamp2)
+                            result = False
+                        if result:
+                            path2 = path + '.' + lvalue
+                            value2 = value[lvalue]
+                            self.update_add(value2, path2, src2, timestamp2)
+                else:
+                    self.update_add(value, path, src, timestamp)
+        except:
+            print 'Error when parsing this sentence:'
+            print js_upb
 
-	def start(self):
-		def run():
-			self.run()
 
-		self.thread = threading.Thread(target=run)
-		self.thread.start()
+    def update_add(self, value, path, src, timestamp):
+        # SRC SignalK Value Unit Interval Status Description timestamp	private_Unit private_Value priv_Faktor priv_Offset
+        #  0    1      2     3      4        5        6          7           8             9           10          11
+        if type(value) is list: value = value[0]
+
+        if isinstance(value, float): pass
+        elif isinstance(value, basestring): value = str(value)
+        elif isinstance(value, int): value = float(value)
+        elif value is None: value = 'None'
+        else: value=0.0
+
+        index = 0
+        exists = False
+        for i in self.list_SK:
+            if path == i[1] and i[0] == src:
+                exists = True
+                i[0] = src
+                i[2] = value
+                if i[4] == 0.0:
+                    i[4] = self.json_interval(i[7], timestamp)
+                else:
+                    i[4] = i[4] * .8 + 0.2 * self.json_interval(i[7], timestamp)
+                i[7] = timestamp
+                self.buffer.append([index, 0, i[0]])
+                self.buffer.append([index, 4, str('%.2f' % i[4])])
+                if type(i[2]) is str:
+                    self.buffer.append([index, 2, i[2]])
+                    self.buffer.append([index, 3, i[3]])
+                    break
+                elif type(i[2]) is float:
+                    pass
+                else:
+                    i[2] = 0.0
+                if not self.private_unit_s:
+                    self.buffer.append([index, 2, str('%.3f' % i[2])])
+                    self.buffer.append([index, 3, i[3]])
+                else:
+                    i[9] = i[2] / i[10] + i[11]
+                    self.buffer.append([index, 2, str('%.3f' % i[9])])
+                    self.buffer.append([index, 3, i[8]])
+                break
+            index += 1
+        if not exists:
+            self.lookup_star(path)
+            self.list_SK.append(
+                [src, path, value, str(self.SK_unit), 0.0, 1, self.SK_description, timestamp, str(self.SK_unit_priv), 0,
+                 self.SK_Faktor_priv, self.SK_Offset_priv])
+            self.buffer.append([-1, 0, ''])
+
+    def on_private_unit(self, e):
+        self.private_unit_s = self.private_unit.GetValue()
+
+    def on_error(self, ws, error):
+        print error
+
+    def on_close(self, ws):
+        ws.close()
+
+    def on_open(self, ws):
+        pass
+
+    def run(self):
+        print self.ws_name
+
+        self.endlive=False
+        self.ende=False
+        self.ws = websocket.WebSocketApp(self.ws_name,
+                                         on_message=lambda ws, msg: self.on_message(ws, msg),
+                                         on_error=lambda ws, err: self.on_error(ws, err),
+                                         on_close=lambda ws: self.on_close(ws))
+        self.ws.on_open = lambda ws: self.on_open(ws)
+        self.ws.run_forever()
+        self.ws = None
+
+    def start(self):
+        def run():
+            self.run()
+
+        self.thread = threading.Thread(target=run)
+        self.thread.start()
 
 
 app = wx.App()

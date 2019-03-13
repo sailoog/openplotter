@@ -24,15 +24,15 @@ Language(conf)
 data = conf.get('PYPILOT', 'deviation')
 listsave = []
 try:
-	listsave = eval(data)
+    listsave = eval(data)
 except:
-	listsave = []
+    listsave = []
 
 x=[]
 y=[]
 for ii in listsave:
-	x.append(ii[1] - ii[0])
-	y.append(ii[0])
+    x.append(ii[1] - ii[0])
+    y.append(ii[0])
 
 plt.plot(x,y)
 plt.suptitle(_('Show deviation table as curve'), fontsize=12)

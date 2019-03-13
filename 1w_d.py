@@ -17,43 +17,43 @@
 
 import socket, time, platform
 if platform.machine()[0:3]!='arm':
-	print 'this is not a raspberry pi -> no W1ThermSensor'
+    print 'this is not a raspberry pi -> no W1ThermSensor'
 else:
-	from w1thermsensor import W1ThermSensor
-	from classes.conf import Conf	
-	
-	conf = Conf()
+    from w1thermsensor import W1ThermSensor
+    from classes.conf import Conf
 
-	try:
-		sensors_list=eval(conf.get('1W', 'DS18B20'))
-	except: sensors_list=[]
+    conf = Conf()
 
-	if sensors_list:
-		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-		sensors=[]
-		sensors_list2=[]
-		for item in sensors_list:
-			try:
-				type=W1ThermSensor.THERM_SENSOR_DS18B20
-				for sensor in W1ThermSensor.get_available_sensors():
-					if item[2] == sensor.id:
-						type = sensor.type
-				sensors.append(W1ThermSensor(type, item[2]))
-				sensors_list2.append(item)
-			except Exception,e: print str(e)
-				
-		while True:
-			time.sleep(0.1)
-			list_signalk=[]
-			ib=0
-			for i in sensors_list2:
-				try:
-					temp=sensors[ib].get_temperature(W1ThermSensor.KELVIN)
-					temp_offset=temp+float(i[3])
-					value=str(temp_offset)
-					path=i[1]
-					name=i[0]
-					SignalK='{"updates":[{"$source":"OPsensors.1W.'+name+'","values":[{"path":"'+path+'","value":'+value+'}]}]}\n'
-					sock.sendto(SignalK, ('127.0.0.1', 55557))
-				except Exception,e: print str(e)
-				ib=ib+1	
+    try:
+        sensors_list=eval(conf.get('1W', 'DS18B20'))
+    except: sensors_list=[]
+
+    if sensors_list:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sensors=[]
+        sensors_list2=[]
+        for item in sensors_list:
+            try:
+                type=W1ThermSensor.THERM_SENSOR_DS18B20
+                for sensor in W1ThermSensor.get_available_sensors():
+                    if item[2] == sensor.id:
+                        type = sensor.type
+                sensors.append(W1ThermSensor(type, item[2]))
+                sensors_list2.append(item)
+            except Exception,e: print str(e)
+
+        while True:
+            time.sleep(0.1)
+            list_signalk=[]
+            ib=0
+            for i in sensors_list2:
+                try:
+                    temp=sensors[ib].get_temperature(W1ThermSensor.KELVIN)
+                    temp_offset=temp+float(i[3])
+                    value=str(temp_offset)
+                    path=i[1]
+                    name=i[0]
+                    SignalK='{"updates":[{"$source":"OPsensors.1W.'+name+'","values":[{"path":"'+path+'","value":'+value+'}]}]}\n'
+                    sock.sendto(SignalK, ('127.0.0.1', 55557))
+                except Exception,e: print str(e)
+                ib=ib+1

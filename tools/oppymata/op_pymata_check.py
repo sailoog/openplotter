@@ -18,11 +18,11 @@ import signal, sys, time
 from PyMata.pymata import PyMata
 
 def signal_handler(sig, frame):
-	print('You pressed Ctrl+C!!!!')
-	board.close()
-	if board is not None:
-		board.reset()
-	sys.exit(0)
+    print('You pressed Ctrl+C!!!!')
+    board.close()
+    if board is not None:
+        board.reset()
+    sys.exit(0)
 
 signal.signal(signal.SIGINT, signal_handler)
 board = PyMata("/dev/ttyOP_FIRM")

@@ -24,200 +24,200 @@ from classes.language import Language
 from classes.getkeys import GetKeys
 
 class MyFrame(wx.Frame):
-	def __init__(self):
-		self.list_SK_unit = []
-		self.data_SK_unit_private = []
-		self.SK_unit = ''
-		self.SK_description = ''
+    def __init__(self):
+        self.list_SK_unit = []
+        self.data_SK_unit_private = []
+        self.SK_unit = ''
+        self.SK_description = ''
 
-		self.conf = Conf()
-		self.home = self.conf.home
-		self.currentpath = self.conf.get('GENERAL', 'op_folder')
+        self.conf = Conf()
+        self.home = self.conf.home
+        self.currentpath = self.conf.get('GENERAL', 'op_folder')
 
-		Language(self.conf)
+        Language(self.conf)
 
-		logging.basicConfig()
-		self.buffer = []
-		self.sortCol = 0
+        logging.basicConfig()
+        self.buffer = []
+        self.sortCol = 0
 
-		wx.Frame.__init__(self, None, title='diagnostic SignalK input', size=(650, 435))
-		self.Bind(wx.EVT_CLOSE, self.OnClose)
-		panel = wx.Panel(self, wx.ID_ANY)
+        wx.Frame.__init__(self, None, title='diagnostic SignalK input', size=(650, 435))
+        self.Bind(wx.EVT_CLOSE, self.OnClose)
+        panel = wx.Panel(self, wx.ID_ANY)
 
-		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
+        self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 
-		self.icon = wx.Icon(self.currentpath + '/openplotter.ico', wx.BITMAP_TYPE_ICO)
-		self.SetIcon(self.icon)
+        self.icon = wx.Icon(self.currentpath + '/openplotter.ico', wx.BITMAP_TYPE_ICO)
+        self.SetIcon(self.icon)
 
-		self.list = wx.ListCtrl(panel, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
-		self.list.InsertColumn(0, 'SignalK', width=400)
-		self.list.InsertColumn(1, _('SK Unit'), width=80)
-		self.list.InsertColumn(2, _('Unit'), width=80)
-		self.list.InsertColumn(3, _('Description'), width=500)
+        self.list = wx.ListCtrl(panel, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
+        self.list.InsertColumn(0, 'SignalK', width=400)
+        self.list.InsertColumn(1, _('SK Unit'), width=80)
+        self.list.InsertColumn(2, _('Unit'), width=80)
+        self.list.InsertColumn(3, _('Description'), width=500)
 
-		self.sort_UnitSK = wx.Button(panel, label=_('Sort SK Unit'))
-		self.sort_UnitSK.Bind(wx.EVT_BUTTON, self.on_sort_UnitSK)
+        self.sort_UnitSK = wx.Button(panel, label=_('Sort SK Unit'))
+        self.sort_UnitSK.Bind(wx.EVT_BUTTON, self.on_sort_UnitSK)
 
-		self.sort_Unit = wx.Button(panel, label=_('Sort Unit'))
-		self.Bind(wx.EVT_BUTTON, self.on_sort_Unit, self.sort_Unit)
+        self.sort_Unit = wx.Button(panel, label=_('Sort Unit'))
+        self.Bind(wx.EVT_BUTTON, self.on_sort_Unit, self.sort_Unit)
 
-		self.sort_SK = wx.Button(panel, label=_('Sort SK'))
-		self.sort_SK.Bind(wx.EVT_BUTTON, self.on_sort_SK)
+        self.sort_SK = wx.Button(panel, label=_('Sort SK'))
+        self.sort_SK.Bind(wx.EVT_BUTTON, self.on_sort_SK)
 
-		self.change_selected = wx.Button(panel, label=_('change selected'))
-		self.change_selected.Bind(wx.EVT_BUTTON, self.on_change_selected)
+        self.change_selected = wx.Button(panel, label=_('change selected'))
+        self.change_selected.Bind(wx.EVT_BUTTON, self.on_change_selected)
 
-		list_convert = [
-						'Hz', 'Hz RPM', 
-						'J', 'J Ah(12V)', 'J Ah(24V)',
-						'K', 'K C',	'K F',
-						'm', 'm ft', 'm nm', 'm km',
-						'm/s', 'm/s kn','m/s kmh', 'm/s mph',
-						'm3', 'm3 dm3', 'm3 gal',
-						'm3/s', 'm3/s l/h', 'm3/s gal/h',
-						'Pa', 'Pa hPa', 'Pa Bar',
-						'rad', 'rad deg',
-						's', 's h', 's d', 's y',
-						'ratio', 'ratio %'
-						]
-		self.select_Unit_t = wx.StaticText(panel, label=_('convert'))
-		self.select_Unit = wx.ComboBox(panel, choices=list_convert, style=wx.CB_READONLY, size=(150, 32))
+        list_convert = [
+            'Hz', 'Hz RPM',
+            'J', 'J Ah(12V)', 'J Ah(24V)',
+            'K', 'K C',	'K F',
+            'm', 'm ft', 'm nm', 'm km',
+            'm/s', 'm/s kn','m/s kmh', 'm/s mph',
+            'm3', 'm3 dm3', 'm3 gal',
+            'm3/s', 'm3/s l/h', 'm3/s gal/h',
+            'Pa', 'Pa hPa', 'Pa Bar',
+            'rad', 'rad deg',
+            's', 's h', 's d', 's y',
+            'ratio', 'ratio %'
+        ]
+        self.select_Unit_t = wx.StaticText(panel, label=_('convert'))
+        self.select_Unit = wx.ComboBox(panel, choices=list_convert, style=wx.CB_READONLY, size=(150, 32))
 
-		vbox = wx.BoxSizer(wx.VERTICAL)
-		hlistbox = wx.BoxSizer(wx.HORIZONTAL)
-		hbox = wx.BoxSizer(wx.HORIZONTAL)
-		hlistbox.Add(self.list, 1, wx.ALL | wx.EXPAND, 5)
-		hbox.Add(self.sort_SK, 0, wx.RIGHT | wx.LEFT, 5)
-		hbox.Add(self.sort_UnitSK, 0, wx.RIGHT | wx.LEFT, 5)
-		hbox.Add(self.sort_Unit, 0, wx.RIGHT | wx.LEFT, 5)
-		hbox.Add((0,0), 1, wx.RIGHT | wx.LEFT, 5)
-		hbox.Add(self.change_selected, 0, wx.RIGHT | wx.LEFT, 5)
-		hbox.Add(self.select_Unit_t, 0, wx.LEFT | wx.TOP, 5)
-		hbox.Add(self.select_Unit, 0, wx.RIGHT | wx.LEFT, 5)
-		vbox.Add(hlistbox, 1, wx.ALL | wx.EXPAND, 0)
-		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 0)
-		panel.SetSizer(vbox)
+        vbox = wx.BoxSizer(wx.VERTICAL)
+        hlistbox = wx.BoxSizer(wx.HORIZONTAL)
+        hbox = wx.BoxSizer(wx.HORIZONTAL)
+        hlistbox.Add(self.list, 1, wx.ALL | wx.EXPAND, 5)
+        hbox.Add(self.sort_SK, 0, wx.RIGHT | wx.LEFT, 5)
+        hbox.Add(self.sort_UnitSK, 0, wx.RIGHT | wx.LEFT, 5)
+        hbox.Add(self.sort_Unit, 0, wx.RIGHT | wx.LEFT, 5)
+        hbox.Add((0,0), 1, wx.RIGHT | wx.LEFT, 5)
+        hbox.Add(self.change_selected, 0, wx.RIGHT | wx.LEFT, 5)
+        hbox.Add(self.select_Unit_t, 0, wx.LEFT | wx.TOP, 5)
+        hbox.Add(self.select_Unit, 0, wx.RIGHT | wx.LEFT, 5)
+        vbox.Add(hlistbox, 1, wx.ALL | wx.EXPAND, 0)
+        vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 0)
+        panel.SetSizer(vbox)
 
-		self.CreateStatusBar()
+        self.CreateStatusBar()
 
-		self.read()
-		self.sorting()
+        self.read()
+        self.sorting()
 
-		self.Show(True)
+        self.Show(True)
 
-	def read(self):
-		self.list_SK_unit = []
+    def read(self):
+        self.list_SK_unit = []
 
-		self.keys = GetKeys()
-		data = self.keys.keys
+        self.keys = GetKeys()
+        data = self.keys.keys
 
-		data_sk_unit_private = []
-		if os.path.isfile(self.home+'/.openplotter/private_unit.json'):
-			with open(self.home+'/.openplotter/private_unit.json') as data_file:
-				data_sk_unit_private = json.load(data_file)
-		for i in data:
-			self.list_SK_unit.append([str(i[0]), str(i[2]), '', str(i[1])])
-		for j in data_sk_unit_private:
-			for i in self.list_SK_unit:
-				if j[0] == i[0]:
-					i[2] = j[2]
-					break					
-					
-		self.list_SK_unit.sort(key=lambda tup: tup[0])
-		self.list_SK_unit.sort(key=lambda tup: tup[1])
+        data_sk_unit_private = []
+        if os.path.isfile(self.home+'/.openplotter/private_unit.json'):
+            with open(self.home+'/.openplotter/private_unit.json') as data_file:
+                data_sk_unit_private = json.load(data_file)
+        for i in data:
+            self.list_SK_unit.append([str(i[0]), str(i[2]), '', str(i[1])])
+        for j in data_sk_unit_private:
+            for i in self.list_SK_unit:
+                if j[0] == i[0]:
+                    i[2] = j[2]
+                    break
 
-	def lookup_star(self, name):
-		skip = -1
-		index = 0
-		st = ''
-		for i in name.split('.'):
-			if index > -1:
-				if skip == 0:
-					st += '.*'
-				else:
-					if i in ['propulsion', 'inventory']:
-						skip = 1
-					elif i == 'resources':
-						skip = 2
-					st += '.' + i
-			index += 1
-			skip -= 1
+        self.list_SK_unit.sort(key=lambda tup: tup[0])
+        self.list_SK_unit.sort(key=lambda tup: tup[1])
 
-		st = st[1:]
-		self.SK_unit = ''
-		self.SK_description = ''
-		exist = False
-		for j in self.list_SK_unit:
-			if j[2] == st:
-				self.SK_unit = j[0]
-				self.SK_description = j[3]
-				exist = True
-				break
-		if not exist:
-			print 'no unit for ', st
+    def lookup_star(self, name):
+        skip = -1
+        index = 0
+        st = ''
+        for i in name.split('.'):
+            if index > -1:
+                if skip == 0:
+                    st += '.*'
+                else:
+                    if i in ['propulsion', 'inventory']:
+                        skip = 1
+                    elif i == 'resources':
+                        skip = 2
+                    st += '.' + i
+            index += 1
+            skip -= 1
 
-	def on_sort_Unit(self, e):
-		self.sortCol = 2
-		self.sorting()
+        st = st[1:]
+        self.SK_unit = ''
+        self.SK_description = ''
+        exist = False
+        for j in self.list_SK_unit:
+            if j[2] == st:
+                self.SK_unit = j[0]
+                self.SK_description = j[3]
+                exist = True
+                break
+        if not exist:
+            print 'no unit for ', st
 
-	def on_sort_UnitSK(self, e):
-		self.sortCol = 1
-		self.sorting()
+    def on_sort_Unit(self, e):
+        self.sortCol = 2
+        self.sorting()
 
-	def on_sort_SK(self, e):
-		self.sortCol = 0
-		self.sorting()
+    def on_sort_UnitSK(self, e):
+        self.sortCol = 1
+        self.sorting()
 
-	def on_change_selected(self, e):
-		orig_unit = self.select_Unit.GetValue().split(' ')
-		if len(orig_unit) == 1:
-			orig_unit = [orig_unit[0], '']
-		if orig_unit[0] != '':
-			list_select = []
-			item = self.list.GetFirstSelected()
-			while item != -1:
-				# do something with the item
-				self.list_SK_unit[item][2] = orig_unit[1]
+    def on_sort_SK(self, e):
+        self.sortCol = 0
+        self.sorting()
 
-				list_select.append(self.get_by_index(item))
-				item = self.list.GetNextSelected(item)
+    def on_change_selected(self, e):
+        orig_unit = self.select_Unit.GetValue().split(' ')
+        if len(orig_unit) == 1:
+            orig_unit = [orig_unit[0], '']
+        if orig_unit[0] != '':
+            list_select = []
+            item = self.list.GetFirstSelected()
+            while item != -1:
+                # do something with the item
+                self.list_SK_unit[item][2] = orig_unit[1]
 
-			self.data_SK_unit_private = []
-			for i in self.list_SK_unit:
-				if i[2] != '':
-					self.data_SK_unit_private.append([i[0], i[1], i[2]])
-			with open(self.home+'/.openplotter/private_unit.json', 'w') as data_file:
-				json.dump(self.data_SK_unit_private, data_file)
+                list_select.append(self.get_by_index(item))
+                item = self.list.GetNextSelected(item)
 
-			self.data_SK_unit_private = []
-			with open(self.home+'/.openplotter/private_unit.json') as data_file:
-				self.data_SK_unit_private = json.load(data_file)
-			self.read()
-			self.sorting()
+            self.data_SK_unit_private = []
+            for i in self.list_SK_unit:
+                if i[2] != '':
+                    self.data_SK_unit_private.append([i[0], i[1], i[2]])
+            with open(self.home+'/.openplotter/private_unit.json', 'w') as data_file:
+                json.dump(self.data_SK_unit_private, data_file)
 
-	def get_by_index(self, item):
-		index = 0
-		for i in self.list_SK_unit:
-			if index == item:
-				return i
-			index += 1
-		return False
+            self.data_SK_unit_private = []
+            with open(self.home+'/.openplotter/private_unit.json') as data_file:
+                self.data_SK_unit_private = json.load(data_file)
+            self.read()
+            self.sorting()
 
-	def sorting(self):
-		self.list.DeleteAllItems()
-		self.list_SK_unit.sort(key=lambda tup: tup[self.sortCol])
-		index = 0
-		for i in self.list_SK_unit:
-			self.list.InsertStringItem(index, i[0])
-			self.list.SetStringItem(index, 1, i[1])
-			self.list.SetStringItem(index, 2, i[2])
-			self.list.SetStringItem(index, 3, i[3])
-			index += 1
+    def get_by_index(self, item):
+        index = 0
+        for i in self.list_SK_unit:
+            if index == item:
+                return i
+            index += 1
+        return False
 
-	def OnClose(self, e):
-		self.Destroy()
-	
-	
+    def sorting(self):
+        self.list.DeleteAllItems()
+        self.list_SK_unit.sort(key=lambda tup: tup[self.sortCol])
+        index = 0
+        for i in self.list_SK_unit:
+            self.list.InsertStringItem(index, i[0])
+            self.list.SetStringItem(index, 1, i[1])
+            self.list.SetStringItem(index, 2, i[2])
+            self.list.SetStringItem(index, 3, i[3])
+            index += 1
+
+    def OnClose(self, e):
+        self.Destroy()
+
+
 app = wx.App()
 MyFrame().Show()
 app.MainLoop()

@@ -29,68 +29,68 @@ sen_humi_SK = 'environment.inside.humidity'
 # Control-C signal handler to suppress exceptions if user presses Control C
 # This is totally optional.
 def signal_handler(sig, frame):
-	print('You pressed Ctrl+C!!!!')
-	sys.exit(0)
+    print('You pressed Ctrl+C!!!!')
+    sys.exit(0)
 
-		
-def init():	
-	signal.signal(signal.SIGINT, signal_handler)
 
-	SK_name.append(sen_temp_SK);
-	SK_name.append(sen_humi_SK);
+def init():
+    signal.signal(signal.SIGINT, signal_handler)
+
+    SK_name.append(sen_temp_SK);
+    SK_name.append(sen_humi_SK);
 
 if len(sys.argv)>1:
-	if sys.argv[1]=='settings':
-		print 'No config file or gui! Changes must be made in the python file'
-	exit
+    if sys.argv[1]=='settings':
+        print 'No config file or gui! Changes must be made in the python file'
+    exit
 else:
-	index=0
-	SignalK=''
-	RawValue=[]
-	SK_name=[]
-	channel_rtl=''
-	type_rtl=''
-	output=''
-	finish=False
-	proc = subprocess.Popen(shlex.split('rtl_433 -f'+ sen_frequenz + ' -R' + sen_type +' -s280000'), bufsize = 1, stdout=subprocess.PIPE)
-	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	init()
-	index=0
-		
-	for line in iter(proc.stdout.readline, b''):
-		if 'Temperature:' in line:
-			temperature_rtl = float(line[14:-3])
-			if line[-2:-1] == 'F':
-				temperature_rtl = (temperature_rtl-32.)/1.8 +273.15
-			else:
-				temperature_rtl += 273.15
-			output += line[:-1] + '   float=' + str(temperature_rtl) + '\n'
-		elif 'Humidity:' in line:
-			humidity_rtl = float(line[11:-3])
-			output += line[:-1] + '   float=' + str(humidity_rtl) + '\n'
-			finish=True
-		elif 'Channel:' in line:
-			channel_rtl = line[-2:-1]
-			output += line[:-1] + '   char=' + channel_rtl + '\n'
-		elif 'Prologue sensor' in line:
-			type_rtl = 'PRO'
-			#output += '   shortcut='
-			output += str(line[:-1]) + '   shortcut=' + str(type_rtl) + '\n'
-		else:
-			output += line
-		if finish:
-			finish=False
-			print output
-			output=''
-			SignalK = '{"updates":[{"$source":"OPsensors.RTL433.'+type_rtl+channel_rtl+'","values":[ '
-			Erg=''
-			Erg += '{"path": "'+SK_name[1]+'","value":'+str(humidity_rtl)+'},'
-			Erg += '{"path": "'+SK_name[0]+'","value":'+str(temperature_rtl)+'},'
+    index=0
+    SignalK=''
+    RawValue=[]
+    SK_name=[]
+    channel_rtl=''
+    type_rtl=''
+    output=''
+    finish=False
+    proc = subprocess.Popen(shlex.split('rtl_433 -f'+ sen_frequenz + ' -R' + sen_type +' -s280000'), bufsize = 1, stdout=subprocess.PIPE)
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    init()
+    index=0
 
-			SignalK +=Erg[0:-1]+']}]}\n'
-			sock.sendto(SignalK, ('127.0.0.1', 55557))
-			print SignalK
-			sys.stdout.flush()
-			time.sleep(0.2)
+    for line in iter(proc.stdout.readline, b''):
+        if 'Temperature:' in line:
+            temperature_rtl = float(line[14:-3])
+            if line[-2:-1] == 'F':
+                temperature_rtl = (temperature_rtl-32.)/1.8 +273.15
+            else:
+                temperature_rtl += 273.15
+            output += line[:-1] + '   float=' + str(temperature_rtl) + '\n'
+        elif 'Humidity:' in line:
+            humidity_rtl = float(line[11:-3])
+            output += line[:-1] + '   float=' + str(humidity_rtl) + '\n'
+            finish=True
+        elif 'Channel:' in line:
+            channel_rtl = line[-2:-1]
+            output += line[:-1] + '   char=' + channel_rtl + '\n'
+        elif 'Prologue sensor' in line:
+            type_rtl = 'PRO'
+            #output += '   shortcut='
+            output += str(line[:-1]) + '   shortcut=' + str(type_rtl) + '\n'
+        else:
+            output += line
+        if finish:
+            finish=False
+            print output
+            output=''
+            SignalK = '{"updates":[{"$source":"OPsensors.RTL433.'+type_rtl+channel_rtl+'","values":[ '
+            Erg=''
+            Erg += '{"path": "'+SK_name[1]+'","value":'+str(humidity_rtl)+'},'
+            Erg += '{"path": "'+SK_name[0]+'","value":'+str(temperature_rtl)+'},'
 
-	proc.wait()
+            SignalK +=Erg[0:-1]+']}]}\n'
+            sock.sendto(SignalK, ('127.0.0.1', 55557))
+            print SignalK
+            sys.stdout.flush()
+            time.sleep(0.2)
+
+    proc.wait()

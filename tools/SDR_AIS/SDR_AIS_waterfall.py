@@ -158,7 +158,7 @@ class Waterfall(object):
         else:
             blit = True
         ani = animation.FuncAnimation(self.fig, self.update, interval=50,
-                blit=blit)
+                                      blit=blit)
 
         pyl.show()
 

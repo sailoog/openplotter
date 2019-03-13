@@ -19,59 +19,59 @@ from getkeys import GetKeys
 
 
 class showKeys(wx.Dialog):
-	def __init__(self):
-		wx.Dialog.__init__(self, None, title=_('Show Signal K keys'), size=(430, 320))
-		
-		group = _('ungrouped')
-			
-		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
-		panel = wx.Panel(self)
+    def __init__(self):
+        wx.Dialog.__init__(self, None, title=_('Show Signal K keys'), size=(430, 320))
 
-		self.keys = GetKeys()
-		self.skkeys = self.keys.keys
-		self.groups = self.keys.groups
-		self.ungrouped = self.keys.ungrouped
+        group = _('ungrouped')
 
-		wx.StaticText(panel, label=_('Groups'), pos=(10, 10))
-		self.groups_list = wx.ComboBox(panel, choices=self.groups , style=wx.CB_READONLY, size=(250, 32), pos=(10, 30))
-		self.groups_list.Bind(wx.EVT_COMBOBOX, self.onSelect_group)
-		self.group_description = wx.TextCtrl(panel, -1, style=wx.TE_MULTILINE | wx.TE_READONLY, size=(410, 50), pos=(10, 65))
-		self.group_description.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_INACTIVECAPTION))
-		self.groups_list.SetValue(group)
+        self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
+        panel = wx.Panel(self)
 
-		self.list_sk_keys = []
-		wx.StaticText(panel, label=_('Keys'), pos=(10, 125))
-		self.keys_list = wx.ComboBox(panel, choices=self.list_sk_keys , style=wx.CB_READONLY, size=(410, 32), pos=(10, 145))
-		self.keys_list.Bind(wx.EVT_COMBOBOX, self.onSelect_key)
-		self.key_description = wx.TextCtrl(panel, -1, style=wx.TE_MULTILINE | wx.TE_READONLY, size=(410, 50), pos=(10, 180))
-		self.key_description.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_INACTIVECAPTION))
-		
-		closeBtn = wx.Button(panel, wx.ID_OK, pos=(180, 245))
-		
-		self.onSelect_group(0)
-		
-	def onSelect_group(self,e):
-		selected = self.groups_list.GetValue()
-		self.keys_list.Clear()
-		if selected == _('ungrouped'):
-			self.list_sk_keys = self.ungrouped
-			self.group_description.SetValue(_('Ungrouped Signal K keys.'))
-		else:
-			tmp_list = []
-			for i in self.skkeys:
-				if selected == i[0]:
-					self.group_description.SetValue(i[1])
-				else:
-					items=i[0].split('.')
-					if selected == items[0]:
-						tmp_list.append(i[0])
-			self.list_sk_keys = tmp_list
-		self.keys_list.AppendItems(self.list_sk_keys)
-		self.keys_list.SetSelection(0)
-		self.onSelect_key(0)
+        self.keys = GetKeys()
+        self.skkeys = self.keys.keys
+        self.groups = self.keys.groups
+        self.ungrouped = self.keys.ungrouped
 
-	def onSelect_key(self,e):
-		selected = self.keys_list.GetValue()
-		for i in self.skkeys:
-			if selected == i[0]:
-				self.key_description.SetValue(i[1])
+        wx.StaticText(panel, label=_('Groups'), pos=(10, 10))
+        self.groups_list = wx.ComboBox(panel, choices=self.groups , style=wx.CB_READONLY, size=(250, 32), pos=(10, 30))
+        self.groups_list.Bind(wx.EVT_COMBOBOX, self.onSelect_group)
+        self.group_description = wx.TextCtrl(panel, -1, style=wx.TE_MULTILINE | wx.TE_READONLY, size=(410, 50), pos=(10, 65))
+        self.group_description.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_INACTIVECAPTION))
+        self.groups_list.SetValue(group)
+
+        self.list_sk_keys = []
+        wx.StaticText(panel, label=_('Keys'), pos=(10, 125))
+        self.keys_list = wx.ComboBox(panel, choices=self.list_sk_keys , style=wx.CB_READONLY, size=(410, 32), pos=(10, 145))
+        self.keys_list.Bind(wx.EVT_COMBOBOX, self.onSelect_key)
+        self.key_description = wx.TextCtrl(panel, -1, style=wx.TE_MULTILINE | wx.TE_READONLY, size=(410, 50), pos=(10, 180))
+        self.key_description.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_INACTIVECAPTION))
+
+        closeBtn = wx.Button(panel, wx.ID_OK, pos=(180, 245))
+
+        self.onSelect_group(0)
+
+    def onSelect_group(self,e):
+        selected = self.groups_list.GetValue()
+        self.keys_list.Clear()
+        if selected == _('ungrouped'):
+            self.list_sk_keys = self.ungrouped
+            self.group_description.SetValue(_('Ungrouped Signal K keys.'))
+        else:
+            tmp_list = []
+            for i in self.skkeys:
+                if selected == i[0]:
+                    self.group_description.SetValue(i[1])
+                else:
+                    items=i[0].split('.')
+                    if selected == items[0]:
+                        tmp_list.append(i[0])
+            self.list_sk_keys = tmp_list
+        self.keys_list.AppendItems(self.list_sk_keys)
+        self.keys_list.SetSelection(0)
+        self.onSelect_key(0)
+
+    def onSelect_key(self,e):
+        selected = self.keys_list.GetValue()
+        for i in self.skkeys:
+            if selected == i[0]:
+                self.key_description.SetValue(i[1])

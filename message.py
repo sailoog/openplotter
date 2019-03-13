@@ -23,13 +23,13 @@ text=sys.argv[1]
 lang=sys.argv[2]
 
 class MyFrame(wx.Frame):
-	def __init__(self, parent):
-		conf = Conf()
-		Language(conf)
-		wx.Frame.__init__(self, parent)
-		dlg = wx.MessageDialog(self, text, _('Message'), wx.OK | wx.ICON_WARNING)
-		dlg.ShowModal()
-		sys.exit()
+    def __init__(self, parent):
+        conf = Conf()
+        Language(conf)
+        wx.Frame.__init__(self, parent)
+        dlg = wx.MessageDialog(self, text, _('Message'), wx.OK | wx.ICON_WARNING)
+        dlg.ShowModal()
+        sys.exit()
 
 app = wx.App(False)
 frame = MyFrame(None)

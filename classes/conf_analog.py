@@ -17,40 +17,40 @@
 import ConfigParser, os
 
 class Conf_analog:
-	def __init__(self):
-		self.home = os.path.expanduser('~')
-		if 'root' in self.home:
-			self.home = '/home/'+os.path.expanduser(os.environ["SUDO_USER"])
-		self.conf_folder = self.home+'/.openplotter'
-		self.data_conf = ConfigParser.SafeConfigParser()
-		self.read()
+    def __init__(self):
+        self.home = os.path.expanduser('~')
+        if 'root' in self.home:
+            self.home = '/home/'+os.path.expanduser(os.environ["SUDO_USER"])
+        self.conf_folder = self.home+'/.openplotter'
+        self.data_conf = ConfigParser.SafeConfigParser()
+        self.read()
 
-	def read(self):
-		self.data_conf.read(self.conf_folder+'/tools/openplotter_analog.conf')
+    def read(self):
+        self.data_conf.read(self.conf_folder+'/tools/openplotter_analog.conf')
 
-	def write(self):
-		with open(self.conf_folder+'/tools/openplotter_analog.conf', 'wb') as configfile:
-			self.data_conf.write(configfile)
+    def write(self):
+        with open(self.conf_folder+'/tools/openplotter_analog.conf', 'wb') as configfile:
+            self.data_conf.write(configfile)
 
-	def get(self,section,item):
-		return self.data_conf.get(section,item)
+    def get(self,section,item):
+        return self.data_conf.get(section,item)
 
-	def getint(self,section,item):
-		return self.data_conf.getint(section,item)
+    def getint(self,section,item):
+        return self.data_conf.getint(section,item)
 
-	def getfloat(self,section,item):
-		return self.data_conf.getfloat(section,item)
+    def getfloat(self,section,item):
+        return self.data_conf.getfloat(section,item)
 
-	def has_option(self,section,item):
-		return self.data_conf.has_option(section,item)
-		
-	def has_section(self,section):
-		return self.data_conf.has_section(section)
-		
-	def add_section(self,section):
-		return self.data_conf.add_section(section)
-		
-	def set(self,section,item,value):
-		self.read()
-		self.data_conf.set(section, item, value)
-		self.write()
+    def has_option(self,section,item):
+        return self.data_conf.has_option(section,item)
+
+    def has_section(self,section):
+        return self.data_conf.has_section(section)
+
+    def add_section(self,section):
+        return self.data_conf.add_section(section)
+
+    def set(self,section,item,value):
+        self.read()
+        self.data_conf.set(section, item, value)
+        self.write()

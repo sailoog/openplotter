@@ -43,7 +43,7 @@ class ms5607:
     def getMetricAltitude(self, currentMilliBar, baseMilliBar):
         return 0.3048 * self.getImperialAltitude(currentMilliBar, baseMilliBar)
 
-    # Commands		
+    # Commands
     def resetSensor(self):
         bus.write_byte(self.DEVICE_ADDRESS, self._CMD_RESET)
         time.sleep(0.003) # wait for the reset sequence timing
@@ -67,7 +67,7 @@ class ms5607:
     def getTemperature(self):
         dT = self.getDigitalTemperature() - self.coefficients[4] * math.pow(2, 8)
         return (2000 + dT * self.coefficients[5] / math.pow(2, 23)) / 100
-        
+
     def convertPressureTemperature(self, pressure, temperature):
         # Calculate 1st order pressure and temperature
         dT = temperature - self.coefficients[4] * 256
