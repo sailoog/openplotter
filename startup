@@ -243,9 +243,11 @@ class MyFrame(wx.Frame):
 		self.check_start('SK-base_d.py')
 
 		subprocess.call(['pkill', '-f', 'read_sensors_d.py'])
-		self.add_logger_data(_('\nStarting I2C, SPI and Pypilot...'))
+		self.add_logger_data(_('\nStarting I2C, SPI and pypilot...'))
 		if not os.path.exists(self.home + '/.pypilot'):
-			self.add_logger_data(_(' Pypilot not found '))
+			self.add_logger_data(_(' Pypilot not found.'))
+			subprocess.Popen(['python', self.op_folder+'/read_sensors_d.py'])
+			self.check_start('read_sensors_d.py')
 		else:
 			subprocess.Popen(['python', self.op_folder+'/read_sensors_d.py'], cwd=self.home + '/.pypilot')
 			self.check_start('read_sensors_d.py')

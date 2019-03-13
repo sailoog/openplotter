@@ -1203,13 +1203,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.select_pypilot()
 
 	def check_imu(self):
-
+		detected_imu = 'Error: ~/.pypilot not found.'
 		if  os.path.exists(self.home + '/.pypilot'):
 			detected_imu = subprocess.check_output(['python', self.currentpath + '/check_rtimulib.py'], cwd=self.home + '/.pypilot')
-		else:
-			detected_imu = 'Error: ~/.pypilot not found.'
-
-		if 'Error:' in detected_imu: return
+		if 'Error:' in detected_imu: 
+			print detected_imu
+			return
 		else:
 			l_detected = detected_imu.split('\n')
 			for line in l_detected:
