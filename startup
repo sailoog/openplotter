@@ -244,15 +244,18 @@ class MyFrame(wx.Frame):
 
 		subprocess.call(['pkill', '-f', 'read_sensors_d.py'])
 		self.add_logger_data(_('\nStarting I2C, SPI and Pypilot...'))
-		subprocess.Popen(['python', self.op_folder+'/read_sensors_d.py'], cwd=self.home + '/.pypilot')
-		self.check_start('read_sensors_d.py')
+		if not os.path.exists(self.home + '/.pypilot'):
+			self.add_logger_data(_(' Pypilot not found '))
+		else:
+			subprocess.Popen(['python', self.op_folder+'/read_sensors_d.py'], cwd=self.home + '/.pypilot')
+			self.check_start('read_sensors_d.py')
 
-		subprocess.call(['pkill', '-f', 'pypilot_webapp'])
-		if webapp=='1' and pypilot_mode == 'basic autopilot':
-			self.add_logger_data(_('\nStarting Pypilot Web App...'))
-			try: subprocess.Popen(['pypilot_webapp', webapp_port])
-			except: pass
-			self.check_start('pypilot_webapp')
+			subprocess.call(['pkill', '-f', 'pypilot_webapp'])
+			if webapp=='1' and pypilot_mode == 'basic autopilot':
+				self.add_logger_data(_('\nStarting Pypilot Web App...'))
+				try: subprocess.Popen(['pypilot_webapp', webapp_port])
+				except: pass
+				self.check_start('pypilot_webapp')
 
 		subprocess.call(['pkill', '-9', 'aisdecoder'])
 		subprocess.call(['pkill', '-9', 'rtl_fm'])
@@ -301,7 +304,7 @@ class MyFrame(wx.Frame):
 				if os.path.isfile(self.conf_folder+'/tools/'+folder+'/'+file):
 					subprocess.Popen(['python',self.conf_folder+'/tools/'+folder+'/'+file])
 				else:
-					subprocess.Popen(['python',self.op_folder+'/tools/'+folder+'/'+file])	
+					subprocess.Popen(['python',self.op_folder+'/tools/'+folder+'/'+file])
 			index+=1
 		self.add_logger_data(_(' Done.'))
 
