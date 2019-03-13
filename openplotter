@@ -87,7 +87,7 @@ class MainFrame(wx.Frame):
 		sizer = wx.BoxSizer()
 		sizer.Add(self.nb, 1, wx.EXPAND)
 		self.p.SetSizer(sizer)
-		self.help_bmp = wx.Bitmap("/usr/share/icons/PiX/24x24/apps/help-browser.png", wx.BITMAP_TYPE_ANY)
+		self.help_bmp = wx.Bitmap(self.currentpath + "/static/icons/help-browser.png", wx.BITMAP_TYPE_ANY)
 		self.icon = wx.Icon(self.currentpath + '/openplotter.ico', wx.BITMAP_TYPE_ICO)
 		self.SetIcon(self.icon)
 		self.CreateStatusBar()
