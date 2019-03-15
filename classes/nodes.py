@@ -2640,6 +2640,7 @@ class ActionSendTelegram(wx.Dialog):
 	def __init__(self, parent, edit):
 		self.credentials = ''
 		self.nodes = parent.nodes
+		self.home = parent.home
 		self.actions_flow_id = parent.actions_flow_id
 		self.telegramid = parent.telegramid
 		self.action_id = parent.available_actions_select.GetSelection()
@@ -2671,6 +2672,35 @@ class ActionSendTelegram(wx.Dialog):
 		        ],
 		        "answer": false,
 		        "silent": false,
+		        "x": 380,
+		        "y": 120,
+		        "wires": [[]]
+		    }'''
+		self.image_node_template = '''
+		    {
+		        "id": "",
+		        "type": "chatbot-image",
+		        "z": "",
+		        "name": "",
+		        "filename": "",
+		        "image": "",
+		        "caption": "",
+		        "x": 380,
+		        "y": 120,
+		        "wires": [[]]
+		    }'''
+		self.photo_node_template = '''
+		    {
+		        "id": "",
+		        "type": "usbcamera",
+		        "z": "",
+		        "filemode": "0",
+		        "filename": "image01.jpg",
+		        "filedefpath": "1",
+		        "filepath": "",
+		        "fileformat": "jpeg",
+		        "resolution": "",
+		        "name": "",
 		        "x": 380,
 		        "y": 120,
 		        "wires": [[]]
@@ -2724,7 +2754,7 @@ class ActionSendTelegram(wx.Dialog):
 		if edit == 0: title = _('Add Telegram action')
 		else: title = _('Edit Telegram action')
 
-		wx.Dialog.__init__(self, None, title = title, size=(710, 420))
+		wx.Dialog.__init__(self, None, title = title, size=(710, 460))
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 
 		panel = wx.Panel(self)
@@ -2732,11 +2762,23 @@ class ActionSendTelegram(wx.Dialog):
 		chatidlabel = wx.StaticText(panel, label=_('Chat ID'))
 		self.chatid = wx.TextCtrl(panel)
 
-		msglabel = wx.StaticText(panel, label=_('Message'))
+		self.text = wx.CheckBox(panel, label=_('Text'))
+		self.text.Bind(wx.EVT_CHECKBOX, self.on_text)
 		self.msg = wx.TextCtrl(panel, style=wx.TE_MULTILINE, size=(-1,60))
-
 		self.addsk = wx.Button(panel, label=_('Add Signal K key value'))
 		self.addsk.Bind(wx.EVT_BUTTON, self.on_addsk)
+
+		self.picture = wx.CheckBox(panel, label=_('Image'))
+		self.picture.Bind(wx.EVT_CHECKBOX, self.on_picture)
+		self.path_file = wx.TextCtrl(panel)
+		self.button_select_file = wx.Button(panel, label=_('File'))
+		self.button_select_file.Bind(wx.EVT_BUTTON, self.on_select_file)
+
+		self.photo = wx.CheckBox(panel, label=_('Take picture'))
+		self.photo.Bind(wx.EVT_CHECKBOX, self.on_photo)
+		resolutionlabel = wx.StaticText(panel, label=_('Resolution'))
+		resolution_list = ['320x240','640x480','800x600','1024x768','1920x1080']
+		self.resolution = wx.Choice(panel, choices=resolution_list, style=wx.CB_READONLY)
 
 		self.repeat = wx.CheckBox(panel, label=_('Repeat'))
 		self.repeat.Bind(wx.EVT_CHECKBOX, self.on_repeat)
@@ -2755,7 +2797,13 @@ class ActionSendTelegram(wx.Dialog):
 		self.time = wx.SpinCtrl(panel, min=1, max=100000, initial=1)
 		self.timeunit = wx.Choice(panel, choices=self.RepeatOptions.rateUnit, style=wx.CB_READONLY)
 		self.timeunit.SetSelection(2)
-		
+
+		self.msg.Disable()
+		self.addsk.Disable()
+		self.path_file.Disable()
+		self.button_select_file.Disable()
+		self.resolution.Disable()
+
 		self.interval.Disable()
 		self.unit.Disable()
 		self.max.Disable()
@@ -2771,13 +2819,28 @@ class ActionSendTelegram(wx.Dialog):
 		subject.Add(chatidlabel, 0, wx.ALL, 5)
 		subject.Add(self.chatid, 0, wx.ALL, 5)
 
-		body = wx.BoxSizer(wx.HORIZONTAL)
-		body.Add(msglabel, 0, wx.ALL, 5)
-		body.Add(self.msg, 1, wx.ALL, 5)
+		res = wx.BoxSizer(wx.HORIZONTAL)
+		res.Add(resolutionlabel, 0, wx.ALL, 5)
+		res.Add(self.resolution, 0, wx.ALL, 5)
 
-		addsk = wx.BoxSizer(wx.HORIZONTAL)
-		addsk.Add((0, 0), 1, wx.ALL, 5)
-		addsk.Add(self.addsk, 1, wx.ALL, 5)
+		col1 = wx.BoxSizer(wx.VERTICAL)
+		col1.Add(subject, 0, wx.ALL, 5)
+		col1.AddSpacer(10)
+		col1.Add(self.text, 0, wx.ALL, 5)
+		col1.Add(self.msg, 1, wx.ALL | wx.EXPAND, 5)
+		col1.Add(self.addsk, 0, wx.ALL, 5)
+
+		col2 = wx.BoxSizer(wx.VERTICAL)
+		col2.Add(self.picture, 0, wx.ALL, 5)
+		col2.Add(self.path_file, 1, wx.ALL | wx.EXPAND, 5)
+		col2.Add(self.button_select_file, 0, wx.ALL, 5)
+		col2.AddSpacer(10)
+		col2.Add(self.photo, 0, wx.ALL, 5)
+		col2.Add(res, 0, wx.ALL, 5)
+		
+		options = wx.BoxSizer(wx.HORIZONTAL)
+		options.Add(col1, 1, wx.ALL, 5)
+		options.Add(col2, 1, wx.ALL, 5)
 
 		repeath = wx.BoxSizer(wx.HORIZONTAL)
 		repeath.Add(intervallabel, 0, wx.ALL, 5)
@@ -2800,15 +2863,13 @@ class ActionSendTelegram(wx.Dialog):
 		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
 
 		main = wx.BoxSizer(wx.VERTICAL)
-		main.Add(subject, 1, wx.ALL, 5)
-		main.Add(body, 1, wx.ALL | wx.EXPAND, 5)
-		main.Add(addsk, 1, wx.RIGHT | wx.LEFT | wx.EXPAND, 5)
+		main.Add(options, 1, wx.ALL | wx.EXPAND, 5)
 		main.AddSpacer(15)
-		main.Add(self.repeat, 1, wx.RIGHT | wx.LEFT, 5)
-		main.Add(repeath, 1, wx.RIGHT | wx.LEFT, 5)
+		main.Add(self.repeat, 1, wx.RIGHT | wx.LEFT, 10)
+		main.Add(repeath, 1, wx.RIGHT | wx.LEFT, 10)
 		main.AddSpacer(10)
-		main.Add(self.rate, 1, wx.RIGHT | wx.LEFT, 5)
-		main.Add(rate, 1, wx.RIGHT | wx.LEFT, 5)
+		main.Add(self.rate, 1, wx.RIGHT | wx.LEFT, 10)
+		main.Add(rate, 1, wx.RIGHT | wx.LEFT, 10)
 		main.Add((0, 0), 1, wx.ALL, 0)
 		main.Add(ok_cancel, 0, wx.ALL | wx.EXPAND, 10)
 
@@ -2822,6 +2883,47 @@ class ActionSendTelegram(wx.Dialog):
 		if res == wx.OK:
 			self.msg.AppendText('{{flow.'+dlg.selected_vessel+'.'+dlg.selected_key+'}}')
 		dlg.Destroy()
+
+	def on_select_file(self, e):
+		dlg = wx.FileDialog(self, message=_('Choose a file'), defaultDir = self.home+'/Pictures', defaultFile='',
+							wildcard=_('Image files').decode('utf8')+' (*.jpg, *.png, *.gif)|*.jpg;*.png;*.gif|'+_('All files').decode('utf8')+' (*.*)|*.*',
+							style=wx.OPEN | wx.CHANGE_DIR)
+		if dlg.ShowModal() == wx.ID_OK: self.path_file.SetValue(dlg.GetPath())
+		dlg.Destroy()
+
+	def on_text(self, e):
+		if self.text.GetValue():
+			self.msg.Enable()
+			self.addsk.Enable()
+			self.picture.SetValue(False)
+			self.photo.SetValue(False)
+			self.on_picture(0)
+			self.on_photo(0)
+		else:
+			self.msg.Disable()
+			self.addsk.Disable()
+
+	def on_picture(self, e):
+		if self.picture.GetValue():
+			self.path_file.Enable()
+			self.button_select_file.Enable()
+			self.text.SetValue(False)
+			self.photo.SetValue(False)
+			self.on_text(0)
+			self.on_photo(0)
+		else:
+			self.path_file.Disable()
+			self.button_select_file.Disable()
+
+	def on_photo(self, e):
+		if self.photo.GetValue():
+			self.resolution.Enable()
+			self.text.SetValue(False)
+			self.picture.SetValue(False)
+			self.on_text(0)
+			self.on_picture(0)
+		else:
+			self.resolution.Disable()
 
 	def on_repeat(self, e):
 		if self.repeat.GetValue():
@@ -2854,64 +2956,103 @@ class ActionSendTelegram(wx.Dialog):
 
 	def OnOk(self,e):
 		chatid = self.chatid.GetValue()
+		text = self.text.GetValue()
+		picture = self.picture.GetValue()
+		photo = self.photo.GetValue()
 		if not chatid:
 			wx.MessageBox(_('Send "/start" from your bot and you will get your chat ID.'), 'Info', wx.OK | wx.ICON_INFORMATION)
 			return
-		msg = self.msg.GetValue()
-		if not msg:
-			wx.MessageBox(_('Write a message to send.'), 'Info', wx.OK | wx.ICON_INFORMATION)
+		if not text and not picture and not photo:
+			wx.MessageBox(_('Select a content type to send.'), 'Info', wx.OK | wx.ICON_INFORMATION)
 			return
+		if text:
+			msg = self.msg.GetValue()
+			if not msg:
+				wx.MessageBox(_('Write a text to send.'), 'Info', wx.OK | wx.ICON_INFORMATION)
+				return
+		elif picture:
+			path = self.path_file.GetValue()
+			if not path:
+				wx.MessageBox(_('Select an image to send.'), 'Info', wx.OK | wx.ICON_INFORMATION)
+				return
+		elif photo:
+			resolution = self.resolution.GetSelection()+1
+			if resolution < 1:
+				wx.MessageBox(_('Select the picture resolution.'), 'Info', wx.OK | wx.ICON_INFORMATION)
+				return
 		self.ActionNodes = []
 		telegram_node = ujson.loads(self.telegram_node_template)
 		telegram_node['z'] = self.actions_flow_id
 		telegram_node['bot'] = self.telegramid
-		text_node = ujson.loads(self.text_node_template)
-		text_node['z'] = self.actions_flow_id
-		text_node['id'] = self.nodes.get_node_id()
-		subid0 = text_node['id'].split('.')
-		subid = subid0[0]
-		telegram_node['id'] = self.nodes.get_node_id(subid)
-		text_node['name'] = 'a|'+telegram_node['id']+'|'+str(self.action_id)
-		text_node['wires'] = [[telegram_node['id']]]
-		self.ActionNodes.append(telegram_node)
-		self.ActionNodes.append(text_node)
+		if text:
+			text_node = ujson.loads(self.text_node_template)
+			text_node['z'] = self.actions_flow_id
+			text_node['id'] = self.nodes.get_node_id()
+			subid0 = text_node['id'].split('.')
+			subid = subid0[0]
+			telegram_node['id'] = self.nodes.get_node_id(subid)
+			text_node['name'] = 'a|'+telegram_node['id']+'|'+str(self.action_id)
+			text_node['wires'] = [[telegram_node['id']]]
+			self.ActionNodes.append(text_node)
+			payload_node = ujson.loads(self.payload_node_template)
+			payload_node['id'] = self.nodes.get_node_id()
+			payload_node['z'] = self.actions_flow_id
+			payload_node['name'] = text_node['name']
+			payload_node['template'] = msg
+			payload_node['wires'] = [[text_node['id']]]
+			self.ActionNodes.append(payload_node)
+		if picture or photo:
+			image_node = ujson.loads(self.image_node_template)
+			image_node['z'] = self.actions_flow_id
+			image_node['id'] = self.nodes.get_node_id()
+			subid0 = image_node['id'].split('.')
+			subid = subid0[0]
+			telegram_node['id'] = self.nodes.get_node_id(subid)
+			image_node['name'] = 'a|'+telegram_node['id']+'|'+str(self.action_id)
+			image_node['wires'] = [[telegram_node['id']]]
+			if picture: image_node['image'] = path
+			self.ActionNodes.append(image_node)
+			if photo:
+				photo_node = ujson.loads(self.photo_node_template)
+				photo_node['id'] = self.nodes.get_node_id()
+				photo_node['z'] = self.actions_flow_id
+				photo_node['name'] = image_node['name']
+				photo_node['resolution'] = str(resolution)
+				photo_node['wires'] = [[image_node['id']]]
+				self.ActionNodes.append(photo_node)
 		conversation_node = ujson.loads(self.conversation_node_template)
 		conversation_node['id'] = self.nodes.get_node_id()
 		conversation_node['z'] = self.actions_flow_id
-		conversation_node['name'] = text_node['name']
+		conversation_node['name'] = 'a|'+telegram_node['id']+'|'+str(self.action_id)
 		conversation_node['botTelegram'] = self.telegramid
 		conversation_node['chatId'] = chatid
-		conversation_node['wires'] = [[text_node['id']]]
+		if text: conversation_node['wires'] = [[payload_node['id']]]
+		elif picture: conversation_node['wires'] = [[image_node['id']]]
+		elif photo: conversation_node['wires'] = [[photo_node['id']]]
 		self.ActionNodes.append(conversation_node)
-		payload_node = ujson.loads(self.payload_node_template)
-		payload_node['id'] = self.nodes.get_node_id()
-		payload_node['z'] = self.actions_flow_id
-		payload_node['name'] = text_node['name']
-		payload_node['template'] = msg
-		payload_node['wires'] = [[conversation_node['id']]]
-		self.ActionNodes.append(payload_node)
+		self.ActionNodes.append(telegram_node)
 		if not self.repeat.GetValue() and not self.rate.GetValue():
-			self.connector_id = payload_node['id']
+			self.connector_id = conversation_node['id']
 		elif self.repeat.GetValue():
 			repeat_node = ujson.loads(self.RepeatOptions.repeat_template)
 			repeat_node['id'] = self.nodes.get_node_id()
 			repeat_node['z'] = self.actions_flow_id
-			repeat_node['name'] = text_node['name']
+			repeat_node['name'] = 'a|'+telegram_node['id']+'|'+str(self.action_id)
 			repeat_node['interval'] = str(self.interval.GetValue())
 			repeat_node['intervalUnit'] = self.RepeatOptions.intervalUnit2[self.unit.GetSelection()]
 			repeat_node['maximum'] = str(self.max.GetValue())
-			repeat_node['wires'] = [[payload_node['id']]]
+			repeat_node['wires'] = [[conversation_node['id']]]
 			self.connector_id = repeat_node['id']
 			self.ActionNodes.append(repeat_node)
 		elif self.rate.GetValue():
 			rate_node = ujson.loads(self.RepeatOptions.rate_limit_template)
 			rate_node['id'] = self.nodes.get_node_id()
 			rate_node['z'] = self.actions_flow_id
-			rate_node['name'] = text_node['name']
+			rate_node['name'] = 'a|'+telegram_node['id']+'|'+str(self.action_id)
 			rate_node['rate'] = str(self.amount.GetValue())
 			rate_node['nbRateUnits'] = str(self.time.GetValue())
 			rate_node['rateUnits'] = self.RepeatOptions.rateUnit2[self.timeunit.GetSelection()]
-			rate_node['wires'] = [[payload_node['id']]]
+			rate_node['wires'] = [[conversation_node['id']]]
 			self.connector_id = rate_node['id']
 			self.ActionNodes.append(rate_node)
 		self.EndModal(wx.OK)

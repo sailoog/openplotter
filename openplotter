@@ -2806,6 +2806,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 						if node['type'] == 'delay': field3 = _('rate limit')
 					if action["type"] == '9':
 						if node['type'] == 'template': field2 = node['template']
+						if node['type'] == 'usbcamera': field2 = _('take picture')
+						if node['type'] == 'chatbot-image' and not field2: field2 = node['image']
 						if node['type'] == 'msg-resend': field3 = _('repeat')
 						if node['type'] == 'delay': field3 = _('rate limit')
 			self.list_actions.Append([self.available_actions[int(action["type"])].decode('utf8'), field2.decode('utf8'), field3.decode('utf8')])
