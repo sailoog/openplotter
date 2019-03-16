@@ -90,26 +90,13 @@ class editI2c(wx.Dialog):
 		self.SKkey.SetValue('')
 
 	def onEditSkkey(self,e):
-		key = self.SKkey.GetValue()
-		dlg = selectKey(key)
+		dlg = selectKey(self.SKkey.GetValue(),'self')
 		
 		res = dlg.ShowModal()
-		if res == wx.ID_OK:
-			key = dlg.keys_list.GetValue()
-			if '*' in key:
-				wildcard = dlg.wildcard.GetValue()
-				if wildcard:
-					if not re.match('^[0-9a-zA-Z]+$', wildcard):
-						self.ShowMessage(_('Failed. * must contain only allowed characters.'))
-						dlg.Destroy()
-						return
-					key = key.replace('*',wildcard)
-				else:
-					self.ShowMessage(_('Failed. You have to provide a name for *.'))
-					dlg.Destroy()
-					return
+		if res == wx.OK:
+			key = dlg.selected_key
+			self.SKkey.SetValue(key)
 		dlg.Destroy()
-		self.SKkey.SetValue(key)
 
 	def ShowMessage(self, w_msg):
 		wx.MessageBox(w_msg, 'Info', wx.OK | wx.ICON_INFORMATION)
