@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
-import ujson, uuid, os, wx, re, requests, time
+import ujson, uuid, os, wx, re, requests, time, webbrowser
 from select_key import selectKey
 from datetime import datetime
 
@@ -288,6 +288,8 @@ class Nodes:
 class TriggerSK(wx.Dialog):
 	def __init__(self,parent,edit):
 		self.nodes = parent.nodes
+		help_bmp = parent.help_bmp
+		self.currentpath = parent.currentpath
 		self.actions_flow_id = parent.actions_flow_id
 		self.trigger_type = parent.available_triggers_select.GetSelection()
 
@@ -337,13 +339,16 @@ class TriggerSK(wx.Dialog):
 
 		skkeylabel = wx.StaticText(panel, label=_('Signal K key'))
 		self.skkey = wx.TextCtrl(panel)
-		edit_skkey = wx.Button(panel, label=_('Edit'))
+		edit_skkey = wx.Button(panel, label=_('Add'))
 		edit_skkey.Bind(wx.EVT_BUTTON, self.onEditSkkey)
 
 		sourcelabel = wx.StaticText(panel, label=_('Source'))
 		self.source = wx.TextCtrl(panel)
 		sourcetext = wx.StaticText(panel, label=_('Leave blank to listen to any source.\nAllowed characters: . 0-9 a-z A-Z'))
 
+		hline1 = wx.StaticLine(panel)
+		help_button = wx.BitmapButton(panel, bitmap=help_bmp, size=(help_bmp.GetWidth()+40, help_bmp.GetHeight()+10))
+		help_button.Bind(wx.EVT_BUTTON, self.on_help)
 		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
 		okBtn = wx.Button(panel, wx.ID_OK)
 		okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
@@ -369,10 +374,10 @@ class TriggerSK(wx.Dialog):
 		source.Add(self.source, 1, wx.ALL, 5)
 
 		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(help_button, 0, wx.ALL, 10)
 		hbox.Add((0, 0), 1, wx.ALL, 0)
-		hbox.Add(okBtn, 0, wx.ALL, 10)
 		hbox.Add(cancelBtn, 0, wx.ALL, 10)
-		hbox.Add((0, 0), 1, wx.ALL, 0)
+		hbox.Add(okBtn, 0, wx.ALL, 10)
 
 		vbox = wx.BoxSizer(wx.VERTICAL)
 		vbox.AddSpacer(10)
@@ -385,9 +390,14 @@ class TriggerSK(wx.Dialog):
 		vbox.Add(source, 0, wx.LEFT | wx.EXPAND, 5)
 		vbox.Add(sourcetext, 0, wx.LEFT, 10)
 		vbox.Add((0, 0), 1, wx.ALL, 0)
+		vbox.Add(hline1, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
 		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 0)
 
 		panel.SetSizer(vbox)
+
+	def on_help(self, e):
+		url = self.currentpath+"/docs/html/xxx/xxx.html"
+		webbrowser.open(url, new=2)
 
 	def onEditSkkey(self,e):
 		oldkey = False
@@ -449,6 +459,8 @@ class TriggerSK(wx.Dialog):
 class TriggerGeofence(wx.Dialog):
 	def __init__(self,parent,edit):
 		self.nodes = parent.nodes
+		help_bmp = parent.help_bmp
+		self.currentpath = parent.currentpath
 		self.actions_flow_id = parent.actions_flow_id
 		self.trigger_type = parent.available_triggers_select.GetSelection()
 
@@ -505,6 +517,9 @@ class TriggerGeofence(wx.Dialog):
 		self.lon = wx.SpinCtrlDouble(panel, min=-180, max=180, initial=0)
 		self.lon.SetDigits(10)
 
+		hline1 = wx.StaticLine(panel)
+		help_button = wx.BitmapButton(panel, bitmap=help_bmp, size=(help_bmp.GetWidth()+40, help_bmp.GetHeight()+10))
+		help_button.Bind(wx.EVT_BUTTON, self.on_help)
 		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
 		okBtn = wx.Button(panel, wx.ID_OK)
 		okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
@@ -529,10 +544,10 @@ class TriggerGeofence(wx.Dialog):
 		latlon.Add(self.lon, 1, wx.ALL, 5)
 
 		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(help_button, 0, wx.ALL, 10)
 		hbox.Add((0, 0), 1, wx.ALL, 0)
-		hbox.Add(okBtn, 0, wx.ALL, 10)
 		hbox.Add(cancelBtn, 0, wx.ALL, 10)
-		hbox.Add((0, 0), 1, wx.ALL, 0)
+		hbox.Add(okBtn, 0, wx.ALL, 10)
 
 		vbox = wx.BoxSizer(wx.VERTICAL)
 		vbox.AddSpacer(10)
@@ -544,11 +559,16 @@ class TriggerGeofence(wx.Dialog):
 		vbox.Add(latlon, 0, wx.LEFT | wx.EXPAND, 5)
 		vbox.Add(distance, 0, wx.LEFT, 5)
 		vbox.Add((0, 0), 1, wx.ALL, 0)
+		vbox.Add(hline1, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
 		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 0)
 
 		panel.SetSizer(vbox)
 
 		self.OnRefreshBtn(0)
+
+	def on_help(self, e):
+		url = self.currentpath+"/docs/html/xxx/xxx.html"
+		webbrowser.open(url, new=2)
 
 	def OnRefreshBtn(self,e):
 		self.list_vessels = ['self']
@@ -596,6 +616,8 @@ class TriggerGeofence(wx.Dialog):
 class TriggerGPIO(wx.Dialog):
 	def __init__(self,parent,edit):
 		self.nodes = parent.nodes
+		help_bmp = parent.help_bmp
+		self.currentpath = parent.currentpath
 		self.actions_flow_id = parent.actions_flow_id
 		self.trigger_type = parent.available_triggers_select.GetSelection()
 
@@ -648,6 +670,9 @@ class TriggerGPIO(wx.Dialog):
 
 		self.read = wx.CheckBox(panel, label=_('Read initial state of pin on restart?'))
 
+		hline1 = wx.StaticLine(panel)
+		help_button = wx.BitmapButton(panel, bitmap=help_bmp, size=(help_bmp.GetWidth()+40, help_bmp.GetHeight()+10))
+		help_button.Bind(wx.EVT_BUTTON, self.on_help)
 		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
 		okBtn = wx.Button(panel, wx.ID_OK)
 		okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
@@ -658,20 +683,25 @@ class TriggerGPIO(wx.Dialog):
 		pinh.Add(resitorlabel, 0, wx.ALL, 10)
 		pinh.Add(self.resistor, 0, wx.ALL, 10)
 
-		okcancel = wx.BoxSizer(wx.HORIZONTAL)
-		okcancel.Add((0, 0), 1, wx.ALL, 0)
-		okcancel.Add(okBtn, 0, wx.ALL, 10)
-		okcancel.Add(cancelBtn, 0, wx.ALL, 10)
-		okcancel.Add((0, 0), 1, wx.ALL, 0)
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(help_button, 0, wx.ALL, 10)
+		hbox.Add((0, 0), 1, wx.ALL, 0)
+		hbox.Add(cancelBtn, 0, wx.ALL, 10)
+		hbox.Add(okBtn, 0, wx.ALL, 10)
 
 		main = wx.BoxSizer(wx.VERTICAL)
 		main.Add(pinsinuse, 0, wx.ALL, 10)
 		main.Add(pinh, 0, wx.ALL, 0)
 		main.Add(self.read, 0, wx.ALL, 10)
 		main.Add((0, 0), 1, wx.ALL, 0)
-		main.Add(okcancel, 0, wx.ALL | wx.EXPAND, 0)
+		main.Add(hline1, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
+		main.Add(hbox, 0, wx.ALL | wx.EXPAND, 0)
 
 		panel.SetSizer(main)
+
+	def on_help(self, e):
+		url = self.currentpath+"/docs/html/xxx/xxx.html"
+		webbrowser.open(url, new=2)
 
 	def OnOk(self,e):
 		pin = self.pin.GetStringSelection()
@@ -704,6 +734,8 @@ class TriggerGPIO(wx.Dialog):
 class TriggerMQTT(wx.Dialog):
 	def __init__(self,parent,edit,local,remote):
 		self.nodes = parent.nodes
+		help_bmp = parent.help_bmp
+		self.currentpath = parent.currentpath
 		self.localbrokerid = parent.localbrokerid
 		self.remotebrokerid = parent.remotebrokerid
 		self.actions_flow_id = parent.actions_flow_id
@@ -739,32 +771,39 @@ class TriggerMQTT(wx.Dialog):
 		topiclabel = wx.StaticText(panel, label=_('Topic'))
 		self.topic = wx.TextCtrl(panel)
 		
+		hline1 = wx.StaticLine(panel)
+		help_button = wx.BitmapButton(panel, bitmap=help_bmp, size=(help_bmp.GetWidth()+40, help_bmp.GetHeight()+10))
+		help_button.Bind(wx.EVT_BUTTON, self.on_help)
+		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
 		okBtn = wx.Button(panel, wx.ID_OK)
 		okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
-		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
 
 		topic = wx.BoxSizer(wx.HORIZONTAL)
 		topic.Add(topiclabel, 0, wx.ALL, 10)
 		topic.Add(self.topic, 1, wx.ALL, 10)
 
-		ok_cancel = wx.BoxSizer(wx.HORIZONTAL)
-		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
-		ok_cancel.Add(okBtn, 0, wx.ALL, 10)
-		ok_cancel.Add(cancelBtn, 0, wx.ALL, 10)
-		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(help_button, 0, wx.ALL, 10)
+		hbox.Add((0, 0), 1, wx.ALL, 0)
+		hbox.Add(cancelBtn, 0, wx.ALL, 10)
+		hbox.Add(okBtn, 0, wx.ALL, 10)
 
 		main = wx.BoxSizer(wx.VERTICAL)
 		main.Add(self.local, 0, wx.ALL, 10)
 		main.Add(self.remote, 0, wx.ALL, 10)
 		main.Add(topic, 0, wx.ALL | wx.EXPAND, 0)
 		main.Add((0, 0), 1, wx.ALL, 0)
-		main.Add(ok_cancel, 0, wx.ALL | wx.EXPAND, 0)
+		main.Add(hline1, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
+		main.Add(hbox, 0, wx.ALL | wx.EXPAND, 0)
 
 		panel.SetSizer(main)
 
 		if not local: self.local.Disable()
 		if not remote: self.remote.Disable()
 
+	def on_help(self, e):
+		url = self.currentpath+"/docs/html/xxx/xxx.html"
+		webbrowser.open(url, new=2)
 
 	def on_local(self, e):
 		self.local.SetValue(True)
@@ -805,6 +844,8 @@ class TriggerMQTT(wx.Dialog):
 class TriggerTelegram(wx.Dialog):
 	def __init__(self,parent):
 		self.nodes = parent.nodes
+		help_bmp = parent.help_bmp
+		self.currentpath = parent.currentpath
 		self.actions_flow_id = parent.actions_flow_id
 		self.trigger_type = parent.available_triggers_select.GetSelection()
 		self.telegramid = parent.telegramid
@@ -874,21 +915,27 @@ class TriggerTelegram(wx.Dialog):
 
 		panel = wx.Panel(self)
 		
+		help_button = wx.BitmapButton(panel, bitmap=help_bmp, size=(help_bmp.GetWidth()+40, help_bmp.GetHeight()+10))
+		help_button.Bind(wx.EVT_BUTTON, self.on_help)
+		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
 		okBtn = wx.Button(panel, wx.ID_OK)
 		okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
-		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
 
-		ok_cancel = wx.BoxSizer(wx.HORIZONTAL)
-		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
-		ok_cancel.Add(okBtn, 0, wx.ALL, 10)
-		ok_cancel.Add(cancelBtn, 0, wx.ALL, 10)
-		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(help_button, 0, wx.ALL, 10)
+		hbox.Add((0, 0), 1, wx.ALL, 0)
+		hbox.Add(cancelBtn, 0, wx.ALL, 10)
+		hbox.Add(okBtn, 0, wx.ALL, 10)
 
 		main = wx.BoxSizer(wx.VERTICAL)
 		main.Add((0, 0), 1, wx.ALL, 0)
-		main.Add(ok_cancel, 0, wx.ALL | wx.EXPAND, 0)
+		main.Add(hbox, 0, wx.ALL | wx.EXPAND, 0)
 
 		panel.SetSizer(main)
+
+	def on_help(self, e):
+		url = self.currentpath+"/docs/html/xxx/xxx.html"
+		webbrowser.open(url, new=2)
 
 	def OnOk(self,e):
 		self.TriggerNodes = []
@@ -928,6 +975,8 @@ class TriggerTelegram(wx.Dialog):
 class TriggerTime(wx.Dialog):
 	def __init__(self,parent,edit):
 		self.nodes = parent.nodes
+		help_bmp = parent.help_bmp
+		self.currentpath = parent.currentpath
 		self.actions_flow_id = parent.actions_flow_id
 		self.trigger_type = parent.available_triggers_select.GetSelection()
 		self.telegramid = parent.telegramid
@@ -965,28 +1014,36 @@ class TriggerTime(wx.Dialog):
 		self.periodunit = wx.Choice(panel, choices=periodunits, style=wx.CB_READONLY)
 		self.periodunit.SetSelection(0)
 
+		hline1 = wx.StaticLine(panel)
+		help_button = wx.BitmapButton(panel, bitmap=help_bmp, size=(help_bmp.GetWidth()+40, help_bmp.GetHeight()+10))
+		help_button.Bind(wx.EVT_BUTTON, self.on_help)
+		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
 		okBtn = wx.Button(panel, wx.ID_OK)
 		okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
-		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
 
 		period = wx.BoxSizer(wx.HORIZONTAL)
 		period.Add(periodlabel, 0, wx.ALL, 5)
 		period.Add(self.period, 0, wx.ALL, 5)
 		period.Add(self.periodunit, 0, wx.ALL, 5)
 
-		ok_cancel = wx.BoxSizer(wx.HORIZONTAL)
-		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
-		ok_cancel.Add(okBtn, 0, wx.ALL, 10)
-		ok_cancel.Add(cancelBtn, 0, wx.ALL, 10)
-		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(help_button, 0, wx.ALL, 10)
+		hbox.Add((0, 0), 1, wx.ALL, 0)
+		hbox.Add(cancelBtn, 0, wx.ALL, 10)
+		hbox.Add(okBtn, 0, wx.ALL, 10)
 
 		main = wx.BoxSizer(wx.VERTICAL)
 		main.AddSpacer(10)
 		main.Add(period, 0, wx.RIGHT | wx.LEFT, 5)
 		main.Add((0, 0), 1, wx.ALL, 0)
-		main.Add(ok_cancel, 0, wx.ALL | wx.EXPAND, 0)
+		main.Add(hline1, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
+		main.Add(hbox, 0, wx.ALL | wx.EXPAND, 0)
 
 		panel.SetSizer(main)
+
+	def on_help(self, e):
+		url = self.currentpath+"/docs/html/xxx/xxx.html"
+		webbrowser.open(url, new=2)
 
 	def OnOk(self,e):
 		self.TriggerNodes = []
@@ -1011,6 +1068,8 @@ class TriggerTime(wx.Dialog):
 class Condition(wx.Dialog):
 	def __init__(self,parent,edit):
 		self.nodes = parent.nodes
+		help_bmp = parent.help_bmp
+		self.currentpath = parent.currentpath
 		self.actions_flow_id = parent.actions_flow_id
 		self.available_operators = ['eq', 'neq', 'lt', 'lte', 'gt', 'gte','btwn', 'cont', 'true', 'false', 'null', 'nnull', 'empty', 'nempty']
 		self.operator_id = parent.available_operators_select.GetSelection()
@@ -1035,7 +1094,7 @@ class Condition(wx.Dialog):
 		if edit == 0: title = _('Add condition')
 		else: title = _('Edit condition')
 
-		wx.Dialog.__init__(self, None, title = title, size=(600, 250))
+		wx.Dialog.__init__(self, None, title = title, size=(600, 270))
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 
 		panel = wx.Panel(self)
@@ -1059,9 +1118,12 @@ class Condition(wx.Dialog):
 		self.edit_value2 = wx.Button(panel, label=_('Add'))
 		self.edit_value2.Bind(wx.EVT_BUTTON, self.onEditSkkey2)
 		
+		hline1 = wx.StaticLine(panel)
+		help_button = wx.BitmapButton(panel, bitmap=help_bmp, size=(help_bmp.GetWidth()+40, help_bmp.GetHeight()+10))
+		help_button.Bind(wx.EVT_BUTTON, self.on_help)
+		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
 		okBtn = wx.Button(panel, wx.ID_OK)
 		okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
-		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
 
 		typevalue = wx.BoxSizer(wx.HORIZONTAL)
 		typevalue.Add(type1label, 0, wx.ALL, 5)
@@ -1077,11 +1139,11 @@ class Condition(wx.Dialog):
 		value2.Add(self.value2, 1, wx.ALL, 5)
 		value2.Add(self.edit_value2, 0, wx.ALL, 5)
 
-		ok_cancel = wx.BoxSizer(wx.HORIZONTAL)
-		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
-		ok_cancel.Add(okBtn, 0, wx.ALL, 10)
-		ok_cancel.Add(cancelBtn, 0, wx.ALL, 10)
-		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(help_button, 0, wx.ALL, 10)
+		hbox.Add((0, 0), 1, wx.ALL, 0)
+		hbox.Add(cancelBtn, 0, wx.ALL, 10)
+		hbox.Add(okBtn, 0, wx.ALL, 10)
 
 		main = wx.BoxSizer(wx.VERTICAL)
 		main.Add(operatorlabel, 0, wx.ALL, 10)
@@ -1089,7 +1151,8 @@ class Condition(wx.Dialog):
 		main.Add(value1, 0, wx.ALL | wx.EXPAND, 0)
 		main.Add(value2, 0, wx.ALL | wx.EXPAND, 0)
 		main.Add((0, 0), 1, wx.ALL, 0)
-		main.Add(ok_cancel, 0, wx.ALL | wx.EXPAND, 0)
+		main.Add(hline1, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
+		main.Add(hbox, 0, wx.ALL | wx.EXPAND, 0)
 
 		panel.SetSizer(main)
 
@@ -1101,6 +1164,10 @@ class Condition(wx.Dialog):
 			self.value2.Disable()
 		elif self.operator != 'btwn':			
 			self.value2.Disable()
+
+	def on_help(self, e):
+		url = self.currentpath+"/docs/html/xxx/xxx.html"
+		webbrowser.open(url, new=2)
 
 	def onEditSkkey1(self,e):
 		oldkey = False
@@ -1233,6 +1300,8 @@ class ActionSetSignalkKey(wx.Dialog):
 	def __init__(self, parent, edit):
 		self.credentials = ''
 		self.nodes = parent.nodes
+		help_bmp = parent.help_bmp
+		self.currentpath = parent.currentpath
 		self.actions_flow_id = parent.actions_flow_id
 		self.action_id = parent.available_actions_select.GetSelection()
 		self.sk_node_template = '''
@@ -1285,7 +1354,7 @@ class ActionSetSignalkKey(wx.Dialog):
 		if edit == 0: title = _('Set Signal K key')
 		else: title = _('Edit Signal K key')
 
-		wx.Dialog.__init__(self, None, title = title, size=(550, 180))
+		wx.Dialog.__init__(self, None, title = title, size=(550, 190))
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 
 		panel = wx.Panel(self)
@@ -1304,9 +1373,12 @@ class ActionSetSignalkKey(wx.Dialog):
 		self.edit_skkey2 = wx.Button(panel, label=_('Edit'))
 		self.edit_skkey2.Bind(wx.EVT_BUTTON, self.onEditSkkey2)
 
+		hline1 = wx.StaticLine(panel)
+		help_button = wx.BitmapButton(panel, bitmap=help_bmp, size=(help_bmp.GetWidth()+40, help_bmp.GetHeight()+10))
+		help_button.Bind(wx.EVT_BUTTON, self.on_help)
+		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
 		okBtn = wx.Button(panel, wx.ID_OK)
 		okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
-		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
 
 		skkey1 = wx.BoxSizer(wx.HORIZONTAL)
 		skkey1.Add(skkeylabel, 0, wx.ALL, 5)
@@ -1319,23 +1391,28 @@ class ActionSetSignalkKey(wx.Dialog):
 		value.Add(self.value, 1, wx.ALL, 5)
 		value.Add(self.edit_skkey2, 0, wx.ALL, 5)
 
-		ok_cancel = wx.BoxSizer(wx.HORIZONTAL)
-		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
-		ok_cancel.Add(okBtn, 0, wx.RIGHT | wx.LEFT, 10)
-		ok_cancel.Add(cancelBtn, 0, wx.RIGHT | wx.LEFT, 10)
-		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(help_button, 0, wx.ALL, 10)
+		hbox.Add((0, 0), 1, wx.ALL, 0)
+		hbox.Add(cancelBtn, 0, wx.ALL, 10)
+		hbox.Add(okBtn, 0, wx.ALL, 10)
 
 		main = wx.BoxSizer(wx.VERTICAL)
 		main.Add(skkey1, 1, wx.ALL | wx.EXPAND, 0)
 		main.AddSpacer(5)
 		main.Add(value, 1, wx.ALL | wx.EXPAND, 0)
 		main.Add((0, 0), 1, wx.ALL, 0)
-		main.Add(ok_cancel, 0, wx.ALL | wx.EXPAND, 10)
+		main.Add(hline1, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
+		main.Add(hbox, 0, wx.ALL | wx.EXPAND, 0)
 
 		panel.SetSizer(main)
 
 		self.type.SetSelection(1)
 		self.edit_skkey2.Disable()
+
+	def on_help(self, e):
+		url = self.currentpath+"/docs/html/xxx/xxx.html"
+		webbrowser.open(url, new=2)
 
 	def on_select_type(self,e):
 		selected = self.type.GetSelection()
@@ -1411,6 +1488,8 @@ class ActionSetGPIO(wx.Dialog):
 	def __init__(self, parent, edit):
 		self.credentials = ''
 		self.nodes = parent.nodes
+		help_bmp = parent.help_bmp
+		self.currentpath = parent.currentpath
 		self.actions_flow_id = parent.actions_flow_id
 		self.action_id = parent.available_actions_select.GetSelection()
 		self.gpio_node_template = '''
@@ -1494,19 +1573,22 @@ class ActionSetGPIO(wx.Dialog):
 		self.inithigh = wx.CheckBox(panel, label='1')
 		self.inithigh.Bind(wx.EVT_CHECKBOX, self.on_inithigh)
 
+		hline1 = wx.StaticLine(panel)
+		help_button = wx.BitmapButton(panel, bitmap=help_bmp, size=(help_bmp.GetWidth()+40, help_bmp.GetHeight()+10))
+		help_button.Bind(wx.EVT_BUTTON, self.on_help)
+		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
 		okBtn = wx.Button(panel, wx.ID_OK)
 		okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
-		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
 
 		pin = wx.BoxSizer(wx.HORIZONTAL)
 		pin.Add(pinlabel, 0, wx.LEFT, 10)
 		pin.Add(self.pin, 0, wx.LEFT, 10)
 
-		ok_cancel = wx.BoxSizer(wx.HORIZONTAL)
-		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
-		ok_cancel.Add(okBtn, 0, wx.RIGHT | wx.LEFT, 10)
-		ok_cancel.Add(cancelBtn, 0, wx.RIGHT | wx.LEFT, 10)
-		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(help_button, 0, wx.ALL, 10)
+		hbox.Add((0, 0), 1, wx.ALL, 0)
+		hbox.Add(cancelBtn, 0, wx.ALL, 10)
+		hbox.Add(okBtn, 0, wx.ALL, 10)
 
 		main = wx.BoxSizer(wx.VERTICAL)
 		main.AddSpacer(10)
@@ -1524,13 +1606,18 @@ class ActionSetGPIO(wx.Dialog):
 		main.AddSpacer(5)
 		main.Add(self.inithigh, 0, wx.LEFT, 20)
 		main.Add((0, 0), 1, wx.ALL, 0)
-		main.Add(ok_cancel, 0, wx.ALL | wx.EXPAND, 10)
+		main.Add(hline1, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
+		main.Add(hbox, 0, wx.ALL | wx.EXPAND, 0)
 
 		panel.SetSizer(main)
 
 		self.on_low(0)
 		self.init.SetValue(True)
 		self.initlow.SetValue(True)
+
+	def on_help(self, e):
+		url = self.currentpath+"/docs/html/xxx/xxx.html"
+		webbrowser.open(url, new=2)
 
 	def on_low(self, e):
 		self.low.SetValue(True)
@@ -1590,6 +1677,8 @@ class ActionSetMQTT(wx.Dialog):
 	def __init__(self, parent, edit, local, remote):
 		self.credentials = ''
 		self.nodes = parent.nodes
+		help_bmp = parent.help_bmp
+		self.currentpath = parent.currentpath
 		self.localbrokerid = parent.localbrokerid
 		self.remotebrokerid = parent.remotebrokerid
 		self.actions_flow_id = parent.actions_flow_id
@@ -1668,19 +1757,22 @@ class ActionSetMQTT(wx.Dialog):
 		value.Add(self.value, 1, wx.ALL, 5)
 		value.Add(self.edit_skkey2, 0, wx.ALL, 5)
 	
+		hline1 = wx.StaticLine(panel)
+		help_button = wx.BitmapButton(panel, bitmap=help_bmp, size=(help_bmp.GetWidth()+40, help_bmp.GetHeight()+10))
+		help_button.Bind(wx.EVT_BUTTON, self.on_help)
+		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
 		okBtn = wx.Button(panel, wx.ID_OK)
 		okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
-		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
 
 		topic = wx.BoxSizer(wx.HORIZONTAL)
 		topic.Add(topiclabel, 0, wx.ALL, 10)
 		topic.Add(self.topic, 1, wx.ALL, 10)
 
-		ok_cancel = wx.BoxSizer(wx.HORIZONTAL)
-		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
-		ok_cancel.Add(okBtn, 0, wx.ALL, 10)
-		ok_cancel.Add(cancelBtn, 0, wx.ALL, 10)
-		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(help_button, 0, wx.ALL, 10)
+		hbox.Add((0, 0), 1, wx.ALL, 0)
+		hbox.Add(cancelBtn, 0, wx.ALL, 10)
+		hbox.Add(okBtn, 0, wx.ALL, 10)
 
 		main = wx.BoxSizer(wx.VERTICAL)
 		main.Add(self.local, 0, wx.ALL, 10)
@@ -1688,13 +1780,18 @@ class ActionSetMQTT(wx.Dialog):
 		main.Add(topic, 0, wx.ALL | wx.EXPAND, 0)
 		main.Add(value, 0, wx.ALL | wx.EXPAND, 0)
 		main.Add((0, 0), 1, wx.ALL, 0)
-		main.Add(ok_cancel, 0, wx.ALL | wx.EXPAND, 0)
+		main.Add(hline1, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
+		main.Add(hbox, 0, wx.ALL | wx.EXPAND, 0)
 
 		panel.SetSizer(main)
 
 		if not local: self.local.Disable()
 		if not remote: self.remote.Disable()
 		self.edit_skkey2.Disable()
+
+	def on_help(self, e):
+		url = self.currentpath+"/docs/html/xxx/xxx.html"
+		webbrowser.open(url, new=2)
 
 	def on_local(self, e):
 		self.local.SetValue(True)
@@ -1773,6 +1870,8 @@ class ActionPublishTwitter(wx.Dialog):
 		self.credentials = ''
 		self.nodes = parent.nodes
 		self.home = parent.home
+		help_bmp = parent.help_bmp
+		self.currentpath = parent.currentpath
 		self.actions_flow_id = parent.actions_flow_id
 		self.action_id = parent.available_actions_select.GetSelection()
 		self.twitterid = parent.twitterid
@@ -1915,9 +2014,12 @@ class ActionPublishTwitter(wx.Dialog):
 		self.time.Disable()
 		self.timeunit.Disable()
 
+		hline1 = wx.StaticLine(panel)
+		help_button = wx.BitmapButton(panel, bitmap=help_bmp, size=(help_bmp.GetWidth()+40, help_bmp.GetHeight()+10))
+		help_button.Bind(wx.EVT_BUTTON, self.on_help)
+		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
 		okBtn = wx.Button(panel, wx.ID_OK)
 		okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
-		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
 
 		body = wx.BoxSizer(wx.HORIZONTAL)
 		body.Add(bodylabel, 0, wx.ALL, 5)
@@ -1958,25 +2060,30 @@ class ActionPublishTwitter(wx.Dialog):
 		rate.Add(self.time, 0, wx.ALL, 5)
 		rate.Add(self.timeunit, 0, wx.ALL, 5)
 
-		ok_cancel = wx.BoxSizer(wx.HORIZONTAL)
-		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
-		ok_cancel.Add(okBtn, 0, wx.RIGHT | wx.LEFT, 10)
-		ok_cancel.Add(cancelBtn, 0, wx.RIGHT | wx.LEFT, 10)
-		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(help_button, 0, wx.ALL, 10)
+		hbox.Add((0, 0), 1, wx.ALL, 0)
+		hbox.Add(cancelBtn, 0, wx.ALL, 10)
+		hbox.Add(okBtn, 0, wx.ALL, 10)
 
 		main = wx.BoxSizer(wx.VERTICAL)
 		main.Add(options, 1, wx.ALL | wx.EXPAND, 5)
-		main.AddSpacer(10)
+		main.AddSpacer(5)
 		main.Add(self.repeat, 1, wx.RIGHT | wx.LEFT, 10)
 		main.Add(repeath, 1, wx.RIGHT | wx.LEFT, 10)
 		main.AddSpacer(10)
 		main.Add(self.rate, 1, wx.RIGHT | wx.LEFT, 10)
 		main.Add(rate, 1, wx.RIGHT | wx.LEFT, 10)
 		main.Add((0, 0), 1, wx.ALL, 0)
-		main.Add(ok_cancel, 0, wx.ALL | wx.EXPAND, 10)
+		main.Add(hline1, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
+		main.Add(hbox, 0, wx.ALL | wx.EXPAND, 0)
 
 		panel.SetSizer(main)
 		self.Centre()
+
+	def on_help(self, e):
+		url = self.currentpath+"/docs/html/xxx/xxx.html"
+		webbrowser.open(url, new=2)
 
 	def on_addsk(self, e):
 		oldkey = False
@@ -2130,6 +2237,8 @@ class ActionSendEmail(wx.Dialog):
 	def __init__(self, parent, edit):
 		self.credentials = ''
 		self.nodes = parent.nodes
+		help_bmp = parent.help_bmp
+		self.currentpath = parent.currentpath
 		self.actions_flow_id = parent.actions_flow_id
 		self.action_id = parent.available_actions_select.GetSelection()
 		self.RepeatOptions = RepeatOptions()
@@ -2242,9 +2351,12 @@ class ActionSendEmail(wx.Dialog):
 		self.time.Disable()
 		self.timeunit.Disable()
 
+		hline1 = wx.StaticLine(panel)
+		help_button = wx.BitmapButton(panel, bitmap=help_bmp, size=(help_bmp.GetWidth()+40, help_bmp.GetHeight()+10))
+		help_button.Bind(wx.EVT_BUTTON, self.on_help)
+		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
 		okBtn = wx.Button(panel, wx.ID_OK)
 		okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
-		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
 
 		toserver = wx.BoxSizer(wx.HORIZONTAL)
 		toserver.Add(tolabel, 0, wx.ALL, 5)
@@ -2287,11 +2399,11 @@ class ActionSendEmail(wx.Dialog):
 		rate.Add(self.time, 0, wx.ALL, 5)
 		rate.Add(self.timeunit, 0, wx.ALL, 5)
 
-		ok_cancel = wx.BoxSizer(wx.HORIZONTAL)
-		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
-		ok_cancel.Add(okBtn, 0, wx.RIGHT | wx.LEFT, 10)
-		ok_cancel.Add(cancelBtn, 0, wx.RIGHT | wx.LEFT, 10)
-		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(help_button, 0, wx.ALL, 10)
+		hbox.Add((0, 0), 1, wx.ALL, 0)
+		hbox.Add(cancelBtn, 0, wx.ALL, 10)
+		hbox.Add(okBtn, 0, wx.ALL, 10)
 
 		main = wx.BoxSizer(wx.VERTICAL)
 		main.Add(toserver, 1, wx.ALL | wx.EXPAND, 0)
@@ -2306,13 +2418,18 @@ class ActionSendEmail(wx.Dialog):
 		main.Add(self.rate, 1, wx.RIGHT | wx.LEFT, 5)
 		main.Add(rate, 1, wx.RIGHT | wx.LEFT, 5)
 		main.Add((0, 0), 1, wx.ALL, 0)
-		main.Add(ok_cancel, 0, wx.ALL | wx.EXPAND, 10)
+		main.Add(hline1, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
+		main.Add(hbox, 0, wx.ALL | wx.EXPAND, 0)
 
 		panel.SetSizer(main)
 		self.Centre()
 
 		self.server.SetValue('smtp.gmail.com')
 		self.secure.SetValue(True)
+
+	def on_help(self, e):
+		url = self.currentpath+"/docs/html/xxx/xxx.html"
+		webbrowser.open(url, new=2)
 
 	def on_addsk(self, e):
 		oldkey = False
@@ -2424,6 +2541,7 @@ class ActionSendEmail(wx.Dialog):
 class ActionPlaySound(wx.Dialog):
 	def __init__(self, parent, edit):
 		self.credentials = ''
+		help_bmp = parent.help_bmp
 		self.currentpath = parent.currentpath
 		self.nodes = parent.nodes
 		self.actions_flow_id = parent.actions_flow_id
@@ -2487,9 +2605,12 @@ class ActionPlaySound(wx.Dialog):
 		self.time.Disable()
 		self.timeunit.Disable()
 
+		hline1 = wx.StaticLine(panel)
+		help_button = wx.BitmapButton(panel, bitmap=help_bmp, size=(help_bmp.GetWidth()+40, help_bmp.GetHeight()+10))
+		help_button.Bind(wx.EVT_BUTTON, self.on_help)
+		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
 		okBtn = wx.Button(panel, wx.ID_OK)
 		okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
-		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
 
 		file = wx.BoxSizer(wx.HORIZONTAL)
 		file.Add(self.path_sound, 1, wx.ALL, 5)
@@ -2509,11 +2630,11 @@ class ActionPlaySound(wx.Dialog):
 		rate.Add(self.time, 0, wx.ALL, 5)
 		rate.Add(self.timeunit, 0, wx.ALL, 5)
 
-		ok_cancel = wx.BoxSizer(wx.HORIZONTAL)
-		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
-		ok_cancel.Add(okBtn, 0, wx.RIGHT | wx.LEFT, 10)
-		ok_cancel.Add(cancelBtn, 0, wx.RIGHT | wx.LEFT, 10)
-		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(help_button, 0, wx.ALL, 10)
+		hbox.Add((0, 0), 1, wx.ALL, 0)
+		hbox.Add(cancelBtn, 0, wx.ALL, 10)
+		hbox.Add(okBtn, 0, wx.ALL, 10)
 
 		main = wx.BoxSizer(wx.VERTICAL)
 		main.Add(file, 1, wx.ALL | wx.EXPAND, 0)
@@ -2524,9 +2645,14 @@ class ActionPlaySound(wx.Dialog):
 		main.Add(self.rate, 1, wx.RIGHT | wx.LEFT, 5)
 		main.Add(rate, 1, wx.RIGHT | wx.LEFT, 5)
 		main.Add((0, 0), 1, wx.ALL, 0)
-		main.Add(ok_cancel, 0, wx.ALL | wx.EXPAND, 10)
+		main.Add(hline1, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
+		main.Add(hbox, 0, wx.ALL | wx.EXPAND, 0)
 
 		panel.SetSizer(main)
+
+	def on_help(self, e):
+		url = self.currentpath+"/docs/html/xxx/xxx.html"
+		webbrowser.open(url, new=2)
 
 	def on_repeat(self, e):
 		if self.repeat.GetValue():
@@ -2607,6 +2733,7 @@ class ActionPlaySound(wx.Dialog):
 class ActionRunCommand(wx.Dialog):
 	def __init__(self, parent, edit):
 		self.credentials = ''
+		help_bmp = parent.help_bmp
 		self.currentpath = parent.currentpath
 		self.nodes = parent.nodes
 		self.actions_flow_id = parent.actions_flow_id
@@ -2664,9 +2791,12 @@ class ActionRunCommand(wx.Dialog):
 		self.timeunit = wx.Choice(panel, choices=self.RepeatOptions.rateUnit, style=wx.CB_READONLY)
 		self.timeunit.SetSelection(2)
 
+		hline1 = wx.StaticLine(panel)
+		help_button = wx.BitmapButton(panel, bitmap=help_bmp, size=(help_bmp.GetWidth()+40, help_bmp.GetHeight()+10))
+		help_button.Bind(wx.EVT_BUTTON, self.on_help)
+		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
 		okBtn = wx.Button(panel, wx.ID_OK)
 		okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
-		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
 
 		command = wx.BoxSizer(wx.HORIZONTAL)
 		command.Add(commandlabel, 0, wx.ALL, 5)
@@ -2690,23 +2820,24 @@ class ActionRunCommand(wx.Dialog):
 		rate.Add(self.time, 0, wx.ALL, 5)
 		rate.Add(self.timeunit, 0, wx.ALL, 5)
 
-		ok_cancel = wx.BoxSizer(wx.HORIZONTAL)
-		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
-		ok_cancel.Add(okBtn, 0, wx.RIGHT | wx.LEFT, 10)
-		ok_cancel.Add(cancelBtn, 0, wx.RIGHT | wx.LEFT, 10)
-		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(help_button, 0, wx.ALL, 10)
+		hbox.Add((0, 0), 1, wx.ALL, 0)
+		hbox.Add(cancelBtn, 0, wx.ALL, 10)
+		hbox.Add(okBtn, 0, wx.ALL, 10)
 
 		main = wx.BoxSizer(wx.VERTICAL)
 		main.Add(command, 1, wx.ALL | wx.EXPAND, 10)
 		main.Add(arguments, 1, wx.ALL | wx.EXPAND, 10)
-		main.AddSpacer(15)
+		main.AddSpacer(10)
 		main.Add(self.repeat, 1, wx.RIGHT | wx.LEFT, 5)
 		main.Add(repeath, 1, wx.RIGHT | wx.LEFT, 5)
 		main.AddSpacer(10)
 		main.Add(self.rate, 1, wx.RIGHT | wx.LEFT, 5)
 		main.Add(rate, 1, wx.RIGHT | wx.LEFT, 5)
 		main.Add((0, 0), 1, wx.ALL, 0)
-		main.Add(ok_cancel, 0, wx.ALL | wx.EXPAND, 10)
+		main.Add(hline1, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
+		main.Add(hbox, 0, wx.ALL | wx.EXPAND, 0)
 
 		panel.SetSizer(main)
 
@@ -2720,6 +2851,10 @@ class ActionRunCommand(wx.Dialog):
 		self.amount.Disable()
 		self.time.Disable()
 		self.timeunit.Disable()
+
+	def on_help(self, e):
+		url = self.currentpath+"/docs/html/xxx/xxx.html"
+		webbrowser.open(url, new=2)
 
 	def on_repeat(self, e):
 		if self.repeat.GetValue():
@@ -2794,6 +2929,8 @@ class ActionSendTelegram(wx.Dialog):
 		self.credentials = ''
 		self.nodes = parent.nodes
 		self.home = parent.home
+		help_bmp = parent.help_bmp
+		self.currentpath = parent.currentpath
 		self.actions_flow_id = parent.actions_flow_id
 		self.telegramid = parent.telegramid
 		self.action_id = parent.available_actions_select.GetSelection()
@@ -2964,9 +3101,12 @@ class ActionSendTelegram(wx.Dialog):
 		self.time.Disable()
 		self.timeunit.Disable()
 
+		hline1 = wx.StaticLine(panel)
+		help_button = wx.BitmapButton(panel, bitmap=help_bmp, size=(help_bmp.GetWidth()+40, help_bmp.GetHeight()+10))
+		help_button.Bind(wx.EVT_BUTTON, self.on_help)
+		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
 		okBtn = wx.Button(panel, wx.ID_OK)
 		okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
-		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
 
 		subject = wx.BoxSizer(wx.HORIZONTAL)
 		subject.Add(chatidlabel, 0, wx.ALL, 5)
@@ -3009,25 +3149,30 @@ class ActionSendTelegram(wx.Dialog):
 		rate.Add(self.time, 0, wx.ALL, 5)
 		rate.Add(self.timeunit, 0, wx.ALL, 5)
 
-		ok_cancel = wx.BoxSizer(wx.HORIZONTAL)
-		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
-		ok_cancel.Add(okBtn, 0, wx.RIGHT | wx.LEFT, 10)
-		ok_cancel.Add(cancelBtn, 0, wx.RIGHT | wx.LEFT, 10)
-		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(help_button, 0, wx.ALL, 10)
+		hbox.Add((0, 0), 1, wx.ALL, 0)
+		hbox.Add(cancelBtn, 0, wx.ALL, 10)
+		hbox.Add(okBtn, 0, wx.ALL, 10)
 
 		main = wx.BoxSizer(wx.VERTICAL)
 		main.Add(options, 1, wx.ALL | wx.EXPAND, 5)
-		main.AddSpacer(15)
+		main.AddSpacer(10)
 		main.Add(self.repeat, 1, wx.RIGHT | wx.LEFT, 10)
 		main.Add(repeath, 1, wx.RIGHT | wx.LEFT, 10)
 		main.AddSpacer(10)
 		main.Add(self.rate, 1, wx.RIGHT | wx.LEFT, 10)
 		main.Add(rate, 1, wx.RIGHT | wx.LEFT, 10)
 		main.Add((0, 0), 1, wx.ALL, 0)
-		main.Add(ok_cancel, 0, wx.ALL | wx.EXPAND, 10)
+		main.Add(hline1, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
+		main.Add(hbox, 0, wx.ALL | wx.EXPAND, 0)
 
 		panel.SetSizer(main)
 		self.Centre()
+
+	def on_help(self, e):
+		url = self.currentpath+"/docs/html/xxx/xxx.html"
+		webbrowser.open(url, new=2)
 
 	def on_addsk(self, e):
 		oldkey = False
