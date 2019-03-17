@@ -2028,11 +2028,15 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		help_button = wx.BitmapButton(self.p_credentials, bitmap=self.help_bmp, size=(self.help_bmp.GetWidth()+40, self.help_bmp.GetHeight()+10))
 		help_button.Bind(wx.EVT_BUTTON, self.on_help_credentials)
+		self.encrypt = wx.Button(self.p_credentials, label=_('Encrypt'))
+		self.encrypt.Bind(wx.EVT_BUTTON, self.on_encrypt)
+		self.decrypt = wx.Button(self.p_credentials, label=_('Decrypt'))
+		self.decrypt.Bind(wx.EVT_BUTTON, self.on_decrypt)
 
-		apply_changes = wx.Button(self.p_credentials, label=_('Apply changes'))
-		apply_changes.Bind(wx.EVT_BUTTON, self.on_apply_changes_credentials)
-		cancel_changes = wx.Button(self.p_credentials, label=_('Cancel changes'))
-		cancel_changes.Bind(wx.EVT_BUTTON, self.on_cancel_changes_credentials)
+		self.apply_changes_cre = wx.Button(self.p_credentials, label=_('Apply changes'))
+		self.apply_changes_cre.Bind(wx.EVT_BUTTON, self.on_apply_changes_credentials)
+		self.cancel_changes_cre = wx.Button(self.p_credentials, label=_('Cancel changes'))
+		self.cancel_changes_cre.Bind(wx.EVT_BUTTON, self.on_cancel_changes_credentials)
 
 		localmqtt = wx.BoxSizer(wx.HORIZONTAL)
 		localmqtt.Add(userlocalmqttlabel, 0, wx.ALL | wx.EXPAND, 3)
@@ -2080,10 +2084,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		telegram1.Add(self.users, 1, wx.ALL | wx.EXPAND, 3)
 
 		buttons = wx.BoxSizer(wx.HORIZONTAL)
-		buttons.Add(help_button, 0, wx.ALL, 0)
-		buttons.Add((0, 0), 1, wx.RIGHT | wx.LEFT, 3)
-		buttons.Add(apply_changes, 0, wx.RIGHT | wx.LEFT, 3)
-		buttons.Add(cancel_changes, 0, wx.RIGHT | wx.LEFT, 3)
+		buttons.Add(help_button, 0, wx.RIGHT, 5)
+		buttons.Add(self.encrypt, 0, wx.RIGHT | wx.LEFT, 5)
+		buttons.Add(self.decrypt, 0, wx.RIGHT | wx.LEFT, 5)
+		buttons.Add((0, 0), 1, wx.RIGHT | wx.LEFT, 5)
+		buttons.Add(self.apply_changes_cre, 0, wx.RIGHT | wx.LEFT, 5)
+		buttons.Add(self.cancel_changes_cre, 0, wx.RIGHT | wx.LEFT, 5)
 
 		main = wx.BoxSizer(wx.VERTICAL)
 		main.Add(self.localmqtt, 0, wx.ALL | wx.EXPAND, 3)
@@ -2100,6 +2106,93 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		self.p_credentials.SetSizer(main)
 
+	def on_encrypt(self, e):
+		add_nodes = []
+		remove_ids = []			
+		dlg = wx.MessageDialog(None, _(
+			'All current credentials will be deleted and actions that use them will stop working. Actions that need credentials should be defined in the Node-RED admin interface.\n\nAre you sure?'),
+							   _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+		if dlg.ShowModal() != wx.ID_YES:	
+			dlg.Destroy()
+			return
+
+		os.remove(self.cred_file)
+
+		self.conf.set('CREDENTIALS', 'encrypted', '1')
+		self.conf.set('CREDENTIALS', 'local_mqtt', '0')
+		self.conf.set('CREDENTIALS', 'remote_mqtt', '0')
+		self.conf.set('CREDENTIALS', 'twitter', '0')
+		self.conf.set('CREDENTIALS', 'telegram', '0')
+
+		remove_ids.append(self.localbrokerid)
+		remove_ids.append(self.remotebrokerid)
+		remove_ids.append(self.twitterid)
+		remove_ids.append(self.telegramid)
+		remove_ids.append(self.telegramid+'1')
+		remove_ids.append(self.telegramid+'2')
+		remove_ids.append(self.telegramid+'3')
+		remove_ids.append(self.telegramid+'4')
+		remove_ids.append(self.telegramid+'5')
+		self.nodes.edit_flow(add_nodes, remove_ids)
+
+		ndsettings = self.home+'/.signalk/node_modules/@signalk/signalk-node-red/index.js'
+		tmpndsettings = self.home+'/.cre'
+		file = open(ndsettings, 'r')
+		file1 = open(tmpndsettings, 'w')
+		while True:
+			line = file.readline()
+			if not line: break
+			if 'credentialSecret:' in line:
+				line2 = '      credentialSecret: "'+self.nodes.get_node_id()+'",\n'
+				file1.write(line2)
+			else: file1.write(line)
+		file.close()
+		file1.close()
+		os.system('mv '+tmpndsettings+' '+ndsettings)
+
+		self.print_credentials()
+		self.restart_SK()
+		seconds = 15
+		for i in range(seconds, 0, -1):
+			self.ShowStatusBarGREEN(_('Signal K server restarted')+' | '+_('Starting Node-Red... ')+str(i))
+			time.sleep(1)
+		self.ShowStatusBarGREEN(_('Signal K server restarted')+' | '+_('Node-Red restarted'))
+
+	def on_decrypt(self, e):	
+		dlg = wx.MessageDialog(None, _(
+			'Credentials created outside of OpenPlotter interface will be deleted and its nodes will stop working. Your new credentials will be stored without encryption, do not use your usual passwords.\n\nAre you sure?'),
+							   _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+		if dlg.ShowModal() != wx.ID_YES:	
+			dlg.Destroy()
+			return
+
+		os.remove(self.cred_file)
+
+		self.conf.set('CREDENTIALS', 'encrypted', '0')
+
+		ndsettings = self.home+'/.signalk/node_modules/@signalk/signalk-node-red/index.js'
+		tmpndsettings = self.home+'/.cre'
+		file = open(ndsettings, 'r')
+		file1 = open(tmpndsettings, 'w')
+		while True:
+			line = file.readline()
+			if not line: break
+			if 'credentialSecret:' in line:
+				line2 = '      credentialSecret: false,\n'
+				file1.write(line2)
+			else: file1.write(line)
+		file.close()
+		file1.close()
+		os.system('mv '+tmpndsettings+' '+ndsettings)
+
+		self.print_credentials()
+		self.restart_SK()
+		seconds = 15
+		for i in range(seconds, 0, -1):
+			self.ShowStatusBarGREEN(_('Signal K server restarted')+' | '+_('Starting Node-Red... ')+str(i))
+			time.sleep(1)
+		self.ShowStatusBarGREEN(_('Signal K server restarted')+' | '+_('Node-Red restarted'))
+
 	def read_credentials(self):
 		self.cred_file = self.home+'/.signalk/red/flows_openplotter_cred.json'
 		try:
@@ -2111,91 +2204,139 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			print "ERROR reading credentials file"
 
 	def print_credentials(self):
-		credentials = self.read_credentials()
-		if self.conf.get('CREDENTIALS', 'local_mqtt') == '1':
-			self.localmqtt.SetValue(True)
-			try:
-				self.userlocalmqtt.SetValue(credentials[self.localbrokerid]['user'])
-				self.passlocalmqtt.SetValue(credentials[self.localbrokerid]['password'])
-			except: pass
+		if self.conf.get('CREDENTIALS', 'encrypted') == '1':
+			self.localmqtt.Disable()
+			self.localmqtt.SetValue(False)
 			self.userlocalmqtt.Disable()
 			self.passlocalmqtt.Disable()
-		else:
-			self.localmqtt.SetValue(False)
 			self.userlocalmqtt.SetValue('')
 			self.passlocalmqtt.SetValue('')
-			self.userlocalmqtt.Enable()
-			self.passlocalmqtt.Enable()
-		if self.conf.get('CREDENTIALS', 'remote_mqtt') == '1':
-			self.remotemqtt.SetValue(True)
-			try:
-				self.userremotemqtt.SetValue(credentials[self.remotebrokerid]['user'])
-				self.passremotemqtt.SetValue(credentials[self.remotebrokerid]['password'])
-			except: pass
-			for i in self.no_actions_nodes:
-				if i['id'] == self.remotebrokerid: 
-					self.serverremotemqtt.SetValue(i['broker'])
-					self.portremotemqtt.SetValue(int(i['port']))
+			self.remotemqtt.Disable()
+			self.remotemqtt.SetValue(False)
 			self.serverremotemqtt.Disable()
 			self.portremotemqtt.Disable()
 			self.userremotemqtt.Disable()
 			self.passremotemqtt.Disable()
-		else:
-			self.remotemqtt.SetValue(False)
 			self.userremotemqtt.SetValue('')
 			self.passremotemqtt.SetValue('')
 			self.serverremotemqtt.SetValue('')
 			self.portremotemqtt.SetValue(1883)
-			self.serverremotemqtt.Enable()
-			self.portremotemqtt.Enable()
-			self.userremotemqtt.Enable()
-			self.passremotemqtt.Enable()
-
-		if self.conf.get('CREDENTIALS', 'twitter') == '1':
-			self.twitter.SetValue(True)
-			try:
-				self.apikey.SetValue(credentials[self.twitterid]['consumer_key'])
-				self.apisecretkey.SetValue(credentials[self.twitterid]['consumer_secret'])
-				self.accesstoken.SetValue(credentials[self.twitterid]['access_token'])
-				self.accesstokensecret.SetValue(credentials[self.twitterid]['access_token_secret'])
-			except: pass
-			for i in self.no_actions_nodes:
-				if i['id'] == self.twitterid: 
-					self.twitteraccount.SetValue(i['screen_name'])
+			self.twitter.Disable()
+			self.twitter.SetValue(False)
 			self.twitteraccount.Disable()
 			self.apikey.Disable()
 			self.apisecretkey.Disable()
 			self.accesstoken.Disable()
 			self.accesstokensecret.Disable()
-		else:
-			self.twitter.SetValue(False)
 			self.twitteraccount.SetValue('')
 			self.apikey.SetValue('')
 			self.apisecretkey.SetValue('')
 			self.accesstoken.SetValue('')
 			self.accesstokensecret.SetValue('')
-			self.twitteraccount.Enable()
-			self.apikey.Enable()
-			self.apisecretkey.Enable()
-			self.accesstoken.Enable()
-			self.accesstokensecret.Enable()
-
-		if self.conf.get('CREDENTIALS', 'telegram') == '1':
-			self.telegram.SetValue(True)
-			try:
-				self.token.SetValue(credentials[self.telegramid]['token'])
-			except: pass
-			for i in self.no_actions_nodes:
-				if i['id'] == self.telegramid: 
-					self.users.SetValue(i['usernames'])
+			self.telegram.Disable()
+			self.telegram.SetValue(False)
 			self.token.Disable()
 			self.users.Disable()
-		else:
-			self.telegram.SetValue(False)
 			self.token.SetValue('')
 			self.users.SetValue('')
-			self.token.Enable()
-			self.users.Enable()
+			self.encrypt.Disable()
+			self.decrypt.Enable()
+			self.apply_changes_cre.Disable()
+			self.cancel_changes_cre.Disable()
+		else:
+			self.localmqtt.Enable()
+			self.remotemqtt.Enable()
+			self.twitter.Enable()
+			self.telegram.Enable()
+			self.encrypt.Enable()
+			self.decrypt.Disable()
+			self.apply_changes_cre.Enable()
+			self.cancel_changes_cre.Enable()
+			credentials = self.read_credentials()
+			if self.conf.get('CREDENTIALS', 'local_mqtt') == '1':
+				self.localmqtt.SetValue(True)
+				try:
+					self.userlocalmqtt.SetValue(credentials[self.localbrokerid]['user'])
+					self.passlocalmqtt.SetValue(credentials[self.localbrokerid]['password'])
+				except: pass
+				self.userlocalmqtt.Disable()
+				self.passlocalmqtt.Disable()
+			else:
+				self.localmqtt.SetValue(False)
+				self.userlocalmqtt.SetValue('')
+				self.passlocalmqtt.SetValue('')
+				self.userlocalmqtt.Enable()
+				self.passlocalmqtt.Enable()
+			if self.conf.get('CREDENTIALS', 'remote_mqtt') == '1':
+				self.remotemqtt.SetValue(True)
+				try:
+					self.userremotemqtt.SetValue(credentials[self.remotebrokerid]['user'])
+					self.passremotemqtt.SetValue(credentials[self.remotebrokerid]['password'])
+				except: pass
+				for i in self.no_actions_nodes:
+					if i['id'] == self.remotebrokerid: 
+						self.serverremotemqtt.SetValue(i['broker'])
+						self.portremotemqtt.SetValue(int(i['port']))
+				self.serverremotemqtt.Disable()
+				self.portremotemqtt.Disable()
+				self.userremotemqtt.Disable()
+				self.passremotemqtt.Disable()
+			else:
+				self.remotemqtt.SetValue(False)
+				self.userremotemqtt.SetValue('')
+				self.passremotemqtt.SetValue('')
+				self.serverremotemqtt.SetValue('')
+				self.portremotemqtt.SetValue(1883)
+				self.serverremotemqtt.Enable()
+				self.portremotemqtt.Enable()
+				self.userremotemqtt.Enable()
+				self.passremotemqtt.Enable()
+
+			if self.conf.get('CREDENTIALS', 'twitter') == '1':
+				self.twitter.SetValue(True)
+				try:
+					self.apikey.SetValue(credentials[self.twitterid]['consumer_key'])
+					self.apisecretkey.SetValue(credentials[self.twitterid]['consumer_secret'])
+					self.accesstoken.SetValue(credentials[self.twitterid]['access_token'])
+					self.accesstokensecret.SetValue(credentials[self.twitterid]['access_token_secret'])
+				except: pass
+				for i in self.no_actions_nodes:
+					if i['id'] == self.twitterid: 
+						self.twitteraccount.SetValue(i['screen_name'])
+				self.twitteraccount.Disable()
+				self.apikey.Disable()
+				self.apisecretkey.Disable()
+				self.accesstoken.Disable()
+				self.accesstokensecret.Disable()
+			else:
+				self.twitter.SetValue(False)
+				self.twitteraccount.SetValue('')
+				self.apikey.SetValue('')
+				self.apisecretkey.SetValue('')
+				self.accesstoken.SetValue('')
+				self.accesstokensecret.SetValue('')
+				self.twitteraccount.Enable()
+				self.apikey.Enable()
+				self.apisecretkey.Enable()
+				self.accesstoken.Enable()
+				self.accesstokensecret.Enable()
+
+			if self.conf.get('CREDENTIALS', 'telegram') == '1':
+				self.telegram.SetValue(True)
+				try:
+					self.token.SetValue(credentials[self.telegramid]['token'])
+				except: pass
+				for i in self.no_actions_nodes:
+					if i['id'] == self.telegramid: 
+						self.users.SetValue(i['usernames'])
+				self.token.Disable()
+				self.users.Disable()
+			else:
+				self.telegram.SetValue(False)
+				self.token.SetValue('')
+				self.users.SetValue('')
+				self.token.Enable()
+				self.users.Enable()
 
 	def edit_credentials(self, add, remove):
 		save = False
@@ -2515,7 +2656,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.ShowStatusBarGREEN(_('Signal K server restarted')+' | '+_('Node-Red restarted'))
 
 	def on_cancel_changes_credentials(self, e):
-		pass
+		self.print_credentials()
 
 	def on_help_credentials(self, e):
 		url = self.currentpath+"/docs/html/credentials/what_are_credentials.html"
