@@ -1772,6 +1772,7 @@ class ActionPublishTwitter(wx.Dialog):
 	def __init__(self, parent, edit):
 		self.credentials = ''
 		self.nodes = parent.nodes
+		self.home = parent.home
 		self.actions_flow_id = parent.actions_flow_id
 		self.action_id = parent.available_actions_select.GetSelection()
 		self.twitterid = parent.twitterid
@@ -1805,19 +1806,85 @@ class ActionPublishTwitter(wx.Dialog):
 		            []
 		        ]
 		    }'''
+		self.change_node_template = '''
+		    {
+		        "id": "",
+		        "type": "change",
+		        "z": "",
+		        "name": "",
+		        "rules": [
+		            {
+		                "t": "set",
+		                "p": "media",
+		                "pt": "msg",
+		                "to": "payload",
+		                "tot": "msg"
+		            }
+		        ],
+		        "action": "",
+		        "property": "",
+		        "from": "",
+		        "to": "",
+		        "reg": false,
+		        "x": 380,
+		        "y": 120,
+		        "wires": [[]]
+		    }'''
+		self.file_node_template = '''
+		    {
+		        "id": "",
+		        "type": "file in",
+		        "z": "",
+		        "name": "",
+		        "filename": "",
+		        "format": "",
+		        "chunk": false,
+		        "sendError": false,
+		        "x": 380,
+		        "y": 120,
+		        "wires": [[]]
+		    }'''
+		self.photo_node_template = '''
+		    {
+		        "id": "",
+		        "type": "usbcamera",
+		        "z": "",
+		        "filemode": "0",
+		        "filename": "image01.jpg",
+		        "filedefpath": "1",
+		        "filepath": "",
+		        "fileformat": "jpeg",
+		        "resolution": "",
+		        "name": "",
+		        "x": 380,
+		        "y": 120,
+		        "wires": [[]]
+		    }'''
+
 		if edit == 0: title = _('Add Twitter action')
 		else: title = _('Edit Twitter action')
 
-		wx.Dialog.__init__(self, None, title = title, size=(710, 390))
+		wx.Dialog.__init__(self, None, title = title, size=(710, 460))
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 
 		panel = wx.Panel(self)
 
 		bodylabel = wx.StaticText(panel, label=_('Tweet'))
 		self.body = wx.TextCtrl(panel, style=wx.TE_MULTILINE, size=(-1,60))
-
 		self.addsk = wx.Button(panel, label=_('Add Signal K key value'))
 		self.addsk.Bind(wx.EVT_BUTTON, self.on_addsk)
+
+		self.picture = wx.CheckBox(panel, label=_('Image'))
+		self.picture.Bind(wx.EVT_CHECKBOX, self.on_picture)
+		self.path_file = wx.TextCtrl(panel)
+		self.button_select_file = wx.Button(panel, label=_('File'))
+		self.button_select_file.Bind(wx.EVT_BUTTON, self.on_select_file)
+
+		self.photo = wx.CheckBox(panel, label=_('Take picture'))
+		self.photo.Bind(wx.EVT_CHECKBOX, self.on_photo)
+		resolutionlabel = wx.StaticText(panel, label=_('Resolution'))
+		resolution_list = ['320x240','640x480','800x600','1024x768','1920x1080']
+		self.resolution = wx.Choice(panel, choices=resolution_list, style=wx.CB_READONLY)
 
 		self.repeat = wx.CheckBox(panel, label=_('Repeat'))
 		self.repeat.Bind(wx.EVT_CHECKBOX, self.on_repeat)
@@ -1836,7 +1903,11 @@ class ActionPublishTwitter(wx.Dialog):
 		self.time = wx.SpinCtrl(panel, min=1, max=100000, initial=1)
 		self.timeunit = wx.Choice(panel, choices=self.RepeatOptions.rateUnit, style=wx.CB_READONLY)
 		self.timeunit.SetSelection(2)
-		
+
+		self.path_file.Disable()
+		self.button_select_file.Disable()
+		self.resolution.Disable()
+
 		self.interval.Disable()
 		self.unit.Disable()
 		self.max.Disable()
@@ -1852,9 +1923,26 @@ class ActionPublishTwitter(wx.Dialog):
 		body.Add(bodylabel, 0, wx.ALL, 5)
 		body.Add(self.body, 1, wx.ALL, 5)
 
-		addsk = wx.BoxSizer(wx.HORIZONTAL)
-		addsk.Add((0, 0), 1, wx.ALL, 5)
-		addsk.Add(self.addsk, 1, wx.ALL, 5)
+		res = wx.BoxSizer(wx.HORIZONTAL)
+		res.Add(resolutionlabel, 0, wx.ALL, 5)
+		res.Add(self.resolution, 0, wx.ALL, 5)
+
+		col1 = wx.BoxSizer(wx.VERTICAL)
+		col1.Add(bodylabel, 0, wx.ALL, 5)
+		col1.Add(self.body, 1, wx.ALL | wx.EXPAND, 5)
+		col1.Add(self.addsk, 0, wx.ALL, 5)
+
+		col2 = wx.BoxSizer(wx.VERTICAL)
+		col2.Add(self.picture, 0, wx.ALL, 5)
+		col2.Add(self.path_file, 1, wx.ALL | wx.EXPAND, 5)
+		col2.Add(self.button_select_file, 0, wx.ALL, 5)
+		col2.AddSpacer(10)
+		col2.Add(self.photo, 0, wx.ALL, 5)
+		col2.Add(res, 0, wx.ALL, 5)
+		
+		options = wx.BoxSizer(wx.HORIZONTAL)
+		options.Add(col1, 1, wx.ALL, 5)
+		options.Add(col2, 1, wx.ALL, 5)
 
 		repeath = wx.BoxSizer(wx.HORIZONTAL)
 		repeath.Add(intervallabel, 0, wx.ALL, 5)
@@ -1877,14 +1965,13 @@ class ActionPublishTwitter(wx.Dialog):
 		ok_cancel.Add((0, 0), 1, wx.ALL, 0)
 
 		main = wx.BoxSizer(wx.VERTICAL)
-		main.Add(body, 1, wx.ALL | wx.EXPAND, 0)
-		main.Add(addsk, 1, wx.ALL | wx.EXPAND, 0)
+		main.Add(options, 1, wx.ALL | wx.EXPAND, 5)
 		main.AddSpacer(10)
-		main.Add(self.repeat, 1, wx.RIGHT | wx.LEFT, 5)
-		main.Add(repeath, 1, wx.RIGHT | wx.LEFT, 5)
+		main.Add(self.repeat, 1, wx.RIGHT | wx.LEFT, 10)
+		main.Add(repeath, 1, wx.RIGHT | wx.LEFT, 10)
 		main.AddSpacer(10)
-		main.Add(self.rate, 1, wx.RIGHT | wx.LEFT, 5)
-		main.Add(rate, 1, wx.RIGHT | wx.LEFT, 5)
+		main.Add(self.rate, 1, wx.RIGHT | wx.LEFT, 10)
+		main.Add(rate, 1, wx.RIGHT | wx.LEFT, 10)
 		main.Add((0, 0), 1, wx.ALL, 0)
 		main.Add(ok_cancel, 0, wx.ALL | wx.EXPAND, 10)
 
@@ -1898,6 +1985,31 @@ class ActionPublishTwitter(wx.Dialog):
 		if res == wx.OK:
 			self.body.AppendText('{{flow.'+dlg.selected_vessel+'.'+dlg.selected_key+'}}')
 		dlg.Destroy()
+
+	def on_select_file(self, e):
+		dlg = wx.FileDialog(self, message=_('Choose a file'), defaultDir = self.home+'/Pictures', defaultFile='',
+							wildcard=_('Image files').decode('utf8')+' (*.jpg, *.png, *.gif)|*.jpg;*.png;*.gif|'+_('All files').decode('utf8')+' (*.*)|*.*',
+							style=wx.OPEN | wx.CHANGE_DIR)
+		if dlg.ShowModal() == wx.ID_OK: self.path_file.SetValue(dlg.GetPath())
+		dlg.Destroy()
+
+	def on_picture(self, e):
+		if self.picture.GetValue():
+			self.path_file.Enable()
+			self.button_select_file.Enable()
+			self.photo.SetValue(False)
+			self.on_photo(0)
+		else:
+			self.path_file.Disable()
+			self.button_select_file.Disable()
+
+	def on_photo(self, e):
+		if self.photo.GetValue():
+			self.resolution.Enable()
+			self.picture.SetValue(False)
+			self.on_picture(0)
+		else:
+			self.resolution.Disable()
 
 	def on_repeat(self, e):
 		if self.repeat.GetValue():
@@ -1930,9 +2042,21 @@ class ActionPublishTwitter(wx.Dialog):
 
 	def OnOk(self,e):
 		body = self.body.GetValue()
+		picture = self.picture.GetValue()
+		photo = self.photo.GetValue()
 		if not body:
-			wx.MessageBox(_('You must provide something to publish.'), 'Info', wx.OK | wx.ICON_INFORMATION)
+			wx.MessageBox(_('Write a text to send.'), 'Info', wx.OK | wx.ICON_INFORMATION)
 			return
+		if picture:
+			path = self.path_file.GetValue()
+			if not path:
+				wx.MessageBox(_('Select an image to send.'), 'Info', wx.OK | wx.ICON_INFORMATION)
+				return
+		if photo:
+			resolution = self.resolution.GetSelection()+1
+			if resolution < 1:
+				wx.MessageBox(_('Select the picture resolution.'), 'Info', wx.OK | wx.ICON_INFORMATION)
+				return
 		self.ActionNodes = []
 		twitter_node = ujson.loads(self.twitter_node_template)
 		twitter_node['id'] = self.nodes.get_node_id()
@@ -1947,8 +2071,33 @@ class ActionPublishTwitter(wx.Dialog):
 		payload_node['template'] = body
 		payload_node['wires'] = [[twitter_node['id']]]
 		self.ActionNodes.append(payload_node)
+		if picture or photo:
+			change_node = ujson.loads(self.change_node_template)
+			change_node['id'] = self.nodes.get_node_id()
+			change_node['z'] = self.actions_flow_id
+			change_node['name'] = twitter_node['name']
+			change_node['wires'] = [[payload_node['id']]]
+			self.ActionNodes.append(change_node)
+			if picture:
+				file_node = ujson.loads(self.file_node_template)
+				file_node['id'] = self.nodes.get_node_id()
+				file_node['z'] = self.actions_flow_id
+				file_node['name'] = twitter_node['name']
+				file_node['filename'] = path
+				file_node['wires'] = [[change_node['id']]]
+				self.ActionNodes.append(file_node)
+			elif photo:
+				photo_node = ujson.loads(self.photo_node_template)
+				photo_node['id'] = self.nodes.get_node_id()
+				photo_node['z'] = self.actions_flow_id
+				photo_node['name'] = twitter_node['name']
+				photo_node['resolution'] = str(resolution)
+				photo_node['wires'] = [[change_node['id']]]
+				self.ActionNodes.append(photo_node)
 		if not self.repeat.GetValue() and not self.rate.GetValue():
-			self.connector_id = payload_node['id']
+			if picture: self.connector_id = file_node['id']
+			elif photo: self.connector_id = photo_node['id']
+			else: self.connector_id = payload_node['id']
 		elif self.repeat.GetValue():
 			repeat_node = ujson.loads(self.RepeatOptions.repeat_template)
 			repeat_node['id'] = self.nodes.get_node_id()
@@ -1957,7 +2106,9 @@ class ActionPublishTwitter(wx.Dialog):
 			repeat_node['interval'] = str(self.interval.GetValue())
 			repeat_node['intervalUnit'] = self.RepeatOptions.intervalUnit2[self.unit.GetSelection()]
 			repeat_node['maximum'] = str(self.max.GetValue())
-			repeat_node['wires'] = [[payload_node['id']]]
+			if picture: repeat_node['wires'] = [[file_node['id']]]
+			elif photo: repeat_node['wires'] = [[photo_node['id']]]
+			else: repeat_node['wires'] = [[payload_node['id']]]
 			self.connector_id = repeat_node['id']
 			self.ActionNodes.append(repeat_node)
 		elif self.rate.GetValue():
@@ -1968,7 +2119,9 @@ class ActionPublishTwitter(wx.Dialog):
 			rate_node['rate'] = str(self.amount.GetValue())
 			rate_node['nbRateUnits'] = str(self.time.GetValue())
 			rate_node['rateUnits'] = self.RepeatOptions.rateUnit2[self.timeunit.GetSelection()]
-			rate_node['wires'] = [[payload_node['id']]]
+			if picture: rate_node['wires'] = [[file_node['id']]]
+			elif photo: rate_node['wires'] = [[photo_node['id']]]
+			else: rate_node['wires'] = [[payload_node['id']]]
 			self.connector_id = rate_node['id']
 			self.ActionNodes.append(rate_node)
 		self.EndModal(wx.OK)
