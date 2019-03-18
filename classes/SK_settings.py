@@ -98,6 +98,8 @@ class SK_settings:
 							write = True
 			except:
 				print 'Error parsing setting.json'
+		else:
+			self.data['pipedProviders'] = []
 
 		if not OPcan: self.data['pipedProviders'].append({'pipeElements': [{'type': 'providers/simple', 'options': {'logging': False, 'type': 'NMEA2000', 'subOptions': {'device': '/dev/ttyOP_', 'type': 'ngt-1'}}}], 'enabled': False, 'id': 'OPcan'})
 		if not OPpypilot: self.data['pipedProviders'].append({'pipeElements': [{'type': 'providers/simple', 'options': {'logging': False, 'type': 'NMEA0183', 'subOptions': {'host': 'localhost', 'type': 'tcp', 'port': '20220'}}}], 'enabled': True, 'id': 'OPpypilot'})
