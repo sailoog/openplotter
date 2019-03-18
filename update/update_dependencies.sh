@@ -1,5 +1,7 @@
 #!/bin/bash
 
+GIT_CLONE_ARGS=--depth 1  # make shallow repositories to save time
+
 cd $HOME
 
 if [ $branch = "stable" ]; then
@@ -71,12 +73,12 @@ cd $HOME
 mkdir delete
 
 #cd $HOME/delete
-#git clone https://github.com/$repository/PyWavefront
+#git clone $GIT_CLONE_ARGS https://github.com/$repository/PyWavefront
 #cd PyWavefront
 #sudo python setup.py install
 
 #cd $HOME/delete
-#git clone https://github.com/$repository/rtl_433.git
+#git clone $GIT_CLONE_ARGS https://github.com/$repository/rtl_433.git
 #cd rtl_433/
 #mkdir build
 #cd build
@@ -85,27 +87,27 @@ mkdir delete
 #sudo make install
 
 #cd $HOME/delete
-#git clone https://github.com/$repository/kplex.git
+#git clone $GIT_CLONE_ARGS https://github.com/$repository/kplex.git
 #cd kplex
 #make
 #sudo make install
 
 #cd $HOME/delete
-#git clone git://github.com/$repository/canboat
+#git clone $GIT_CLONE_ARGS git://github.com/$repository/canboat
 #cd canboat
 #make
 #sudo make install
 
 #cd $HOME/delete
 #pkill aisdecoder
-#git clone https://github.com/$repository/aisdecoder.git
+#git clone $GIT_CLONE_ARGS https://github.com/$repository/aisdecoder.git
 #cd aisdecoder
 #cmake -DCMAKE_BUILD_TYPE=release
 #make
 #sudo cp aisdecoder /usr/local/bin
 
 #cd $HOME/delete
-#git clone https://github.com/$repository/kalibrate-rtl.git
+#git clone $GIT_CLONE_ARGS https://github.com/$repository/kalibrate-rtl.git
 #cd kalibrate-rtl
 #./bootstrap && CXXFLAGS='-W -Wall -O3'
 #./configure
@@ -113,13 +115,13 @@ mkdir delete
 #sudo make install
 
 #cd $HOME/delete
-#git clone https://github.com/$repository/geomag.git
+#git clone $GIT_CLONE_ARGS https://github.com/$repository/geomag.git
 #cd geomag/geomag
 #python setup.py build
 #sudo python setup.py install
 
 cd $HOME/delete
-git clone https://github.com/$repository/RTIMULib2.git
+git clone $GIT_CLONE_ARGS https://github.com/$repository/RTIMULib2.git
 cd RTIMULib2/Linux
 #mkdir build
 #cd build
@@ -141,8 +143,8 @@ python setup.py build
 sudo python setup.py install
 
 cd $HOME/delete
-git clone https://github.com/$repository/pypilot
-git clone https://github.com/$repository/pypilot_data
+git clone $GIT_CLONE_ARGS https://github.com/$repository/pypilot
+git clone $GIT_CLONE_ARGS https://github.com/$repository/pypilot_data
 cp -rv pypilot_data/* pypilot
 cd pypilot
 python setup.py build
@@ -150,6 +152,7 @@ sudo python setup.py install
 
 cd $HOME
 sudo rm -rf delete
+
 
 echo
 echo "Adding support for wifi modules using the rtl8188eu, rtl8192eu, rtl8812au, 8822bu, mt7610 and mt7612 drivers..."
