@@ -1,1 +1,1 @@
-ACTION=="add", SUBSYSTEM=="net", DRIVERS=="?*", KERNEL=="wlan*", NAME="wlan1" 
+ACTION=="add", SUBSYSTEM=="ieee80211", KERNEL=="phy0", NAME="wlan1"
