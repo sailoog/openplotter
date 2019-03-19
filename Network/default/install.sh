@@ -28,3 +28,13 @@ if [ -e /lib/dhcpcd/10-wpa_supplicant ]
 then
     sudo mv /lib/dhcpcd/10-wpa_supplicant /lib/dhcpcd/dhcpcd-hooks
 fi
+
+if [ -e /etc/udev/rules.d/11-openplotter-usb0.rules ]
+then
+    sudo rm /etc/udev/rules.d/11-openplotter-usb0.rules
+fi
+
+sudo systemctl disable dnsmasq
+sudo systemctl disable hostapd
+
+/bin/bash delete_hostname_dot_local.sh

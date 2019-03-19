@@ -18,3 +18,24 @@ if [ -e /lib/dhcpcd/dhcpcd-hooks/10-wpa_supplicant ]
 then
     sudo mv /lib/dhcpcd/dhcpcd-hooks/10-wpa_supplicant /lib/dhcpcd
 fi
+
+if [ ! -e /etc/udev/rules.d/11-openplotter-usb0.rules ]
+then
+    sudo cp udev/rules.d/11-openplotter-usb0.rules /etc/udev/rules.d
+fi
+
+erg=$(systemctl status dnsmasq | grep disabled)
+chrlen=${#erg}
+if [ $chrlen -gt 0 ]
+then
+	sudo systemctl enable dnsmasq
+fi
+
+erg=$(systemctl status hostapd | grep disabled)
+chrlen=${#erg}
+if [ $chrlen -gt 0 ]
+then
+	sudo systemctl enable hostapd
+fi
+
+/bin/bash add_hostname_dot_local.sh
