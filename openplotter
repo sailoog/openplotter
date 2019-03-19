@@ -3420,7 +3420,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.Serial_assignment.SetSelection(0)
 
 		bauds_label = wx.StaticText(self.p_serial, label=_('bauds'))
-		self.bauds = ['','4800', '9600', '19200', '38400', '57600', '115200', '230400', '460800']
+		self.bauds = ['','4800', '9600', '19200', '38400', '57600', '115200', '230400', '460800', '921600']
 		self.Serial_baud_select = wx.Choice(self.p_serial, choices=self.bauds, style=wx.CB_READONLY)
 		self.Serial_baud_select.SetSelection(0)
 
@@ -3687,7 +3687,17 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			bauds = ''
 		elif self.readNMEA2000(device, '115200'):
 			assignment = 'CAN-USB'
-			bauds = ''
+			bauds = '115200'
+		elif self.readNMEA2000(device, '230400'):
+			assignment = 'CAN-USB'
+			bauds = '230400'
+		elif self.readNMEA2000(device, '460800'):
+			assignment = 'CAN-USB'
+			bauds = '460800'
+		elif self.readNMEA2000(device, '921600'):
+			assignment = 'CAN-USB'
+			bauds = '921600'
+
 		elif self.detect_pypilot_servo(device, 38400):
 			assignment = 'pypilot'
 			bauds = '38400'
@@ -3696,11 +3706,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			bauds = ''
 		else:
 			bauds = ''
+			self.bauds = ['4800', '9600', '19200', '38400', '57600', '115200', '230400', '460800']
+
 			for i in self.bauds:
-				if i != '':
-					if self.readNMEA0183(device, i):
-						assignment = 'Kplex'
-						bauds = i
+				if self.readNMEA0183(device, i):
+					assignment = 'Kplex'
+					bauds = i
 			if not bauds: return False
 
 		self.Serial_OPname.SetValue(name)
@@ -3724,7 +3735,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.on_restart_kplex(0)
 		self.start_sensors()
 		self.start_SK()
-		if self.Serial_assignment.GetStringSelection() == 'Kplex':
+		if self.Serial_assignment.GetStringSelection() in {'Kplex','NMEA 0183 out','CAN-USB'}:
 			self.Serial_baud_select.Enable()
 		else:
 			self.Serial_baud_select.SetSelection(0)
@@ -3762,7 +3773,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.Serial_assignment.SetStringSelection(self.list_Serialinst.GetItemText(i, 6))
 		self.Serial_baud_select.SetStringSelection(self.list_Serialinst.GetItemText(i, 8))
 
-		if self.Serial_assignment.GetStringSelection() == 'Kplex' or self.Serial_assignment.GetStringSelection() == 'NMEA 0183 out':
+		if self.Serial_assignment.GetStringSelection() in {'Kplex','NMEA 0183 out','CAN-USB'}:
 			self.Serial_baud_select.Enable()
 		else:
 			self.Serial_baud_select.SetSelection(0)
@@ -3797,7 +3808,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		assignment = self.Serial_assignment.GetStringSelection()
 		bauds = self.Serial_baud_select.GetStringSelection()
 
-		if (assignment == 'Kplex' or assignment == 'NMEA 0183 out') and bauds == '':
+		if (assignment in {'Kplex','NMEA 0183 out'}) and bauds == '':
 			self.ShowMessage(_('Failed. Select bauds.'))
 			return
 
@@ -3870,7 +3881,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.Serial_baud_select.SetSelection(0)
                                         
 	def apply_changes_Serialinst(self):
-		file = open('10-openplotter.rules', 'w')
+		file = open(self.home +'/10-openplotter.rules', 'w')
 		for name in self.Serialinst:
 			i = self.Serialinst[name]
 			if 'virtual' == i['port']:
@@ -3886,7 +3897,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			file.write(write_str)
 		file.close()
 		test = 0
-		test = os.system('sudo mv 10-openplotter.rules /etc/udev/rules.d')
+		test = os.system('sudo mv '+self.home +'/10-openplotter.rules /etc/udev/rules.d')
 
 		self.ShowStatusBarRED(_('Restarting ...'))
 		self.start_udev()
@@ -3998,14 +4009,15 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		can_device = ''
 		for name in self.Serialinst:
 			if self.Serialinst[name]['assignment'] == 'CAN-USB':
-				can_device = '/dev/ttyOP_'+name
+				self.can_device = '/dev/ttyOP_'+name
+				self.can_speed = self.Serialinst[name]['bauds']
 				break
 		if not can_device:
 			self.conf.set('N2K', 'output', '0')
 			self.SK_settings.enable_disable_all(0)
 		else:
-			if self.SK_settings.ngt1_device != can_device:
-				self.SK_settings.set_ngt1_device(can_device)
+			if self.SK_settings.ngt1_device != self.can_device:
+				self.SK_settings.set_ngt1_device(self.can_device,self.can_speed)
 		self.read_n2k()
 
 		time.sleep(1.5)
@@ -4019,7 +4031,19 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					self.ShowMessage(_('Failed. You can assign only one ')+selected+_(' device'))
 					self.Serial_assignment.SetSelection(0)
 		if selected == 'Kplex' or selected == 'NMEA 0183 out':
+			self.Serial_baud_select.Clear()
+			self.bauds = ['','4800', '9600', '19200', '38400', '57600', '115200', '230400', '460800']
+			for i in self.bauds:
+				self.Serial_baud_select.Append(i)				
+		
 			self.Serial_baud_select.SetSelection(1)
+			self.Serial_baud_select.Enable()
+		elif selected == 'CAN-USB':
+			self.Serial_baud_select.Clear()
+			self.bauds = ['115200', '230400', '460800', '921600']
+			for i in self.bauds:
+				self.Serial_baud_select.Append(i)				
+			self.Serial_baud_select.SetSelection(0)
 			self.Serial_baud_select.Enable()
 		else:
 			self.Serial_baud_select.SetSelection(0)
@@ -4172,11 +4196,19 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		for name in self.Serialinst:
 			if self.Serialinst[name]['assignment'] == 'CAN-USB':
 				self.can_device = '/dev/ttyOP_'+name
+				self.can_speed = self.Serialinst[name]['bauds']
 				break
 		self.n2k_enable.SetValue(self.SK_settings.ngt1_enabled == 1)
 		self.n2k_out_enable.SetValue(self.conf.get('N2K', 'output') == '1')
 		self.ngt1js_enabled.SetValue(self.SK_settings.ngt1js_enabled == 1)
-		self.n2k_can0_enable.SetValue(self.SK_settings.canbus_enabled == 1)
+
+		can_exists=os.path.isdir('/sys/class/net/can0')
+		if can_exists:
+			self.n2k_can0_enable.Enable()
+			self.n2k_can0_enable.SetValue(self.SK_settings.canbus_enabled == 1)
+		else:
+			self.n2k_can0_enable.Disable()
+			
 		if self.can_device:	
 			self.can_usb.SetLabel(self.can_device)
 			if self.n2k_enable.GetValue() or self.n2k_out_enable.GetValue() or self.ngt1js_enabled.GetValue():
@@ -4192,7 +4224,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.n2k_can0_enable.Disable()
 			else:
 				self.ngt1js_enabled.Enable()
-				self.n2k_can0_enable.Enable()
+				if can_exists: 
+					self.n2k_can0_enable.Enable()
 			if self.ngt1js_enabled.GetValue() or self.n2k_can0_enable.GetValue():
 				self.n2k_enable.Disable()
 				self.n2k_out_enable.Disable()
@@ -4202,7 +4235,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			if self.ngt1js_enabled.GetValue() or self.n2k_enable.GetValue() or self.n2k_out_enable.GetValue():
 				self.n2k_can0_enable.Disable()
 			else:
-				self.n2k_can0_enable.Enable()	
+				if can_exists:
+					self.n2k_can0_enable.Enable()	
 			if self.n2k_can0_enable.GetValue() or self.n2k_enable.GetValue() or self.n2k_out_enable.GetValue():
 				self.ngt1js_enabled.Disable()
 			else:
@@ -4214,14 +4248,15 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.N2K_diagnostic_b.Disable()
 			self.n2k_out_enable.Disable()
 			self.N2K_diagnostic_out_b.Disable()
-			self.ngt1js_enabled.Disable()	
-			self.n2k_can0_enable.Enable()
+			self.ngt1js_enabled.Disable()
+			if can_exists:
+				self.n2k_can0_enable.Enable()
 
 	def on_n2k_enable(self, e):
 		if self.n2k_enable.GetValue():
-			self.SK_settings.set_ngt1_enable(True,self.can_device)
+			self.SK_settings.set_ngt1_enable(True,self.can_device,self.can_speed)
 		else:
-			self.SK_settings.set_ngt1_enable(False,self.can_device)
+			self.SK_settings.set_ngt1_enable(False,self.can_device,self.can_speed)
 		self.read_n2k()
 
 	def on_n2k_output(self, e):
@@ -4238,9 +4273,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			
 	def on_ngt1js_enabled(self, e):
 		if self.ngt1js_enabled.GetValue():
-			self.SK_settings.set_ngt1js_enable(True,self.can_device)
+			self.SK_settings.set_ngt1js_enable(True,self.can_device,self.can_speed)
 		else:
-			self.SK_settings.set_ngt1js_enable(False,self.can_device)
+			self.SK_settings.set_ngt1js_enable(False,self.can_device,self.can_speed)
 		self.read_n2k()	
 
 	def on_N2K_setting(self, e):

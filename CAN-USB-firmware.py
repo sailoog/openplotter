@@ -1,7 +1,6 @@
 #!/usr/bin/env python
-
 # This file is part of Openplotter.
-# Copyright (C) 2015 by sailoog <https://github.com/sailoog/openplotter>
+# Copyright (C) 2019 by sailoog <https://github.com/sailoog/openplotter>
 # 					  e-sailing <https://github.com/e-sailing/openplotter>
 # Openplotter is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,94 +14,84 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, time, serial, sys, os
-from classes.conf import Conf
-from classes.language import Language
+import fcntl
+import sys
+import os
+import time
+import tty
+import termios, pyudev, serial
 
-class MyFrame(wx.Frame):
+class raw(object):
+    def __init__(self, stream):
+        self.stream = stream
+        self.fd = self.stream.fileno()
+    def __enter__(self):
+        self.original_stty = termios.tcgetattr(self.stream)
+        tty.setcbreak(self.stream)
+    def __exit__(self, type, value, traceback):
+        termios.tcsetattr(self.stream, termios.TCSANOW, self.original_stty)
 
-	def __init__(self):
-		self.ttimer=40
-		self.conf = Conf()
-		self.home = self.conf.home
-		self.currentpath = self.conf.get('GENERAL', 'op_folder')
+class nonblocking(object):
+    def __init__(self, stream):
+        self.stream = stream
+        self.fd = self.stream.fileno()
+    def __enter__(self):
+        self.orig_fl = fcntl.fcntl(self.fd, fcntl.F_GETFL)
+        fcntl.fcntl(self.fd, fcntl.F_SETFL, self.orig_fl | os.O_NONBLOCK)
+    def __exit__(self, *args):
+        fcntl.fcntl(self.fd, fcntl.F_SETFL, self.orig_fl)
+
 		
-		data = self.conf.get('UDEV', 'Serialinst')
-		try:
-			Serialinst = eval(data)
-		except:
-			Serialinst = {}
+context = pyudev.Context()
+monitor = pyudev.Monitor.from_netlink(context)
+monitor.filter_by(subsystem='tty')
+print 'Please connect (or disconnect and reconnect) CANUSB adapter'
 
-		self.can_device = ''
-		for name in Serialinst:
-			if Serialinst[name]['assignment'] == 'CAN-USB':
-				self.can_device = '/dev/ttyOP_'+name
-				break
-				
+
+for device in iter(monitor.poll, None):
+	if device.action == 'add':
+		value = device['DEVPATH']
+		port = value[len(value) - value.find('/tty'):]
+		port = port[port.rfind('/') + 1:]
+		print port
 		try:
-			self.ser = serial.Serial(self.can_device, 115200, timeout=0.5)
+			ser = serial.Serial('/dev/'+port, 9600, timeout=0.5)
 		except:
-			print 'failed to start N2K output setting on '+self.can_device
+			print 'Can not open serial device (CAN-USB) connected on: '+port
 			sys.exit(0)
-					
-		Language(self.conf)
-
-		wx.Frame.__init__(self, None, title="CAN-USB reset", size=(300,130))
-		self.Bind(wx.EVT_CLOSE, self.OnClose)
-	
-		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
-		
-		self.icon = wx.Icon(self.currentpath+'/static/icons/openplotter.ico', wx.BITMAP_TYPE_ICO)
-		self.SetIcon(self.icon)
-		
-		panel = wx.Panel(self, 100)
-		
-		wx.StaticText(panel, wx.ID_ANY, label='!!!'+_('You know that all settings')+'\n'+_('on your CAN-USB will be cleared')+'!!!', style=wx.ALIGN_CENTER, pos=(10,60))
-		
-		self.reset_b = wx.Button(panel, label=_('reset'),size=(70, 32), pos=(10, 10))
-		self.Bind(wx.EVT_BUTTON, self.reset, self.reset_b)
-		
-		self.Centre()
-		self.Show(True)
-		
-	def reset(self,e):
-		try:
-			self.ser = serial.Serial(self.can_device, 115200, timeout=0.5)
-		except:
-			wx.MessageBox(_('There is no active serial device (CAN-USB) connected on: '+self.can_device), 'Info', wx.OK | wx.ICON_ERROR)
-			sys.exit(0)
-		self.ser.close()
-		
-		text = _('Please disconnect CAN-USB from USB-cable and then reconnect it')
-		wx.MessageBox(text, 'Info', wx.OK | wx.ICON_INFORMATION)
+		ser.write('0')
 		time.sleep(0.2)
-		i=0
-		disconnected=True
-		while disconnected:
-			time.sleep(0.2)
-			i+=1
-			if os.path.exists(self.can_device) or i>100:
-				disconnected=False
-		try:
-			self.ser = serial.Serial(self.can_device, 9600, timeout=0.5)
-		except:
-			wx.MessageBox(_('Can not open serial device (CAN-USB) connected on: '+self.can_device), 'Info', wx.OK | wx.ICON_ERROR)
-			sys.exit(0)
-		self.ser.write('0')
-		time.sleep(0.2)
-		sertext=self.ser.readline()
-		if len(sertext)>5:
-			time.sleep(0.2)
-			self.ser.write('1')
-			time.sleep(1)
-			self.ser.write('9')
-			wx.MessageBox(_('Firmware reset finished\n'+text), 'Info', wx.OK | wx.ICON_INFORMATION)
-			self.OnClose(0)
-	
-	def OnClose(self, event):
-		self.Destroy()
-						
-			
-app = wx.App()
-MyFrame().Show()
-app.MainLoop()
+		sertext=ser.readline()
+		if len(sertext)>=1:
+			#time.sleep(0.2)
+			#ser.write('0')
+			c='0'
+			while c<>'9':
+				i=20
+				while i>0:
+					if ser.inWaiting():
+						sertext=ser.readline()
+						print sertext[:-1]
+					else:
+						i-=1
+						time.sleep(0.05)
+				i=180
+				with raw(sys.stdin):
+					with nonblocking(sys.stdin):				
+						while i>0:
+							try:
+								c = sys.stdin.read(1)
+								if c in ['1','2','3','4','5','6','7','8','9','0']:
+									ser.write(c)
+									i=-5
+									#print 'ser.write('+c+')',i
+									
+							except IOError:
+								#print 'not ready',i
+								time.sleep(.1)						
+							i-=1
+						if i>-2:
+							ser.write('0')
+							#print 'ser.write(0)'
+		sys.exit(0)
+								

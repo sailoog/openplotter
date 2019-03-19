@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # This file is part of Openplotter.
-# Copyright (C) 2015 by sailoog <https://github.com/sailoog/openplotter>
+# Copyright (C) 2019 by sailoog <https://github.com/sailoog/openplotter>
 # 					  e-sailing <https://github.com/e-sailing/openplotter>
 # Openplotter is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -171,41 +171,92 @@ class MyFrame(wx.Frame):
 		self.list_SK_unit.sort(key=lambda tup: tup[0])
 		self.list_SK_unit.sort(key=lambda tup: tup[1])
 		
+		self.data_sk_star3 = []
+		self.data_sk_star4 = []
+		self.data_sk_1 = []
+		self.data_sk_2 = []
+		self.data_sk_3 = []
+		self.data_sk_4 = []
+		self.data_sk_5 = []
+		for i in self.list_SK_unit:
+			j=i[0].split('.')
+			if "*" in i[0]:
+				if len(j)==3:
+					self.data_sk_star3.append(i)
+				elif len(j)==4:
+					self.data_sk_star4.append(i)
+			else:
+				if len(j)==3:
+					self.data_sk_3.append(i)
+				elif len(j)==4:
+					self.data_sk_4.append(i)
+				elif len(j)==1:
+					self.data_sk_1.append(i)
+				elif len(j)==2:
+					self.data_sk_2.append(i)
+				elif len(j)==5:
+					self.data_sk_5.append(i)
 
 	def lookup_star(self, name):
-		skip = -1
-		index = 0
-		st = ''
-		for i in name.split('.'):
-			if index > -1:
-				if skip == 0:
-					st += '.*'
-				else:
-					if i in ['propulsion', 'sensors']:
-						skip = 1
-					elif i in ['electrical', 'registrations','tanks']:
-						skip = 2
-					st += '.' + i
-			index += 1
-			skip -= 1
+		j=name.split('.')
+		erg=[]
+		if len(j)==3:
+			for i in self.data_sk_3:
+				if name==i[0]: 
+					erg=i
+					break
+		elif len(j)==4:
+			for i in self.data_sk_4:
+				if name==i[0]: 
+					erg=i
+					break
+		elif len(j)==1:
+			for i in self.data_sk_1:
+				if name==i[0]: 
+					erg=i
+					break
+		elif len(j)==2:
+			for i in self.data_sk_2:
+				if name==i[0]: 
+					erg=i
+					break
+		elif len(j)==5:
+			for i in self.data_sk_5:
+				if name==i[0]: 
+					erg=i
+					break
 
-		st = st[1:]
+		if erg == []:
+			if len(j)==3:
+				for i in self.data_sk_star3:
+					if (j[0]+".*."+j[2])==i[0]: 
+						erg=i
+						break
+					elif (j[0]+'.'+j[1]+'.*')==i[0]: 
+						erg=i
+						break
+			if len(j)==4:
+				for i in self.data_sk_star4:
+					if (j[0]+'.*.'+j[2]+'.'+j[3])==i[0]: 
+						erg=i
+						break
+					elif (j[0]+'.'+j[1]+'.*.'+j[3])==i[0]: 
+						erg=i
+						break
+
+
 		self.SK_unit = ''
 		self.SK_unit_priv = ''
 		self.SK_description = ''
-		for j in self.list_SK_unit:
-			exist = False
-			if j[0] == st:
-				exist = True
-				self.SK_unit = j[1]
-				self.SK_description = j[3]
-				if j[2] != '':
-					self.SK_unit_priv = j[2]
-				else:
-					self.SK_unit_priv = j[1]
-				break
-		if not exist:
-			print 'no unit for ', st
+		if erg != []:
+			self.SK_unit = erg[1]
+			self.SK_description = erg[3]
+			if erg[2] != '':
+				self.SK_unit_priv = erg[2]
+			else:
+				self.SK_unit_priv = erg[1]
+		else:
+			print 'no unit for ', name
 
 		self.SK_Faktor_priv = 1
 		self.SK_Offset_priv = 0
@@ -325,10 +376,6 @@ class MyFrame(wx.Frame):
 
 	def OnClose(self, e):
 		self.endlive=True
-		qx=0
-		while not self.ende and qx<50:
-			time.sleep(0.1)
-			qx+=1
 		 
 		if self.ws:
 			self.ws.close()
