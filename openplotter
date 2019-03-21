@@ -1060,19 +1060,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		imu_box = wx.StaticBox(self.p_pypilot, label=_(' IMU '))
 		detected_label = wx.StaticText(self.p_pypilot, label=_('Detected IMU:'))
 		self.imu_detected = wx.StaticText(self.p_pypilot, label=_('None'))
-
-		self.reset_imu = wx.Button(self.p_pypilot, label=_('Reset'))
-		self.reset_imu.Bind(wx.EVT_BUTTON, self.on_pypilot_reset)
-
-		connections_box = wx.StaticBox(self.p_pypilot, label= _(' Autopilot '))
-
-		serial_ports_label = wx.StaticText(self.p_pypilot, label=_('Serial ports (Controller/Wind/GPS)'))
-		self.pypilot_nmea = wx.TextCtrl(self.p_pypilot,style=wx.TE_MULTILINE | wx.VSCROLL | wx.TE_READONLY)
-
-		self.pypilot_webapp_cb = wx.CheckBox(self.p_pypilot, False, _('Enable webapp'))
-		pypilot_webapp_port_label = wx.StaticText(self.p_pypilot, label=_('port:'))
-		self.pypilot_webapp_port = wx.SpinCtrl(self.p_pypilot, min=1, max=65536, initial=8080)
-
 		self.calibration = wx.Button(self.p_pypilot, label=_('Calibration'))
 		self.calibration.Bind(wx.EVT_BUTTON, self.on_pypilot_calibration)
 
@@ -1082,91 +1069,121 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.client = wx.Button(self.p_pypilot, label=_('Client'))
 		self.client.Bind(wx.EVT_BUTTON, self.on_pypilot_client)
 
+		self.reset_imu = wx.Button(self.p_pypilot, label=_('Reset'))
+		self.reset_imu.Bind(wx.EVT_BUTTON, self.on_pypilot_reset)
+
+                mode = wx.BoxSizer(wx.HORIZONTAL)
+		mode.Add(pypilot_mode_label, 0, wx.UP | wx.EXPAND, 5)
+		mode.Add(self.pypilot_mode, 0,  wx.LEFT | wx.EXPAND, 5)
+
+		connections_box = wx.StaticBox(self.p_pypilot, label= _(' Autopilot '))
+
+		serial_ports_label = wx.StaticText(self.p_pypilot, label=_('Serial ports (Controller/Wind/GPS)'))
+		self.pypilot_nmea = wx.TextCtrl(self.p_pypilot,style=wx.TE_MULTILINE | wx.VSCROLL | wx.TE_READONLY)
+
+		self.pypilot_webapp_cb = wx.CheckBox(self.p_pypilot, False, _('Enable webapp'))
+		pypilot_webapp_port_label = wx.StaticText(self.p_pypilot, label=_('port:'))
+		self.pypilot_webapp_port = wx.SpinCtrl(self.p_pypilot, min=1, max=65536, initial=8080)                
 		self.pypilot_control = wx.Button(self.p_pypilot, label=_('Autopilot Control'))
 		self.pypilot_control.Bind(wx.EVT_BUTTON, self.on_pypilot_control)
 
-		restart = wx.Button(self.p_pypilot, label=_('Restart'))
-		restart.Bind(wx.EVT_BUTTON, self.reset_sensors)
+		signalk_box = wx.StaticBox(self.p_pypilot, label=_(' SignalK '))
+                signalk = wx.StaticBoxSizer(signalk_box, wx.VERTICAL)
 
-		apply_changes_pypilot = wx.Button(self.p_pypilot, label=_('Apply changes'))
-		apply_changes_pypilot.Bind(wx.EVT_BUTTON, self.on_apply_changes_pypilot)
-		cancel_changes_pypilot = wx.Button(self.p_pypilot, label=_('Cancel changes'))
-		cancel_changes_pypilot.Bind(wx.EVT_BUTTON, self.on_cancel_changes_pypilot)
-
+		translation_rate = wx.BoxSizer(wx.HORIZONTAL)
+		translation_rate_label = wx.StaticText(self.p_pypilot, label=_('Translation Rate (seconds)'))
+		translation_rate.Add(translation_rate_label, 0, wx.UP | wx.EXPAND, 10)
 		self.pypilot_translation_names_list = ['magnetic_h', 'attitude']
 		translation_choices = ['imu.heading -> navigation.headingMagnetic','imu.[pitch, roll] -> navigation.attitude.[pitch, roll]']
-		self.pypilot_signalk_translation = wx.CheckListBox(self.p_pypilot, choices=translation_choices)
+		self.pypilot_signalk_translation = wx.CheckListBox(self.p_pypilot, choices=translation_choices, size=wx.Size(-1, 60))
 
-		translation_rate_label = wx.StaticText(self.p_pypilot, label=_('Translation Rate (seconds)'))
 		translation_rate_list = ['0.1', '0.2', '0.5', '1', '2', '5', '10', '30', '60']
 		self.pypilot_translation_rate= wx.Choice(self.p_pypilot, choices=translation_rate_list)
+		translation_rate.Add(self.pypilot_translation_rate, 0, wx.ALL | wx.EXPAND, 5)
+		signalk.Add(self.pypilot_signalk_translation, 0, wx.ALL | wx.EXPAND, 5)
+		signalk.Add(translation_rate, 0, wx.ALL | wx.EXPAND, 5)
 
 		diagnostic = wx.Button(self.p_pypilot, label=_('SK Diagnostic'))
 		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
 
-		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox1.Add(pypilot_mode_label, 0, wx.UP | wx.EXPAND, 5)
-		hbox1.Add(self.pypilot_mode, 0,  wx.LEFT | wx.EXPAND, 5)
+		translation_rate.Add(diagnostic, 0, wx.ALL | wx.EXPAND, 5)
 
-		hbox2 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox2.Add(detected_label, 0, wx.ALL | wx.EXPAND, 5)
-		hbox2.Add(self.imu_detected, 0, wx.ALL | wx.EXPAND, 5)
+		apply_pypilot = wx.Button(self.p_pypilot, label=_('Apply Changes'))
+		apply_pypilot.Bind(wx.EVT_BUTTON, self.on_apply_pypilot)
+		cancel_changes_pypilot = wx.Button(self.p_pypilot, label=_('Cancel changes'))
+		cancel_changes_pypilot.Bind(wx.EVT_BUTTON, self.on_cancel_changes_pypilot)
 
-		hbox5 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox5.Add(self.calibration, 1, wx.ALL | wx.EXPAND, 5)
-		hbox5.Add(self.scope, 1, wx.ALL | wx.EXPAND, 5)
-		hbox5.Add(self.client, 1, wx.ALL | wx.EXPAND, 5)
-		hbox5.Add(self.reset_imu, 1, wx.ALL | wx.EXPAND, 5)
+		lcd_box = wx.StaticBox(self.p_pypilot, label=_(' LCD '))
+		lcd = wx.StaticBoxSizer(lcd_box, wx.HORIZONTAL)
+		self.pypilot_lcd_cb = wx.CheckBox(self.p_pypilot, False, _('Enable LCD'))
+                self.pypilot_lcd_type= wx.Choice(self.p_pypilot, choices=['hdmi', 'nokia5110'])
+                question_lcd_pypilot = wx.Button(self.p_pypilot, label='?', size=wx.Size(15, -1))
+		question_lcd_pypilot.Bind(wx.EVT_BUTTON, self.on_question_lcd_pypilot)
 
-		hbox3 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox3.Add(translation_rate_label, 0, wx.UP | wx.EXPAND, 10)
-		hbox3.Add(self.pypilot_translation_rate, 0, wx.ALL | wx.EXPAND, 5)
+                lcd.Add(self.pypilot_lcd_cb, 0, wx.ALL | wx.EXPAND, 5)
+                lcd.Add(self.pypilot_lcd_type, 0, wx.ALL | wx.EXPAND, 5)
+                lcd.Add(question_lcd_pypilot, 0, wx.ALL | wx.EXPAND, 5)
 
-		vbox1 = wx.StaticBoxSizer(imu_box, wx.VERTICAL)
-		vbox1.Add(hbox2, 0, wx.ALL | wx.EXPAND, 5)
-		vbox1.Add(hbox5, 0, wx.ALL | wx.EXPAND, 5)
-		vbox1.Add(self.pypilot_signalk_translation, 0, wx.ALL | wx.EXPAND, 5)
-		vbox1.Add(hbox3, 0, wx.ALL | wx.EXPAND, 5)
+		imu_detected = wx.BoxSizer(wx.HORIZONTAL)
+		imu_detected.Add(detected_label, 0, wx.ALL | wx.EXPAND, 5)
+		imu_detected.Add(self.imu_detected, 0, wx.ALL | wx.EXPAND, 5)
 
-		hbox4 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox4.Add(pypilot_webapp_port_label, 0, wx.UP | wx.LEFT | wx.EXPAND, 10)
-		hbox4.Add(self.pypilot_webapp_port, 0, wx.ALL | wx.EXPAND, 5)
+		core_functions = wx.BoxSizer(wx.HORIZONTAL)
+		core_functions.Add(self.calibration, 1, wx.ALL | wx.EXPAND, 5)
+		core_functions.Add(self.scope, 1, wx.ALL | wx.EXPAND, 5)
+		core_functions.Add(self.client, 1, wx.ALL | wx.EXPAND, 5)
+		core_functions.Add(self.reset_imu, 1, wx.ALL | wx.EXPAND, 5)
 
-		vbox2 = wx.StaticBoxSizer(connections_box, wx.VERTICAL)
-		vbox2.Add(serial_ports_label, 0, wx.ALL | wx.EXPAND, 5)
-		vbox2.Add(self.pypilot_nmea, 1, wx.ALL | wx.EXPAND, 5)
-		vbox2.Add(self.pypilot_control, 0, wx.ALL | wx.EXPAND, 5)
-		vbox2.Add(self.pypilot_webapp_cb, 0, wx.ALL | wx.EXPAND, 5)
-		vbox2.Add(hbox4, 0, wx.ALL | wx.EXPAND, 5)
+		imu = wx.StaticBoxSizer(imu_box, wx.VERTICAL)
+		imu.Add(imu_detected, 0, wx.ALL | wx.EXPAND, 5)
+		imu.Add(core_functions, 0, wx.ALL | wx.EXPAND, 5)
+                
+		webapp = wx.BoxSizer(wx.HORIZONTAL)
+		webapp.Add(pypilot_webapp_port_label, 0, wx.UP | wx.LEFT | wx.EXPAND, 10)
+		webapp.Add(self.pypilot_webapp_port, 0, wx.ALL | wx.EXPAND, 5)
+
+		autopilot = wx.StaticBoxSizer(connections_box, wx.VERTICAL)
+		autopilot.Add(serial_ports_label, 0, wx.ALL | wx.EXPAND, 5)
+		autopilot.Add(self.pypilot_nmea, 1, wx.ALL | wx.EXPAND, 5)
+		autopilot.Add(self.pypilot_control, 0, wx.ALL | wx.EXPAND, 5)
+		autopilot.Add(self.pypilot_webapp_cb, 0, wx.ALL | wx.EXPAND, 5)
+		autopilot.Add(webapp, 0, wx.ALL | wx.EXPAND, 5)
 
 		hbox8 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox8.Add(vbox1, 1, wx.ALL | wx.EXPAND, 5)
-		hbox8.Add(vbox2, 0, wx.ALL | wx.EXPAND, 5)
+		hbox8.Add(apply_pypilot, 0, wx.ALL | wx.EXPAND, 5)
+		hbox8.Add(cancel_changes_pypilot, 0, wx.ALL | wx.EXPAND, 5)
 
-		hbox9 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox9.Add(diagnostic, 0, wx.ALL | wx.EXPAND, 5)
-		hbox9.Add(restart, 0, wx.ALL | wx.EXPAND, 5)
-		hbox9.Add((0, 0), 1, wx.ALL | wx.EXPAND, 5)
-		hbox9.Add(apply_changes_pypilot, 0, wx.ALL | wx.EXPAND, 5)
-		hbox9.Add(cancel_changes_pypilot, 0, wx.ALL | wx.EXPAND, 5)
+		pypilota = wx.FlexGridSizer(0, 1, 0, 0)
+		pypilota.Add(mode, 0, wx.ALL | wx.EXPAND, 5)
+		pypilota.Add(imu, 1, wx.ALL | wx.EXPAND, 5)
+		pypilota.Add(signalk, 0, wx.ALL | wx.EXPAND, 5)
+
+		pypilotb = wx.FlexGridSizer(0, 1, 0, 0)
+		pypilotb.Add(autopilot, 0, wx.ALL | wx.EXPAND, 5)
+		pypilotb.Add(lcd, 0, wx.ALL | wx.EXPAND, 5)
+		pypilotb.Add(hbox8, 0, wx.ALL | wx.EXPAND, 0)
+
+		pypilot = wx.FlexGridSizer(0, 2, 0, 0)
+		pypilot.Add(pypilota, 0, wx.ALL | wx.EXPAND, 5)
+		pypilot.Add(pypilotb, 0, wx.ALL | wx.EXPAND, 5)
 
 		sizer = wx.BoxSizer(wx.VERTICAL)
-		sizer.Add(hbox1, 0, wx.ALL | wx.EXPAND, 5)
-		sizer.Add(hbox8, 0, wx.ALL | wx.EXPAND, 0)
+		sizer.Add(pypilot, 0, wx.ALL | wx.EXPAND, 0)
 		sizer.Add((0, 0), 1, wx.ALL | wx.EXPAND, 5)
-		sizer.Add(hbox9, 0, wx.ALL | wx.EXPAND, 0)
 
 		self.p_pypilot.SetSizer(sizer)
 
 	def disable_autopilot(self):
 		self.pypilot_nmea.Disable()
 		self.pypilot_control.Disable()
+		self.pypilot_lcd_cb.Disable()
 		self.pypilot_webapp_cb.Disable()
 		self.pypilot_webapp_port.Disable()
 
 	def enable_autopilot(self):
 		self.pypilot_nmea.Enable()
 		self.pypilot_control.Enable()
+		self.pypilot_lcd_cb.Enable()
 		self.pypilot_webapp_cb.Enable()
 		self.pypilot_webapp_port.Enable()
 		self.enable_imu()
@@ -1221,6 +1238,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			file.close()
 			self.pypilot_nmea.SetValue(data)
 		except: pass
+
+		self.pypilot_lcd_cb.SetValue(self.conf.get('PYPILOT', 'lcd') == '1')
+                try: self.pypilot_lcd_type.SetStringSelection(self.conf.get('PYPILOT', 'lcd_type'))
+                except: pass
 
 		self.pypilot_webapp_cb.SetValue(self.conf.get('PYPILOT', 'webapp') == '1')
 		try: self.pypilot_webapp_port.SetValue(int(self.conf.get('PYPILOT', 'webapp_port')))
@@ -1278,7 +1299,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def on_pypilot_control(self, e):
 		subprocess.Popen('pypilot_control', cwd=self.home + '/.pypilot')
 
-	def on_apply_changes_pypilot(self,e=0):
+	def on_apply_pypilot(self,e=0):
 		self.conf.set('PYPILOT', 'mode', self.pypilot_modes[self.pypilot_mode.GetSelection()])
 
 		i = 0
@@ -1288,18 +1309,35 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		self.conf.set('PYPILOT', 'translation_rate', self.pypilot_translation_rate.GetStringSelection())
 
+		self.conf.set('PYPILOT', 'lcd', '1' if self.pypilot_lcd_cb.GetValue() else '0')
+		self.conf.set('PYPILOT', 'lcd_type', self.pypilot_lcd_type.GetStringSelection())
 		self.conf.set('PYPILOT', 'webapp', '1' if self.pypilot_webapp_cb.GetValue() else '0')
 		self.conf.set('PYPILOT', 'webapp_port', str(self.pypilot_webapp_port.GetValue()))
-
 		self.reset_sensors()
 		self.restart_SK()
 
-		subprocess.call(['pkill', '-f', 'pypilot_webapp'])
-		if self.pypilot_webapp_cb.GetValue() and self.pypilot_mode.GetSelection() == 2:
-			subprocess.Popen(['pypilot_webapp', str(self.pypilot_webapp_port.GetValue())])
+                print 'SERIAL!!!!!!!!!!!'
+                if self.pypilot_mode.GetSelection() == 2:
+			for n in self.Serialinst:
+				ii = self.Serialinst[n]
+                                if ii['assignment'] == 'pypilot' and ii['device'] == '/dev/ttyS0':
+                                        self.ShowMessage(_('Software serial port is selected.   This is unreliable, consider "Enable UART" option in the serial tab and reboot'));
+                
+		        subprocess.call(['pkill', '-f', 'pypilot_lcd'])
+		        if self.pypilot_lcd_cb.GetValue():
+                                subprocess.Popen(['pypilot_lcd', self.pypilot_lcd_type.GetStringSelection()])
+                                
+		        subprocess.call(['pkill', '-f', 'pypilot_webapp'])
+		        if self.pypilot_webapp_cb.GetValue():
+			        subprocess.Popen(['pypilot_webapp', str(self.pypilot_webapp_port.GetValue())])
 
 	def on_cancel_changes_pypilot(self,e):
 		self.read_pypilot()
+
+        def on_question_lcd_pypilot(self, e):
+                self.ShowMessage(_(
+			'If the nokia or other lcd is selected, ensure the io pins are wired correctly and not shorted.  See pypilot.org/wiki for details.'))
+
 
 	def start_sensors(self):
 		subprocess.Popen(['python', self.currentpath + '/read_sensors_d.py'], cwd=self.home + '/.pypilot')
@@ -1347,9 +1385,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		restart.Bind(wx.EVT_BUTTON, self.on_restart_kplex)
 		advanced = wx.Button(self.p_kplex, label=_('Advanced'))
 		advanced.Bind(wx.EVT_BUTTON, self.on_advanced_kplex)
-		apply_changes = wx.Button(self.p_kplex, label=_('Apply changes'))
+		apply_changes = wx.Button(self.p_kplex, label=_('Apply'))
 		apply_changes.Bind(wx.EVT_BUTTON, self.on_apply_changes_kplex)
-		cancel_changes = wx.Button(self.p_kplex, label=_('Cancel changes'))
+		cancel_changes = wx.Button(self.p_kplex, label=_('Cancel'))
 		cancel_changes.Bind(wx.EVT_BUTTON, self.on_cancel_changes_kplex)
 
 		hlistbox = wx.BoxSizer(wx.HORIZONTAL)
