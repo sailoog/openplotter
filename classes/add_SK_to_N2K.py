@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
-import wx, os, sys, subprocess
+import wx, subprocess
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 from classes.conf import Conf
 from classes.language import Language
@@ -45,29 +45,29 @@ class addSKtoN2K(wx.Dialog):
 
 		self.list_N2Kgen = [
 			['126992','System Time',''],
-			['127245','Rudder','steering.rudderAngle.value'],
-			['127250','Heading','navigation.headingMagnetic.value'],
-			['127257','Attitude','navigation.attitude.pitch.value, navigation.attitude.roll.value, navigation.attitude.yaw.value'],
-			['127488','Engine_Rapid','propulsion.port.revolutions.value'],
-			['127488_1','Engine_Rapid','propulsion.starboard.revolutions.value'],
-			['127489','Engine','propulsion.port.oilTemperature.value, propulsion.port.temperature.value'],
-			['127489_1','Engine','propulsion.starboard.oilTemperature.value, propulsion.starboard.temperature.value'],
-			['127505','FluidLevel','tanks.fuel.standard.capacity.value, tanks.fuel.standard.currentLevel.value'],
-			['127505_1','FluidLevel','tanks.liveWell.standard.capacity.value, tanks.liveWell.standard.currentLevel.value'],
-			['127505_2','FluidLevel','tanks.wasteWater.standard.capacity.value, tanks.wasteWater.standard.currentLevel.value'],
-			['127505_3','FluidLevel','tanks.blackWater.standard.capacity.value, tanks.blackWater.standard.currentLevel.value'],
-			['127508','Battery_Status','DC Electrical Properties.dcSource.voltage.value, DC Electrical Properties.dcSource.current.value, DC Electrical Properties.dcSource.temperature.value'],
-			['128259','Speed','navigation.speedOverGround.value, navigation.speedThroughWater.value'],
-			['128267','Depth','environment.depth.belowTransducer.value, environment.depth.surfaceToTransducer.value'],
-			['128275','Distance_Log','navigation.log.value, navigation.logTrip.value'],
+			['127245','Rudder','steering.rudderAngle'],
+			['127250','Heading','navigation.headingMagnetic'],
+			['127257','Attitude','navigation.attitude.pitch, navigation.attitude.roll, navigation.attitude.yaw'],
+			['127488','Engine_Rapid','propulsion.port.revolutions'],
+			['127488_1','Engine_Rapid','propulsion.starboard.revolutions'],
+			['127489','Engine','propulsion.port.oilTemperature, propulsion.port.temperature'],
+			['127489_1','Engine','propulsion.starboard.oilTemperature, propulsion.starboard.temperature'],
+			['127505','FluidLevel','tanks.fuel.standard.capacity, tanks.fuel.standard.currentLevel'],
+			['127505_1','FluidLevel','tanks.liveWell.standard.capacity, tanks.liveWell.standard.currentLevel'],
+			['127505_2','FluidLevel','tanks.wasteWater.standard.capacity, tanks.wasteWater.standard.currentLevel'],
+			['127505_3','FluidLevel','tanks.blackWater.standard.capacity, tanks.blackWater.standard.currentLevel'],
+			['127508','Battery_Status','electrical.batteries.service.voltage, electrical.batteries.service.current, electrical.batteries.service.temperature'],
+			['128259','Speed','navigation.speedOverGround, navigation.speedThroughWater'],
+			['128267','Depth','environment.depth.belowTransducer, environment.depth.surfaceToTransducer'],
+			['128275','Distance_Log','navigation.log, navigation.logTrip'],
 			['129025','Position_Rapid','navigation.position.latitude, navigation.position.longitude'],
-			['129026','COG_SOG','navigation.courseOverGroundTrue.value, navigation.speedOverGround.value'],
-			['130306_2','Wind Data','environment.wind.angleApparent.value, environment.wind.speedApparent.value'],
-			['130306_3','Wind Data','environment.wind.angleTrueWater.value, environment.wind.speedTrue.value'],
-			['130310','Environmental_Parameters','environment.outside.pressure.value, environment.outside.temperature.value, environment.water.temperature.value'],
-			['130311','Environmental_Parameters','environment.outside.pressure.value, environment.inside.humidity.value, environment.water.temperature.value'],
-			['130316','Temperature','environment.inside.refrigerator.temperature.value'],
-			['130316_1','Temperature','propulsion.port.exhaustTemperature.value']
+			['129026','COG_SOG','navigation.courseOverGroundTrue, navigation.speedOverGround'],
+			['130306_2','Wind Data','environment.wind.angleApparent, environment.wind.speedApparent'],
+			['130306_3','Wind Data','environment.wind.angleTrueWater, environment.wind.speedTrue'],
+			['130310','Environmental_Parameters','environment.outside.pressure, environment.outside.temperature, environment.water.temperature'],
+			['130311','Environmental_Parameters','environment.outside.pressure, environment.inside.humidity, environment.water.temperature'],
+			['130316','Temperature','environment.inside.refrigerator.temperature'],
+			['130316_1','Temperature','propulsion.port.exhaustTemperature']
 		]
 		
 		self.list_N2K = CheckListCtrl(self.panel, 100)

@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
-import wx, pynmea2, inspect, webbrowser, json, subprocess, requests, re
+import wx, pynmea2, inspect, webbrowser, requests, re
 from SK_settings import SK_settings
 
 

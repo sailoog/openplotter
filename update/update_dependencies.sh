@@ -118,9 +118,9 @@ mkdir delete
 #python setup.py build
 #sudo python setup.py install
 
-#cd $HOME/delete
-#git clone https://github.com/$repository/RTIMULib2.git
-#cd RTIMULib2/Linux
+cd $HOME/delete
+git clone https://github.com/$repository/RTIMULib2.git
+cd RTIMULib2/Linux
 #mkdir build
 #cd build
 #cmake ..
@@ -136,9 +136,9 @@ mkdir delete
 #make -j4
 #sudo make install
 #cd ..
-#cd python
-#python setup.py build
-#sudo python setup.py install
+cd python
+python setup.py build
+sudo python setup.py install
 
 cd $HOME/delete
 git clone https://github.com/$repository/pypilot
@@ -150,6 +150,14 @@ sudo python setup.py install
 
 cd $HOME
 sudo rm -rf delete
+
+echo
+echo "Adding support for wifi modules using the rtl8188eu, rtl8192eu, rtl8812au, 8822bu, mt7610 and mt7612 drivers..."
+echo
+cd $HOME
+sudo wget http://www.fars-robotics.net/install-wifi -O /usr/bin/install-wifi
+sudo chmod +x /usr/bin/install-wifi
+sudo install-wifi
 
 #echo
 #echo "UPDATING GQRX..."

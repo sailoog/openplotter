@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import socket, time, math, datetime, platform, threading, os, pynmea2
+import socket, time, platform, threading, os, pynmea2
 from classes.conf import Conf
 from signalk.client import SignalKClient
 
@@ -58,7 +58,7 @@ def read_adc(channel):
 # read heading, heel, pitch and GENERATE SK
 
 #translate pypilot signalk -> node signalk
-def Translate(result):
+def oldTranslate(result):
 	translation_table = {'imu.roll' : ['navigation.attitude.roll', 0.017453293], 'imu.pitch' : ['navigation.attitude.pitch', 0.017453293]}
 	Erg = ''
 	for translation in translation_table:
@@ -66,6 +66,18 @@ def Translate(result):
 			value = result[translation]['value']
 			tr = translation_table[translation]
 			Erg += '{"path": "' + tr[0] + '","value":'+str(value*tr[1])+'},'
+	return Erg
+
+#translate pypilot signalk -> node signalk
+def Translate(result):
+	translation_table = {'imu.roll' : ['navigation.attitude.roll', 0.017453293], 'imu.pitch' : ['navigation.attitude.pitch', 0.017453293]}
+	Erg = '{"path": "navigation.attitude","value":{'
+	for translation in translation_table:
+		if translation in result:
+			value = result[translation]['value']
+			tr = translation_table[translation]
+			Erg += '"'+tr[0][20:]+'":'+str(value*tr[1])+','
+	Erg += '"yaw": 0.0},'
 	return Erg
 
 def work_pypilot():
@@ -144,7 +156,7 @@ def work_pypilot():
                 
 		Erg = Translate(result)
 		SignalK='{"updates":[{"$source":"OPsensors.I2C.'+imuName+'","values":['
-		SignalK+=Erg[0:-1]+']}]}\n'		
+		SignalK+=Erg[0:-1]+'}]}]}\n'
 		sock.sendto(SignalK, ('127.0.0.1', 55557))
 
 		if mode == 'imu':

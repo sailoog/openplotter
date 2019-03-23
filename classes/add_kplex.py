@@ -60,7 +60,7 @@ class addkplex(wx.Dialog):
 		self.kplex_netport = wx.TextCtrl(panel, -1, size=(55, 32), pos=(370, 55))
 
 		self.ser_io_list = ['in', 'out', 'both']
-		self.net_io_list = ['in', 'out']
+		self.net_io_list = ['in', 'out', 'both']
 		wx.StaticText(panel, label=_('in/out'), pos=(470, 35))
 		self.kplex_io_ser = wx.ComboBox(panel, choices=self.ser_io_list, style=wx.CB_READONLY, size=(70, 32),pos=(465, 55))
 		self.kplex_io_net = wx.ComboBox(panel, choices=self.net_io_list, style=wx.CB_READONLY, size=(70, 32),pos=(465, 55))
@@ -163,6 +163,18 @@ class addkplex(wx.Dialog):
 			else:
 				self.ofilter_select.SetValue(self.mode_ofilter[0])
 
+			if edit[10] == 1:
+				self.kplex_type.Disable()
+				self.kplex_device.Disable()
+				self.kplex_name.Disable()
+				#self.kplex_ser_T1.Disable()
+				#self.kplex_ser_T2.Disable()
+				self.kplex_address.Disable()
+				self.kplex_netport.Disable()
+				#self.kplex_io_ser.Disable()
+				self.kplex_io_net.Disable()
+				#self.kplex_ser_T1.Disable()
+				#self.kplex_ser_T1.Disable()
 	'''
 	def GPS_examp(self, e):
 		self.kplex_type.SetValue('Serial')
@@ -374,9 +386,9 @@ class addkplex(wx.Dialog):
 				self.ShowMessage(_('This name is already in use.'))
 				return
 
-		if name == 'system' or name == 'signalk' or name == 'gpsd':
-			self.ShowMessage(_('This name is reserved by the system.'))
-			return
+		#if name == 'system' or name == 'signalk' or name == 'gpsd':
+		#	self.ShowMessage(_('This name is reserved by the system.'))
+		#	return
 
 		if type_conn == 'Serial':
 			if str(self.kplex_device.GetValue()) != 'none':
@@ -391,11 +403,11 @@ class addkplex(wx.Dialog):
 					return
 
 		if type_conn == 'UDP' or type_conn == 'TCP':
-			if self.kplex_address.GetValue():
-				port_address = self.kplex_address.GetValue()
-			else:
-				self.ShowMessage(_('You must enter an Address.'))
-				return
+			#if self.kplex_address.GetValue() or type_conn == 'UDP':
+			port_address = self.kplex_address.GetValue()
+			#else:
+			#	self.ShowMessage(_('You must enter an Address.'))
+			#	return
 			if self.kplex_netport.GetValue():
 				bauds_port = self.kplex_netport.GetValue()
 			else:

@@ -15,14 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import json
+import ujson
 import logging
 import subprocess
 import threading
 import os
 import websocket
 import wx
-import time,yaml
+import time
 from classes.getkeys import GetKeys
 from classes.conf import Conf
 from classes.SK_settings import SK_settings
@@ -158,7 +158,7 @@ class MyFrame(wx.Frame):
 		data_sk_unit_private = []
 		if os.path.isfile(self.home+'/.openplotter/private_unit.json'):
 			with open(self.home+'/.openplotter/private_unit.json') as data_file:
-				data_sk_unit_private = json.load(data_file)
+				data_sk_unit_private = ujson.load(data_file)
 
 		for i in data:
 			self.list_SK_unit.append([str(i[0]), str(i[2]), '', str(i[1])])
@@ -340,76 +340,79 @@ class MyFrame(wx.Frame):
 			self.on_close(ws)
 			self.ende=True
 			return
+			js_upb=''
 		try:
-			js_up = yaml.load(message)['updates'][0]
-		except:
-			return
-
-		label = ''
-		src = ''
-		type = ''
-		value = ''
-		
-		if 'source' in js_up:
-			source=js_up['source']
-			label = source['label']
-			if 'type' in source:
-				type = source['type']
-				if type == 'NMEA0183':
-					if 'talker' in source: 
-						src =label+'.'+source['talker']
-						if 'sentence' in source: src =label+'.'+source['sentence']
-				elif type == 'NMEA2000':
-					if 'src' in source: 
-						src =label+'.'+source['src']
-						if 'pgn' in source: src +='.'+str(source['pgn'])
-		if '$source' in js_up and src=='':
-			src = js_up['$source']
-		try:
-			timestamp = js_up['timestamp']
-		except:
-			timestamp = '2000-01-01T00:00:00.000Z'
-
-		values_ = js_up['values']
-
-		for values in values_:
-			path = values['path']
-			value = values['value']
-			src2 = src
-			timestamp2 = timestamp
+			js_upb = ujson.loads(message)
+			if 'updates' not in js_upb:
+				return
+			js_up = js_upb['updates'][0]
+			label = ''
+			src = ''
+			type = ''
+			value = ''
 			
-			if isinstance(value, dict):
-				if 'timestamp' in value: timestamp2 = value['timestamp']
-				if '$source' in value and src=='':
-					src = value['$source']
-				elif 'source' in value:
-					source=value['source']
-					label = source['label']
-					if 'type' in source:
-						type = source['type']
-						if type == 'NMEA0183':
-							if 'talker' in source: 
-								src =label+'.'+source['talker']
-								if 'sentence' in source: src =label+'.'+source['sentence']
-						elif type == 'NMEA2000':
-							if 'src' in source: 
-								src =label+'.'+source['src']
-								if 'pgn' in source: src +='.'+str(source['pgn'])
-
-				for lvalue in value:
-					result = True
-					if lvalue in ['source', '$source']:
-						result = False
-					elif lvalue == 'timestamp':
-						if 'position' in path and 'RMC' in src2:
-							self.update_add(timestamp2, 'navigation.datetime', src2, timestamp2)
-						result = False
-					if result:
-						path2 = path + '.' + lvalue
-						value2 = value[lvalue]
-						self.update_add(value2, path2, src2, timestamp2)
+			if 'source' in js_up.keys():
+				source=js_up['source']
+				label = source['label']
+				if 'type' in source:
+					type = source['type']
+					if type == 'NMEA0183':
+						if 'talker' in source: 
+							src =label+'.'+source['talker']
+							if 'sentence' in source: src =label+'.'+source['sentence']
+					elif type == 'NMEA2000':
+						if 'src' in source: 
+							src =label+'.'+source['src']
+							if 'pgn' in source: src +='.'+str(source['pgn'])
+			if '$source' in js_up and src=='':
+				src = js_up['$source']
+			if 'timestamp' in js_up.keys():
+				timestamp = js_up['timestamp']
 			else:
-				self.update_add(value, path, src, timestamp)
+				timestamp = '2000-01-01T00:00:00.000Z'
+			values_ = js_up['values']
+
+			for values in values_:
+				path = values['path']
+				value = values['value']
+				src2 = src
+				timestamp2 = timestamp
+				
+				if isinstance(value, dict):
+					if 'timestamp' in value: timestamp2 = value['timestamp']
+					if '$source' in value and src=='':
+						src = value['$source']
+					elif 'source' in value:
+						source=value['source']
+						label = source['label']
+						if 'type' in source:
+							type = source['type']
+							if type == 'NMEA0183':
+								if 'talker' in source: 
+									src =label+'.'+source['talker']
+									if 'sentence' in source: src =label+'.'+source['sentence']
+							elif type == 'NMEA2000':
+								if 'src' in source: 
+									src =label+'.'+source['src']
+									if 'pgn' in source: src +='.'+str(source['pgn'])
+
+					for lvalue in value:
+						result = True
+						if lvalue in ['source', '$source']:
+							result = False
+						elif lvalue == 'timestamp':
+							if 'position' in path and 'RMC' in src2:
+								self.update_add(timestamp2, 'navigation.datetime', src2, timestamp2)
+							result = False
+						if result:
+							path2 = path + '.' + lvalue
+							value2 = value[lvalue]
+							self.update_add(value2, path2, src2, timestamp2)
+				else:
+					self.update_add(value, path, src, timestamp)
+		except:
+			print 'Error when parsing this sentence:'
+			print js_upb
 
 				
 	def update_add(self, value, path, src, timestamp):

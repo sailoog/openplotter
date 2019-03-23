@@ -369,12 +369,12 @@ class MyFrame(wx.Frame):
 						vr = data_conf.get('GENERAL','version')
 						sr = data_conf.get('GENERAL','state')
 						vr_list = vr.split('.')
-						print vr_list
+						#print vr_list
 						remote_xxx = int(vr_list[0])
 						remote_oxx = int(vr_list[1])
 						remote_oox = int(vr_list[2])
-						print 'remote '+str(remote_xxx)
-						print 'local '+str(local_xxx)
+						#print 'remote '+str(remote_xxx)
+						#print 'local '+str(local_xxx)
 					except:
 						self.add_logger_data(_(' Error reading versions.'))
 				if sr == 'stable': branch = stable_branch

@@ -24,7 +24,6 @@ class GetKeys:
 		keys = []
 
 		conf = Conf()
-		home = conf.home
 		sk_folder = conf.get('GENERAL', 'sk_folder')
 		self.data = ""
 		try:

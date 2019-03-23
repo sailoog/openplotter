@@ -668,7 +668,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				########################################### Network
 
 	def page_wifi(self):
-		wx.StaticBox(self.p_wifi, size=(370, 315), pos=(10, 10))
+		wx.StaticBox(self.p_wifi, size=(370, 330), pos=(10, 10))
 
 		self.available_wireless = []
 		output = subprocess.check_output('ifconfig')
@@ -724,18 +724,21 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 										size=(120, 32), pos=(20, 253))
 		self.wifi_channel_label = wx.StaticText(self.p_wifi, label=_('Channel'), pos=(160, 260))
 
-		self.wifi_button_apply = wx.Button(self.p_wifi, label=_('Apply'), pos=(275, 280))
+		self.drivers_button = wx.Button(self.p_wifi, label=_('Install drivers'), pos=(20, 300))
+		self.drivers_button.Bind(wx.EVT_BUTTON, self.on_drivers_button)	
+
+		self.wifi_button_apply = wx.Button(self.p_wifi, label=_('Apply'), pos=(275, 300))
 		self.wifi_button_apply.Bind(wx.EVT_BUTTON, self.onwifi_apply)
 
-		wx.StaticBox(self.p_wifi, label=_(' Addresses '), size=(290, 315), pos=(385, 10))
-		self.ip_info = wx.TextCtrl(self.p_wifi, -1, style=wx.TE_MULTILINE | wx.TE_READONLY, size=(270, 245),
+		wx.StaticBox(self.p_wifi, label=_(' Addresses '), size=(290, 330), pos=(385, 10))
+		self.ip_info = wx.TextCtrl(self.p_wifi, -1, style=wx.TE_MULTILINE | wx.TE_READONLY, size=(270, 265),
 								   pos=(395, 30))
 		self.ip_info.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_INACTIVECAPTION))
 
-		self.button_refresh_ip = wx.Button(self.p_wifi, label=_('Refresh'), pos=(565, 280))
+		self.button_refresh_ip = wx.Button(self.p_wifi, label=_('Refresh'), pos=(565, 300))
 		self.button_refresh_ip.Bind(wx.EVT_BUTTON, self.on_show_ip_info)
 
-		self.check_net_b = wx.Button(self.p_wifi, label=_('Status'), pos=(465, 280))
+		self.check_net_b = wx.Button(self.p_wifi, label=_('Status'), pos=(465, 300))
 		self.check_net_b.Bind(wx.EVT_BUTTON, self.on_check_net)
 
 	def read_wifi_conf(self):		
@@ -1042,6 +1045,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			if i[1] == j:
 				shutil.copytree(self.currentpath+'/Network/'+i[0], self.conf_folder+'/Network/'+i[0]) 
 		self.read_wifi_conf()
+
+	def on_drivers_button(self,e):
+		subprocess.Popen(['lxterminal', '-e', 'bash', self.currentpath+'/classes/install-wifi.sh'])
 		
 				########################################### PYPILOT
 
@@ -1190,13 +1196,18 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def select_pypilot(self,e=0):
 		mode = self.pypilot_modes[self.pypilot_mode.GetSelection()]
 
-		if mode == 'basic autopilot': self.enable_autopilot()
-		elif mode == 'imu': 
-			self.enable_imu()
-			self.disable_autopilot()
+		if mode == 'basic autopilot': 
+			self.enable_autopilot()
+			if self.SK_settings.pypilot_enabled!=1:
+				self.SK_settings.set_pypilot_enable(True)
 		else:
 			self.disable_autopilot()
-			self.disable_imu()
+			if self.SK_settings.pypilot_enabled==1:
+				self.SK_settings.set_pypilot_enable(False)
+			if mode == 'imu': 
+				self.enable_imu()
+			else:
+				self.disable_imu()
 
 	def read_pypilot(self, e=0):
 		mode = self.conf.get('PYPILOT', 'mode')
@@ -1400,14 +1411,15 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def edit_kplex(self, e):
 		idx = e.GetIndex()
-
+		filteronly = 0
 		if self.kplex[idx][1] == 'system' or self.kplex[idx][1] == 'signalk' or self.kplex[idx][1] == 'gpsd':
-			self.ShowStatusBarRED(_('You can not edit this.'))
-			return
+			self.ShowStatusBarBLACK(_('You can only edit filter.'))
+			filteronly = 1
 		edit = []
 		for i in range(9):
 			edit.append(self.list_kplex.GetItem(idx, i).GetText())
 		edit.append(idx)
+		edit.append(filteronly)
 		self.edit_add_kplex(edit)
 
 	def on_add_kplex(self, e):
@@ -1538,11 +1550,27 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			if i[10] == '1': self.list_kplex.CheckItem(index)
 
 	def on_apply_changes_kplex(self, event):
+		state = ''
 		data = '# For advanced manual configuration, please visit: http://www.stripydog.com/kplex/configuration.html\n# Please do not modify defaults nor OpenPlotter GUI settings.\n# Add manual settings at the end of the document.\n\n'
 
 		data += '###defaults\n\n'
-		data += '[udp]\nname=system\ndirection=in\nport=10110\n\n'
+		data += '[udp]\nname=system\ndirection=in\nport=10110\n'
+		for index, item in enumerate(self.kplex):
+			if 'system' in item[1]:
+				if not (item[6] == _('none') or item[6] == 'none') and not (item[7] == _('nothing') or item[7] == 'nothing'): 
+					data += state + 'ifilter=' + item[7] + '\n'
+				if not (item[8] == _('none') or item[8] == 'none') and not (item[9] == _('nothing') or item[9] == 'nothing'): 
+					data += state + 'ofilter=' + item[9] + '\n'
+				data += '\n'
 		data += '[tcp]\nname=signalk\ndirection=out\nmode=server\nport=30330\n\n'
+		for index, item in enumerate(self.kplex):
+			if 'signalk' in item[1]:
+				if not (item[6] == _('none') or item[6] == 'none') and not (item[7] == _('nothing') or item[7] == 'nothing'): 
+					data += state + 'ifilter=' + item[7] + '\n'
+				if not (item[8] == _('none') or item[8] == 'none') and not (item[9] == _('nothing') or item[9] == 'nothing'): 
+					data += state + 'ofilter=' + item[9] + '\n'
+				data += '\n'
+
 		data += '###end of defaults\n\n###OpenPlotter GUI settings\n\n'
 
 		for index, item in enumerate(self.kplex):
@@ -1560,12 +1588,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					data += state + '[tcp]\n' + state + 'name=' + item[1] + '\n' + state + 'direction=' + item[
 						3] + '\n' + state + 'optional=yes\n'
 					if item[1] == 'gpsd': data += state + 'gpsd=yes\n'
-					if item[3] == 'in':
+					if item[3] <> 'out':
 						data += state + 'mode=client\n'
 						data += state + 'persist=yes\n' + state + 'retry=10\n'
 					else:
 						data += state + 'mode=server\n'
-					data += state + 'address=' + str(item[4]) + '\n' + state + 'port=' + str(item[5]) + '\n'
+					if item[4]: data += state + 'address=' + str(item[4]) + '\n' 
+					data += state + 'port=' + str(item[5]) + '\n'
 				if 'UDP' in item[2]:
 					data += state + '[udp]\n' + state + 'name=' + item[1] + '\n' + state + 'direction=' + item[
 						3] + '\n' + state + 'optional=yes\n'
@@ -1674,6 +1703,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.list_i2c.InsertColumn(5, _('Rate'), width=40)
 		self.list_i2c.InsertColumn(6, _('Offset'), width=50)
 		self.list_i2c.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_i2c)
+		self.list_i2c.Bind(wx.EVT_LIST_ITEM_SELECTED, self.edit_i2c)
 
 		add = wx.Button(self.p_i2c, label=_('add'))
 		add.Bind(wx.EVT_BUTTON, self.on_add_i2c)
@@ -1999,6 +2029,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.list_gpio.InsertColumn(4, _('Signal K key'), width=180)
 		self.list_gpio.InsertColumn(5, _('Source'), width=100)
 		self.list_gpio.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_gpio)
+		self.list_gpio.Bind(wx.EVT_LIST_ITEM_SELECTED, self.edit_gpio)
+
 
 		add = wx.Button(self.p_gpio, label=_('add'))
 		add.Bind(wx.EVT_BUTTON, self.on_add_gpio)
@@ -2223,6 +2255,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.list_actions.InsertColumn(0, _('action'), width=200)
 		self.list_actions.InsertColumn(1, _('data'), width=260)
 		self.list_actions.InsertColumn(2, _('repeat'), width=130)
+		self.list_actions.Bind(wx.EVT_LIST_ITEM_SELECTED, self.edit_actions)
 		self.list_actions.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_actions)
 		self.list_actions.SetMinSize((10, 10))
 
@@ -2478,6 +2511,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.list_DS18B20.InsertColumn(2, _('Offset'), width=50)
 		self.list_DS18B20.InsertColumn(3, _('Signal K key'), width=215)
 		self.list_DS18B20.InsertColumn(4, _('Source'), width=120)
+		self.list_DS18B20.Bind(wx.EVT_LIST_ITEM_SELECTED, self.edit_DS18B20)
 		self.list_DS18B20.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_DS18B20)
 
 		add = wx.Button(self.p_1w, label=_('add'))
@@ -2906,13 +2940,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.stop_sensors()
 		self.stop_kplex()
 		os.system('sudo service gpsd stop')
-		self.stop_n2k()
+		self.stop_SK()
 		self.ShowStatusBarGREEN(_('Checking selected device ...'))
 		result = self.detect_serial(index)
 		os.system('sudo service gpsd start')
 		self.on_restart_kplex(0)
 		self.start_sensors()
-		self.start_n2k()
+		self.start_SK()
 		if self.Serial_assignment.GetStringSelection() == 'Kplex':
 			self.Serial_baud_select.Enable()
 		else:
@@ -3189,10 +3223,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			if self.Serialinst[name]['assignment'] == 'CAN-USB':
 				can_device = '/dev/ttyOP_'+name
 				break
-		self.SK_settings.set_ngt1_device(can_device)
-		if can_device: self.n2k_enable.SetValue(True)
-		self.on_n2k_enable(self.n2k_enable.GetValue())
-		self.on_n2k_output(self.n2k_out_enable.GetValue())
+		if not can_device:
+			self.conf.set('N2K', 'output', '0')
+			self.SK_settings.enable_disable_all(0)
+		else:
+			if self.SK_settings.ngt1_device != can_device:
+				self.SK_settings.set_ngt1_device(can_device)
+		self.read_n2k()
 
 		#set SMS device
 		sms_device = ''
@@ -3287,68 +3324,74 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		else: os.system('rm -f '+self.home+'/cmdline.txt')
 
 		if reset == True : os.system('sudo shutdown -r now')
-	###################################### N2K
 
-	def page_n2k(self):
-	
-		CANUSB_label = wx.StaticText(self.p_n2k, label=_('CAN-USB port:'))
+	###################################### N2K
+	def page_n2k(self):	
+		CANUSB_label = wx.StaticText(self.p_n2k, label=_('CAN-USB device:'))
 		self.can_usb = wx.StaticText(self.p_n2k)
 
-		n2k_input_box = wx.StaticBox(self.p_n2k, label=_(' Input ')) 
+		canboat_box = wx.StaticBox(self.p_n2k, label=_(' Managed by OpenPlotter (canboat) ')) 
 
-		self.n2k_enable = wx.CheckBox(self.p_n2k, label=_('Enable N2K input'))
+		self.n2k_enable = wx.CheckBox(self.p_n2k, label=_('Input CAN-USB'))
 		self.n2k_enable.Bind(wx.EVT_CHECKBOX, self.on_n2k_enable)
 
 		self.N2K_diagnostic_b = wx.Button(self.p_n2k, label=_('Diagnostic'))
 		self.N2K_diagnostic_b.Bind(wx.EVT_BUTTON, self.on_N2K_diagnostic)
 
-		n2k_output_box = wx.StaticBox(self.p_n2k, label=_(' Output ')) 
-
-		self.n2k_out_enable = wx.CheckBox(self.p_n2k, label=_('Enable N2K output'))
+		self.n2k_out_enable = wx.CheckBox(self.p_n2k, label=_('Output CAN-USB'))
 		self.n2k_out_enable.Bind(wx.EVT_CHECKBOX, self.on_n2k_output)
 
-		if self.SK_settings.canbus_enabled != -1:		
-			n2k_can0_input_box = wx.StaticBox(self.p_n2k, label=_(' Input can0 ')) 
-
-			self.n2k_can0_enable = wx.CheckBox(self.p_n2k, label=_('Enable can0 N2K input'))
-			self.n2k_can0_enable.Bind(wx.EVT_CHECKBOX, self.on_n2k_can0_enable)		
-		
 		self.N2K_diagnostic_out_b = wx.Button(self.p_n2k, label=_('Diagnostic'))
 		self.N2K_diagnostic_out_b.Bind(wx.EVT_BUTTON, self.on_N2K_diagnostic_out)
 	
-		self.button_N2K_setting = wx.Button(self.p_n2k, label=_('Device settings'))
+		self.button_N2K_setting = wx.Button(self.p_n2k, label=_('TX PGN enable list'))
 		self.button_N2K_setting.Bind(wx.EVT_BUTTON, self.on_N2K_setting)
 	
-		self.SK_to_N2K = wx.Button(self.p_n2k, label=_('Signal K to N2K converter'))
+		self.SK_to_N2K = wx.Button(self.p_n2k, label=_('Signal K to N2K'))
 		self.SK_to_N2K.Bind(wx.EVT_BUTTON, self.on_SK_to_N2K)
 
 		diagnostic = wx.Button(self.p_n2k, label=_('SK Diagnostic'))
 		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
 
-		hbox = wx.BoxSizer(wx.HORIZONTAL) 
-		hbox.Add(CANUSB_label, 0, wx.ALL | wx.EXPAND, 5) 
-		hbox.Add(self.can_usb, 0, wx.ALL | wx.EXPAND, 5)
+		canboatjs_box = wx.StaticBox(self.p_n2k, label=_(' Managed by Signal K (canboatjs) ')) 
+		
+		self.ngt1js_enabled = wx.CheckBox(self.p_n2k, label=_('Input/Output CAN-USB'))
+		self.ngt1js_enabled.Bind(wx.EVT_CHECKBOX, self.on_ngt1js_enabled)		
+		self.n2k_can0_enable = wx.CheckBox(self.p_n2k, label=_('Input/Output can0'))
+		self.n2k_can0_enable.Bind(wx.EVT_CHECKBOX, self.on_n2k_can0_enable)	
 
-		v_boxSizer1 = wx.StaticBoxSizer(n2k_input_box, wx.HORIZONTAL) 
+		self.SK_to_N2K2 = wx.Button(self.p_n2k, label=_('Signal K to N2K'))
+		self.SK_to_N2K2.Bind(wx.EVT_BUTTON, self.on_SK_to_N2K2)	
+		
+		hbox = wx.BoxSizer(wx.HORIZONTAL) 
+		hbox.Add(CANUSB_label, 0, wx.ALL | wx.EXPAND, 10) 
+		hbox.Add(self.can_usb, 0, wx.ALL | wx.EXPAND, 10)
+		hbox.Add((0,0), 1, wx.ALL | wx.EXPAND, 5)
+		hbox.Add(self.button_N2K_setting, 0, wx.ALL | wx.EXPAND, 5)
+
+		v_boxSizer1 = wx.BoxSizer(wx.HORIZONTAL)
 		v_boxSizer1.Add(self.n2k_enable, 0, wx.ALL | wx.EXPAND, 5)
 		v_boxSizer1.Add(self.N2K_diagnostic_b, 0, wx.ALL | wx.EXPAND, 5)
 
-		v_boxSizer2 = wx.StaticBoxSizer(n2k_output_box, wx.HORIZONTAL) 
+		v_boxSizer2 = wx.BoxSizer(wx.HORIZONTAL)
 		v_boxSizer2.Add(self.n2k_out_enable, 0, wx.ALL | wx.EXPAND, 5)
-		v_boxSizer2.Add(self.SK_to_N2K, 0, wx.ALL | wx.EXPAND, 5)
-		v_boxSizer2.Add(self.button_N2K_setting, 0, wx.ALL | wx.EXPAND, 5)
 		v_boxSizer2.Add(self.N2K_diagnostic_out_b, 0, wx.ALL | wx.EXPAND, 5)
+		v_boxSizer2.Add(self.SK_to_N2K, 0, wx.ALL | wx.EXPAND, 5)
 
-		if self.SK_settings.canbus_enabled != -1:
-			v_boxSizer3 = wx.StaticBoxSizer(n2k_can0_input_box, wx.HORIZONTAL) 
-			v_boxSizer3.Add(self.n2k_can0_enable, 0, wx.ALL | wx.EXPAND, 5)
+		v_boxSizer0 = wx.StaticBoxSizer(canboat_box, wx.VERTICAL)
+		v_boxSizer0.Add(v_boxSizer1, 0, wx.ALL | wx.EXPAND, 5)
+		v_boxSizer0.Add(v_boxSizer2, 0, wx.ALL | wx.EXPAND, 5)
 
+		v_boxSizer3 = wx.StaticBoxSizer(canboatjs_box, wx.HORIZONTAL) 
+		v_boxSizer3.Add(self.ngt1js_enabled, 0, wx.ALL | wx.EXPAND, 5)
+		v_boxSizer3.Add(self.n2k_can0_enable, 0, wx.ALL | wx.EXPAND, 5)
+		v_boxSizer3.Add(self.SK_to_N2K2, 0, wx.ALL | wx.EXPAND, 5)
+		
 		vbox = wx.BoxSizer(wx.VERTICAL) 
 		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 5) 
-		vbox.Add(v_boxSizer1, 0, wx.ALL | wx.EXPAND, 5)
-		vbox.Add(v_boxSizer2, 0, wx.ALL | wx.EXPAND, 5)
-		if self.SK_settings.canbus_enabled != -1:
-			vbox.Add(v_boxSizer3, 0, wx.ALL | wx.EXPAND, 5)
+		vbox.Add(v_boxSizer0, 0, wx.ALL | wx.EXPAND, 5)
+		vbox.AddSpacer(10)
+		vbox.Add(v_boxSizer3, 0, wx.ALL | wx.EXPAND, 5)
 		vbox.Add((0,0), 1, wx.ALL | wx.EXPAND, 5)
 		vbox.Add(diagnostic, 0, wx.ALL, 5) 
 		self.p_n2k.SetSizer(vbox) 
@@ -3357,138 +3400,110 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		dlg = addSKtoN2K()
 		res = dlg.ShowModal()
 		dlg.Destroy()
-	
-		#subprocess.call(['pkill', '-f', 'SK_to_N2K.py'])
-		#subprocess.Popen(['python', self.currentpath + '/SK_to_N2K.py'])
 
-	def set_n2k_enable(self,enable):
-		if enable:
-			if self.SK_settings.ngt1_enabled != 1:
-				self.SK_settings.set_ngt1_enable(1)
-				if self.SK_settings.ngt1_device <> self.can_device:
-					self.SK_settings.set_ngt1_device(self.can_device)
-				self.SK_settings.set_ngt1_enable(1)
-			self.n2k_enable.SetValue(True)
-		else:
-			if self.SK_settings.ngt1_enabled != 0:
-				self.SK_settings.set_ngt1_enable(0)			
-			self.n2k_enable.SetValue(False)
-
-	def set_n2k_out_enable(self,enable):
-		if enable:
-			if self.conf.get('N2K', 'output') != '1':
-				self.conf.set('N2K', 'output', '1')
-			self.n2k_out_enable.SetValue(True)
-			subprocess.call(['pkill', '-f', 'diagnostic-N2K-output.py'])
-			subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
-			subprocess.Popen(['python', self.currentpath + '/N2K-server_d.py'])			
-		else:
-			if self.conf.get('N2K', 'output') != '0':
-				self.conf.set('N2K', 'output', '0')
-			self.n2k_out_enable.SetValue(False)
-			subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
-
-	def update_form(self):
+	def on_SK_to_N2K2(self, event):
+		url = "http://localhost:3000/@signalk/server-admin-ui/#/serverConfiguration/plugins"
+		webbrowser.open(url, new=2)
+				
+	def read_n2k(self):
 		self.can_device = ''
 		for name in self.Serialinst:
 			if self.Serialinst[name]['assignment'] == 'CAN-USB':
 				self.can_device = '/dev/ttyOP_'+name
 				break
-	
-		if not self.can_device:
-			self.set_n2k_enable(False)
-			self.set_n2k_out_enable(False)
-			self.can_usb.SetLabel(_('none')) 
-			self.n2k_enable.Disable()
-			self.n2k_out_enable.Disable()
-			self.button_N2K_setting.Disable()
-			self.N2K_diagnostic_b.Disable()
-			self.N2K_diagnostic_out_b.Disable()
-		else:
-			self.n2k_enable.Enable()
-			self.n2k_out_enable.Enable()
-			self.can_usb.SetLabel(self.can_device)		
-			self.n2k_enable.SetValue(self.SK_settings.ngt1_enabled==1)
-			if self.SK_settings.ngt1_enabled == 0:
-				self.button_N2K_setting.Enable()
-				self.N2K_diagnostic_b.Enable()
-			else:
+		self.n2k_enable.SetValue(self.SK_settings.ngt1_enabled == 1)
+		self.n2k_out_enable.SetValue(self.conf.get('N2K', 'output') == '1')
+		self.ngt1js_enabled.SetValue(self.SK_settings.ngt1js_enabled == 1)
+		self.n2k_can0_enable.SetValue(self.SK_settings.canbus_enabled == 1)
+		if self.can_device:	
+			self.can_usb.SetLabel(self.can_device)
+			if self.n2k_enable.GetValue() or self.n2k_out_enable.GetValue() or self.ngt1js_enabled.GetValue():
 				self.button_N2K_setting.Disable()
 				self.N2K_diagnostic_b.Disable()
-			if self.conf.get('N2K', 'output') == '1':
-				self.n2k_out_enable.SetValue(True)
-				self.button_N2K_setting.Disable()
 				self.N2K_diagnostic_out_b.Disable()
 			else:
-				self.n2k_out_enable.SetValue(False)
+				self.button_N2K_setting.Enable()
+				self.N2K_diagnostic_b.Enable()
 				self.N2K_diagnostic_out_b.Enable()
-	
-		if self.SK_settings.canbus_enabled != -1:
-			self.n2k_can0_enable.SetValue(self.SK_settings.canbus_enabled == 1)
-				
-	def read_n2k(self):
-		self.update_form()
-
-	def stop_n2k(self):
-		subprocess.call(['pkill', '-f', 'CAN-USB-stick.py'])
-		subprocess.call(['pkill', '-f', 'diagnostic-N2K-input.py'])
-		subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
-		self.SK_settings.set_ngt1_enable(0)
-
-	def start_n2k(self):
-		self.set_n2k_enable(self.n2k_enable.GetValue())
-		self.set_n2k_out_enable(self.n2k_out_enable.GetValue())
+			if self.n2k_enable.GetValue() or self.n2k_out_enable.GetValue():
+				self.ngt1js_enabled.Disable()
+				self.n2k_can0_enable.Disable()
+			else:
+				self.ngt1js_enabled.Enable()
+				self.n2k_can0_enable.Enable()
+			if self.ngt1js_enabled.GetValue() or self.n2k_can0_enable.GetValue():
+				self.n2k_enable.Disable()
+				self.n2k_out_enable.Disable()
+			else:
+				self.n2k_enable.Enable()
+				self.n2k_out_enable.Enable()
+			if self.ngt1js_enabled.GetValue() or self.n2k_enable.GetValue() or self.n2k_out_enable.GetValue():
+				self.n2k_can0_enable.Disable()
+			else:
+				self.n2k_can0_enable.Enable()	
+			if self.n2k_can0_enable.GetValue() or self.n2k_enable.GetValue() or self.n2k_out_enable.GetValue():
+				self.ngt1js_enabled.Disable()
+			else:
+				self.ngt1js_enabled.Enable()
+		else:
+			self.can_usb.SetLabel(_('none'))
+			self.button_N2K_setting.Disable()
+			self.n2k_enable.Disable()
+			self.N2K_diagnostic_b.Disable()
+			self.n2k_out_enable.Disable()
+			self.N2K_diagnostic_out_b.Disable()
+			self.ngt1js_enabled.Disable()	
+			self.n2k_can0_enable.Enable()
 
 	def on_n2k_enable(self, e):
-		self.set_n2k_enable(self.n2k_enable.GetValue())
-		self.update_form()
+		if self.n2k_enable.GetValue():
+			self.SK_settings.set_ngt1_enable(True,self.can_device)
+		else:
+			self.SK_settings.set_ngt1_enable(False,self.can_device)
+		self.read_n2k()
 
 	def on_n2k_output(self, e):
-		self.set_n2k_out_enable(self.n2k_out_enable.GetValue())
-		self.update_form()
+		if self.n2k_out_enable.GetValue():
+			self.conf.set('N2K', 'output', '1')
+			subprocess.call(['pkill', '-f', 'diagnostic-N2K-output.py'])
+			subprocess.call(['pkill', '-f', 'diagnostic-N2K-input.py'])
+			subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
+			subprocess.Popen(['python', self.currentpath + '/N2K-server_d.py'])
+		else:
+			self.conf.set('N2K', 'output', '0')
+			subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
+		self.read_n2k()
+			
+	def on_ngt1js_enabled(self, e):
+		if self.ngt1js_enabled.GetValue():
+			self.SK_settings.set_ngt1js_enable(True,self.can_device)
+		else:
+			self.SK_settings.set_ngt1js_enable(False,self.can_device)
+		self.read_n2k()	
 
 	def on_N2K_setting(self, e):
-		if self.check_can_device():
-			subprocess.call(['pkill', '-f', 'CAN-USB-stick.py'])
-			subprocess.Popen(['python', self.currentpath + '/CAN-USB-stick.py'])
-			self.ShowStatusBarBLACK(_('Select PGNs to transmit and enable N2K input/output again.'))
+		subprocess.call(['pkill', '-f', 'CAN-USB-stick.py'])
+		subprocess.Popen(['python', self.currentpath + '/CAN-USB-stick.py'])
+		self.ShowStatusBarBLACK(_('Enable PGNs to transmit in your device.'))
 
 	def on_N2K_diagnostic(self, e):
-		if self.check_can_device():
-			subprocess.call(['pkill', '-f', 'diagnostic-N2K-input.py'])
-			subprocess.Popen(['python', self.currentpath + '/diagnostic-N2K-input.py'])
-			self.ShowStatusBarBLACK(_('Show received PGNs.'))
+		subprocess.call(['pkill', '-f', 'diagnostic-N2K-input.py'])
+		subprocess.Popen(['python', self.currentpath + '/diagnostic-N2K-input.py'])
+		self.ShowStatusBarBLACK(_('Show received PGNs.'))
 
 	def on_N2K_diagnostic_out(self, e):
-		if self.check_can_device():
-			subprocess.call(['pkill', '-f', 'diagnostic-N2K-output.py'])
-			subprocess.Popen(['python', self.currentpath + '/diagnostic-N2K-output.py'])
-			self.ShowStatusBarBLACK(_('Show sent PGNs.'))
-
+		subprocess.call(['pkill', '-f', 'diagnostic-N2K-output.py'])
+		subprocess.Popen(['python', self.currentpath + '/diagnostic-N2K-output.py'])
+		self.ShowStatusBarBLACK(_('Show sent PGNs.'))
+					
 	def on_n2k_can0_enable(self, e):
-		if self.SK_settings.canbus_enabled != self.n2k_can0_enable.GetValue():
-			self.SK_settings.set_canbus_enable(self.n2k_can0_enable.GetValue())
-			
-	def check_can_device(self):
-		if not self.SK_settings.ngt1_device:
-			self.n2k_enable.SetValue(False)
-			self.n2k_out_enable.SetValue(False)
-			self.ShowStatusBarBLACK(_('You have to add a CAN-USB device on Serial ports tab'))
-			return False
-		else: return True
+		if self.n2k_can0_enable.GetValue():
+			self.SK_settings.set_canbus_enable(True)
+		else:
+			self.SK_settings.set_canbus_enable(False)
+		self.read_n2k()
 
 	###################################### Signal K
-
-	def restart_SK(self):
-		# stopping sk server
-		self.ShowStatusBarRED(_('Closing Signal K server ...'))
-		subprocess.call(['sudo', 'systemctl', 'stop', 'signalk.service'])
-		subprocess.call(['sudo', 'systemctl', 'stop', 'signalk.socket'])
-		# restarting sk server
-		subprocess.call(['sudo', 'systemctl', 'start', 'signalk.socket'])
-		subprocess.call(['sudo', 'systemctl', 'start', 'signalk.service'])
-		self.ShowStatusBarGREEN(_('Signal K server restarted'))
-
 	def start_SK(self):
 		subprocess.call(['sudo', 'systemctl', 'start', 'signalk.socket'])
 		subprocess.call(['sudo', 'systemctl', 'start', 'signalk.service'])
@@ -3496,6 +3511,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def stop_SK(self):
 		subprocess.call(['sudo', 'systemctl', 'stop', 'signalk.service'])
 		subprocess.call(['sudo', 'systemctl', 'stop', 'signalk.socket'])
+		
+	def restart_SK(self):
+		# stopping sk server
+		self.ShowStatusBarRED(_('Closing Signal K server ...'))
+		self.stop_SK()
+		# restarting sk server
+		self.start_SK()
+		self.ShowStatusBarGREEN(_('Signal K server restarted'))
 
 	def on_diagnostic_SK(self, e):
 		subprocess.call(['pkill', '-f', 'diagnostic-SK-input.py'])
@@ -3965,7 +3988,7 @@ if __name__ == "__main__":
 	conf = Conf()
 	currentpath = conf.get('GENERAL', 'op_folder')
 	app = wx.App()
-	bitmap = wx.Bitmap(currentpath+'/openplotter.ico', wx.BITMAP_TYPE_ICO)
+	bitmap = wx.Bitmap(currentpath+'/openplotter.png',wx.BITMAP_TYPE_PNG)
 	splash = wx.SplashScreen(bitmap, wx.SPLASH_CENTRE_ON_SCREEN | wx.SPLASH_TIMEOUT, 500, None, style=wx.SIMPLE_BORDER | wx.STAY_ON_TOP)
 	wx.Yield()
 	MainFrame().Show()
