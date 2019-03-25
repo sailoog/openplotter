@@ -170,3 +170,5 @@ sudo install-wifi
 #mv gqrx-sdr-2.11.5-linux-rpi3 gqrx
 #cd gqrx
 #sudo cp udev/*.rules /etc/udev/rules.d/
+
+sudo systemctl enable hostapd
