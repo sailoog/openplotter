@@ -174,7 +174,8 @@ class MainFrame(wx.Frame):
 		self.update.AppendSeparator()
 		self.openplotter_item1 = self.update.Append(wx.ID_ANY, _('Update OpenPlotter'), _('Apply latest changes on OpenPlotter and update the system if necessary'))
 		self.Bind(wx.EVT_MENU, self.update_openplotter, self.openplotter_item1)
-		self.menubar.Append(self.update, _('Updates'))
+		if not self.conf.get('UPDATE', 'disable_update_menu') == '1':
+			self.menubar.Append(self.update, _('Updates'))
 
 		self.helpm = wx.Menu()
 		self.helpm_item1 = self.helpm.Append(wx.ID_ANY, _('&About'), _('About OpenPlotter'))
