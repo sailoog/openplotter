@@ -13,8 +13,8 @@ GPIO
 MQTT topic
 **********
 
+Telegram message
+****************
+
 Time
 ****
-
-Telegram command
-****************
