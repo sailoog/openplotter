@@ -2662,7 +2662,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		url = self.currentpath+"/docs/html/credentials/what_are_credentials.html"
 		webbrowser.open(url, new=2)
 
-	####################### Actions
+	#######################Actions
 
 	def page_action(self):
 		self.list_triggers = CheckListCtrl(self.p_action, -1,90)
@@ -2966,14 +2966,45 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.selected_action = -1
 
 	def on_edit_triggers(self, e):
-		pass
+		if self.selected_trigger == -1: return
+		node = self.actions_flow_tree[self.selected_trigger]['trigger_node_out_id']
+		triggertype = self.actions_flow_tree[self.selected_trigger]['type']
+		name = 't|'+node+'|'+triggertype
+		tmplist = []
+		for i in self.triggers_flow_nodes:
+			if 'name' in i and i['name'] == name: tmplist.append(i)
+			else:
+				subid0 = i['id'].split('.')
+				subid = subid0[0]
+				for ii in self.triggers_flow_nodes:
+					subid0 = ii['id'].split('.')
+					subid2 = subid0[0]
+					if subid2 == subid and name == ii['name']: tmplist.append(i)
+		edit = 0
+		if triggertype == '0':
+			subkey = ''
+			for i in tmplist:
+				if i['type'] == 'signalk-subscribe':
+					period = int(i['period'])
+					vessel = i['context'].replace('vessels.','')
+					key = i['path']
+					source = i['source']
+				elif i['type'] == 'function' and i['func'] != 'return msg;':
+					subkey = i['func'].split(';')
+					subkey = subkey[0].split('.')
+					subkey = ':'+subkey[3]
+			edit = {'triggertype': int(triggertype),'period': period,'vessel': vessel,'key': key+subkey,'source': source}
+
+		self.edit_add_trigger(edit)
+
+
 
 	def on_add_trigger(self, e):
 		self.edit_add_trigger(0)
 
-
 	def edit_add_trigger(self, edit):
-		trigger = self.available_triggers_select.GetSelection()
+		if not edit: trigger = self.available_triggers_select.GetSelection()
+		else: trigger = edit['triggertype']
 		if trigger == 0: dlg = TriggerSK(self,edit)
 		elif trigger == 1: dlg = TriggerGeofence(self,edit)
 		elif trigger == 2: dlg = TriggerGPIO(self,edit)

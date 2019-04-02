@@ -395,8 +395,14 @@ class TriggerSK(wx.Dialog):
 
 		panel.SetSizer(vbox)
 
+		if edit:
+			self.period.SetValue(edit['period'])
+			self.vessel.SetValue(edit['vessel'])
+			self.skkey.SetValue(edit['key'])
+			self.source.SetValue(edit['source'])
+
 	def on_help(self, e):
-		url = self.currentpath+"/docs/html/xxx/xxx.html"
+		url = self.currentpath+"/docs/html/actions/triggers.html"
 		webbrowser.open(url, new=2)
 
 	def onEditSkkey(self,e):
