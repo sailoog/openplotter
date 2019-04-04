@@ -2970,58 +2970,44 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		node = self.actions_flow_tree[self.selected_trigger]['trigger_node_out_id']
 		triggertype = self.actions_flow_tree[self.selected_trigger]['type']
 		name = 't|'+node+'|'+triggertype
-		tmplist = []
+		edit = []
 		for i in self.triggers_flow_nodes:
-			if 'name' in i and i['name'] == name: tmplist.append(i)
+			if 'name' in i:
+				if i['name'] == name: edit.append(i)
 			else:
 				subid0 = i['id'].split('.')
 				subid = subid0[0]
 				for ii in self.triggers_flow_nodes:
 					subid0 = ii['id'].split('.')
 					subid2 = subid0[0]
-					if subid2 == subid and name == ii['name']: tmplist.append(i)
-		edit = 0
-		if triggertype == '0':
-			subkey = ''
-			for i in tmplist:
-				if i['type'] == 'signalk-subscribe':
-					period = int(i['period'])
-					vessel = i['context'].replace('vessels.','')
-					key = i['path']
-					source = i['source']
-				elif i['type'] == 'function' and i['func'] != 'return msg;':
-					subkey = i['func'].split(';')
-					subkey = subkey[0].split('.')
-					subkey = ':'+subkey[3]
-			edit = {'triggertype': int(triggertype),'period': period,'vessel': vessel,'key': key+subkey,'source': source}
-
+					if subid2 == subid and name == ii['name']: edit.append(i)
 		self.edit_add_trigger(edit)
-
-
 
 	def on_add_trigger(self, e):
 		self.edit_add_trigger(0)
 
 	def edit_add_trigger(self, edit):
 		if not edit: trigger = self.available_triggers_select.GetSelection()
-		else: trigger = edit['triggertype']
-		if trigger == 0: dlg = TriggerSK(self,edit)
-		elif trigger == 1: dlg = TriggerGeofence(self,edit)
-		elif trigger == 2: dlg = TriggerGPIO(self,edit)
+		else: trigger = int(self.actions_flow_tree[self.selected_trigger]['type'])
+		if trigger == 0: dlg = TriggerSK(self,edit,trigger)
+		elif trigger == 1: dlg = TriggerGeofence(self,edit,trigger)
+		elif trigger == 2: dlg = TriggerGPIO(self,edit,trigger)
 		elif trigger == 3:
 			local =  int(self.conf.get('CREDENTIALS', 'local_mqtt'))
 			remote =  int(self.conf.get('CREDENTIALS', 'remote_mqtt'))
 			if not local and not remote:
 				self.ShowStatusBarRED(_('Go to the Credentials tab and enable at least one MQTT broker'))
 				return
-			else: dlg = TriggerMQTT(self,edit,local,remote)
+			else: dlg = TriggerMQTT(self,edit,local,remote,trigger)
 		elif trigger == 4:
 			telegram =  int(self.conf.get('CREDENTIALS', 'telegram'))
 			if not telegram:
 				self.ShowStatusBarRED(_('Go to the Credentials tab and enable a Telegram bot'))
 				return
-			else: dlg = TriggerTelegram(self)
-		elif trigger == 5: dlg = TriggerTime(self,edit)
+			else: 
+				if edit: return
+				else: dlg = TriggerTelegram(self,trigger)
+		elif trigger == 5: dlg = TriggerTime(self,edit,trigger)
 		else:
 			self.ShowStatusBarRED(_('Select a trigger type.'))
 			return
@@ -3036,7 +3022,27 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				last = self.list_triggers.GetItemCount()-1
 				self.list_triggers.Select(last)
 			else:
-				pass
+				tmplist = []
+				nodeout = self.actions_flow_tree[self.selected_trigger]['trigger_node_out_id']
+				for i in self.triggers_flow_nodes:
+					exist = False
+					for ii in edit:
+						if i['id'] == ii['id']: 
+							exist = True
+							if ii['id'] == nodeout: wires = ii['wires']
+					if not exist: tmplist.append(i)
+				self.triggers_flow_nodes = tmplist
+				for i in dlg.TriggerNodes:
+					if 'name' in i: items = i['name'].split('|')
+					self.triggers_flow_nodes.append(i)
+				for i in self.triggers_flow_nodes:
+					if i['id'] == items[1]: i['wires'] = wires
+				self.actions_flow_tree[self.selected_trigger]['trigger_node_out_id'] = items[1]
+				self.actions_flow_tree[self.selected_trigger]['type'] = items[2]
+				selected_trigger = self.selected_trigger
+				self.on_print_triggers()
+				self.selected_trigger = selected_trigger
+				self.list_triggers.Select(self.selected_trigger)
 		dlg.Destroy()
 
 	def edit_conditions(self, e):

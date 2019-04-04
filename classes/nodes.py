@@ -286,12 +286,12 @@ class Nodes:
 
 # triggers
 class TriggerSK(wx.Dialog):
-	def __init__(self,parent,edit):
+	def __init__(self,parent,edit,trigger):
 		self.nodes = parent.nodes
 		help_bmp = parent.help_bmp
 		self.currentpath = parent.currentpath
 		self.actions_flow_id = parent.actions_flow_id
-		self.trigger_type = parent.available_triggers_select.GetSelection()
+		self.trigger_type = trigger
 
 		if edit == 0: title = _('Add Signal K trigger')
 		else: title = _('Edit Signal K trigger')
@@ -396,10 +396,22 @@ class TriggerSK(wx.Dialog):
 		panel.SetSizer(vbox)
 
 		if edit:
-			self.period.SetValue(edit['period'])
-			self.vessel.SetValue(edit['vessel'])
-			self.skkey.SetValue(edit['key'])
-			self.source.SetValue(edit['source'])
+			subkey = ''
+			for i in edit:
+				if i['type'] == 'signalk-subscribe':
+					period = int(i['period'])
+					vessel = i['context'].replace('vessels.','')
+					key = i['path']
+					source = i['source']
+				elif i['type'] == 'function' and i['func'] != 'return msg;':
+					subkey = i['func'].split(';')
+					subkey = subkey[0].split('.')
+					subkey = ':'+subkey[3]
+			self.period.SetValue(period)
+			self.vessel.SetValue(vessel)
+			self.skkey.SetValue(key+subkey)
+			self.source.SetValue(source)
+
 
 	def on_help(self, e):
 		url = self.currentpath+"/docs/html/actions/triggers.html"
@@ -463,12 +475,12 @@ class TriggerSK(wx.Dialog):
 		self.EndModal(wx.OK)
 
 class TriggerGeofence(wx.Dialog):
-	def __init__(self,parent,edit):
+	def __init__(self,parent,edit,trigger):
 		self.nodes = parent.nodes
 		help_bmp = parent.help_bmp
 		self.currentpath = parent.currentpath
 		self.actions_flow_id = parent.actions_flow_id
-		self.trigger_type = parent.available_triggers_select.GetSelection()
+		self.trigger_type = trigger
 
 		SK_ = parent.SK_settings
 		self.port = SK_.aktport
@@ -620,12 +632,12 @@ class TriggerGeofence(wx.Dialog):
 		self.EndModal(wx.OK)
 
 class TriggerGPIO(wx.Dialog):
-	def __init__(self,parent,edit):
+	def __init__(self,parent,edit,trigger):
 		self.nodes = parent.nodes
 		help_bmp = parent.help_bmp
 		self.currentpath = parent.currentpath
 		self.actions_flow_id = parent.actions_flow_id
-		self.trigger_type = parent.available_triggers_select.GetSelection()
+		self.trigger_type = trigger
 
 		if edit == 0: title = _('Add GPIO trigger')
 		else: title = _('Edit GPIO trigger')
@@ -738,14 +750,14 @@ class TriggerGPIO(wx.Dialog):
 		self.EndModal(wx.OK)
 
 class TriggerMQTT(wx.Dialog):
-	def __init__(self,parent,edit,local,remote):
+	def __init__(self,parent,edit,local,remote,trigger):
 		self.nodes = parent.nodes
 		help_bmp = parent.help_bmp
 		self.currentpath = parent.currentpath
 		self.localbrokerid = parent.localbrokerid
 		self.remotebrokerid = parent.remotebrokerid
 		self.actions_flow_id = parent.actions_flow_id
-		self.trigger_type = parent.available_triggers_select.GetSelection()
+		self.trigger_type = trigger
 
 		if edit == 0: title = _('Add MQTT trigger')
 		else: title = _('Edit MQTT trigger')
@@ -848,12 +860,12 @@ class TriggerMQTT(wx.Dialog):
 		self.EndModal(wx.OK)
 
 class TriggerTelegram(wx.Dialog):
-	def __init__(self,parent):
+	def __init__(self,parent,trigger):
 		self.nodes = parent.nodes
 		help_bmp = parent.help_bmp
 		self.currentpath = parent.currentpath
 		self.actions_flow_id = parent.actions_flow_id
-		self.trigger_type = parent.available_triggers_select.GetSelection()
+		self.trigger_type = trigger
 		self.telegramid = parent.telegramid
 		
 		title = _('Add Telegram trigger')
@@ -979,12 +991,12 @@ class TriggerTelegram(wx.Dialog):
 		self.EndModal(wx.OK)
 
 class TriggerTime(wx.Dialog):
-	def __init__(self,parent,edit):
+	def __init__(self,parent,edit,trigger):
 		self.nodes = parent.nodes
 		help_bmp = parent.help_bmp
 		self.currentpath = parent.currentpath
 		self.actions_flow_id = parent.actions_flow_id
-		self.trigger_type = parent.available_triggers_select.GetSelection()
+		self.trigger_type = trigger
 		self.telegramid = parent.telegramid
 		
 		if edit == 0: title = _('Add Time trigger')
