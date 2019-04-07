@@ -10,8 +10,8 @@ Set GPIO output
 Set MQTT topic
 **************
 
-Publish Twitter
-***************
+Publish on Twitter
+******************
 
 Send e-mail
 ***********
@@ -28,8 +28,5 @@ Reset system
 Shutdown system
 ***************
 
-Telegram: get Signal K key
-**************************
-
-Telegram: subscribe to Signal K key
-***********************************
+Send Telegram message
+*********************
