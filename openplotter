@@ -867,7 +867,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			except:
 				bak=''
 			if len(bak)>0:
-				self.find_line_split_set(bak,"channel",self.wifi_channel,1)
 				self.find_line_split_set(bak,"wpa_passphrase",self.passw,1)
 				self.bak_passw=self.passw.GetValue()
 				if len(self.bak_passw) > 0:
@@ -884,6 +883,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.wifi_channel.Clear()
 				for i in self.wifi_channel_list:
 					self.wifi_channel.Append(i)				
+				self.find_line_split_set(bak,"channel",self.wifi_channel,1)
 				
 				i=bak.find("bridge=br0")
 				if i>=0:
@@ -1013,7 +1013,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					text += ' e'
 				else:
 					text += ' i'
-				subprocess.Popen(('lxterminal -e bash '+self.currentpath+'/Network/copy_main.sh '+text).split())
+				process = subprocess.Popen(('bash '+self.currentpath+'/Network/copy_main.sh '+text).split())
 				time.sleep(2)
 		self.read_wifi_conf()
 		self.ShowStatusBarBLACK('')
