@@ -626,83 +626,223 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.conf.set('STARTUP', '800x480', '0')
 
 				########################################### Network
-
 	def page_wifi(self):
-		wx.StaticBox(self.p_wifi, size=(370, 330), pos=(10, 10))
-
-		self.available_wireless = []
-		output = subprocess.check_output('ifconfig')
-		for i in range(0, 9):
-			ii = str(i)
-			if 'wlan' + ii in output: self.available_wireless.append('wlan' + ii)
+		modelfile = open('/sys/firmware/devicetree/base/model', 'r', 2000)
+		self.rpimodel = modelfile.read()
+		modelfile.close()
+			
+		leftbox = wx.StaticBox(self.p_wifi, label=_('Network mode')+'  '+self.rpimodel)
 	
-		self.available_share = [_('none')]
-		for i in range(0, 9):
-			ii = str(i)
-			if 'eth' + ii in output: self.available_share.append('eth' + ii)
-			if 'ppp' + ii in output: self.available_share.append('ppp' + ii)
-			if 'usb' + ii in output: self.available_share.append('usb' + ii)
-			if 'wwan' + ii in output: self.available_share.append('wwan' + ii)
-		for i in self.available_wireless:
-			self.available_share.append(i)
-		
-		self.available_net_sys = []
-		self.available_net_sys.append(['default',_('client')])
-		self.available_net_sys.append(['pi2_wlan1',_('RPi2: AP')])
-		self.available_net_sys.append(['pi3_uap0_with_eth0_wlan0',_('RPi3: AP/client + bridge eth0')])
-		self.available_net_sys.append(['pi3_uap0_wlan0',_('RPi3: AP/client')])
-		self.available_net_sys.append(['pi3_wlan1_with_eth0_wlan0',_('RPi3: AP + client + bridge eth0')])
-		self.available_net_sys.append(['pi3_wlan1_wlan0',_('RPi3: AP + client')])
-		self.available_net_sys.append(['pi3+_wlan1_with_eth0_wlan0',_('RPi3+: AP + client + bridge eth0')])
-		self.available_net_sys.append(['pi3+_wlan1_5G_w_eth0_wlan0',_('RPi3+: AP 5G + client + bridge eth0')])
-		self.available_net_sys.append(['pi3+_wlan1_5GH_eth0_wlan0',_('RPi3+: AP 5GH + client + bridge eth0')])
-		self.available_net_sys.append(['pi3+_wlan1_wlan0',_('RPi3+: AP + client')])
-		
-		self.available_net_sys2 = []
-		for i in self.available_net_sys:
-			self.available_net_sys2.append(i[1])
-		
-		self.net_sys_label = wx.StaticText(self.p_wifi, label=_('Network mode'), pos=(20, 25))
-		self.net_sys = wx.ComboBox(self.p_wifi, choices=self.available_net_sys2, style=wx.CB_READONLY, size=(265, 32),pos=(20, 40))
+		self.available_share = []
+		self.available_ap_device2 = []
 
-		self.wifi_button_set = wx.Button(self.p_wifi, label=_('Set'),size=(75, 32), pos=(285, 40))
-		self.wifi_button_set.Bind(wx.EVT_BUTTON, self.on_wifi_set)		
+		self.ap_device_label = wx.StaticText(self.p_wifi, label=_('AP'))
+		self.ap_device = wx.ComboBox(self.p_wifi, choices=self.available_ap_device2, style=wx.CB_READONLY, size=(265, 32))
+		self.ap_device.Bind(wx.EVT_COMBOBOX, self.on_ap_device)
+
+		h_ap = wx.BoxSizer(wx.HORIZONTAL)
+		h_ap.Add(self.ap_device_label, 0, wx.RIGHT | wx.UP |wx.EXPAND, 10)
+		h_ap.Add(self.ap_device, 0, wx.RIGHT | wx.EXPAND, 10)	
 		
-		self.share_label = wx.StaticText(self.p_wifi, label=_('Sharing Internet device'), pos=(20, 85))
-		self.share = wx.ComboBox(self.p_wifi, choices=self.available_share, style=wx.CB_READONLY, size=(100, 32),pos=(20, 100))
+		self.ap_5 = wx.CheckBox(self.p_wifi, label=_('5 GHz'))
+		self.bridge = wx.CheckBox(self.p_wifi, label=_('Add ethernet port to the AP'))
+		
+		h_set = wx.BoxSizer(wx.HORIZONTAL)
+		h_set.Add(self.ap_5, 0, wx.RIGHT | wx.EXPAND, 10)
+		h_set.Add(self.bridge, 0, wx.RIGHT | wx.EXPAND, 10)
 
-		self.wifi_settings_label = wx.StaticText(self.p_wifi, label=_('Access point settings'), pos=(20, 150))
+		self.wifi_button_apply1 = wx.Button(self.p_wifi, label=_('Apply')+' 1',size=(75, 32))
+		self.wifi_button_apply1.Bind(wx.EVT_BUTTON, self.on_wifi_apply1)		
 
-		self.ssid = wx.TextCtrl(self.p_wifi, -1, size=(120, 32), pos=(20, 170))
-		self.ssid_label = wx.StaticText(self.p_wifi, label=_('SSID \nmaximum 32 characters'), pos=(160, 170))
+		self.drivers_button = wx.Button(self.p_wifi, label=_('Install drivers'))
+		self.drivers_button.Bind(wx.EVT_BUTTON, self.on_drivers_button)			
+		
+		h_button0 = wx.BoxSizer(wx.HORIZONTAL)
+		h_button0.Add(self.wifi_button_apply1, 0, wx.Left | wx.EXPAND, 10)
+		h_button0.AddStretchSpacer(1)
+		h_button0.Add(self.drivers_button, 0, wx.RIGHT | wx.EXPAND, 10)
 
-		self.passw = wx.TextCtrl(self.p_wifi, -1, size=(120, 32), pos=(20, 210))
-		self.passw_label = wx.StaticText(self.p_wifi, label=_('Password \nminimum 8 characters required'), pos=(160, 210))
+		v_leftbox = wx.StaticBoxSizer(leftbox, wx.VERTICAL)
+		v_leftbox.AddSpacer(5)
+		v_leftbox.Add(h_ap, 0, wx.LEFT | wx.EXPAND, 10)
+		v_leftbox.Add(h_set, 0, wx.LEFT | wx.EXPAND, 10)
+		v_leftbox.Add(h_button0, 0, wx.LEFT | wx.EXPAND, 10)
+		v_leftbox.AddSpacer(5)
+		
+		leftbox2 = wx.StaticBox(self.p_wifi, label=_('Access point settings'))
+
+		self.share = wx.ComboBox(self.p_wifi, choices=self.available_share, style=wx.CB_READONLY, size=(120, 32))
+		self.share.Bind(wx.EVT_COMBOBOX, self.on_share)
+		self.share_label = wx.StaticText(self.p_wifi, label=_('Sharing Internet device'))
+
+		h_share = wx.BoxSizer(wx.HORIZONTAL)
+		h_share.Add(self.share, 0, wx.RIGHT | wx.EXPAND, 10)
+		h_share.Add(self.share_label, 0, wx.RIGHT | wx.UP | wx.EXPAND, 10)
+		
+		self.ssid = wx.TextCtrl(self.p_wifi, -1, size=(120, 32))
+		self.ssid_label = wx.StaticText(self.p_wifi, label=_('SSID \nmaximum 32 characters'))
+
+		h_ssid = wx.BoxSizer(wx.HORIZONTAL)
+		h_ssid.Add(self.ssid, 0, wx.RIGHT |wx.EXPAND, 10)
+		h_ssid.Add(self.ssid_label, 0, wx.RIGHT | wx.EXPAND, 10)
+
+		self.passw = wx.TextCtrl(self.p_wifi, -1, size=(120, 32))
+		self.passw_label = wx.StaticText(self.p_wifi, label=_('Password \nminimum 8 characters required'))
+		
+		h_passw = wx.BoxSizer(wx.HORIZONTAL)
+		h_passw.Add(self.passw, 0, wx.RIGHT | wx.EXPAND, 10)
+		h_passw.Add(self.passw_label, 0, wx.RIGHT | wx.EXPAND, 10)
 		
 		self.wifi_channel_list = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13','36','40','44','48','149','153','157','161','165']
-		self.wifi_channel = wx.ComboBox(self.p_wifi, choices=self.wifi_channel_list, style=wx.CB_READONLY,
-										size=(120, 32), pos=(20, 253))
-		self.wifi_channel_label = wx.StaticText(self.p_wifi, label=_('Channel'), pos=(160, 260))
+		self.wifi_channel = wx.ComboBox(self.p_wifi, choices=self.wifi_channel_list, style=wx.CB_READONLY, size=(120, 32))
+		self.wifi_channel_label = wx.StaticText(self.p_wifi, label=_('Channel'))
 
-		self.drivers_button = wx.Button(self.p_wifi, label=_('Install drivers'), pos=(20, 300))
-		self.drivers_button.Bind(wx.EVT_BUTTON, self.on_drivers_button)	
+		h_wifi_channel = wx.BoxSizer(wx.HORIZONTAL)
+		h_wifi_channel.Add(self.wifi_channel, 0, wx.RIGHT | wx.EXPAND, 10)
+		h_wifi_channel.Add(self.wifi_channel_label, 0, wx.RIGHT | wx.UP | wx.EXPAND, 10)
 
-		self.wifi_button_apply = wx.Button(self.p_wifi, label=_('Apply'), pos=(275, 300))
-		self.wifi_button_apply.Bind(wx.EVT_BUTTON, self.onwifi_apply)
+		self.wifi_button_apply = wx.Button(self.p_wifi, label=_('Apply')+' 2')
+		self.wifi_button_apply.Bind(wx.EVT_BUTTON, self.on_wifi_apply2)
 
-		wx.StaticBox(self.p_wifi, label=_(' Addresses '), size=(290, 330), pos=(385, 10))
-		self.ip_info = wx.TextCtrl(self.p_wifi, -1, style=wx.TE_MULTILINE | wx.TE_READONLY, size=(270, 265),
-								   pos=(395, 30))
+		h_button = wx.BoxSizer(wx.HORIZONTAL)
+		h_button.Add(self.wifi_button_apply, 0, wx.Left, 10)
+
+		v_leftbox2 = wx.StaticBoxSizer(leftbox2, wx.VERTICAL)
+		v_leftbox2.AddSpacer(5)
+		v_leftbox2.Add(h_share, 0, wx.LEFT | wx.EXPAND, 10)
+		v_leftbox2.Add(h_ssid, 0, wx.LEFT | wx.EXPAND, 10)
+		v_leftbox2.Add(h_passw, 0, wx.LEFT | wx.EXPAND, 10)
+		v_leftbox2.Add(h_wifi_channel, 0, wx.LEFT | wx.EXPAND, 10)
+		v_leftbox2.AddStretchSpacer(1)
+		v_leftbox2.Add(h_button, 0, wx.LEFT | wx.EXPAND, 10)
+		v_leftbox2.AddSpacer(3)
+		
+		v_leftside = wx.BoxSizer(wx.VERTICAL)
+		v_leftside.Add(v_leftbox, 0, wx.LEFT | wx.EXPAND, 10)
+		v_leftside.AddSpacer(5)		
+		v_leftside.Add(v_leftbox2, 1, wx.LEFT | wx.EXPAND, 10)
+
+		
+		rigthbox = wx.StaticBox(self.p_wifi, label=_(' Addresses '), size=(290, -1))
+		self.ip_info = wx.TextCtrl(self.p_wifi, -1, style=wx.TE_MULTILINE | wx.TE_READONLY)
 		self.ip_info.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_INACTIVECAPTION))
 
-		self.button_refresh_ip = wx.Button(self.p_wifi, label=_('Refresh'), pos=(565, 300))
-		self.button_refresh_ip.Bind(wx.EVT_BUTTON, self.on_show_ip_info)
+		self.button_refresh_ip_info = wx.Button(self.p_wifi, label=_('Refresh'))
+		self.button_refresh_ip_info.Bind(wx.EVT_BUTTON, self.on_refresh_ip_info)
 
-		self.check_net_b = wx.Button(self.p_wifi, label=_('Status'), pos=(465, 300))
-		self.check_net_b.Bind(wx.EVT_BUTTON, self.on_check_net)
+		self.button_net_status = wx.Button(self.p_wifi, label=_('Status'))
+		self.button_net_status.Bind(wx.EVT_BUTTON, self.on_net_status)
 
-	def read_wifi_conf(self):		
-		self.conf_network = self.conf_folder + '/Network'			
+		h_rbutton = wx.BoxSizer(wx.HORIZONTAL)
+		h_rbutton.Add(self.button_refresh_ip_info, 0, wx.RIGHT | wx.EXPAND, 10)
+		h_rbutton.Add(self.button_net_status, 0, wx.RIGHT | wx.EXPAND, 10)
+
+		v_rigthbox = wx.StaticBoxSizer(rigthbox, wx.VERTICAL)	
+		#v_rigthbox = wx.BoxSizer(wx.VERTICAL)
+		v_rigthbox.Add(self.ip_info, 1, wx.LEFT | wx.EXPAND, 10)
+		v_rigthbox.AddSpacer(3)		
+		v_rigthbox.Add(h_rbutton, 0, wx.LEFT | wx.EXPAND, 10)
+		v_rigthbox.AddSpacer(3)
+
+
+		h_box = wx.BoxSizer(wx.HORIZONTAL)
+		h_box.Add(v_leftside, 1, wx.ALL | wx.EXPAND, 5)
+		h_box.Add(v_rigthbox, 0, wx.ALL | wx.EXPAND, 5)
+		
+		v_box = wx.BoxSizer(wx.VERTICAL)
+		v_box.Add(h_box, 1, wx.LEFT | wx.EXPAND, 0)
+		
+		self.p_wifi.SetSizer(v_box)		
+		
+	def find_line_split_set(self,data,search,_setvalue,pos):
+		i=data.find(search)
+		if i>=0:
+			j=data[i:].find("\n")
+			if j==0:j=data[i:].length
+			line = data[i:i+j]
+			sline = line.split('=')
+			if len(sline)>1:
+				_setvalue.SetValue(sline[pos])
+	
+	def find_line_split(self,data,search,pos):
+		i=data.find(search)
+		if i>=0:
+			j=data[i:].find("\n")
+			if j==0:j=data[i:].length
+			line = data[i:i+j]
+			sline = line.split('=')
+			if len(sline)>1:
+				return sline[pos]
+			else:
+				return ""
+
+	def read_network_interfaces(self):
+		network_info = ''
+		try:
+			network_info = subprocess.check_output('ls /sys/class/net'.split())
+		except:
+			pass
+
+		self.available_share = [_('none')]
+		unavailable_net = ['uap0','wlan1','lo']
+		if self.bridge.GetValue():
+			unavailable_net.append('eth0')
+
+		for i in network_info.split():		
+			if i in unavailable_net:
+				pass
+			else:
+				self.available_share.append(i)
+
+		self.share.Clear()
+		for i in self.available_share:
+			self.share.Append(i)				
+		
+		type=''
+		phy=''
+		AP=-1
+		GHz=-1
+		
+		self.available_ap_device = []
+		self.available_ap_device.append([_('none'),'',-1,-1,'none'])
+		for i in network_info.split():
+			if 'wlan' in i:
+				wlan = 'wlan1'
+				mac = (subprocess.check_output(('cat /sys/class/net/'+i+'/address').split())[:-1])
+				if 'usb' in subprocess.check_output(('ls -l /sys/class/net/'+i).split()):
+					type  = 'usb'
+					ni = subprocess.check_output(('ls -l /sys/class/net/'+i+'/').split())
+					phy = ni[ni.find('/phy')+1:ni.find('/phy')+5]
+					ni = subprocess.check_output(('iw '+phy+' info').split())
+					AP = ni.find('* AP\n')
+					GHz = ni.find('Band 2:')
+					if AP > -1:
+						self.available_ap_device.append([mac+' '+type, mac, type, GHz, wlan])
+				else:
+					type = 'on board'
+					if 'Raspberry Pi 3 Model B Plus' in self.rpimodel:
+						GHz = 1
+					else:
+						GHz = -1
+					self.available_ap_device.append([mac+' '+type, mac, type, GHz, wlan])
+
+		if 'Raspberry Pi 3 Model B R' in self.rpimodel and len(self.available_ap_device) == 2:
+			for i in self.available_ap_device:
+				if 'on board' == i[2]:
+					type = 'AP and Station'
+					wlan = 'uap0'
+					self.available_ap_device.append([i[1]+' '+type, i[1], type, i[3], wlan])
+
+		self.available_ap_device2 = []
+		for i in self.available_ap_device:
+			self.available_ap_device2.append(i[0])
+			
+		self.ap_device.Clear()
+		for i in self.available_ap_device2:
+			self.ap_device.Append(i)
+
+	def read_wifi_conf(self):
+		self.conf_network = self.conf_folder + '/Network'
 		self.bak_net_sys = ''
 
 		if os.path.isdir(self.conf_network):
@@ -717,163 +857,265 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.hostapd_interface=''
 		self.hostapd_bridge=''
 		if self.bak_net_sys<>'' and self.bak_net_sys<>'default':
-			self.share.Enable()
-			self.ssid.Enable()
-			self.passw.Enable()
-			self.wifi_channel.Enable()	
+			self.ap_enable2()
 		
-			wififile = open(self.conf_network+'/'+self.bak_net_sys+'/hostapd/hostapd.conf', 'r', 2000)
-			bak = wififile.read()
-			wififile.close()
-			i=bak.find("channel")
-			if i>=0:
-				j=bak[i:].find("\n")
-				if j==0:j=bak[i:].length
-				line = bak[i:i+j]
-				sline = line.split('=')
-				if len(sline)>1:
-					self.wifi_channel.SetValue(sline[1])
-			i=bak.find("wpa_passphrase")
-			if i>=0:
-				j=bak[i:].find("\n")
-				if j==0:j=bak[i:].length
-				line = bak[i:i+j]
-				sline = line.split('=')
-				if len(sline)>1:
-					self.bak_passw=sline[1]
+			#read settings from hostapd.conf  GHz, bridge, ssid, password, channel
+			try:
+				wififile = open(self.conf_network+'/hostapd/hostapd.conf', 'r', 2000)
+				bak = wififile.read()
+				wififile.close()
+			except:
+				bak=''
+			if len(bak)>0:
+				self.find_line_split_set(bak,"channel",self.wifi_channel,1)
+				self.find_line_split_set(bak,"wpa_passphrase",self.passw,1)
+				self.bak_passw=self.passw.GetValue()
+				if len(self.bak_passw) > 0:
 					self.passw.SetValue('**********')
-			i=bak.find("ssid")
-			if i>=0:
-				j=bak[i:].find("\n")
-				if j==0:j=bak[i:].length
-				line = bak[i:i+j]
-				sline = line.split('=')
-				if len(sline)>1:
-					self.ssid.SetValue(sline[1])
-			i=bak.find("interface")
-			if i>=0:
-				j=bak[i:].find("\n")
-				if j==0:j=bak[i:].length
-				line = bak[i:i+j]
-				sline = line.split('=')
-				if len(sline)>1:
-					self.hostapd_interface=sline[1]
-			i=bak.find("bridge")
-			if i>=0:
-				j=bak[i:].find("\n")
-				if j==0:j=bak[i:].length
-				line = bak[i:i+j]
-				sline = line.split('=')
-				if len(sline)>1:
-					self.hostapd_bridge=sline[1]
-	
-			wififile = open(self.conf_network+'/'+self.bak_net_sys+'/.openplotter/start-ap-managed-wifi.sh', 'r', 2000)
-			bak = wififile.read()
-			wififile.close()
-			i=bak.find("iptables -t nat -A POSTROUTING -o ")
-			if i>0:
-				j=bak[i:].find("\n")
-				if j==0:j=bak[i:].length
-				line = bak[i:i+j]
-				sline = line.split()
-				if len(sline)>7:
-					self.bak_share=sline[6]
-					if sline[6] in self.available_share:
-						pass
-					else: self.share.Append(sline[6])
-					self.share.SetValue(sline[6])
+				self.find_line_split_set(bak,"ssid",self.ssid,1)
+				self.hostapd_interface = self.find_line_split(bak,"interface",1)
+				if (self.find_line_split(bak,"hw_mode",1))[0:1] == "a":
+					self.ap_5.SetValue(True)
+					self.wifi_channel_list = ['36','40','44','48','149','153','157','161','165']
+				else:
+					self.ap_5.SetValue(False)
+					self.wifi_channel_list = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13']
+				
+				self.wifi_channel.Clear()
+				for i in self.wifi_channel_list:
+					self.wifi_channel.Append(i)				
+				
+				i=bak.find("bridge=br0")
+				if i>=0:
+					i=bak.find("#bridge=br0")
+					if i>=0:
+						self.bridge.SetValue(False)
+					else:
+						self.bridge.SetValue(True)
+			self.read_network_interfaces()
+
+			#search selected AP device 
+			found = False
+			if 'uap0' == self.hostapd_interface:
+				for i in self.available_ap_device:
+					if 'AP and Station' == i[2]:
+						self.ap_device.SetStringSelection(i[0])
+						self.ap_5.Disable()
+						if i[3]>=1: self.ap_5.Enable()
+						found = True;
+			else:
+				try:
+					wififile = open(self.conf_network+'/udev/rules.d/72-wireless.rules', 'r', 2000)
+					bak = wififile.read()
+					wififile.close()
+				except:
+					bak=''
+				if 'brcmfmac' in bak:
+					for i in self.available_ap_device:
+						if 'on board' == i[2]:
+							self.ap_device.SetStringSelection(i[0])
+							self.ap_5.Disable()
+							if i[3]>=1: self.ap_5.Enable()
+							found = True;
+				if not found:
+					for i in self.available_ap_device:
+						if i[1] in bak and len(i[1])>10:
+							self.ap_device.SetStringSelection(i[0])
+							self.ap_5.Disable()
+							if i[3]>=1: self.ap_5.Enable()
+							found = True;
+			if not found:
+				self.ap_device.SetStringSelection(_('none'))
+				self.ap_disable()
+			else:
+				self.ap_enable()
+			
+			#search shared device from iptables.sh
+			
+			i=' '
+			try:
+				wififile = open(self.conf_network+'/../start-ap-managed-wifi.sh', 'r', 2000)
+				bak = wififile.read()
+				wififile.close()
+			except:
+				bak=''
+			i=self.find_line_split(bak,"internet=",1)
+			if i<>None:
+				if i in self.available_share:
+					pass
+				else: self.share.Append(i)
+				self.share.SetValue(i)
+			else:
+				self.share.SetValue(_('none'))
 			
 		else:
-			self.share.Disable()
-			self.ssid.Disable()
-			self.passw.Disable()
-			self.wifi_channel.Disable()
-			
-			self.wifi_channel.SetValue('')
-			self.passw.SetValue('')
-			self.ssid.SetValue('')
-			self.share.SetValue('')
+			self.ap_disable()
+			self.read_network_interfaces()
 
-		for i in self.available_net_sys:
+
+		for i in self.available_ap_device:
 			if i[0] == self.bak_net_sys:
-				self.net_sys.SetValue(i[1])		
-		self.on_show_ip_info('')
+				self.ap_device.SetValue(i[1])
+		self.on_refresh_ip_info('')
 
+	def ap_disable(self):
+		self.ap_5.Disable()
+		self.bridge.Disable()
+
+		self.ap_5.SetValue(False)
+		self.bridge.SetValue(False)
 		
-	def onwifi_apply(self, e):
-		if '*****' in self.passw.GetValue():
-			passw = self.bak_passw
-		else:
-			passw = self.passw.GetValue()
-			
-		ssid = self.ssid.GetValue()
-		channel = self.wifi_channel.GetValue()
+		self.share.Disable()
+		self.ssid.Disable()
+		self.passw.Disable()
+		self.wifi_channel.Disable()
+		
+		self.wifi_channel.SetValue('')
+		self.passw.SetValue('')
+		self.ssid.SetValue('')
+		self.share.SetValue('')
+	
+	def ap_enable(self):
+		self.bridge.Enable()
+		
+	def ap_enable2(self):
+		self.share.Enable()
+		self.ssid.Enable()
+		self.passw.Enable()
+		self.wifi_channel.Enable()
+	
+	def on_ap_device(self, e):
+		j = self.ap_device.GetValue()
+		self.ap_enable()
+		self.ap_5.Disable()
+		for i in self.available_ap_device:
+			if _('none') == j:
+				self.ap_disable()
+			if i[0] == j:
+				if i[3] >0:
+					self.ap_5.Enable()
+
+	def on_wifi_apply1(self, e):
+		self.ShowStatusBarBLACK(_('wait'))
+		j = self.ap_device.GetValue()
+		for i in self.available_ap_device:
+			if i[0] == j:
+				if self.bridge.GetValue():
+					text = 'br0'
+				else:
+					text = 'no'
+				text += ' '+i[4]+' '+i[1]+' '
+				if self.ap_5.GetValue():
+					text += '5'
+				else:
+					text += '2.4'
+				if i[2] == 'usb':
+					text += ' e'
+				else:
+					text += ' i'
+				subprocess.Popen(('lxterminal -e bash '+self.currentpath+'/Network/copy_main.sh '+text).split())
+				time.sleep(2)
+		self.read_wifi_conf()
+		self.ShowStatusBarBLACK('')
+
+	def on_drivers_button(self,e):
+		subprocess.Popen(['lxterminal', '-e', 'bash', self.currentpath+'/classes/install-wifi.sh'])	
+
+	#leftbox 2
+	def on_share(self, e):
 		share = self.share.GetValue()
 		
-		if self.bak_net_sys<>'' and self.bak_net_sys<>'default':
-			if (len(ssid) > 32 or len(passw) < 8):
-				self.ShowStatusBarRED(_('Your SSID must have a maximum of 32 characters and your password a minimum of 8.'))
-				return
-
-		used_interfaces=[self.hostapd_interface]
-		if self.hostapd_bridge<>'':
-			used_interfaces.append('eth0')
-		#print used_interfaces,share
-		if share in used_interfaces:
-			self.ShowStatusBarRED(_('The device you want to share is in use (bridge or AP).'))
-			return
-							
 		dlg = wx.MessageDialog(None, _(
-			'Changes will be applied after next reboot.\n\nIf something goes wrong and you are on a headless system,\nyou may not be able to reconnect again.\n\nAre you sure?'),
-							   _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
-		if dlg.ShowModal() != wx.ID_YES:	
+			'Do you want to change the internet connection directly?'),
+			_('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+		if dlg.ShowModal() != wx.ID_YES:
 			dlg.Destroy()
 			return
-						
-		if os.path.isfile(self.conf_network+'/'+self.bak_net_sys+'/hostapd/hostapd.conf'):
-			wififile = open(self.conf_network+'/'+self.bak_net_sys+'/hostapd/hostapd.conf', 'r', 2000)
-			lines = wififile.readlines()
-			wififile.close()
-			
-			wififile = open(self.conf_network+'/'+self.bak_net_sys+'/hostapd/hostapd.conf', 'w')
-			for line in lines:
-				if 0<=line.find("wpa_passphrase"): line = "wpa_passphrase="+passw+'\n'
-				if 0<=line.find("channel"): line = "channel="+channel+'\n'
-				if 0<=line.find("ssid"): 
-					sline = line.split('=')
-					if sline[0][:4]== "ssid":
-						line = "ssid="+ssid+'\n'
-				wififile.write(line)
-			wififile.close()
 		
-		if os.path.isfile(self.conf_network+'/'+self.bak_net_sys+'/.openplotter/start-ap-managed-wifi.sh'):
-			if self.bak_share<>share:			
-				wififile = open(self.conf_network+'/'+self.bak_net_sys+'/.openplotter/start-ap-managed-wifi.sh', 'r', 2000)
+		j = self.ap_device.GetValue()
+		for i in self.available_ap_device:
+			if i[0] == j:
+				text = i[4]
+				if self.bridge.GetValue():
+					text = 'br0'
+		process = subprocess.Popen(['bash', self.currentpath+'/Network/.openplotter/iptables.sh',share,text])
+
+	def on_wifi_apply2(self, e):
+		if 'none' <> self.ap_device.GetValue():
+			if '*****' in self.passw.GetValue():
+				passw = self.bak_passw
+			else:
+				passw = self.passw.GetValue()
+				
+			ssid = self.ssid.GetValue()
+			channel = self.wifi_channel.GetValue()
+			share = self.share.GetValue()
+			
+			if self.bak_net_sys<>'' and self.bak_net_sys<>'default':
+				if (len(ssid) > 32 or len(passw) < 8):
+					self.ShowStatusBarRED(_('Your SSID must have a maximum of 32 characters and your password a minimum of 8.'))
+					return
+
+			used_interfaces=[self.hostapd_interface]
+			if self.hostapd_bridge<>'':
+				used_interfaces.append('eth0')
+			if share in used_interfaces:
+				self.ShowStatusBarRED(_('The device you want to share is in use (bridge or AP).'))
+				return
+								
+			dlg = wx.MessageDialog(None, _(
+				'Changes will be applied after next reboot.\n\nIf something goes wrong and you are on a headless system,\nyou may not be able to reconnect again.\n\nAre you sure?'),
+				_('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+			if dlg.ShowModal() != wx.ID_YES:
+				dlg.Destroy()
+				return
+			
+			if os.path.isfile(self.conf_network+'/'+self.bak_net_sys+'/hostapd/hostapd.conf'):
+				wififile = open(self.conf_network+'/'+self.bak_net_sys+'/hostapd/hostapd.conf', 'r', 2000)
 				lines = wififile.readlines()
 				wififile.close()
-
-				wififile = open(self.conf_network+'/'+self.bak_net_sys+'/.openplotter/start-ap-managed-wifi.sh', 'w')
+				
+				wififile = open(self.conf_network+'/'+self.bak_net_sys+'/hostapd/hostapd.conf', 'w')
 				for line in lines:
-					if 0<=line.find("iptables -t nat -A POSTROUTING -o "): line = line.replace(self.bak_share, share)
-					if 0<=line.find("iptables -A FORWARD"): line = line.replace(self.bak_share, share)
+					if 0<=line.find("wpa_passphrase"): line = "wpa_passphrase="+passw+'\n'
+					if 0<=line.find("channel"): line = "channel="+channel+'\n'
+					if 0<=line.find("ssid"): 
+						sline = line.split('=')
+						if sline[0][:4]== "ssid":
+							line = "ssid="+ssid+'\n'
 					wififile.write(line)
 				wififile.close()
-		process = subprocess.Popen(['bash', self.conf_network+'/'+self.bak_net_sys+'/install.sh'], cwd = self.conf_network+'/'+self.bak_net_sys)
-		
-		
+			
+			if os.path.isfile(self.conf_network+'/'+self.bak_net_sys+'/.openplotter/Network/start-ap-managed-wifi.sh'):
+				if self.bak_share<>share:
+					wififile = open(self.conf_network+'/'+self.bak_net_sys+'/.openplotter/Network/start-ap-managed-wifi.sh', 'r', 2000)
+					lines = wififile.readlines()
+					wififile.close()
+
+					wififile = open(self.conf_network+'/'+self.bak_net_sys+'/.openplotter/Network/start-ap-managed-wifi.sh', 'w')
+					for line in lines:
+						if 0<=line.find("internet="): line = "internet="+share
+						wififile.write(line)
+					wififile.close()
+			process = subprocess.Popen(['bash', self.currentpath+'/Network/install.sh'], cwd = self.conf_network)
+		else:
+			process = subprocess.Popen(['bash', self.currentpath+'/Network/install.sh','uninstall'], cwd = self.conf_network)
+	
+	#rightbox
 	def on_show_ip_info_txt(self,port,ips,ip_hostname):
-		out=''
+		out='   '+ip_hostname + '.local:'+port+'\n'
 		if port != '':
 			port=':'+port
 		for ip in ips:
 			if ip[0:7]=='169.254':
-				if not (ip_hostname + '.local'+port in out):
-					out += ip_hostname + '.local'+port+' (169.254...)\n'
+				pass
+			elif ':' in ip:
+				pass
 			else:
-				out += ip + port+'\n'
+				out +='   '+ ip + port+'\n'
 		return out		
 			
-	def on_show_ip_info(self, e):
+	def on_refresh_ip_info(self, e):
 		ip_hostname = subprocess.check_output(['hostname'])[:-1]
 		ip_info = subprocess.check_output(['hostname', '-I'])
 		out = _(' Multiplexed NMEA 0183:\n')
@@ -883,13 +1125,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		out += self.on_show_ip_info_txt('3000',ips,ip_hostname)
 		out += _('\n VNC remote desktop:\n')
 		out += self.on_show_ip_info_txt('5900',ips,ip_hostname)
-		out += _('\n node-red:\n')
-		out += self.on_show_ip_info_txt('1880',ips,ip_hostname)
+		out += _('\n grafana:\n')
+		out += self.on_show_ip_info_txt('3001',ips,ip_hostname)
 		out += _('\n MQTT local broker:\n')
 		out += self.on_show_ip_info_txt('1883',ips,ip_hostname)
 		self.ip_info.SetValue(out)
 
-	def on_check_net(self, e):
+	def on_net_status(self, e):
 		msg = ''
 		msg1 = ''
 
@@ -911,104 +1153,46 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			network_info = subprocess.check_output('ifconfig'.split())
 		except:
 			pass
+		net=['wlan0','wlan1','uap0','usb0','br0','eth0','eth1']
+		netactiv = [False,False,False,False,False,False,False]
+
 		for i in network_info.split('\n'):
-			if 'wlan0' in i: msg1 += 'wlan0 '
-			if 'wlan1' in i: msg1 += 'wlan1 '
-			if 'uap0' in i: msg1 += 'uap0 '
+			for j in range(7):
+				if net[j] in i: 
+					netactiv[j]=True
+					if j<3: msg1 += net[j]+' '
 		msg += _('up network: ') + msg1 + '\n'
 
-		msg1 = ''
-		network_info = ''
-		try:
-			network_info = subprocess.check_output('service dnsmasq status'.split())
-		except:
-			pass
-		for i in network_info.split('\n'):
-			if 'running' in i: msg1 += _('running')
-		if msg1 == '': msg1 += _('stopped')
-		msg += 'dnsmasq (dhcp-server):\t' + msg1 + '\n'
+		service=['dnsmasq','hostapd','dhcpcd','avahi-daemon']
+		servicetxt=['dnsmasq (dhcp-server):\t','hostapd (AP):\t\t\t','dhcpcd:\t\t\t\t\t','avahi-daemon:\t\t\t']
+
+		for j in range(len(service)):
+			msg1 = ''
+			network_info = ''
+			try:
+				network_info = subprocess.check_output(('service '+service[j]+' status').split())
+			except:
+				pass
+			for i in network_info.split('\n'):
+				if '(running)' in i: msg1 += _('running')
+			if msg1 == '': msg1 += _('stopped')
+			msg += servicetxt[j] + msg1 + '\n'
 
 		msg1 = ''
 		network_info = ''
-		try:
-			network_info = subprocess.check_output('service hostapd status'.split())
-		except:
-			pass
-		for i in network_info.split('\n'):
-			if 'running' in i: msg1 += _('running')
-		if msg1 == '': msg1 += _('stopped')
-		msg += 'hostapd (AP):\t\t\t' + msg1 + '\n'
 
-		msg1 = ''
-		network_info = ''
-		try:
-			network_info = subprocess.check_output('service dhcpcd status'.split())
-		except:
-			pass
-		for i in network_info.split('\n'):
-			if 'running' in i: msg1 += _('running')
-		if msg1 == '': msg1 += _('stopped')
-		msg += 'dhcpcd:\t\t\t\t\t' + msg1 + '\n'
-		
-		msg1 = ''
-		network_info = ''
-		try:
-			network_info = subprocess.check_output('service avahi-daemon status'.split())
-		except:
-			pass
-		for i in network_info.split('\n'):
-			if 'running' in i: msg1 += _('running')
-		if msg1 == '': 
-			msg1 += _('stopped')
-		else:
-			msg1 = _('running')
-		msg += 'avahi-daemon:\t\t\t' + msg1 + '\n'
-		
-		msg1 = ''
-		network_info = ''
-		try:
-			network_info = subprocess.check_output('ip addr show wlan0'.split())
-		except:
-			pass
-		for i in network_info.split('\n'):
-			if 'inet ' in i:
-				if not '169.254' in i.split(' ')[5]: msg1 += i.split(' ')[5][0:-3] + ' ' + i[-5:] + '\n'
-		network_info = ''
-		try:
-			network_info = subprocess.check_output('ip addr show wlan1'.split())
-		except:
-			pass
-		for i in network_info.split('\n'):
-			if 'inet ' in i:
-				if not '169.254' in i.split(' ')[5]: msg1 += i.split(' ')[5][0:-3] + ' ' + i[-5:] + '\n'
-		network_info = ''
-		try:
-			network_info = subprocess.check_output('ip addr show br0'.split())
-		except:
-			pass
-		for i in network_info.split('\n'):
-			if 'inet ' in i:
-
-				if not '169.254' in i.split(' ')[5]:
-					if 'br0:0' in i:
-						msg1 += i.split(' ')[5][0:-3] + ' ' + i[-5:] + '\n'
-					else:
-						msg1 += i.split(' ')[5][0:-3] + ' ' + i[-3:] + '\n'
+		for j in range(7):
+			if netactiv[j]:
+				network_info = subprocess.check_output(('ip addr show '+net[j]).split())
+				for i in network_info.split('\n'):
+					if 'inet ' in i:
+						if not '169.254' in i.split(' ')[5]: 
+							msg1 += i.split(' ')[5][0:-3] + ' ' + net[j] + '\n'
+				network_info = ''
 		msg += _('IP address\n') + msg1 + '\n'
 
 		self.ShowMessage(msg)
 
-	def on_wifi_set(self, e):
-		os.system("rm -rf '"+self.conf_folder+"/Network/"+self.bak_net_sys+"'") 
-		j = self.net_sys.GetValue()
-		for i in self.available_net_sys:
-			if i[1] == j:
-				shutil.copytree(self.currentpath+'/Network/'+i[0], self.conf_folder+'/Network/'+i[0]) 
-		self.read_wifi_conf()
-
-	def on_drivers_button(self,e):
-		subprocess.Popen(['lxterminal', '-e', 'bash', self.currentpath+'/classes/install-wifi.sh'])
-		
 				########################################### PYPILOT
 
 	def page_pypilot(self):
