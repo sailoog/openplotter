@@ -1,1 +1,0 @@
-ACTION=="add", SUBSYSTEM=="ieee80211", KERNEL=="phy0", NAME="wlan1"
