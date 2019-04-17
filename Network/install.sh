@@ -3,7 +3,7 @@ response=$1
 if [[ "$response" = "uninstall" ]]; then
 	#no AP (set back to original setting)
 	sudo cp dhcpcd.conf /etc
-	sudo echo '#!/bin/sh' >> start-ap-managed-wifi.sh
+	sudo echo '#!/bin/sh' > ~/.openplotter/start-ap-managed-wifi.sh
 	sudo cp network/interfaces /etc/network
 
 	if [ -e /etc/network/interfaces.d/ap ]
@@ -47,6 +47,7 @@ if [[ "$response" = "uninstall" ]]; then
 
 else
 	sudo cp dhcpcd.conf /etc
+	sudo cp dnsmasq.conf /etc
 	sudo cp .openplotter/start-ap-managed-wifi.sh ~/.openplotter
 	sudo cp .openplotter/iptables.sh ~/.openplotter
 	sudo cp .openplotter/start1.sh ~/.openplotter
