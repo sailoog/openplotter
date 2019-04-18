@@ -32,7 +32,6 @@ if [ "$AP" = "none" ]; then
 else
 	bash "${loadfolder}/hostname_dot_local.sh" "y"
 	cp "${loadfolder}/udev/rules.d/11-openplotter-usb0.rules" "${targetfolder}/udev/rules.d/11-openplotter-usb0.rules"
-	cp "${loadfolder}/network/interfaces.d/station" "${targetfolder}/network/interfaces.d/station"
 	cp "${loadfolder}/.openplotter/iptables.sh" "${targetfolder}/.openplotter/iptables.sh"
 	cp "${loadfolder}/.openplotter/start-ap-managed-wifi.sh" "${targetfolder}/.openplotter/start-ap-managed-wifi.sh"
 fi
