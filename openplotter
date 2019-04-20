@@ -630,7 +630,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			return
 		self.conf.set('STARTUP', 'delay', delay)
 
-		if self.op_maximize.GetValue(): self.conf.set('STARTUP', 'maximize', '1')
+		if self.op_maximize.GetValue(): 
+			self.conf.set('STARTUP', 'maximize', '1')
+			self.Maximize()
 		else: self.conf.set('STARTUP', 'maximize', '0')
 
 		if self.disable_screensaver.GetValue(): 

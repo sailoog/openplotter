@@ -142,7 +142,7 @@ class MyFrame(wx.Frame):
 	def starting(self):
 
 		delay=float(self.conf.get('STARTUP', 'delay'))
-		screensaver=int(self.conf.get('STARTUP', 'screensaver'))
+		screensaver=self.conf.get('STARTUP', 'screensaver')
 		opencpn=self.conf.get('STARTUP', 'opencpn')
 		opencpn_no=self.conf.get('STARTUP', 'opencpn_no_opengl')
 		opencpn_fullscreen=self.conf.get('STARTUP', 'opencpn_fullscreen')
