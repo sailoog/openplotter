@@ -83,7 +83,7 @@ class MainFrame(wx.Frame):
 		self.nb.AddPage(self.p_i2c, _('I2C'))
 		self.nb.AddPage(self.p_1w, '1W')
 		self.nb.AddPage(self.p_spi, 'SPI')
-		self.nb.AddPage(self.p_startup, _('Startup'))
+		self.nb.AddPage(self.p_startup, _('Settings'))
 		sizer = wx.BoxSizer()
 		sizer.Add(self.nb, 1, wx.EXPAND)
 		self.p.SetSizer(sizer)
@@ -98,7 +98,7 @@ class MainFrame(wx.Frame):
 		self.nb.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.Changingpage)
 		self.Centre()
 
-		########################### menu
+		###########################menu
 
 		self.menubar = wx.MenuBar()
 		self.settings = wx.Menu()
@@ -214,7 +214,7 @@ class MainFrame(wx.Frame):
 		self.print_credentials()
 		#self.when_closed(0x001)
 
-	###########################################	general functions
+	###########################################general functions
 
 	def read_language(self):
 		if self.language == 'en': self.lang.Check(self.lang_item1.GetId(), True)
@@ -491,76 +491,123 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				break
 		return exist
 
-	###########################################	startup
+	###########################################Settings
+
 	def page_startup(self):
 
+		general = wx.StaticBox(self.p_startup, label=_('General'))
+
+		self.op_maximize = wx.CheckBox(self.p_startup, label=_('Maximize OpenPlotter window'))
+
+		self.disable_screensaver = wx.CheckBox(self.p_startup, label=_('Disable screen saver'))
+
+		startup = wx.StaticBox(self.p_startup, label=_('Startup'))
+
 		delay_label = wx.StaticText(self.p_startup, label=_('Delay (seconds)'))
-		self.delay = wx.TextCtrl(self.p_startup, -1, size=(55, 32))
-		button_ok_delay = wx.Button(self.p_startup, label=_('OK'), size=(70, 32))
-		button_ok_delay.Bind(wx.EVT_BUTTON, self.on_ok_delay)
+		self.delay = wx.TextCtrl(self.p_startup)
 
 		self.startup_opencpn = wx.CheckBox(self.p_startup, label='OpenCPN')
-		self.startup_opencpn.Bind(wx.EVT_CHECKBOX, self.startup)
+		self.startup_opencpn.Bind(wx.EVT_CHECKBOX, self.on_opencpn)
 		self.startup_opencpn_nopengl = wx.CheckBox(self.p_startup, label=_('no OpenGL'))
-		self.startup_opencpn_nopengl.Bind(wx.EVT_CHECKBOX, self.startup)
 		self.startup_opencpn_fullscreen = wx.CheckBox(self.p_startup, label=_('fullscreen'))
-		self.startup_opencpn_fullscreen.Bind(wx.EVT_CHECKBOX, self.startup)
 
 		self.startup_play_sound = wx.CheckBox(self.p_startup, label=_('Play sound'))
-		self.startup_play_sound.Bind(wx.EVT_CHECKBOX, self.startup)
-		self.startup_path_sound = wx.TextCtrl(self.p_startup, -1, size=(400, 32))
+		self.startup_path_sound = wx.TextCtrl(self.p_startup)
 		self.button_select_sound = wx.Button(self.p_startup, label=_('File'))
 		self.button_select_sound.Bind(wx.EVT_BUTTON, self.on_select_sound)
 
-		self.op_maximize = wx.CheckBox(self.p_startup, label=_('Maximize OpenPlotter'))
-		self.op_maximize.Bind(wx.EVT_CHECKBOX, self.startup)
-
 		self.d800x480 = wx.CheckBox(self.p_startup, label=_('Check 800x480 display'))
-		self.d800x480.Bind(wx.EVT_CHECKBOX, self.startup)
+
+		help_button = wx.BitmapButton(self.p_startup, bitmap=self.help_bmp, size=(self.help_bmp.GetWidth()+40, self.help_bmp.GetHeight()+10))
+		help_button.Bind(wx.EVT_BUTTON, self.on_help_settngs)
+
+		apply_changes = wx.Button(self.p_startup, label=_('Apply changes'))
+		apply_changes.Bind(wx.EVT_BUTTON, self.on_apply_changes_settings)
+		cancel_changes = wx.Button(self.p_startup, label=_('Cancel changes'))
+		cancel_changes.Bind(wx.EVT_BUTTON, self.on_cancel_changes_settings)
 
 		h_delay = wx.BoxSizer(wx.HORIZONTAL)
-		h_delay.Add(delay_label, 0, wx.RIGHT | wx.UP |wx.EXPAND, 10)
-		h_delay.Add(self.delay, 0, wx.RIGHT | wx.EXPAND, 10)
-		h_delay.Add(button_ok_delay, 0, wx.RIGHT | wx.EXPAND, 10)
+		h_delay.Add(delay_label, 0, wx.ALL, 5)
+		h_delay.Add(self.delay, 0, wx.ALL, 5)
 
-		h_sound= wx.BoxSizer(wx.HORIZONTAL)
-		h_sound.Add(self.startup_play_sound , 0, wx.RIGHT | wx.EXPAND, 10)
-		h_sound.Add(self.startup_path_sound, 0, wx.RIGHT | wx.EXPAND, 10)
-		h_sound.Add(self.button_select_sound, 0, wx.RIGHT | wx.EXPAND, 10)
+		h_opencpn = wx.BoxSizer(wx.HORIZONTAL)
+		h_opencpn.Add(self.startup_opencpn, 0, wx.ALL, 5)
+		h_opencpn.Add(self.startup_opencpn_fullscreen, 0, wx.ALL, 5)
+		h_opencpn.Add(self.startup_opencpn_nopengl, 0, wx.ALL, 5)
 
-		final = wx.BoxSizer(wx.VERTICAL)
-		final.AddSpacer(15)
-		final.Add(h_delay, 0, wx.LEFT | wx.EXPAND, 10)
-		final.AddSpacer(15)
-		final.Add(self.startup_opencpn, 0, wx.LEFT | wx.EXPAND, 10)
-		final.Add(self.startup_opencpn_nopengl, 0, wx.LEFT | wx.EXPAND, 25)
-		final.Add(self.startup_opencpn_fullscreen, 0, wx.LEFT | wx.EXPAND, 25)
-		final.AddSpacer(15)
-		final.Add(h_sound, 0, wx.LEFT | wx.EXPAND, 10)
-		final.AddSpacer(15)
-		final.Add(self.op_maximize, 0, wx.LEFT | wx.EXPAND, 10)
-		final.AddSpacer(15)
-		final.Add(self.d800x480, 0, wx.LEFT | wx.EXPAND, 10)
+		h_sound = wx.BoxSizer(wx.HORIZONTAL)
+		h_sound.Add(self.startup_play_sound, 0, wx.ALL, 5)
+		h_sound.Add(self.startup_path_sound, 1, wx.ALL | wx.EXPAND, 5)
+		h_sound.Add(self.button_select_sound, 0, wx.ALL, 5)
 
-		self.p_startup.SetSizer(final)
+		h_general = wx.BoxSizer(wx.HORIZONTAL)
+		h_general.Add(self.op_maximize, 1, wx.ALL, 5)
+		h_general.Add(self.disable_screensaver, 1, wx.ALL, 5)
+
+		v_general = wx.StaticBoxSizer(general, wx.VERTICAL)
+		v_general.AddSpacer(5)
+		v_general.Add(h_general, 0, wx.ALL | wx.EXPAND, 0)
+		v_general.AddSpacer(5)
+
+		v_startup = wx.StaticBoxSizer(startup, wx.VERTICAL)
+		v_startup.AddSpacer(5)
+		v_startup.Add(h_delay, 0, wx.ALL, 0)
+		v_startup.Add(h_opencpn, 0, wx.ALL, 0)
+		v_startup.Add(h_sound, 0, wx.ALL | wx.EXPAND, 0)
+		v_startup.Add(self.d800x480, 0, wx.ALL, 5)
+		v_startup.AddSpacer(5)
+
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(help_button, 0, wx.ALL, 0)
+		hbox.Add((0, 0), 1, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add(apply_changes, 0, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add(cancel_changes, 0, wx.RIGHT | wx.LEFT, 5)
+
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		vbox.Add(v_general, 0, wx.ALL | wx.EXPAND, 5)
+		vbox.Add(v_startup, 0, wx.ALL | wx.EXPAND, 5)
+		vbox.Add((0, 0), 1, wx.ALL | wx.EXPAND, 5)
+		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 5)
+
+		self.p_startup.SetSizer(vbox)
 
 	def read_startup(self):
 		self.delay.SetValue(self.conf.get('STARTUP', 'delay'))
 
-		if self.conf.get('STARTUP', 'opencpn') == '1':
-			self.startup_opencpn.SetValue(True)
-		else:
-			self.startup_opencpn_nopengl.Disable()
-			self.startup_opencpn_fullscreen.Disable()
-		if self.conf.get('STARTUP', 'opencpn_no_opengl') == '1': self.startup_opencpn_nopengl.SetValue(True)
-		if self.conf.get('STARTUP', 'opencpn_fullscreen') == '1': self.startup_opencpn_fullscreen.SetValue(True)
 		if self.conf.get('STARTUP', 'maximize') == '1':
 			self.op_maximize.SetValue(True)
 			self.Maximize()
+		else: self.op_maximize.SetValue(False)
+
+		if self.conf.get('STARTUP', 'screensaver') == '1': self.disable_screensaver.SetValue(True)
+		else: self.disable_screensaver.SetValue(False)
+
+		if self.conf.get('STARTUP', 'opencpn') == '1':
+			self.startup_opencpn.SetValue(True)
+			self.startup_opencpn_nopengl.Enable()
+			self.startup_opencpn_fullscreen.Enable()
+		else:
+			self.startup_opencpn.SetValue(False)
+			self.startup_opencpn_nopengl.Disable()
+			self.startup_opencpn_fullscreen.Disable()
+		if self.conf.get('STARTUP', 'opencpn_no_opengl') == '1': self.startup_opencpn_nopengl.SetValue(True)
+		else: self.startup_opencpn_nopengl.SetValue(False)
+		if self.conf.get('STARTUP', 'opencpn_fullscreen') == '1': self.startup_opencpn_fullscreen.SetValue(True)
+		else: self.startup_opencpn_fullscreen.SetValue(False)
+
 		if self.conf.get('STARTUP', '800x480') == '1': self.d800x480.SetValue(True)
+
 		self.startup_path_sound.SetValue(self.conf.get('STARTUP', 'sound'))
-		if self.conf.get('STARTUP', 'play') == '1':
-			self.startup_play_sound.SetValue(True)
+		if self.conf.get('STARTUP', 'play') == '1': self.startup_play_sound.SetValue(True)
+		else: self.startup_play_sound.SetValue(False)
+
+	def on_opencpn(self, e):
+		if self.startup_opencpn.GetValue():
+			self.startup_opencpn_nopengl.Enable()
+			self.startup_opencpn_fullscreen.Enable()
+		else:
+			self.startup_opencpn_nopengl.Disable()
+			self.startup_opencpn_fullscreen.Disable()
 
 	def on_select_sound(self, e):
 		dlg = wx.FileDialog(self, message=_('Choose a file'), defaultDir=self.currentpath + '/sounds', defaultFile='',
@@ -569,63 +616,59 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if dlg.ShowModal() == wx.ID_OK:
 			file_path = dlg.GetPath()
 			self.startup_path_sound.SetValue(file_path)
-			self.conf.set('STARTUP', 'sound', file_path)
 		dlg.Destroy()
 
-	def on_ok_delay(self, e):
+	def on_apply_changes_settings(self, e):
 		delay = self.delay.GetValue()
-		if not re.match('^[0-9]*$', delay):
-			self.ShowStatusBarRED(_('You can enter only numbers.'))
+		if not delay: 
+			self.delay.SetValue('0')
+			delay = '0'
+		try: float(delay)
+		except:
+			self.delay.SetValue('0')
+			self.ShowStatusBarRED(_('You can enter only a number in Delay field.'))
 			return
-		else:
-			if delay != '0': delay = delay.lstrip('0')
-			self.conf.set('STARTUP', 'delay', delay)
-			self.ShowStatusBarBLACK(_('Startup delay set to ').decode('utf8') + delay + _(' seconds').decode('utf8'))
+		self.conf.set('STARTUP', 'delay', delay)
 
-	def startup(self, e):
-		sender = e.GetEventObject()
+		if self.op_maximize.GetValue(): self.conf.set('STARTUP', 'maximize', '1')
+		else: self.conf.set('STARTUP', 'maximize', '0')
 
-		if sender == self.startup_opencpn:
-			if self.startup_opencpn.GetValue():
-				self.startup_opencpn_nopengl.Enable()
-				self.startup_opencpn_fullscreen.Enable()
-				self.conf.set('STARTUP', 'opencpn', '1')
-			else:
-				self.startup_opencpn_nopengl.Disable()
-				self.startup_opencpn_fullscreen.Disable()
-				self.conf.set('STARTUP', 'opencpn', '0')
+		if self.disable_screensaver.GetValue(): 
+			self.conf.set('STARTUP', 'screensaver', '1')
+			subprocess.call(['xset', 's', 'noblank'])
+			subprocess.call(['xset', 's', 'off'])
+			subprocess.call(['xset', '-dpms'])
+		else: 
+			self.conf.set('STARTUP', 'screensaver', '0')
+			subprocess.call(['xset', 's', 'blank'])
+			subprocess.call(['xset', 's', 'on'])
+			subprocess.call(['xset', '+dpms'])
 
-		if sender == self.startup_opencpn_nopengl:
-			if self.startup_opencpn_nopengl.GetValue():
-				self.conf.set('STARTUP', 'opencpn_no_opengl', '1')
-			else:
-				self.conf.set('STARTUP', 'opencpn_no_opengl', '0')
+		if self.startup_opencpn.GetValue(): self.conf.set('STARTUP', 'opencpn', '1')
+		else: self.conf.set('STARTUP', 'opencpn', '0')
+		if self.startup_opencpn_nopengl.GetValue(): self.conf.set('STARTUP', 'opencpn_no_opengl', '1')
+		else: self.conf.set('STARTUP', 'opencpn_no_opengl', '0')
+		if self.startup_opencpn_fullscreen.GetValue(): self.conf.set('STARTUP', 'opencpn_fullscreen', '1')
+		else: self.conf.set('STARTUP', 'opencpn_fullscreen', '0')
 
-		if sender == self.startup_opencpn_fullscreen:
-			if self.startup_opencpn_fullscreen.GetValue():
-				self.conf.set('STARTUP', 'opencpn_fullscreen', '1')
-			else:
-				self.conf.set('STARTUP', 'opencpn_fullscreen', '0')
+		if self.startup_play_sound.GetValue(): self.conf.set('STARTUP', 'play', '1')
+		else: self.conf.set('STARTUP', 'play', '0')
+		self.conf.set('STARTUP', 'sound', self.startup_path_sound.GetValue())
 
-		if sender == self.op_maximize:
-			if self.op_maximize.GetValue():
-				self.conf.set('STARTUP', 'maximize', '1')
-			else:
-				self.conf.set('STARTUP', 'maximize', '0')
+		if self.d800x480.GetValue(): self.conf.set('STARTUP', '800x480', '1')
+		else: self.conf.set('STARTUP', '800x480', '0')
 
-		if sender == self.startup_play_sound:
-			if self.startup_play_sound.GetValue():
-				self.conf.set('STARTUP', 'play', '1')
-			else:
-				self.conf.set('STARTUP', 'play', '0')
+		self.ShowStatusBarGREEN(_('Settings changes saved'))
 
-		if sender == self.d800x480:
-			if self.d800x480.GetValue():
-				self.conf.set('STARTUP', '800x480', '1')
-			else:
-				self.conf.set('STARTUP', '800x480', '0')
+	def on_cancel_changes_settings(self, e):
+		self.read_startup()
 
-				########################################### Network
+	def on_help_settngs(self, e):
+		url = self.currentpath+"/docs/html/getting_started/settings.html"
+		webbrowser.open(url, new=2)
+
+	###########################################Network
+
 	def page_wifi(self):
 		modelfile = open('/sys/firmware/devicetree/base/model', 'r', 2000)
 		self.rpimodel = modelfile.read()
@@ -1193,7 +1236,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		self.ShowMessage(msg)
 
-				########################################### PYPILOT
+	###########################################pypiloy
 
 	def page_pypilot(self):
 		pypilot_mode_label = wx.StaticText(self.p_pypilot, label=_('pypilot Mode:'))
@@ -1466,7 +1509,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.read_pypilot()
 		self.start_sensors()
 		
-			########################################### kplex
+	###########################################kplex
 
 	def page_kplex(self):
 
@@ -1826,7 +1869,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 						if Serialinst[name]['assignment'] == 'NMEA 0183 out':
 							subprocess.Popen(['kplex', '-f', self.home+'/.nmea0183out.conf'])
 							break
-						###################################### I2C sensors
+
+	###########################################I2C
 
 	def page_i2c(self):
 		self.i2c_sensors_def = []
@@ -2039,7 +2083,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.list_i2c.Append([str(c), name, address, magn_list[c], iii[0], str(iii[1]), str(iii[2])])
 				c = c + 1
 
-	###################################### SPI
+	###########################################SPI
+
 	def page_spi(self):
 		title = wx.StaticText(self.p_spi, label=_(' SPI MCP3008 '))
 
@@ -2163,7 +2208,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.conf.read()
 		self.read_MCP()
 
-	####################### Credentials
+	###########################################Credentials
 	
 	def page_credentials(self):
 
@@ -2846,7 +2891,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		url = self.currentpath+"/docs/html/credentials/what_are_credentials.html"
 		webbrowser.open(url, new=2)
 
-	#######################Actions
+	###########################################Actions
 
 	def page_action(self):
 		self.list_triggers = CheckListCtrl(self.p_action, -1,90)
@@ -3499,7 +3544,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		url = self.currentpath+"/docs/html/actions/what_are_actions.html"
 		webbrowser.open(url, new=2)
 
-	####################### 1W sensors
+	###########################################1W
+
 	def page_1w(self):
 		title = wx.StaticText(self.p_1w, label=_(' Temperature sensors '))
 
@@ -3617,7 +3663,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.start_1w()
 		self.read_DS18B20()
 
-	####################### Serial manager
+	###########################################Serial
+
 	def page_serial(self):
 		self.list_Serialinst = wx.ListCtrl(self.p_serial, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER | wx.LC_SINGLE_SEL)
 		self.list_Serialinst.InsertColumn(0, _('name'), width=85)
@@ -4332,7 +4379,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		if reset == True : os.system('sudo shutdown -r now')
 
-	###################################### N2K
+	###########################################CAN
+
 	def page_n2k(self):	
 		CANUSB_label = wx.StaticText(self.p_n2k, label=_('CAN-USB device:'))
 		self.can_usb = wx.StaticText(self.p_n2k)
@@ -4521,7 +4569,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.SK_settings.set_canbus_enable(False)
 		self.read_n2k()
 
-	###################################### Signal K
+	###########################################Signal K
+
 	def start_SK(self):
 		subprocess.call(['sudo', 'systemctl', 'start', 'signalk.socket'])
 		subprocess.call(['sudo', 'systemctl', 'start', 'signalk.service'])
@@ -4545,7 +4594,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		subprocess.call(['pkill', '-f', 'diagnostic-SK-input.py'])
 		subprocess.Popen(['python', self.currentpath + '/diagnostic-SK-input.py'])
 
-############################## Main
+###########################################Main
+
 if __name__ == "__main__":
 	conf = Conf()
 	currentpath = conf.get('GENERAL', 'op_folder')
