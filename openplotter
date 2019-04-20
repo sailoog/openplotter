@@ -2908,8 +2908,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		delete_trigger = wx.Button(self.p_action, label=_('delete'))
 		delete_trigger.Bind(wx.EVT_BUTTON, self.on_delete_trigger)
 
+		self.available_operators = ['eq', 'neq', 'lt', 'lte', 'gt', 'gte','btwn', 'cont', 'true', 'false', 'null', 'nnull', 'empty', 'nempty']
 		self.available_conditions = ['=', '!=', '<', '<=', '>', '>=', _('is between'), _('contains'), _('is true'), ('is false'), _('is null'), _('is not null'), _('is empty'), _('is not empty')]
-		self.available_operators_select = wx.Choice(self.p_action, choices=self.available_conditions, style=wx.CB_READONLY)
+		#self.available_operators_select = wx.Choice(self.p_action, choices=self.available_conditions, style=wx.CB_READONLY)
 
 		self.list_conditions = wx.ListCtrl(self.p_action, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(-1,90))
 		self.list_conditions.InsertColumn(0, _('Conditions'), width= 100)
@@ -2978,7 +2979,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		hlistbox_but2.Add(delete_condition, 0, wx.ALL, 5)
 
 		vlistbox_cond = wx.BoxSizer(wx.VERTICAL)
-		vlistbox_cond.Add(self.available_operators_select, 0, wx.ALL | wx.EXPAND, 5)
+		vlistbox_cond.AddSpacer(35)
+		#vlistbox_cond.Add(self.available_operators_select, 0, wx.ALL | wx.EXPAND, 5)
 		vlistbox_cond.Add(hlistbox_but2, 0, wx.ALL, 0)
 
 		hlistbox2 = wx.BoxSizer(wx.HORIZONTAL)
@@ -2999,7 +3001,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		hbox = wx.BoxSizer(wx.HORIZONTAL)
 		hbox.Add(help_button, 0, wx.ALL, 0)
-		hbox.Add((0, 0), 1, wx.RIGHT | wx.LEFT, 5)
+		hbox.AddStretchSpacer(1)
 		hbox.Add(apply_changes, 0, wx.RIGHT | wx.LEFT, 5)
 		hbox.Add(cancel_changes, 0, wx.RIGHT | wx.LEFT, 5)
 
@@ -3263,20 +3265,29 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		dlg.Destroy()
 
 	def edit_conditions(self, e):
-		pass
+		#find connected condition
+		if self.selected_condition == -1: return
+		nodec = self.actions_flow_tree[self.selected_trigger]['conditions'][self.selected_condition]['condition_node_out_id']
+		typec = self.actions_flow_tree[self.selected_trigger]['conditions'][self.selected_condition]['operator']
+		name = 'c|'+nodec+'|'+typec
+		edit = ''
+		for i in self.conditions_flow_nodes:
+			if 'name' in i:
+				if i['name'] == name: 
+					edit = i['rules'][0]
+				self.edit_cond = i
+		self.edit_add_condition(edit)
 
 	def on_add_condition(self, e):
 		self.edit_add_condition(0)
 
 	def edit_add_condition(self, edit):
-		if self.selected_trigger == -1:
-			self.ShowStatusBarRED(_('Select a trigger.'))
-			return
-		operator = self.available_operators_select.GetSelection()
-		if operator != -1: dlg = Condition(self,edit)
-		else:
-			self.ShowStatusBarRED(_('Select an operator.'))
-			return
+		if not edit:
+			if self.selected_trigger == -1:
+				self.ShowStatusBarRED(_('Select a trigger.'))
+				return
+		dlg = Condition(self,edit)
+			
 		res = dlg.ShowModal()
 		if res == wx.OK:
 			if not edit:
@@ -3290,7 +3301,20 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				last = self.list_conditions.GetItemCount()-1
 				self.list_conditions.Select(last)
 			else:
-				pass
+				self.edit_cond['rules'] = dlg.ConditionNode['rules']
+				namesplit = self.edit_cond['name'].split('|')
+				operator = self.available_operators.index(self.edit_cond['rules'][0]['t'])
+				self.edit_cond['name'] = namesplit[0]+'|'+namesplit[1]+'|'+str(operator)
+
+				for i in self.actions_flow_tree[self.selected_trigger]['conditions']:
+					if 'condition_node_out_id' in i:
+						if i['condition_node_out_id'] == namesplit[1]:
+							i['operator'] = str(operator)
+						
+				self.on_print_conditions(0)
+				last = self.list_conditions.GetItemCount()-1
+				self.list_conditions.Select(last)
+
 		dlg.Destroy()
 
 	def edit_actions(self, e):

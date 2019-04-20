@@ -1102,9 +1102,12 @@ class Condition(wx.Dialog):
 		help_bmp = parent.help_bmp
 		self.currentpath = parent.currentpath
 		self.actions_flow_id = parent.actions_flow_id
-		self.available_operators = ['eq', 'neq', 'lt', 'lte', 'gt', 'gte','btwn', 'cont', 'true', 'false', 'null', 'nnull', 'empty', 'nempty']
-		self.operator_id = parent.available_operators_select.GetSelection()
-		self.operator = self.available_operators[self.operator_id]
+		self.available_operators = parent.available_operators
+		self.available_conditions = parent.available_conditions
+		if edit:
+			self.operator = edit['t']
+		else:
+			self.operator = self.available_operators[0]
 		self.condition_node_template = '''
 		    {
 		        "id": "",
@@ -1130,7 +1133,9 @@ class Condition(wx.Dialog):
 
 		panel = wx.Panel(self)
 
-		operatorlabel = wx.StaticText(panel, label=_('Operator: ')+parent.available_conditions[self.operator_id])
+		operatorlabel = wx.StaticText(panel, label=_('Operator'))
+		self.available_operators_select = wx.Choice(panel, choices=self.available_conditions, style=wx.CB_READONLY)
+		self.available_operators_select.Bind(wx.EVT_CHOICE, self.on_available_operators_select)
 
 		type_list = [_('Number'), _('String'), _('Signal K key'), _('Date and time')]
 		self.type_list = ['num', 'str', 'flow', 'num']
@@ -1156,6 +1161,10 @@ class Condition(wx.Dialog):
 		okBtn = wx.Button(panel, wx.ID_OK)
 		okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
 
+		typeoperator = wx.BoxSizer(wx.HORIZONTAL)
+		typeoperator.Add(operatorlabel, 0, wx.TOP | wx.BOTTOM, 6)
+		typeoperator.Add(self.available_operators_select, 0, wx.LEFT, 5)
+
 		typevalue = wx.BoxSizer(wx.HORIZONTAL)
 		typevalue.Add(type1label, 0, wx.TOP | wx.BOTTOM, 6)
 		typevalue.Add(self.type1, 0, wx.LEFT, 5)
@@ -1179,7 +1188,7 @@ class Condition(wx.Dialog):
 		hbox.Add(okBtn, 0, wx.ALL, 10)
 
 		main = wx.BoxSizer(wx.VERTICAL)
-		main.Add(operatorlabel, 0, wx.ALL, 10)
+		main.Add(typeoperator, 0, wx.ALL, 10)
 		main.Add(typevalue, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
 		main.Add(value1, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM | wx.EXPAND, 10)
 		main.Add(value2, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM | wx.EXPAND, 10)
@@ -1189,14 +1198,28 @@ class Condition(wx.Dialog):
 
 		panel.SetSizer(main)
 
-		self.edit_value1.Disable()
-		self.edit_value2.Disable()
 		if self.operator == 'true' or self.operator == 'false' or self.operator == 'null' or self.operator == 'nnull' or self.operator == 'empty' or self.operator == 'nempty':
 			self.type1.Disable()
 			self.value1.Disable()
 			self.value2.Disable()
 		elif self.operator != 'btwn':			
 			self.value2.Disable()
+			
+		if edit:
+			operator_value = self.available_operators.index(edit['t'])
+			type_list_value = self.type_list.index(edit['vt'])
+			self.available_operators_select.SetSelection(operator_value)
+			self.type1.SetSelection(type_list_value)
+
+			if type_list_value == 0:	#num is for date and num
+				if '-' in edit['v']:
+					self.type1.SetSelection(3)
+
+			self.value1.SetValue(edit['v'])
+			if operator_value == 6:
+				self.value2.SetValue(edit['v2'])				
+
+		self.Set_SK_add()
 
 	def on_help(self, e):
 		url = self.currentpath+"/docs/html/xxx/xxx.html"
@@ -1218,13 +1241,31 @@ class Condition(wx.Dialog):
 		if res == wx.OK: self.value2.SetValue(dlg.selected_vessel+'.'+dlg.selected_key)
 		dlg.Destroy()
 
-	def on_select_type1(self,e):
+	def on_available_operators_select(self,e):
+		self.operator = self.available_operators[self.available_operators_select.GetSelection()]
+		
+		self.type1.Enable()
+		self.value1.Enable()
+		self.value2.Enable()
+		if self.operator in ['true','false','null','nnull','empty','nempty']:
+			self.type1.Disable()
+			self.value1.Disable()
+			self.value2.Disable()
+		elif self.operator != 'btwn':			
+			self.value2.Disable()
+		
+		self.Set_SK_add()
+
+	def Set_SK_add(self):
 		if self.type1.GetSelection() == 2: 
 			self.edit_value1.Enable()
 			if self.operator == 'btwn': self.edit_value2.Enable()
 		else: 
 			self.edit_value1.Disable()
 			self.edit_value2.Disable()
+
+	def on_select_type1(self,e):
+		self.Set_SK_add()
 		if self.type1.GetSelection() == 3:
 			now = datetime.now()
 			self.value1.SetValue(now.strftime("%Y-%m-%d %H:%M:%S"))
@@ -1238,7 +1279,7 @@ class Condition(wx.Dialog):
 		condition_node['id'] = self.nodes.get_node_id()
 		condition_node['z'] = self.actions_flow_id
 		self.connector_id = condition_node['id']
-		condition_node['name'] = 'c|'+condition_node['id']+'|'+str(self.operator_id)
+		condition_node['name'] = 'c|'+condition_node['id']+'|'+str(self.available_operators.index(self.operator))
 		if self.operator == 'true' or self.operator == 'false' or self.operator == 'null' or self.operator == 'nnull' or self.operator == 'empty' or self.operator == 'nempty':
 			condition_node['rules'].append({"t": self.operator})
 		else:
