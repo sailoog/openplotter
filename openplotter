@@ -682,69 +682,77 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.available_ap_device2 = []
 
 		self.ap_device_label = wx.StaticText(self.p_wifi, label=_('AP'))
-		self.ap_device = wx.ComboBox(self.p_wifi, choices=self.available_ap_device2, style=wx.CB_READONLY, size=(265, 32))
+		self.ap_device = wx.ComboBox(self.p_wifi, choices=self.available_ap_device2, style=wx.CB_READONLY, size=(265, -1))
 		self.ap_device.Bind(wx.EVT_COMBOBOX, self.on_ap_device)
 
 		h_ap = wx.BoxSizer(wx.HORIZONTAL)
-		h_ap.Add(self.ap_device_label, 0, wx.RIGHT | wx.UP |wx.EXPAND, 10)
-		h_ap.Add(self.ap_device, 0, wx.RIGHT | wx.EXPAND, 10)	
+		h_ap.Add(self.ap_device_label, 0, wx.TOP | wx.BOTTOM, 6)
+		h_ap.Add(self.ap_device, 0, wx.LEFT, 5)	
+		#h_ap.Add(self.ap_device_label, 0, wx.RIGHT | wx.UP |wx.EXPAND, 10)
+		#h_ap.Add(self.ap_device, 0, wx.RIGHT | wx.EXPAND, 10)	
 		
 		self.ap_5 = wx.CheckBox(self.p_wifi, label=_('5 GHz'))
 		self.bridge = wx.CheckBox(self.p_wifi, label=_('Add ethernet port to the AP'))
 		
 		h_set = wx.BoxSizer(wx.HORIZONTAL)
-		h_set.Add(self.ap_5, 0, wx.RIGHT | wx.EXPAND, 10)
-		h_set.Add(self.bridge, 0, wx.RIGHT | wx.EXPAND, 10)
+		h_set.Add(self.ap_5, 0, wx.TOP | wx.BOTTOM | wx.EXPAND, 6)
+		h_set.AddSpacer(10)
+		h_set.Add(self.bridge, 0, wx.TOP | wx.BOTTOM | wx.EXPAND, 6)
 
-		self.wifi_button_apply1 = wx.Button(self.p_wifi, label=_('Apply')+' 1',size=(75, 32))
+		self.wifi_button_apply1 = wx.Button(self.p_wifi, label=_('Apply')+' 1')
 		self.wifi_button_apply1.Bind(wx.EVT_BUTTON, self.on_wifi_apply1)		
 
 		self.drivers_button = wx.Button(self.p_wifi, label=_('Install drivers'))
 		self.drivers_button.Bind(wx.EVT_BUTTON, self.on_drivers_button)			
 		
 		h_button0 = wx.BoxSizer(wx.HORIZONTAL)
-		h_button0.Add(self.wifi_button_apply1, 0, wx.Left | wx.EXPAND, 10)
+		h_button0.Add(self.wifi_button_apply1, 0, wx.EXPAND, 0)
 		h_button0.AddStretchSpacer(1)
-		h_button0.Add(self.drivers_button, 0, wx.RIGHT | wx.EXPAND, 10)
+		h_button0.Add(self.drivers_button, 0, wx.EXPAND, 0)
 
 		v_leftbox = wx.StaticBoxSizer(leftbox, wx.VERTICAL)
 		v_leftbox.AddSpacer(5)
-		v_leftbox.Add(h_ap, 0, wx.LEFT | wx.EXPAND, 10)
-		v_leftbox.Add(h_set, 0, wx.LEFT | wx.EXPAND, 10)
-		v_leftbox.Add(h_button0, 0, wx.LEFT | wx.EXPAND, 10)
-		v_leftbox.AddSpacer(5)
+		v_leftbox.Add(h_ap, 0, wx.LEFT, 10)
+		v_leftbox.Add(h_set, 0, wx.LEFT | wx.EXPAND, 8)
+		v_leftbox.Add(h_button0, 0, wx.LEFT |wx.RIGHT | wx.EXPAND, 10)
+		v_leftbox.AddSpacer(6)
 		
 		leftbox2 = wx.StaticBox(self.p_wifi, label=_('Access point settings'))
 
-		self.share = wx.ComboBox(self.p_wifi, choices=self.available_share, style=wx.CB_READONLY, size=(120, 32))
+		self.share = wx.ComboBox(self.p_wifi, choices=self.available_share, style=wx.CB_READONLY, size=(120, -1))
 		self.share.Bind(wx.EVT_COMBOBOX, self.on_share)
 		self.share_label = wx.StaticText(self.p_wifi, label=_('Sharing Internet device'))
 
 		h_share = wx.BoxSizer(wx.HORIZONTAL)
-		h_share.Add(self.share, 0, wx.RIGHT | wx.EXPAND, 10)
-		h_share.Add(self.share_label, 0, wx.RIGHT | wx.UP | wx.EXPAND, 10)
+		h_share.Add(self.share, 0)
+		h_share.AddSpacer(5)
+		h_share.Add(self.share_label, 0, wx.TOP | wx.BOTTOM, 5)
 		
-		self.ssid = wx.TextCtrl(self.p_wifi, -1, size=(120, 32))
+		self.ssid = wx.TextCtrl(self.p_wifi, -1, size=(120, -1))
 		self.ssid_label = wx.StaticText(self.p_wifi, label=_('SSID \nmaximum 32 characters'))
 
 		h_ssid = wx.BoxSizer(wx.HORIZONTAL)
-		h_ssid.Add(self.ssid, 0, wx.RIGHT |wx.EXPAND, 10)
-		h_ssid.Add(self.ssid_label, 0, wx.RIGHT | wx.EXPAND, 10)
+		h_ssid.Add(self.ssid, 0)
+		h_ssid.AddSpacer(5)
+		h_ssid.Add(self.ssid_label, 0)
 
-		self.passw = wx.TextCtrl(self.p_wifi, -1, size=(120, 32))
+		self.passw = wx.TextCtrl(self.p_wifi, -1, size=(120, -1))
 		self.passw_label = wx.StaticText(self.p_wifi, label=_('Password \nminimum 8 characters required'))
 		
 		h_passw = wx.BoxSizer(wx.HORIZONTAL)
-		h_passw.Add(self.passw, 0, wx.RIGHT | wx.EXPAND, 10)
-		h_passw.Add(self.passw_label, 0, wx.RIGHT | wx.EXPAND, 10)
+		h_passw.Add(self.passw, 0)
+		#h_passw.Add(self.passw, 0, wx.TOP | wx.BOTTOM, 1)
+		h_passw.AddSpacer(5)
+		h_passw.Add(self.passw_label, 0)
 		
 		self.wifi_channel_list = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13','36','40','44','48','149','153','157','161','165']
-		self.wifi_channel = wx.ComboBox(self.p_wifi, choices=self.wifi_channel_list, style=wx.CB_READONLY, size=(120, 32))
+		self.wifi_channel = wx.ComboBox(self.p_wifi, choices=self.wifi_channel_list, style=wx.CB_READONLY, size=(120, -1))
 		self.wifi_channel_label = wx.StaticText(self.p_wifi, label=_('Channel'))
 
 		h_wifi_channel = wx.BoxSizer(wx.HORIZONTAL)
-		h_wifi_channel.Add(self.wifi_channel, 0, wx.RIGHT | wx.EXPAND, 10)
-		h_wifi_channel.Add(self.wifi_channel_label, 0, wx.RIGHT | wx.UP | wx.EXPAND, 10)
+		h_wifi_channel.Add(self.wifi_channel, 0)
+		h_wifi_channel.AddSpacer(5)
+		h_wifi_channel.Add(self.wifi_channel_label, 0, wx.TOP | wx.BOTTOM, 6)
 
 		self.wifi_button_apply = wx.Button(self.p_wifi, label=_('Apply')+' 2')
 		self.wifi_button_apply.Bind(wx.EVT_BUTTON, self.on_wifi_apply2)
@@ -755,12 +763,15 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		v_leftbox2 = wx.StaticBoxSizer(leftbox2, wx.VERTICAL)
 		v_leftbox2.AddSpacer(5)
 		v_leftbox2.Add(h_share, 0, wx.LEFT | wx.EXPAND, 10)
+		v_leftbox2.AddSpacer(5)
 		v_leftbox2.Add(h_ssid, 0, wx.LEFT | wx.EXPAND, 10)
+		v_leftbox2.AddSpacer(3)
 		v_leftbox2.Add(h_passw, 0, wx.LEFT | wx.EXPAND, 10)
+		v_leftbox2.AddSpacer(3)
 		v_leftbox2.Add(h_wifi_channel, 0, wx.LEFT | wx.EXPAND, 10)
 		v_leftbox2.AddStretchSpacer(1)
 		v_leftbox2.Add(h_button, 0, wx.LEFT | wx.EXPAND, 10)
-		v_leftbox2.AddSpacer(3)
+		v_leftbox2.AddSpacer(6)
 		
 		v_leftside = wx.BoxSizer(wx.VERTICAL)
 		v_leftside.Add(v_leftbox, 0, wx.LEFT | wx.EXPAND, 10)
@@ -783,11 +794,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		h_rbutton.Add(self.button_net_status, 0, wx.RIGHT | wx.EXPAND, 10)
 
 		v_rigthbox = wx.StaticBoxSizer(rigthbox, wx.VERTICAL)	
-		#v_rigthbox = wx.BoxSizer(wx.VERTICAL)
+		v_rigthbox.AddSpacer(5)		
 		v_rigthbox.Add(self.ip_info, 1, wx.LEFT | wx.EXPAND, 10)
-		v_rigthbox.AddSpacer(3)		
+		v_rigthbox.AddSpacer(6)		
 		v_rigthbox.Add(h_rbutton, 0, wx.LEFT | wx.EXPAND, 10)
-		v_rigthbox.AddSpacer(3)
+		v_rigthbox.AddSpacer(6)
 
 
 		h_box = wx.BoxSizer(wx.HORIZONTAL)
@@ -1294,7 +1305,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
 
 		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox1.Add(pypilot_mode_label, 0, wx.UP | wx.EXPAND, 5)
+		hbox1.Add(pypilot_mode_label, 0, wx.TOP | wx.BOTTOM, 5)
 		hbox1.Add(self.pypilot_mode, 0,  wx.LEFT | wx.EXPAND, 5)
 
 		hbox2 = wx.BoxSizer(wx.HORIZONTAL)
@@ -1308,18 +1319,18 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		hbox5.Add(self.reset_imu, 1, wx.ALL | wx.EXPAND, 5)
 
 		hbox3 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox3.Add(translation_rate_label, 0, wx.UP | wx.EXPAND, 10)
-		hbox3.Add(self.pypilot_translation_rate, 0, wx.ALL | wx.EXPAND, 5)
+		hbox3.Add(translation_rate_label, 0, wx.TOP | wx.BOTTOM, 5)
+		hbox3.Add(self.pypilot_translation_rate, 0,  wx.LEFT, 5)
 
 		vbox1 = wx.StaticBoxSizer(imu_box, wx.VERTICAL)
 		vbox1.Add(hbox2, 0, wx.ALL | wx.EXPAND, 5)
 		vbox1.Add(hbox5, 0, wx.ALL | wx.EXPAND, 5)
-		vbox1.Add(self.pypilot_signalk_translation, 0, wx.ALL | wx.EXPAND, 5)
+		vbox1.Add(self.pypilot_signalk_translation, 0, wx.ALL | wx.EXPAND, 10)
 		vbox1.Add(hbox3, 0, wx.ALL | wx.EXPAND, 5)
 
 		hbox4 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox4.Add(pypilot_webapp_port_label, 0, wx.UP | wx.LEFT | wx.EXPAND, 10)
-		hbox4.Add(self.pypilot_webapp_port, 0, wx.ALL | wx.EXPAND, 5)
+		hbox4.Add(pypilot_webapp_port_label, 0, wx.TOP | wx.BOTTOM, 5)
+		hbox4.Add(self.pypilot_webapp_port, 0, wx.LEFT, 5)
 
 		vbox2 = wx.StaticBoxSizer(connections_box, wx.VERTICAL)
 		vbox2.Add(serial_ports_label, 0, wx.ALL | wx.EXPAND, 5)
@@ -1342,8 +1353,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		sizer = wx.BoxSizer(wx.VERTICAL)
 		sizer.Add(hbox1, 0, wx.ALL | wx.EXPAND, 5)
 		sizer.Add(hbox8, 0, wx.ALL | wx.EXPAND, 0)
-		sizer.Add((0, 0), 1, wx.ALL | wx.EXPAND, 5)
-		sizer.Add(hbox9, 0, wx.ALL | wx.EXPAND, 0)
+		sizer.AddStretchSpacer(1)
+		sizer.Add(hbox9, 0, wx.EXPAND, 0)
 
 		self.p_pypilot.SetSizer(sizer)
 
@@ -1510,7 +1521,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.read_i2c()
 		self.read_pypilot()
 		self.start_sensors()
-		
+    
 	###########################################kplex
 
 	def page_kplex(self):
@@ -2270,49 +2281,62 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.cancel_changes_cre.Bind(wx.EVT_BUTTON, self.on_cancel_changes_credentials)
 
 		localmqtt = wx.BoxSizer(wx.HORIZONTAL)
-		localmqtt.Add(userlocalmqttlabel, 0, wx.ALL | wx.EXPAND, 3)
-		localmqtt.Add(self.userlocalmqtt, 1, wx.ALL | wx.EXPAND, 3)
-		localmqtt.Add(passlocalmqttlabel, 0, wx.ALL | wx.EXPAND, 3)
-		localmqtt.Add(self.passlocalmqtt, 1, wx.ALL | wx.EXPAND, 3)
+		localmqtt.AddSpacer(25)
+		localmqtt.Add(userlocalmqttlabel, 0, wx.TOP | wx.BOTTOM, 6)
+		localmqtt.Add(self.userlocalmqtt, 1, wx.LEFT, 5)
+		localmqtt.AddSpacer(10)
+		localmqtt.Add(passlocalmqttlabel, 0, wx.TOP | wx.BOTTOM, 6)
+		localmqtt.Add(self.passlocalmqtt, 1, wx.LEFT, 5)
 
 		remotemqtt0 = wx.BoxSizer(wx.HORIZONTAL)
-		remotemqtt0.Add(self.remotemqtt, 0, wx.ALL | wx.EXPAND, 3)
-		remotemqtt0.Add(serverremotemqttlabel, 0, wx.ALL | wx.EXPAND, 3)
-		remotemqtt0.Add(self.serverremotemqtt, 1, wx.ALL | wx.EXPAND, 3)
-		remotemqtt0.Add(portremotemqttlabel, 0, wx.ALL | wx.EXPAND, 3)
-		remotemqtt0.Add(self.portremotemqtt, 0, wx.ALL | wx.EXPAND, 3)
+		remotemqtt0.Add(self.remotemqtt, 0, wx.TOP | wx.BOTTOM, 2)
+		remotemqtt0.AddSpacer(10)		
+		remotemqtt0.Add(serverremotemqttlabel, 0, wx.TOP | wx.BOTTOM, 6)
+		remotemqtt0.Add(self.serverremotemqtt, 1, wx.LEFT, 5)
+		remotemqtt0.AddSpacer(10)		
+		remotemqtt0.Add(portremotemqttlabel, 0, wx.TOP | wx.BOTTOM, 6)
+		remotemqtt0.Add(self.portremotemqtt, 0, wx.LEFT, 5)
 
 		remotemqtt = wx.BoxSizer(wx.HORIZONTAL)
-		remotemqtt.Add(userremotemqttlabel, 0, wx.ALL | wx.EXPAND, 3)
-		remotemqtt.Add(self.userremotemqtt, 1, wx.ALL | wx.EXPAND, 3)
-		remotemqtt.Add(passremotemqttlabel, 0, wx.ALL | wx.EXPAND, 3)
-		remotemqtt.Add(self.passremotemqtt, 1, wx.ALL | wx.EXPAND, 3)
+		remotemqtt.AddSpacer(25)
+		remotemqtt.Add(userremotemqttlabel, 0, wx.TOP | wx.BOTTOM, 6)
+		remotemqtt.Add(self.userremotemqtt, 1, wx.LEFT, 5)
+		remotemqtt.AddSpacer(10)
+		remotemqtt.Add(passremotemqttlabel, 0, wx.TOP | wx.BOTTOM, 6)
+		remotemqtt.Add(self.passremotemqtt, 1, wx.LEFT, 5)
 
 		twitter0 = wx.BoxSizer(wx.HORIZONTAL)
-		twitter0.Add(self.twitter, 0, wx.ALL, 3)
-		twitter0.Add(twitteraccountlabel, 0, wx.ALL, 3)
-		twitter0.Add(self.twitteraccount, 1, wx.ALL | wx.EXPAND, 3)
+		twitter0.Add(self.twitter, 0, wx.TOP | wx.BOTTOM, 2)
+		twitter0.AddSpacer(10)
+		twitter0.Add(twitteraccountlabel, 0, wx.TOP | wx.BOTTOM, 6)
+		twitter0.Add(self.twitteraccount, 1, wx.LEFT, 5)
 
 		twitter1 = wx.BoxSizer(wx.HORIZONTAL)
-		twitter1.Add(apikeylabel, 0, wx.ALL, 3)
-		twitter1.Add(self.apikey, 1, wx.ALL | wx.EXPAND, 3)
-		twitter1.Add(apisecretkeylabel, 0, wx.ALL, 3)
-		twitter1.Add(self.apisecretkey, 1, wx.ALL | wx.EXPAND, 3)
+		twitter1.AddSpacer(25)
+		twitter1.Add(apikeylabel, 0, wx.TOP | wx.BOTTOM, 6)
+		twitter1.Add(self.apikey, 1, wx.LEFT, 5)
+		twitter1.AddSpacer(10)
+		twitter1.Add(apisecretkeylabel, 0, wx.TOP | wx.BOTTOM, 6)
+		twitter1.Add(self.apisecretkey, 1, wx.LEFT, 5)
 
 		twitter2 = wx.BoxSizer(wx.HORIZONTAL)
-		twitter2.Add(accesstokenlabel, 0, wx.ALL, 3)
-		twitter2.Add(self.accesstoken, 1, wx.ALL | wx.EXPAND, 3)
-		twitter2.Add(accesstokensecretlabel, 0, wx.ALL, 3)
-		twitter2.Add(self.accesstokensecret, 1, wx.ALL | wx.EXPAND, 3)
+		twitter2.AddSpacer(25)
+		twitter2.Add(accesstokenlabel, 0, wx.TOP | wx.BOTTOM, 6)
+		twitter2.Add(self.accesstoken, 1, wx.LEFT, 5)
+		twitter2.AddSpacer(10)
+		twitter2.Add(accesstokensecretlabel, 0, wx.TOP | wx.BOTTOM, 6)
+		twitter2.Add(self.accesstokensecret, 1, wx.LEFT, 5)
 
 		telegram0 = wx.BoxSizer(wx.HORIZONTAL)
-		telegram0.Add(self.telegram, 0, wx.ALL, 3)
-		telegram0.Add(tokenlabel, 0, wx.ALL, 3)
-		telegram0.Add(self.token, 1, wx.ALL | wx.EXPAND, 3)
+		telegram0.Add(self.telegram, 0, wx.TOP | wx.BOTTOM, 2)
+		telegram0.AddSpacer(10)
+		telegram0.Add(tokenlabel, 0, wx.TOP | wx.BOTTOM, 6)
+		telegram0.Add(self.token, 1, wx.LEFT, 5)
 
 		telegram1 = wx.BoxSizer(wx.HORIZONTAL)
-		telegram1.Add(userslabel, 0, wx.ALL, 3)
-		telegram1.Add(self.users, 1, wx.ALL | wx.EXPAND, 3)
+		telegram1.AddSpacer(25)
+		telegram1.Add(userslabel, 0, wx.TOP | wx.BOTTOM, 6)
+		telegram1.Add(self.users, 1, wx.LEFT, 5)
 
 		buttons = wx.BoxSizer(wx.HORIZONTAL)
 		buttons.Add(help_button, 0, wx.RIGHT, 5)
@@ -2323,16 +2347,23 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		buttons.Add(self.cancel_changes_cre, 0, wx.RIGHT | wx.LEFT, 5)
 
 		main = wx.BoxSizer(wx.VERTICAL)
-		main.Add(self.localmqtt, 0, wx.ALL | wx.EXPAND, 3)
+		main.Add(self.localmqtt, 0, wx.TOP | wx.BOTTOM, 2)
 		main.Add(localmqtt, 0, wx.ALL | wx.EXPAND, 0)
-		main.Add(remotemqtt0, 0, wx.ALL | wx.EXPAND, 0)
+		main.AddSpacer(10)		
+		main.Add(remotemqtt0, 0, wx.EXPAND, 0)
+		main.AddSpacer(3)		
 		main.Add(remotemqtt, 0, wx.ALL | wx.EXPAND, 0)
+		main.AddSpacer(10)		
 		main.Add(twitter0, 0, wx.ALL | wx.EXPAND, 0)
+		main.AddSpacer(3)		
 		main.Add(twitter1, 0, wx.ALL | wx.EXPAND, 0)
+		main.AddSpacer(3)		
 		main.Add(twitter2, 0, wx.ALL | wx.EXPAND, 0)
+		main.AddSpacer(10)		
 		main.Add(telegram0, 0, wx.ALL | wx.EXPAND, 0)
+		main.AddSpacer(3)		
 		main.Add(telegram1, 0, wx.ALL | wx.EXPAND, 0)
-		main.Add((0, 0), 1, wx.ALL, 0)
+		main.AddStretchSpacer(1)		
 		main.Add(buttons, 0, wx.ALL | wx.EXPAND, 5)
 
 		self.p_credentials.SetSizer(main)
@@ -2893,7 +2924,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		url = self.currentpath+"/docs/html/credentials/what_are_credentials.html"
 		webbrowser.open(url, new=2)
 
-	###########################################Actions
+	######################################Actions
 
 	def page_action(self):
 		self.list_triggers = CheckListCtrl(self.p_action, -1,90)
@@ -2922,8 +2953,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		delete_trigger = wx.Button(self.p_action, label=_('delete'))
 		delete_trigger.Bind(wx.EVT_BUTTON, self.on_delete_trigger)
 
+		self.available_operators = ['eq', 'neq', 'lt', 'lte', 'gt', 'gte','btwn', 'cont', 'true', 'false', 'null', 'nnull', 'empty', 'nempty']
 		self.available_conditions = ['=', '!=', '<', '<=', '>', '>=', _('is between'), _('contains'), _('is true'), ('is false'), _('is null'), _('is not null'), _('is empty'), _('is not empty')]
-		self.available_operators_select = wx.Choice(self.p_action, choices=self.available_conditions, style=wx.CB_READONLY)
+		#self.available_operators_select = wx.Choice(self.p_action, choices=self.available_conditions, style=wx.CB_READONLY)
 
 		self.list_conditions = wx.ListCtrl(self.p_action, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(-1,90))
 		self.list_conditions.InsertColumn(0, _('Conditions'), width= 100)
@@ -2992,7 +3024,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		hlistbox_but2.Add(delete_condition, 0, wx.ALL, 5)
 
 		vlistbox_cond = wx.BoxSizer(wx.VERTICAL)
-		vlistbox_cond.Add(self.available_operators_select, 0, wx.ALL | wx.EXPAND, 5)
+		vlistbox_cond.AddSpacer(35)
+		#vlistbox_cond.Add(self.available_operators_select, 0, wx.ALL | wx.EXPAND, 5)
 		vlistbox_cond.Add(hlistbox_but2, 0, wx.ALL, 0)
 
 		hlistbox2 = wx.BoxSizer(wx.HORIZONTAL)
@@ -3013,7 +3046,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		hbox = wx.BoxSizer(wx.HORIZONTAL)
 		hbox.Add(help_button, 0, wx.ALL, 0)
-		hbox.Add((0, 0), 1, wx.RIGHT | wx.LEFT, 5)
+		hbox.AddStretchSpacer(1)
 		hbox.Add(apply_changes, 0, wx.RIGHT | wx.LEFT, 5)
 		hbox.Add(cancel_changes, 0, wx.RIGHT | wx.LEFT, 5)
 
@@ -3277,20 +3310,29 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		dlg.Destroy()
 
 	def edit_conditions(self, e):
-		pass
+		#find connected condition
+		if self.selected_condition == -1: return
+		nodec = self.actions_flow_tree[self.selected_trigger]['conditions'][self.selected_condition]['condition_node_out_id']
+		typec = self.actions_flow_tree[self.selected_trigger]['conditions'][self.selected_condition]['operator']
+		name = 'c|'+nodec+'|'+typec
+		edit = ''
+		for i in self.conditions_flow_nodes:
+			if 'name' in i:
+				if i['name'] == name: 
+					edit = i['rules'][0]
+				self.edit_cond = i
+		self.edit_add_condition(edit)
 
 	def on_add_condition(self, e):
 		self.edit_add_condition(0)
 
 	def edit_add_condition(self, edit):
-		if self.selected_trigger == -1:
-			self.ShowStatusBarRED(_('Select a trigger.'))
-			return
-		operator = self.available_operators_select.GetSelection()
-		if operator != -1: dlg = Condition(self,edit)
-		else:
-			self.ShowStatusBarRED(_('Select an operator.'))
-			return
+		if not edit:
+			if self.selected_trigger == -1:
+				self.ShowStatusBarRED(_('Select a trigger.'))
+				return
+		dlg = Condition(self,edit)
+			
 		res = dlg.ShowModal()
 		if res == wx.OK:
 			if not edit:
@@ -3304,7 +3346,20 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				last = self.list_conditions.GetItemCount()-1
 				self.list_conditions.Select(last)
 			else:
-				pass
+				self.edit_cond['rules'] = dlg.ConditionNode['rules']
+				namesplit = self.edit_cond['name'].split('|')
+				operator = self.available_operators.index(self.edit_cond['rules'][0]['t'])
+				self.edit_cond['name'] = namesplit[0]+'|'+namesplit[1]+'|'+str(operator)
+
+				for i in self.actions_flow_tree[self.selected_trigger]['conditions']:
+					if 'condition_node_out_id' in i:
+						if i['condition_node_out_id'] == namesplit[1]:
+							i['operator'] = str(operator)
+						
+				self.on_print_conditions(0)
+				last = self.list_conditions.GetItemCount()-1
+				self.list_conditions.Select(last)
+
 		dlg.Destroy()
 
 	def edit_actions(self, e):

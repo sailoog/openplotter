@@ -11,19 +11,15 @@ if [[ "$response" = "uninstall" ]]; then
 		sudo rm /etc/network/interfaces.d/ap
 	fi
 
-	if [ -e /etc/network/interfaces.d/station ]
-	then
-		sudo rm /etc/network/interfaces.d/station
-	fi
-
 	if [ -e /etc/udev/rules.d/72-wireless.rules ]
 	then
 		sudo rm /etc/udev/rules.d/72-wireless.rules
 	fi
 
-	if [ -e /lib/dhcpcd/10-wpa_supplicant ]
+	if [ -e /lib/dhcpcd/dhcpcd-hooks/10-wpa_supplicant_wlan0 ]
 	then
-		sudo mv /lib/dhcpcd/10-wpa_supplicant /lib/dhcpcd/dhcpcd-hooks
+		sudo rm /lib/dhcpcd/dhcpcd-hooks/10-wpa_supplicant_wlan0
+		sudo cp ~/.config/openplotter/Network/dhcpcd-hooks/10-wpa_supplicant /lib/dhcpcd/dhcpcd-hooks
 	fi
 
 	if [ -e /etc/udev/rules.d/11-openplotter-usb0.rules ]
@@ -55,12 +51,12 @@ else
 	sudo cp hostapd/hostapd.conf /etc/hostapd
 	sudo cp network/interfaces /etc/network
 	sudo cp network/interfaces.d/ap /etc/network/interfaces.d
-	sudo cp network/interfaces.d/station /etc/network/interfaces.d
 	sudo cp udev/rules.d/72-wireless.rules /etc/udev/rules.d
 
 	if [ -e /lib/dhcpcd/dhcpcd-hooks/10-wpa_supplicant ]
 	then
-		sudo mv /lib/dhcpcd/dhcpcd-hooks/10-wpa_supplicant /lib/dhcpcd
+		sudo rm /lib/dhcpcd/dhcpcd-hooks/10-wpa_supplicant
+		sudo cp ~/.config/openplotter/Network/dhcpcd-hooks/10-wpa_supplicant_wlan0 /lib/dhcpcd/dhcpcd-hooks
 	fi
 
 	if [ ! -e /etc/udev/rules.d/11-openplotter-usb0.rules ]
