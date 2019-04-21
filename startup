@@ -141,7 +141,8 @@ class MyFrame(wx.Frame):
 		
 	def starting(self):
 
-		delay=int(self.conf.get('STARTUP', 'delay'))
+		delay=float(self.conf.get('STARTUP', 'delay'))
+		screensaver=self.conf.get('STARTUP', 'screensaver')
 		opencpn=self.conf.get('STARTUP', 'opencpn')
 		opencpn_no=self.conf.get('STARTUP', 'opencpn_no_opengl')
 		opencpn_fullscreen=self.conf.get('STARTUP', 'opencpn_fullscreen')
@@ -220,10 +221,21 @@ class MyFrame(wx.Frame):
 			else:
 				self.add_logger_data(_(' Done.'))
 				
+		if screensaver == '1':
+			subprocess.call(['xset', 's', 'noblank'])
+			subprocess.call(['xset', 's', 'off'])
+			subprocess.call(['xset', '-dpms'])
+			self.add_logger_data(_('\nScreen saver disabled.').decode('utf8'))
+		else:
+			subprocess.call(['xset', 's', 'blank'])
+			subprocess.call(['xset', 's', 'on'])
+			subprocess.call(['xset', '+dpms'])
+			self.add_logger_data(_('\nScreen saver enabled.').decode('utf8'))
+
 		if delay!=0:
 			self.add_logger_data(_('\nApplying ').decode('utf8')+str(delay)+_(' seconds of delay...').decode('utf8'))
 			time.sleep(delay)
-			self.add_logger_data(_(' Done.'))		
+			self.add_logger_data(_(' Done.'))	
 
 		subprocess.call(['pkill', '-f', '1w_d.py'])
 		self.add_logger_data(_('\nStarting 1W sensors...'))
@@ -380,10 +392,8 @@ class MyFrame(wx.Frame):
 					self.add_logger_data(' OpenPlotter '+vl+' '+sl+_(' is up to date.').decode('utf8'))
 
 		subprocess.call(['pkill', '-9', 'omxplayer'])
-		if play=='1':
-			if sound:
-				try: subprocess.Popen(['omxplayer', sound])
-				except: pass
+		if play == '1':
+			if sound: subprocess.Popen(['omxplayer', sound])
 
 		self.autoclose=time.time() + 60
 
