@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>How to collaborate &mdash; OpenPlotter 2.x.x documentation</title>
+  <title>Influxdb + Grafana &mdash; OpenPlotter 2.x.x documentation</title>
   
 
   
@@ -28,8 +28,7 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Downloading" href="../getting_started/downloading.html" />
-    <link rel="prev" title="How does it work?" href="how_does_it_work.html" /> 
+    <link rel="prev" title="Node-Red Dashboard" href="nodered_dashboard.html" /> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -83,13 +82,13 @@
             
             
               <p class="caption"><span class="caption-text">General</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="what_is_openplotter.html">What is OpenPlotter?</a></li>
-<li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="what_do_you_need.html">What do you need?</a></li>
-<li class="toctree-l1"><a class="reference internal" href="how_does_it_work.html">How does it work?</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">How to collaborate</a></li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../general/what_is_openplotter.html">What is OpenPlotter?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/features.html">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/what_do_you_need.html">What do you need?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/how_does_it_work.html">How does it work?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/how_to_collaborate.html">How to collaborate</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Getting started</span></p>
 <ul>
@@ -145,12 +144,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../credentials/encrypt.html">Encrypt</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Dashboards</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../dashboards/what_are_dashboards.html">What are dashboards?</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../dashboards/instrumentpanel.html">Instrument Panel</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../dashboards/kip.html">KIP</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../dashboards/nodered_dashboard.html">Node-Red Dashboard</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../dashboards/influxdb_grafana.html">Influxdb + Grafana</a></li>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="what_are_dashboards.html">What are dashboards?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="instrumentpanel.html">Instrument Panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kip.html">KIP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodered_dashboard.html">Node-Red Dashboard</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Influxdb + Grafana</a></li>
 </ul>
 
             
@@ -196,13 +195,13 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-      <li>How to collaborate</li>
+      <li>Influxdb + Grafana</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/general/how_to_collaborate.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/dashboards/influxdb_grafana.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -215,8 +214,51 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="how-to-collaborate">
-<h1>How to collaborate<a class="headerlink" href="#how-to-collaborate" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="influxdb-grafana">
+<h1>Influxdb + Grafana<a class="headerlink" href="#influxdb-grafana" title="Permalink to this headline">¶</a></h1>
+<p>How to activate data logging with signalk influxdb grafana</p>
+<p>OpenPlotter</p>
+<ol class="arabic simple">
+<li>Create database “boatdata”</li>
+</ol>
+<p>Signal K</p>
+<ol class="arabic simple">
+<li>call openplotter.local:3000 in a browser</li>
+<li>login signalk</li>
+<li>Server Plugin Config InfluxDb writer</li>
+<li>Check InfluDB writer Active</li>
+<li>Enter for example environment.outside.pressure in the field under “Path*”
+(Enter more path if you wish or don’t enter any path and switch Type of List to Black)</li>
+<li>Submit</li>
+</ol>
+<p>Grafana</p>
+<ol class="arabic">
+<li><p class="first">call openplotter.local:3001 in a browser</p>
+</li>
+<li><p class="first">login as user admin password admin and enter new password</p>
+</li>
+<li><p class="first">choose datasource InfluxDB</p>
+</li>
+<li><p class="first">settings</p>
+<blockquote>
+<div><p>URL: <a class="reference external" href="http://openplotter.local:8086">http://openplotter.local:8086</a></p>
+<p>Database: boatdata</p>
+</div></blockquote>
+</li>
+<li><p class="first">Button Save &amp; Test (there should be a green band Data source is working)</p>
+</li>
+<li><p class="first">Click the “+” symbol on the menu on the left side  Create Dashboard</p>
+</li>
+<li><p class="first">Add Query</p>
+</li>
+<li><p class="first">In line FROM click on select measurement (there should be a list of saved signalk path)</p>
+</li>
+<li><p class="first">Click on the clock symbol top right menu and select last 5 minutes (now you should see a graf)</p>
+</li>
+<li><p class="first">Click on save symbol</p>
+</li>
+</ol>
+<p>Now play with grafana.</p>
 </div>
 
 
@@ -227,10 +269,8 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../getting_started/downloading.html" class="btn btn-neutral float-right" title="Downloading" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
-      
-        <a href="how_does_it_work.html" class="btn btn-neutral" title="How does it work?" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="nodered_dashboard.html" class="btn btn-neutral" title="Node-Red Dashboard" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

@@ -73,6 +73,7 @@ class MainFrame(wx.Frame):
 		self.p_credentials = wx.Panel(self.nb)
 		self.p_mqtt = wx.Panel(self.nb)
 		self.p_startup = wx.Panel(self.nb)
+		self.p_dashboards = wx.Panel(self.nb)
 		self.nb.AddPage(self.p_serial, _('Serial'))
 		self.nb.AddPage(self.p_kplex, 'Kplex')
 		self.nb.AddPage(self.p_pypilot, _('pypilot'))
@@ -84,6 +85,7 @@ class MainFrame(wx.Frame):
 		self.nb.AddPage(self.p_1w, '1W')
 		self.nb.AddPage(self.p_spi, 'SPI')
 		self.nb.AddPage(self.p_startup, _('Settings'))
+		self.nb.AddPage(self.p_dashboards, _('Dashboards'))
 		sizer = wx.BoxSizer()
 		sizer.Add(self.nb, 1, wx.EXPAND)
 		self.p.SetSizer(sizer)
@@ -197,6 +199,7 @@ class MainFrame(wx.Frame):
 		self.page_spi()
 		self.page_credentials()
 		self.page_startup()
+		self.page_dashboards()
 
 		self.manual_settings = ''
 		self.read_kplex_conf()
@@ -212,6 +215,7 @@ class MainFrame(wx.Frame):
 		self.read_n2k()
 		self.read_triggers()
 		self.print_credentials()
+		self.read_dashboards()
 		#self.when_closed(0x001)
 
 	###########################################general functions
@@ -667,6 +671,136 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def on_help_settngs(self, e):
 		url = self.currentpath+"/docs/html/getting_started/settings.html"
+		webbrowser.open(url, new=2)
+
+	###########################################dashboards
+
+	def page_dashboards(self):
+		instrumentpanel = wx.StaticBox(self.p_dashboards, label=_('Instrument Panel'))
+		button_instrumentpanel = wx.Button(self.p_dashboards, label=_('Edit/Show'))
+		button_instrumentpanel.Bind(wx.EVT_BUTTON, self.on_instrumentpanel)
+
+		kip = wx.StaticBox(self.p_dashboards, label=_('KIP'))
+		button_kip = wx.Button(self.p_dashboards, label=_('Edit/Show'))
+		button_kip.Bind(wx.EVT_BUTTON, self.on_kip)
+
+		nodered = wx.StaticBox(self.p_dashboards, label=_('Node-Red Dashboard'))
+		button_edit_nodered = wx.Button(self.p_dashboards, label=_('Edit'))
+		button_edit_nodered.Bind(wx.EVT_BUTTON, self.on_edit_nodered)
+		button_show_nodered = wx.Button(self.p_dashboards, label=_('Show'))
+		button_show_nodered.Bind(wx.EVT_BUTTON, self.on_show_nodered)
+
+		influxgrafana = wx.StaticBox(self.p_dashboards, label=_('Influxdb + Grafana'))
+		self.enable_influxgrafana = wx.CheckBox(self.p_dashboards, label=_('Create database "boatdata"'))
+		button_edit_influxgrafana = wx.Button(self.p_dashboards, label=_('Add Signal K paths'))
+		button_edit_influxgrafana.Bind(wx.EVT_BUTTON, self.on_edit_influxgrafana)
+		button_show_influxgrafana = wx.Button(self.p_dashboards, label=_('Edit/Show'))
+		button_show_influxgrafana.Bind(wx.EVT_BUTTON, self.on_show_influxgrafana)
+
+		help_button = wx.BitmapButton(self.p_dashboards, bitmap=self.help_bmp, size=(self.help_bmp.GetWidth()+40, self.help_bmp.GetHeight()+10))
+		help_button.Bind(wx.EVT_BUTTON, self.on_help_dashboards)
+
+		apply_changes = wx.Button(self.p_dashboards, label=_('Apply changes'))
+		apply_changes.Bind(wx.EVT_BUTTON, self.on_apply_changes_dashboards)
+		cancel_changes = wx.Button(self.p_dashboards, label=_('Cancel changes'))
+		cancel_changes.Bind(wx.EVT_BUTTON, self.on_cancel_changes_dashboards)
+
+		h_instrumentpanel = wx.StaticBoxSizer(instrumentpanel, wx.HORIZONTAL)
+		h_instrumentpanel.Add(button_instrumentpanel, 0, wx.ALL, 10)
+
+		h_kip = wx.StaticBoxSizer(kip, wx.HORIZONTAL)
+		h_kip.Add(button_kip, 0, wx.ALL, 10)
+
+		h_nodered = wx.StaticBoxSizer(nodered, wx.HORIZONTAL)
+		h_nodered.Add(button_edit_nodered, 0, wx.ALL, 10)
+		h_nodered.Add(button_show_nodered, 0, wx.ALL, 10)
+
+		v_influxgrafana = wx.StaticBoxSizer(influxgrafana, wx.VERTICAL)
+		v_influxgrafana.Add(self.enable_influxgrafana, 0, wx.ALL, 10)
+		v_influxgrafana.Add(button_edit_influxgrafana, 0, wx.ALL, 10)
+		v_influxgrafana.Add(button_show_influxgrafana, 0, wx.ALL, 10)
+
+		vleft = wx.BoxSizer(wx.VERTICAL)
+		vleft.AddSpacer(5)
+		vleft.Add(h_instrumentpanel, 0, wx.ALL | wx.EXPAND, 0)
+		vleft.AddSpacer(10)
+		vleft.Add(h_kip, 0, wx.ALL | wx.EXPAND, 0)
+		vleft.AddSpacer(10)
+		vleft.Add(h_nodered, 0, wx.ALL | wx.EXPAND, 0)
+
+		vright = wx.BoxSizer(wx.VERTICAL)
+		vright.AddSpacer(5)
+		vright.Add(v_influxgrafana, 0, wx.ALL | wx.EXPAND, 0)
+
+		hboth = wx.BoxSizer(wx.HORIZONTAL)
+		hboth.Add(vleft, 1, wx.ALL | wx.EXPAND, 5)
+		hboth.Add(vright, 1, wx.ALL | wx.EXPAND, 5)
+
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(help_button, 0, wx.ALL, 0)
+		hbox.Add((0, 0), 1, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add(apply_changes, 0, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add(cancel_changes, 0, wx.RIGHT | wx.LEFT, 5)
+
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		vbox.Add(hboth, 0, wx.ALL | wx.EXPAND, 0)
+		vbox.Add((0, 0), 1, wx.ALL | wx.EXPAND, 5)
+		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 5)
+
+		self.p_dashboards.SetSizer(vbox)
+
+
+	def read_dashboards(self):
+		if self.conf.get('DASHBOARDS', 'database') == '1': self.enable_influxgrafana.SetValue(True)
+		else: self.enable_influxgrafana.SetValue(False)
+
+	def on_instrumentpanel(self, e):
+		url = "http://openplotter.local:3000/@signalk/instrumentpanel/"
+		webbrowser.open(url, new=2)
+
+	def on_kip(self, e):
+		url = "http://openplotter.local:3000/@mxtommy/kip/"
+		webbrowser.open(url, new=2)
+
+	def on_edit_nodered(self, e):
+		url = "http://openplotter.local:3000/plugins/signalk-node-red/redAdmin/"
+		webbrowser.open(url, new=2)
+
+	def on_show_nodered(self, e):
+		url = "http://openplotter.local:3000/plugins/signalk-node-red/redApi/ui/"
+		webbrowser.open(url, new=2)
+
+	def on_edit_influxgrafana(self, e):
+		url = "http://openplotter.local:3000/admin/#/serverConfiguration/plugins/signalk-to-influxdb"
+		webbrowser.open(url, new=2)
+
+	def on_show_influxgrafana(self, e):
+		url = "http://openplotter.local:3001"
+		webbrowser.open(url, new=2)
+
+	def on_apply_changes_dashboards(self, e):
+		if self.enable_influxgrafana.GetValue():
+			subprocess.call(['sudo', 'systemctl', 'unmask', 'influxdb.service'])
+			subprocess.call(['sudo', 'systemctl', 'enable', 'influxdb.service'])
+			subprocess.call(['sudo', 'systemctl', 'start', 'influxdb'])
+			subprocess.call(['sudo', 'systemctl', 'enable', 'grafana-server.service'])
+			subprocess.call(['sudo', 'systemctl', 'start', 'grafana-server'])
+			subprocess.call(['bash', self.currentpath+'/classes/influxdb_set.sh', 'y'])
+			self.conf.set('DASHBOARDS', 'database', '1')
+		else:
+			subprocess.call(['sudo', 'systemctl', 'disable', 'influxdb.service'])
+			subprocess.call(['sudo', 'systemctl', 'stop', 'influxdb'])
+			subprocess.call(['sudo', 'systemctl', 'disable', 'grafana-server.service'])
+			subprocess.call(['sudo', 'systemctl', 'stop', 'grafana-server'])
+			subprocess.call(['bash', self.currentpath+'/classes/influxdb_set.sh', 'n'])
+			self.conf.set('DASHBOARDS', 'database', '0')
+		self.ShowStatusBarGREEN(_('Dashboards changes saved'))
+
+	def on_cancel_changes_dashboards(self, e):
+		self.read_dashboards()
+
+	def on_help_dashboards(self, e):
+		url = self.currentpath+"/docs/html/dashboards/what_are_dashboards.html"
 		webbrowser.open(url, new=2)
 
 	###########################################Network
