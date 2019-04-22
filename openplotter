@@ -692,7 +692,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		influxgrafana = wx.StaticBox(self.p_dashboards, label=_('Influxdb + Grafana'))
 		self.enable_influxgrafana = wx.CheckBox(self.p_dashboards, label=_('Create database "boatdata"'))
-		retencion_label = wx.StaticText(self.p_dashboards, label=_('Retencion time'))
+		retencion_label = wx.StaticText(self.p_dashboards, label=_('Retention time'))
 		self.retencion_time = wx.TextCtrl(self.p_dashboards)
 		retencion_units = [_('hour'),_('day'),_('week')]
 		self.retencion_units2 = ['h','d','w']
@@ -813,7 +813,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			subprocess.call(['sudo', 'systemctl', 'enable', 'grafana-server.service'])
 			subprocess.call(['sudo', 'systemctl', 'start', 'grafana-server'])
 			self.conf.set('DASHBOARDS', 'database', '1')
-			seconds = 20
+			seconds = 25
 			for i in range(seconds, 0, -1):
 				self.ShowStatusBarRED(_('Creating database and starting Influxdb/Grafana services... ')+str(i))
 				time.sleep(1)

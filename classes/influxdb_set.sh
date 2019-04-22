@@ -14,10 +14,10 @@ if [[ "$response" =~ ^([yY][eE][sS]|[yY])+$ ]]; then
 		sudo sed -i "s/${oldline}/${newline}/g" "$file1"
 	fi
 	if [ "$dbexist" == "boatdata" ]; then
-		curl -X POST http://localhost:8086/query?q=ALTER+RETENTION+POLICY+boatdatapolicy+ON+boatdata+DURATION+$duration+REPLICATION+1
+		curl -X POST http://localhost:8086/query?q=ALTER+RETENTION+POLICY+boatdatapolicy+ON+boatdata+DURATION+$duration+REPLICATION+1+DEFAULT
 	else
 		curl -X POST http://localhost:8086/query?q=CREATE+DATABASE+boatdata
-		curl -X POST http://localhost:8086/query?q=CREATE+RETENTION+POLICY+boatdatapolicy+ON+boatdata+DURATION+$duration+REPLICATION+1
+		curl -X POST http://localhost:8086/query?q=CREATE+RETENTION+POLICY+boatdatapolicy+ON+boatdata+DURATION+$duration+REPLICATION+1+DEFAULT
 	fi
 else
 	if ! [ "$oldline" = "$newline2" ]; then
