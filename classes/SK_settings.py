@@ -19,11 +19,11 @@ from conf import Conf
 
 
 class SK_settings:
+
 	def __init__(self):
 
 		self.conf = Conf()
 		self.home = self.conf.home
-		
 		self.setting_file = self.home+'/.signalk/settings.json'
 		self.load()
 		
@@ -32,7 +32,9 @@ class SK_settings:
 		if os.path.isfile(self.setting_file):
 			with open(self.setting_file) as data_file:
 				self.data = ujson.load(data_file)
-		else: self.data = {}
+		else: 
+			self.data = {}
+			print 'Error: file ~/.signalk/settings.json does not exists'
 
 		self.sslport = -1
 		if 'sslport' in self.data: self.sslport = self.data['sslport']
@@ -40,9 +42,7 @@ class SK_settings:
 		if 'port' in self.data: self.port = self.data['port']
 		self.ssl = -1
 		if 'ssl' in self.data: self.ssl = self.data['ssl']
-		
 		if (self.ssl == -1 or self.ssl == False) and self.port == -1: self.port = 3000 
-		
 		self.http = 'http://'
 		self.ws = 'ws://'
 		self.aktport = self.port
@@ -50,96 +50,80 @@ class SK_settings:
 			self.http = 'https://'
 			self.ws = 'wss://'
 			self.aktport = self.sslport
-			
-		self.ip = 'localhost'
-				
+		self.ip = 'localhost'	
 		self.http_address = self.http+self.ip+':'+str(self.aktport)
 		
-		#check defaults
 		write = False
+
+		#check defaults
 		OPcan = False
 		OPpypilot = False
-		OPkplex = False
-		OPwifi = False
-		OPserial = False
-		OPnotifications = False
-		OPsensors = False
-		if 'pipedProviders' in self.data:
-			try:
+		OPserial = False	#TODO afegir funcio per activar la conexio de dispositius serie
+		OPsensors = False 	#TODO afegir funcio per activar la conexio dels sensors
+		OPsdr_ais = False
+
+		try:
+			if 'pipedProviders' in self.data:
 				for i in self.data['pipedProviders']:
-					if i['id'] == 'OPcan': 
-						OPcan = True
-					elif i['id'] == 'OPpypilot': 
-						OPpypilot = True
-					elif i['id'] == 'OPkplex': 
-						OPkplex = True
-						if not i['enabled']: 
-							i['enabled'] = True
-							write = True
-					elif i['id'] == 'OPwifi': 
-						OPwifi = True
-						if not i['enabled']: 
-							i['enabled'] = True
-							write = True
-					elif i['id'] == 'OPserial': 
-						OPserial = True
-						if not i['enabled']: 
-							i['enabled'] = True
-							write = True
-					elif i['id'] == 'OPnotifications': 
-						OPnotifications = True
-						if not i['enabled']: 
-							i['enabled'] = True
-							write = True
-					elif i['id'] == 'OPsensors': 
-						OPsensors = True
-						if not i['enabled']: 
-							i['enabled'] = True
-							write = True
-			except:
-				print 'Error parsing setting.json'
+					if i['id'] == 'OPcan': OPcan = True
+					elif i['id'] == 'OPpypilot': OPpypilot = True
+					elif i['id'] == 'OPserial': OPserial = True
+					elif i['id'] == 'OPsensors': OPsensors = True
+					elif i['id'] == 'OPsdr_ais': OPsdr_ais = True
+		except: print 'Error: error parsing Signal K settings defaults'
 
-		if not OPcan: self.data['pipedProviders'].append({'pipeElements': [{'type': 'providers/simple', 'options': {'logging': False, 'type': 'NMEA2000', 'subOptions': {'device': '/dev/ttyOP_', 'type': 'ngt-1'}}}], 'enabled': False, 'id': 'OPcan'})
-		if not OPpypilot: self.data['pipedProviders'].append({'pipeElements': [{'type': 'providers/simple', 'options': {'logging': False, 'type': 'NMEA0183', 'subOptions': {'host': 'localhost', 'type': 'tcp', 'port': '20220'}}}], 'enabled': True, 'id': 'OPpypilot'})
-		if not OPkplex: self.data['pipedProviders'].append({'pipeElements': [{'type': 'providers/simple', 'options': {'logging': False, 'type': 'NMEA0183', 'subOptions': {'host': 'localhost', 'type': 'tcp', 'port': '30330'}}}], 'enabled': True, 'id': 'OPkplex'})
-		if not OPwifi: self.data['pipedProviders'].append({'pipeElements': [{'type': 'providers/simple', 'options': {'logging': False, 'type': 'SignalK', 'subOptions': {'type': 'udp', 'port': '55561'}}}], 'enabled': True, 'id': 'OPwifi'})
-		if not OPserial: self.data['pipedProviders'].append({'pipeElements': [{'type': 'providers/simple', 'options': {'logging': False, 'type': 'SignalK', 'subOptions': {'type': 'udp', 'port': '55559'}}}], 'enabled': True, 'id': 'OPserial'})
-		if not OPnotifications: self.data['pipedProviders'].append({'pipeElements': [{'type': 'providers/simple', 'options': {'logging': False, 'type': 'SignalK', 'subOptions': {'type': 'udp', 'port': '55558'}}}], 'enabled': True, 'id': 'OPnotifications'})
-		if not OPsensors: self.data['pipedProviders'].append({'pipeElements': [{'type': 'providers/simple', 'options': {'logging': False, 'type': 'SignalK', 'subOptions': {'type': 'udp', 'port': '55557'}}}], 'enabled': True, 'id': 'OPsensors'})
+		if not OPcan: 
+			self.data['pipedProviders'].append({'pipeElements': [{'type': 'providers/simple', 'options': {'logging': False, 'type': 'NMEA2000', 'subOptions': {'device': '/dev/ttyOP_', 'type': 'ngt-1'}}}], 'enabled': False, 'id': 'OPcan'})
+			write = True
+		if not OPpypilot: 
+			self.data['pipedProviders'].append({'pipeElements': [{'type': 'providers/simple', 'options': {'logging': False, 'type': 'NMEA0183', 'subOptions': {'host': 'localhost', 'type': 'tcp', 'port': '20220'}}}], 'enabled': False, 'id': 'OPpypilot'})
+			write = True
+		if not OPserial: 
+			self.data['pipedProviders'].append({'pipeElements': [{'type': 'providers/simple', 'options': {'logging': False, 'type': 'SignalK', 'subOptions': {'type': 'udp', 'port': '55559'}}}], 'enabled': False, 'id': 'OPserial'})
+			write = True
+		if not OPsensors: 
+			self.data['pipedProviders'].append({'pipeElements': [{'type': 'providers/simple', 'options': {'logging': False, 'type': 'SignalK', 'subOptions': {'type': 'udp', 'port': '55557'}}}], 'enabled': False, 'id': 'OPsensors'})
+			write = True
+		if not OPsdr_ais: 
+			self.data['pipedProviders'].append({'pipeElements': [{'type': 'providers/simple', 'options': {'logging': False, 'type': 'NMEA0183', 'subOptions': {'type': 'udp', 'port': '10110'}}}], 'enabled': False, 'id': 'OPsdr_ais'})
+			write = True
 
-		#check can devices
-		self.OPcan=''
-		self.ngt1_enabled=-1
-		self.ngt1_device=''
-		self.ngt1js_enabled=-1
-		self.canbus_enabled=-1
-		self.canbus_interface=''
-		self.pypilot_enabled=-1
+		#check connections
+		self.OPcan = ''
+		self.ngt1_enabled = -1
+		self.ngt1_device = ''
+		self.ngt1js_enabled = -1
+		self.canbus_enabled = -1
+		self.canbus_interface = ''
+		self.pypilot_enabled = -1
+		self.sdr_ais_enabled = -1
 		count = 0
-		if 'pipedProviders' in self.data:
-			try:
+		try:
+			if 'pipedProviders' in self.data:
 				for i in self.data['pipedProviders']:
 					if 'type' in i['pipeElements'][0]['options']['subOptions']:
 						if i['pipeElements'][0]['options']['subOptions']['type'] == 'ngt-1':
-							self.ngt1_enabled=i['enabled']
-							self.OPcan=count
-							self.ngt1_device=i['pipeElements'][0]['options']['subOptions']['device']
+							self.ngt1_enabled = i['enabled']
+							self.OPcan = count
+							self.ngt1_device = i['pipeElements'][0]['options']['subOptions']['device']
 						elif i['pipeElements'][0]['options']['subOptions']['type'] == 'ngt-1-canboatjs':
-							self.ngt1js_enabled=i['enabled']
-							self.OPcan=count
+							self.ngt1js_enabled = i['enabled']
+							self.OPcan = count
 							self.ngt1_device=i['pipeElements'][0]['options']['subOptions']['device']
 						elif i['pipeElements'][0]['options']['subOptions']['type'][0:6] == 'canbus':
-							self.canbus_enabled=i['enabled']
-							self.OPcan=count
-							self.canbus_interface=i['pipeElements'][0]['options']['subOptions']['interface']
+							self.canbus_enabled = i['enabled']
+							self.OPcan = ount
+							self.canbus_interface = i['pipeElements'][0]['options']['subOptions']['interface']
 						elif i['id'] == 'OPpypilot':
-							self.pypilot_enabled=i['enabled']
-							self.pypilot=count
+							self.pypilot_enabled = i['enabled']
+							self.pypilot = count
+						elif i['id'] == 'OPsdr_ais':
+							self.sdr_ais_enabled = i['enabled']
+							self.sdr_ais = count
 					count+=1
-			except:
-				print 'Error parsing setting.json'
+		except: print 'Error: error parsing Signal K settings connections'
 
-		if write or not OPcan or not OPpypilot or not OPkplex or not OPwifi or not OPserial or not OPnotifications or not OPsensors: self.write_settings()
+		if write: self.write_settings()
 				
 	def set_ngt1_device(self,device,speed):
 		self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['device'] = device
@@ -180,14 +164,6 @@ class SK_settings:
 				pass
 		self.enable_disable_all(enable)
 
-	def set_pypilot_enable(self,enable):
-		if self.pypilot_enabled != -1:
-			if enable == 1:
-				self.data['pipedProviders'][self.pypilot]['enabled']=True
-			elif enable == 0:
-				self.data['pipedProviders'][self.pypilot]['enabled']=False
-			self.write_settings()
-
 	def set_canbus_enable(self,enable):
 		if self.canbus_enabled == -1:
 			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['type'] = 'canbus-canboatjs'
@@ -206,6 +182,22 @@ class SK_settings:
 			self.data['pipedProviders'][self.OPcan]['enabled']=False
 		self.write_settings()
 
+	def set_pypilot_enable(self,enable):
+		if self.pypilot_enabled != -1:
+			if enable == 1:
+				self.data['pipedProviders'][self.pypilot]['enabled']=True
+			elif enable == 0:
+				self.data['pipedProviders'][self.pypilot]['enabled']=False
+			self.write_settings()
+
+	def set_sdr_ais_enable(self,enable):
+		if self.sdr_ais_enabled != -1:
+			if enable == 1:
+				self.data['pipedProviders'][self.sdr_ais]['enabled']=True
+			elif enable == 0:
+				self.data['pipedProviders'][self.sdr_ais]['enabled']=False
+			self.write_settings()
+
 	def write_settings(self):
 		data = ujson.dumps(self.data, indent=4, sort_keys=True)
 		try:
@@ -219,6 +211,5 @@ class SK_settings:
 			subprocess.call(['sudo', 'systemctl', 'start', 'signalk.socket'])
 			subprocess.call(['sudo', 'systemctl', 'start', 'signalk.service'])
 			self.load()
-		except:
-			print 'Error saving setting.json'
+		except: print 'Error: error saving Signal K settings'
 			

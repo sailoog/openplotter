@@ -49,3 +49,14 @@ Welcome to OpenPlotter's documentation!
    credentials/twitter
    credentials/telegram
    credentials/encrypt
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Dashboards
+   :name: sec-dashboards
+
+   dashboards/what_are_dashboards
+   dashboards/instrumentpanel
+   dashboards/kip
+   dashboards/nodered_dashboard
+   dashboards/influxdb_grafana
