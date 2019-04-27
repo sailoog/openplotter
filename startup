@@ -20,6 +20,7 @@ from shutil import copyfile
 from classes.conf import Conf
 from classes.language import Language
 from classes.SK_settings import SK_settings
+from classes.opencpnSettings import opencpnSettings
 
 class MyFrame(wx.Frame):
 		
@@ -75,8 +76,8 @@ class MyFrame(wx.Frame):
 		self.SetIcon(self.icon)
 
 		self.logger = wx.TextCtrl(panel, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_DONTWRAP|wx.LC_SORT_ASCENDING)
-		self.warnings = wx.TextCtrl(panel, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_DONTWRAP|wx.LC_SORT_ASCENDING)
-
+		self.warnings = wx.TextCtrl(panel, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_DONTWRAP|wx.LC_SORT_ASCENDING|wx.TE_RICH)
+		self.warnings.SetForegroundColour(wx.RED)
 
 		self.button_close =wx.Button(panel, label=_('Close'), pos=(555, 160))
 		self.button_close.Bind(wx.EVT_BUTTON, self.OnClose_button)
@@ -177,11 +178,21 @@ class MyFrame(wx.Frame):
 
 		subprocess.call(['pkill', '-f', '/openplotter/openplotter'])
 
-		self.add_logger_data(_('\nChecking Signal K defaults...'))
+		self.add_logger_data(_('\nChecking Signal K connections...'))
 		self.SK_settings = SK_settings()
 		self.check_start('signalk-server')
 		
-		#TODO comprobar si la connexió per defecte a opencpn esta activa
+		self.add_logger_data(_('\nChecking OpenCPN connections...'))
+		self.opencpnSettings = opencpnSettings()
+		opencpnConnection = self.opencpnSettings.getConnectionState()
+		if not opencpnConnection:
+			self.add_warnings_data(_('\n\nThe default OpenCPN connection is missing: input TCP localhost:10110.\nSome features may not work as expected.'))
+			self.add_logger_data(_(' See warning.'))
+		elif opencpnConnection == 'disabled': 
+			self.add_warnings_data(_('\n\nThe default OpenCPN connection is disabled: input TCP localhost:10110.\nSome features may not work as expected.'))
+			self.add_logger_data(_(' See warning.'))
+		else: self.add_logger_data(_(' Done.'))
+
 		#TODO cada vegada comprovem que existeixen tots els nodes de les credencials
 
 		if platform.machine()[0:3]=='arm':
@@ -280,8 +291,8 @@ class MyFrame(wx.Frame):
 			subprocess.Popen(['rtl_ais', '-R', '-p', ppm])
 			self.check_start('rtl_ais')
 			if self.SK_settings.sdr_ais_enabled != True:
-				self.SK_settings.set_sdr_ais_enable(True)
 				self.add_logger_data(_('Enabling Signal K connection for SDR AIS...'))
+				self.SK_settings.set_sdr_ais_enable(True)
 				self.check_start('signalk-server')
 
 		if d800x480=='1':
@@ -301,7 +312,7 @@ class MyFrame(wx.Frame):
 				self.add_logger_data(_(' Done.'))
 				break
 
-		subprocess.call(['pkill', '-9', 'opencpn'])
+		subprocess.call(['pkill', '-15', 'opencpn'])
 		if opencpn=='1':
 			self.add_logger_data(_('\nStarting OpenCPN...'))
 			opencpn_commands = ['opencpn']
