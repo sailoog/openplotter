@@ -22,6 +22,7 @@ sys.path.append(op_folder+'/classes')
 from conf import Conf
 from language import Language
 from SK_settings import SK_settings
+from opencpnSettings import opencpnSettings
 
 class MyFrame(wx.Frame):
 		
@@ -33,6 +34,7 @@ class MyFrame(wx.Frame):
 			self.help_bmp = wx.Bitmap(self.op_folder + "/static/icons/help-browser.png", wx.BITMAP_TYPE_ANY)
 			Language(self.conf)
 			self.SK_settings = SK_settings()
+			self.opencpnSettings = opencpnSettings()
 
 			wx.Frame.__init__(self, None, title=_('SDR receiver'), size=(710,460))
 			
@@ -196,13 +198,17 @@ class MyFrame(wx.Frame):
 				self.on_saveppm(0)
 				self.SK_settings.set_sdr_ais_enable(True)
 				msg = _('SDR-AIS reception enabled')
+				opencpn = self.opencpnSettings.getConnectionState()
+				if not opencpn: 
+					msg = _('Failed. The default OpenCPN connection is missing: input TCP localhost:10110')
+				elif opencpn == 'disabled': 
+					msg = _('Failed. The default OpenCPN connection is disabled: input TCP localhost:10110')
 			else:
 				self.enable_sdr_controls()
 				self.conf.set('AIS-SDR', 'enable', '0')
 				self.SK_settings.set_sdr_ais_enable(False)
 				msg = _('SDR-AIS reception disabled')
 			self.SetStatusText(msg)
-			#TODO comprobar si la connexió per defecte a opencpn esta activa
 
 		def test_gain(self,event):
 			self.kill_sdr()
