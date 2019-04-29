@@ -3146,7 +3146,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.list_actions.InsertColumn(2, _(' '), width= 100)
 		self.list_actions.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_select_actions)
 		self.list_actions.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.on_deselected_actions)
-		self.list_actions.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_actions)
+		self.list_actions.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit_actions)
 
 		self.available_actions = [
 		_('Set Signal K key'),
@@ -3530,16 +3530,46 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		dlg.Destroy()
 
-	def edit_actions(self, e):
+	def on_edit_actions(self, e):
+		'''
+		#find connected action
+		if self.selected_action == -1: return
+		node = self.actions_flow_tree[self.selected_trigger]['conditions'][self.selected_condition]['actions']
+		nodea = node[self.selected_action]['action_node_out_id']
+		typea = node[self.selected_action]['type']
+		name = 'a|'+nodea+'|'+typea
+		edit = ''
+		for i in self.actions_flow_tree:
+			print 1,i
+			if 'name' in i:
+				print 2
+				if i['name'] == name: 
+					print 3
+					edit.append(i)
+				self.edit_cond = i
+		
+		print 'edit'
+		for i in edit:
+			print i
+		
+		print 'self.actions_flow_tree'
+		for i in self.actions_flow_tree:
+			print i
+				
+		self.edit_add_action(edit)
+		'''
 		pass
 
 	def on_add_action(self, e):
 		self.edit_add_action(0)
 
 	def edit_add_action(self, edit):
-		if self.selected_condition == -1:
-			self.ShowStatusBarRED(_('Select a condition.'))
-			return
+		if not edit:
+			if self.selected_condition == -1:
+				self.ShowStatusBarRED(_('Select a condition.'))
+				return
+		#else:
+		#	self.available_actions_select.SetSelection()
 		action = self.available_actions_select.GetSelection()
 		if action == 0: dlg = ActionSetSignalkKey(self,edit)
 		elif action == 1: dlg = ActionSetGPIO(self,edit)
@@ -3585,6 +3615,32 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				last = self.list_actions.GetItemCount()-1
 				self.list_actions.Select(last)
 			else:
+				'''
+			if not edit:
+				self.conditions_flow_nodes.append(dlg.ConditionNode)
+				items = dlg.ConditionNode['name'].split('|')
+				self.actions_flow_tree[self.selected_trigger]['conditions'].append({"condition_node_out_id": items[1],"operator": items[2],"actions": []})
+				trigger_id = self.actions_flow_tree[self.selected_trigger]['trigger_node_out_id']
+				for i in self.triggers_flow_nodes:
+					if i['id'] == trigger_id: i['wires'][0].append(dlg.connector_id)
+				self.on_print_conditions(0)
+				last = self.list_conditions.GetItemCount()-1
+				self.list_conditions.Select(last)
+			else:
+				self.edit_cond['rules'] = dlg.ConditionNode['rules']
+				namesplit = self.edit_cond['name'].split('|')
+				operator = self.available_operators.index(self.edit_cond['rules'][0]['t'])
+				self.edit_cond['name'] = namesplit[0]+'|'+namesplit[1]+'|'+str(operator)
+
+				for i in self.actions_flow_tree[self.selected_trigger]['conditions']:
+					if 'condition_node_out_id' in i:
+						if i['condition_node_out_id'] == namesplit[1]:
+							i['operator'] = str(operator)
+						
+				self.on_print_conditions(0)
+				last = self.list_conditions.GetItemCount()-1
+				self.list_conditions.Select(last)
+'''			
 				pass
 			if dlg.credentials:
 				for i in dlg.credentials:
@@ -3753,6 +3809,160 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 							if 'name' in iii and iii['name'] == name: exists = True
 						if not exists:
 							for iiii in result: all_flows.append(iiii)
+
+		shortcut = []
+		idabs = []
+		line = 0
+		absline = 0
+		treeline = 0
+		
+		#create list of shortcuts
+		for i in all_flows:
+			if 'type' in i and 'wires' in i and 'id' in i:
+				if i['wires'] == [] or i['wires'] == [[],[],[]]:
+					#line,tree,parent,x,y,idnum,wiresnum,id,wires
+					# 0     1    2    3 4   5       6     7   8
+					shortcut.append([line,-1,-1,-1,-1,absline,-1,i['id'],''])
+					line += 1
+				else:
+					treeline = 0
+					for ii in i['wires'][0]:
+						shortcut.append([line,treeline,-1,-1,-1,absline,-1,i['id'],ii])
+						line += 1
+						treeline += 1
+				absline += 1
+				idabs.append(i['id'])
+		#	print absline,i
+
+		#for i in idabs:
+		#	print idabs.index(i),i
+
+		#find idnum for id
+		for i in shortcut:
+			if i[8] <> '':
+				i[6] = idabs.index(i[8])
+	
+		parentlist = []
+		parentnum = 0
+		
+		#identify first node of a line
+		for i in shortcut:
+			#x -1
+			if i[3] == -1:
+				parent=False
+				for ii in shortcut:
+					# idnum = wiresnum -> it's a child
+					if i[5] == ii[6]:
+						parent = True
+				# it's the first node if it doesn't has parents
+				if parent == False:
+					i[2]=parentnum
+					parentnum += 1
+					i[3]=0
+					i[4]=0
+					parentlist.append(i[0])
+					
+		#print 'parentlist'
+		#for i in parentlist:
+		#	print i
+
+		#identify x position of following nodes
+		for j in range(10):
+			for i in shortcut:
+				if i[3] == j:
+					for ii in shortcut:
+						if ii[5] == i[6]:
+							if ii[3] == -1:						
+								ii[3] = j+1
+								ii[2] = i[2]
+
+		for j in range(len(parentlist)):
+			y = 1
+			#find all forks and set y
+			for i in shortcut:
+				if i[2] == j and i[1] >= 1:
+					i[4] = y
+					y += 1
+
+		#for i in shortcut:
+		#	print i
+		
+		
+		for j in range(10):
+			for i in shortcut:
+				#x -1
+				if i[3] == j:
+					for ii in shortcut:
+						#x -1
+						if ii[5] == i[6]:
+							if ii[4] == -1:
+								ii[4] = i[4]
+
+
+		fork = []
+		for j in range(len(parentlist)):
+			for i in shortcut:
+				#x -1
+				if i[2] == j and i[1] >= 1:
+					# line,linenum,mainfork(y),subfork(y),x
+					fork.append([i[2],i[0],shortcut[i[0]-1][4],i[4],i[3]])
+					i[4] = shortcut[i[0]-1][4]
+		
+		fork=sorted(fork, key=lambda x: (x[0], x[2], -x[4]))
+		
+		#for i in fork:
+		#	print i
+
+		#set lines with fork in right direction
+		#build a converting table
+		convert = []
+		for j in range(len(parentlist)):
+			convert.append([0])
+			for i in fork:
+				if i[0] == j:
+					convert[j].append(0)
+
+		#set values to converting table
+		for j in range(len(parentlist)):
+			y = 1
+			for i in fork:
+				if i[0] == j:
+					convert[j][i[3]] = y
+					y += 1
+		
+		#print 'fork'
+		#for i in fork:
+		#	print i
+		#print 'convert'
+		#for i in convert:
+		#	print i
+
+		#convert every line
+		for i in shortcut:
+			i[4] = convert[i[2]][i[4]]
+
+
+		#for i in shortcut:
+		#	print i
+
+		xstart = 140
+		ystart = 60
+		xstep = 220
+		ystep = 55
+		ymax = 0
+		for j in range(len(parentlist)):
+			if ymax >= ystart:
+				ystart = ymax + ystep
+
+			for i in all_flows:
+				if 'type' in i and 'wires' in i and 'id' in i:
+					for ii in reversed(shortcut):
+						if i['id'] == ii[7] and ii[2] == j:
+							i['x'] = xstart + xstep * ii[3]
+							i['y'] = ystart + ystep * ii[4]
+							if i['y'] > ymax:
+								ymax = i['y']						
+					
 		self.nodes.write_flow(all_flows)
 		self.edit_credentials(self.add_credentials, self.remove_credentials)
 		self.restart_SK()
