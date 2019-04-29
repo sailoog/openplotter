@@ -1,6 +1,8 @@
 Influxdb + Grafana
 ##################
 
+.. image:: img/grafana.png
+
 How to activate data logging with signalk influxdb grafana
 
 OpenPlotter

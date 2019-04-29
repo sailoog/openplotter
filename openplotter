@@ -111,9 +111,6 @@ class MainFrame(wx.Frame):
 													_('Create a deviation table for your boat'))
 		self.Bind(wx.EVT_MENU, self.on_deviation_table, self.deviation_table)
 
-		self.nmea_0183_item1 = self.settings.Append(wx.ID_ANY, _('NMEA 0183 generator'),
-													_('Generate NMEA 0183 from current values'))
-		self.Bind(wx.EVT_MENU, self.open_nmea_0183, self.nmea_0183_item1)
 		self.settings.AppendSeparator()
 
 		self.tools_py = []
@@ -257,10 +254,6 @@ class MainFrame(wx.Frame):
 		dlg = adddeviationsetting(self)
 		dlg.ShowModal()
 		dlg.Destroy()
-
-	def open_nmea_0183(self, event):
-		subprocess.call(['pkill', '-f', 'NMEA_0183_generator.py'])
-		subprocess.Popen(['python', self.currentpath + '/tools/NMEA_0183_generator/NMEA_0183_generator.py'])
 
 	def tool10(self, event):
 		menuId = event.Id

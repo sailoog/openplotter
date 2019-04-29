@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, os, sys, subprocess, ConfigParser
+import wx, os, sys, subprocess, ConfigParser, webbrowser
 
 op_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../..')
 sys.path.append(op_folder+'/classes')
@@ -307,7 +307,7 @@ class MyFrame(wx.Frame):
 			subprocess.Popen('/opt/gqrx/gqrx')
 
 		def on_help_sdr(self, e):
-			url = self.currentpath+"/docs/html/sdr/xxx.html"
+			url = self.op_folder+"/docs/html/tools/sdr_receiver.html"
 			webbrowser.open(url, new=2)
 
 app = wx.App()
