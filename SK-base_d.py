@@ -431,131 +431,18 @@ class MySK_to_N2K:
 													self.environment_outside_pressure[1][2])
 			if self.akt128275: self.N2K.Send_Distance_Log(self.navigation_log[1][2], self.navigation_logTrip[1][2])
 
-
-class MySK_to_NMEA:
-	def __init__(self, SK_):
-		self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
-		self.SK = SK_
-		self.nmea_list = []
-
-		data = self.SK.conf.get('NMEA0183', 'sentences')
-		try:
-			temp_list = eval(data)
-		except:
-			temp_list = []
-		for ii in temp_list:
-			self.nmea_list.append(ii)
-
-		self.SK.static_list.append([])
-		self.SKb = self.SK.static_list[-1]
-
-		for i in self.nmea_list:
-			for ii in i:
-				if type(ii) is list:
-					for iii in ii:
-						if type(iii) is list:
-							self.SKb.append([iii[0], [0, 0, 0, 0]])
-							iii.append(self.SKb[-1])
-
-		self.cycle_list = []
-		index = 0
-		for i in self.nmea_list:
-			cycle = i[2]
-			self.cycle_list.append([cycle, time.time() + cycle, index])
-			index += 1
-
-	def nmea_make(self, index):
-		NMEA_string = str(self.nmea_list[index][0])
-
-		for i in self.nmea_list[index][1]:
-			if type(i) is str:
-				NMEA_string += ',' + i
-			elif type(i) is list:
-				value = i[4][1][2]
-				if type(value) is float:
-					pass
-				else:
-					value = 0.0
-				if i[2] == '+':
-					value = value + i[3]
-				elif i[2] == '-':
-					value = value - i[3]
-				elif i[2] == '*':
-					value = value * i[3]
-				elif i[2] == '/':
-					value = value / i[3]
-				value_str = ''
-				if i[1] == 'x.x':
-					value_str = str(round(value, 1))
-				elif i[1] == 'x.x|deg':
-					value_str = str(round(value*57.2957795, 1))
-				elif i[1] == 'x.x|kn':
-					value_str = str(round(value*1.94384, 1))
-				elif i[1] == 'x.x|C':
-					value_str = str(round(value-273.15, 1))
-				elif i[1] == 'x.x|F':
-					value_str = str(round(value*1.8 -459.67, 1))
-				elif i[1] == 'x.xx':
-					value_str = str(round(value, 2))
-				elif i[1] == 'x.xxx':
-					value_str = str(round(value, 3))
-				elif i[1] == 'x.xxxx':
-					value_str = str(round(value, 4))
-				elif i[1] == 'hhmmss.ss':
-					value_str = datetime.datetime.utcnow().strftime('%H%M%S.00')
-				elif i[1] == 'ddmmyy':
-					value_str = datetime.datetime.utcnow().strftime('%d%m%y')
-				elif i[1] == 'ddmm.mm':
-					value = abs(value)
-					h = int(value)
-					l = round((value - h) * 60, 5)
-					value_str = ('00' + str(int(value)))[-2:] + str(l)
-					str(round(value, 2))
-				elif i[1] == 'dddmm.mm':
-					value = abs(value)
-					h = int(value)
-					l = round((value - h) * 60, 5)
-					value_str = ('000' + str(int(value)))[-3:] + str(l)
-					str(round(value, 2))
-				elif i[1] == 'N/S':
-					if value > 0:
-						value_str = 'N'
-					else:
-						value_str = 'S'
-				elif i[1] == 'E/W':
-					if value > 0:
-						value_str = 'E'
-					else:
-						value_str = 'W'
-				NMEA_string += ',' + value_str
-		CRC = hex(reduce(operator.xor, map(ord, 'OC' + NMEA_string), 0)).upper()[2:]
-		NMEA_string = '$OC' + NMEA_string + '*' + ('0' + CRC)[-2:] + '\r\n'
-		# print NMEA_string
-		self.sock.sendto(NMEA_string, ('127.0.0.1', 10110))
-
-	def NMEA_cycle(self, tick2a):
-		for k in self.cycle_list:
-			if tick2a > k[1]:
-				k[1] += k[0]
-				self.nmea_make(k[2])
-
 def signal_handler(signal_, frame):
 	print 'You pressed Ctrl+C!'
 	SK.stop()
 	sys.exit(0)
 
-
 signal.signal(signal.SIGINT, signal_handler)
 SK = MySK()
 SKN2K = MySK_to_N2K(SK)
-SKNMEA = MySK_to_NMEA(SK)
 
 timedif = (datetime.datetime.utcnow() - datetime.datetime.now()).total_seconds()
 aktiv_N2K = True
-aktiv_NMEA = True
 if not SKN2K.PGN_list: aktiv_N2K = False
-if not SKNMEA.nmea_list: aktiv_NMEA = False
 
 stop = 0
 if aktiv_N2K or aktiv_NMEA:
@@ -563,9 +450,7 @@ if aktiv_N2K or aktiv_NMEA:
 		time.sleep(0.05)
 		tick2 = time.time()
 		if aktiv_N2K: SKN2K.N2K_cycle(tick2)
-		if aktiv_NMEA: SKNMEA.NMEA_cycle(tick2)
 	while 1:
 		time.sleep(0.05)
 		tick2 = time.time()
 		if aktiv_N2K: SKN2K.N2K_cycle(tick2)
-		if aktiv_NMEA: SKNMEA.NMEA_cycle(tick2)

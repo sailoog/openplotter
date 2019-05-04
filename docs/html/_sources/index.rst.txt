@@ -60,3 +60,15 @@ Welcome to OpenPlotter's documentation!
    dashboards/kip
    dashboards/nodered_dashboard
    dashboards/influxdb_grafana
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Tools
+   :name: sec-tools
+
+   tools/demo_tool
+   tools/sdr_receiver
+   tools/moitessier_hat
+   tools/deviation_table
+   tools/ads1115
+   tools/firmata
