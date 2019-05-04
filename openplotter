@@ -3297,6 +3297,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.selected_condition = -1
 		self.selected_action = -1
 		self.selected_trigger = self.list_triggers.GetFirstSelected()
+		self.list_triggers.Focus(self.list_triggers.GetFirstSelected())
 		if self.selected_trigger == -1: return
 		conditions = self.actions_flow_tree[self.selected_trigger]["conditions"]
 		triggertype = self.actions_flow_tree[self.selected_trigger]["type"]
@@ -3481,7 +3482,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			if 'name' in i:
 				if i['name'] == name: 
 					edit = i['rules'][0]
-				self.edit_cond = i
+					self.edit_cond = i
 		self.edit_add_condition(edit)
 
 	def on_add_condition(self, e):
@@ -3503,9 +3504,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				trigger_id = self.actions_flow_tree[self.selected_trigger]['trigger_node_out_id']
 				for i in self.triggers_flow_nodes:
 					if i['id'] == trigger_id: i['wires'][0].append(dlg.connector_id)
-				self.on_print_conditions(0)
-				last = self.list_conditions.GetItemCount()-1
-				self.list_conditions.Select(last)
 			else:
 				self.edit_cond['rules'] = dlg.ConditionNode['rules']
 				namesplit = self.edit_cond['name'].split('|')
@@ -3516,43 +3514,42 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					if 'condition_node_out_id' in i:
 						if i['condition_node_out_id'] == namesplit[1]:
 							i['operator'] = str(operator)
-						
-				self.on_print_conditions(0)
-				last = self.list_conditions.GetItemCount()-1
-				self.list_conditions.Select(last)
+
+			self.on_print_conditions(0)
+			last = self.list_conditions.GetItemCount()-1
+			self.list_conditions.Select(last)
 
 		dlg.Destroy()
 
 	def on_edit_actions(self, e):
-		'''
 		#find connected action
 		if self.selected_action == -1: return
 		node = self.actions_flow_tree[self.selected_trigger]['conditions'][self.selected_condition]['actions']
 		nodea = node[self.selected_action]['action_node_out_id']
 		typea = node[self.selected_action]['type']
 		name = 'a|'+nodea+'|'+typea
-		edit = ''
-		for i in self.actions_flow_tree:
-			print 1,i
-			if 'name' in i:
-				print 2
+		edit = []
+		for i in self.actions_flow_nodes:
+			#print 1,i
+			if 'dname' in i:
+				#print 0,i['name']
+				if i['dname'] == name: 
+					#print -3
+					edit.append(i)
+				self.edit_cond = i
+			elif 'name' in i:
+				#print 0,i['name']
 				if i['name'] == name: 
-					print 3
+					#print -3
 					edit.append(i)
 				self.edit_cond = i
 		
-		print 'edit'
-		for i in edit:
-			print i
+		#print 'edit'
+		#for i in edit:
+		#	print i
 		
-		print 'self.actions_flow_tree'
-		for i in self.actions_flow_tree:
-			print i
-				
 		self.edit_add_action(edit)
-		'''
-		pass
-
+		
 	def on_add_action(self, e):
 		self.edit_add_action(0)
 
@@ -3561,8 +3558,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			if self.selected_condition == -1:
 				self.ShowStatusBarRED(_('Select a condition.'))
 				return
-		#else:
-		#	self.available_actions_select.SetSelection()
+		else:
+			if 'dname' in edit[0]:
+				typesplit = edit[0]['dname'].split('|')
+			else:	
+				typesplit = edit[0]['name'].split('|')
+			type = int(typesplit[2])
+			self.available_actions_select.SetSelection(type)
 		action = self.available_actions_select.GetSelection()
 		if action == 0: dlg = ActionSetSignalkKey(self,edit)
 		elif action == 1: dlg = ActionSetGPIO(self,edit)
@@ -3595,46 +3597,19 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			return
 		res = dlg.ShowModal()
 		if res == wx.OK:
-			if not edit:
-				for i in dlg.ActionNodes:
-					self.actions_flow_nodes.append(i)
-					if 'dname' in i: items = i['dname'].split('|')
-					elif 'name' in i: items = i['name'].split('|')
-				self.actions_flow_tree[self.selected_trigger]['conditions'][self.selected_condition]['actions'].append({"action_node_out_id": items[1],"type": items[2]})
-				condition_id = self.actions_flow_tree[self.selected_trigger]['conditions'][self.selected_condition]['condition_node_out_id']
-				for i in self.conditions_flow_nodes:
-					if i['id'] == condition_id: i['wires'][0].append(dlg.connector_id)
-				self.on_print_actions(0)
-				last = self.list_actions.GetItemCount()-1
-				self.list_actions.Select(last)
-			else:
-				'''
-			if not edit:
-				self.conditions_flow_nodes.append(dlg.ConditionNode)
-				items = dlg.ConditionNode['name'].split('|')
-				self.actions_flow_tree[self.selected_trigger]['conditions'].append({"condition_node_out_id": items[1],"operator": items[2],"actions": []})
-				trigger_id = self.actions_flow_tree[self.selected_trigger]['trigger_node_out_id']
-				for i in self.triggers_flow_nodes:
-					if i['id'] == trigger_id: i['wires'][0].append(dlg.connector_id)
-				self.on_print_conditions(0)
-				last = self.list_conditions.GetItemCount()-1
-				self.list_conditions.Select(last)
-			else:
-				self.edit_cond['rules'] = dlg.ConditionNode['rules']
-				namesplit = self.edit_cond['name'].split('|')
-				operator = self.available_operators.index(self.edit_cond['rules'][0]['t'])
-				self.edit_cond['name'] = namesplit[0]+'|'+namesplit[1]+'|'+str(operator)
-
-				for i in self.actions_flow_tree[self.selected_trigger]['conditions']:
-					if 'condition_node_out_id' in i:
-						if i['condition_node_out_id'] == namesplit[1]:
-							i['operator'] = str(operator)
-						
-				self.on_print_conditions(0)
-				last = self.list_conditions.GetItemCount()-1
-				self.list_conditions.Select(last)
-'''			
-				pass
+			if edit:
+				self.on_delete_action(0)
+			for i in dlg.ActionNodes:
+				self.actions_flow_nodes.append(i)
+				if 'dname' in i: items = i['dname'].split('|')
+				elif 'name' in i: items = i['name'].split('|')
+			self.actions_flow_tree[self.selected_trigger]['conditions'][self.selected_condition]['actions'].append({"action_node_out_id": items[1],"type": items[2]})
+			condition_id = self.actions_flow_tree[self.selected_trigger]['conditions'][self.selected_condition]['condition_node_out_id']
+			for i in self.conditions_flow_nodes:
+				if i['id'] == condition_id: i['wires'][0].append(dlg.connector_id)
+			self.on_print_actions(0)
+			last = self.list_actions.GetItemCount()-1
+			self.list_actions.Select(last)
 			if dlg.credentials:
 				for i in dlg.credentials:
 					self.add_credentials[i] = dlg.credentials[i]
@@ -3805,13 +3780,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		shortcut = []
 		idabs = []
+		idabs_parent = []
 		line = 0
 		absline = 0
 		treeline = 0
 		
 		#create list of shortcuts
 		for i in all_flows:
-			if 'type' in i and 'wires' in i and 'id' in i:
+			if 'type' in i and 'wires' in i and 'id' in i and i['z'] == 'openplot.actio':
 				if i['wires'] == [] or i['wires'] == [[],[],[]]:
 					#line,tree,parent,x,y,idnum,wiresnum,id,wires
 					# 0     1    2    3 4   5       6     7   8
@@ -3823,42 +3799,42 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 						shortcut.append([line,treeline,-1,-1,-1,absline,-1,i['id'],ii])
 						line += 1
 						treeline += 1
-				absline += 1
 				idabs.append(i['id'])
-		#	print absline,i
+				idabs_parent.append(absline)
+				absline += 1
+			#print absline,i
 
-		#for i in idabs:
-		#	print idabs.index(i),i
+		#print 'idabs'
+		#for i in idabs: print idabs.index(i),i
+
+		#print 'idabs_parent'
+		#for i in idabs_parent: print idabs_parent.index(i),i
 
 		#find idnum for id
 		for i in shortcut:
 			if i[8] <> '':
-				i[6] = idabs.index(i[8])
-	
+				i[6] = idabs.index(i[8])			
+				idabs_parent[i[6]] = -1				
+
+		#print 'idabs_parent'
+		#for i in idabs_parent: print idabs_parent.index(i),i
+			
 		parentlist = []
 		parentnum = 0
+		#create parentlist
+		for i in idabs_parent:
+			if i > -1:
+				parentlist.append(i)
+				for j in shortcut:
+					if j[5] == i:
+						j[2]=parentnum
+						j[3]=0
+						j[4]=0
+				parentnum += 1
+			
+		#print 'shortcut'
+		#for i in shortcut: print i
 		
-		#identify first node of a line
-		for i in shortcut:
-			#x -1
-			if i[3] == -1:
-				parent=False
-				for ii in shortcut:
-					# idnum = wiresnum -> it's a child
-					if i[5] == ii[6]:
-						parent = True
-				# it's the first node if it doesn't has parents
-				if parent == False:
-					i[2]=parentnum
-					parentnum += 1
-					i[3]=0
-					i[4]=0
-					parentlist.append(i[0])
-					
-		#print 'parentlist'
-		#for i in parentlist:
-		#	print i
-
 		#identify x position of following nodes
 		for j in range(10):
 			for i in shortcut:
@@ -3877,9 +3853,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					i[4] = y
 					y += 1
 
-		#for i in shortcut:
-		#	print i
-		
+		#print 'shortcut'
+		#for i in shortcut: print i
 		
 		for j in range(10):
 			for i in shortcut:
@@ -3891,7 +3866,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 							if ii[4] == -1:
 								ii[4] = i[4]
 
-
 		fork = []
 		for j in range(len(parentlist)):
 			for i in shortcut:
@@ -3902,9 +3876,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					i[4] = shortcut[i[0]-1][4]
 		
 		fork=sorted(fork, key=lambda x: (x[0], x[2], -x[4]))
-		
-		#for i in fork:
-		#	print i
+
+		#print 'fork'
+		#for i in fork: print i
 
 		#set lines with fork in right direction
 		#build a converting table
@@ -3923,20 +3897,15 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					convert[j][i[3]] = y
 					y += 1
 		
-		#print 'fork'
-		#for i in fork:
-		#	print i
 		#print 'convert'
-		#for i in convert:
-		#	print i
+		#for i in convert: print i
 
 		#convert every line
 		for i in shortcut:
 			i[4] = convert[i[2]][i[4]]
 
-
-		#for i in shortcut:
-		#	print i
+		#print 'shortcut'
+		#for i in shortcut: print i
 
 		xstart = 140
 		ystart = 60
@@ -3948,7 +3917,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				ystart = ymax + ystep
 
 			for i in all_flows:
-				if 'type' in i and 'wires' in i and 'id' in i:
+				if 'type' in i and 'wires' in i and 'id' in i and i['z'] == 'openplot.actio':
 					for ii in reversed(shortcut):
 						if i['id'] == ii[7] and ii[2] == j:
 							i['x'] = xstart + xstep * ii[3]
