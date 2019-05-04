@@ -478,6 +478,150 @@ class TriggerSK(wx.Dialog):
 		self.TriggerNodes.append(subscribe_node)
 		self.EndModal(wx.OK)
 
+class TriggerFilterSK(wx.Dialog):
+	def __init__(self,parent,edit,trigger):
+		self.nodes = parent.nodes
+		help_bmp = parent.help_bmp
+		self.currentpath = parent.currentpath
+		self.actions_flow_id = parent.actions_flow_id
+		self.trigger_type = trigger
+
+		if edit == 0: title = _('Add Signal K trigger')
+		else: title = _('Edit Signal K trigger')
+
+		wx.Dialog.__init__(self, None, title = title, size=(400, 350))
+		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
+
+		self.subscribtion_node_template = '''
+			{
+				"id": "",
+				"type": "signalk-input-handler",
+				"z": "",
+				"name": "",
+				"context": "",
+				"path": "",
+				"source": "",
+				"x": 380,
+				"y": 120,
+				"wires": [[]]
+		    }'''
+
+		panel = wx.Panel(self)
+
+		vessellabel = wx.StaticText(panel, label=_('Vessel'))
+		self.vessel = wx.TextCtrl(panel, size=(290,-1))
+
+		skkeylabel = wx.StaticText(panel, label=_('Signal K key'))
+		self.skkey = wx.TextCtrl(panel, size=(290,-1))
+		if edit == 0: edit_skkey = wx.Button(panel, label=_('Add'))
+		else: edit_skkey = wx.Button(panel, label=_('Edit'))
+		edit_skkey.Bind(wx.EVT_BUTTON, self.onEditSkkey)
+
+		sourcelabel = wx.StaticText(panel, label=_('Source'))
+		self.source = wx.TextCtrl(panel, size=(290,-1))
+		sourcetext = wx.StaticText(panel, label=_('Leave blank to listen to any source.\nAllowed characters: . 0-9 a-z A-Z'), size=(300,-1))
+
+		hline1 = wx.StaticLine(panel)
+		help_button = wx.BitmapButton(panel, bitmap=help_bmp, size=(help_bmp.GetWidth()+40, help_bmp.GetHeight()+10))
+		help_button.Bind(wx.EVT_BUTTON, self.on_help)
+		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
+		okBtn = wx.Button(panel, wx.ID_OK)
+		okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
+
+		vessel = wx.BoxSizer(wx.HORIZONTAL)
+		vessel.Add(vessellabel, 1, wx.RIGHT | wx.ALL | wx.EXPAND, 6)
+		vessel.Add(self.vessel, 0, wx.RIGHT, 10)
+
+		skkey = wx.BoxSizer(wx.HORIZONTAL)
+		skkey.Add(skkeylabel, 1, wx.RIGHT | wx.ALL | wx.EXPAND, 6)
+		skkey.Add(self.skkey, 0, wx.RIGHT, 10)
+
+		editskkey = wx.BoxSizer(wx.HORIZONTAL)
+		editskkey.Add((0, 0), 1, wx.ALL, 6)
+		editskkey.Add(edit_skkey, 0, wx.RIGHT, 10)
+
+		source = wx.BoxSizer(wx.HORIZONTAL)
+		source.Add(sourcelabel, 1, wx.RIGHT | wx.ALL | wx.EXPAND, 6)
+		source.Add(self.source, 0, wx.RIGHT, 10)
+
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(help_button, 0, wx.ALL, 10)
+		hbox.Add((0, 0), 1, wx.ALL, 0)
+		hbox.Add(cancelBtn, 0, wx.ALL, 10)
+		hbox.Add(okBtn, 0, wx.ALL, 10)
+
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		vbox.AddSpacer(10)
+		vbox.Add(vessel, 0, wx.LEFT | wx.EXPAND, 5)
+		vbox.Add(skkey, 0, wx.LEFT | wx.EXPAND, 5)
+		vbox.AddSpacer(3)
+		vbox.Add(editskkey, 0, wx.ALL | wx.EXPAND, 0)
+		vbox.AddSpacer(10)
+		vbox.Add(source, 0, wx.LEFT | wx.EXPAND, 5)
+		vbox.Add(sourcetext, 0, wx.LEFT, 10)
+		vbox.Add((0, 0), 1, wx.ALL, 0)
+		vbox.Add(hline1, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
+		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 0)
+
+		panel.SetSizer(vbox)
+
+		if edit:
+			subkey = ''
+			for i in edit:
+				if i['type'] == 'signalk-input-handler':
+					vessel = i['context'].replace('vessels.','')
+					key = i['path']
+					source = i['source']
+				elif i['type'] == 'function' and i['func'] != 'return msg;':
+					subkey = i['func'].split(';')
+					subkey = subkey[0].split('.')
+					subkey = ':'+subkey[3]
+			self.vessel.SetValue(vessel)
+			self.skkey.SetValue(key+subkey)
+			self.source.SetValue(source)
+		else:
+			self.vessel.SetValue('self')
+
+
+	def on_help(self, e):
+		url = self.currentpath+"/docs/html/actions/triggers.html"
+		webbrowser.open(url, new=2)
+
+	def onEditSkkey(self,e):
+		oldkey = False
+		if self.skkey.GetValue(): oldkey = self.skkey.GetValue()
+		dlg = selectKey(oldkey,1)
+		res = dlg.ShowModal()
+		if res == wx.OK: 
+			self.skkey.SetValue(dlg.selected_key)
+			self.vessel.SetValue(dlg.selected_vessel)
+		dlg.Destroy()
+
+	def OnOk(self,e):
+		skkey = self.skkey.GetValue()
+		vessel = self.vessel.GetValue()
+		source = self.source.GetValue()
+		if not skkey:
+			wx.MessageBox(_('You have to provide a Signal K key.'), 'Info', wx.OK | wx.ICON_INFORMATION)
+			return
+		elif not vessel:
+			wx.MessageBox(_('You have to provide a vessel ID.'), 'Info', wx.OK | wx.ICON_INFORMATION)
+			return
+		elif source and not re.match('^[.0-9a-zA-Z]+$', source):
+			wx.MessageBox(_('Failed. Characters not allowed.'), 'Info', wx.OK | wx.ICON_INFORMATION)
+			return
+		self.TriggerNodes = []
+		sk_input_node = ujson.loads(self.subscribtion_node_template)
+		sk_input_node['id'] = self.nodes.get_node_id()
+		sk_input_node['z'] = self.actions_flow_id
+		sk_input_node['name'] = 't|'+sk_input_node['id']+'|'+str(self.trigger_type)
+		sk_input_node['path'] = skkey
+		sk_input_node['wires'] = [[]]
+		sk_input_node['context'] = 'vessels.'+self.vessel.GetValue()
+		sk_input_node['source'] = source
+		self.TriggerNodes.append(sk_input_node)
+		self.EndModal(wx.OK)
+
 class TriggerGeofence(wx.Dialog):
 	def __init__(self,parent,edit,trigger):
 		self.nodes = parent.nodes
@@ -1592,6 +1736,56 @@ class ActionSetSignalkKey(wx.Dialog):
 		self.connector_id = change_node['id']
 		self.EndModal(wx.OK)
 
+class ActionEndFilterSignalk(wx.Dialog):
+	def __init__(self, parent, edit):
+		self.credentials = ''
+		self.nodes = parent.nodes
+		help_bmp = parent.help_bmp
+		self.currentpath = parent.currentpath
+		self.actions_flow_id = parent.actions_flow_id
+		self.action_id = parent.available_actions_select.GetSelection()
+		self.sk_node_template = '''
+		    {			
+		        "id": "",
+				"type": "signalk-input-handler-next",
+		        "z": "",
+		        "name": "",
+		        "x": 380,
+		        "y": 120,
+		        "wires": []
+		    }'''
+
+		if edit == 0: title = _('Set Signal K key')
+		else: title = _('Edit Signal K key')
+
+		wx.Dialog.__init__(self, None, title = title, size=(350, 100))
+		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
+
+		panel = wx.Panel(self)
+
+		okBtn = wx.Button(panel, wx.ID_OK)
+		okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
+
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.AddStretchSpacer(1)
+		hbox.Add(okBtn, 0, wx.ALL, 10)
+
+		main = wx.BoxSizer(wx.VERTICAL)
+		main.AddStretchSpacer(1)
+		main.Add(hbox, 0, wx.ALL | wx.EXPAND, 0)
+
+		panel.SetSizer(main)
+
+	def OnOk(self,e):
+		self.ActionNodes = []
+		sk_node = ujson.loads(self.sk_node_template)
+		sk_node['id'] = self.nodes.get_node_id()
+		sk_node['z'] = self.actions_flow_id
+		sk_node['name'] = 'a|'+sk_node['id']+'|'+str(self.action_id)
+		self.ActionNodes.append(sk_node)
+		self.connector_id = sk_node['id']
+		self.EndModal(wx.OK)
+
 class ActionSetGPIO(wx.Dialog):
 	def __init__(self, parent, edit):
 		self.credentials = ''
@@ -2607,7 +2801,6 @@ class ActionSendEmail(wx.Dialog):
 		self.secure.SetValue(True)
 		
 		if edit <> 0:
-			for i in edit: print i
 			self.server.SetValue(edit[0]['server'])
 			self.port.SetValue(edit[0]['port'])
 			self.secure.SetValue(edit[0]['secure'])

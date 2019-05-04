@@ -33,7 +33,7 @@ from classes.add_SK_to_N2K import addSKtoN2K
 from classes.conf import Conf
 from classes.SK_settings import SK_settings
 from classes.language import Language
-from classes.nodes import Nodes, TriggerSK, TriggerGeofence, TriggerGPIO, TriggerMQTT, TriggerTelegram, TriggerTime, Condition, ActionSetSignalkKey, ActionSetGPIO, ActionSetMQTT, ActionPublishTwitter, ActionSendEmail, ActionPlaySound, ActionRunCommand, ActionSendTelegram
+from classes.nodes import Nodes, TriggerSK, TriggerFilterSK, TriggerGeofence, TriggerGPIO, TriggerMQTT, TriggerTelegram, TriggerTime, Condition, ActionSetSignalkKey, ActionEndFilterSignalk, ActionSetGPIO, ActionSetMQTT, ActionPublishTwitter, ActionSendEmail, ActionPlaySound, ActionRunCommand, ActionSendTelegram
 
 class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 	def __init__(self, parent, width, height):
@@ -3089,10 +3089,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def page_action(self):
 		self.list_triggers = CheckListCtrl(self.p_action, -1,90)
-		self.list_triggers.InsertColumn(0, _('Triggers'), width=100)
+		self.list_triggers.InsertColumn(0, _('Triggers'), width=120)
 		self.list_triggers.InsertColumn(1, _(' '), width= 130)
 		self.list_triggers.InsertColumn(2, _(' '), width= 130)
-		self.list_triggers.InsertColumn(3, _(' '), width= 130)
+		self.list_triggers.InsertColumn(3, _(' '), width= 100)
 		self.list_triggers.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_print_conditions)
 		self.list_triggers.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.on_deselected_triggers)
 		self.list_triggers.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit_triggers)
@@ -3100,6 +3100,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		self.available_triggers = [
 		_('Signal K key'), 
+		_('Signal K Filter'), 
 		_('Geofence'), 
 		'GPIO', 
 		'MQTT topic', 
@@ -3143,6 +3144,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		self.available_actions = [
 		_('Set Signal K key'),
+		_('End Filter Signal K'),
 		_('Set GPIO output'),
 		_('Set MQTT topic'),
 		_('Publish on Twitter'),
@@ -3262,24 +3264,33 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 							items2 = items[0].split('.')
 							path_property = ':'+items2[-1]
 						field3 = path+path_property
-					if trigger["type"] == '1' and node['type'] == 'signalk-geofence': 
+					if trigger["type"] == '1':
+						if node['type'] == 'signalk-input-handler': 
+							path = node['path']
+							field2 = node['context']
+							field3 = path
+							field4 = node['source']
+					if trigger["type"] == '2' and node['type'] == 'signalk-geofence': 
 						field2 = node['context']
 						if node['myposition']: field3 = _('Use My Position')
 						else: field3 = node['lat']+', '+node['lon']
 						field4 = node['distance']
-					if trigger["type"] == '2' and node['type'] == 'rpi-gpio in': 
+					if trigger["type"] == '3' and node['type'] == 'rpi-gpio in': 
 						field2 = node['pin']
 						field3 = node['intype']
 						if node['read']: field4 = _('initial state')
-					if trigger["type"] == '3' and node['type'] == 'mqtt in':
+					if trigger["type"] == '4' and node['type'] == 'mqtt in':
 						if node['broker'] == self.localbrokerid: field2 = _('local broker')
 						elif node['broker'] == self.remotebrokerid: field2 = _('remote broker')
 						field3 = node['topic']
-					if trigger["type"] == '5' and node['type'] == 'inject':
+					if trigger["type"] == '6' and node['type'] == 'inject':
 						field2 = node['repeat']
 						field3 = _('Seconds')
-				if node['id'] == trigger["trigger_node_out_id"]: 
-					if 	node['func'] == 'return msg;': enabled = True
+				if node['id'] == trigger["trigger_node_out_id"]:
+					if 'func' in node:
+						if 	node['func'] == 'return msg;': enabled = True
+					else:
+						enabled = True
 			self.list_triggers.Append([self.available_triggers[int(trigger["type"])].decode('utf8'), field2.decode('utf8'), field3.decode('utf8'), field4.decode('utf8')])
 			last = self.list_triggers.GetItemCount()-1
 			if enabled: self.list_triggers.CheckItem(last)
@@ -3416,16 +3427,17 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if not edit: trigger = self.available_triggers_select.GetSelection()
 		else: trigger = int(self.actions_flow_tree[self.selected_trigger]['type'])
 		if trigger == 0: dlg = TriggerSK(self,edit,trigger)
-		elif trigger == 1: dlg = TriggerGeofence(self,edit,trigger)
-		elif trigger == 2: dlg = TriggerGPIO(self,edit,trigger)
-		elif trigger == 3:
+		elif trigger == 1: dlg = TriggerFilterSK(self,edit,trigger)
+		elif trigger == 2: dlg = TriggerGeofence(self,edit,trigger)
+		elif trigger == 3: dlg = TriggerGPIO(self,edit,trigger)
+		elif trigger == 4:
 			local =  int(self.conf.get('CREDENTIALS', 'local_mqtt'))
 			remote =  int(self.conf.get('CREDENTIALS', 'remote_mqtt'))
 			if not local and not remote:
 				self.ShowStatusBarRED(_('Go to the Credentials tab and enable at least one MQTT broker'))
 				return
 			else: dlg = TriggerMQTT(self,edit,local,remote,trigger)
-		elif trigger == 4:
+		elif trigger == 5:
 			telegram =  int(self.conf.get('CREDENTIALS', 'telegram'))
 			if not telegram:
 				self.ShowStatusBarRED(_('Go to the Credentials tab and enable a Telegram bot'))
@@ -3433,7 +3445,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			else: 
 				if edit: return
 				else: dlg = TriggerTelegram(self,trigger)
-		elif trigger == 5: dlg = TriggerTime(self,edit,trigger)
+		elif trigger == 6: dlg = TriggerTime(self,edit,trigger)
 		else:
 			self.ShowStatusBarRED(_('Select a trigger type.'))
 			return
@@ -3498,6 +3510,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		res = dlg.ShowModal()
 		if res == wx.OK:
 			if not edit:
+				#when filter SK (type 1) property is src not payload
+				if self.actions_flow_tree[self.selected_trigger]['type'] == '1':
+					dlg.ConditionNode['property'] = 'source.src'
 				self.conditions_flow_nodes.append(dlg.ConditionNode)
 				items = dlg.ConditionNode['name'].split('|')
 				self.actions_flow_tree[self.selected_trigger]['conditions'].append({"condition_node_out_id": items[1],"operator": items[2],"actions": []})
@@ -3567,26 +3582,27 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.available_actions_select.SetSelection(type)
 		action = self.available_actions_select.GetSelection()
 		if action == 0: dlg = ActionSetSignalkKey(self,edit)
-		elif action == 1: dlg = ActionSetGPIO(self,edit)
-		elif action == 2:
+		elif action == 1: dlg = ActionEndFilterSignalk(self,edit)
+		elif action == 2: dlg = ActionSetGPIO(self,edit)
+		elif action == 3:
 			local =  int(self.conf.get('CREDENTIALS', 'local_mqtt'))
 			remote =  int(self.conf.get('CREDENTIALS', 'remote_mqtt'))
 			if not local and not remote:
 				self.ShowStatusBarRED(_('Go to the Credentials tab and enable at least one MQTT broker'))
 				return
 			else: dlg = ActionSetMQTT(self,edit,local,remote)
-		elif action == 3:
+		elif action == 4:
 			twitter =  int(self.conf.get('CREDENTIALS', 'twitter'))
 			if not twitter:
 				self.ShowStatusBarRED(_('Go to the Credentials tab and enable the Twitter account'))
 				return
 			else: dlg = ActionPublishTwitter(self,edit)
-		elif action == 4: dlg = ActionSendEmail(self,edit)
-		elif action == 5: dlg = ActionPlaySound(self,edit)
-		elif action == 6: dlg = ActionRunCommand(self,edit)
-		elif action == 7: dlg = ActionRunCommand(self,['sudo','reboot',0])
-		elif action == 8: dlg = ActionRunCommand(self,['sudo', 'shutdown -h now',0])
-		elif action == 9:
+		elif action == 5: dlg = ActionSendEmail(self,edit)
+		elif action == 6: dlg = ActionPlaySound(self,edit)
+		elif action == 7: dlg = ActionRunCommand(self,edit)
+		elif action == 8: dlg = ActionRunCommand(self,['sudo','reboot',0])
+		elif action == 9: dlg = ActionRunCommand(self,['sudo', 'shutdown -h now',0])
+		elif action == 10:
 			telegram =  int(self.conf.get('CREDENTIALS', 'telegram'))
 			if not telegram:
 				self.ShowStatusBarRED(_('Go to the Credentials tab and enable a Telegram bot'))
@@ -3788,7 +3804,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		#create list of shortcuts
 		for i in all_flows:
 			if 'type' in i and 'wires' in i and 'id' in i and i['z'] == 'openplot.actio':
-				if i['wires'] == [] or i['wires'] == [[],[],[]]:
+				if i['wires'] in [[],[[]],[[],[]],[[],[],[]]]:
 					#line,tree,parent,x,y,idnum,wiresnum,id,wires
 					# 0     1    2    3 4   5       6     7   8
 					shortcut.append([line,-1,-1,-1,-1,absline,-1,i['id'],''])
@@ -3802,7 +3818,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				idabs.append(i['id'])
 				idabs_parent.append(absline)
 				absline += 1
-			#print absline,i
+			#print absline,line,i
 
 		#print 'idabs'
 		#for i in idabs: print idabs.index(i),i
