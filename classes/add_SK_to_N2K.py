@@ -111,8 +111,10 @@ class addSKtoN2K(wx.Dialog):
 				result.append(str(ii[0]))
 			i += 1
 		self.conf.set('N2K', 'pgn_generate', str(result))
-		subprocess.call(['pkill', '-f', 'SK-base_d.py'])
-		subprocess.Popen(['python',self.currentpath+'/SK-base_d.py'])		
+		N2K_output=self.conf.get('N2K', 'output')
+		if N2K_output == '1':
+			subprocess.call(['pkill', '-f', 'SK-base_d.py'])
+			subprocess.Popen(['python',self.currentpath+'/SK-base_d.py'])		
 	
 		self.when_closed(e)
 		
