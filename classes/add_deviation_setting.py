@@ -203,8 +203,10 @@ class adddeviationsetting(wx.Dialog):
    		subprocess.Popen(['python', self.parent.currentpath+'/show_deviation_table.py', str(self.edit)])
 
 	def on_close(self, e):
-		subprocess.call(['pkill', '-f', 'SK-base_d.py'])
-		subprocess.Popen(['python', self.parent.currentpath+'/SK-base_d.py'])
+		N2K_output=self.conf.get('N2K', 'output')
+		if N2K_output == '1':
+			subprocess.call(['pkill', '-f', 'SK-base_d.py'])
+			subprocess.Popen(['python', self.parent.currentpath+'/SK-base_d.py'])
 		self.Destroy()
 
 	def ShowMessage(self, w_msg):

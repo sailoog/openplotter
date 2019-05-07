@@ -339,7 +339,8 @@ class TriggerSK(wx.Dialog):
 
 		skkeylabel = wx.StaticText(panel, label=_('Signal K key'))
 		self.skkey = wx.TextCtrl(panel, size=(290,-1))
-		edit_skkey = wx.Button(panel, label=_('Add'))
+		if edit == 0: edit_skkey = wx.Button(panel, label=_('Add'))
+		else: edit_skkey = wx.Button(panel, label=_('Edit'))
 		edit_skkey.Bind(wx.EVT_BUTTON, self.onEditSkkey)
 
 		sourcelabel = wx.StaticText(panel, label=_('Source'))
@@ -477,6 +478,150 @@ class TriggerSK(wx.Dialog):
 		self.TriggerNodes.append(subscribe_node)
 		self.EndModal(wx.OK)
 
+class TriggerFilterSK(wx.Dialog):
+	def __init__(self,parent,edit,trigger):
+		self.nodes = parent.nodes
+		help_bmp = parent.help_bmp
+		self.currentpath = parent.currentpath
+		self.actions_flow_id = parent.actions_flow_id
+		self.trigger_type = trigger
+
+		if edit == 0: title = _('Add Signal K trigger')
+		else: title = _('Edit Signal K trigger')
+
+		wx.Dialog.__init__(self, None, title = title, size=(400, 350))
+		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
+
+		self.subscribtion_node_template = '''
+			{
+				"id": "",
+				"type": "signalk-input-handler",
+				"z": "",
+				"name": "",
+				"context": "",
+				"path": "",
+				"source": "",
+				"x": 380,
+				"y": 120,
+				"wires": [[]]
+		    }'''
+
+		panel = wx.Panel(self)
+
+		vessellabel = wx.StaticText(panel, label=_('Vessel'))
+		self.vessel = wx.TextCtrl(panel, size=(290,-1))
+
+		skkeylabel = wx.StaticText(panel, label=_('Signal K key'))
+		self.skkey = wx.TextCtrl(panel, size=(290,-1))
+		if edit == 0: edit_skkey = wx.Button(panel, label=_('Add'))
+		else: edit_skkey = wx.Button(panel, label=_('Edit'))
+		edit_skkey.Bind(wx.EVT_BUTTON, self.onEditSkkey)
+
+		sourcelabel = wx.StaticText(panel, label=_('Source'))
+		self.source = wx.TextCtrl(panel, size=(290,-1))
+		sourcetext = wx.StaticText(panel, label=_('Leave blank to listen to any source.\nAllowed characters: . 0-9 a-z A-Z'), size=(300,-1))
+
+		hline1 = wx.StaticLine(panel)
+		help_button = wx.BitmapButton(panel, bitmap=help_bmp, size=(help_bmp.GetWidth()+40, help_bmp.GetHeight()+10))
+		help_button.Bind(wx.EVT_BUTTON, self.on_help)
+		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
+		okBtn = wx.Button(panel, wx.ID_OK)
+		okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
+
+		vessel = wx.BoxSizer(wx.HORIZONTAL)
+		vessel.Add(vessellabel, 1, wx.RIGHT | wx.ALL | wx.EXPAND, 6)
+		vessel.Add(self.vessel, 0, wx.RIGHT, 10)
+
+		skkey = wx.BoxSizer(wx.HORIZONTAL)
+		skkey.Add(skkeylabel, 1, wx.RIGHT | wx.ALL | wx.EXPAND, 6)
+		skkey.Add(self.skkey, 0, wx.RIGHT, 10)
+
+		editskkey = wx.BoxSizer(wx.HORIZONTAL)
+		editskkey.Add((0, 0), 1, wx.ALL, 6)
+		editskkey.Add(edit_skkey, 0, wx.RIGHT, 10)
+
+		source = wx.BoxSizer(wx.HORIZONTAL)
+		source.Add(sourcelabel, 1, wx.RIGHT | wx.ALL | wx.EXPAND, 6)
+		source.Add(self.source, 0, wx.RIGHT, 10)
+
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(help_button, 0, wx.ALL, 10)
+		hbox.Add((0, 0), 1, wx.ALL, 0)
+		hbox.Add(cancelBtn, 0, wx.ALL, 10)
+		hbox.Add(okBtn, 0, wx.ALL, 10)
+
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		vbox.AddSpacer(10)
+		vbox.Add(vessel, 0, wx.LEFT | wx.EXPAND, 5)
+		vbox.Add(skkey, 0, wx.LEFT | wx.EXPAND, 5)
+		vbox.AddSpacer(3)
+		vbox.Add(editskkey, 0, wx.ALL | wx.EXPAND, 0)
+		vbox.AddSpacer(10)
+		vbox.Add(source, 0, wx.LEFT | wx.EXPAND, 5)
+		vbox.Add(sourcetext, 0, wx.LEFT, 10)
+		vbox.Add((0, 0), 1, wx.ALL, 0)
+		vbox.Add(hline1, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
+		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 0)
+
+		panel.SetSizer(vbox)
+
+		if edit:
+			subkey = ''
+			for i in edit:
+				if i['type'] == 'signalk-input-handler':
+					vessel = i['context'].replace('vessels.','')
+					key = i['path']
+					source = i['source']
+				elif i['type'] == 'function' and i['func'] != 'return msg;':
+					subkey = i['func'].split(';')
+					subkey = subkey[0].split('.')
+					subkey = ':'+subkey[3]
+			self.vessel.SetValue(vessel)
+			self.skkey.SetValue(key+subkey)
+			self.source.SetValue(source)
+		else:
+			self.vessel.SetValue('self')
+
+
+	def on_help(self, e):
+		url = self.currentpath+"/docs/html/actions/triggers.html"
+		webbrowser.open(url, new=2)
+
+	def onEditSkkey(self,e):
+		oldkey = False
+		if self.skkey.GetValue(): oldkey = self.skkey.GetValue()
+		dlg = selectKey(oldkey,1)
+		res = dlg.ShowModal()
+		if res == wx.OK: 
+			self.skkey.SetValue(dlg.selected_key)
+			self.vessel.SetValue(dlg.selected_vessel)
+		dlg.Destroy()
+
+	def OnOk(self,e):
+		skkey = self.skkey.GetValue()
+		vessel = self.vessel.GetValue()
+		source = self.source.GetValue()
+		if not skkey:
+			wx.MessageBox(_('You have to provide a Signal K key.'), 'Info', wx.OK | wx.ICON_INFORMATION)
+			return
+		elif not vessel:
+			wx.MessageBox(_('You have to provide a vessel ID.'), 'Info', wx.OK | wx.ICON_INFORMATION)
+			return
+		elif source and not re.match('^[.0-9a-zA-Z]+$', source):
+			wx.MessageBox(_('Failed. Characters not allowed.'), 'Info', wx.OK | wx.ICON_INFORMATION)
+			return
+		self.TriggerNodes = []
+		sk_input_node = ujson.loads(self.subscribtion_node_template)
+		sk_input_node['id'] = self.nodes.get_node_id()
+		sk_input_node['z'] = self.actions_flow_id
+		sk_input_node['name'] = 't|'+sk_input_node['id']+'|'+str(self.trigger_type)
+		sk_input_node['path'] = skkey
+		sk_input_node['wires'] = [[]]
+		sk_input_node['context'] = 'vessels.'+self.vessel.GetValue()
+		sk_input_node['source'] = source
+		self.TriggerNodes.append(sk_input_node)
+		self.EndModal(wx.OK)
+
 class TriggerGeofence(wx.Dialog):
 	def __init__(self,parent,edit,trigger):
 		self.nodes = parent.nodes
@@ -595,6 +740,18 @@ class TriggerGeofence(wx.Dialog):
 		panel.SetSizer(vbox)
 
 		self.OnRefreshBtn(0)
+		
+		if edit <> 0:
+			self.period.SetValue(int(edit[1]['period']))
+			self.vessel.SetValue(edit[1]['context'][8:])
+			self.mypos.SetValue(edit[1]['myposition'])
+			if edit[1]['myposition']:
+				self.lat.Disable()
+				self.lon.Disable()
+			else:				
+				self.lat.SetValue(float(edit[1]['lat']))
+				self.lon.SetValue(float(edit[1]['lon']))
+			self.distance.SetValue(float(edit[1]['distance']))
 
 	def on_help(self, e):
 		url = self.currentpath+"/docs/html/xxx/xxx.html"
@@ -729,6 +886,11 @@ class TriggerGPIO(wx.Dialog):
 		main.Add(hbox, 0, wx.ALL | wx.EXPAND, 0)
 
 		panel.SetSizer(main)
+		
+		if edit <> 0:
+			self.pin.SetSelection(self.nodes.allowed_pins.index(edit[1]['pin']))
+			self.resistor.SetSelection(self.resistor_select2.index(edit[1]['intype']))
+			self.read.SetValue(edit[1]['read'])
 
 	def on_help(self, e):
 		url = self.currentpath+"/docs/html/xxx/xxx.html"
@@ -831,6 +993,11 @@ class TriggerMQTT(wx.Dialog):
 
 		if not local: self.local.Disable()
 		if not remote: self.remote.Disable()
+
+		if edit <> 0:
+			self.topic.SetValue(edit[1]['topic'])
+			self.local.SetValue(edit[1]['broker'] == self.localbrokerid)
+			self.remote.SetValue(edit[1]['broker'] == self.remotebrokerid)
 
 	def on_help(self, e):
 		url = self.currentpath+"/docs/html/xxx/xxx.html"
@@ -963,7 +1130,7 @@ class TriggerTelegram(wx.Dialog):
 		main.Add(hbox, 0, wx.ALL | wx.EXPAND, 0)
 
 		panel.SetSizer(main)
-
+		
 	def on_help(self, e):
 		url = self.currentpath+"/docs/html/xxx/xxx.html"
 		webbrowser.open(url, new=2)
@@ -1071,6 +1238,9 @@ class TriggerTime(wx.Dialog):
 		main.Add(hbox, 0, wx.ALL | wx.EXPAND, 0)
 
 		panel.SetSizer(main)
+		
+		if edit <> 0:
+			self.period.SetValue(int(edit[1]['repeat']))
 
 	def on_help(self, e):
 		url = self.currentpath+"/docs/html/xxx/xxx.html"
@@ -1344,7 +1514,7 @@ class RepeatOptions():
 		            ]
 		        ]
 		    }'''
-		self.intervalUnit = [_('MiliSeconds'),_('Seconds'),_('Minutes'),_('Hours')]
+		self.intervalUnit = [_('MilliSeconds'),_('Seconds'),_('Minutes'),_('Hours')]
 		self.intervalUnit2 = ['msecs','secs','mins','hours']
 		self.repeat_template = '''
 		    {
@@ -1439,6 +1609,7 @@ class ActionSetSignalkKey(wx.Dialog):
 		self.edit_skkey1.Bind(wx.EVT_BUTTON, self.onEditSkkey1)
 
 		self.type_list = [_('Trigger value'), _('Number'), _('String'), _('Signal K key value')]
+		self.type_list2 = ['msg','num','str','flow'] 
 
 		tolabel = wx.StaticText(panel, label=_('to'))
 		self.type = wx.Choice(panel, choices=self.type_list, style=wx.CB_READONLY)
@@ -1485,6 +1656,11 @@ class ActionSetSignalkKey(wx.Dialog):
 
 		self.type.SetSelection(1)
 		self.edit_skkey2.Disable()
+		
+		if edit <> 0:
+			self.skkey1.SetValue(edit[1]['rules'][0]['to'])
+			self.type.SetSelection(self.type_list2.index(edit[1]['rules'][1]['tot']))				
+			self.value.SetValue(edit[1]['rules'][1]['to'])						
 
 	def on_help(self, e):
 		url = self.currentpath+"/docs/html/xxx/xxx.html"
@@ -1558,6 +1734,56 @@ class ActionSetSignalkKey(wx.Dialog):
 		change_node['wires'] = [[sk_node['id']]]
 		self.ActionNodes.append(change_node)
 		self.connector_id = change_node['id']
+		self.EndModal(wx.OK)
+
+class ActionEndFilterSignalk(wx.Dialog):
+	def __init__(self, parent, edit):
+		self.credentials = ''
+		self.nodes = parent.nodes
+		help_bmp = parent.help_bmp
+		self.currentpath = parent.currentpath
+		self.actions_flow_id = parent.actions_flow_id
+		self.action_id = parent.available_actions_select.GetSelection()
+		self.sk_node_template = '''
+		    {			
+		        "id": "",
+				"type": "signalk-input-handler-next",
+		        "z": "",
+		        "name": "",
+		        "x": 380,
+		        "y": 120,
+		        "wires": []
+		    }'''
+
+		if edit == 0: title = _('Set Signal K key')
+		else: title = _('Edit Signal K key')
+
+		wx.Dialog.__init__(self, None, title = title, size=(350, 100))
+		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
+
+		panel = wx.Panel(self)
+
+		okBtn = wx.Button(panel, wx.ID_OK)
+		okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
+
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.AddStretchSpacer(1)
+		hbox.Add(okBtn, 0, wx.ALL, 10)
+
+		main = wx.BoxSizer(wx.VERTICAL)
+		main.AddStretchSpacer(1)
+		main.Add(hbox, 0, wx.ALL | wx.EXPAND, 0)
+
+		panel.SetSizer(main)
+
+	def OnOk(self,e):
+		self.ActionNodes = []
+		sk_node = ujson.loads(self.sk_node_template)
+		sk_node['id'] = self.nodes.get_node_id()
+		sk_node['z'] = self.actions_flow_id
+		sk_node['name'] = 'a|'+sk_node['id']+'|'+str(self.action_id)
+		self.ActionNodes.append(sk_node)
+		self.connector_id = sk_node['id']
 		self.EndModal(wx.OK)
 
 class ActionSetGPIO(wx.Dialog):
@@ -1688,7 +1914,15 @@ class ActionSetGPIO(wx.Dialog):
 		self.on_low(0)
 		self.init.SetValue(True)
 		self.initlow.SetValue(True)
-
+		
+		if edit <> 0:
+			self.pin.SetSelection(self.nodes.allowed_pins.index(edit[0]['pin']))
+			self.low.SetValue(edit[1]['rules'][0]['to'] == '0')
+			self.high.SetValue(edit[1]['rules'][0]['to'] == '1')
+			self.init.SetValue(edit[0]['set'])
+			self.initlow.SetValue(edit[0]['level'] == '0')
+			self.inithigh.SetValue(edit[0]['level'] == '1')
+			
 	def on_help(self, e):
 		url = self.currentpath+"/docs/html/xxx/xxx.html"
 		webbrowser.open(url, new=2)
@@ -1817,6 +2051,7 @@ class ActionSetMQTT(wx.Dialog):
 		self.topic = wx.TextCtrl(panel)
 
 		self.type_list = [_('Trigger value'), _('Fix value'), _('Signal K key value')]
+		self.type_list2 = ['msg','str','flow']
 
 		tolabel = wx.StaticText(panel, label=_('to'))
 		self.type = wx.Choice(panel, choices=self.type_list, style=wx.CB_READONLY)
@@ -1864,6 +2099,13 @@ class ActionSetMQTT(wx.Dialog):
 		if not local: self.local.Disable()
 		if not remote: self.remote.Disable()
 		self.edit_skkey2.Disable()
+		
+		if edit <> 0:
+			self.topic.SetValue(edit[0]['topic'])
+			self.local.SetValue(edit[0]['broker'] == self.localbrokerid)
+			self.remote.SetValue(edit[0]['broker'] == self.remotebrokerid)
+			self.value.SetValue(edit[1]['rules'][0]['to'])
+			self.type.SetSelection(self.type_list2.index(edit[1]['rules'][0]['tot']))
 
 	def on_help(self, e):
 		url = self.currentpath+"/docs/html/xxx/xxx.html"
@@ -2162,6 +2404,43 @@ class ActionPublishTwitter(wx.Dialog):
 
 		panel.SetSizer(main)
 		self.Centre()
+
+		if edit <> 0:
+			self.body.SetValue(edit[1]['template'])
+			if 'resolution' in edit[3]:
+				self.photo.SetValue(True)
+				self.resolution.SetSelection(int(edit[3]['resolution'])-1)
+				self.resolution.Enable()
+			elif 'filename' in edit[3]:
+				self.picture.SetValue(True)
+				self.path_file.SetValue(edit[3]['filename'])
+				self.path_file.Enable()
+				self.button_select_file.Enable()
+
+			Rline = 4
+			if len(edit) > Rline:
+				if edit[Rline]['type'] == 'msg-resend':
+					self.interval.Enable()
+					self.unit.Enable()
+					self.max.Enable()
+					self.repeat.SetValue(True)
+					try:
+						self.interval.SetValue(int(edit[Rline]['interval']))				
+						self.unit.SetSelection(self.RepeatOptions.intervalUnit2.index(edit[Rline]['intervalUnit']))
+						self.max.SetValue(int(edit[Rline]['maximum']))
+					except:
+						pass
+				if edit[Rline]['type'] == 'delay':
+					self.amount.Enable()
+					self.time.Enable()
+					self.timeunit.Enable()
+					self.rate.SetValue(True)
+					try:
+						self.amount.SetValue(int(edit[Rline]['rate']))				
+						self.time.SetValue(int(edit[Rline]['nbRateUnits']))
+						self.timeunit.SetSelection(self.RepeatOptions.rateUnit2.index(edit[Rline]['rateUnits']))
+					except:
+						pass
 
 	def on_help(self, e):
 		url = self.currentpath+"/docs/html/xxx/xxx.html"
@@ -2520,6 +2799,40 @@ class ActionSendEmail(wx.Dialog):
 
 		self.server.SetValue('smtp.gmail.com')
 		self.secure.SetValue(True)
+		
+		if edit <> 0:
+			self.server.SetValue(edit[0]['server'])
+			self.port.SetValue(edit[0]['port'])
+			self.secure.SetValue(edit[0]['secure'])
+			self.to.SetValue(edit[0]['name'])	
+			
+			self.subject.SetValue(edit[2]['template'])
+			self.body.SetValue(edit[1]['template'])
+		
+			Rline = 3
+			if len(edit) > Rline:
+				if edit[Rline]['type'] == 'msg-resend':
+					self.interval.Enable()
+					self.unit.Enable()
+					self.max.Enable()
+					self.repeat.SetValue(True)
+					try:
+						self.interval.SetValue(int(edit[Rline]['interval']))				
+						self.unit.SetSelection(self.RepeatOptions.intervalUnit2.index(edit[Rline]['intervalUnit']))
+						self.max.SetValue(int(edit[Rline]['maximum']))
+					except:
+						pass
+				if edit[Rline]['type'] == 'delay':
+					self.amount.Enable()
+					self.time.Enable()
+					self.timeunit.Enable()
+					self.rate.SetValue(True)
+					try:
+						self.amount.SetValue(int(edit[Rline]['rate']))				
+						self.time.SetValue(int(edit[Rline]['nbRateUnits']))
+						self.timeunit.SetSelection(self.RepeatOptions.rateUnit2.index(edit[Rline]['rateUnits']))
+					except:
+						pass
 
 	def on_help(self, e):
 		url = self.currentpath+"/docs/html/xxx/xxx.html"
@@ -2749,6 +3062,33 @@ class ActionPlaySound(wx.Dialog):
 		main.Add(hbox, 0, wx.ALL | wx.EXPAND, 0)
 
 		panel.SetSizer(main)
+		
+		if edit <> 0:
+			self.path_sound.SetValue(edit[0]['append'])
+			Rline = 1
+			if len(edit) > Rline:
+				if edit[Rline]['type'] == 'msg-resend':
+					self.interval.Enable()
+					self.unit.Enable()
+					self.max.Enable()
+					self.repeat.SetValue(True)
+					try:
+						self.interval.SetValue(int(edit[Rline]['interval']))				
+						self.unit.SetSelection(self.RepeatOptions.intervalUnit2.index(edit[Rline]['intervalUnit']))
+						self.max.SetValue(int(edit[Rline]['maximum']))
+					except:
+						pass
+				if edit[Rline]['type'] == 'delay':
+					self.amount.Enable()
+					self.time.Enable()
+					self.timeunit.Enable()
+					self.rate.SetValue(True)
+					try:
+						self.amount.SetValue(int(edit[Rline]['rate']))				
+						self.time.SetValue(int(edit[Rline]['nbRateUnits']))
+						self.timeunit.SetSelection(self.RepeatOptions.rateUnit2.index(edit[Rline]['rateUnits']))
+					except:
+						pass
 
 	def on_help(self, e):
 		url = self.currentpath+"/docs/html/xxx/xxx.html"
@@ -2947,16 +3287,40 @@ class ActionRunCommand(wx.Dialog):
 
 		panel.SetSizer(main)
 
-		if edit != 0:
-			self.command.SetValue(edit[0])
-			if edit[1] != 0: self.arguments.SetValue(edit[1])
-
 		self.interval.Disable()
 		self.unit.Disable()
 		self.max.Disable()
 		self.amount.Disable()
 		self.time.Disable()
 		self.timeunit.Disable()
+
+		if edit <> 0:
+			self.command.SetValue(edit[0]['command'])
+			self.arguments.SetValue(edit[0]['append'])
+			Rline = 1
+			if len(edit) > Rline:
+				if edit[Rline]['type'] == 'msg-resend':
+					self.interval.Enable()
+					self.unit.Enable()
+					self.max.Enable()
+					self.repeat.SetValue(True)
+					try:
+						self.interval.SetValue(int(edit[Rline]['interval']))				
+						self.unit.SetSelection(self.RepeatOptions.intervalUnit2.index(edit[Rline]['intervalUnit']))
+						self.max.SetValue(int(edit[Rline]['maximum']))
+					except:
+						pass
+				if edit[Rline]['type'] == 'delay':
+					self.amount.Enable()
+					self.time.Enable()
+					self.timeunit.Enable()
+					self.rate.SetValue(True)
+					try:
+						self.amount.SetValue(int(edit[Rline]['rate']))				
+						self.time.SetValue(int(edit[Rline]['nbRateUnits']))
+						self.timeunit.SetSelection(self.RepeatOptions.rateUnit2.index(edit[Rline]['rateUnits']))
+					except:
+						pass
 
 	def on_help(self, e):
 		url = self.currentpath+"/docs/html/xxx/xxx.html"
@@ -3281,6 +3645,51 @@ class ActionSendTelegram(wx.Dialog):
 
 		panel.SetSizer(main)
 		self.Centre()
+
+		if edit <> 0:	
+			if 'template' in edit[1]:
+				self.text.SetValue(True)
+				self.msg.SetValue(edit[1]['template'])
+				self.msg.Enable()
+				self.chatid.SetValue(edit[2]['chatId'])
+				Rline = 3
+			if 'resolution' in edit[1]:
+				self.chatid.SetValue(edit[2]['chatId'])
+				self.photo.SetValue(True)
+				self.resolution.SetSelection(int(edit[1]['resolution'])-1)
+				self.resolution.Enable()
+				Rline = 3
+			elif 'image' in edit[0]:
+				self.chatid.SetValue(edit[1]['chatId'])
+				self.picture.SetValue(True)
+				self.path_file.SetValue(edit[0]['image'])
+				self.path_file.Enable()
+				self.button_select_file.Enable()
+				Rline = 2
+
+			if len(edit) > Rline:
+				if edit[Rline]['type'] == 'msg-resend':
+					self.interval.Enable()
+					self.unit.Enable()
+					self.max.Enable()
+					self.repeat.SetValue(True)
+					try:
+						self.interval.SetValue(int(edit[Rline]['interval']))				
+						self.unit.SetSelection(self.RepeatOptions.intervalUnit2.index(edit[Rline]['intervalUnit']))
+						self.max.SetValue(int(edit[Rline]['maximum']))
+					except:
+						pass
+				if edit[Rline]['type'] == 'delay':
+					self.amount.Enable()
+					self.time.Enable()
+					self.timeunit.Enable()
+					self.rate.SetValue(True)
+					try:
+						self.amount.SetValue(int(edit[Rline]['rate']))				
+						self.time.SetValue(int(edit[Rline]['nbRateUnits']))
+						self.timeunit.SetSelection(self.RepeatOptions.rateUnit2.index(edit[Rline]['rateUnits']))
+					except:
+						pass
 
 	def on_help(self, e):
 		url = self.currentpath+"/docs/html/xxx/xxx.html"

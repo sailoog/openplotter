@@ -151,14 +151,48 @@ class selectKey(wx.Dialog):
 			for i in self.grouped_data:
 				i['keys'] = sorted(i['keys'], key=lambda k: k['name'])
 
+		self.list_groups2 = []
 		for i in self.grouped_data:
 			self.list_groups.Append([i["name"]])
+			self.list_groups2.append(i["name"])
 
 		self.selected_group = False
 		self.selected_path = False
 		self.selected_property = False
 
+		self.list_skpaths2 = []
+		
 		if oldkey: 
+			skproperties = oldkey.split(':')
+			skpath = skproperties[0].split('.')
+			self.list_groups.Select(self.list_groups2.index(skpath[0]),1)
+			keysindex = -1
+			for i in self.grouped_data[self.selected_group]['keys']:
+				self.list_skpaths.Append([i["name"]])
+				self.list_skpaths2.append(i["name"])
+				if skproperties[0][len(skpath[0])+1:] == i["name"]:
+					keysindex = self.list_skpaths2.index(i["name"])
+
+			if keysindex == -1:
+				newkey = '*'+skproperties[0][len(skpath[0])+len(skpath[1])+1:]
+				for i in self.list_skpaths2:
+					if newkey == i:
+						keysindex = self.list_skpaths2.index(i)
+						self.wildcard.SetValue(skpath[1])
+
+			if keysindex > -1:
+				self.list_skpaths.Select(keysindex,1)
+				self.list_skpaths.Focus(keysindex)
+				self.selected_path = keysindex
+				keysindex = -1
+				if len(skproperties)>1:
+					list_skproperties2 = []
+					for i in self.grouped_data[self.selected_group]['keys'][self.selected_path]['content']['properties']:
+						list_skproperties2.append(i)
+						if skproperties[1] == i:
+							keysindex = list_skproperties2.index(i)
+					if keysindex > -1:
+						self.list_skproperties.Select(keysindex,1)
 			self.SKkey.SetValue(oldkey)
 
 		if not selectvessels:
