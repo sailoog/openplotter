@@ -56,7 +56,7 @@ class SK_settings:
 		OPcan = False
 		OPpypilot = False
 		OPserial = False	#TODO afegir funcio per activar la conexio de dispositius serie
-		OPsensors = False 	#TODO afegir funcio per activar la conexio dels sensors
+		OPsensors = False
 		OPnmea0183 = False
 
 		try:

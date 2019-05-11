@@ -201,7 +201,6 @@ class MainFrame(wx.Frame):
 		self.manual_settings = ''
 		self.read_kplex_conf()
 		self.read_language()
-
 		self.read_startup()
 		self.read_wifi_conf()
 		self.read_DS18B20()
@@ -1702,11 +1701,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		diagnostic = wx.Button(self.p_kplex, label=_('Diagnostic'))
 		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_kplex)
 
-		add = wx.Button(self.p_kplex, label=_('add network'))
+		add = wx.Button(self.p_kplex, label=_('add network connection'))
 		add.Bind(wx.EVT_BUTTON, self.on_add_kplex)
 		delete = wx.Button(self.p_kplex, label=_('delete'))
 		delete.Bind(wx.EVT_BUTTON, self.on_delete_kplex)
 
+		help_button = wx.BitmapButton(self.p_kplex, bitmap=self.help_bmp, size=(self.help_bmp.GetWidth()+40, self.help_bmp.GetHeight()+10))
+		help_button.Bind(wx.EVT_BUTTON, self.on_help_kplex)
 		restart = wx.Button(self.p_kplex, label=_('Restart'))
 		restart.Bind(wx.EVT_BUTTON, self.on_restart_kplex)
 		advanced = wx.Button(self.p_kplex, label=_('Advanced'))
@@ -1725,6 +1726,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		hbox.Add(delete, 0, wx.RIGHT | wx.LEFT, 5)
 
 		hboxb = wx.BoxSizer(wx.HORIZONTAL)
+		hboxb.Add(help_button, 0, wx.RIGHT, 5)
 		hboxb.Add(diagnostic, 0, wx.RIGHT | wx.LEFT, 5)
 		hboxb.Add(restart, 0, wx.RIGHT | wx.LEFT, 5)
 		hboxb.Add(advanced, 0, wx.RIGHT | wx.LEFT, 5)
@@ -1765,7 +1767,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.read_kplex_conf()
 
 	def stop_kplex(self):
-		subprocess.call(['pkill', '-9', 'kplex'])
+		subprocess.call(['pkill', '-15', 'kplex'])
 		while self.util_process_exist('kplex'):
 			time.sleep(0.05)
 
@@ -1775,15 +1777,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def edit_kplex(self, e):
 		idx = e.GetIndex()
-		filteronly = 0
-		if self.kplex[idx][1] == 'system' or self.kplex[idx][1] == 'signalk' or self.kplex[idx][1] == 'gpsd':
-			self.ShowStatusBarBLACK(_('You can only edit filter.'))
-			filteronly = 1
 		edit = []
 		for i in range(9):
 			edit.append(self.list_kplex.GetItem(idx, i).GetText())
 		edit.append(idx)
-		edit.append(filteronly)
 		self.edit_add_kplex(edit)
 
 	def on_add_kplex(self, e):
@@ -1867,8 +1864,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 			self.set_list_kplex()
 
-		except IOError:
-			self.ShowMessage(_('Multiplexer configuration file does not exist. Add inputs and apply changes.'))
+		except: pass
 
 	def extract_value(self, data):
 		option, value = data.split('=')
@@ -1915,27 +1911,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def on_apply_changes_kplex(self, event):
 		state = ''
-		data = '# For advanced manual configuration, please visit: http://www.stripydog.com/kplex/configuration.html\n# Please do not modify defaults nor OpenPlotter GUI settings.\n# Add manual settings at the end of the document.\n\n'
-
-		data += '###defaults\n\n'
-		data += '[udp]\nname=system\ndirection=in\nport=10110\n'
-		for index, item in enumerate(self.kplex):
-			if 'system' in item[1]:
-				if not (item[6] == _('none') or item[6] == 'none') and not (item[7] == _('nothing') or item[7] == 'nothing'): 
-					data += state + 'ifilter=' + item[7] + '\n'
-				if not (item[8] == _('none') or item[8] == 'none') and not (item[9] == _('nothing') or item[9] == 'nothing'): 
-					data += state + 'ofilter=' + item[9] + '\n'
-				data += '\n'
-		data += '[tcp]\nname=signalk\ndirection=out\nmode=server\nport=30330\n\n'
-		for index, item in enumerate(self.kplex):
-			if 'signalk' in item[1]:
-				if not (item[6] == _('none') or item[6] == 'none') and not (item[7] == _('nothing') or item[7] == 'nothing'): 
-					data += state + 'ifilter=' + item[7] + '\n'
-				if not (item[8] == _('none') or item[8] == 'none') and not (item[9] == _('nothing') or item[9] == 'nothing'): 
-					data += state + 'ofilter=' + item[9] + '\n'
-				data += '\n'
-
-		data += '###end of defaults\n\n###OpenPlotter GUI settings\n\n'
+		data = '# For advanced manual configuration, please visit: http://www.stripydog.com/kplex/configuration.html\n# Please do not modify OpenPlotter GUI settings.\n# Add manual settings at the end of the document.\n\n'
+		data += '###OpenPlotter GUI settings\n\n'
 
 		for index, item in enumerate(self.kplex):
 			if not ('system' in item[1] or 'signalk' in item[1]):
@@ -1990,11 +1967,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		num = len(self.kplex)
 		for i in range(num):
 			if self.list_kplex.IsSelected(i):
-				if self.kplex[i][1] == 'system' or self.kplex[i][1] == 'signalk':
-					self.ShowStatusBarRED(_('You can not delete this'))
-					return
 				if self.kplex[i][2] == 'Serial' or self.kplex[i][1] == 'gpsd':
-					self.ShowStatusBarRED(_('Unassign this device on "Serial ports" tab'))
+					self.ShowStatusBarRED(_('Unassign this device on "Serial" tab'))
 					return	
 				del self.kplex[i]
 		self.set_list_kplex()
@@ -2043,6 +2017,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 						if Serialinst[name]['assignment'] == 'NMEA 0183 out':
 							subprocess.Popen(['kplex', '-f', self.home+'/.nmea0183out.conf'])
 							break
+	
+	def on_help_kplex(self, e):
+		url = self.currentpath+"/docs/html/kplex/xxx.html"
+		webbrowser.open(url, new=2)
 
 	###########################################I2C
 
@@ -4690,7 +4668,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					if i[1] == name and self.Serialinst[name]['assignment'] == 'Kplex': exist = True
 				if not exist: del self.kplex[index]
 		self.set_list_kplex()
-		self.on_apply_changes_kplex(0)
+		#self.on_apply_changes_kplex(0)
 
 		#set CAN-USB devices
 		can_device = ''

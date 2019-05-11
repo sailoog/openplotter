@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, subprocess, time, os, threading, sys, platform, requests, ConfigParser, io
+import wx, subprocess, time, os, threading, sys, platform, requests, ConfigParser, io, re
 from shutil import copyfile
 from classes.conf import Conf
 from classes.language import Language
@@ -306,13 +306,6 @@ class MyFrame(wx.Frame):
 
 		######################################
 
-		#subprocess.call(['pkill', '-9', 'kplex'])
-		#self.add_logger_data(_('\nStarting NMEA 0183 Multiplexer Kplex...'))
-		#subprocess.Popen('kplex')
-		#self.check_start('kplex')
-
-		######################################
-
 		subprocess.call(['pkill', '-15', 'opencpn'])
 		if opencpn=='1':
 			self.add_logger_data(_('\nStarting OpenCPN...'))
@@ -359,6 +352,23 @@ class MyFrame(wx.Frame):
 			self.add_logger_data(_(' See warning.'))
 		else: self.add_logger_data(_(' Done.'))
 
+		######################################
+
+		subprocess.call(['pkill', '-15', 'kplex'])
+		startKplex = False
+		try:
+			file = open(self.home + '/.kplex.conf', 'r')
+			data = file.readlines()
+			file.close()
+			for item in data:
+				if re.search('\[*\]', item):
+					if not '#[' in item: startKplex = True
+		except: pass
+		if startKplex:
+			self.add_logger_data(_('\nStarting kplex...'))
+			subprocess.Popen('kplex')
+			self.check_start('kplex')
+			
 		######################################
 
 		self.add_logger_data(_('\nChecking OpenPlotter updates...'))
@@ -482,8 +492,8 @@ if len(sys.argv)>1:
 	if sys.argv[1]=='stop':
 		subprocess.call(['sudo', 'systemctl', 'stop', 'signalk.service'])
 		subprocess.call(['sudo', 'systemctl', 'stop', 'signalk.socket'])
-		subprocess.call(['pkill', '-9', 'opencpn'])
-		subprocess.call(['pkill', '-9', 'kplex'])
+		subprocess.call(['pkill', '-15', 'opencpn'])
+		subprocess.call(['pkill', '-15', 'kplex'])
 		#SDR
 		subprocess.call(['pkill', '-15', 'rtl_ais'])
 		subprocess.call(['pkill', '-f', 'SDR_AIS_fine_cal.py'])

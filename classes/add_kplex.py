@@ -163,18 +163,6 @@ class addkplex(wx.Dialog):
 			else:
 				self.ofilter_select.SetValue(self.mode_ofilter[0])
 
-			if edit[10] == 1:
-				self.kplex_type.Disable()
-				self.kplex_device.Disable()
-				self.kplex_name.Disable()
-				#self.kplex_ser_T1.Disable()
-				#self.kplex_ser_T2.Disable()
-				self.kplex_address.Disable()
-				self.kplex_netport.Disable()
-				#self.kplex_io_ser.Disable()
-				self.kplex_io_net.Disable()
-				#self.kplex_ser_T1.Disable()
-				#self.kplex_ser_T1.Disable()
 	'''
 	def GPS_examp(self, e):
 		self.kplex_type.SetValue('Serial')
