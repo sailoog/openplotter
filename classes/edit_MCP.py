@@ -18,6 +18,7 @@ import wx
 import re
 
 from select_key import selectKey
+from add_value_setting import addvaluesetting
 
 class editMCP(wx.Dialog):
 	def __init__(self,aktiv,channel,sk,convert,parent):
@@ -26,7 +27,7 @@ class editMCP(wx.Dialog):
 
 		title = _('Edit').decode('utf8')+(' MCP3008-channel '+str(channel)).encode('utf-8')
 
-		wx.Dialog.__init__(self, None, title=title, size=(450, 250))
+		wx.Dialog.__init__(self, None, title=title, size=(450, 270))
 
 		panel = wx.Panel(self)
 
@@ -55,6 +56,9 @@ class editMCP(wx.Dialog):
 		if convert == 1: convertB = True
 		self.convert.SetValue(convertB)
 
+		self.value_setting = wx.Button(panel, label=_('value setting'))
+		self.value_setting.Bind(wx.EVT_BUTTON, self.on_value_setting)	
+		
 		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
 		okBtn = wx.Button(panel, wx.ID_OK)
 
@@ -67,6 +71,7 @@ class editMCP(wx.Dialog):
 
 		hbox4 = wx.BoxSizer(wx.HORIZONTAL)
 		hbox4.Add(self.convert, 0, wx.ALL| wx.EXPAND, 5)
+		hbox4.Add(self.value_setting, 0, wx.ALL| wx.EXPAND, 5)
 
 		hbox = wx.BoxSizer(wx.HORIZONTAL)
 		hbox.Add((0, 0), 1, wx.ALL | wx.EXPAND, 5)
@@ -93,25 +98,13 @@ class editMCP(wx.Dialog):
 
 	def onEditSkkey(self,e):
 		key = self.SKkey.GetValue()
-		dlg = selectKey(key)
+		dlg = selectKey(key,'self')
 		
 		res = dlg.ShowModal()
-		if res == wx.ID_OK:
-			key = dlg.keys_list.GetValue()
-			if '*' in key:
-				wildcard = dlg.wildcard.GetValue()
-				if wildcard:
-					if not re.match('^[0-9a-zA-Z]+$', wildcard):
-						self.ShowMessage(_('Failed. * must contain only allowed characters.'))
-						dlg.Destroy()
-						return
-					key = key.replace('*',wildcard)
-				else:
-					self.ShowMessage(_('Failed. You have to provide a name for *.'))
-					dlg.Destroy()
-					return
+		if res == wx.OK:
+			key = dlg.selected_key
+			self.SKkey.SetValue(key)
 		dlg.Destroy()
-		self.SKkey.SetValue(key)
 		
 	def on_convert(self, e):
 		convert = 0
@@ -141,6 +134,37 @@ class editMCP(wx.Dialog):
 
 		self.convert.SetValue(convert)
 		
+	def on_value_setting(self, e):
+		edit = self.channel
+		if edit == -1:
+			return
+		dlg = addvaluesetting(edit, self)
+		dlg.ShowModal()
+
+		if self.convert.GetValue():
+			convert = 1
+			self.conf.read()
+			data = self.conf.get('SPI', 'value_' + str(edit))
+			try:
+				temp_list = eval(data)
+			except:
+				temp_list = []
+			min = 1023
+			max = 0
+			for ii in temp_list:
+				if ii[0] > max: max = ii[0]
+				if ii[0] < min: min = ii[0]
+			if min > 0:
+				wx.MessageBox(_('minimum raw value in setting table > 0'), 'info', wx.OK | wx.ICON_INFORMATION)
+				convert = 0
+			if max < 1023:
+				wx.MessageBox(_('maximum raw value in setting table < 1023'), 'info', wx.OK | wx.ICON_INFORMATION)
+				convert = 0
+			if convert == 0:
+				self.MCP[edit][4] = convert
+				self.conf.set('SPI', 'mcp', str(self.MCP))
+				self.read_MCP()
+				wx.MessageBox(_('convert disabled'), 'info', wx.OK | wx.ICON_INFORMATION)
 
 	def ShowMessage(self, w_msg):
 		wx.MessageBox(w_msg, 'Info', wx.OK | wx.ICON_INFORMATION)
