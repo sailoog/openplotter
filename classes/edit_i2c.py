@@ -29,7 +29,7 @@ class editI2c(wx.Dialog):
 		panel = wx.Panel(self)
 
 		titl = wx.StaticText(panel, label=_('Signal K key'))
-		self.SKkey = wx.TextCtrl(panel, style=wx.CB_READONLY)
+		self.SKkey = wx.TextCtrl(panel)
 		self.SKkey.SetValue(sk)
 
 		self.edit_skkey = wx.Button(panel, label=_('Edit'))
@@ -90,11 +90,10 @@ class editI2c(wx.Dialog):
 		self.SKkey.SetValue('')
 
 	def onEditSkkey(self,e):
-		dlg = selectKey(self.SKkey.GetValue(),'self')
-		
+		dlg = selectKey(self.SKkey.GetValue(),0)
 		res = dlg.ShowModal()
 		if res == wx.OK:
-			key = dlg.selected_key
+			key = dlg.selected_key.replace(':','.')
 			self.SKkey.SetValue(key)
 		dlg.Destroy()
 

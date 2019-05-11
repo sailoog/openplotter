@@ -32,7 +32,7 @@ class selectKey(wx.Dialog):
 				data = ujson.load(data_file)
 		except: self.ShowMessage(_('Error. File not found: ')+'keyswithmetadata.json')
 
-		SK_ = SK_settings()
+		SK_ = SK_settings(conf)
 		self.port = SK_.aktport
 		self.http = SK_.http
 

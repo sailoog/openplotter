@@ -15,16 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 import os, ujson, subprocess
-from conf import Conf
-
 
 class SK_settings:
 
-	def __init__(self):
+	def __init__(self, conf):
 
-		self.conf = Conf()
-		self.home = self.conf.home
-		self.setting_file = self.home+'/.signalk/settings.json'
+		self.conf = conf
+		self.setting_file = self.conf.home+'/.signalk/settings.json'
 		self.load()
 		
 	def load(self):
@@ -59,8 +56,8 @@ class SK_settings:
 		OPcan = False
 		OPpypilot = False
 		OPserial = False	#TODO afegir funcio per activar la conexio de dispositius serie
-		OPsensors = False 	#TODO afegir funcio per activar la conexio dels sensors
-		OPsdr_ais = False
+		OPsensors = False
+		OPnmea0183 = False
 
 		try:
 			if 'pipedProviders' in self.data:
@@ -69,7 +66,7 @@ class SK_settings:
 					elif i['id'] == 'OPpypilot': OPpypilot = True
 					elif i['id'] == 'OPserial': OPserial = True
 					elif i['id'] == 'OPsensors': OPsensors = True
-					elif i['id'] == 'OPsdr_ais': OPsdr_ais = True
+					elif i['id'] == 'OPnmea0183': OPnmea0183 = True
 		except: print 'Error: error parsing Signal K settings defaults'
 
 		if not OPcan: 
@@ -84,11 +81,11 @@ class SK_settings:
 		if not OPsensors: 
 			self.data['pipedProviders'].append({'pipeElements': [{'type': 'providers/simple', 'options': {'logging': False, 'type': 'SignalK', 'subOptions': {'type': 'udp', 'port': '55557'}}}], 'enabled': False, 'id': 'OPsensors'})
 			write = True
-		if not OPsdr_ais: 
-			self.data['pipedProviders'].append({'pipeElements': [{'type': 'providers/simple', 'options': {'logging': False, 'type': 'NMEA0183', 'subOptions': {'type': 'udp', 'port': '10110'}}}], 'enabled': False, 'id': 'OPsdr_ais'})
+		if not OPnmea0183: 
+			self.data['pipedProviders'].append({'pipeElements': [{'type': 'providers/simple', 'options': {'logging': False, 'type': 'NMEA0183', 'subOptions': {'type': 'udp', 'port': '10110'}}}], 'enabled': False, 'id': 'OPnmea0183'})
 			write = True
 
-		#check connections
+		#check state and devices
 		self.OPcan = ''
 		self.ngt1_enabled = -1
 		self.ngt1_device = ''
@@ -96,7 +93,8 @@ class SK_settings:
 		self.canbus_enabled = -1
 		self.canbus_interface = ''
 		self.pypilot_enabled = -1
-		self.sdr_ais_enabled = -1
+		self.nmea0183_enabled = -1
+		self.sensors_enabled = -1
 		count = 0
 		try:
 			if 'pipedProviders' in self.data:
@@ -117,14 +115,60 @@ class SK_settings:
 						elif i['id'] == 'OPpypilot':
 							self.pypilot_enabled = i['enabled']
 							self.pypilot = count
-						elif i['id'] == 'OPsdr_ais':
-							self.sdr_ais_enabled = i['enabled']
-							self.sdr_ais = count
+						elif i['id'] == 'OPnmea0183':
+							self.nmea0183_enabled = i['enabled']
+							self.nmea0183 = count
+						elif i['id'] == 'OPsensors':
+							self.sensors_enabled = i['enabled']
+							self.sensors = count
 					count+=1
 		except: print 'Error: error parsing Signal K settings connections'
 
 		if write: self.write_settings()
-				
+
+	def setSKsettings(self):
+		write = False
+		#OPsensors
+		pypilot = self.conf.get('PYPILOT', 'mode')
+		i2c = self.conf.get('I2C', 'sensors')
+		if i2c: i2c = eval(i2c)
+		onewire = self.conf.get('1W', 'ds18b20')
+		if onewire: onewire = eval(onewire)
+		spi = eval(self.conf.get('SPI', 'mcp'))
+		spiEnabled = False
+		for i in spi:
+			if i[0] == 1: spiEnabled = True
+		if spiEnabled or i2c or onewire or pypilot == 'basic autopilot' or pypilot == 'imu':
+			if not self.sensors_enabled: 
+				self.data['pipedProviders'][self.sensors]['enabled'] = True
+				write = True
+		else:
+			if self.sensors_enabled:
+				self.data['pipedProviders'][self.sensors]['enabled'] = False
+				write = True
+		#OPnmea0183
+		sdr = self.conf.get('AIS-SDR', 'enable')
+		if sdr == '1' or pypilot == 'imu':
+			if not self.nmea0183_enabled: 
+				self.data['pipedProviders'][self.nmea0183]['enabled'] = True
+				write = True
+		else:
+			if self.nmea0183_enabled: 
+				self.data['pipedProviders'][self.nmea0183]['enabled'] = False
+				write = True
+		#OPpypilot
+		if pypilot == 'basic autopilot':
+			if not self.pypilot_enabled: 
+				self.data['pipedProviders'][self.pypilot]['enabled'] = True
+				write = True
+		else:
+			if self.pypilot_enabled: 
+				self.data['pipedProviders'][self.pypilot]['enabled'] = False
+				write = True
+
+		if write: self.write_settings()
+
+
 	def set_ngt1_device(self,device,speed):
 		self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['device'] = device
 		self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['baudrate'] = long(speed)
@@ -181,22 +225,6 @@ class SK_settings:
 		elif enable == 0:
 			self.data['pipedProviders'][self.OPcan]['enabled']=False
 		self.write_settings()
-
-	def set_pypilot_enable(self,enable):
-		if self.pypilot_enabled != -1:
-			if enable == 1:
-				self.data['pipedProviders'][self.pypilot]['enabled']=True
-			elif enable == 0:
-				self.data['pipedProviders'][self.pypilot]['enabled']=False
-			self.write_settings()
-
-	def set_sdr_ais_enable(self,enable):
-		if self.sdr_ais_enabled != -1:
-			if enable == 1:
-				self.data['pipedProviders'][self.sdr_ais]['enabled']=True
-			elif enable == 0:
-				self.data['pipedProviders'][self.sdr_ais]['enabled']=False
-			self.write_settings()
 
 	def write_settings(self):
 		data = ujson.dumps(self.data, indent=4, sort_keys=True)

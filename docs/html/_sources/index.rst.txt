@@ -52,6 +52,15 @@ Welcome to OpenPlotter's documentation!
 
 .. toctree::
    :maxdepth: 1
+   :caption: Sensors
+   :name: sec-sensors
+
+   sensors/i2c
+   sensors/1w
+   sensors/spi
+
+.. toctree::
+   :maxdepth: 1
    :caption: Dashboards
    :name: sec-dashboards
 

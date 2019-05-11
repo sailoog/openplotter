@@ -35,7 +35,7 @@ class MySK:
 		self.home = self.conf.home
 		self.currentpath = self.conf.get('GENERAL', 'op_folder')
 
-		SK_ = SK_settings()
+		SK_ = SK_settings(self.conf)
 		self.ws_name = SK_.ws+SK_.ip+":"+str(SK_.aktport)+"/signalk/v1/stream?subscribe=self"
 
 		self.data = []

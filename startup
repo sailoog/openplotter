@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, subprocess, time, os, threading, sys, platform, requests, ConfigParser, io
+import wx, subprocess, time, os, threading, sys, platform, requests, ConfigParser, io, re
 from shutil import copyfile
 from classes.conf import Conf
 from classes.language import Language
@@ -152,15 +152,13 @@ class MyFrame(wx.Frame):
 		d800x480=self.conf.get('STARTUP', '800x480')
 		ais_enable = self.conf.get('AIS-SDR', 'enable')
 		ppm = self.conf.get('AIS-SDR', 'ppm')
-		pypilot_mode=self.conf.get('PYPILOT', 'mode')
-		webapp=self.conf.get('PYPILOT', 'webapp')
-		webapp_port=self.conf.get('PYPILOT', 'webapp_port')
+		pypilot_mode = self.conf.get('PYPILOT', 'mode')
+		webapp = self.conf.get('PYPILOT', 'webapp')
+		webapp_port = self.conf.get('PYPILOT', 'webapp_port')
 		N2K_output=self.conf.get('N2K', 'output')
-
-		try:
-			Serialinst = eval(self.conf.get('UDEV', 'serialinst'))
-		except:
-			Serialinst = {}
+		i2c = self.conf.get('I2C', 'sensors')
+		onewire = self.conf.get('1W', 'ds18b20')
+		spi = self.conf.get('SPI', 'mcp')
 
 		tools_py=[]
 		if self.conf.has_section('TOOLS'):
@@ -178,22 +176,9 @@ class MyFrame(wx.Frame):
 
 		subprocess.call(['pkill', '-f', '/openplotter/openplotter'])
 
-		self.add_logger_data(_('\nChecking Signal K connections...'))
-		self.SK_settings = SK_settings()
-		self.check_start('signalk-server')
-		
-		self.add_logger_data(_('\nChecking OpenCPN connections...'))
-		self.opencpnSettings = opencpnSettings()
-		opencpnConnection = self.opencpnSettings.getConnectionState()
-		if not opencpnConnection:
-			self.add_warnings_data(_('\n\nThe default OpenCPN connection is missing: input TCP localhost:10110.\nSome features may not work as expected.'))
-			self.add_logger_data(_(' See warning.'))
-		elif opencpnConnection == 'disabled': 
-			self.add_warnings_data(_('\n\nThe default OpenCPN connection is disabled: input TCP localhost:10110.\nSome features may not work as expected.'))
-			self.add_logger_data(_(' See warning.'))
-		else: self.add_logger_data(_(' Done.'))
-
 		#TODO cada vegada comprovem que existeixen tots els nodes de les credencials
+
+		######################################
 
 		if platform.machine()[0:3]=='arm':
 			self.add_logger_data(_('\nChecking pi password...'))
@@ -207,6 +192,8 @@ class MyFrame(wx.Frame):
 				self.add_warnings_data(_('\n\nSecurity warning: You are using the default password for "pi" user (raspberry).\nPlease change password in Menu > Preferences > Raspberry Pi Configuration.'))
 				self.add_logger_data(_(' See warning.'))
 			else: self.add_logger_data(_(' Done.'))
+
+		######################################
 
 		wifi_default = self.conf_folder + '/Network/default'
 		if not os.path.isdir(wifi_default):
@@ -230,7 +217,9 @@ class MyFrame(wx.Frame):
 				self.add_logger_data(_(' See warning.'))
 			else:
 				self.add_logger_data(_(' Done.'))
-				
+
+		######################################
+
 		if screensaver == '1':
 			subprocess.call(['xset', 's', 'noblank'])
 			subprocess.call(['xset', 's', 'off'])
@@ -242,45 +231,62 @@ class MyFrame(wx.Frame):
 			subprocess.call(['xset', '+dpms'])
 			self.add_logger_data(_('\nScreen saver enabled.').decode('utf8'))
 
+		######################################
+
 		if delay!=0:
 			self.add_logger_data(_('\nApplying ').decode('utf8')+str(delay)+_(' seconds of delay...').decode('utf8'))
 			time.sleep(delay)
 			self.add_logger_data(_(' Done.'))	
 
-		subprocess.call(['pkill', '-f', '1w_d.py'])
-		self.add_logger_data(_('\nStarting 1W sensors...'))
-		subprocess.Popen(['python', self.op_folder+'/1w_d.py'])
-		self.check_start('1w_d.py')
+		######################################
 
 		subprocess.call(['pkill', '-f', 'diagnostic-N2K-output.py'])
 		subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
+		subprocess.call(['pkill', '-f', 'SK-base_d.py'])
 		if N2K_output == '1':
 			self.add_logger_data(_('\nStarting N2K server...'))
 			subprocess.Popen(['python', self.op_folder+'/N2K-server_d.py'])
 			self.check_start('N2K-server_d.py')
-
-			subprocess.call(['pkill', '-f', 'SK-base_d.py'])
-			self.add_logger_data(_('\nStarting NMEA 0183/N2K generators...'))
+			self.add_logger_data(_('\nStarting N2K generators...'))
 			subprocess.Popen(['python', self.op_folder+'/SK-base_d.py'])
 			self.check_start('SK-base_d.py')
 
+		######################################
+
 		subprocess.call(['pkill', '-f', 'read_sensors_d.py'])
-		self.add_logger_data(_('\nStarting I2C, SPI and pypilot...'))
-		if not os.path.exists(self.home + '/.pypilot'):
-			self.add_logger_data(_(' Pypilot not found.'))
-			subprocess.Popen(['python', self.op_folder+'/read_sensors_d.py'])
-			self.check_start('read_sensors_d.py')
-		else:
+		spiEnabled = False
+		try:
+			temp_list = eval(spi)
+		except:
+			temp_list = []
+		for i in temp_list:
+			if i[0] == 1: spiEnabled = True
+		if i2c: i2c = eval(i2c)
+		if spiEnabled or i2c or pypilot_mode == 'imu' or  pypilot_mode == 'basic autopilot':
+			self.add_logger_data(_('\nStarting I2C, SPI or pypilot sensors...'))
 			subprocess.Popen(['python', self.op_folder+'/read_sensors_d.py'], cwd=self.home + '/.pypilot')
 			self.check_start('read_sensors_d.py')
 
-			subprocess.call(['pkill', '-f', 'pypilot_webapp'])
-			if webapp=='1' and pypilot_mode == 'basic autopilot':
-				self.add_logger_data(_('\nStarting Pypilot Web App...'))
-				try: subprocess.Popen(['pypilot_webapp', webapp_port])
-				except: pass
-				self.check_start('pypilot_webapp')
-		#SDR
+		######################################
+
+		subprocess.call(['pkill', '-f', 'pypilot_webapp'])
+		if webapp == '1' and pypilot_mode == 'basic autopilot':
+			self.add_logger_data(_('\nStarting pypilot Web App...'))
+			try: subprocess.Popen(['pypilot_webapp', webapp_port])
+			except: pass
+			self.check_start('pypilot_webapp')
+
+		######################################
+
+		subprocess.call(['pkill', '-f', '1w_d.py'])
+		if onewire: onewire = eval(onewire)
+		if onewire:
+			self.add_logger_data(_('\nStarting 1W sensors...'))
+			subprocess.Popen(['python', self.op_folder+'/1w_d.py'])
+			self.check_start('1w_d.py')
+
+		######################################
+
 		subprocess.call(['pkill', '-15', 'rtl_ais'])
 		subprocess.call(['pkill', '-f', 'SDR_AIS_fine_cal.py'])
 		subprocess.call(['pkill', '-15', 'rtl_test'])
@@ -290,27 +296,15 @@ class MyFrame(wx.Frame):
 			self.add_logger_data(_('\nStarting SDR AIS reception...'))
 			subprocess.Popen(['rtl_ais', '-R', '-p', ppm])
 			self.check_start('rtl_ais')
-			if self.SK_settings.sdr_ais_enabled != True:
-				self.add_logger_data(_('Enabling Signal K connection for SDR AIS...'))
-				self.SK_settings.set_sdr_ais_enable(True)
-				self.check_start('signalk-server')
 
-		if d800x480=='1':
+		######################################
+
+		if d800x480 == '1':
 			self.add_logger_data(_('\nChecking 800x480 display...'))
 			subprocess.call(['sudo', 'python', self.op_folder+'/display800x480.py'])
 			self.add_logger_data(_(' Done.'))
 
-		#subprocess.call(['pkill', '-9', 'kplex'])
-		#self.add_logger_data(_('\nStarting NMEA 0183 Multiplexer Kplex...'))
-		#subprocess.Popen('kplex')
-		#self.check_start('kplex')
-
-		for name in Serialinst:
-			if Serialinst[name]['assignment'] == 'NMEA 0183 out':
-				self.add_logger_data(_('\nStarting serial NMEA 0183 output...'))
-				subprocess.Popen(['kplex', '-f', self.home+'/.nmea0183out.conf'])
-				self.add_logger_data(_(' Done.'))
-				break
+		######################################
 
 		subprocess.call(['pkill', '-15', 'opencpn'])
 		if opencpn=='1':
@@ -321,6 +315,8 @@ class MyFrame(wx.Frame):
 			if len(opencpn_commands)>1: subprocess.Popen(opencpn_commands)
 			if len(opencpn_commands)==1: subprocess.Popen('opencpn')
 			self.check_start('opencpn')
+
+		######################################
 
 		self.add_logger_data(_('\nStarting Tools...'))
 		index=0
@@ -335,6 +331,45 @@ class MyFrame(wx.Frame):
 					subprocess.Popen(['python',self.op_folder+'/tools/'+folder+'/'+file])
 			index+=1
 		self.add_logger_data(_(' Done.'))
+
+		######################################
+
+		self.add_logger_data(_('\nChecking Signal K connections...'))
+		self.SK_settings = SK_settings(self.conf)
+		self.SK_settings.setSKsettings()
+		self.check_start('signalk-server')
+		
+		######################################
+
+		self.add_logger_data(_('\nChecking OpenCPN connections...'))
+		self.opencpnSettings = opencpnSettings()
+		opencpnConnection = self.opencpnSettings.getConnectionState()
+		if not opencpnConnection:
+			self.add_warnings_data(_('\n\nThe default OpenCPN connection is missing: input TCP localhost:10110.\nSome features may not work as expected.'))
+			self.add_logger_data(_(' See warning.'))
+		elif opencpnConnection == 'disabled': 
+			self.add_warnings_data(_('\n\nThe default OpenCPN connection is disabled: input TCP localhost:10110.\nSome features may not work as expected.'))
+			self.add_logger_data(_(' See warning.'))
+		else: self.add_logger_data(_(' Done.'))
+
+		######################################
+
+		subprocess.call(['pkill', '-15', 'kplex'])
+		startKplex = False
+		try:
+			file = open(self.home + '/.kplex.conf', 'r')
+			data = file.readlines()
+			file.close()
+			for item in data:
+				if re.search('\[*\]', item):
+					if not '#[' in item: startKplex = True
+		except: pass
+		if startKplex:
+			self.add_logger_data(_('\nStarting kplex...'))
+			subprocess.Popen('kplex')
+			self.check_start('kplex')
+			
+		######################################
 
 		self.add_logger_data(_('\nChecking OpenPlotter updates...'))
 
@@ -404,10 +439,14 @@ class MyFrame(wx.Frame):
 					self.add_warnings_data('\nhttps://raw.githubusercontent.com/'+master_github_repositories+'/openplotter/'+branch+'/CHANGELOG.md\n')
 				else:
 					self.add_logger_data(' OpenPlotter '+vl+' '+sl+_(' is up to date.').decode('utf8'))
+		
+		######################################
 
 		subprocess.call(['pkill', '-9', 'omxplayer'])
 		if play == '1':
 			if sound: subprocess.Popen(['omxplayer', sound])
+
+		######################################
 
 		self.autoclose=time.time() + 60
 
@@ -453,8 +492,8 @@ if len(sys.argv)>1:
 	if sys.argv[1]=='stop':
 		subprocess.call(['sudo', 'systemctl', 'stop', 'signalk.service'])
 		subprocess.call(['sudo', 'systemctl', 'stop', 'signalk.socket'])
-		subprocess.call(['pkill', '-9', 'opencpn'])
-		subprocess.call(['pkill', '-9', 'kplex'])
+		subprocess.call(['pkill', '-15', 'opencpn'])
+		subprocess.call(['pkill', '-15', 'kplex'])
 		#SDR
 		subprocess.call(['pkill', '-15', 'rtl_ais'])
 		subprocess.call(['pkill', '-f', 'SDR_AIS_fine_cal.py'])
