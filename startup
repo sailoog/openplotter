@@ -261,6 +261,7 @@ class MyFrame(wx.Frame):
 			temp_list = []
 		for i in temp_list:
 			if i[0] == 1: spiEnabled = True
+		if i2c: i2c = eval(i2c)
 		if spiEnabled or i2c or pypilot_mode == 'imu' or  pypilot_mode == 'basic autopilot':
 			self.add_logger_data(_('\nStarting I2C, SPI or pypilot sensors...'))
 			subprocess.Popen(['python', self.op_folder+'/read_sensors_d.py'], cwd=self.home + '/.pypilot')
@@ -278,6 +279,7 @@ class MyFrame(wx.Frame):
 		######################################
 
 		subprocess.call(['pkill', '-f', '1w_d.py'])
+		if onewire: onewire = eval(onewire)
 		if onewire:
 			self.add_logger_data(_('\nStarting 1W sensors...'))
 			subprocess.Popen(['python', self.op_folder+'/1w_d.py'])
