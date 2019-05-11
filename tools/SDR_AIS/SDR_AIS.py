@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, os, sys, subprocess, ConfigParser, webbrowser
+import wx, os, sys, subprocess, ConfigParser, webbrowser, time
 
 op_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../..')
 sys.path.append(op_folder+'/classes')
@@ -33,7 +33,7 @@ class MyFrame(wx.Frame):
 			self.op_folder = self.conf.get('GENERAL', 'op_folder')
 			self.help_bmp = wx.Bitmap(self.op_folder + "/static/icons/help-browser.png", wx.BITMAP_TYPE_ANY)
 			Language(self.conf)
-			self.SK_settings = SK_settings()
+			self.SK_settings = SK_settings(self.conf)
 			self.opencpnSettings = opencpnSettings()
 
 			wx.Frame.__init__(self, None, title=_('SDR receiver'), size=(710,460))
@@ -191,12 +191,11 @@ class MyFrame(wx.Frame):
 				ppm = self.ppm.GetValue()
 				try: int(ppm)
 				except:
-					self.SetStatusText(_('Failed. Wrong PPM'))
+					self.ShowStatusBarRED(_('Failed. Wrong PPM'))
 					return
 				subprocess.Popen(['rtl_ais', '-R', '-p', ppm])    
 				self.conf.set('AIS-SDR', 'enable', '1')
 				self.on_saveppm(0)
-				self.SK_settings.set_sdr_ais_enable(True)
 				msg = _('SDR-AIS reception enabled')
 				opencpn = self.opencpnSettings.getConnectionState()
 				if not opencpn: 
@@ -206,15 +205,20 @@ class MyFrame(wx.Frame):
 			else:
 				self.enable_sdr_controls()
 				self.conf.set('AIS-SDR', 'enable', '0')
-				self.SK_settings.set_sdr_ais_enable(False)
 				msg = _('SDR-AIS reception disabled')
-			self.SetStatusText(msg)
+
+			self.SK_settings.setSKsettings()
+			seconds = 12
+			for i in range(seconds, 0, -1):
+				self.ShowStatusBarRED(_('Restarting Signal K server... ')+str(i))
+				time.sleep(1)
+			self.ShowStatusBarBLACK(msg)
 
 		def test_gain(self,event):
 			self.kill_sdr()
 			subprocess.Popen(['lxterminal', '-e', 'rtl_test', '-p'])
 			msg=_('Wait for "cumulative PPM" value to stabilize and copy it into "PPM" field')
-			self.SetStatusText(msg)
+			self.ShowStatusBarBLACK(msg)
 
 		def check_band(self, event):
 			self.kill_sdr()
@@ -223,20 +227,20 @@ class MyFrame(wx.Frame):
 			self.conf.set('AIS-SDR', 'band', band)
 			subprocess.Popen(['python',self.op_folder+'/tools/SDR_AIS/SDR_AIS_fine_cal.py', 'b'])
 			msg=_('Select the GSM band used in your country to get the strongest channel')
-			self.SetStatusText(msg)
+			self.ShowStatusBarBLACK(msg)
 			
 		def check_channel(self, event):
 			self.kill_sdr()
 			channel=self.channel.GetValue()
 			try: int(channel)
 			except:
-				self.SetStatusText(_('Failed. Wrong channel'))
+				self.ShowStatusBarRED(_('Failed. Wrong channel'))
 				return
 			self.on_saveppm(0)
 			self.conf.set('AIS-SDR', 'gsm_channel', channel)
 			if channel: subprocess.Popen(['python',self.op_folder+'/tools/SDR_AIS/SDR_AIS_fine_cal.py', 'c'])
 			msg=_('Use the strongest channel to calculate the final PPM')
-			self.SetStatusText(msg)
+			self.ShowStatusBarBLACK(msg)
 
 		def on_radio_default(self, event):
 			self.kill_sdr()
@@ -289,7 +293,7 @@ class MyFrame(wx.Frame):
 			ppm = self.ppm.GetValue()
 			try: ppm2 = int(ppm)*1000000
 			except:
-				self.SetStatusText(_('Failed. Wrong PPM'))
+				self.ShowStatusBarRED(_('Failed. Wrong PPM'))
 				return
 			self.gqrx_conf = ConfigParser.SafeConfigParser()
 			self.gqrx_conf.read(self.home+'/.config/gqrx/default.conf')
@@ -301,7 +305,7 @@ class MyFrame(wx.Frame):
 			with open(self.home+'/.config/gqrx/default.conf', 'wb') as configfile:
 				self.gqrx_conf.write(configfile)
 			self.conf.set('AIS-SDR', 'ppm', ppm)
-			self.SetStatusText(_('Saved PPM'))
+			self.ShowStatusBarGREEN(_('Saved PPM'))
 
 		def open_gqrx(self):
 			subprocess.Popen('/opt/gqrx/gqrx')
@@ -309,6 +313,19 @@ class MyFrame(wx.Frame):
 		def on_help_sdr(self, e):
 			url = self.op_folder+"/docs/html/tools/sdr_receiver.html"
 			webbrowser.open(url, new=2)
+
+		def ShowStatusBar(self, w_msg, colour):
+			self.GetStatusBar().SetForegroundColour(colour)
+			self.SetStatusText(w_msg)
+
+		def ShowStatusBarRED(self, w_msg):
+			self.ShowStatusBar(w_msg, wx.RED)
+
+		def ShowStatusBarGREEN(self, w_msg):
+			self.ShowStatusBar(w_msg, wx.GREEN)
+
+		def ShowStatusBarBLACK(self, w_msg):
+			self.ShowStatusBar(w_msg, wx.BLACK)	
 
 app = wx.App()
 MyFrame().Show()

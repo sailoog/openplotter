@@ -47,7 +47,7 @@ class MainFrame(wx.Frame):
 		self.home = conf.home
 		self.conf_folder = conf.conf_folder
 		self.currentpath = currentpath
-		self.SK_settings = SK_settings()
+		self.SK_settings = SK_settings(self.conf)
 
 		wx.Frame.__init__(self, None, title="OpenPlotter", size=(710, 460))
 		if self.util_process_exist('startup.py'):
@@ -1410,7 +1410,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		self.ShowMessage(msg)
 
-	###########################################pypiloy
+	###########################################pypilot
 
 	def page_pypilot(self):
 		pypilot_mode_label = wx.StaticText(self.p_pypilot, label=_('pypilot Mode:'))
@@ -1559,12 +1559,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		if mode == 'basic autopilot': 
 			self.enable_autopilot()
-			if self.SK_settings.pypilot_enabled!=1:
-				self.SK_settings.set_pypilot_enable(True)
 		else:
 			self.disable_autopilot()
-			if self.SK_settings.pypilot_enabled==1:
-				self.SK_settings.set_pypilot_enable(False)
 			if mode == 'imu': 
 				self.enable_imu()
 			else:
@@ -1657,7 +1653,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.conf.set('PYPILOT', 'webapp_port', str(self.pypilot_webapp_port.GetValue()))
 
 		self.reset_sensors()
-		self.restart_SK()
 
 		subprocess.call(['pkill', '-f', 'pypilot_webapp'])
 		if self.pypilot_webapp_cb.GetValue() and self.pypilot_mode.GetSelection() == 2:
@@ -1668,10 +1663,15 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def start_sensors(self):
 		subprocess.Popen(['python', self.currentpath + '/read_sensors_d.py'], cwd=self.home + '/.pypilot')
-		self.ShowStatusBarGREEN(_('Sensors restarted'))
+		self.SK_settings.setSKsettings()
+		seconds = 12
+		for i in range(seconds, 0, -1):
+			self.ShowStatusBarRED(_('Restarting Signal K server... ')+str(i))
+			time.sleep(1)
+		self.ShowStatusBarGREEN(_('Signal K server restarted'))
 
 	def stop_sensors(self):
-		self.ShowStatusBarRED(_('Sensors stopped'))
+		self.ShowStatusBarRED(_('Restarting Signal K server... '))
 		subprocess.call(['pkill', '-f', 'pypilot_calibration'])
 		subprocess.call(['pkill', '-f', 'signalk_scope_wx'])
 		subprocess.call(['pkill', '-f', 'pypilot_control'])
@@ -2076,9 +2076,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		delete = wx.Button(self.p_i2c, label=_('delete'))
 		delete.Bind(wx.EVT_BUTTON, self.on_delete_i2c)
 
+		help_button = wx.BitmapButton(self.p_i2c, bitmap=self.help_bmp, size=(self.help_bmp.GetWidth()+40, self.help_bmp.GetHeight()+10))
+		help_button.Bind(wx.EVT_BUTTON, self.on_help_i2c)
 		diagnostic = wx.Button(self.p_i2c, label=_('SK Diagnostic'))
 		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_SK)
-
 		reset_i2c = wx.Button(self.p_i2c, label=_('Restart'))
 		reset_i2c.Bind(wx.EVT_BUTTON, self.reset_sensors)
 
@@ -2091,6 +2092,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		hlistbox.Add(hlistbox_but, 0, wx.RIGHT | wx.LEFT, 0)
 
 		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(help_button, 0, wx.RIGHT, 5)
 		hbox.Add(diagnostic, 0, wx.RIGHT | wx.LEFT, 5)
 		hbox.Add(reset_i2c, 0, wx.RIGHT | wx.LEFT, 5)
 
@@ -2256,6 +2258,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			for iii in i[2]:
 				self.list_i2c.Append([str(c), name, address, magn_list[c], iii[0], str(iii[1]), str(iii[2])])
 				c = c + 1
+
+	def on_help_i2c(self, e):
+		url = self.currentpath+"/docs/html/sensors/i2c.html"
+		webbrowser.open(url, new=2)
 
 	###########################################SPI
 
