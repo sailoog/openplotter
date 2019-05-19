@@ -40,7 +40,7 @@ class MyFrame(wx.Frame):
 			
 			self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 			
-			self.icon = wx.Icon(self.op_folder+'/static/icons/openplotter.ico', wx.BITMAP_TYPE_ICO)
+			self.icon = wx.Icon(self.op_folder+'/static/icons/sdr.ico', wx.BITMAP_TYPE_ICO)
 			self.SetIcon(self.icon)
 
 			calibrationbox = wx.StaticBox(self, label=_(' Calibration '))
