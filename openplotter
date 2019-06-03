@@ -34,6 +34,7 @@ from classes.conf import Conf
 from classes.SK_settings import SK_settings
 from classes.language import Language
 from classes.nodes import Nodes, TriggerSK, TriggerFilterSK, TriggerGeofence, TriggerGPIO, TriggerMQTT, TriggerTelegram, TriggerTime, Condition, ActionSetSignalkKey, ActionEndFilterSignalk, ActionSetGPIO, ActionSetMQTT, ActionPublishTwitter, ActionSendEmail, ActionPlaySound, ActionRunCommand, ActionSendTelegram
+from classes.opencpnSettings import opencpnSettings
 
 class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 	def __init__(self, parent, width, height):
@@ -75,17 +76,17 @@ class MainFrame(wx.Frame):
 		self.p_startup = wx.Panel(self.nb)
 		self.p_dashboards = wx.Panel(self.nb)
 		self.nb.AddPage(self.p_serial, _('Serial'))
-		self.nb.AddPage(self.p_kplex, 'Kplex')
-		self.nb.AddPage(self.p_pypilot, _('pypilot'))
 		self.nb.AddPage(self.p_n2k, 'CAN')
+		self.nb.AddPage(self.p_pypilot, _('pypilot'))
 		self.nb.AddPage(self.p_wifi, _('Network'))
-		self.nb.AddPage(self.p_action, _('Actions'))
-		self.nb.AddPage(self.p_credentials, _('Credentials'))
+		self.nb.AddPage(self.p_kplex, 'Kplex')
 		self.nb.AddPage(self.p_i2c, _('I2C'))
 		self.nb.AddPage(self.p_1w, '1W')
 		self.nb.AddPage(self.p_spi, 'SPI')
-		self.nb.AddPage(self.p_startup, _('Settings'))
+		self.nb.AddPage(self.p_action, _('Actions'))
+		self.nb.AddPage(self.p_credentials, _('Credentials'))
 		self.nb.AddPage(self.p_dashboards, _('Dashboards'))
+		self.nb.AddPage(self.p_startup, _('Settings'))
 		sizer = wx.BoxSizer()
 		sizer.Add(self.nb, 1, wx.EXPAND)
 		self.p.SetSizer(sizer)
@@ -244,6 +245,9 @@ class MainFrame(wx.Frame):
 
 	def ShowStatusBarBLACK(self, w_msg):
 		self.ShowStatusBar(w_msg, wx.BLACK)	
+
+	def ShowStatusBarYELLOW(self, w_msg):
+		self.ShowStatusBar(w_msg,(255,140,0))	
 
 	def open_sdr_ais(self, event):
 		subprocess.call(['pkill', '-f', 'SDR_AIS.py'])
@@ -1662,15 +1666,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def start_sensors(self):
 		subprocess.Popen(['python', self.currentpath + '/read_sensors_d.py'], cwd=self.home + '/.pypilot')
-		self.SK_settings.setSKsettings()
-		seconds = 12
-		for i in range(seconds, 0, -1):
-			self.ShowStatusBarRED(_('Restarting Signal K server... ')+str(i))
-			time.sleep(1)
-		self.ShowStatusBarGREEN(_('Signal K server restarted'))
+		if self.SK_settings.setSKsettings():
+			seconds = 12
+			for i in range(seconds, 0, -1):
+				self.ShowStatusBarYELLOW(_('Restarting Signal K server... ')+str(i))
+				time.sleep(1)
+			self.ShowStatusBarGREEN(_('Signal K server restarted'))
 
 	def stop_sensors(self):
-		self.ShowStatusBarRED(_('Restarting Signal K server... '))
 		subprocess.call(['pkill', '-f', 'pypilot_calibration'])
 		subprocess.call(['pkill', '-f', 'signalk_scope_wx'])
 		subprocess.call(['pkill', '-f', 'pypilot_control'])
@@ -4064,30 +4067,33 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def page_serial(self):
 		self.list_Serialinst = wx.ListCtrl(self.p_serial, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER | wx.LC_SINGLE_SEL)
-		self.list_Serialinst.InsertColumn(0, _('name'), width=85)
-		self.list_Serialinst.InsertColumn(1, _('device'), width=110)
-		self.list_Serialinst.InsertColumn(2, _('vendor'), width=50)
-		self.list_Serialinst.InsertColumn(3, _('product'), width=55)
-		self.list_Serialinst.InsertColumn(4, _('port'), width=90)
-		self.list_Serialinst.InsertColumn(5, _('serial'), width=80)
-		self.list_Serialinst.InsertColumn(6, _('assignment'), width=80)
-		self.list_Serialinst.InsertColumn(7, _('remember'), width=75)
-		self.list_Serialinst.InsertColumn(8, _('bauds'), width=60)
+		self.list_Serialinst.InsertColumn(0, _('alias'), width=150)
+		self.list_Serialinst.InsertColumn(1, _('device'), width=100)
+		self.list_Serialinst.InsertColumn(2, _('vendor'), width=60)
+		self.list_Serialinst.InsertColumn(3, _('product'), width=60)
+		self.list_Serialinst.InsertColumn(4, _('serial'), width=120)
+		self.list_Serialinst.InsertColumn(5, _('USB port'), width=120)
+		self.list_Serialinst.InsertColumn(6, _('remember'), width=80)
 		self.list_Serialinst.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_SerialinstSelected)
+		self.list_Serialinst.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.on_SerialinstDeselected)
 
-		ttyOP_label = wx.StaticText(self.p_serial, label=_('name /dev/ttyOP_'))
+		name_label = wx.StaticText(self.p_serial, label=_('alias'))
+		ttyOP_label = wx.StaticText(self.p_serial, label=_('/dev/ttyOP_'))
 		self.Serial_OPname = wx.TextCtrl(self.p_serial)
-		
+	
+		dataLabel = wx.StaticText(self.p_serial, label=_('data'))
+		self.serialData = wx.Choice(self.p_serial, choices=['NMEA 0183','NMEA 2000'], style=wx.CB_READONLY)
+		self.serialData.Bind(wx.EVT_CHOICE, self.onSelectData)
+
 		assignment_label = wx.StaticText(self.p_serial, label=_('assignment'))
-		self.assignment = [_('none'), 'Kplex', 'pypilot', 'CAN-USB', 'GPSD', 'NMEA 0183 out']
-		self.Serial_assignment = wx.Choice(self.p_serial, choices=self.assignment, style=wx.CB_READONLY)
+		self.assignmentN2K = [_('manual'),'Signal K > OpenCPN']
+		self.assignment0183 = [_('manual'),'GPSD','Signal K > OpenCPN','pypilot > Signal K > OpenCPN','GPSD > pypilot > Signal K > OpenCPN']
+		self.Serial_assignment = wx.Choice(self.p_serial, choices=self.assignment0183, style=wx.CB_READONLY, size=(100,-1))
 		self.Serial_assignment.Bind(wx.EVT_CHOICE, self.onSelectAssigment)
-		self.Serial_assignment.SetSelection(0)
 
 		bauds_label = wx.StaticText(self.p_serial, label=_('bauds'))
-		self.bauds = ['','4800', '9600', '19200', '38400', '57600', '115200', '230400', '460800', '921600']
+		self.bauds = ['4800', '9600', '19200', '38400', '57600', '115200', '230400', '460800', '921600']
 		self.Serial_baud_select = wx.Choice(self.p_serial, choices=self.bauds, style=wx.CB_READONLY)
-		self.Serial_baud_select.SetSelection(0)
 
 		self.Serial_rem_dev = wx.RadioButton(self.p_serial, label=_('Remember device (by vendor, product, serial)'))
 		self.Serial_rem_port = wx.RadioButton(self.p_serial, label=_('Remember port (positon on the USB-hub)'))
@@ -4095,14 +4101,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.serial_update = wx.Button(self.p_serial, label=_('apply'))
 		self.serial_update.Bind(wx.EVT_BUTTON, self.on_update_Serialinst)
 
-		self.serial_detect = wx.Button(self.p_serial, label=_('auto'))
-		self.serial_detect.Bind(wx.EVT_BUTTON, self.on_detect_Serialinst)
-
 		self.serial_delete = wx.Button(self.p_serial, label=_('delete'))
 		self.serial_delete.Bind(wx.EVT_BUTTON, self.on_delete_Serialinst)
 
 		refresh = wx.Button(self.p_serial, label=_('refresh'))
-		refresh.Bind(wx.EVT_BUTTON, self.on_refresh_Serialinst)
+		refresh.Bind(wx.EVT_BUTTON, self.read_Serialinst)
 
 		enableUART = wx.Button(self.p_serial, label=_('enable UART'))
 		enableUART.Bind(wx.EVT_BUTTON, self.on_enable_UART)
@@ -4110,59 +4113,69 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		disableUART = wx.Button(self.p_serial, label=_('disable UART'))
 		disableUART.Bind(wx.EVT_BUTTON, self.on_disable_UART)
 
+		help_button = wx.BitmapButton(self.p_serial, bitmap=self.help_bmp, size=(self.help_bmp.GetWidth()+40, self.help_bmp.GetHeight()+10))
+		help_button.Bind(wx.EVT_BUTTON, self.on_help_serial)
+
+		row1labels = wx.BoxSizer(wx.HORIZONTAL)
+		row1labels.Add((0,0), 0, wx.LEFT | wx.EXPAND, 85)
+		row1labels.Add(name_label, 1, wx.EXPAND, 0)
+		row1labels.Add(dataLabel, 1, wx.LEFT | wx.EXPAND, 5)
+		row1labels.Add(assignment_label, 1, wx.LEFT | wx.EXPAND, 5)
+		row1labels.Add(bauds_label, 1, wx.LEFT | wx.EXPAND, 5)
+
 		row1 = wx.BoxSizer(wx.HORIZONTAL)
-		row1.Add(ttyOP_label, 0, wx.UP | wx.LEFT | wx.EXPAND, 10)
-		row1.Add(self.Serial_OPname, 0, wx.ALL | wx.EXPAND, 5)
-		row1.Add((0,0), 1, wx.ALL | wx.EXPAND, 0)
-		row1.Add(assignment_label, 0, wx.UP | wx.LEFT | wx.EXPAND, 10)
-		row1.Add(self.Serial_assignment, 0, wx.ALL | wx.EXPAND, 5)
-		row1.Add((0,0), 1, wx.ALL | wx.EXPAND, 0)
-		row1.Add(bauds_label, 0, wx.UP | wx.LEFT | wx.EXPAND, 10)
-		row1.Add(self.Serial_baud_select, 0, wx.ALL | wx.EXPAND, 5)
+		row1.Add(ttyOP_label, 0, wx.LEFT | wx.UP | wx.EXPAND, 10)
+		row1.Add(self.Serial_OPname, 1, wx.EXPAND, 5)
+		row1.Add(self.serialData, 1, wx.LEFT | wx.EXPAND, 5)
+		row1.Add(self.Serial_assignment, 1, wx.LEFT | wx.EXPAND, 5)
+		row1.Add(self.Serial_baud_select, 1, wx.LEFT | wx.RIGHT | wx.EXPAND, 5)
 
 		col1 = wx.BoxSizer(wx.VERTICAL)
 		col1.Add(self.Serial_rem_dev, 0, wx.ALL | wx.EXPAND, 5)
 		col1.Add(self.Serial_rem_port, 0, wx.ALL | wx.EXPAND, 5)
 
 		col2 = wx.BoxSizer(wx.HORIZONTAL)
-		col2.Add(self.serial_detect, 0, wx.ALL | wx.EXPAND, 5)
-		col2.Add(self.serial_update, 0, wx.ALL | wx.EXPAND, 5)
+		col2.AddStretchSpacer(1)
 		col2.Add(self.serial_delete, 0, wx.ALL | wx.EXPAND, 5)
+		col2.Add(self.serial_update, 0, wx.ALL | wx.EXPAND, 5)
 
 		row2 = wx.BoxSizer(wx.HORIZONTAL)
 		row2.Add(col1, 1, wx.ALL | wx.EXPAND, 0)
 		row2.Add(col2, 1, wx.ALL | wx.EXPAND, 0)
 
 		row3 = wx.BoxSizer(wx.HORIZONTAL)
+		row3.Add(help_button, 0, wx.ALL | wx.EXPAND, 5)
+		row3.AddStretchSpacer(1)
+		row3.Add(refresh, 0, wx.ALL | wx.EXPAND, 5)
 		row3.Add(enableUART, 0, wx.ALL | wx.EXPAND, 5)
 		row3.Add(disableUART, 0, wx.ALL | wx.EXPAND, 5)
-		row3.Add(refresh, 0, wx.ALL | wx.EXPAND, 5)
 
 		v_final = wx.BoxSizer(wx.VERTICAL)
-		v_final.Add(self.list_Serialinst, 1, wx.ALL | wx.EXPAND, 5)
-		v_final.Add(row1, 0, wx.ALL | wx.EXPAND, 5)
-		v_final.Add(row2, 0, wx.ALL | wx.EXPAND, 5)
-		v_final.Add(row3, 0, wx.ALL | wx.EXPAND, 5)
+		v_final.Add(self.list_Serialinst, 1, wx.EXPAND, 0)
+		v_final.AddSpacer(10)	
+		v_final.Add(row1labels, 0, wx.EXPAND, 0)
+		v_final.AddSpacer(5)
+		v_final.Add(row1, 0, wx.EXPAND, 0)
+		v_final.AddSpacer(10)
+		v_final.Add(row2, 0, wx.EXPAND, 0)
+		v_final.AddSpacer(10)
+		v_final.Add(row3, 0, wx.EXPAND, 0)
 
 		self.p_serial.SetSizer(v_final)
-
-		self.on_SerialinstSelected()
 
 	def start_udev(self):
 		subprocess.call(['sudo', 'udevadm', 'control', '--reload-rules'])
 		subprocess.call(['sudo', 'udevadm', 'trigger', '--attr-match=subsystem=tty'])
 
-	def read_Serialinst(self):
-		self.on_refresh_Serialinst()
-
-	def on_refresh_Serialinst(self, e=0):
+	def read_Serialinst(self,e=0):
+		self.reset_Serial_fields()
+		self.ShowStatusBarBLACK('')
 		self.list_Serialinst.DeleteAllItems()
 		data = self.conf.get('UDEV', 'Serialinst')
 		try:
 			self.Serialinst = eval(data)
 		except:
 			self.Serialinst = {}
-		sentence = 0
 		try:
 			self.context
 		except:
@@ -4203,24 +4216,25 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 			# default values if this port is not configured
 			name = ''
-			assignment = _('none')
+			assignment = ''
 			remember = ''
 			bauds = ''
+			serialData = ''
 
 			for n in self.Serialinst:
 				ii = self.Serialinst[n]
 
 				if ii['remember'] == 'port' and ii['port'] == port:
 					if ii['vendor'] != vendor_id or ii['product'] != model_id or ii['serial'] != serial:
-						self.ShowMessage(_('Warning: You have connected the "').decode('utf8') + vendor_id + ', ' + model_id + _('" to the usb port which is reserved for another device').decode('utf8'))
+						self.ShowStatusBarRED(_('Device with vendor ').decode('utf8') + vendor_id + ' and product '.decode('utf8') + model_id + _(' is connected to a reserved port').decode('utf8'))
 						break
 					name = n
 					assignment = ii['assignment']
 					remember = ii['remember']
+					serialData = ii['data']
 					try:
 						bauds = ii['bauds']
-					except:
-						pass
+					except: pass
 					break
 				elif ii['remember'] == 'dev' and ii['vendor'] == vendor_id and ii['product'] == model_id and ii['serial'] == serial:
 					#check if device with same product/vendor/serial has been added
@@ -4231,265 +4245,110 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 						name = n
 						assignment = ii['assignment']
 						remember = ii['remember']
+						serialData = ii['data']
 						try:
 							bauds = ii['bauds']
-						except:
-							pass
+						except: pass
 
-			l = [name, i, vendor_id, model_id, port, serial, assignment, remember, bauds]
+			l = [name, i, vendor_id, model_id, serial, port, remember]
 			self.list_Serialinst.Append(map(lambda x : x.decode('utf8'), l))
-			sentence = 1
 
 		for name in self.Serialinst:
 			exist = False
 			for i in range(self.list_Serialinst.GetItemCount()):
-				if name == self.list_Serialinst.GetItemText(i, 0): exist = True
+				if name == self.list_Serialinst.GetItemText(i, 0): 
+					self.list_Serialinst.SetItemBackgroundColour(i,(102,205,170))
+					exist = True
 			if not exist:
-				l = [name, self.Serialinst[name]['device'], self.Serialinst[name]['vendor'], self.Serialinst[name]['product'], self.Serialinst[name]['port'], self.Serialinst[name]['serial'], self.Serialinst[name]['assignment'], self.Serialinst[name]['remember'], self.Serialinst[name]['bauds']]
+				l = [name, self.Serialinst[name]['device'], self.Serialinst[name]['vendor'], self.Serialinst[name]['product'], self.Serialinst[name]['serial'], self.Serialinst[name]['port'], self.Serialinst[name]['remember']]
 				self.list_Serialinst.Append(map(lambda x : x.decode('utf8'), l))
-				self.list_Serialinst.SetItemBackgroundColour(self.list_Serialinst.GetItemCount()-1, "red")
+				self.list_Serialinst.SetItemBackgroundColour(self.list_Serialinst.GetItemCount()-1,(255,0,0))
+				self.ShowStatusBarRED(_('There are missing devices').decode('utf8'))
 
-		try:
-			filesize = os.stat('/etc/udev/rules.d/10-openplotter.rules').st_size
-		except:
-			filesize = 0
-
-		if sentence == 0 and filesize > 10:
-			self.apply_changes_Serialinst()
-		if sentence == 1 and filesize < 10:
-			self.apply_changes_Serialinst()
-
-		self.on_SerialinstSelected()
-
-	def detect_pypilot_servo(self, device, baud):
-		# try pypilot binary arduino servo
-		test = os.system('sudo pypilot_servo -t ' + device + ' %d' % baud)
-		if test == 0: return True
-		else: return False
-
-	def detect_gps_device(self, device):
-		subprocess.call(['killall', '-9', 'gpscat'])
-		gpscat = subprocess.Popen(['gpscat','-t',device], stdout=subprocess.PIPE)
-		#poll = select.poll()
-		#poll.register(gpscat.stdout, select.POLLOUT)
-		#x = poll.poll(5000)
-		#ret = x[0][1] == select.POLLOUT
-		import fcntl
-		fcntl.fcntl(gpscat.stdout.fileno(), fcntl.F_SETFD, os.O_NONBLOCK)
-		time.sleep(3)
-		ret = gpscat.stdout.readline()
-		os.system('kill %d' % gpscat.pid)
-		return ret
-
-	def readNMEA0183(self, port, baudrate):
-		try:
-			device = serial.Serial(port, baudrate, timeout=1)
-		except Exception as e:
-			print str(e)
-			return False
-		timewait = time.time() + 1.5
-		index = 0
-		countwrong = 0
-		text = ''
-		while time.time() < timewait:
-			try:
-				c = device.read(1)
-			except: c = ''
-			if c != '':
-				b = ord(c)
-				# print c
-				if b == 10 or b == 13 or (32 <= b < 128):
-					index += 1
-					if b == 13:
-						#print '	' + text[:-1]
-						text = ''
-					elif b == 10:
-						pass
-					else:
-						text += c
-				else:
-					#print 'countwrong ', b
-					countwrong += 1
-		if index > 10 and countwrong < index/10: return True
-		else: return False
-
-	def readNMEA2000(self, port, baudrate):
-		try:
-			device = serial.Serial(port, baudrate, timeout=1)
-		except Exception as e:
-			print str(e)
-			return False
-		timewait = time.time() + 0.5
-		data = [0x10, 0x2, 0xa1, 0x01, 0x01, 0x5d, 0x10, 0x03]
-		for i in data:
-			device.write(chr(i))
-		while time.time() < timewait:
-			try:
-				c = device.read(1)
-			except: c = ''
-			if c != '':
-				b = ord(c)
-				if b == 0x10:
-					try:
-						c = device.read(1)
-					except: c = ''
-					if c != '':
-						b = ord(c)
-						if b == 0x02:
-							return True
-		return False
-
-	def detect_serial(self, index):
-		name = self.list_Serialinst.GetItemText(index, 0)
-		if not name: name = 'serial%d'%index
-		device = self.list_Serialinst.GetItemText(index, 1)
-		bauds = self.list_Serialinst.GetItemText(index, 8)
-		if bauds: bauds = int(bauds)
-		pypilot_mode = self.conf.get('PYPILOT', 'mode')
-
-		if device == '/dev/moitessier.tty':
-			assignment = 'GPSD'
-			bauds = ''
-		elif self.readNMEA2000(device, '115200'):
-			assignment = 'CAN-USB'
-			bauds = '115200'
-		elif self.readNMEA2000(device, '230400'):
-			assignment = 'CAN-USB'
-			bauds = '230400'
-		elif self.readNMEA2000(device, '460800'):
-			assignment = 'CAN-USB'
-			bauds = '460800'
-		elif self.readNMEA2000(device, '921600'):
-			assignment = 'CAN-USB'
-			bauds = '921600'
-
-		elif self.detect_pypilot_servo(device, 38400):
-			assignment = 'pypilot'
-			bauds = '38400'
-		elif pypilot_mode == 'basic autopilot' and self.detect_gps_device(device):
-			assignment = 'GPSD'
-			bauds = ''
-		else:
-			bauds = ''
-			self.bauds = ['4800', '9600', '19200', '38400', '57600', '115200', '230400', '460800']
-
-			for i in self.bauds:
-				if self.readNMEA0183(device, i):
-					assignment = 'Kplex'
-					bauds = i
-			if not bauds: return False
-
-		self.Serial_OPname.SetValue(name)
-		self.Serial_assignment.SetStringSelection(assignment)
-		self.Serial_baud_select.SetStringSelection(bauds)
-		return True
-                
-	def on_detect_Serialinst(self, e):
-		index = self.list_Serialinst.GetNextItem(-1, wx.LIST_NEXT_ALL, wx.LIST_STATE_SELECTED)
-		if index < 0:
-			self.ShowMessage(_('Failed. No port selected'))
-			self.on_SerialinstSelected()
-			return
-		self.stop_sensors()
-		self.stop_kplex()
-		os.system('sudo service gpsd stop')
-		self.stop_SK()
-		self.ShowStatusBarGREEN(_('Checking selected device ...'))
-		result = self.detect_serial(index)
-		os.system('sudo service gpsd start')
-		self.on_restart_kplex(0)
-		self.start_sensors()
-		self.start_SK()
-		if self.Serial_assignment.GetStringSelection() in {'Kplex','NMEA 0183 out','CAN-USB'}:
-			self.Serial_baud_select.Enable()
-		else:
-			self.Serial_baud_select.SetSelection(0)
-			self.Serial_baud_select.Disable()
-		if result:
-			self.ShowStatusBarGREEN(_('Suitable parameters according to your system settings. Press apply to save.'))
-		else: 
-			self.ShowStatusBarRED (_('We have not found any recognizable data on your device.'))
-
-	def on_SerialinstSelected(self, e=False):
-		valid = e and e.GetIndex() >= 0
-		self.Serial_OPname.Enable(valid)
-		self.Serial_assignment.Enable(valid)
-		self.serial_detect.Enable(valid)
-		self.serial_update.Enable(valid)
-		self.serial_delete.Enable(valid)
-		self.Serial_baud_select.Enable(valid)
-		self.Serial_rem_dev.Enable(valid)
-		self.Serial_rem_port.Enable(valid)
-		if not valid:
-			self.reset_Serial_fields()
-			return
-
+	def on_SerialinstSelected(self,e):
 		i = e.GetIndex()
-		if 'serial' in self.list_Serialinst.GetItemText(i, 4):
+		valid = e and i >= 0
+		self.reset_Serial_fields()
+		if not valid: return
+
+		name = self.list_Serialinst.GetItemText(i, 0)
+		if not name: item = {'data':'','assignment':'','bauds':'','port':self.list_Serialinst.GetItemText(i, 5),'remember':''}
+		else: item = self.Serialinst[name]
+
+		self.Serial_OPname.Enable()
+		self.serialData.Enable()
+		self.Serial_assignment.Enable()
+		self.serial_update.Enable()
+		self.serial_delete.Enable()
+		self.Serial_baud_select.Enable()
+		self.Serial_rem_dev.Enable()
+		self.Serial_rem_port.Enable()
+
+		self.Serial_OPname.SetValue(name.replace('/dev/ttyOP_',''))
+		self.serialData.SetStringSelection(item['data'])
+		self.onSelectData()
+		self.Serial_assignment.SetStringSelection(item['assignment'])
+		self.onSelectAssigment()
+		self.Serial_baud_select.SetStringSelection(item['bauds'])
+		if 'serial' in item['port']:
 			self.Serial_rem_port.SetValue(True) # remember by port for non usb
-			self.Serial_rem_dev.Disable()
 			self.Serial_rem_port.Disable()
+			self.Serial_rem_dev.SetValue(False)
+			self.Serial_rem_dev.Disable()
 		else:
-			rem = self.list_Serialinst.GetItemText(i, 7)
+			rem = item['remember']
 			self.Serial_rem_dev.SetValue(rem == 'dev')
 			self.Serial_rem_port.SetValue(rem == 'port')
-
-		self.Serial_OPname.SetValue(self.list_Serialinst.GetItemText(i, 0))
-		self.Serial_assignment.SetStringSelection(self.list_Serialinst.GetItemText(i, 6))
-		self.Serial_baud_select.SetStringSelection(self.list_Serialinst.GetItemText(i, 8))
-
-		if self.Serial_assignment.GetStringSelection() in {'Kplex','NMEA 0183 out','CAN-USB'}:
-			self.Serial_baud_select.Enable()
-		else:
-			self.Serial_baud_select.SetSelection(0)
-			self.Serial_baud_select.Disable()
 
 	def on_update_Serialinst(self, e=0):
 
 		index = self.list_Serialinst.GetNextItem(-1, wx.LIST_NEXT_ALL, wx.LIST_STATE_SELECTED)
 		if index < 0:
-			self.ShowMessage(_('Failed. No port selected'))
-			self.on_SerialinstSelected()
+			self.ShowStatusBarRED(_('Failed. No port selected').decode('utf8'))
 			return
 
 		name = self.Serial_OPname.GetValue()
-		old_name = self.list_Serialinst.GetItemText(index, 0)
-
-		if not name:
-			self.ShowMessage(_('Failed. You have to provide a name (between 1 and 8 letters and/or numbers).'))
+		if not name or not re.match('^[0-9a-z]{1,8}$', name):
+			self.ShowStatusBarYELLOW(_('The alias must be a lowercase string between 1 and 8 characters or numbers.').decode('utf8'))
 			return
-
+		old_name = self.list_Serialinst.GetItemText(index, 0)
+		name  = '/dev/ttyOP_'+name
 		for i in range(self.list_Serialinst.GetItemCount()):
 			if i != index and name == self.list_Serialinst.GetItemText(i, 0):
-				self.ShowMessage(_('Failed. Same name used for multiple devices'))
+				self.ShowStatusBarYELLOW(_('Same alias used for multiple devices').decode('utf8'))
 				return
 
-		if not re.match('^[0-9a-z]{1,8}$', name):
-			self.ShowMessage(_('Failed. The new name must be a lowercase string between 1 and 8 letters and/or numbers.'))
-			return
+		data = self.serialData.GetStringSelection()
+		if not data:
+				self.ShowStatusBarYELLOW(_('Please select type of data').decode('utf8'))
+				return
+		if data == 'NMEA 2000':
+			for name3 in self.Serialinst:
+				if name != name3 and name3 != old_name and self.Serialinst[name3]['data'] == data:
+					self.ShowStatusBarYELLOW(_('You can set only one NMEA 2000 device').decode('utf8'))
+					return
 
-
-		self.list_Serialinst.SetStringItem(index, 0, name)
 		assignment = self.Serial_assignment.GetStringSelection()
+		if not assignment:
+				self.ShowStatusBarYELLOW(_('Please assign the device').decode('utf8'))
+				return
+
 		bauds = self.Serial_baud_select.GetStringSelection()
+		if assignment == 'Signal K > OpenCPN' and not bauds:
+				self.ShowStatusBarYELLOW(_('Please select bauds').decode('utf8'))
+				return
 
-		if (assignment in {'Kplex','NMEA 0183 out'}) and bauds == '':
-			self.ShowMessage(_('Failed. Select bauds.'))
-			return
-
-		self.list_Serialinst.SetStringItem(index, 6, assignment)
 		if self.Serial_rem_dev.GetValue():
-			rem = 'dev'
+			remember = 'dev'
 		else:
-			rem = 'port'
-		self.list_Serialinst.SetStringItem(index, 7, rem)
-		self.list_Serialinst.SetStringItem(index, 8, bauds)
+			remember = 'port'
 
-		ii = {}
-		cols = ['name', 'device', 'vendor', 'product', 'port', 'serial', 'assignment', 'remember', 'bauds']
-		for j in range(len(cols)):
-			ii[cols[j]] = self.list_Serialinst.GetItemText(index, j)
-		del ii['name']
+		device = self.list_Serialinst.GetItemText(index, 1)
+		vendor = self.list_Serialinst.GetItemText(index, 2)
+		product = self.list_Serialinst.GetItemText(index, 3)
+		serial = self.list_Serialinst.GetItemText(index, 4)
+		port = self.list_Serialinst.GetItemText(index, 5)
+		ii = {'device':device, 'vendor':vendor, 'product':product, 'port':port, 'serial':serial, 'assignment':assignment, 'remember':remember, 'bauds':bauds,'data':data}
 
 		if old_name and old_name != name: del self.Serialinst[old_name]
 
@@ -4497,53 +4356,19 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		for name2 in self.Serialinst:
 			if self.Serialinst[name2]['remember'] == 'dev' and ii['remember'] == 'dev' and name != name2:
 				if self.Serialinst[name2]['vendor'] == ii['vendor'] and self.Serialinst[name2]['product'] == ii['product'] and self.Serialinst[name2]['serial'] == ii['serial']:
-					self.ShowMessage(_('Warning: USB-Port with duplicate vendor product must be set to "Remember port".'))
-					ii['remember'] = 'port'
-					break
+					self.ShowStatusBarYELLOW(_('Device with duplicate vendor and product must be set to "Remember port".').decode('utf8'))
+					return
 
 		# do not allow entrees with the same port and different name
 		for name2 in self.Serialinst:
 			if self.Serialinst[name2]['remember'] == 'port' and ii['remember'] == 'port' and name != name2:
 				if self.Serialinst[name2]['port'] == ii['port']:
-					self.ShowMessage(_('Warning: This port is already reserved and must be set to "Remember device".'))
-					ii['remember'] = 'dev'
-					break
+					self.ShowStatusBarYELLOW(_('This port is already reserved and must be set to "Remember device".').decode('utf8'))
+					return
 		
 		self.Serialinst[name] = ii
-
-		self.conf.set('UDEV', 'Serialinst', str(self.Serialinst))
-		self.on_refresh_Serialinst()
-		self.Serialinst[name] = ii
-		self.apply_changes_Serialinst()
-
-	def on_delete_Serialinst(self, e):
-		index = self.list_Serialinst.GetNextItem(-1, wx.LIST_NEXT_ALL, wx.LIST_STATE_SELECTED)
-		if index < 0:
-			self.ShowMessage(_('Failed. No port selected'))
-			self.on_SerialinstSelected()
-			return
-
-		name = self.list_Serialinst.GetItemText(index, 0)
-		try:
-			del self.Serialinst[name]
-		except: return
-
-		self.list_Serialinst.SetStringItem(index, 0, '')
-		self.list_Serialinst.SetStringItem(index, 6, _('none'))
-		self.list_Serialinst.SetStringItem(index, 7, '')
-		self.list_Serialinst.SetStringItem(index, 8, '')
-
-		self.reset_Serial_fields()
-
 		self.conf.set('UDEV', 'Serialinst', str(self.Serialinst))
 		self.apply_changes_Serialinst()
-
-	def reset_Serial_fields(self):
-		self.Serial_OPname.SetValue('')
-		self.Serial_rem_dev.SetValue(True)
-		self.Serial_rem_port.SetValue(False)
-		self.Serial_assignment.SetSelection(0)
-		self.Serial_baud_select.SetSelection(0)
                                         
 	def apply_changes_Serialinst(self):
 		file = open(self.home +'/10-openplotter.rules', 'w')
@@ -4558,13 +4383,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				write_str += '",ATTRS{idProduct}=="' + i['product']
 				if i['serial'] != '':
 					write_str += '",ATTRS{serial}=="' + i['serial']
-			write_str += '",SYMLINK+="ttyOP_' + name + '"\n'
+			name = name.replace('/dev/','')
+			write_str += '",SYMLINK+="' + name + '"\n'
 			file.write(write_str)
 		file.close()
 		test = 0
 		test = os.system('sudo mv '+self.home +'/10-openplotter.rules /etc/udev/rules.d')
 
-		self.ShowStatusBarRED(_('Restarting ...'))
+		self.ShowStatusBarYELLOW(_('Applying changes ...').decode('utf8'))
 		self.start_udev()
 
 		# write gpsd config
@@ -4577,99 +4403,61 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			if line[:9] == 'DEVICES="':
 				file1.write('DEVICES="')
 				for name in self.Serialinst:
-					if self.Serialinst[name]['assignment'] == 'GPSD':
+					if self.Serialinst[name]['assignment'] == 'GPSD' or self.Serialinst[name]['assignment'] == 'GPSD > pypilot > Signal K > OpenCPN':
 						gpsd_exists = True
-						port = '/dev/ttyOP_' + name
-						file1.write(port + ' ')
+						file1.write(name + ' ')
 				file1.write('"\n')
 			else: file1.write(line)
 		file.close()
 		file1.close()
 
 		if os.system('diff '+self.home+'/gpsd /etc/default/gpsd > /dev/null'):
-			# only restart gpsd if changed
 			os.system('sudo mv '+self.home+'/gpsd /etc/default')
 			os.system('sudo service gpsd restart')
 		else: os.system('rm -f '+self.home+'/gpsd')
 
 		# write pypilot allowed ports
+		resetPypilot = False
 		file = open(self.home+'/pypilot_serial_ports', 'w')
-		pypilot_exists = False
 		for name in self.Serialinst:
-			if self.Serialinst[name]['assignment'] == 'pypilot':
-				pypilot_exists = True
-				port = '/dev/ttyOP_' + name
-				file.write(port + '\n')
-				os.system('sudo chown pi ' + port) # set permissions
+			if self.Serialinst[name]['assignment'] == 'pypilot > Signal K > OpenCPN':
+				file.write(name + '\n')
 		file.close()
-
 		path = self.home + '/.pypilot/serial_ports'
 		if os.system('diff '+self.home+'/pypilot_serial_ports ' + path + ' > /dev/null'):
 			os.system('mv '+self.home+'/pypilot_serial_ports ' + path)
-			if pypilot_exists:
+			resetPypilot = True
+		else: os.system('rm -f '+self.home+'/pypilot_serial_ports')
+
+		checkPypilot = False
+		pypilotMode = self.conf.get('PYPILOT', 'mode')
+		for name in self.Serialinst:
+			if 'pypilot' in self.Serialinst[name]['assignment']: checkPypilot = True
+		if checkPypilot:
+			if pypilotMode != 'basic autopilot':
 				self.conf.set('PYPILOT', 'mode', 'basic autopilot')
-			else:
-				self.conf.set('PYPILOT', 'mode', 'disabled')
+				resetPypilot = True
+		else:
+			if pypilotMode == 'basic autopilot':
 				check_imu = self.check_imu()
 				if check_imu: 
 					imu_data = eval(check_imu) 
 					imu_name = imu_data[0][0]
-					if imu_name != '0': self.conf.set('PYPILOT', 'mode', 'imu')
+					if imu_name != '0': 
+						self.conf.set('PYPILOT', 'mode', 'imu')
+						resetPypilot = True
+					else: 
+						self.conf.set('PYPILOT', 'mode', 'disabled')
+						resetPypilot = True
+				else: 
+					self.conf.set('PYPILOT', 'mode', 'disabled')
+					resetPypilot = True
+		
+		if resetPypilot:
 			self.read_pypilot()
 			self.on_apply_changes_pypilot()
-		else: os.system('rm -f '+self.home+'/pypilot_serial_ports')
 
-		#set kplex devices
-		self.read_kplex_conf()
-		for name in self.Serialinst:
-			if self.Serialinst[name]['assignment'] == 'Kplex':
-				exist = False
-				for index, i in enumerate(self.kplex):
-					if i[1] == name:
-						if i[2] != 'Serial':
-							self.Serialinst[name]['assignment'] == _('none')
-							self.ShowMessage(_('Failed. Same name used for multiple devices: ')+name)
-						else:
-							exist = True
-							self.kplex[index][5] = self.Serialinst[name]['bauds']
-				if not exist:
-					self.kplex.append([None, name, 'Serial', 'in', 'ttyOP_'+name, self.Serialinst[name]['bauds'], 'none', 'nothing', 'none', 'nothing', '1'])
-	
-		#check if there is gpsd and create kplex input
-		if gpsd_exists:
-			exist = False
-			for index, i in enumerate(self.kplex):
-				if i[1] == 'gpsd': exist = True
-			if not exist:
-				self.kplex.append([None, 'gpsd', 'TCP', 'in', 'localhost', '2947', 'none', 'nothing', 'none', 'nothing', '1'])
-		else:
-			for index, i in enumerate(self.kplex):
-				if i[1] == 'gpsd': 
-					del self.kplex[index]
-					break
-
-		#set nmea 0183 out (put this always before clean kplex)
-		nmea0183out_exists = False
-		data = '[tcp]\nname=nmea0183out\ndirection=in\nmode=client\npersist=fromstart\nretry=10\naddress=localhost\nport=10110\n'
-		for name in self.Serialinst:
-			if self.Serialinst[name]['assignment'] == 'NMEA 0183 out':
-				nmea0183out_exists = True
-				data += '\n[serial]\nname='+name+'\ndirection=out\noptional=yes\nfilename=/dev/ttyOP_'+name+'\nbaud='+self.Serialinst[name]['bauds']+'\n'
-		if nmea0183out_exists:
-			file = open(self.home+'/.nmea0183out.conf', 'w')
-			file.write(data)
-			file.close()
-
-		#clean kplex
-		for index, i in enumerate(self.kplex):
-			if i[2] == 'Serial':
-				exist = False
-				for name in self.Serialinst:
-					if i[1] == name and self.Serialinst[name]['assignment'] == 'Kplex': exist = True
-				if not exist: del self.kplex[index]
-		self.set_list_kplex()
-		#self.on_apply_changes_kplex(0)
-
+		'''
 		#set CAN-USB devices
 		can_device = ''
 		for name in self.Serialinst:
@@ -4684,35 +4472,79 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			if self.SK_settings.ngt1_device != self.can_device:
 				self.SK_settings.set_ngt1_device(self.can_device,self.can_speed)
 		self.read_n2k()
+		'''
 
-		time.sleep(1.5)
-		self.ShowStatusBarGREEN(_('Serial port modified and restarted'))
+		if self.SK_settings.setSKsettings():
+			seconds = 12
+			for i in range(seconds, 0, -1):
+				self.ShowStatusBarYELLOW(_('Restarting Signal K server... ')+str(i))
+				time.sleep(1)
+			self.ShowStatusBarGREEN(_('Signal K server restarted'))
+		else: time.sleep(1.5)
+		self.read_Serialinst()
 
-	def onSelectAssigment(self, e):
+		checkOpencpn = False
+		for alias in self.Serialinst:
+			assignment = self.Serialinst[alias]['assignment'] 
+			if 'OpenCPN' in assignment: checkOpencpn = True
+		if checkOpencpn:
+			Osettings = opencpnSettings()
+			opencpnConnection = Osettings.getConnectionState()
+			if not opencpnConnection:
+				wx.MessageBox(_('The default OpenCPN connection is missing and it is not getting data from Signal K. Please create this connection in OpenCPN:\n\nNetwork\nProtocol: TCP\nAddress: localhost\nData Port: 10110'), 'Warning', wx.OK | wx.ICON_WARNING)
+			elif opencpnConnection == 'disabled': 
+				wx.MessageBox(_('The default OpenCPN connection is disabled and it is not getting data from Signal K. Please enable this connection in OpenCPN:\n\nNetwork\nProtocol: TCP\nAddress: localhost\nData Port: 10110'), 'Warning', wx.OK | wx.ICON_WARNING)
+
+
+	def on_delete_Serialinst(self, e):
+		index = self.list_Serialinst.GetNextItem(-1, wx.LIST_NEXT_ALL, wx.LIST_STATE_SELECTED)
+		if index < 0:
+			self.ShowStatusBarYELLOW(_('No device selected'))
+			return
+		name = self.list_Serialinst.GetItemText(index, 0)
+		try:
+			del self.Serialinst[name]
+		except: return
+		self.list_Serialinst.SetStringItem(index, 0, '')
+		self.list_Serialinst.SetStringItem(index, 6, '')
+		self.reset_Serial_fields()
+		self.conf.set('UDEV', 'Serialinst', str(self.Serialinst))
+		self.apply_changes_Serialinst()
+
+	def on_SerialinstDeselected(self,e):
+		self.reset_Serial_fields()
+
+	def reset_Serial_fields(self):
+		self.Serial_OPname.SetValue('')
+		self.serialData.SetSelection(-1)
+		self.Serial_rem_dev.SetValue(True)
+		self.Serial_rem_port.SetValue(False)
+		self.Serial_assignment.SetSelection(-1)
+		self.Serial_baud_select.SetSelection(-1)
+		self.Serial_OPname.Disable()
+		self.serialData.Disable()
+		self.Serial_assignment.Disable()
+		self.serial_update.Disable()
+		self.serial_delete.Disable()
+		self.Serial_baud_select.Disable()
+		self.Serial_rem_dev.Disable()
+		self.Serial_rem_port.Disable()
+
+	def onSelectData(self, e=0):
+		selected = self.serialData.GetStringSelection()
+		self.Serial_assignment.Clear()
+		if selected == 'NMEA 0183':
+			self.Serial_assignment.AppendItems(self.assignment0183)
+		elif selected == 'NMEA 2000':
+			self.Serial_assignment.AppendItems(self.assignmentN2K)
+		self.Serial_baud_select.SetSelection(-1)
+		self.Serial_baud_select.Disable()
+
+	def onSelectAssigment(self, e=0):
+		self.Serial_baud_select.Disable()
+		self.Serial_baud_select.SetSelection(-1)
 		selected = self.Serial_assignment.GetStringSelection()
-		if selected == 'CAN-USB':
-			for name in self.Serialinst:
-				if self.Serialinst[name]['assignment'] == selected:
-					self.ShowMessage(_('Failed. You can assign only one ')+selected+_(' device'))
-					self.Serial_assignment.SetSelection(0)
-		if selected == 'Kplex' or selected == 'NMEA 0183 out':
-			self.Serial_baud_select.Clear()
-			self.bauds = ['','4800', '9600', '19200', '38400', '57600', '115200', '230400', '460800']
-			for i in self.bauds:
-				self.Serial_baud_select.Append(i)				
-		
-			self.Serial_baud_select.SetSelection(1)
-			self.Serial_baud_select.Enable()
-		elif selected == 'CAN-USB':
-			self.Serial_baud_select.Clear()
-			self.bauds = ['115200', '230400', '460800', '921600']
-			for i in self.bauds:
-				self.Serial_baud_select.Append(i)				
-			self.Serial_baud_select.SetSelection(0)
-			self.Serial_baud_select.Enable()
-		else:
-			self.Serial_baud_select.SetSelection(0)
-			self.Serial_baud_select.Disable()
+		if selected == 'Signal K > OpenCPN': self.Serial_baud_select.Enable()
 
 	def on_enable_UART(self,e):
 		msg = _('This action disables Bluetooth and enables UART. OpenPlotter will reboot.\n').decode('utf8')
@@ -4775,6 +4607,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		else: os.system('rm -f '+self.home+'/cmdline.txt')
 
 		if reset == True : os.system('sudo shutdown -r now')
+
+	def on_help_serial(self, e):
+		url = self.currentpath+"/docs/html/getting_started/connecting_serial_devices.html"
+		webbrowser.open(url, new=2)
 
 	###########################################CAN
 
@@ -4983,7 +4819,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		# restarting sk server
 		self.start_SK()
 		for i in range(seconds, 0, -1):
-			self.ShowStatusBarRED(_('Restarting Signal K server... ')+str(i))
+			self.ShowStatusBarYELLOW(_('Restarting Signal K server... ')+str(i))
 			time.sleep(1)
 		self.ShowStatusBarGREEN(_('Signal K server restarted'))
 
