@@ -6,6 +6,8 @@ echo
 echo "APPLYING SETTINGS..."
 echo
 
+grep -qF "dtoverlay=i2c-gpio,i2c_gpio_sda=2,i2c_gpio_scl=3,bus=3" "/boot/config.txt"  || echo "dtoverlay=i2c-gpio,i2c_gpio_sda=2,i2c_gpio_scl=3,bus=3" | sudo tee --append "/boot/config.txt"
+
 chmod 755 openplotter_tmp/openplotter
 chmod 755 openplotter_tmp/keyword
 chmod 755 openplotter_tmp/startup
