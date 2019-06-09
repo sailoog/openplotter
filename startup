@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, subprocess, time, os, threading, sys, platform, requests, ConfigParser, io, re
+import wx, subprocess, time, os, threading, sys, platform, requests, ConfigParser, io, re, ujson
 from shutil import copyfile
 from classes.conf import Conf
 from classes.language import Language
@@ -32,10 +32,32 @@ class MyFrame(wx.Frame):
 		self.conf_folder = self.conf.conf_folder
 
 		try:
+			sk_defaults_file = self.home+'/.signalk/defaults.json'
+			if os.path.isfile(sk_defaults_file):
+				with open(sk_defaults_file) as data_file:
+					data = ujson.load(data_file)
+				if 'vessels' in data:
+					if 'self' in data['vessels']:
+						if 'uuid' in data['vessels']['self']:
+							if data['vessels']['self']['uuid'] == 'urn:mrn:signalk:uuid:00000000-0000-0000-0000-000000000000':
+								data['vessels']['self']['uuid'] = 'urn:mrn:signalk:uuid:'+subprocess.check_output('uuid')
+								data2 = ujson.dumps(data, indent=4, sort_keys=True)
+								try:
+									with open(sk_defaults_file, 'w') as defile:
+										data2.write(defile)
+								except: pass
+								subprocess.call(['sudo', 'systemctl', 'stop', 'signalk.service'])
+								subprocess.call(['sudo', 'systemctl', 'stop', 'signalk.socket'])
+								subprocess.call(['sudo', 'systemctl', 'start', 'signalk.socket'])
+								subprocess.call(['sudo', 'systemctl', 'start', 'signalk.service'])
+			else: print 'Error: file ~/.signalk/defaults.json does not exist'	
+		except: pass
+		try:
 			private_unit_file_path = self.conf_folder+'/private_unit.json'
 			if not os.path.isfile(private_unit_file_path):
 				copyfile(self.op_folder+'/classes/private_unit.json', private_unit_file_path)
-
+		except: pass
+		try:
 			if not os.path.exists(self.conf_folder+'/tools/demo_tool'):
 				os.makedirs(self.conf_folder+'/tools/demo_tool')
 			demo_tool_file_path = self.conf_folder+'/tools/demo_tool/demo_tool.py'
@@ -44,7 +66,8 @@ class MyFrame(wx.Frame):
 			readme_tool_file_path = self.conf_folder+'/tools/README.md'
 			if not os.path.isfile(readme_tool_file_path):
 				copyfile(self.op_folder+'/tools/README.md', readme_tool_file_path)
-
+		except: pass
+		try:
 			if not os.path.exists(self.conf_folder+'/tools'):
 				os.makedirs(self.conf_folder+'/tools')
 			analog_file_path = self.conf_folder+'/tools/openplotter_analog.conf'

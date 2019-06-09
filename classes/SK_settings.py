@@ -128,13 +128,17 @@ class SK_settings:
 
 	def setSKsettings(self):
 		write = False
-		#OPsensors
 		pypilot = self.conf.get('PYPILOT', 'mode')
 		i2c = self.conf.get('I2C', 'sensors')
 		if i2c: i2c = eval(i2c)
 		onewire = self.conf.get('1W', 'ds18b20')
 		if onewire: onewire = eval(onewire)
 		spi = eval(self.conf.get('SPI', 'mcp'))
+		sdr = self.conf.get('AIS-SDR', 'enable')
+		serialInst = self.conf.get('UDEV', 'Serialinst')
+		try: serialInst = eval(serialInst)
+		except: serialInst = {}
+		#OPsensors
 		spiEnabled = False
 		for i in spi:
 			if i[0] == 1: spiEnabled = True
@@ -147,7 +151,6 @@ class SK_settings:
 				self.data['pipedProviders'][self.sensors]['enabled'] = False
 				write = True
 		#OPnmea0183
-		sdr = self.conf.get('AIS-SDR', 'enable')
 		if sdr == '1' or pypilot == 'imu':
 			if not self.nmea0183_enabled: 
 				self.data['pipedProviders'][self.nmea0183]['enabled'] = True
@@ -165,8 +168,38 @@ class SK_settings:
 			if self.pypilot_enabled: 
 				self.data['pipedProviders'][self.pypilot]['enabled'] = False
 				write = True
+		#serial NMEA 0183 devices
+		for alias in serialInst:
+			if serialInst[alias]['data'] == 'NMEA 0183' and serialInst[alias]['assignment'] == 'Signal K > OpenCPN':
+				exists = False
+				if 'pipedProviders' in self.data:
+					count = 0
+					for i in self.data['pipedProviders']:
+						if i['id'] == alias: 
+							exists = True
+							if i['pipeElements'][0]['options']['subOptions']['baudrate'] != int(serialInst[alias]['bauds']):
+								write = True
+								self.data['pipedProviders'][count]['pipeElements'][0]['options']['subOptions']['baudrate'] = int(serialInst[alias]['bauds'])
+						count = count + 1
+				if not exists:		
+					self.data['pipedProviders'].append({'pipeElements': [{'type': 'providers/simple', 'options': {'logging': False, 'type': 'NMEA0183', 'subOptions': {"validateChecksum": True, "type": "serial", "device": alias, "baudrate": int(serialInst[alias]['bauds'])}}}], 'enabled': True, 'id': alias})
+					write = True
+		count = 0
+		for i in self.data['pipedProviders']:
+			if '/dev/ttyOP_' in i['id']:
+				exists = False
+				for alias in serialInst:
+					if alias == i['id'] and serialInst[alias]['data'] == 'NMEA 0183' and serialInst[alias]['assignment'] == 'Signal K > OpenCPN': 
+						exists = True
+				if not exists:
+					write = True
+					del self.data['pipedProviders'][count]
+			count = count + 1
 
-		if write: self.write_settings()
+		if write: 
+			self.write_settings()
+			return True
+		else: return False
 
 
 	def set_ngt1_device(self,device,speed):

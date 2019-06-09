@@ -207,11 +207,11 @@ class MyFrame(wx.Frame):
 				self.conf.set('AIS-SDR', 'enable', '0')
 				msg = _('SDR-AIS reception disabled')
 
-			self.SK_settings.setSKsettings()
-			seconds = 12
-			for i in range(seconds, 0, -1):
-				self.ShowStatusBarRED(_('Restarting Signal K server... ')+str(i))
-				time.sleep(1)
+			if self.SK_settings.setSKsettings():
+				seconds = 12
+				for i in range(seconds, 0, -1):
+					self.ShowStatusBarRED(_('Restarting Signal K server... ')+str(i))
+					time.sleep(1)
 			self.ShowStatusBarBLACK(msg)
 
 		def test_gain(self,event):
