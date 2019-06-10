@@ -104,10 +104,6 @@ class SK_settings:
 							self.ngt1_enabled = i['enabled']
 							self.OPcan = count
 							self.ngt1_device = i['pipeElements'][0]['options']['subOptions']['device']
-						elif i['pipeElements'][0]['options']['subOptions']['type'] == 'ngt-1-canboatjs':
-							self.ngt1js_enabled = i['enabled']
-							self.OPcan = count
-							self.ngt1_device=i['pipeElements'][0]['options']['subOptions']['device']
 						elif i['pipeElements'][0]['options']['subOptions']['type'][0:6] == 'canbus':
 							self.canbus_enabled = i['enabled']
 							self.OPcan = ount
@@ -186,10 +182,37 @@ class SK_settings:
 					write = True
 		count = 0
 		for i in self.data['pipedProviders']:
-			if '/dev/ttyOP_' in i['id']:
+			if '/dev/ttyOP_' in i['id'] and i['pipeElements'][0]['options']['subOptions']['type'] == 'serial':
 				exists = False
 				for alias in serialInst:
 					if alias == i['id'] and serialInst[alias]['data'] == 'NMEA 0183' and serialInst[alias]['assignment'] == 'Signal K > OpenCPN': 
+						exists = True
+				if not exists:
+					write = True
+					del self.data['pipedProviders'][count]
+			count = count + 1
+		#serial NMEA 2000 devices
+		for alias in serialInst:
+			if serialInst[alias]['data'] == 'NMEA 2000' and serialInst[alias]['assignment'] == 'Signal K > OpenCPN':
+				exists = False
+				if 'pipedProviders' in self.data:
+					count = 0
+					for i in self.data['pipedProviders']:
+						if i['id'] == alias: 
+							exists = True
+							if i['pipeElements'][0]['options']['subOptions']['baudrate'] != int(serialInst[alias]['bauds']):
+								write = True
+								self.data['pipedProviders'][count]['pipeElements'][0]['options']['subOptions']['baudrate'] = int(serialInst[alias]['bauds'])
+						count = count + 1
+				if not exists:		
+					self.data['pipedProviders'].append({'pipeElements': [{'type': 'providers/simple', 'options': {'logging': False, 'type': 'NMEA2000', 'subOptions': {'device': alias, "baudrate": int(serialInst[alias]['bauds']), 'type': 'ngt-1-canboatjs'}}}], 'enabled': True, 'id': alias})
+					write = True
+		count = 0
+		for i in self.data['pipedProviders']:
+			if '/dev/ttyOP_' in i['id'] and i['pipeElements'][0]['options']['subOptions']['type'] == 'ngt-1-canboatjs':
+				exists = False
+				for alias in serialInst:
+					if alias == i['id'] and serialInst[alias]['data'] == 'NMEA 2000' and serialInst[alias]['assignment'] == 'Signal K > OpenCPN': 
 						exists = True
 				if not exists:
 					write = True
@@ -226,21 +249,6 @@ class SK_settings:
 				pass
 		self.enable_disable_all(enable)
 
-	def set_ngt1js_enable(self,enable,device,speed):
-		if enable == True:
-			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['type'] = 'ngt-1-canboatjs'
-			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['device'] = device
-			try:
-				self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['baudrate'] = long(speed)
-			except:
-				self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['baudrate'] = 115200
-
-			try:
-				del self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['interface']
-			except:
-				pass
-		self.enable_disable_all(enable)
-
 	def set_canbus_enable(self,enable):
 		if self.canbus_enabled == -1:
 			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['type'] = 'canbus-canboatjs'
@@ -258,6 +266,26 @@ class SK_settings:
 		elif enable == 0:
 			self.data['pipedProviders'][self.OPcan]['enabled']=False
 		self.write_settings()
+
+	def enable_disable_device(self,deviceId,enable):
+		write = False
+		count = 0
+		for i in self.data['pipedProviders']:
+			if i['id'] == deviceId:
+				if enable == 1:
+					if i['enabled'] == False:
+						write = True
+						self.data['pipedProviders'][count]['enabled'] = True
+				elif enable == 0:
+					if i['enabled'] == True:
+						write = True
+						self.data['pipedProviders'][count]['enabled'] = False
+			count = count + 1
+
+		if write: 
+			self.write_settings()
+			return True
+		else: return False
 
 	def write_settings(self):
 		data = ujson.dumps(self.data, indent=4, sort_keys=True)

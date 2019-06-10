@@ -34,7 +34,7 @@ try:
 except:
 	Serialinst = {}
 
-can_device = ''
+can_device = '/dev/ttyOP_can1'
 for name in Serialinst:
 	if Serialinst[name]['assignment'] == 'CAN-USB':
 		can_device = '/dev/ttyOP_'+name
