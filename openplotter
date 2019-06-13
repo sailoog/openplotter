@@ -1667,12 +1667,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 	def start_sensors(self):
 		subprocess.Popen(['python', self.currentpath + '/read_sensors_d.py'], cwd=self.home + '/.pypilot')
-		if self.SK_settings.setSKsettings():
-			seconds = 12
-			for i in range(seconds, 0, -1):
-				self.ShowStatusBarYELLOW(_('Restarting Signal K server... ')+str(i))
-				time.sleep(1)
-			self.ShowStatusBarGREEN(_('Signal K server restarted'))
+		if self.SK_settings.setSKsettings(): self.restart_SK(0)
 
 	def stop_sensors(self):
 		subprocess.call(['pkill', '-f', 'pypilot_calibration'])
@@ -2562,7 +2557,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		os.system('mv '+tmpndsettings+' '+ndsettings)
 
 		self.print_credentials()
-		self.restart_SK()
+		self.restart_SK(0)
 		seconds = 15
 		for i in range(seconds, 0, -1):
 			self.ShowStatusBarGREEN(_('Signal K server restarted')+' | '+_('Starting Node-Red... ')+str(i))
@@ -2597,7 +2592,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		os.system('mv '+tmpndsettings+' '+ndsettings)
 
 		self.print_credentials()
-		self.restart_SK()
+		self.restart_SK(0)
 		seconds = 15
 		for i in range(seconds, 0, -1):
 			self.ShowStatusBarGREEN(_('Signal K server restarted')+' | '+_('Starting Node-Red... ')+str(i))
@@ -3059,7 +3054,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.edit_credentials(add_credentials, remove_credentials)
 		self.nodes.edit_flow(add_nodes, remove_ids)
 		self.print_credentials()
-		self.restart_SK()
+		self.restart_SK(0)
 		seconds = 15
 		for i in range(seconds, 0, -1):
 			self.ShowStatusBarGREEN(_('Signal K server restarted')+' | '+_('Starting Node-Red... ')+str(i))
@@ -3931,7 +3926,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					
 		self.nodes.write_flow(all_flows)
 		self.edit_credentials(self.add_credentials, self.remove_credentials)
-		self.restart_SK()
+		self.restart_SK(0)
 		seconds = 15
 		for i in range(seconds, 0, -1):
 			self.ShowStatusBarGREEN(_('Signal K server restarted')+' | '+_('Starting Node-Red... ')+str(i))
@@ -4288,7 +4283,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.Serial_OPname.SetValue(name.replace('/dev/ttyOP_',''))
 		self.serialData.SetStringSelection(item['data'])
 		self.onSelectData()
-		self.Serial_assignment.SetStringSelection(item['assignment'])
+		if item['assignment'] == '0': self.Serial_assignment.SetSelection(0)
+		else: self.Serial_assignment.SetStringSelection(item['assignment'])
 		self.onSelectAssigment()
 		self.Serial_baud_select.SetStringSelection(item['bauds'])
 		if 'serial' in item['port'] or 'virtual' in item['port']:
@@ -4324,10 +4320,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				self.ShowStatusBarYELLOW(_('Please select type of data').decode('utf8'))
 				return
 
-		assignment = self.Serial_assignment.GetStringSelection()
-		if not assignment:
+		assignmentIndex = self.Serial_assignment.GetSelection()
+		if assignmentIndex == -1:
 				self.ShowStatusBarYELLOW(_('Please assign the device').decode('utf8'))
 				return
+		elif assignmentIndex == 0:
+			assignment = '0'
+		else:
+			assignment = self.Serial_assignment.GetStringSelection()
 
 		bauds = self.Serial_baud_select.GetStringSelection()
 		if assignment == 'Signal K > OpenCPN' and not bauds:
@@ -4453,16 +4453,37 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.read_pypilot()
 			self.on_apply_changes_pypilot()
 
-		if self.SK_settings.setSKsettings():
-			seconds = 12
-			for i in range(seconds, 0, -1):
-				self.ShowStatusBarYELLOW(_('Restarting Signal K server... ')+str(i))
-				time.sleep(1)
-			self.ShowStatusBarGREEN(_('Signal K server restarted'))
+		# check SK devices
+		resetSK = False
+
+		if self.SK_settings.setSKsettings(): resetSK = True
+
+		canDevice = self.SK_settings.ngt1_device
+		if canDevice:
+			exists = False
+			for alias in self.Serialinst:
+				if alias == canDevice:
+					if self.Serialinst[alias]['data'] == 'NMEA 2000' and self.Serialinst[alias]['assignment'] == '0': exists = True
+			if not exists:
+				self.SK_settings.set_ngt1_device('',0)
+				self.SK_settings.enable_disable_device('OPcan',0)
+				self.conf.set('N2K', 'output', '0')
+				self.killDevApps()
+				resetSK = True
+
+		if resetSK:	self.restart_SK(0)
 		else: time.sleep(1.5)
 
 		self.read_Serialinst()
 		self.read_n2k()
+
+		# check connections
+		exists = False
+		for alias in self.Serialinst:
+			if self.Serialinst[alias]['data'] == 'NMEA 2000' and self.Serialinst[alias]['assignment'] == 'Signal K > OpenCPN':
+				exists = True
+		if exists:
+			wx.MessageBox(_('You have assigned one or more N2K devices to Signal K > OpenCPN.\n\nThey are ready to send data to Signal K but if you want OpenCPN to get data from Signal K you need to use the Signal K plugins "SK to NMEA 0183" and "N2K AIS to NMEA0183".\n\nYour devices are also ready to send data from Signal K to your N2K network. Use the Signal K plugin "SK to N2K" and allow PGNs transmission using the "Open TX PGNs" tool.\n\n Go to "CAN" tab to access plugins and settings.'), 'Warning', wx.OK | wx.ICON_WARNING)
 
 		checkOpencpn = False
 		for alias in self.Serialinst:
@@ -4595,9 +4616,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	###########################################CAN
 
 	def page_n2k(self):	
-		#CANUSB_label = wx.StaticText(self.p_n2k, label=_('CAN-USB device:'))
-		#self.can_usb = wx.StaticText(self.p_n2k)
-
 		canboatjs = wx.StaticBox(self.p_n2k, label=_(' Managed by Signal K '))
 		self.listSKcan = wx.ListCtrl(self.p_n2k, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER | wx.LC_SINGLE_SEL, size=(-1,70))
 		self.listSKcan.InsertColumn(0, _('alias'), width=200)
@@ -4606,7 +4624,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.listSKcan.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.onListSKcanDeselected)
 
 		SKoutLabel = wx.StaticText(self.p_n2k, label=_('Data output'))
-		self.SKcanTX = wx.Button(self.p_n2k, label=_('Open device PGNs'))
+		self.SKcanTX = wx.Button(self.p_n2k, label=_('Open TX PGNs'))
 		self.SKcanTX.Bind(wx.EVT_BUTTON, self.onSKcanTX)
 		SKtoN2K = wx.Button(self.p_n2k, label=_('SK to N2K'))
 		SKtoN2K.Bind(wx.EVT_BUTTON, self.onSKtoN2K)
@@ -4625,14 +4643,22 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		canboat = wx.StaticBox(self.p_n2k, label=_(' Managed by OpenPlotter '))
 
-		'''
-		self.n2k_enable = wx.CheckBox(self.p_n2k, label=_('Data input'))
+		canUsbLabel = wx.StaticText(self.p_n2k, label=_('Alias'))
+		self.canUsbList = []
+		self.can_usb = wx.Choice(self.p_n2k, choices=self.canUsbList, style=wx.CB_READONLY, size=(130,-1))
+		baudsLabel = wx.StaticText(self.p_n2k, label=_('Bauds'))
+		self.canBaudsSelect = wx.Choice(self.p_n2k, choices=self.bauds, style=wx.CB_READONLY)
+
+		canApply = wx.Button(self.p_n2k, label=_('Apply'))
+		canApply.Bind(wx.EVT_BUTTON, self.onCanApply)
+
+		self.n2k_enable = wx.CheckBox(self.p_n2k, label=_('Input'))
 		self.n2k_enable.Bind(wx.EVT_CHECKBOX, self.on_n2k_enable)
 
 		self.N2K_diagnostic_b = wx.Button(self.p_n2k, label=_('Diagnostic'))
 		self.N2K_diagnostic_b.Bind(wx.EVT_BUTTON, self.on_N2K_diagnostic)
 
-		self.n2k_out_enable = wx.CheckBox(self.p_n2k, label=_('Data output'))
+		self.n2k_out_enable = wx.CheckBox(self.p_n2k, label=_('Output'))
 		self.n2k_out_enable.Bind(wx.EVT_CHECKBOX, self.on_n2k_output)
 
 		self.N2K_diagnostic_out_b = wx.Button(self.p_n2k, label=_('Diagnostic'))
@@ -4640,15 +4666,15 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	
 		self.SK_to_N2K = wx.Button(self.p_n2k, label=_('SK to N2K'))
 		self.SK_to_N2K.Bind(wx.EVT_BUTTON, self.on_SK_to_N2K)
-		'''
+
+		self.SKcanTX2 = wx.Button(self.p_n2k, label=_('Open TX PGNs'))
+		self.SKcanTX2.Bind(wx.EVT_BUTTON, self.onSKcanTX2)
+
 		mcp2515 = wx.StaticBox(self.p_n2k, label=_(' MCP2515 '))
 
 		'''
 		self.n2k_can0_enable = wx.CheckBox(self.p_n2k, label=_('Input/Output can0'))
 		self.n2k_can0_enable.Bind(wx.EVT_CHECKBOX, self.on_n2k_can0_enable)	
-
-		self.SK_to_N2K2 = wx.Button(self.p_n2k, label=_('Signal K to N2K'))
-		self.SK_to_N2K2.Bind(wx.EVT_BUTTON, self.on_SK_to_N2K2)	
 		'''
 		hbox = wx.BoxSizer(wx.HORIZONTAL)
 		hbox.Add(diagnostic, 0, wx.ALL, 5)
@@ -4666,40 +4692,44 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		canboatjsBox.Add(self.listSKcan, 1, wx.ALL | wx.EXPAND, 5)
 		canboatjsBox.Add(vbox, 0, wx.ALL, 5)
 
-		canboatBox = wx.StaticBoxSizer(canboat, wx.VERTICAL)
+		canboatH0 = wx.BoxSizer(wx.HORIZONTAL)
+		canboatH0.Add(canUsbLabel, 0, wx.LEFT | wx.UP, 5)
+		canboatH0.Add(self.can_usb, 0, wx.LEFT, 5)
+		canboatH0.Add(baudsLabel, 0, wx.LEFT | wx.UP, 5)
+		canboatH0.Add(self.canBaudsSelect, 0, wx.LEFT, 5)
+		canboatH0.Add(canApply, 0, wx.LEFT, 5)
 
+		canboatH1 = wx.BoxSizer(wx.HORIZONTAL)
+		canboatH1.Add(self.n2k_enable, 0, wx.LEFT, 5)
+		canboatH1.Add(self.N2K_diagnostic_b, 0, wx.LEFT, 5)
+
+		canboatH2 = wx.BoxSizer(wx.HORIZONTAL)
+		canboatH2.Add(self.n2k_out_enable, 0, wx.LEFT, 5)
+		canboatH2.Add(self.SK_to_N2K, 0, wx.LEFT, 5)
+		canboatH2.Add(self.N2K_diagnostic_out_b, 0, wx.LEFT, 5)
+		canboatH2.Add(self.SKcanTX2, 0, wx.LEFT | wx.RIGHT, 5)
+		
+		canboatBox = wx.StaticBoxSizer(canboat, wx.VERTICAL)
+		canboatBox.AddSpacer(5)
+		canboatBox.Add(canboatH0, 0, wx.ALL, 0)
+		canboatBox.AddSpacer(10)
+		canboatBox.Add(canboatH1, 0, wx.ALL, 0)
+		canboatBox.AddSpacer(10)
+		canboatBox.Add(canboatH2, 0, wx.ALL, 0)
+		canboatBox.AddSpacer(5)
 
 		mcp2515Box = wx.StaticBoxSizer(mcp2515, wx.VERTICAL)
 
 
 		hbox2 = wx.BoxSizer(wx.HORIZONTAL)
 		hbox2.Add(canboatBox, 1, wx.ALL | wx.EXPAND, 5)
-		hbox2.Add(mcp2515Box, 1, wx.ALL | wx.EXPAND, 5)
+		hbox2.Add(mcp2515Box, 0, wx.ALL | wx.EXPAND, 5)
 
-		'''
-		v_boxSizer1 = wx.BoxSizer(wx.HORIZONTAL)
-		v_boxSizer1.Add(self.n2k_enable, 0, wx.ALL | wx.EXPAND, 5)
-		v_boxSizer1.Add(self.N2K_diagnostic_b, 0, wx.ALL | wx.EXPAND, 5)
-
-		v_boxSizer2 = wx.BoxSizer(wx.HORIZONTAL)
-		v_boxSizer2.Add(self.n2k_out_enable, 0, wx.ALL | wx.EXPAND, 5)
-		v_boxSizer2.Add(self.N2K_diagnostic_out_b, 0, wx.ALL | wx.EXPAND, 5)
-		v_boxSizer2.Add(self.SK_to_N2K, 0, wx.ALL | wx.EXPAND, 5)
-
-		v_boxSizer0 = wx.StaticBoxSizer(canboat_box, wx.VERTICAL)
-		v_boxSizer0.Add(v_boxSizer1, 0, wx.ALL | wx.EXPAND, 5)
-		v_boxSizer0.Add(v_boxSizer2, 0, wx.ALL | wx.EXPAND, 5)
-
-		v_boxSizer3 = wx.StaticBoxSizer(canboatjs_box, wx.HORIZONTAL) 
-		v_boxSizer3.Add(self.n2k_can0_enable, 0, wx.ALL | wx.EXPAND, 5)
-		v_boxSizer3.Add(self.SK_to_N2K2, 0, wx.ALL | wx.EXPAND, 5)
-		'''
 		main = wx.BoxSizer(wx.VERTICAL) 
 		main.Add(canboatjsBox, 0, wx.ALL | wx.EXPAND, 5)
 		main.Add(hbox2, 0, wx.ALL | wx.EXPAND, 0)
 		main.AddStretchSpacer(1)
 		main.Add(hbox, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 5)
-
 
 		self.p_n2k.SetSizer(main) 
 
@@ -4733,80 +4763,84 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def read_n2k(self):
 		self.SKcanTX.Disable()
 		self.listSKcan.DeleteAllItems()
+		self.can_usb.Clear()
+		manualList = ['']
 		for alias in self.Serialinst:
-			if self.Serialinst[alias]['data'] == 'NMEA 2000' and self.Serialinst[alias]['assignment'] == 'Signal K > OpenCPN':
-				self.listSKcan.Append([alias,self.Serialinst[alias]['bauds']])
-
-		'''
-		for name in self.Serialinst:
-			if self.Serialinst[name]['assignment'] == 'CAN-USB':
-				self.can_device = '/dev/ttyOP_'+name
-				self.can_speed = self.Serialinst[name]['bauds']
-				break
-
-		self.n2k_enable.SetValue(self.SK_settings.ngt1_enabled == 1)
-		self.n2k_out_enable.SetValue(self.conf.get('N2K', 'output') == '1')
-
-		can_exists=os.path.isdir('/sys/class/net/can0')
-		if can_exists:
-			self.n2k_can0_enable.Enable()
-			self.n2k_can0_enable.SetValue(self.SK_settings.canbus_enabled == 1)
-		else:
-			self.n2k_can0_enable.Disable()
-			
-		if self.can_device:	
-			#self.can_usb.SetLabel(self.can_device)
-			if self.n2k_enable.GetValue() or self.n2k_out_enable.GetValue():
-				#self.button_N2K_setting.Disable()
+			if self.Serialinst[alias]['data'] == 'NMEA 2000':
+				if self.Serialinst[alias]['assignment'] == 'Signal K > OpenCPN':
+					self.listSKcan.Append([alias,self.Serialinst[alias]['bauds']])
+				if self.Serialinst[alias]['assignment'] == '0':
+					manualList.append(alias)
+		self.can_usb.AppendItems(manualList)
+		if self.SK_settings.ngt1_device: 
+			self.n2k_enable.Enable()
+			self.N2K_diagnostic_b.Enable()
+			self.n2k_out_enable.Enable()
+			self.N2K_diagnostic_out_b.Enable()
+			self.SK_to_N2K.Enable()
+			self.SKcanTX2.Enable()
+			self.can_usb.SetStringSelection(self.SK_settings.ngt1_device)
+			if self.SK_settings.ngt1_baudrate: self.canBaudsSelect.SetStringSelection(str(self.SK_settings.ngt1_baudrate))
+			else: self.canBaudsSelect.SetSelection(-1)
+			if self.SK_settings.ngt1_enabled: self.n2k_enable.SetValue(True)
+			else: self.n2k_enable.SetValue(False)
+			out = self.conf.get('N2K', 'output') == '1'
+			self.n2k_out_enable.SetValue(out)
+			if self.SK_settings.ngt1_enabled or out:
 				self.N2K_diagnostic_b.Disable()
 				self.N2K_diagnostic_out_b.Disable()
-			else:
-				#self.button_N2K_setting.Enable()
-				self.N2K_diagnostic_b.Enable()
-				self.N2K_diagnostic_out_b.Enable()
-			if self.n2k_enable.GetValue() or self.n2k_out_enable.GetValue():
-				self.n2k_can0_enable.Disable()
-			else:
-				if can_exists: 
-					self.n2k_can0_enable.Enable()
-			if self.n2k_can0_enable.GetValue():
-				self.n2k_enable.Disable()
-				self.n2k_out_enable.Disable()
-			else:
-				self.n2k_enable.Enable()
-				self.n2k_out_enable.Enable()
-			if self.n2k_enable.GetValue() or self.n2k_out_enable.GetValue():
-				self.n2k_can0_enable.Disable()
-			else:
-				if can_exists:
-					self.n2k_can0_enable.Enable()	
-		else:
-			#self.can_usb.SetLabel(_('none'))
-			#self.button_N2K_setting.Disable()
+				self.SK_to_N2K.Disable()
+				self.SKcanTX2.Disable()
+		else: 
 			self.n2k_enable.Disable()
+			self.n2k_enable.SetValue(False)
 			self.N2K_diagnostic_b.Disable()
 			self.n2k_out_enable.Disable()
+			self.n2k_out_enable.SetValue(False)
 			self.N2K_diagnostic_out_b.Disable()
-			if can_exists:
-				self.n2k_can0_enable.Enable()
-		'''
+			self.SK_to_N2K.Disable()
+			self.SKcanTX2.Disable()
+			self.can_usb.SetSelection(-1)
+			self.canBaudsSelect.SetSelection(-1)
+
+	def onCanApply(self, e):
+		if self.can_usb.GetSelection() == -1:
+			self.ShowStatusBarYELLOW(_('Set a device as "manual" in Serial tab and select it in field Alias'))
+		elif self.canBaudsSelect.GetSelection() == -1:
+			self.ShowStatusBarYELLOW(_('Select a baudrate'))
+		else:
+			restart = False
+			if self.can_usb.GetStringSelection() == '':
+				if self.SK_settings.enable_disable_device('OPcan',0): restart = True
+			if self.SK_settings.set_ngt1_device(self.can_usb.GetStringSelection(),self.canBaudsSelect.GetStringSelection()): restart = True
+			if restart:
+				self.killDevApps()
+				self.conf.set('N2K', 'output', '0')
+				self.restart_SK(0)
+			self.read_n2k()
+
 	def on_n2k_enable(self, e):
 		if self.n2k_enable.GetValue():
-			self.SK_settings.set_ngt1_enable(True,self.can_device,self.can_speed)
+			if self.SK_settings.enable_disable_device('OPcan',1): self.restart_SK(0)
 		else:
-			self.SK_settings.set_ngt1_enable(False,self.can_device,self.can_speed)
+			if self.SK_settings.enable_disable_device('OPcan',0): self.restart_SK(0)
 		self.read_n2k()
+
+	def killDevApps(self):
+		subprocess.call(['pkill', '-f', 'diagnostic-N2K-output.py'])
+		subprocess.call(['pkill', '-f', 'diagnostic-N2K-input.py'])
+		subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
+		subprocess.call(['pkill', '-f', 'SK-base_d.py'])
 
 	def on_n2k_output(self, e):
 		if self.n2k_out_enable.GetValue():
 			self.conf.set('N2K', 'output', '1')
-			subprocess.call(['pkill', '-f', 'diagnostic-N2K-output.py'])
-			subprocess.call(['pkill', '-f', 'diagnostic-N2K-input.py'])
-			subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
+			self.killDevApps()
 			subprocess.Popen(['python', self.currentpath + '/N2K-server_d.py'])
+			subprocess.Popen(['python', self.currentpath+'/SK-base_d.py'])
 		else:
 			self.conf.set('N2K', 'output', '0')
-			subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
+			self.killDevApps()
 		self.read_n2k()
 
 	def onSKcanTX(self, e):
@@ -4816,31 +4850,34 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			return
 		alias = self.listSKcan.GetItemText(index, 0)
 		bauds = self.listSKcan.GetItemText(index, 1)
-		if self.SK_settings.enable_disable_device(alias,0):
-			seconds = 12
-			for i in range(seconds, 0, -1):
-				self.ShowStatusBarYELLOW(_('Disabling device and restarting Signal K server... ')+str(i))
-				time.sleep(1)
-			self.ShowStatusBarGREEN(_('Signal K server restarted'))
+		if self.SK_settings.enable_disable_device(alias,0): self.restart_SK(_('Disabling device and restarting Signal K server... '))
 		dlg = openPGNs(self,alias,bauds)
 		res = dlg.ShowModal()
 		dlg.Destroy()
-		if self.SK_settings.enable_disable_device(alias,1):
-			seconds = 12
-			for i in range(seconds, 0, -1):
-				self.ShowStatusBarYELLOW(_('Enabling device and restarting Signal K server... ')+str(i))
-				time.sleep(1)
-			self.ShowStatusBarGREEN(_('Signal K server restarted'))
+		if self.SK_settings.enable_disable_device(alias,1): self.restart_SK(_('Enabling device and restarting Signal K server... '))
+
+	def onSKcanTX2(self, e):
+		self.killDevApps()
+		alias = self.SK_settings.ngt1_device
+		bauds = self.SK_settings.ngt1_baudrate
+		if not alias:
+			self.ShowStatusBarYELLOW(_('No device selected'))
+			return
+		if self.SK_settings.enable_disable_device('OPcan',0): self.restart_SK(_('Disabling device and restarting Signal K server... '))
+		dlg = openPGNs(self,alias,bauds)
+		res = dlg.ShowModal()
+		dlg.Destroy()
 
 	def on_N2K_diagnostic(self, e):
-		subprocess.call(['pkill', '-f', 'diagnostic-N2K-input.py'])
+		self.killDevApps()
 		subprocess.Popen(['python', self.currentpath + '/diagnostic-N2K-input.py'])
-		self.ShowStatusBarBLACK(_('Show received PGNs.'))
+		self.ShowStatusBarBLACK(_('Show received PGNs'))
 
 	def on_N2K_diagnostic_out(self, e):
-		subprocess.call(['pkill', '-f', 'diagnostic-N2K-output.py'])
+		self.killDevApps()
+		subprocess.Popen(['python', self.currentpath+'/SK-base_d.py'])
 		subprocess.Popen(['python', self.currentpath + '/diagnostic-N2K-output.py'])
-		self.ShowStatusBarBLACK(_('Show sent PGNs.'))
+		self.ShowStatusBarBLACK(_('Show sent PGNs'))
 					
 	def on_n2k_can0_enable(self, e):
 		if self.n2k_can0_enable.GetValue():
@@ -4859,14 +4896,13 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		subprocess.call(['sudo', 'systemctl', 'stop', 'signalk.service'])
 		subprocess.call(['sudo', 'systemctl', 'stop', 'signalk.socket'])
 		
-	def restart_SK(self):
+	def restart_SK(self, msg):
+		if msg == 0: msg = _('Restarting Signal K server... ')
 		seconds = 12
-		# stopping sk server
 		self.stop_SK()
-		# restarting sk server
 		self.start_SK()
 		for i in range(seconds, 0, -1):
-			self.ShowStatusBarYELLOW(_('Restarting Signal K server... ')+str(i))
+			self.ShowStatusBarYELLOW(msg+str(i))
 			time.sleep(1)
 		self.ShowStatusBarGREEN(_('Signal K server restarted'))
 

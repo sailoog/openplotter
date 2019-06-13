@@ -262,15 +262,16 @@ class MyFrame(wx.Frame):
 			self.add_logger_data(_(' Done.'))	
 
 		######################################
-
+		
 		subprocess.call(['pkill', '-f', 'diagnostic-N2K-output.py'])
+		subprocess.call(['pkill', '-f', 'diagnostic-N2K-input.py'])
 		subprocess.call(['pkill', '-f', 'N2K-server_d.py'])
 		subprocess.call(['pkill', '-f', 'SK-base_d.py'])
 		if N2K_output == '1':
 			self.add_logger_data(_('\nStarting N2K server...'))
 			subprocess.Popen(['python', self.op_folder+'/N2K-server_d.py'])
 			self.check_start('N2K-server_d.py')
-			self.add_logger_data(_('\nStarting N2K generators...'))
+			self.add_logger_data(_('\nStarting N2K generator...'))
 			subprocess.Popen(['python', self.op_folder+'/SK-base_d.py'])
 			self.check_start('SK-base_d.py')
 
@@ -359,7 +360,11 @@ class MyFrame(wx.Frame):
 
 		self.add_logger_data(_('\nChecking Signal K connections...'))
 		self.SK_settings = SK_settings(self.conf)
-		self.SK_settings.setSKsettings()
+		if self.SK_settings.setSKsettings():
+			subprocess.call(['sudo', 'systemctl', 'stop', 'signalk.service'])
+			subprocess.call(['sudo', 'systemctl', 'stop', 'signalk.socket'])
+			subprocess.call(['sudo', 'systemctl', 'start', 'signalk.socket'])
+			subprocess.call(['sudo', 'systemctl', 'start', 'signalk.service'])
 		self.check_start('signalk-server')
 		
 		######################################

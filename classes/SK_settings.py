@@ -70,7 +70,7 @@ class SK_settings:
 		except: print 'Error: error parsing Signal K settings defaults'
 
 		if not OPcan: 
-			self.data['pipedProviders'].append({'pipeElements': [{'type': 'providers/simple', 'options': {'logging': False, 'type': 'NMEA2000', 'subOptions': {'device': '/dev/ttyOP_', 'type': 'ngt-1'}}}], 'enabled': False, 'id': 'OPcan'})
+			self.data['pipedProviders'].append({'pipeElements': [{'type': 'providers/simple', 'options': {'logging': False, 'type': 'NMEA2000', 'subOptions': {'device': '', 'baudrate': '', 'type': 'ngt-1'}}}], 'enabled': False, 'id': 'OPcan'})
 			write = True
 		if not OPpypilot: 
 			self.data['pipedProviders'].append({'pipeElements': [{'type': 'providers/simple', 'options': {'logging': False, 'type': 'NMEA0183', 'subOptions': {'host': 'localhost', 'type': 'tcp', 'port': '20220'}}}], 'enabled': False, 'id': 'OPpypilot'})
@@ -89,7 +89,7 @@ class SK_settings:
 		self.OPcan = ''
 		self.ngt1_enabled = -1
 		self.ngt1_device = ''
-		self.ngt1js_enabled = -1
+		self.ngt1_baudrate = ''
 		self.canbus_enabled = -1
 		self.canbus_interface = ''
 		self.pypilot_enabled = -1
@@ -104,6 +104,7 @@ class SK_settings:
 							self.ngt1_enabled = i['enabled']
 							self.OPcan = count
 							self.ngt1_device = i['pipeElements'][0]['options']['subOptions']['device']
+							self.ngt1_baudrate = i['pipeElements'][0]['options']['subOptions']['baudrate']
 						elif i['pipeElements'][0]['options']['subOptions']['type'][0:6] == 'canbus':
 							self.canbus_enabled = i['enabled']
 							self.OPcan = ount
@@ -219,35 +220,21 @@ class SK_settings:
 					del self.data['pipedProviders'][count]
 			count = count + 1
 
-		if write: 
-			self.write_settings()
-			return True
-		else: return False
+		if write: self.write_settings()
+		return write
 
 
 	def set_ngt1_device(self,device,speed):
-		self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['device'] = device
-		self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['baudrate'] = long(speed)
-		try:
-			del self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['interface']
-		except:
-			pass
-		self.write_settings()
-
-	def set_ngt1_enable(self,enable,device,speed):
-		if enable == True:
-			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['type'] = 'ngt-1'
+		write = False
+		if self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['device'] != device:
 			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['device'] = device
-			try:
-				self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['baudrate'] = long(speed)
-			except:
-				self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['baudrate'] = 115200
-				
-			try:
-				del self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['interface']
-			except:
-				pass
-		self.enable_disable_all(enable)
+			write = True
+		if self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['baudrate'] != int(speed):
+			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['baudrate'] = int(speed)
+			write = True
+
+		if write: self.write_settings()
+		return write
 
 	def set_canbus_enable(self,enable):
 		if self.canbus_enabled == -1:
@@ -282,10 +269,8 @@ class SK_settings:
 						self.data['pipedProviders'][count]['enabled'] = False
 			count = count + 1
 
-		if write: 
-			self.write_settings()
-			return True
-		else: return False
+		if write: self.write_settings()
+		return write
 
 	def write_settings(self):
 		data = ujson.dumps(self.data, indent=4, sort_keys=True)
@@ -293,12 +278,6 @@ class SK_settings:
 			wififile = open(self.setting_file, 'w')
 			wififile.write(data.replace('\/','/'))
 			wififile.close()
-			# stopping sk server
-			subprocess.call(['sudo', 'systemctl', 'stop', 'signalk.service'])
-			subprocess.call(['sudo', 'systemctl', 'stop', 'signalk.socket'])
-			# restarting sk server
-			subprocess.call(['sudo', 'systemctl', 'start', 'signalk.socket'])
-			subprocess.call(['sudo', 'systemctl', 'start', 'signalk.service'])
 			self.load()
 		except: print 'Error: error saving Signal K settings'
 			

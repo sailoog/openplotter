@@ -18,33 +18,26 @@
 import serial
 import socket
 import sys
-
 from classes.conf import Conf
+from classes.SK_settings import SK_settings
 
 conf = Conf()
 
 activ = False
 activ = conf.get('N2K', 'output') == '1'
-if not activ:
-	sys.exit(0)
+if not activ: sys.exit(0)
 
-data = conf.get('UDEV', 'Serialinst')
-try:
-	Serialinst = eval(data)
-except:
-	Serialinst = {}
+SK_settings = SK_settings(conf)
 
-can_device = '/dev/ttyOP_can1'
-for name in Serialinst:
-	if Serialinst[name]['assignment'] == 'CAN-USB':
-		can_device = '/dev/ttyOP_'+name
-		break
-		
-try:
-	ser = serial.Serial(can_device, 115200, timeout=0.5)
-except:
-	print 'failed to start N2K output server on '+can_device
-	sys.exit(0)
+baudrate = SK_settings.ngt1_baudrate
+can_device = SK_settings.ngt1_device	
+if baudrate and can_device:
+	try:
+		ser = serial.Serial(can_device, baudrate, timeout=0.5)
+	except:
+		print 'failed to start N2K output server on '+can_device
+		sys.exit(0)
+else: sys.exit(0)
 
 	
 Quelle = '127.0.0.1'  # Adresse des eigenen Rechners

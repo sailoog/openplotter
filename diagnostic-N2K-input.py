@@ -18,6 +18,7 @@
 import wx, sys, time, serial
 from classes.conf import Conf
 from classes.language import Language
+from classes.SK_settings import SK_settings
 
 class MyFrame(wx.Frame):
 		
@@ -28,29 +29,17 @@ class MyFrame(wx.Frame):
 		self.home = self.conf.home
 		self.currentpath = self.conf.get('GENERAL', 'op_folder')
 
-		data = self.conf.get('UDEV', 'Serialinst')
-		try:
-			Serialinst = eval(data)
-		except:
-			Serialinst = {}
+		self.SK_settings = SK_settings(self.conf)
 
-		can_device = ''
-		for name in Serialinst:
-			if Serialinst[name]['assignment'] == 'CAN-USB':
-				can_device = '/dev/ttyOP_'+name
-				self.baud_=Serialinst[name]['bauds']
-				break
-
-		if self.baud_ != '':
-			self.baud_=self.baud_*1
-		else:
-			self.baud_=115200			
-				
-		try:
-			self.ser = serial.Serial(can_device, self.baud_, timeout=0.5)
-		except:
-			print 'failed to start N2K input diagnostic on '+can_device
-			sys.exit(0)
+		baudrate = self.SK_settings.ngt1_baudrate
+		can_device = self.SK_settings.ngt1_device	
+		if baudrate and can_device:
+			try:
+				self.ser = serial.Serial(can_device, baudrate, timeout=0.5)
+			except:
+				print 'failed to start N2K input diagnostic on '+can_device
+				sys.exit(0)
+		else: sys.exit(0)		
 
 		Language(self.conf)
 
