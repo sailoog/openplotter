@@ -113,6 +113,9 @@ class MainFrame(wx.Frame):
 
 		self.deviation_table = self.settings.Append(wx.ID_ANY, _('Deviation Table'),_('Create a deviation table for your boat'))
 		self.Bind(wx.EVT_MENU, self.on_deviation_table, self.deviation_table)
+		self.filter_SK = self.settings.Append(wx.ID_ANY, _('Filter SignalK'),
+													_('blocks unwanted SignalK sources before they get into SignalK server node'))
+		self.Bind(wx.EVT_MENU, self.on_filter_SK, self.filter_SK)
 
 		self.settings.AppendSeparator()
 
@@ -260,6 +263,10 @@ class MainFrame(wx.Frame):
 		dlg = adddeviationsetting(self)
 		dlg.ShowModal()
 		dlg.Destroy()
+
+	def on_filter_SK(self, e):
+		subprocess.call(['pkill', '-f', 'SK_filter.py'])
+		subprocess.Popen(['python', self.currentpath + '/tools/SK_filter/SK_filter.py'])
 
 	def tool10(self, event):
 		menuId = event.Id
@@ -1007,7 +1014,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			pass
 
 		self.available_share = [_('none')]
-		unavailable_net = ['uap0','wlan1','lo']
+		unavailable_net = ['wlan9','lo']
 		if self.bridge.GetValue():
 			unavailable_net.append('eth0')
 
@@ -1029,8 +1036,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.available_ap_device = []
 		self.available_ap_device.append([_('none'),'',-1,-1,'none'])
 		for i in network_info.split():
-			if 'wlan' in i:
-				wlan = 'wlan1'
+			if 'wlan' in i and not 'wlan9' in i:
+				wlan = 'wlan9'
 				mac = (subprocess.check_output(('cat /sys/class/net/'+i+'/address').split())[:-1])
 				if 'usb' in subprocess.check_output(('ls -l /sys/class/net/'+i).split()):
 					type  = 'usb'
@@ -1053,7 +1060,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			for i in self.available_ap_device:
 				if 'on board' == i[2]:
 					type = 'AP and Station'
-					wlan = 'uap0'
+					wlan = 'uap'
 					self.available_ap_device.append([i[1]+' '+type, i[1], type, i[3], wlan])
 
 		self.available_ap_device2 = []
@@ -1119,34 +1126,43 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 			#search selected AP device 
 			found = False
-			if 'uap0' == self.hostapd_interface:
+			#if 'uap' == self.hostapd_interface:
+			#	for i in self.available_ap_device:
+			#		if 'AP and Station' == i[2]:
+			#			self.ap_device.SetStringSelection(i[0])
+			#			self.ap_5.Disable()
+			#			if i[3]>=1: self.ap_5.Enable()
+			#			found = True;
+			#else:
+			try:
+				wififile = open(self.conf_network+'/udev/rules.d/72-wireless.rules', 'r', 2000)
+				bak = wififile.read()
+				wififile.close()
+			except:
+				bak=''
+
+			if '__ap' in bak:
 				for i in self.available_ap_device:
 					if 'AP and Station' == i[2]:
+						self.ap_device.SetStringSelection(i[0])
+						self.on_ap_device(0)
+						#self.ap_5.Disable()
+						#if i[3]>=1: self.ap_5.Enable()
+						found = True;
+			if 'brcmfmac' in bak:
+				for i in self.available_ap_device:
+					if 'on board' == i[2]:
 						self.ap_device.SetStringSelection(i[0])
 						self.ap_5.Disable()
 						if i[3]>=1: self.ap_5.Enable()
 						found = True;
-			else:
-				try:
-					wififile = open(self.conf_network+'/udev/rules.d/72-wireless.rules', 'r', 2000)
-					bak = wififile.read()
-					wififile.close()
-				except:
-					bak=''
-				if 'brcmfmac' in bak:
-					for i in self.available_ap_device:
-						if 'on board' == i[2]:
-							self.ap_device.SetStringSelection(i[0])
-							self.ap_5.Disable()
-							if i[3]>=1: self.ap_5.Enable()
-							found = True;
-				if not found:
-					for i in self.available_ap_device:
-						if i[1] in bak and len(i[1])>10:
-							self.ap_device.SetStringSelection(i[0])
-							self.ap_5.Disable()
-							if i[3]>=1: self.ap_5.Enable()
-							found = True;
+			if not found:
+				for i in self.available_ap_device:
+					if i[1] in bak and len(i[1])>10:
+						self.ap_device.SetStringSelection(i[0])
+						self.ap_5.Disable()
+						if i[3]>=1: self.ap_5.Enable()
+						found = True;
 			if not found:
 				self.ap_device.SetStringSelection(_('none'))
 				self.ap_disable()
@@ -1200,6 +1216,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	
 	def ap_enable(self):
 		self.bridge.Enable()
+		if 'AP and Station' in self.ap_device.GetValue():
+			self.bridge.Disable()
 		
 	def ap_enable2(self):
 		self.share.Enable()
@@ -1358,7 +1376,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		msg = ''
 		msg1 = ''
 
-		wlan_interfaces=['wlan0','wlan1','uap0']
+		wlan_interfaces=['wlan0','wlan1','wlan2','wlan9']
 		
 		for i in wlan_interfaces:
 			network_info = ''
@@ -1376,7 +1394,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			network_info = subprocess.check_output('ifconfig'.split())
 		except:
 			pass
-		net=['wlan0','wlan1','uap0','usb0','br0','eth0','eth1']
+		net=['wlan0','wlan1','wlan2','wlan9','usb0','br0','eth0','eth1']
 		netactiv = [False,False,False,False,False,False,False]
 
 		for i in network_info.split('\n'):
@@ -2745,7 +2763,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		self.available_triggers = [
 		_('Signal K key'), 
-		_('Signal K Filter'), 
 		_('Geofence'), 
 		'GPIO', 
 		'MQTT topic', 
@@ -2789,7 +2806,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		self.available_actions = [
 		_('Set Signal K key'),
-		_('End Filter Signal K'),
 		_('Set GPIO output'),
 		_('Set MQTT topic'),
 		_('Publish on Twitter'),
@@ -2909,26 +2925,20 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 							items2 = items[0].split('.')
 							path_property = ':'+items2[-1]
 						field3 = path+path_property
-					if trigger["type"] == '1':
-						if node['type'] == 'signalk-input-handler': 
-							path = node['path']
-							field2 = node['context']
-							field3 = path
-							field4 = node['source']
-					if trigger["type"] == '2' and node['type'] == 'signalk-geofence': 
+					if trigger["type"] == '1' and node['type'] == 'signalk-geofence': 
 						field2 = node['context']
 						if node['myposition']: field3 = _('Use My Position')
 						else: field3 = node['lat']+', '+node['lon']
 						field4 = node['distance']
-					if trigger["type"] == '3' and node['type'] == 'rpi-gpio in': 
+					if trigger["type"] == '2' and node['type'] == 'rpi-gpio in': 
 						field2 = node['pin']
 						field3 = node['intype']
 						if node['read']: field4 = _('initial state')
-					if trigger["type"] == '4' and node['type'] == 'mqtt in':
+					if trigger["type"] == '3' and node['type'] == 'mqtt in':
 						if node['broker'] == self.localbrokerid: field2 = _('local broker')
 						elif node['broker'] == self.remotebrokerid: field2 = _('remote broker')
 						field3 = node['topic']
-					if trigger["type"] == '6' and node['type'] == 'inject':
+					if trigger["type"] == '5' and node['type'] == 'inject':
 						field2 = node['repeat']
 						field3 = _('Seconds')
 				if node['id'] == trigger["trigger_node_out_id"]:
@@ -3072,17 +3082,16 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if not edit: trigger = self.available_triggers_select.GetSelection()
 		else: trigger = int(self.actions_flow_tree[self.selected_trigger]['type'])
 		if trigger == 0: dlg = TriggerSK(self,edit,trigger)
-		elif trigger == 1: dlg = TriggerFilterSK(self,edit,trigger)
-		elif trigger == 2: dlg = TriggerGeofence(self,edit,trigger)
-		elif trigger == 3: dlg = TriggerGPIO(self,edit,trigger)
-		elif trigger == 4:
+		elif trigger == 1: dlg = TriggerGeofence(self,edit,trigger)
+		elif trigger == 2: dlg = TriggerGPIO(self,edit,trigger)
+		elif trigger == 3:
 			local =  int(self.conf.get('CREDENTIALS', 'local_mqtt'))
 			remote =  int(self.conf.get('CREDENTIALS', 'remote_mqtt'))
 			if not local and not remote:
 				self.ShowStatusBarRED(_('Go to the Credentials tab and enable at least one MQTT broker'))
 				return
 			else: dlg = TriggerMQTT(self,edit,local,remote,trigger)
-		elif trigger == 5:
+		elif trigger == 4:
 			telegram =  int(self.conf.get('CREDENTIALS', 'telegram'))
 			if not telegram:
 				self.ShowStatusBarRED(_('Go to the Credentials tab and enable a Telegram bot'))
@@ -3090,7 +3099,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			else: 
 				if edit: return
 				else: dlg = TriggerTelegram(self,trigger)
-		elif trigger == 6: dlg = TriggerTime(self,edit,trigger)
+		elif trigger == 5: dlg = TriggerTime(self,edit,trigger)
 		else:
 			self.ShowStatusBarRED(_('Select a trigger type.'))
 			return
@@ -3155,9 +3164,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		res = dlg.ShowModal()
 		if res == wx.OK:
 			if not edit:
-				#when filter SK (type 1) property is src not payload
-				if self.actions_flow_tree[self.selected_trigger]['type'] == '1':
-					dlg.ConditionNode['property'] = 'source.src'
 				self.conditions_flow_nodes.append(dlg.ConditionNode)
 				items = dlg.ConditionNode['name'].split('|')
 				self.actions_flow_tree[self.selected_trigger]['conditions'].append({"condition_node_out_id": items[1],"operator": items[2],"actions": []})
@@ -3227,27 +3233,26 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.available_actions_select.SetSelection(type)
 		action = self.available_actions_select.GetSelection()
 		if action == 0: dlg = ActionSetSignalkKey(self,edit)
-		elif action == 1: dlg = ActionEndFilterSignalk(self,edit)
-		elif action == 2: dlg = ActionSetGPIO(self,edit)
-		elif action == 3:
+		elif action == 1: dlg = ActionSetGPIO(self,edit)
+		elif action == 2:
 			local =  int(self.conf.get('CREDENTIALS', 'local_mqtt'))
 			remote =  int(self.conf.get('CREDENTIALS', 'remote_mqtt'))
 			if not local and not remote:
 				self.ShowStatusBarRED(_('Go to the Credentials tab and enable at least one MQTT broker'))
 				return
 			else: dlg = ActionSetMQTT(self,edit,local,remote)
-		elif action == 4:
+		elif action == 3:
 			twitter =  int(self.conf.get('CREDENTIALS', 'twitter'))
 			if not twitter:
 				self.ShowStatusBarRED(_('Go to the Credentials tab and enable the Twitter account'))
 				return
 			else: dlg = ActionPublishTwitter(self,edit)
-		elif action == 5: dlg = ActionSendEmail(self,edit)
-		elif action == 6: dlg = ActionPlaySound(self,edit)
-		elif action == 7: dlg = ActionRunCommand(self,edit)
-		elif action == 8: dlg = ActionRunCommand(self,['sudo','reboot',0])
-		elif action == 9: dlg = ActionRunCommand(self,['sudo', 'shutdown -h now',0])
-		elif action == 10:
+		elif action == 4: dlg = ActionSendEmail(self,edit)
+		elif action == 5: dlg = ActionPlaySound(self,edit)
+		elif action == 6: dlg = ActionRunCommand(self,edit)
+		elif action == 7: dlg = ActionRunCommand(self,['sudo','reboot',0])
+		elif action == 8: dlg = ActionRunCommand(self,['sudo', 'shutdown -h now',0])
+		elif action == 9:
 			telegram =  int(self.conf.get('CREDENTIALS', 'telegram'))
 			if not telegram:
 				self.ShowStatusBarRED(_('Go to the Credentials tab and enable a Telegram bot'))
@@ -3448,7 +3453,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		
 		#create list of shortcuts
 		for i in all_flows:
-			if 'type' in i and 'wires' in i and 'id' in i and i['z'] == 'openplot.actio':
+			if 'type' in i and 'wires' in i and 'id' in i and i['z'] == self.actions_flow_id:
 				if i['wires'] in [[],[[]],[[],[]],[[],[],[]]]:
 					#line,tree,parent,x,y,idnum,wiresnum,id,wires
 					# 0     1    2    3 4   5       6     7   8
@@ -3578,7 +3583,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				ystart = ymax + ystep
 
 			for i in all_flows:
-				if 'type' in i and 'wires' in i and 'id' in i and i['z'] == 'openplot.actio':
+				if 'type' in i and 'wires' in i and 'id' in i and i['z'] == self.actions_flow_id:
 					for ii in reversed(shortcut):
 						if i['id'] == ii[7] and ii[2] == j:
 							i['x'] = xstart + xstep * ii[3]
@@ -3903,7 +3908,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 						name = n
 						assignment = ii['assignment']
 						remember = ii['remember']
-						serialData = ii['data']
+						serialData = ''
+						if 'data' in ii:
+							serialData = ii['data']
 						try:
 							bauds = ii['bauds']
 						except: pass

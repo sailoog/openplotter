@@ -1,6 +1,6 @@
 #!/bin/bash
 #echo "copies and renames files to .openplotter/Network."
-#echo "Example: bash copy_main.sh br0 wlan1 00:00:00:00:00:00 5 e"
+#echo "Example: bash copy_main.sh br0 wlan9 00:00:00:00:00:00 5 e"
 bridge=$1
 AP=$2
 mac=$3
@@ -34,6 +34,7 @@ else
 	cp "${loadfolder}/udev/rules.d/11-openplotter-usb0.rules" "${targetfolder}/udev/rules.d/11-openplotter-usb0.rules"
 	cp "${loadfolder}/.openplotter/iptables.sh" "${targetfolder}/.openplotter/iptables.sh"
 	cp "${loadfolder}/.openplotter/start-ap-managed-wifi.sh" "${targetfolder}/.openplotter/start-ap-managed-wifi.sh"
+	cp "${loadfolder}/network/interfaces.d/ap_wlan9" "${targetfolder}/network/interfaces.d/ap"
 fi
 
 if [ "$GHz" = "5" ]; then
@@ -43,49 +44,41 @@ if [ "$GHz" = "2.4" ]; then
 	cp "${loadfolder}/hostapd/hostapd_2_4.conf" "${targetfolder}/hostapd/hostapd.conf"
 fi
 
-if [ "$AP" = "wlan1" ]; then
-	cp "${loadfolder}/udev/rules.d/72-AP_intern_wireless_wlan1.rules" "${targetfolder}/udev/rules.d/72-wireless.rules"
-	cp "${loadfolder}/network/interfaces.d/ap_wlan1" "${targetfolder}/network/interfaces.d/ap"
+if [ "$bridge" = "br0" ]; then
+	bash "${loadfolder}/hostapd_Bridge.sh" y
+	cp "${loadfolder}/dnsmasq_br0.conf" "${targetfolder}/dnsmasq.conf"
+	cp "${loadfolder}/dhcpcd_br0_wlan9.conf" "${targetfolder}/dhcpcd.conf"
+	cp "${loadfolder}/network/interfaces_bridge_wlan9_eth0" "${targetfolder}/network/interfaces"
+	bash "${loadfolder}/set-router.sh" "br0"
+else
+	bash "${loadfolder}/hostapd_Bridge.sh" n
+	cp "${loadfolder}/dnsmasq_wlan9.conf" "${targetfolder}/dnsmasq.conf"
+	cp "${loadfolder}/dhcpcd_wlan9.conf" "${targetfolder}/dhcpcd.conf"
+	cp "${loadfolder}/network/interfaces_standard" "${targetfolder}/network/interfaces"
+	bash "${loadfolder}/set-router.sh" "wlan9"
+fi
+
+
+if [ "$AP" = "wlan9" ]; then
+	cp "${loadfolder}/udev/rules.d/72-AP_intern_wireless_wlan.rules" "${targetfolder}/udev/rules.d/72-wireless.rules"
 	if [ "$bridge" = "br0" ]; then
-		bash "${loadfolder}/hostapd_Bridge.sh" y
-		cp "${loadfolder}/dnsmasq_br0.conf" "${targetfolder}/dnsmasq.conf"
-		cp "${loadfolder}/dhcpcd_br0_wlan1.conf" "${targetfolder}/dhcpcd.conf"
-		cp "${loadfolder}/network/interfaces_bridge_wlan1_eth0" "${targetfolder}/network/interfaces"
 		cp "${loadfolder}/.openplotter/start1-bridge.sh" "${targetfolder}/.openplotter/start1.sh"
-		bash "${loadfolder}/set-router.sh" "br0"
 	else
-		bash "${loadfolder}/hostapd_Bridge.sh" n
-		cp "${loadfolder}/dnsmasq_wlan1.conf" "${targetfolder}/dnsmasq.conf"
-		cp "${loadfolder}/dhcpcd_wlan1.conf" "${targetfolder}/dhcpcd.conf"
-		cp "${loadfolder}/network/interfaces_standard" "${targetfolder}/network/interfaces"
 		cp "${loadfolder}/.openplotter/start1.sh" "${targetfolder}/.openplotter/start1.sh"
-		bash "${loadfolder}/set-router.sh" "wlan1"
 	fi
 fi	
 
-if [ "$AP" = "uap0" ]; then
-	bash "${loadfolder}/hostapd_AP_device.sh" "uap0"
-	cp "${loadfolder}/udev/rules.d/72-AP_intern_wireless_uap0.rules" "${targetfolder}/udev/rules.d/72-wireless.rules"
-	cp "${loadfolder}/network/interfaces.d/ap_uap0" "${targetfolder}/network/interfaces.d/ap"
+if [ "$AP" = "uap" ]; then
+	cp "${loadfolder}/udev/rules.d/72-AP_intern_wireless_uap.rules" "${targetfolder}/udev/rules.d/72-wireless.rules"
 	if [ "$bridge" = "br0" ]; then
-		bash "${loadfolder}/hostapd_Bridge.sh" y
-		cp "${loadfolder}/dnsmasq_br0.conf" "${targetfolder}/dnsmasq.conf"
-		cp "${loadfolder}/dhcpcd_br0_uap0.conf" "${targetfolder}/dhcpcd.conf"
-		cp "${loadfolder}/network/interfaces_bridge_uap0_eth0" "${targetfolder}/network/interfaces"
 		cp "${loadfolder}/.openplotter/start1-bridge-uap.sh" "${targetfolder}/.openplotter/start1.sh"
-		bash "${loadfolder}/set-router.sh" "br0"
 	else
-		bash "${loadfolder}/hostapd_Bridge.sh" n
-		cp "${loadfolder}/dnsmasq_uap0.conf" "${targetfolder}/dnsmasq.conf"
-		cp "${loadfolder}/dhcpcd_uap0.conf" "${targetfolder}/dhcpcd.conf"
-		cp "${loadfolder}/network/interfaces_standard" "${targetfolder}/network/interfaces"
 		cp "${loadfolder}/.openplotter/start1-uap.sh" "${targetfolder}/.openplotter/start1.sh"
-		bash "${loadfolder}/set-router.sh" "uap0"
 	fi
 fi
 
 if [ "$extern" = "e" ]; then
-	echo 'SUBSYSTEM=="net", ACTION=="add", ATTR{address}=="'"${mac}"'", NAME="wlan1"' > "${targetfolder}/udev/rules.d/72-wireless.rules"
+	echo 'SUBSYSTEM=="net", ACTION=="add", ATTR{address}=="'"${mac}"'", NAME="wlan9"' > "${targetfolder}/udev/rules.d/72-wireless.rules"
 fi
 
 #sleep 3

@@ -445,7 +445,7 @@ class MyFrame(wx.Frame):
 
 					for lvalue in value:
 						result = True
-						if lvalue in ['source', '$source']:
+						if lvalue in ['source', '$source', 'method']:
 							result = False
 						elif lvalue == 'timestamp':
 							if 'position' in path and 'RMC' in src2:
@@ -524,8 +524,6 @@ class MyFrame(wx.Frame):
 		pass
 
 	def run(self):
-		print self.ws_name
-
 		self.endlive=False
 		self.ende=False
 		self.ws = websocket.WebSocketApp(self.ws_name,

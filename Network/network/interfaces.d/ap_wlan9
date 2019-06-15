@@ -1,0 +1,5 @@
+allow-hotplug wlan9
+auto wlan9
+iface wlan9 inet static
+    address 10.10.10.1
+    netmask 255.255.255.0

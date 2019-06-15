@@ -11,6 +11,8 @@ Manual settings should be done here also.
 
 The "Apply 2" button copies the .conf files into the system.
 
+(wlan9 is used for the AP. In the past it was wlan1 or uap0. Now you can use more wifi adapter. But remember the internet connection could only work with the first gateway (use: "route -n" to see it)) 
+
 Some settings are done by a cronjob which is called once when booting.
 It starts the bash script /home/pi/.openplotter/start-ap-managed-wifi.sh
 
