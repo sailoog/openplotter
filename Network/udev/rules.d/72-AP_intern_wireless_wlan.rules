@@ -1,0 +1,1 @@
+ACTION=="add", SUBSYSTEM=="net", DRIVERS=="brcmfmac", NAME="wlan9"

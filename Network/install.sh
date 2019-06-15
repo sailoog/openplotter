@@ -16,9 +16,9 @@ if [[ "$response" = "uninstall" ]]; then
 		sudo rm /etc/udev/rules.d/72-wireless.rules
 	fi
 
-	if [ -e /lib/dhcpcd/dhcpcd-hooks/10-wpa_supplicant_wlan0 ]
+	if [ -e /lib/dhcpcd/dhcpcd-hooks/10-wpa_supplicant_wlan9 ]
 	then
-		sudo rm /lib/dhcpcd/dhcpcd-hooks/10-wpa_supplicant_wlan0
+		sudo rm /lib/dhcpcd/dhcpcd-hooks/10-wpa_supplicant_wlan9
 		sudo cp ~/.config/openplotter/Network/dhcpcd-hooks/10-wpa_supplicant /lib/dhcpcd/dhcpcd-hooks
 	fi
 
@@ -56,7 +56,7 @@ else
 	if [ -e /lib/dhcpcd/dhcpcd-hooks/10-wpa_supplicant ]
 	then
 		sudo rm /lib/dhcpcd/dhcpcd-hooks/10-wpa_supplicant
-		sudo cp ~/.config/openplotter/Network/dhcpcd-hooks/10-wpa_supplicant_wlan0 /lib/dhcpcd/dhcpcd-hooks
+		sudo cp ~/.config/openplotter/Network/dhcpcd-hooks/10-wpa_supplicant_wlan9 /lib/dhcpcd/dhcpcd-hooks
 	fi
 
 	if [ ! -e /etc/udev/rules.d/11-openplotter-usb0.rules ]

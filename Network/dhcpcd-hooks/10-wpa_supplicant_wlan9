@@ -63,7 +63,14 @@ wpa_supplicant_start()
 	driver=${wpa_supplicant_driver:+-D}$wpa_supplicant_driver
 	
 	errn=0
-	if [ "$interface" = "wlan0" ]; then
+	xerr=0
+	if [ "$interface" = "wlan9" ]; then 
+		xerr=1 
+	fi
+	if [ "$interface" = "p2p-dev-wlan9" ]; then 
+		xerr=1 
+	fi
+	if [ $xerr = 0 ]; then
 		err=$(wpa_supplicant -B -c"$wpa_supplicant_conf" -i"$interface" \
 			"$driver" 2>&1)	
 		errn=$?

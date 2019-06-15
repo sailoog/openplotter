@@ -1012,7 +1012,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			pass
 
 		self.available_share = [_('none')]
-		unavailable_net = ['uap0','wlan1','lo']
+		unavailable_net = ['wlan9','lo']
 		if self.bridge.GetValue():
 			unavailable_net.append('eth0')
 
@@ -1034,8 +1034,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.available_ap_device = []
 		self.available_ap_device.append([_('none'),'',-1,-1,'none'])
 		for i in network_info.split():
-			if 'wlan' in i:
-				wlan = 'wlan1'
+			if 'wlan' in i and not 'wlan9' in i:
+				wlan = 'wlan9'
 				mac = (subprocess.check_output(('cat /sys/class/net/'+i+'/address').split())[:-1])
 				if 'usb' in subprocess.check_output(('ls -l /sys/class/net/'+i).split()):
 					type  = 'usb'
@@ -1058,7 +1058,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			for i in self.available_ap_device:
 				if 'on board' == i[2]:
 					type = 'AP and Station'
-					wlan = 'uap0'
+					wlan = 'uap'
 					self.available_ap_device.append([i[1]+' '+type, i[1], type, i[3], wlan])
 
 		self.available_ap_device2 = []
@@ -1124,34 +1124,43 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 			#search selected AP device 
 			found = False
-			if 'uap0' == self.hostapd_interface:
+			#if 'uap' == self.hostapd_interface:
+			#	for i in self.available_ap_device:
+			#		if 'AP and Station' == i[2]:
+			#			self.ap_device.SetStringSelection(i[0])
+			#			self.ap_5.Disable()
+			#			if i[3]>=1: self.ap_5.Enable()
+			#			found = True;
+			#else:
+			try:
+				wififile = open(self.conf_network+'/udev/rules.d/72-wireless.rules', 'r', 2000)
+				bak = wififile.read()
+				wififile.close()
+			except:
+				bak=''
+
+			if '__ap' in bak:
 				for i in self.available_ap_device:
 					if 'AP and Station' == i[2]:
+						self.ap_device.SetStringSelection(i[0])
+						self.on_ap_device(0)
+						#self.ap_5.Disable()
+						#if i[3]>=1: self.ap_5.Enable()
+						found = True;
+			if 'brcmfmac' in bak:
+				for i in self.available_ap_device:
+					if 'on board' == i[2]:
 						self.ap_device.SetStringSelection(i[0])
 						self.ap_5.Disable()
 						if i[3]>=1: self.ap_5.Enable()
 						found = True;
-			else:
-				try:
-					wififile = open(self.conf_network+'/udev/rules.d/72-wireless.rules', 'r', 2000)
-					bak = wififile.read()
-					wififile.close()
-				except:
-					bak=''
-				if 'brcmfmac' in bak:
-					for i in self.available_ap_device:
-						if 'on board' == i[2]:
-							self.ap_device.SetStringSelection(i[0])
-							self.ap_5.Disable()
-							if i[3]>=1: self.ap_5.Enable()
-							found = True;
-				if not found:
-					for i in self.available_ap_device:
-						if i[1] in bak and len(i[1])>10:
-							self.ap_device.SetStringSelection(i[0])
-							self.ap_5.Disable()
-							if i[3]>=1: self.ap_5.Enable()
-							found = True;
+			if not found:
+				for i in self.available_ap_device:
+					if i[1] in bak and len(i[1])>10:
+						self.ap_device.SetStringSelection(i[0])
+						self.ap_5.Disable()
+						if i[3]>=1: self.ap_5.Enable()
+						found = True;
 			if not found:
 				self.ap_device.SetStringSelection(_('none'))
 				self.ap_disable()
@@ -1205,6 +1214,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	
 	def ap_enable(self):
 		self.bridge.Enable()
+		if 'AP and Station' in self.ap_device.GetValue():
+			self.bridge.Disable()
 		
 	def ap_enable2(self):
 		self.share.Enable()
@@ -1363,7 +1374,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		msg = ''
 		msg1 = ''
 
-		wlan_interfaces=['wlan0','wlan1','uap0']
+		wlan_interfaces=['wlan0','wlan1','wlan2','wlan9']
 		
 		for i in wlan_interfaces:
 			network_info = ''
@@ -1381,7 +1392,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			network_info = subprocess.check_output('ifconfig'.split())
 		except:
 			pass
-		net=['wlan0','wlan1','uap0','usb0','br0','eth0','eth1']
+		net=['wlan0','wlan1','wlan2','wlan9','usb0','br0','eth0','eth1']
 		netactiv = [False,False,False,False,False,False,False]
 
 		for i in network_info.split('\n'):
@@ -4235,7 +4246,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 						name = n
 						assignment = ii['assignment']
 						remember = ii['remember']
-						serialData = ii['data']
+						serialData = ''
+						if 'data' in ii:
+							serialData = ii['data']
 						try:
 							bauds = ii['bauds']
 						except: pass

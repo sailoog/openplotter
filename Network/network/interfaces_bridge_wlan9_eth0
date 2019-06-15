@@ -8,7 +8,5 @@ source-directory /etc/network/interfaces.d
 
 auto br0
 iface br0 inet manual
-bridge_ports eth0 uap0
-bridge-stp on
-
-
+bridge_ports eth0 wlan9
+bridge-stp on			 
