@@ -209,6 +209,10 @@ class MyFrame(wx.Frame):
 
 			if self.SK_settings.setSKsettings():
 				seconds = 12
+				subprocess.call(['sudo', 'systemctl', 'stop', 'signalk.service'])
+				subprocess.call(['sudo', 'systemctl', 'stop', 'signalk.socket'])
+				subprocess.call(['sudo', 'systemctl', 'start', 'signalk.socket'])
+				subprocess.call(['sudo', 'systemctl', 'start', 'signalk.service'])
 				for i in range(seconds, 0, -1):
 					self.ShowStatusBarRED(_('Restarting Signal K server... ')+str(i))
 					time.sleep(1)

@@ -70,7 +70,7 @@ class SK_settings:
 		except: print 'Error: error parsing Signal K settings defaults'
 
 		if not OPcan: 
-			self.data['pipedProviders'].append({'pipeElements': [{'type': 'providers/simple', 'options': {'logging': False, 'type': 'NMEA2000', 'subOptions': {'device': '/dev/ttyOP_', 'type': 'ngt-1'}}}], 'enabled': False, 'id': 'OPcan'})
+			self.data['pipedProviders'].append({'pipeElements': [{'type': 'providers/simple', 'options': {'logging': False, 'type': 'NMEA2000', 'subOptions': {'device': '', 'baudrate': '', 'type': 'ngt-1'}}}], 'enabled': False, 'id': 'OPcan'})
 			write = True
 		if not OPpypilot: 
 			self.data['pipedProviders'].append({'pipeElements': [{'type': 'providers/simple', 'options': {'logging': False, 'type': 'NMEA0183', 'subOptions': {'host': 'localhost', 'type': 'tcp', 'port': '20220'}}}], 'enabled': False, 'id': 'OPpypilot'})
@@ -89,7 +89,7 @@ class SK_settings:
 		self.OPcan = ''
 		self.ngt1_enabled = -1
 		self.ngt1_device = ''
-		self.ngt1js_enabled = -1
+		self.ngt1_baudrate = ''
 		self.canbus_enabled = -1
 		self.canbus_interface = ''
 		self.pypilot_enabled = -1
@@ -104,10 +104,7 @@ class SK_settings:
 							self.ngt1_enabled = i['enabled']
 							self.OPcan = count
 							self.ngt1_device = i['pipeElements'][0]['options']['subOptions']['device']
-						elif i['pipeElements'][0]['options']['subOptions']['type'] == 'ngt-1-canboatjs':
-							self.ngt1js_enabled = i['enabled']
-							self.OPcan = count
-							self.ngt1_device=i['pipeElements'][0]['options']['subOptions']['device']
+							self.ngt1_baudrate = i['pipeElements'][0]['options']['subOptions']['baudrate']
 						elif i['pipeElements'][0]['options']['subOptions']['type'][0:6] == 'canbus':
 							self.canbus_enabled = i['enabled']
 							self.OPcan = ount
@@ -186,7 +183,7 @@ class SK_settings:
 					write = True
 		count = 0
 		for i in self.data['pipedProviders']:
-			if '/dev/ttyOP_' in i['id']:
+			if '/dev/ttyOP_' in i['id'] and i['pipeElements'][0]['options']['subOptions']['type'] == 'serial':
 				exists = False
 				for alias in serialInst:
 					if alias == i['id'] and serialInst[alias]['data'] == 'NMEA 0183' and serialInst[alias]['assignment'] == 'Signal K > OpenCPN': 
@@ -195,51 +192,49 @@ class SK_settings:
 					write = True
 					del self.data['pipedProviders'][count]
 			count = count + 1
+		#serial NMEA 2000 devices
+		for alias in serialInst:
+			if serialInst[alias]['data'] == 'NMEA 2000' and serialInst[alias]['assignment'] == 'Signal K > OpenCPN':
+				exists = False
+				if 'pipedProviders' in self.data:
+					count = 0
+					for i in self.data['pipedProviders']:
+						if i['id'] == alias: 
+							exists = True
+							if i['pipeElements'][0]['options']['subOptions']['baudrate'] != int(serialInst[alias]['bauds']):
+								write = True
+								self.data['pipedProviders'][count]['pipeElements'][0]['options']['subOptions']['baudrate'] = int(serialInst[alias]['bauds'])
+						count = count + 1
+				if not exists:		
+					self.data['pipedProviders'].append({'pipeElements': [{'type': 'providers/simple', 'options': {'logging': False, 'type': 'NMEA2000', 'subOptions': {'device': alias, "baudrate": int(serialInst[alias]['bauds']), 'type': 'ngt-1-canboatjs'}}}], 'enabled': True, 'id': alias})
+					write = True
+		count = 0
+		for i in self.data['pipedProviders']:
+			if '/dev/ttyOP_' in i['id'] and i['pipeElements'][0]['options']['subOptions']['type'] == 'ngt-1-canboatjs':
+				exists = False
+				for alias in serialInst:
+					if alias == i['id'] and serialInst[alias]['data'] == 'NMEA 2000' and serialInst[alias]['assignment'] == 'Signal K > OpenCPN': 
+						exists = True
+				if not exists:
+					write = True
+					del self.data['pipedProviders'][count]
+			count = count + 1
 
-		if write: 
-			self.write_settings()
-			return True
-		else: return False
+		if write: self.write_settings()
+		return write
 
 
 	def set_ngt1_device(self,device,speed):
-		self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['device'] = device
-		self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['baudrate'] = long(speed)
-		try:
-			del self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['interface']
-		except:
-			pass
-		self.write_settings()
-
-	def set_ngt1_enable(self,enable,device,speed):
-		if enable == True:
-			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['type'] = 'ngt-1'
+		write = False
+		if self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['device'] != device:
 			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['device'] = device
-			try:
-				self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['baudrate'] = long(speed)
-			except:
-				self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['baudrate'] = 115200
-				
-			try:
-				del self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['interface']
-			except:
-				pass
-		self.enable_disable_all(enable)
+			write = True
+		if self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['baudrate'] != int(speed):
+			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['baudrate'] = int(speed)
+			write = True
 
-	def set_ngt1js_enable(self,enable,device,speed):
-		if enable == True:
-			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['type'] = 'ngt-1-canboatjs'
-			self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['device'] = device
-			try:
-				self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['baudrate'] = long(speed)
-			except:
-				self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['baudrate'] = 115200
-
-			try:
-				del self.data['pipedProviders'][self.OPcan]['pipeElements'][0]['options']['subOptions']['interface']
-			except:
-				pass
-		self.enable_disable_all(enable)
+		if write: self.write_settings()
+		return write
 
 	def set_canbus_enable(self,enable):
 		if self.canbus_enabled == -1:
@@ -259,18 +254,30 @@ class SK_settings:
 			self.data['pipedProviders'][self.OPcan]['enabled']=False
 		self.write_settings()
 
+	def enable_disable_device(self,deviceId,enable):
+		write = False
+		count = 0
+		for i in self.data['pipedProviders']:
+			if i['id'] == deviceId:
+				if enable == 1:
+					if i['enabled'] == False:
+						write = True
+						self.data['pipedProviders'][count]['enabled'] = True
+				elif enable == 0:
+					if i['enabled'] == True:
+						write = True
+						self.data['pipedProviders'][count]['enabled'] = False
+			count = count + 1
+
+		if write: self.write_settings()
+		return write
+
 	def write_settings(self):
 		data = ujson.dumps(self.data, indent=4, sort_keys=True)
 		try:
 			wififile = open(self.setting_file, 'w')
 			wififile.write(data.replace('\/','/'))
 			wififile.close()
-			# stopping sk server
-			subprocess.call(['sudo', 'systemctl', 'stop', 'signalk.service'])
-			subprocess.call(['sudo', 'systemctl', 'stop', 'signalk.socket'])
-			# restarting sk server
-			subprocess.call(['sudo', 'systemctl', 'start', 'signalk.socket'])
-			subprocess.call(['sudo', 'systemctl', 'start', 'signalk.service'])
 			self.load()
 		except: print 'Error: error saving Signal K settings'
 			
