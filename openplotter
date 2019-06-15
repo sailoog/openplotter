@@ -1034,7 +1034,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.available_ap_device = []
 		self.available_ap_device.append([_('none'),'',-1,-1,'none'])
 		for i in network_info.split():
-			if 'wlan' in i and not 'wlan9' in i:
+			if 'wlan' in i:
 				wlan = 'wlan9'
 				mac = (subprocess.check_output(('cat /sys/class/net/'+i+'/address').split())[:-1])
 				if 'usb' in subprocess.check_output(('ls -l /sys/class/net/'+i).split()):
