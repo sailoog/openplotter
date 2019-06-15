@@ -14,12 +14,15 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
-import ujson, uuid, os, wx, re, requests, time, webbrowser
+import ujson, uuid, wx, re, time, webbrowser
 from select_key import selectKey
 from datetime import datetime
 
 class Nodes:
 	def __init__(self,parent,actions_flow_id):
+		self.available_conditions = parent.available_conditions
+		self.available_operators = parent.available_operators
+		
 		home = parent.home
 		self.flows_file = home+'/.signalk/red/flows_openplotter.json'
 		self.actions_flow_id = actions_flow_id
@@ -286,17 +289,29 @@ class Nodes:
 
 # triggers
 class TriggerFilterSK(wx.Dialog):
-	def __init__(self,parent,edit,trigger):
-		self.nodes = parent.nodes
-		help_bmp = parent.help_bmp
+	def __init__(self,parent,edit,edit2,trigger,src_property):
 		self.currentpath = parent.currentpath
 		self.actions_flow_id = parent.actions_flow_id
 		self.trigger_type = trigger
+		self.src_property = src_property
 
 		if edit == 0: title = _('Add Signal K trigger')
 		else: title = _('Edit Signal K trigger')
 
-		wx.Dialog.__init__(self, None, title = title, size=(400, 350))
+
+		self.available_operators = parent.available_operators
+		self.available_conditions = parent.available_conditions
+		
+		self.available_source = parent.available_source
+		self.available_source_nr = parent.available_source_nr
+	
+		self.nodes = parent.nodes
+		help_bmp = parent.help_bmp
+
+		if edit == 0: title = _('Add Signal K filter')
+		else: title = _('Edit Signal K filter')
+
+		wx.Dialog.__init__(self, None, title = title, size=(400, 370))
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 
 		self.subscribtion_node_template = '''
@@ -312,21 +327,94 @@ class TriggerFilterSK(wx.Dialog):
 				"y": 120,
 				"wires": [[]]
 		    }'''
+			
+		self.condition_node_template = '''
+		    {
+		        "id": "",
+		        "type": "switch",
+		        "z": "",
+		        "name": "",
+		        "property": "payload",
+		        "propertyType": "msg",
+		        "rules": [],
+		        "checkall": "true",
+		        "repair": false,
+		        "outputs": 1,
+		        "x": 380,
+		        "y": 120,
+		        "wires": [[]]
+		    }'''
 
+		self.sk_node_template = '''
+		    {			
+		        "id": "",
+				"type": "signalk-input-handler-next",
+		        "z": "",
+		        "name": "",
+		        "x": 380,
+		        "y": 120,
+		        "wires": []
+		    }'''
+			
 		panel = wx.Panel(self)
 
 		vessellabel = wx.StaticText(panel, label=_('Vessel'))
 		self.vessel = wx.TextCtrl(panel, size=(290,-1))
 
+		vessel = wx.BoxSizer(wx.HORIZONTAL)
+		vessel.Add(vessellabel, 1, wx.RIGHT | wx.ALL | wx.EXPAND, 6)
+		vessel.Add(self.vessel, 0, wx.RIGHT, 10)
+
 		skkeylabel = wx.StaticText(panel, label=_('Signal K key'))
 		self.skkey = wx.TextCtrl(panel, size=(290,-1))
 		if edit == 0: edit_skkey = wx.Button(panel, label=_('Add'))
 		else: edit_skkey = wx.Button(panel, label=_('Edit'))
+		showlist_multipleSK = wx.Button(panel, label=_('list SK with multiple source'))
 		edit_skkey.Bind(wx.EVT_BUTTON, self.onEditSkkey)
+		
+		skkey = wx.BoxSizer(wx.HORIZONTAL)
+		skkey.Add(skkeylabel, 1, wx.RIGHT | wx.ALL | wx.EXPAND, 6)
+		skkey.Add(self.skkey, 0, wx.RIGHT, 10)
+		
+		editskkey = wx.BoxSizer(wx.HORIZONTAL)
+		editskkey.AddSpacer(10)
+		editskkey.Add(showlist_multipleSK, 0, wx.RIGHT, 10)		
+		editskkey.AddStretchSpacer(1)
+		editskkey.Add(edit_skkey, 0, wx.RIGHT, 10)		
 
-		sourcelabel = wx.StaticText(panel, label=_('Source'))
-		self.source = wx.TextCtrl(panel, size=(290,-1))
-		sourcetext = wx.StaticText(panel, label=_('Leave blank to listen to any source.\nAllowed characters: . 0-9 a-z A-Z'), size=(300,-1))
+		sourcelabel = wx.StaticText(panel, label=_('filter on Source'))
+		self.source_select = wx.Choice(panel, choices=self.available_source, style=wx.CB_READONLY)
+
+		source = wx.BoxSizer(wx.HORIZONTAL)
+		source.Add(sourcelabel, 0, wx.TOP | wx.BOTTOM, 6)
+		source.Add(self.source_select, 0, wx.LEFT, 5)
+
+		operatorlabel = wx.StaticText(panel, label=_('Operator'))
+		self.available_operators_select = wx.Choice(panel, choices=self.available_conditions, style=wx.CB_READONLY)
+		self.available_operators_select.Bind(wx.EVT_CHOICE, self.on_available_operators_select)
+
+		typeoperator = wx.BoxSizer(wx.HORIZONTAL)
+		typeoperator.Add(operatorlabel, 0, wx.TOP | wx.BOTTOM, 6)
+		typeoperator.Add(self.available_operators_select, 0, wx.LEFT, 5)
+
+		type_list = [_('String'), _('Number')]
+		self.type_list = ['str', 'num']
+
+		value1label = wx.StaticText(panel, label=_('Value'))
+		self.value1 = wx.TextCtrl(panel)
+
+		value1 = wx.BoxSizer(wx.HORIZONTAL)
+		value1.Add(value1label, 0, wx.TOP | wx.BOTTOM, 9)
+		value1.AddSpacer(5)
+		value1.Add(self.value1, 1, wx.TOP | wx.BOTTOM, 3)
+
+		value2label = wx.StaticText(panel, label=_('Value'))
+		self.value2 = wx.TextCtrl(panel)
+		
+		value2 = wx.BoxSizer(wx.HORIZONTAL)
+		value2.Add(value2label, 0, wx.TOP | wx.BOTTOM, 9)
+		value2.AddSpacer(5)
+		value2.Add(self.value2, 1, wx.TOP | wx.BOTTOM, 3)
 
 		hline1 = wx.StaticLine(panel)
 		help_button = wx.BitmapButton(panel, bitmap=help_bmp, size=(help_bmp.GetWidth()+40, help_bmp.GetHeight()+10))
@@ -335,27 +423,12 @@ class TriggerFilterSK(wx.Dialog):
 		okBtn = wx.Button(panel, wx.ID_OK)
 		okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
 
-		vessel = wx.BoxSizer(wx.HORIZONTAL)
-		vessel.Add(vessellabel, 1, wx.RIGHT | wx.ALL | wx.EXPAND, 6)
-		vessel.Add(self.vessel, 0, wx.RIGHT, 10)
-
-		skkey = wx.BoxSizer(wx.HORIZONTAL)
-		skkey.Add(skkeylabel, 1, wx.RIGHT | wx.ALL | wx.EXPAND, 6)
-		skkey.Add(self.skkey, 0, wx.RIGHT, 10)
-
-		editskkey = wx.BoxSizer(wx.HORIZONTAL)
-		editskkey.Add((0, 0), 1, wx.ALL, 6)
-		editskkey.Add(edit_skkey, 0, wx.RIGHT, 10)
-
-		source = wx.BoxSizer(wx.HORIZONTAL)
-		source.Add(sourcelabel, 1, wx.RIGHT | wx.ALL | wx.EXPAND, 6)
-		source.Add(self.source, 0, wx.RIGHT, 10)
-
 		hbox = wx.BoxSizer(wx.HORIZONTAL)
 		hbox.Add(help_button, 0, wx.ALL, 10)
-		hbox.Add((0, 0), 1, wx.ALL, 0)
+		hbox.AddStretchSpacer(1)
 		hbox.Add(cancelBtn, 0, wx.ALL, 10)
 		hbox.Add(okBtn, 0, wx.ALL, 10)
+		
 
 		vbox = wx.BoxSizer(wx.VERTICAL)
 		vbox.AddSpacer(10)
@@ -363,10 +436,11 @@ class TriggerFilterSK(wx.Dialog):
 		vbox.Add(skkey, 0, wx.LEFT | wx.EXPAND, 5)
 		vbox.AddSpacer(3)
 		vbox.Add(editskkey, 0, wx.ALL | wx.EXPAND, 0)
-		vbox.AddSpacer(10)
-		vbox.Add(source, 0, wx.LEFT | wx.EXPAND, 5)
-		vbox.Add(sourcetext, 0, wx.LEFT, 10)
-		vbox.Add((0, 0), 1, wx.ALL, 0)
+		vbox.AddStretchSpacer(1)
+		vbox.Add(source, 0, wx.ALL, 10)
+		vbox.Add(typeoperator, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
+		vbox.Add(value1, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM | wx.EXPAND, 10)
+		vbox.Add(value2, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM | wx.EXPAND, 10)
 		vbox.Add(hline1, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
 		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 0)
 
@@ -374,21 +448,35 @@ class TriggerFilterSK(wx.Dialog):
 
 		if edit:
 			subkey = ''
+			vessel = ''
+			key = ''
 			for i in edit:
-				if i['type'] == 'signalk-input-handler':
+				if 'context' in i:
 					vessel = i['context'].replace('vessels.','')
 					key = i['path']
-					source = i['source']
-				elif i['type'] == 'function' and i['func'] != 'return msg;':
-					subkey = i['func'].split(';')
-					subkey = subkey[0].split('.')
-					subkey = ':'+subkey[3]
 			self.vessel.SetValue(vessel)
 			self.skkey.SetValue(key+subkey)
-			self.source.SetValue(source)
 		else:
 			self.vessel.SetValue('self')
 
+		if edit2:
+			self.operator = edit2['t']
+			if self.operator == 'true' or self.operator == 'false' or self.operator == 'null' or self.operator == 'nnull' or self.operator == 'empty' or self.operator == 'nempty':
+				self.type1.Disable()
+				self.value1.Disable()
+				self.value2.Disable()
+			elif self.operator != 'btwn':			
+				self.value2.Disable()
+			
+		if edit2:
+			self.source_select.SetSelection(self.available_source_nr.index(self.src_property))
+			operator_value = self.available_operators.index(edit2['t'])
+			type_list_value = self.type_list.index(edit2['vt'])
+			self.available_operators_select.SetSelection(operator_value)
+
+			self.value1.SetValue(edit2['v'])
+			if operator_value == 6:
+				self.value2.SetValue(edit2['v2'])				
 
 	def on_help(self, e):
 		url = self.currentpath+"/docs/html/actions/triggers.html"
@@ -407,7 +495,7 @@ class TriggerFilterSK(wx.Dialog):
 	def OnOk(self,e):
 		skkey = self.skkey.GetValue()
 		vessel = self.vessel.GetValue()
-		source = self.source.GetValue()
+		source = ''
 		if not skkey:
 			wx.MessageBox(_('You have to provide a Signal K key.'), 'Info', wx.OK | wx.ICON_INFORMATION)
 			return
@@ -417,6 +505,13 @@ class TriggerFilterSK(wx.Dialog):
 		elif source and not re.match('^[.0-9a-zA-Z]+$', source):
 			wx.MessageBox(_('Failed. Characters not allowed.'), 'Info', wx.OK | wx.ICON_INFORMATION)
 			return
+		elif self.source_select.GetSelection() == -1:	
+			wx.MessageBox(_('You have to provide a filter.'), 'Info', wx.OK | wx.ICON_INFORMATION)
+			return
+		elif self.available_operators_select.GetSelection() == -1:	
+			wx.MessageBox(_('You have to provide an operator '), 'Info', wx.OK | wx.ICON_INFORMATION)
+			return
+		
 		self.TriggerNodes = []
 		sk_input_node = ujson.loads(self.subscribtion_node_template)
 		sk_input_node['id'] = self.nodes.get_node_id()
@@ -427,192 +522,61 @@ class TriggerFilterSK(wx.Dialog):
 		sk_input_node['context'] = 'vessels.'+self.vessel.GetValue()
 		sk_input_node['source'] = source
 		self.TriggerNodes.append(sk_input_node)
-		self.EndModal(wx.OK)
-
-# conditions
-class Condition(wx.Dialog):
-	def __init__(self,parent,edit):
-		self.nodes = parent.nodes
-		help_bmp = parent.help_bmp
-		self.currentpath = parent.currentpath
-		self.actions_flow_id = parent.actions_flow_id
-		self.available_operators = parent.available_operators
-		self.available_conditions = parent.available_conditions
-		if edit:
-			self.operator = edit['t']
-		else:
-			self.operator = self.available_operators[0]
-		self.condition_node_template = '''
-		    {
-		        "id": "",
-		        "type": "switch",
-		        "z": "",
-		        "name": "",
-		        "property": "payload",
-		        "propertyType": "msg",
-		        "rules": [],
-		        "checkall": "true",
-		        "repair": false,
-		        "outputs": 1,
-		        "x": 380,
-		        "y": 120,
-		        "wires": [[]]
-		    }'''
-
-		if edit == 0: title = _('Add condition')
-		else: title = _('Edit condition')
-
-		wx.Dialog.__init__(self, None, title = title, size=(600, 270))
-		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
-
-		panel = wx.Panel(self)
-
-		operatorlabel = wx.StaticText(panel, label=_('Operator'))
-		self.available_operators_select = wx.Choice(panel, choices=self.available_conditions, style=wx.CB_READONLY)
-		self.available_operators_select.Bind(wx.EVT_CHOICE, self.on_available_operators_select)
-
-		type_list = [_('Number'), _('String'), _('Signal K key'), _('Date and time')]
-		self.type_list = ['num', 'str', 'flow', 'num']
-
-		type1label = wx.StaticText(panel, label=_('Type'))
-		self.type1 = wx.Choice(panel, choices=type_list, style=wx.CB_READONLY)
-		self.type1.Bind(wx.EVT_CHOICE, self.on_select_type1)
-
-		value1label = wx.StaticText(panel, label=_('Value'))
-		self.value1 = wx.TextCtrl(panel)
-		self.edit_value1 = wx.Button(panel, label=_('Add'))
-		self.edit_value1.Bind(wx.EVT_BUTTON, self.onEditSkkey1)
-
-		value2label = wx.StaticText(panel, label=_('Value'))
-		self.value2 = wx.TextCtrl(panel)
-		self.edit_value2 = wx.Button(panel, label=_('Add'))
-		self.edit_value2.Bind(wx.EVT_BUTTON, self.onEditSkkey2)
 		
-		hline1 = wx.StaticLine(panel)
-		help_button = wx.BitmapButton(panel, bitmap=help_bmp, size=(help_bmp.GetWidth()+40, help_bmp.GetHeight()+10))
-		help_button.Bind(wx.EVT_BUTTON, self.on_help)
-		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
-		okBtn = wx.Button(panel, wx.ID_OK)
-		okBtn.Bind(wx.EVT_BUTTON, self.OnOk)
-
-		typeoperator = wx.BoxSizer(wx.HORIZONTAL)
-		typeoperator.Add(operatorlabel, 0, wx.TOP | wx.BOTTOM, 6)
-		typeoperator.Add(self.available_operators_select, 0, wx.LEFT, 5)
-
-		typevalue = wx.BoxSizer(wx.HORIZONTAL)
-		typevalue.Add(type1label, 0, wx.TOP | wx.BOTTOM, 6)
-		typevalue.Add(self.type1, 0, wx.LEFT, 5)
-
-		value1 = wx.BoxSizer(wx.HORIZONTAL)
-		value1.Add(value1label, 0, wx.TOP | wx.BOTTOM, 9)
-		value1.AddSpacer(5)
-		value1.Add(self.value1, 1, wx.TOP | wx.BOTTOM, 3)
-		value1.Add(self.edit_value1, 0, wx.LEFT, 10)
-
-		value2 = wx.BoxSizer(wx.HORIZONTAL)
-		value2.Add(value2label, 0, wx.TOP | wx.BOTTOM, 9)
-		value2.AddSpacer(5)
-		value2.Add(self.value2, 1, wx.TOP | wx.BOTTOM, 3)
-		value2.Add(self.edit_value2, 0, wx.LEFT, 10)
-
-		hbox = wx.BoxSizer(wx.HORIZONTAL)
-		hbox.Add(help_button, 0, wx.ALL, 10)
-		hbox.AddStretchSpacer(1)
-		hbox.Add(cancelBtn, 0, wx.ALL, 10)
-		hbox.Add(okBtn, 0, wx.ALL, 10)
-
-		main = wx.BoxSizer(wx.VERTICAL)
-		main.Add(typeoperator, 0, wx.ALL, 10)
-		main.Add(typevalue, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
-		main.Add(value1, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM | wx.EXPAND, 10)
-		main.Add(value2, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM | wx.EXPAND, 10)
-		main.AddStretchSpacer(1)
-		main.Add(hline1, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
-		main.Add(hbox, 0, wx.EXPAND, 0)
-
-		panel.SetSizer(main)
-
-		if self.operator == 'true' or self.operator == 'false' or self.operator == 'null' or self.operator == 'nnull' or self.operator == 'empty' or self.operator == 'nempty':
-			self.type1.Disable()
-			self.value1.Disable()
-			self.value2.Disable()
-		elif self.operator != 'btwn':			
-			self.value2.Disable()
-			
-		if edit:
-			operator_value = self.available_operators.index(edit['t'])
-			type_list_value = self.type_list.index(edit['vt'])
-			self.available_operators_select.SetSelection(operator_value)
-			self.type1.SetSelection(type_list_value)
-
-			if type_list_value == 0:	#num is for date and num
-				if '-' in edit['v']:
-					self.type1.SetSelection(3)
-
-			self.value1.SetValue(edit['v'])
-			if operator_value == 6:
-				self.value2.SetValue(edit['v2'])				
-
-		self.Set_SK_add()
-
-	def on_help(self, e):
-		url = self.currentpath+"/docs/html/xxx/xxx.html"
-		webbrowser.open(url, new=2)
-
-	def onEditSkkey1(self,e):
-		oldkey = False
-		if self.value1.GetValue(): oldkey = self.value1.GetValue()
-		dlg = selectKey(oldkey,1)
-		res = dlg.ShowModal()
-		if res == wx.OK: self.value1.SetValue(dlg.selected_vessel+'.'+dlg.selected_key)
-		dlg.Destroy()
-
-	def onEditSkkey2(self,e):
-		oldkey = False
-		if self.value2.GetValue(): oldkey = self.value2.GetValue()
-		dlg = selectKey(oldkey,1)
-		res = dlg.ShowModal()
-		if res == wx.OK: self.value2.SetValue(dlg.selected_vessel+'.'+dlg.selected_key)
-		dlg.Destroy()
-
-	def on_available_operators_select(self,e):
-		self.operator = self.available_operators[self.available_operators_select.GetSelection()]
-		
-		self.type1.Enable()
-		self.value1.Enable()
-		self.value2.Enable()
-		if self.operator in ['true','false','null','nnull','empty','nempty']:
-			self.type1.Disable()
-			self.value1.Disable()
-			self.value2.Disable()
-		elif self.operator != 'btwn':			
-			self.value2.Disable()
-		
-		self.Set_SK_add()
-
-	def Set_SK_add(self):
-		if self.type1.GetSelection() == 2: 
-			self.edit_value1.Enable()
-			if self.operator == 'btwn': self.edit_value2.Enable()
-		else: 
-			self.edit_value1.Disable()
-			self.edit_value2.Disable()
-
-	def on_select_type1(self,e):
-		self.Set_SK_add()
-		if self.type1.GetSelection() == 3:
-			now = datetime.now()
-			self.value1.SetValue(now.strftime("%Y-%m-%d %H:%M:%S"))
-			if self.operator == 'btwn': self.value2.SetValue(now.strftime("%Y-%m-%d %H:%M:%S"))
-		else: 
-			self.value1.SetValue('')
-			self.value2.SetValue('')
-
-	def OnOk(self,e):
+		#OnOk Condition
+		self.ConditionNode = []
 		condition_node = ujson.loads(self.condition_node_template)
 		condition_node['id'] = self.nodes.get_node_id()
 		condition_node['z'] = self.actions_flow_id
-		self.connector_id = condition_node['id']
+		self.condition_connector_id = condition_node['id']
+		condition_node['name'] = 'c|'+condition_node['id']+'|'+str(self.available_operators.index(self.operator))
+		condition_node['property'] = 'source.'+self.available_source_nr[self.source_select.GetSelection()]
+		if self.operator == 'true' or self.operator == 'false' or self.operator == 'null' or self.operator == 'nnull' or self.operator == 'empty' or self.operator == 'nempty':
+			condition_node['rules'].append({"t": self.operator})
+		else:
+			value1 = self.value1.GetValue()
+			type1 = 'str'
+			if self.source_select.GetSelection() == self.available_source_nr.index('pgn'):
+				type1 = 'num'
+
+			if self.operator == 'eq' or self.operator == 'neq' or self.operator == 'lt' or self.operator == 'lte' or self.operator == 'gt' or self.operator == 'gte' or self.operator == 'cont':
+				condition_node['rules'].append({"t": self.operator, "v": value1, "vt": type1})
+			if self.operator == 'btwn':
+				value2 = self.value2.GetValue()
+				if not value2:
+					wx.MessageBox(_('You have to provide 2 values.'), 'Info', wx.OK | wx.ICON_INFORMATION)
+					return
+				if type1 == 3:
+					try: 
+						timestamp = time.mktime(time.strptime(value2, '%Y-%m-%d %H:%M:%S'))
+						value2 = str(timestamp*1000)
+					except:
+						wx.MessageBox(_('Use this date and time format: YYYY-MM-DD HH:MM:SS'), 'Info', wx.OK | wx.ICON_INFORMATION)
+						return
+				condition_node['rules'].append({"t": self.operator, "v": value1, "vt": type1, "v2": value2, "v2t": type1})
+		self.ConditionNode = condition_node
+		
+		self.EndModal(wx.OK)
+
+	def on_available_operators_select(self,e):		
+		self.Set_SK_add()
+
+	def Set_SK_add(self):
+		self.operator = self.available_operators[self.available_operators_select.GetSelection()]
+		
+		self.value1.Enable()
+		self.value2.Enable()
+		if self.operator in ['true','false','null','nnull','empty','nempty']:
+			self.value1.Disable()
+			self.value2.Disable()
+		elif self.operator != 'btwn':			
+			self.value2.Disable()
+
+	def add_empty_condition(self):
+		condition_node = ujson.loads(self.condition_node_template)
+		condition_node['id'] = self.nodes.get_node_id()
+		condition_node['z'] = self.actions_flow_id
+		self.condition_connector_id = condition_node['id']
 		condition_node['name'] = 'c|'+condition_node['id']+'|'+str(self.available_operators.index(self.operator))
 		if self.operator == 'true' or self.operator == 'false' or self.operator == 'null' or self.operator == 'nnull' or self.operator == 'empty' or self.operator == 'nempty':
 			condition_node['rules'].append({"t": self.operator})
@@ -650,59 +614,6 @@ class Condition(wx.Dialog):
 		self.ConditionNode = condition_node
 		self.EndModal(wx.OK)
 
-class RepeatOptions():
-	def __init__(self):
-		self.rateUnit = [_('Seconds'),_('Minutes'),_('Hours'),_('Days')]
-		self.rateUnit2 = ['second','minute','hour','day']
-		self.rate_limit_template = '''
-		    {
-		        "id": "",
-		        "type": "delay",
-		        "z": "",
-		        "name": "",
-		        "pauseType": "rate",
-		        "timeout": "5",
-		        "timeoutUnits": "seconds",
-		        "rate": "",
-		        "nbRateUnits": "",
-		        "rateUnits": "",
-		        "randomFirst": "1",
-		        "randomLast": "5",
-		        "randomUnits": "seconds",
-		        "drop": true,
-		        "x": 380,
-		        "y": 120,
-		        "wires": [
-		            [
-		                ""
-		            ]
-		        ]
-		    }'''
-		self.intervalUnit = [_('MilliSeconds'),_('Seconds'),_('Minutes'),_('Hours')]
-		self.intervalUnit2 = ['msecs','secs','mins','hours']
-		self.repeat_template = '''
-		    {
-		        "id": "",
-		        "type": "msg-resend",
-		        "z": "",
-		        "interval": "",
-		        "intervalUnit": "",
-		        "maximum": "",
-		        "bytopic": false,
-		        "clone": false,
-		        "firstDelayed": false,
-		        "addCounters": false,
-		        "highRate": true,
-		        "outputCountField": "",
-		        "outputMaxField": "",
-		        "name": "",
-		        "x": 380,
-		        "y": 120,
-		        "wires": [
-		            []
-		        ]
-		    }'''
-
 # actions
 class ActionEndFilterSignalk(wx.Dialog):
 	def __init__(self, parent, edit):
@@ -711,7 +622,8 @@ class ActionEndFilterSignalk(wx.Dialog):
 		help_bmp = parent.help_bmp
 		self.currentpath = parent.currentpath
 		self.actions_flow_id = parent.actions_flow_id
-		self.action_id = parent.available_actions_select.GetSelection()
+		#self.action_id = parent.available_actions_select.GetSelection()
+		self.action_id = 0
 		self.sk_node_template = '''
 		    {			
 		        "id": "",
@@ -723,6 +635,7 @@ class ActionEndFilterSignalk(wx.Dialog):
 		        "wires": []
 		    }'''
 
+		
 		if edit == 0: title = _('Set Signal K key')
 		else: title = _('Edit Signal K key')
 
@@ -743,13 +656,19 @@ class ActionEndFilterSignalk(wx.Dialog):
 		main.Add(hbox, 0, wx.ALL | wx.EXPAND, 0)
 
 		panel.SetSizer(main)
+		
+		OnOKp()
+		self.OnOKp()
 
 	def OnOk(self,e):
+		self.OnOKp()
+
+	def OnOkp(self):
 		self.ActionNodes = []
 		sk_node = ujson.loads(self.sk_node_template)
 		sk_node['id'] = self.nodes.get_node_id()
 		sk_node['z'] = self.actions_flow_id
 		sk_node['name'] = 'a|'+sk_node['id']+'|'+str(self.action_id)
 		self.ActionNodes.append(sk_node)
-		self.connector_id = sk_node['id']
+		self.action_connector_id = sk_node['id']
 		self.EndModal(wx.OK)
