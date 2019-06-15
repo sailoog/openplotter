@@ -261,7 +261,9 @@ class MyFrame(wx.Frame):
 				filters = filters.replace('-', '')
 				filters = filters.replace(':', ',')
 				self.list_kplex.SetStringItem(index, 8, filters)
-			if i[10] == '1': self.list_kplex.CheckItem(index)
+			if i[10] == '1': 
+				self.list_kplex.CheckItem(index)
+				self.list_kplex.SetItemBackgroundColour(index,(102,205,170))
 
 	def on_apply_changes_kplex(self, event):
 		state = ''

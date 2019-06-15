@@ -3921,8 +3921,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		for name in self.Serialinst:
 			exist = False
 			for i in range(self.list_Serialinst.GetItemCount()):
-				if name == self.list_Serialinst.GetItemText(i, 0): 
-					self.list_Serialinst.SetItemBackgroundColour(i,(102,205,170))
+				if name == self.list_Serialinst.GetItemText(i, 0):
+					if self.Serialinst[name]['data'] == 'NMEA 0183':
+						self.list_Serialinst.SetItemBackgroundColour(i,(102,205,170))
+					if self.Serialinst[name]['data'] == 'NMEA 2000':
+						self.list_Serialinst.SetItemBackgroundColour(i,(255,215,0))
 					exist = True
 			if not exist:
 				l = [name, self.Serialinst[name]['device'], self.Serialinst[name]['vendor'], self.Serialinst[name]['product'], self.Serialinst[name]['serial'], self.Serialinst[name]['port'], self.Serialinst[name]['remember']]
@@ -4335,8 +4338,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def page_n2k(self):	
 		canboatjs = wx.StaticBox(self.p_n2k, label=_(' Managed by Signal K '))
 		self.listSKcan = wx.ListCtrl(self.p_n2k, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER | wx.LC_SINGLE_SEL, size=(-1,70))
-		self.listSKcan.InsertColumn(0, _('alias'), width=200)
-		self.listSKcan.InsertColumn(1, _('bauds'), width=200)
+		self.listSKcan.InsertColumn(0, _('alias'), width=300)
+		self.listSKcan.InsertColumn(1, _('bauds'), width=250)
 		self.listSKcan.Bind(wx.EVT_LIST_ITEM_SELECTED, self.onListSKcanSelected)
 		self.listSKcan.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.onListSKcanDeselected)
 
@@ -4486,6 +4489,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			if self.Serialinst[alias]['data'] == 'NMEA 2000':
 				if self.Serialinst[alias]['assignment'] == 'Signal K > OpenCPN':
 					self.listSKcan.Append([alias,self.Serialinst[alias]['bauds']])
+					self.listSKcan.SetItemBackgroundColour(self.listSKcan.GetItemCount()-1,(255,215,0))
 				if self.Serialinst[alias]['assignment'] == '0':
 					manualList.append(alias)
 		self.can_usb.AppendItems(manualList)
