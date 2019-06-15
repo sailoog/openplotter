@@ -1914,6 +1914,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			c = 0
 			for iii in i[2]:
 				self.list_i2c.Append([str(c), name, address, magn_list[c], iii[0], str(iii[1]), str(iii[2])])
+				if iii[0]: self.list_i2c.SetItemBackgroundColour(self.list_i2c.GetItemCount()-1,(255,215,0))
 				c = c + 1
 
 	def on_help_i2c(self, e):
@@ -3925,7 +3926,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 					if self.Serialinst[name]['data'] == 'NMEA 0183':
 						self.list_Serialinst.SetItemBackgroundColour(i,(102,205,170))
 					if self.Serialinst[name]['data'] == 'NMEA 2000':
-						self.list_Serialinst.SetItemBackgroundColour(i,(255,215,0))
+						self.list_Serialinst.SetItemBackgroundColour(i,(0,191,255))
 					exist = True
 			if not exist:
 				l = [name, self.Serialinst[name]['device'], self.Serialinst[name]['vendor'], self.Serialinst[name]['product'], self.Serialinst[name]['serial'], self.Serialinst[name]['port'], self.Serialinst[name]['remember']]
@@ -4489,7 +4490,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			if self.Serialinst[alias]['data'] == 'NMEA 2000':
 				if self.Serialinst[alias]['assignment'] == 'Signal K > OpenCPN':
 					self.listSKcan.Append([alias,self.Serialinst[alias]['bauds']])
-					self.listSKcan.SetItemBackgroundColour(self.listSKcan.GetItemCount()-1,(255,215,0))
+					self.listSKcan.SetItemBackgroundColour(self.listSKcan.GetItemCount()-1,(0,191,255))
 				if self.Serialinst[alias]['assignment'] == '0':
 					manualList.append(alias)
 		self.can_usb.AppendItems(manualList)
