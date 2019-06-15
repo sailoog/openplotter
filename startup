@@ -382,6 +382,8 @@ class MyFrame(wx.Frame):
 
 		######################################
 
+		subprocess.call(['pkill', '-f', 'diagnostic-NMEA.py'])
+		subprocess.call(['pkill', '-f', 'kplex.py'])
 		subprocess.call(['pkill', '-15', 'kplex'])
 		startKplex = False
 		try:
