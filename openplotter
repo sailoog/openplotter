@@ -25,7 +25,6 @@ except:
 from classes.edit_MCP import editMCP
 from classes.add_i2c import addI2c
 from classes.edit_i2c import editI2c
-from classes.add_kplex import addkplex
 from classes.add_tool10 import addTool10
 from classes.add_value_setting import addvaluesetting
 from classes.add_deviation_setting import adddeviationsetting
@@ -50,8 +49,10 @@ class MainFrame(wx.Frame):
 		self.conf_folder = conf.conf_folder
 		self.currentpath = currentpath
 		self.SK_settings = SK_settings(self.conf)
+		self.version = self.conf.get('GENERAL', 'version')
+		self.state = self.conf.get('GENERAL', 'state')
 
-		wx.Frame.__init__(self, None, title="OpenPlotter", size=(710, 460))
+		wx.Frame.__init__(self, None, title='OpenPlotter'+' '+self.version+' '+self.state, size=(710, 460))
 		if self.util_process_exist('startup.py'):
 			print "System not ready, try later."
 			sys.exit(0)
@@ -64,7 +65,6 @@ class MainFrame(wx.Frame):
 		self.p.SetupScrolling()
 		self.nb = wx.Notebook(self.p)
 		self.p_serial = wx.Panel(self.nb)
-		self.p_kplex = wx.Panel(self.nb)
 		self.p_n2k = wx.Panel(self.nb)
 		self.p_wifi = wx.Panel(self.nb)
 		self.p_pypilot = wx.Panel(self.nb)
@@ -80,7 +80,6 @@ class MainFrame(wx.Frame):
 		self.nb.AddPage(self.p_n2k, 'CAN')
 		self.nb.AddPage(self.p_pypilot, _('pypilot'))
 		self.nb.AddPage(self.p_wifi, _('Network'))
-		self.nb.AddPage(self.p_kplex, 'Kplex')
 		self.nb.AddPage(self.p_i2c, _('I2C'))
 		self.nb.AddPage(self.p_1w, '1W')
 		self.nb.AddPage(self.p_spi, 'SPI')
@@ -106,11 +105,13 @@ class MainFrame(wx.Frame):
 
 		self.menubar = wx.MenuBar()
 		self.settings = wx.Menu()
-		self.sdr_ais_item1 = self.settings.Append(wx.ID_ANY, _('SDR receiver'),
-												  _('Set an SDR receiver in the new window'))
+		self.sdr_ais_item1 = self.settings.Append(wx.ID_ANY, _('SDR receiver'),_('Get AIS and listen to the VHF'))
 		self.Bind(wx.EVT_MENU, self.open_sdr_ais, self.sdr_ais_item1)
-		self.deviation_table = self.settings.Append(wx.ID_ANY, _('Deviation Table'),
-													_('Create a deviation table for your boat'))
+
+		self.kplexTool = self.settings.Append(wx.ID_ANY, _('Kplex GUI'),_('Graphical user interface for NMEA 0183 multiplexer kplex'))
+		self.Bind(wx.EVT_MENU, self.onKplexTool, self.kplexTool)
+
+		self.deviation_table = self.settings.Append(wx.ID_ANY, _('Deviation Table'),_('Create a deviation table for your boat'))
 		self.Bind(wx.EVT_MENU, self.on_deviation_table, self.deviation_table)
 		self.filter_SK = self.settings.Append(wx.ID_ANY, _('Filter SignalK'),
 													_('blocks unwanted SignalK sources before they get into SignalK server node'))
@@ -191,7 +192,6 @@ class MainFrame(wx.Frame):
 		self.SetMenuBar(self.menubar)
 		# ##########################menu
 		self.page_serial()
-		self.page_kplex()
 		self.page_n2k()
 		self.page_wifi()
 		self.page_pypilot()
@@ -203,8 +203,6 @@ class MainFrame(wx.Frame):
 		self.page_startup()
 		self.page_dashboards()
 
-		self.manual_settings = ''
-		self.read_kplex_conf()
 		self.read_language()
 		self.read_startup()
 		self.read_wifi_conf()
@@ -256,6 +254,10 @@ class MainFrame(wx.Frame):
 	def open_sdr_ais(self, event):
 		subprocess.call(['pkill', '-f', 'SDR_AIS.py'])
 		subprocess.Popen(['python', self.currentpath + '/tools/SDR_AIS/SDR_AIS.py'])
+
+	def onKplexTool(self, event):
+		subprocess.call(['pkill', '-f', 'kplex.py'])
+		subprocess.Popen(['python', self.currentpath + '/tools/kplex/kplex.py'])
 
 	def on_deviation_table(self, e):
 		dlg = adddeviationsetting(self)
@@ -369,8 +371,8 @@ class MainFrame(wx.Frame):
 		self.ShowStatusBarBLACK(_('Follow the instructions of the new window'))
 
 	def update_openplotter(self, e):
-		vl = self.conf.get('GENERAL', 'version')
-		sl = self.conf.get('GENERAL', 'state')
+		vl = self.version
+		sl = self.state
 		vl_list = vl.split('.')
 		local_xxx = int(vl_list[0])
 		local_oxx = int(vl_list[1])
@@ -464,7 +466,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		info = wx.AboutDialogInfo()
 		info.SetName('OpenPlotter')
-		info.SetVersion(self.conf.get('GENERAL', 'version')+' '+self.conf.get('GENERAL', 'state'))
+		info.SetVersion(self.version+' '+self.state)
 		info.SetDescription(description)
 		info.SetCopyright('2018 Sailoog')
 		info.SetWebSite('http://www.sailoog.com')
@@ -1698,346 +1700,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.read_i2c()
 		self.read_pypilot()
 		self.start_sensors()
-    
-	###########################################kplex
-
-	def page_kplex(self):
-
-		self.list_kplex = CheckListCtrl(self.p_kplex, 650, 152)
-		self.list_kplex.InsertColumn(0, _('Name'), width=130)
-		self.list_kplex.InsertColumn(1, _('Type'), width=45)
-		self.list_kplex.InsertColumn(2, _('io'), width=45)
-		self.list_kplex.InsertColumn(3, _('Port/Address'), width=95)
-		self.list_kplex.InsertColumn(4, _('Bauds/Port'), width=60)
-		self.list_kplex.InsertColumn(5, _('inFilter'), width=55)
-		self.list_kplex.InsertColumn(6, _('Filtering'), width=80)
-		self.list_kplex.InsertColumn(7, _('outFilter'), width=60)
-		self.list_kplex.InsertColumn(8, _('Filtering'), width=80)
-		self.list_kplex.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_kplex)
-
-		diagnostic = wx.Button(self.p_kplex, label=_('Diagnostic'))
-		diagnostic.Bind(wx.EVT_BUTTON, self.on_diagnostic_kplex)
-
-		add = wx.Button(self.p_kplex, label=_('add network connection'))
-		add.Bind(wx.EVT_BUTTON, self.on_add_kplex)
-		delete = wx.Button(self.p_kplex, label=_('delete'))
-		delete.Bind(wx.EVT_BUTTON, self.on_delete_kplex)
-
-		help_button = wx.BitmapButton(self.p_kplex, bitmap=self.help_bmp, size=(self.help_bmp.GetWidth()+40, self.help_bmp.GetHeight()+10))
-		help_button.Bind(wx.EVT_BUTTON, self.on_help_kplex)
-		restart = wx.Button(self.p_kplex, label=_('Restart'))
-		restart.Bind(wx.EVT_BUTTON, self.on_restart_kplex)
-		advanced = wx.Button(self.p_kplex, label=_('Advanced'))
-		advanced.Bind(wx.EVT_BUTTON, self.on_advanced_kplex)
-		apply_changes = wx.Button(self.p_kplex, label=_('Apply changes'))
-		apply_changes.Bind(wx.EVT_BUTTON, self.on_apply_changes_kplex)
-		cancel_changes = wx.Button(self.p_kplex, label=_('Cancel changes'))
-		cancel_changes.Bind(wx.EVT_BUTTON, self.on_cancel_changes_kplex)
-
-		hlistbox = wx.BoxSizer(wx.HORIZONTAL)
-		hlistbox.Add(self.list_kplex, 1, wx.ALL | wx.EXPAND, 5)
-
-		hbox = wx.BoxSizer(wx.HORIZONTAL)
-		hbox.Add((0, 0), 1, wx.RIGHT | wx.LEFT, 5)
-		hbox.Add(add, 0, wx.RIGHT | wx.LEFT, 5)
-		hbox.Add(delete, 0, wx.RIGHT | wx.LEFT, 5)
-
-		hboxb = wx.BoxSizer(wx.HORIZONTAL)
-		hboxb.Add(help_button, 0, wx.RIGHT, 5)
-		hboxb.Add(diagnostic, 0, wx.RIGHT | wx.LEFT, 5)
-		hboxb.Add(restart, 0, wx.RIGHT | wx.LEFT, 5)
-		hboxb.Add(advanced, 0, wx.RIGHT | wx.LEFT, 5)
-		hboxb.Add((0, 0), 1, wx.RIGHT | wx.LEFT, 5)
-		hboxb.Add(apply_changes, 0, wx.RIGHT | wx.LEFT, 5)
-		hboxb.Add(cancel_changes, 0, wx.RIGHT | wx.LEFT, 5)
-
-		vbox = wx.BoxSizer(wx.VERTICAL)
-		vbox.Add(hlistbox, 1, wx.ALL | wx.EXPAND, 0)
-		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 5)
-		vbox.AddSpacer(5)
-		vbox.Add(hboxb, 0, wx.ALL | wx.EXPAND, 5)
-
-		self.p_kplex.SetSizer(vbox)
-
-	def on_advanced_kplex(self, event):
-		self.ShowMessage(_(
-			'OpenPlotter will close. Add manual settings at the end of the configuration file. Open OpenPlotter again and restart multiplexer to apply changes.'))
-		subprocess.Popen(['leafpad', self.home + '/.kplex.conf'])
-		self.Close()
-
-	def on_restart_kplex(self, event):
-		self.ShowStatusBarRED(_('Closing Kplex'))
-		subprocess.call(['pkill', '-9', 'kplex'])
-		while self.util_process_exist('kplex'):
-			time.sleep(0.05)
-		time.sleep(0.2)
-		subprocess.Popen('kplex')
-		try:
-			Serialinst = eval(self.conf.get('UDEV', 'serialinst'))
-		except:
-			Serialinst = {}
-		for name in Serialinst:
-			if Serialinst[name]['assignment'] == 'NMEA 0183 out':
-				subprocess.Popen(['kplex', '-f', self.home+'/.nmea0183out.conf'])
-				break
-		self.ShowStatusBarGREEN(_('Kplex restarted'))
-		self.read_kplex_conf()
-
-	def stop_kplex(self):
-		subprocess.call(['pkill', '-15', 'kplex'])
-		while self.util_process_exist('kplex'):
-			time.sleep(0.05)
-
-	def on_cancel_changes_kplex(self, event):
-		self.read_kplex_conf()
-		self.ShowStatusBarBLACK('')
-
-	def edit_kplex(self, e):
-		idx = e.GetIndex()
-		edit = []
-		for i in range(9):
-			edit.append(self.list_kplex.GetItem(idx, i).GetText())
-		edit.append(idx)
-		self.edit_add_kplex(edit)
-
-	def on_add_kplex(self, e):
-		self.edit_add_kplex(0)
-
-	def edit_add_kplex(self, edit):
-		dlg = addkplex(edit, self.kplex, self)
-		dlg.ShowModal()
-		result = dlg.result
-		dlg.Destroy()
-
-		if result != 0:
-			k = int(result[11])
-			if edit == 0:
-				self.kplex.append(result)
-				self.set_list_kplex()
-			else:
-				for i in range(10):
-					self.kplex[k][i] = result[i]
-				self.set_list_kplex()
-
-	def read_kplex_conf(self):
-		self.kplex = []
-		try:
-			file = open(self.home + '/.kplex.conf', 'r')
-			data = file.readlines()
-			file.close()
-
-			l_tmp = [None] * 8
-			self.manual_settings = ''
-			for index, item in enumerate(data):
-
-				if self.manual_settings:
-					if item != '\n': self.manual_settings += item
-				else:
-					if re.search('\[*\]', item):
-						if l_tmp[3] == 'in' or l_tmp[3] == 'out' or l_tmp[3] == 'both':
-							self.kplex.append(l_tmp)
-						l_tmp = [None] * 11
-						l_tmp[6] = 'none'
-						l_tmp[7] = 'nothing'
-						l_tmp[8] = 'none'
-						l_tmp[9] = 'nothing'
-						if '[serial]' in item: l_tmp[2] = 'Serial'
-						if '[tcp]' in item: l_tmp[2] = 'TCP'
-						if '[udp]' in item: l_tmp[2] = 'UDP'
-						if '#[' in item:
-							l_tmp[10] = '0'
-						else:
-							l_tmp[10] = '1'
-					if 'direction=in' in item:
-						l_tmp[3] = 'in'
-					if 'direction=out' in item:
-						l_tmp[3] = 'out'
-					if 'direction=both' in item:
-						l_tmp[3] = 'both'
-					if 'name=' in item and 'filename=' not in item:
-						l_tmp[1] = self.extract_value(item)
-					if 'address=' in item or 'filename=' in item:
-						l_tmp[4] = self.extract_value(item)
-						if '/dev' in l_tmp[4]: l_tmp[4] = l_tmp[4][5:]
-					if 'port=' in item or 'baud=' in item:
-						l_tmp[5] = self.extract_value(item)
-					if 'ifilter=' in item and '-all' in item:
-						l_tmp[6] = 'accept'
-						l_tmp[7] = self.extract_value(item)
-					if 'ifilter=' in item and '-all' not in item:
-						l_tmp[6] = 'ignore'
-						l_tmp[7] = self.extract_value(item)
-					if 'ofilter=' in item and '-all' in item:
-						l_tmp[8] = 'accept'
-						l_tmp[9] = self.extract_value(item)
-					if 'ofilter=' in item and '-all' not in item:
-						l_tmp[8] = 'ignore'
-						l_tmp[9] = self.extract_value(item)
-					if '###Manual settings' in item:
-						self.manual_settings = '###Manual settings\n\n'
-
-			if l_tmp[3] == 'in' or l_tmp[3] == 'out' or l_tmp[3] == 'both':
-				self.kplex.append(l_tmp)
-
-			self.set_list_kplex()
-
-		except: pass
-
-	def extract_value(self, data):
-		option, value = data.split('=')
-		value = value.strip()
-		return value
-
-	def set_list_kplex(self):
-		self.list_kplex.DeleteAllItems()
-		index = 1
-		for i in self.kplex:
-			if i[1]:
-				index = self.list_kplex.InsertStringItem(sys.maxint, i[1])
-
-			if i[2]: self.list_kplex.SetStringItem(index, 1, i[2])
-			if i[3]: self.list_kplex.SetStringItem(index, 2, i[3])
-			else:    self.list_kplex.SetStringItem(index, 2, '127.0.0.1')
-			if i[4]: self.list_kplex.SetStringItem(index, 3, i[4])
-			if i[5]: self.list_kplex.SetStringItem(index, 4, i[5])
-			if i[6]:
-				if i[6] == 'none': self.list_kplex.SetStringItem(index, 5, _('none'))
-				if i[6] == 'accept': self.list_kplex.SetStringItem(index, 5, _('accept'))
-				if i[6] == 'ignore': self.list_kplex.SetStringItem(index, 5, _('ignore'))
-			if i[7] == 'nothing':
-				self.list_kplex.SetStringItem(index, 6, _('nothing'))
-			else:
-				filters = i[7].replace(':-all', '')
-				filters = filters.replace('+', '')
-				filters = filters.replace('-', '')
-				filters = filters.replace(':', ',')
-				self.list_kplex.SetStringItem(index, 6, filters)
-			if i[8]:
-				if i[8] == 'none': self.list_kplex.SetStringItem(index, 7, _('none'))
-				if i[8] == 'accept': self.list_kplex.SetStringItem(index, 7, _('accept'))
-				if i[8] == 'ignore': self.list_kplex.SetStringItem(index, 7, _('ignore'))
-			if i[9] == 'nothing':
-				self.list_kplex.SetStringItem(index, 8, _('nothing'))
-			else:
-				filters = i[9].replace(':-all', '')
-				filters = filters.replace('+', '')
-				filters = filters.replace('-', '')
-				filters = filters.replace(':', ',')
-				self.list_kplex.SetStringItem(index, 8, filters)
-			if i[10] == '1': self.list_kplex.CheckItem(index)
-
-	def on_apply_changes_kplex(self, event):
-		state = ''
-		data = '# For advanced manual configuration, please visit: http://www.stripydog.com/kplex/configuration.html\n# Please do not modify OpenPlotter GUI settings.\n# Add manual settings at the end of the document.\n\n'
-		data += '###OpenPlotter GUI settings\n\n'
-
-		for index, item in enumerate(self.kplex):
-			if not ('system' in item[1] or 'signalk' in item[1]):
-				if self.list_kplex.IsChecked(index):
-					state = ''
-				else:
-					state = '#'
-
-				if 'Serial' in item[2]:
-					data += state + '[serial]\n' + state + 'name=' + item[1] + '\n' + state + 'direction=' + item[
-						3] + '\n' + state + 'optional=yes\n'
-					data += state + 'filename=/dev/' + item[4] + '\n' + state + 'baud=' + item[5] + '\n'
-				if 'TCP' in item[2]:
-					data += state + '[tcp]\n' + state + 'name=' + item[1] + '\n' + state + 'direction=' + item[
-						3] + '\n' + state + 'optional=yes\n'
-					if item[1] == 'gpsd': data += state + 'gpsd=yes\n'
-					if item[3] <> 'out':
-						data += state + 'mode=client\n'
-						data += state + 'persist=yes\n' + state + 'retry=10\n'
-					else:
-						data += state + 'mode=server\n'
-					if item[4]: data += state + 'address=' + str(item[4]) + '\n' 
-					data += state + 'port=' + str(item[5]) + '\n'
-				if 'UDP' in item[2]:
-					data += state + '[udp]\n' + state + 'name=' + item[1] + '\n' + state + 'direction=' + item[
-						3] + '\n' + state + 'optional=yes\n'
-					data += state + 'address=' + item[4] + '\n' + state + 'port=' + item[5] + '\n'
-
-				if not (item[6] == _('none') or item[6] == 'none') and not (item[7] == _('nothing') or item[7] == 'nothing'): 
-					data += state + 'ifilter=' + item[7] + '\n'
-				if not (item[8] == _('none') or item[8] == 'none') and not (item[9] == _('nothing') or item[9] == 'nothing'): 
-					data += state + 'ofilter=' + item[9] + '\n'
-				data += '\n'
-
-		data += '###end of OpenPlotter GUI settings\n\n'
-		if self.manual_settings:
-			data += self.manual_settings
-		else:
-			data += '###Manual settings\n\n'
-
-		file = open(self.home + '/.kplex.conf', 'w')
-		file.write(data)
-		file.close()
-		self.on_restart_kplex(0)
-		self.read_kplex_conf()
-
-	def on_delete_kplex(self, event):
-		selected = self.list_kplex.GetFirstSelected()
-		if selected == -1:
-			self.ShowStatusBarRED(_('Select an item.'))
-			return
-		num = len(self.kplex)
-		for i in range(num):
-			if self.list_kplex.IsSelected(i):
-				if self.kplex[i][2] == 'Serial' or self.kplex[i][1] == 'gpsd':
-					self.ShowStatusBarRED(_('Unassign this device on "Serial" tab'))
-					return	
-				del self.kplex[i]
-		self.set_list_kplex()
-
-	def on_diagnostic_kplex(self, event):
-		selected = self.list_kplex.GetFirstSelected()
-		if selected == -1:
-			self.ShowStatusBarRED(_('Select an item.'))
-			return
-		num = len(self.kplex)
-		for i in range(num):
-			if self.list_kplex.IsSelected(i):
-				if self.list_kplex.IsChecked(i):
-					file = open(self.home + '/.kplex.conf', 'r')
-					data = file.read()
-					file.close()
-
-					if self.kplex[i][3] == 'in' or self.kplex[i][3] == 'both':
-						data = data + '\n\n[tcp]\nname=system_debugi\ndirection=out\nofilter=+*****%' + self.kplex[i][
-							1] + ':-all\nmode=server\nport=10112\n\n'
-					if self.kplex[i][3] == 'out' or self.kplex[i][3] == 'both':
-						data += '\n\n[tcp]\nname=system_debugo\ndirection=out\n'
-						if self.kplex[i][8] != 'none' and self.kplex[i] != 'nothing': data += 'ofilter=' + \
-																							  self.kplex[i][9] + '\n'
-						data += 'mode=server\nport=10113\n\n'
-
-					file = open(self.home + '/.debugkplex.conf', 'w')
-					file.write(data)
-					file.close()
-
-					self.stop_kplex()
-					time.sleep(0.2)
-					subprocess.Popen(['kplex', '-f', self.home + '/.debugkplex.conf'])
-					time.sleep(0.5)
-					subprocess.call(['pkill', '-f', 'diagnostic-NMEA.py'])
-					if self.kplex[i][3] == 'in' or self.kplex[i][3] == 'both':
-						subprocess.Popen(['python', self.currentpath + '/diagnostic-NMEA.py', '10112', 'diagnostic_input'])
-					if self.kplex[i][3] == 'out' or self.kplex[i][3] == 'both':
-						subprocess.Popen(['python', self.currentpath + '/diagnostic-NMEA.py', '10113', 'diagnostic_output'])
-					
-					try:
-						Serialinst = eval(self.conf.get('UDEV', 'serialinst'))
-					except:
-						Serialinst = {}
-					for name in Serialinst:
-						if Serialinst[name]['assignment'] == 'NMEA 0183 out':
-							subprocess.Popen(['kplex', '-f', self.home+'/.nmea0183out.conf'])
-							break
-	
-	def on_help_kplex(self, e):
-		url = self.currentpath+"/docs/html/kplex/xxx.html"
-		webbrowser.open(url, new=2)
 
 	###########################################I2C
 
@@ -2252,6 +1914,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			c = 0
 			for iii in i[2]:
 				self.list_i2c.Append([str(c), name, address, magn_list[c], iii[0], str(iii[1]), str(iii[2])])
+				if iii[0]: self.list_i2c.SetItemBackgroundColour(self.list_i2c.GetItemCount()-1,(255,215,0))
 				c = c + 1
 
 	def on_help_i2c(self, e):
@@ -4259,8 +3922,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		for name in self.Serialinst:
 			exist = False
 			for i in range(self.list_Serialinst.GetItemCount()):
-				if name == self.list_Serialinst.GetItemText(i, 0): 
-					self.list_Serialinst.SetItemBackgroundColour(i,(102,205,170))
+				if name == self.list_Serialinst.GetItemText(i, 0):
+					if self.Serialinst[name]['data'] == 'NMEA 0183':
+						self.list_Serialinst.SetItemBackgroundColour(i,(102,205,170))
+					if self.Serialinst[name]['data'] == 'NMEA 2000':
+						self.list_Serialinst.SetItemBackgroundColour(i,(0,191,255))
 					exist = True
 			if not exist:
 				l = [name, self.Serialinst[name]['device'], self.Serialinst[name]['vendor'], self.Serialinst[name]['product'], self.Serialinst[name]['serial'], self.Serialinst[name]['port'], self.Serialinst[name]['remember']]
@@ -4460,6 +4126,54 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.read_pypilot()
 			self.on_apply_changes_pypilot()
 
+		# check klex interfaces
+		file = open(self.home +'/.kplex.conf', 'r')
+		file1 = open(self.home+'/.kplex.tmp', 'w')
+		interface = ''
+		device = ''
+		while True:
+			line = file.readline()
+			if '[serial]' in line or interface != '':
+				if 'filename=' in line:
+					option, value = line.split('=')
+					device = value.strip()
+				if '[serial]' in line and interface == '':
+					interface = line
+					device = ''
+				elif not line or re.search('\[*\]', line) or '###' in line:
+					exists = False
+					for alias in self.Serialinst:
+						if alias == device and self.Serialinst[alias]['data'] == 'NMEA 0183' and self.Serialinst[alias]['assignment'] == '0': exists = True
+					if exists: 
+						file1.write(interface)
+					if not line: break
+					elif '[serial]' in line:
+						interface = line
+						device = ''
+					else: 
+						file1.write(line)
+						interface = ''
+						device = ''
+				else: interface += line
+			else:
+				if not line: break
+				else: file1.write(line)
+		file.close()
+		file1.close()
+		if os.system('diff '+self.home+'/.kplex.tmp '+self.home+'/.kplex.conf > /dev/null'):
+			os.system('mv '+self.home+'/.kplex.tmp '+self.home+'/.kplex.conf')
+			msg = _('Restarting kplex... ')
+			seconds = 5
+			subprocess.call(['pkill', '-f', 'diagnostic-NMEA.py'])
+			subprocess.call(['pkill', '-f', 'kplex.py'])
+			subprocess.call(['pkill', '-15', 'kplex'])
+			for i in range(seconds, 0, -1):
+				self.ShowStatusBarYELLOW(msg+str(i))
+				time.sleep(1)
+			subprocess.Popen('kplex')
+			self.ShowStatusBarGREEN(_('Kplex restarted'))
+		else: os.system('rm -f '+self.home+'/.kplex.tmp')
+
 		# check SK devices
 		resetSK = False
 
@@ -4625,8 +4339,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def page_n2k(self):	
 		canboatjs = wx.StaticBox(self.p_n2k, label=_(' Managed by Signal K '))
 		self.listSKcan = wx.ListCtrl(self.p_n2k, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER | wx.LC_SINGLE_SEL, size=(-1,70))
-		self.listSKcan.InsertColumn(0, _('alias'), width=200)
-		self.listSKcan.InsertColumn(1, _('bauds'), width=200)
+		self.listSKcan.InsertColumn(0, _('alias'), width=300)
+		self.listSKcan.InsertColumn(1, _('bauds'), width=250)
 		self.listSKcan.Bind(wx.EVT_LIST_ITEM_SELECTED, self.onListSKcanSelected)
 		self.listSKcan.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.onListSKcanDeselected)
 
@@ -4776,6 +4490,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			if self.Serialinst[alias]['data'] == 'NMEA 2000':
 				if self.Serialinst[alias]['assignment'] == 'Signal K > OpenCPN':
 					self.listSKcan.Append([alias,self.Serialinst[alias]['bauds']])
+					self.listSKcan.SetItemBackgroundColour(self.listSKcan.GetItemCount()-1,(0,191,255))
 				if self.Serialinst[alias]['assignment'] == '0':
 					manualList.append(alias)
 		self.can_usb.AppendItems(manualList)

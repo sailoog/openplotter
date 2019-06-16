@@ -20,9 +20,12 @@ import wx
 
 class addkplex(wx.Dialog):
 	def __init__(self, edit, extkplex, parent):
+		conf = parent.conf
 		self.parent = parent
-		self.currentpath = parent.currentpath
-		wx.Dialog.__init__(self, None, title=_('Add/Edit NMEA 0183 (KPLEX)'), size=(550, 400))
+		self.op_folder = parent.op_folder
+		if edit == 0: title = _('Add kplex interface')
+		else: title = _('Edit kplex interface')
+		wx.Dialog.__init__(self, None, title=title, size=(550, 400))
 		self.extkplex = extkplex
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 		self.result = 0
@@ -32,11 +35,11 @@ class addkplex(wx.Dialog):
 
 		panel = wx.Panel(self)
 
-		self.icon = wx.Icon(self.currentpath + '/static/icons/openplotter.ico', wx.BITMAP_TYPE_ICO)
+		self.icon = wx.Icon(self.op_folder + '/static/icons/kplex.ico', wx.BITMAP_TYPE_ICO)
 		self.SetIcon(self.icon)
 
 		wx.StaticText(panel, label=_('Type'), pos=(20, 30))
-		self.kplex_type_list = ['TCP', 'UDP']
+		self.kplex_type_list = ['Serial', 'TCP', 'UDP']
 		self.kplex_type = wx.ComboBox(panel, choices=self.kplex_type_list, style=wx.CB_READONLY, size=(80, 32),
 									  pos=(20, 55))
 		self.Bind(wx.EVT_COMBOBOX, self.on_kplex_type_change, self.kplex_type)
@@ -46,11 +49,17 @@ class addkplex(wx.Dialog):
 
 		wx.StaticBox(panel, label=_(' settings '), size=(530, 90), pos=(10, 10))
 
-		self.kplex_ser_T1 = wx.StaticText(panel, label=_('Port'), pos=(230, 35))
-		self.kplex_device = wx.TextCtrl(panel, -1, size=(140, 32), pos=(225, 55))
+		serialInst = conf.get('UDEV', 'Serialinst')
+		try: serialInst = eval(serialInst)
+		except: serialInst = {}
+		SerDevLs = []
+		for alias in serialInst:
+			if serialInst[alias]['data'] == 'NMEA 0183':
+				if serialInst[alias]['assignment'] == '0': SerDevLs.append(alias)
+		self.kplex_ser_T1 = wx.StaticText(panel, label=_('Alias'), pos=(230, 35))
+		self.kplex_device_select = wx.ComboBox(panel, choices=SerDevLs, style=wx.CB_DROPDOWN, size=(140, 32),pos=(225, 55))
 
-		self.bauds = ['4800', '9600', '19200', '38400', '57600', '115200']
-		#self.bauds = ['4800', '9600', '19200', '38400', '57600', '115200', '230400', '460800']
+		self.bauds = ['4800', '9600', '19200', '38400', '57600', '115200', '230400', '460800']
 		self.kplex_ser_T2 = wx.StaticText(panel, label=_('Bauds'), pos=(375, 35))
 		self.kplex_baud_select = wx.ComboBox(panel, choices=self.bauds, style=wx.CB_READONLY, size=(90, 32),pos=(370, 55))
 
@@ -114,37 +123,34 @@ class addkplex(wx.Dialog):
 		self.otalker.SetValue('**')
 		self.osent.SetValue('***')
 
+		self.gpsd_examp_b = wx.Button(panel, label=_('Add GPSD input'), pos=(220, 320))
+		self.Bind(wx.EVT_BUTTON, self.gpsd_examp, self.gpsd_examp_b)
+
 		self.ok = wx.Button(panel, label=_('OK'), pos=(425, 320))
 		self.Bind(wx.EVT_BUTTON, self.ok_conn, self.ok)
 		cancelBtn = wx.Button(panel, wx.ID_CANCEL, pos=(330, 320))
 
 		if edit == 0:
 			edit = ['0', '0', '0', '0', '0', '0', '0', '0', '0', -1]
-			self.kplex_type.SetValue('TCP')
+			self.kplex_type.SetValue('Serial')
+			self.kplex_baud_select.SetValue('4800')
 			self.kplex_io_ser.SetValue('in')
 			self.kplex_io_net.SetValue('in')
-			self.switch_ser_net(False)
+			self.switch_ser_net(True)
 			self.switch_io_out(False)
 		else:
 			self.kplex_name.SetValue(edit[0])
+			self.kplex_type.SetValue(edit[1])
 			if edit[1] == 'Serial':
-				self.kplex_type_list = ['TCP', 'UDP', 'Serial']
-				self.kplex_type.Clear()
-				self.kplex_type.AppendItems(self.kplex_type_list)
 				self.kplex_io_ser.SetValue(edit[2])
 				self.switch_ser_net(True)
-				self.kplex_device.SetValue(edit[3])
+				self.kplex_device_select.SetValue(edit[3])
 				self.kplex_baud_select.SetValue(edit[4])
-				self.kplex_type.Disable()
-				self.kplex_name.Disable()
-				self.kplex_device.Disable()
-				self.kplex_baud_select.Disable()
 			else:
 				self.kplex_io_net.SetValue(edit[2])
 				self.switch_ser_net(False)
 				self.kplex_address.SetValue(edit[3])
 				self.kplex_netport.SetValue(edit[4])
-			self.kplex_type.SetValue(edit[1])
 			self.on_kplex_io_change(0)
 			if edit[5] != _('none').decode("utf-8"):
 				if edit[5] == _('accept').decode("utf-8"):
@@ -189,7 +195,7 @@ class addkplex(wx.Dialog):
 		self.ifilter_sentences.SetValue('**HDM,**RSA')
 		self.ofilter_select.SetValue(self.mode_ifilter[1])
 		self.ofilter_sentences.SetValue('**RM*,**VHW,**VWR')
-	
+	'''
 	def gpsd_examp(self, e):
 		self.kplex_type.SetValue('TCP')
 		self.kplex_io_net.SetValue('in')
@@ -205,7 +211,6 @@ class addkplex(wx.Dialog):
 		self.ifilter_sentences.SetValue(_('nothing'))
 		self.ofilter_select.SetValue(self.mode_ifilter[0])
 		self.ofilter_sentences.SetValue(_('nothing'))
-	'''
 
 	def ifilter_del(self, event):
 		self.ifilter_sentences.SetValue(_('nothing'))
@@ -228,8 +233,7 @@ class addkplex(wx.Dialog):
 		# if self.name_ifilter_select.GetValue()!='':
 		#	r_sentence+='%'+self.name_ifilter_select.GetValue()
 		if r_sentence == '*****':
-			self.ShowMessage(_(
-				'You must enter 2 uppercase characters for talker or 3 uppercase characters for sentence. The symbol * matches any character.'))
+			self.ShowMessage(_('You must enter 2 uppercase characters for talker or 3 uppercase characters for sentence. The symbol * matches any character.'))
 			return
 		if r_sentence in self.ifilter_sentences.GetValue():
 			self.ShowMessage(_('This sentence already exists.'))
@@ -254,8 +258,7 @@ class addkplex(wx.Dialog):
 		if self.name_ofilter_select.GetValue() != '':
 			r_sentence += '%' + self.name_ofilter_select.GetValue()
 		if r_sentence == '*****':
-			self.ShowMessage(_(
-				'You must enter 2 uppercase characters for talker or 3 uppercase characters for sentence. The symbol * matches any character.'))
+			self.ShowMessage(_('You must enter 2 uppercase characters for talker or 3 uppercase characters for sentence. The symbol * matches any character.'))
 			return
 		if r_sentence in self.ofilter_sentences.GetValue():
 			self.ShowMessage(_('This sentence already exists.'))
@@ -273,7 +276,7 @@ class addkplex(wx.Dialog):
 
 	def switch_ser_net(self, b):
 		self.kplex_ser_T1.Show(b)
-		self.kplex_device.Show(b)
+		self.kplex_device_select.Show(b)
 		self.kplex_ser_T2.Show(b)
 		self.kplex_baud_select.Show(b)
 		self.kplex_io_ser.Show(b)
@@ -365,8 +368,7 @@ class addkplex(wx.Dialog):
 			in_out = str(self.kplex_io_net.GetValue())
 
 		if not re.match('^[_0-9a-z]{1,13}$', name):
-			self.ShowMessage(_(
-				'"Name" must be a string between 1 and 13 lowercase letters and/or numbers which is not used as name for another input/output.'))
+			self.ShowMessage(_('"Name" must be a unique word between 1 and 13 lowercase letters and/or numbers.'))
 			return
 
 		for index, sublist in enumerate(self.extkplex):
@@ -374,13 +376,9 @@ class addkplex(wx.Dialog):
 				self.ShowMessage(_('This name is already in use.'))
 				return
 
-		#if name == 'system' or name == 'signalk' or name == 'gpsd':
-		#	self.ShowMessage(_('This name is reserved by the system.'))
-		#	return
-
 		if type_conn == 'Serial':
-			if str(self.kplex_device.GetValue()) != 'none':
-				port_address = str(self.kplex_device.GetValue())
+			if str(self.kplex_device_select.GetValue()) != 'none':
+				port_address = str(self.kplex_device_select.GetValue())
 			else:
 				self.ShowMessage(_('You must select a Port.'))
 				return
@@ -403,7 +401,7 @@ class addkplex(wx.Dialog):
 				return
 
 			if bauds_port >= '10111' and bauds_port <= '10113' and type_conn == 'TCP':
-				self.ShowMessage(_('Cancelled. Port 10111-10113 are reserved.'))
+				self.ShowMessage(_('Cancelled. Ports 10111 to 10113 are reserved.'))
 				return
 
 			new_address_port = str(type_conn) + str(port_address) + str(bauds_port)

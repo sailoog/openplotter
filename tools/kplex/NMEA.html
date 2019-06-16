@@ -1,0 +1,6415 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="generator" content="AsciiDoc 8.6.9">
+<meta name="description" content="A programmer's guide to NMEA0183, the GPS protocol reporting standard">
+<meta name="keywords" content="NMEA0183, GPS, standard, protocol">
+<title>NMEA Revealed</title>
+<style type="text/css">
+/* Shared CSS for AsciiDoc xhtml11 and html5 backends */
+
+/* Default font. */
+body {
+  font-family: Georgia,serif;
+}
+
+/* Title font. */
+h1, h2, h3, h4, h5, h6,
+div.title, caption.title,
+thead, p.table.header,
+#toctitle,
+#author, #revnumber, #revdate, #revremark,
+#footer {
+  font-family: Arial,Helvetica,sans-serif;
+}
+
+body {
+  margin: 1em 5% 1em 5%;
+}
+
+a {
+  color: blue;
+  text-decoration: underline;
+}
+a:visited {
+  color: fuchsia;
+}
+
+em {
+  font-style: italic;
+  color: navy;
+}
+
+strong {
+  font-weight: bold;
+  color: #083194;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #527bbd;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+}
+
+h1, h2, h3 {
+  border-bottom: 2px solid silver;
+}
+h2 {
+  padding-top: 0.5em;
+}
+h3 {
+  float: left;
+}
+h3 + * {
+  clear: left;
+}
+h5 {
+  font-size: 1.0em;
+}
+
+div.sectionbody {
+  margin-left: 0;
+}
+
+hr {
+  border: 1px solid silver;
+}
+
+p {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+ul, ol, li > p {
+  margin-top: 0;
+}
+ul > li     { color: #aaa; }
+ul > li > * { color: black; }
+
+.monospaced, code, pre {
+  font-family: "Courier New", Courier, monospace;
+  font-size: inherit;
+  color: navy;
+  padding: 0;
+  margin: 0;
+}
+pre {
+  white-space: pre-wrap;
+}
+
+#author {
+  color: #527bbd;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+#email {
+}
+#revnumber, #revdate, #revremark {
+}
+
+#footer {
+  font-size: small;
+  border-top: 2px solid silver;
+  padding-top: 0.5em;
+  margin-top: 4.0em;
+}
+#footer-text {
+  float: left;
+  padding-bottom: 0.5em;
+}
+#footer-badges {
+  float: right;
+  padding-bottom: 0.5em;
+}
+
+#preamble {
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+}
+div.imageblock, div.exampleblock, div.verseblock,
+div.quoteblock, div.literalblock, div.listingblock, div.sidebarblock,
+div.admonitionblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+div.admonitionblock {
+  margin-top: 2.0em;
+  margin-bottom: 2.0em;
+  margin-right: 10%;
+  color: #606060;
+}
+
+div.content { /* Block element content. */
+  padding: 0;
+}
+
+/* Block element titles. */
+div.title, caption.title {
+  color: #527bbd;
+  font-weight: bold;
+  text-align: left;
+  margin-top: 1.0em;
+  margin-bottom: 0.5em;
+}
+div.title + * {
+  margin-top: 0;
+}
+
+td div.title:first-child {
+  margin-top: 0.0em;
+}
+div.content div.title:first-child {
+  margin-top: 0.0em;
+}
+div.content + div.title {
+  margin-top: 0.0em;
+}
+
+div.sidebarblock > div.content {
+  background: #ffffee;
+  border: 1px solid #dddddd;
+  border-left: 4px solid #f0f0f0;
+  padding: 0.5em;
+}
+
+div.listingblock > div.content {
+  border: 1px solid #dddddd;
+  border-left: 5px solid #f0f0f0;
+  background: #f8f8f8;
+  padding: 0.5em;
+}
+
+div.quoteblock, div.verseblock {
+  padding-left: 1.0em;
+  margin-left: 1.0em;
+  margin-right: 10%;
+  border-left: 5px solid #f0f0f0;
+  color: #888;
+}
+
+div.quoteblock > div.attribution {
+  padding-top: 0.5em;
+  text-align: right;
+}
+
+div.verseblock > pre.content {
+  font-family: inherit;
+  font-size: inherit;
+}
+div.verseblock > div.attribution {
+  padding-top: 0.75em;
+  text-align: left;
+}
+/* DEPRECATED: Pre version 8.2.7 verse style literal block. */
+div.verseblock + div.attribution {
+  text-align: left;
+}
+
+div.admonitionblock .icon {
+  vertical-align: top;
+  font-size: 1.1em;
+  font-weight: bold;
+  text-decoration: underline;
+  color: #527bbd;
+  padding-right: 0.5em;
+}
+div.admonitionblock td.content {
+  padding-left: 0.5em;
+  border-left: 3px solid #dddddd;
+}
+
+div.exampleblock > div.content {
+  border-left: 3px solid #dddddd;
+  padding-left: 0.5em;
+}
+
+div.imageblock div.content { padding-left: 0; }
+span.image img { border-style: none; vertical-align: text-bottom; }
+a.image:visited { color: white; }
+
+dl {
+  margin-top: 0.8em;
+  margin-bottom: 0.8em;
+}
+dt {
+  margin-top: 0.5em;
+  margin-bottom: 0;
+  font-style: normal;
+  color: navy;
+}
+dd > *:first-child {
+  margin-top: 0.1em;
+}
+
+ul, ol {
+    list-style-position: outside;
+}
+ol.arabic {
+  list-style-type: decimal;
+}
+ol.loweralpha {
+  list-style-type: lower-alpha;
+}
+ol.upperalpha {
+  list-style-type: upper-alpha;
+}
+ol.lowerroman {
+  list-style-type: lower-roman;
+}
+ol.upperroman {
+  list-style-type: upper-roman;
+}
+
+div.compact ul, div.compact ol,
+div.compact p, div.compact p,
+div.compact div, div.compact div {
+  margin-top: 0.1em;
+  margin-bottom: 0.1em;
+}
+
+tfoot {
+  font-weight: bold;
+}
+td > div.verse {
+  white-space: pre;
+}
+
+div.hdlist {
+  margin-top: 0.8em;
+  margin-bottom: 0.8em;
+}
+div.hdlist tr {
+  padding-bottom: 15px;
+}
+dt.hdlist1.strong, td.hdlist1.strong {
+  font-weight: bold;
+}
+td.hdlist1 {
+  vertical-align: top;
+  font-style: normal;
+  padding-right: 0.8em;
+  color: navy;
+}
+td.hdlist2 {
+  vertical-align: top;
+}
+div.hdlist.compact tr {
+  margin: 0;
+  padding-bottom: 0;
+}
+
+.comment {
+  background: yellow;
+}
+
+.footnote, .footnoteref {
+  font-size: 0.8em;
+}
+
+span.footnote, span.footnoteref {
+  vertical-align: super;
+}
+
+#footnotes {
+  margin: 20px 0 20px 0;
+  padding: 7px 0 0 0;
+}
+
+#footnotes div.footnote {
+  margin: 0 0 5px 0;
+}
+
+#footnotes hr {
+  border: none;
+  border-top: 1px solid silver;
+  height: 1px;
+  text-align: left;
+  margin-left: 0;
+  width: 20%;
+  min-width: 100px;
+}
+
+div.colist td {
+  padding-right: 0.5em;
+  padding-bottom: 0.3em;
+  vertical-align: top;
+}
+div.colist td img {
+  margin-top: 0.3em;
+}
+
+@media print {
+  #footer-badges { display: none; }
+}
+
+#toc {
+  margin-bottom: 2.5em;
+}
+
+#toctitle {
+  color: #527bbd;
+  font-size: 1.1em;
+  font-weight: bold;
+  margin-top: 1.0em;
+  margin-bottom: 0.1em;
+}
+
+div.toclevel0, div.toclevel1, div.toclevel2, div.toclevel3, div.toclevel4 {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+div.toclevel2 {
+  margin-left: 2em;
+  font-size: 0.9em;
+}
+div.toclevel3 {
+  margin-left: 4em;
+  font-size: 0.9em;
+}
+div.toclevel4 {
+  margin-left: 6em;
+  font-size: 0.9em;
+}
+
+span.aqua { color: aqua; }
+span.black { color: black; }
+span.blue { color: blue; }
+span.fuchsia { color: fuchsia; }
+span.gray { color: gray; }
+span.green { color: green; }
+span.lime { color: lime; }
+span.maroon { color: maroon; }
+span.navy { color: navy; }
+span.olive { color: olive; }
+span.purple { color: purple; }
+span.red { color: red; }
+span.silver { color: silver; }
+span.teal { color: teal; }
+span.white { color: white; }
+span.yellow { color: yellow; }
+
+span.aqua-background { background: aqua; }
+span.black-background { background: black; }
+span.blue-background { background: blue; }
+span.fuchsia-background { background: fuchsia; }
+span.gray-background { background: gray; }
+span.green-background { background: green; }
+span.lime-background { background: lime; }
+span.maroon-background { background: maroon; }
+span.navy-background { background: navy; }
+span.olive-background { background: olive; }
+span.purple-background { background: purple; }
+span.red-background { background: red; }
+span.silver-background { background: silver; }
+span.teal-background { background: teal; }
+span.white-background { background: white; }
+span.yellow-background { background: yellow; }
+
+span.big { font-size: 2em; }
+span.small { font-size: 0.6em; }
+
+span.underline { text-decoration: underline; }
+span.overline { text-decoration: overline; }
+span.line-through { text-decoration: line-through; }
+
+div.unbreakable { page-break-inside: avoid; }
+
+
+/*
+ * xhtml11 specific
+ *
+ * */
+
+div.tableblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+div.tableblock > table {
+  border: 3px solid #527bbd;
+}
+thead, p.table.header {
+  font-weight: bold;
+  color: #527bbd;
+}
+p.table {
+  margin-top: 0;
+}
+/* Because the table frame attribute is overriden by CSS in most browsers. */
+div.tableblock > table[frame="void"] {
+  border-style: none;
+}
+div.tableblock > table[frame="hsides"] {
+  border-left-style: none;
+  border-right-style: none;
+}
+div.tableblock > table[frame="vsides"] {
+  border-top-style: none;
+  border-bottom-style: none;
+}
+
+
+/*
+ * html5 specific
+ *
+ * */
+
+table.tableblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+thead, p.tableblock.header {
+  font-weight: bold;
+  color: #527bbd;
+}
+p.tableblock {
+  margin-top: 0;
+}
+table.tableblock {
+  border-width: 3px;
+  border-spacing: 0px;
+  border-style: solid;
+  border-color: #527bbd;
+  border-collapse: collapse;
+}
+th.tableblock, td.tableblock {
+  border-width: 1px;
+  padding: 4px;
+  border-style: solid;
+  border-color: #527bbd;
+}
+
+table.tableblock.frame-topbot {
+  border-left-style: hidden;
+  border-right-style: hidden;
+}
+table.tableblock.frame-sides {
+  border-top-style: hidden;
+  border-bottom-style: hidden;
+}
+table.tableblock.frame-none {
+  border-style: hidden;
+}
+
+th.tableblock.halign-left, td.tableblock.halign-left {
+  text-align: left;
+}
+th.tableblock.halign-center, td.tableblock.halign-center {
+  text-align: center;
+}
+th.tableblock.halign-right, td.tableblock.halign-right {
+  text-align: right;
+}
+
+th.tableblock.valign-top, td.tableblock.valign-top {
+  vertical-align: top;
+}
+th.tableblock.valign-middle, td.tableblock.valign-middle {
+  vertical-align: middle;
+}
+th.tableblock.valign-bottom, td.tableblock.valign-bottom {
+  vertical-align: bottom;
+}
+
+
+/*
+ * manpage specific
+ *
+ * */
+
+body.manpage h1 {
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  border-top: 2px solid silver;
+  border-bottom: 2px solid silver;
+}
+body.manpage h2 {
+  border-style: none;
+}
+body.manpage div.sectionbody {
+  margin-left: 3em;
+}
+
+@media print {
+  body.manpage div#toc { display: none; }
+}
+
+
+</style>
+<script type="text/javascript">
+/*<![CDATA[*/
+var asciidoc = {  // Namespace.
+
+/////////////////////////////////////////////////////////////////////
+// Table Of Contents generator
+/////////////////////////////////////////////////////////////////////
+
+/* Author: Mihai Bazon, September 2002
+ * http://students.infoiasi.ro/~mishoo
+ *
+ * Table Of Content generator
+ * Version: 0.4
+ *
+ * Feel free to use this script under the terms of the GNU General Public
+ * License, as long as you do not remove or alter this notice.
+ */
+
+ /* modified by Troy D. Hanson, September 2006. License: GPL */
+ /* modified by Stuart Rackham, 2006, 2009. License: GPL */
+
+// toclevels = 1..4.
+toc: function (toclevels) {
+
+  function getText(el) {
+    var text = "";
+    for (var i = el.firstChild; i != null; i = i.nextSibling) {
+      if (i.nodeType == 3 /* Node.TEXT_NODE */) // IE doesn't speak constants.
+        text += i.data;
+      else if (i.firstChild != null)
+        text += getText(i);
+    }
+    return text;
+  }
+
+  function TocEntry(el, text, toclevel) {
+    this.element = el;
+    this.text = text;
+    this.toclevel = toclevel;
+  }
+
+  function tocEntries(el, toclevels) {
+    var result = new Array;
+    var re = new RegExp('[hH]([1-'+(toclevels+1)+'])');
+    // Function that scans the DOM tree for header elements (the DOM2
+    // nodeIterator API would be a better technique but not supported by all
+    // browsers).
+    var iterate = function (el) {
+      for (var i = el.firstChild; i != null; i = i.nextSibling) {
+        if (i.nodeType == 1 /* Node.ELEMENT_NODE */) {
+          var mo = re.exec(i.tagName);
+          if (mo && (i.getAttribute("class") || i.getAttribute("className")) != "float") {
+            result[result.length] = new TocEntry(i, getText(i), mo[1]-1);
+          }
+          iterate(i);
+        }
+      }
+    }
+    iterate(el);
+    return result;
+  }
+
+  var toc = document.getElementById("toc");
+  if (!toc) {
+    return;
+  }
+
+  // Delete existing TOC entries in case we're reloading the TOC.
+  var tocEntriesToRemove = [];
+  var i;
+  for (i = 0; i < toc.childNodes.length; i++) {
+    var entry = toc.childNodes[i];
+    if (entry.nodeName.toLowerCase() == 'div'
+     && entry.getAttribute("class")
+     && entry.getAttribute("class").match(/^toclevel/))
+      tocEntriesToRemove.push(entry);
+  }
+  for (i = 0; i < tocEntriesToRemove.length; i++) {
+    toc.removeChild(tocEntriesToRemove[i]);
+  }
+
+  // Rebuild TOC entries.
+  var entries = tocEntries(document.getElementById("content"), toclevels);
+  for (var i = 0; i < entries.length; ++i) {
+    var entry = entries[i];
+    if (entry.element.id == "")
+      entry.element.id = "_toc_" + i;
+    var a = document.createElement("a");
+    a.href = "#" + entry.element.id;
+    a.appendChild(document.createTextNode(entry.text));
+    var div = document.createElement("div");
+    div.appendChild(a);
+    div.className = "toclevel" + entry.toclevel;
+    toc.appendChild(div);
+  }
+  if (entries.length == 0)
+    toc.parentNode.removeChild(toc);
+},
+
+
+/////////////////////////////////////////////////////////////////////
+// Footnotes generator
+/////////////////////////////////////////////////////////////////////
+
+/* Based on footnote generation code from:
+ * http://www.brandspankingnew.net/archive/2005/07/format_footnote.html
+ */
+
+footnotes: function () {
+  // Delete existing footnote entries in case we're reloading the footnodes.
+  var i;
+  var noteholder = document.getElementById("footnotes");
+  if (!noteholder) {
+    return;
+  }
+  var entriesToRemove = [];
+  for (i = 0; i < noteholder.childNodes.length; i++) {
+    var entry = noteholder.childNodes[i];
+    if (entry.nodeName.toLowerCase() == 'div' && entry.getAttribute("class") == "footnote")
+      entriesToRemove.push(entry);
+  }
+  for (i = 0; i < entriesToRemove.length; i++) {
+    noteholder.removeChild(entriesToRemove[i]);
+  }
+
+  // Rebuild footnote entries.
+  var cont = document.getElementById("content");
+  var spans = cont.getElementsByTagName("span");
+  var refs = {};
+  var n = 0;
+  for (i=0; i<spans.length; i++) {
+    if (spans[i].className == "footnote") {
+      n++;
+      var note = spans[i].getAttribute("data-note");
+      if (!note) {
+        // Use [\s\S] in place of . so multi-line matches work.
+        // Because JavaScript has no s (dotall) regex flag.
+        note = spans[i].innerHTML.match(/\s*\[([\s\S]*)]\s*/)[1];
+        spans[i].innerHTML =
+          "[<a id='_footnoteref_" + n + "' href='#_footnote_" + n +
+          "' title='View footnote' class='footnote'>" + n + "</a>]";
+        spans[i].setAttribute("data-note", note);
+      }
+      noteholder.innerHTML +=
+        "<div class='footnote' id='_footnote_" + n + "'>" +
+        "<a href='#_footnoteref_" + n + "' title='Return to text'>" +
+        n + "</a>. " + note + "</div>";
+      var id =spans[i].getAttribute("id");
+      if (id != null) refs["#"+id] = n;
+    }
+  }
+  if (n == 0)
+    noteholder.parentNode.removeChild(noteholder);
+  else {
+    // Process footnoterefs.
+    for (i=0; i<spans.length; i++) {
+      if (spans[i].className == "footnoteref") {
+        var href = spans[i].getElementsByTagName("a")[0].getAttribute("href");
+        href = href.match(/#.*/)[0];  // Because IE return full URL.
+        n = refs[href];
+        spans[i].innerHTML =
+          "[<a href='#_footnote_" + n +
+          "' title='View footnote' class='footnote'>" + n + "</a>]";
+      }
+    }
+  }
+},
+
+install: function(toclevels) {
+  var timerId;
+
+  function reinstall() {
+    asciidoc.footnotes();
+    if (toclevels) {
+      asciidoc.toc(toclevels);
+    }
+  }
+
+  function reinstallAndRemoveTimer() {
+    clearInterval(timerId);
+    reinstall();
+  }
+
+  timerId = setInterval(reinstall, 500);
+  if (document.addEventListener)
+    document.addEventListener("DOMContentLoaded", reinstallAndRemoveTimer, false);
+  else
+    window.onload = reinstallAndRemoveTimer;
+}
+
+}
+asciidoc.install(2);
+/*]]>*/
+</script>
+</head>
+<body class="article">
+<div id="header">
+<h1>NMEA Revealed</h1>
+<span id="author">Eric S. Raymond</span><br>
+<span id="email" class="monospaced">&lt;<a href="mailto:esr@thyrsus.com">esr@thyrsus.com</a>&gt;</span><br>
+<span id="revnumber">version 2.21,</span>
+<span id="revdate">Jan 2016</span>
+<div id="toc">
+  <div id="toctitle">Table of Contents</div>
+  <noscript><p><b>JavaScript must be enabled in your browser to display the table of contents.</b></p></noscript>
+<div class="toclevel1"><a href="#_sources_and_applicable_standards">Sources and Applicable Standards</a></div><div class="toclevel1"><a href="#_relationship_to_nmea_2000">Relationship to NMEA 2000</a></div><div class="toclevel1"><a href="#_nmea_version_timeline">NMEA version timeline</a></div><div class="toclevel1"><a href="#_nmea_0183_physical_protocol_layer">NMEA 0183 physical protocol layer</a></div><div class="toclevel1"><a href="#_sentence_mixes_and_nmea_variations">Sentence Mixes and NMEA Variations</a></div><div class="toclevel1"><a href="#_nmea_encoding_conventions">NMEA Encoding Conventions</a></div><div class="toclevel1"><a href="#_dates_and_times">Dates and times</a></div><div class="toclevel1"><a href="#_error_status_indications">Error status indications</a></div><div class="toclevel1"><a href="#_talker_ids">Talker IDs</a></div><div class="toclevel1"><a href="#_satellite_ids">Satellite IDs</a></div><div class="toclevel1"><a href="#_obsolete_sentences">Obsolete sentences</a></div><div class="toclevel1"><a href="#_nmea_standard_sentences">NMEA-Standard Sentences</a></div><div class="toclevel2"><a href="#_aam_waypoint_arrival_alarm">AAM - Waypoint Arrival Alarm</a></div><div class="toclevel2"><a href="#_alm_gps_almanac_data">ALM - GPS Almanac Data</a></div><div class="toclevel2"><a href="#_apa_autopilot_sentence_a">APA - Autopilot Sentence "A"</a></div><div class="toclevel2"><a href="#_apb_autopilot_sentence_b">APB - Autopilot Sentence "B"</a></div><div class="toclevel2"><a href="#_bod_bearing_waypoint_to_waypoint">BOD - Bearing - Waypoint to Waypoint</a></div><div class="toclevel2"><a href="#_bwc_bearing_amp_distance_to_waypoint_great_circle">BWC - Bearing &amp; Distance to Waypoint - Great Circle</a></div><div class="toclevel2"><a href="#_bwr_bearing_and_distance_to_waypoint_rhumb_line">BWR - Bearing and Distance to Waypoint - Rhumb Line</a></div><div class="toclevel2"><a href="#_bww_bearing_waypoint_to_waypoint">BWW - Bearing - Waypoint to Waypoint</a></div><div class="toclevel2"><a href="#_dbk_depth_below_keel">DBK - Depth Below Keel</a></div><div class="toclevel2"><a href="#_dbs_depth_below_surface">DBS - Depth Below Surface</a></div><div class="toclevel2"><a href="#_dbt_depth_below_transducer">DBT - Depth below transducer</a></div><div class="toclevel2"><a href="#_dcn_decca_position">DCN - Decca Position</a></div><div class="toclevel2"><a href="#_dpt_depth_of_water">DPT - Depth of Water</a></div><div class="toclevel2"><a href="#_dtm_datum_reference">DTM - Datum Reference</a></div><div class="toclevel2"><a href="#_fsi_frequency_set_information">FSI - Frequency Set Information</a></div><div class="toclevel2"><a href="#_gbs_gps_satellite_fault_detection">GBS - GPS Satellite Fault Detection</a></div><div class="toclevel2"><a href="#_gga_global_positioning_system_fix_data">GGA - Global Positioning System Fix Data</a></div><div class="toclevel2"><a href="#_glc_geographic_position_loran_c">GLC - Geographic Position, Loran-C</a></div><div class="toclevel2"><a href="#_gll_geographic_position_latitude_longitude">GLL - Geographic Position - Latitude/Longitude</a></div><div class="toclevel2"><a href="#_gns_fix_data">GNS - Fix data</a></div><div class="toclevel2"><a href="#_grs_gps_range_residuals">GRS - GPS Range Residuals</a></div><div class="toclevel2"><a href="#_gst_gps_pseudorange_noise_statistics">GST - GPS Pseudorange Noise Statistics</a></div><div class="toclevel2"><a href="#_gsa_gps_dop_and_active_satellites">GSA - GPS DOP and active satellites</a></div><div class="toclevel2"><a href="#_gsv_satellites_in_view">GSV - Satellites in view</a></div><div class="toclevel2"><a href="#_gtd_geographic_location_in_time_differences">GTD - Geographic Location in Time Differences</a></div><div class="toclevel2"><a href="#_gxa_transit_position_latitude_longitude">GXA - TRANSIT Position - Latitude/Longitude</a></div><div class="toclevel2"><a href="#_hdg_heading_deviation_amp_variation">HDG - Heading - Deviation &amp; Variation</a></div><div class="toclevel2"><a href="#_hdm_heading_magnetic">HDM - Heading - Magnetic</a></div><div class="toclevel2"><a href="#_hdt_heading_true">HDT - Heading - True</a></div><div class="toclevel2"><a href="#_hfb_trawl_headrope_to_footrope_and_bottom">HFB - Trawl Headrope to Footrope and Bottom</a></div><div class="toclevel2"><a href="#_hsc_heading_steering_command">HSC - Heading Steering Command</a></div><div class="toclevel2"><a href="#_its_trawl_door_spread_2_distance">ITS - Trawl Door Spread 2 Distance</a></div><div class="toclevel2"><a href="#_lcd_loran_c_signal_data">LCD - Loran-C Signal Data</a></div><div class="toclevel2"><a href="#_msk_control_for_a_beacon_receiver">MSK - Control for a Beacon Receiver</a></div><div class="toclevel2"><a href="#_mss_beacon_receiver_status">MSS - Beacon Receiver Status</a></div><div class="toclevel2"><a href="#_mtw_mean_temperature_of_water">MTW - Mean Temperature of Water</a></div><div class="toclevel2"><a href="#_mwv_wind_speed_and_angle">MWV - Wind Speed and Angle</a></div><div class="toclevel2"><a href="#_oln_omega_lane_numbers">OLN - Omega Lane Numbers</a></div><div class="toclevel2"><a href="#_osd_own_ship_data">OSD - Own Ship Data</a></div><div class="toclevel2"><a href="#_r00_waypoints_in_active_route">R00 - Waypoints in active route</a></div><div class="toclevel2"><a href="#_rma_recommended_minimum_navigation_information">RMA - Recommended Minimum Navigation Information</a></div><div class="toclevel2"><a href="#_rmb_recommended_minimum_navigation_information">RMB - Recommended Minimum Navigation Information</a></div><div class="toclevel2"><a href="#_rmc_recommended_minimum_navigation_information">RMC - Recommended Minimum Navigation Information</a></div><div class="toclevel2"><a href="#_rot_rate_of_turn">ROT - Rate Of Turn</a></div><div class="toclevel2"><a href="#_rpm_revolutions">RPM - Revolutions</a></div><div class="toclevel2"><a href="#_rsa_rudder_sensor_angle">RSA - Rudder Sensor Angle</a></div><div class="toclevel2"><a href="#_rsd_radar_system_data">RSD - RADAR System Data</a></div><div class="toclevel2"><a href="#_rte_routes">RTE - Routes</a></div><div class="toclevel2"><a href="#_sfi_scanning_frequency_information">SFI - Scanning Frequency Information</a></div><div class="toclevel2"><a href="#_stn_multiple_data_id">STN - Multiple Data ID</a></div><div class="toclevel2"><a href="#_tds_trawl_door_spread_distance">TDS - Trawl Door Spread Distance</a></div><div class="toclevel2"><a href="#_tfi_trawl_filling_indicator">TFI - Trawl Filling Indicator</a></div><div class="toclevel2"><a href="#_tpc_trawl_position_cartesian_coordinates">TPC - Trawl Position Cartesian Coordinates</a></div><div class="toclevel2"><a href="#_tpr_trawl_position_relative_vessel">TPR - Trawl Position Relative Vessel</a></div><div class="toclevel2"><a href="#_tpt_trawl_position_true">TPT - Trawl Position True</a></div><div class="toclevel2"><a href="#_trf_transit_fix_data">TRF - TRANSIT Fix Data</a></div><div class="toclevel2"><a href="#_ttm_tracked_target_message">TTM - Tracked Target Message</a></div><div class="toclevel2"><a href="#_vbw_dual_ground_water_speed">VBW - Dual Ground/Water Speed</a></div><div class="toclevel2"><a href="#_vdr_set_and_drift">VDR - Set and Drift</a></div><div class="toclevel2"><a href="#_vhw_water_speed_and_heading">VHW - Water speed and heading</a></div><div class="toclevel2"><a href="#_vlw_distance_traveled_through_water">VLW - Distance Traveled through Water</a></div><div class="toclevel2"><a href="#_vpw_speed_measured_parallel_to_wind">VPW - Speed - Measured Parallel to Wind</a></div><div class="toclevel2"><a href="#_vtg_track_made_good_and_ground_speed">VTG - Track made good and Ground speed</a></div><div class="toclevel2"><a href="#_vwr_relative_wind_speed_and_angle">VWR - Relative Wind Speed and Angle</a></div><div class="toclevel2"><a href="#_wcv_waypoint_closure_velocity">WCV - Waypoint Closure Velocity</a></div><div class="toclevel2"><a href="#_wnc_distance_waypoint_to_waypoint">WNC - Distance - Waypoint to Waypoint</a></div><div class="toclevel2"><a href="#_wpl_waypoint_location">WPL - Waypoint Location</a></div><div class="toclevel2"><a href="#_xdr_transducer_measurement">XDR - Transducer Measurement</a></div><div class="toclevel2"><a href="#_xte_cross_track_error_measured">XTE - Cross-Track Error, Measured</a></div><div class="toclevel2"><a href="#_xtr_cross_track_error_dead_reckoning">XTR - Cross Track Error - Dead Reckoning</a></div><div class="toclevel2"><a href="#_zda_time_amp_date_utc_day_month_year_and_local_time_zone">ZDA - Time &amp; Date - UTC, day, month, year and local time zone</a></div><div class="toclevel2"><a href="#_zfo_utc_amp_time_from_origin_waypoint">ZFO - UTC &amp; Time from origin Waypoint</a></div><div class="toclevel2"><a href="#_ztg_utc_amp_time_to_destination_waypoint">ZTG - UTC &amp; Time to Destination Waypoint</a></div><div class="toclevel2"><a href="#_other_sentences">Other sentences</a></div><div class="toclevel1"><a href="#_vendor_extensions">Vendor extensions</a></div><div class="toclevel2"><a href="#_pashr_rt300_proprietary_roll_and_pitch_sentence">PASHR - RT300 proprietary roll and pitch sentence</a></div><div class="toclevel2"><a href="#_pgrme_garmin_estimated_error">PGRME - Garmin Estimated Error</a></div><div class="toclevel2"><a href="#_pmgnst_magellan_status">PMGNST - Magellan Status</a></div><div class="toclevel2"><a href="#_prwizch_rockwell_channel_status">PRWIZCH - Rockwell Channel Status</a></div><div class="toclevel2"><a href="#_pubx_00_u_blox_lat_long_position_data">PUBX 00 - u-blox Lat/Long Position Data</a></div><div class="toclevel2"><a href="#_pubx_01_u_blox_utm_position_data">PUBX 01 - u-blox UTM Position Data</a></div><div class="toclevel2"><a href="#_pubx_03_u_blox_satellite_status">PUBX 03 - u-blox Satellite Status</a></div><div class="toclevel2"><a href="#_pubx_04_u_blox_time_of_day_and_clock_information">PUBX 04 - u-blox Time of Day and Clock Information</a></div><div class="toclevel2"><a href="#_tmvtd_transas_vts_sml_tracking_system_report">TMVTD - Transas VTS / SML tracking system report</a></div><div class="toclevel1"><a href="#_references">References</a></div></div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph"><p>NMEA 0183 is a proprietary protocol issued by the National Marine
+Electronics Association for use in boat navigation and control
+systems.  Because early GPS sensors were designed for compatibility
+with these systems, GPS reporting protocols are often a small
+subset of NMEA 0183 or mutated from such as subset.  AIS, the
+Marine Automatic Identification system, also uses NMEA0183-like
+packet formats.</p></div>
+<div class="paragraph"><p>This document is a list of NMEA 0183 sentences with field descriptions.
+It is primarily intended to help people understand GPS reports, but
+also exists because the author finds life-critical protocols with
+only closed/proprietary documentation deeply offensive.</p></div>
+<div class="paragraph"><p>The master of this document is in asciidoc format at the GPSD project
+website; you are probably seeing it as a web page.  You may encounter
+versions of it, in plain ASCII, that do not have a revision number and
+do not list an editor. These are older and should be considered
+obsolescent.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_sources_and_applicable_standards">Sources and Applicable Standards</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>This collection may originally have been redacted from the document
+cited as <a href="#BETKE">[BETKE]</a>; see the list of sources at the end of this
+document.  The official NMEA 0183 standard was not consulted at any
+point, thus this document is not a derivative work of that standard
+and is not controlled by the rapacious lawyers of NMEA.</p></div>
+<div class="paragraph"><p>It appears there is an international standard, IEC 61162-1, published
+in 2000, that is essentially NMEA 0183.  <a href="#IEC61162-1">[IEC61162-1]</a> says it "is closely
+aligned with NMEA 0183 version 2.30".  Unfortunately, it costs money
+and is not redistributable.</p></div>
+<div class="paragraph"><p>This collection of sentences is originally from the gpsdrive
+distribution, but adds more information on the following topics:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+Old and new forms of VTG
+</p>
+</li>
+<li>
+<p>
+Units used in GGA
+</p>
+</li>
+<li>
+<p>
+Vendor extensions PRWIZCH and PMGNST
+</p>
+</li>
+<li>
+<p>
+FAA Mode Indicator field for RMC, RMB, VTG, GLL, BWC, XTE.
+</p>
+</li>
+<li>
+<p>
+New documentation on BWC, DTM, GBS, GNS, GRS, GST, MSK, and MSS sentences.
+</p>
+</li>
+<li>
+<p>
+Sentence examples merged from <a href="#GIDS">[GIDS]</a>
+</p>
+</li>
+<li>
+<p>
+Sentence explanations from <a href="#GIDS">[GIDS]</a> and elsewhere
+</p>
+</li>
+<li>
+<p>
+Corrected badly mangled ZDA description.
+</p>
+</li>
+<li>
+<p>
+Corrected DPT titling
+</p>
+</li>
+<li>
+<p>
+Common talker IDs
+</p>
+</li>
+<li>
+<p>
+Sentences HFB, ITS, TPC, TDS, TFI, TPC, TPR, TPT from [GLOBALSAT].
+</p>
+</li>
+<li>
+<p>
+Sentence PASHR from <a href="#PASHR">[PASHR]</a>.
+</p>
+</li>
+<li>
+<p>
+Satellite IDs: PRN vs NMEA-ID.
+</p>
+</li>
+<li>
+<p>
+Error status indications.
+</p>
+</li>
+</ul></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_relationship_to_nmea_2000">Relationship to NMEA 2000</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Recently the National Marine Electronics Association has attempted to
+replace NMEA 0183 with a very differently structured protocol named
+NMEA 2000.  It is binary rather than textual, a profile or
+interpretation of the Controller Area Network (CAN) protocol used in
+automotive networking. Unlike NMEA 0183 it is frame-based and cannot
+be transmitted over serial links.</p></div>
+<div class="paragraph"><p>While newer marine electronics uses this protocol, general-purpose
+GPSes have not adopted it.  Thus we do not attempt to document NMEA
+2000 here; see <a href="#CANBUS">[CANBUS]</a>, <a href="#NMEA2000">[NMEA2000]</a>, and <a href="#KEVERSOFT">[KEVERSOFT]</a> instead.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_nmea_version_timeline">NMEA version timeline</h2>
+<div class="sectionbody">
+<table class="tableblock frame-all grid-all" style="
+width:100%;
+">
+<colgroup><col style="width:50%;">
+<col style="width:50%;">
+</colgroup><tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">NMEA 2.00</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">January 1992</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">NMEA 2.01</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">August 1994</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">NMEA 2.10</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">October 1995</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">NMEA 2.20</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">January 1997</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">NMEA 2.30</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">March 1998</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">NMEA 3.00</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">July 2000</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">NMEA 3.01</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">January 2002</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">NMEA 4.00</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">November 2008</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">NMEA 4.10</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">July 2012</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph"><p>No version earlier than 2.00 is listed or archived on the NMEA website.</p></div>
+<div class="paragraph"><p>The NMEA 4.00 standard states, provocatively, that it is "in theory"
+backwards compatible to 2.00, and that versions before 2.00 are not
+forward-compatible <a href="#ANON">[ANON]</a>.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_nmea_0183_physical_protocol_layer">NMEA 0183 physical protocol layer</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The NMEA specification requires a physical-level protocol compatible
+with RS422 at 4800bps, 8N1 or 7N2.  It is RS422 rather than RS232
+because NMEA expects many navigational devices to feed a common serial
+bus.  The data encoding is ASCII with the high data bit not used and
+zeroed.</p></div>
+<div class="paragraph"><p>Consumer-grade GPS sensors normally report over an RS232 port or a USB
+port emulating an RS232 serial device; some use Bluetooth. Baud rate
+is variable, with 9600 probably the most common.  Most devices use
+8N1; there are rare exceptions that use 7N2 (San Jose Navigation) or
+even 8O1 (Trimble).</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_sentence_mixes_and_nmea_variations">Sentence Mixes and NMEA Variations</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Most GPS sensors emit only RMC, GSA, GSV, GLL, VTG, and (rarely) ZDA.
+Newer ones conforming to NMEA 3.x may emit GBS as well. Other NMEA
+sentences are usually only emitted by high-end maritime navigation
+systems.</p></div>
+<div class="paragraph"><p>The form of VTG is incompatibly variable with NMEA version. See
+the detailed description of that sentence for details.</p></div>
+<div class="paragraph"><p>In NMEA 2.3, several sentences (APB, BWC, BWR, GLL, RMA, RMB, RMC,
+VTG, WCV, and XTE) got a new last field carrying the signal integrity
+information needed by the FAA.  (The values in the GGA mode field were
+extended to carry this information as well.) Here are the values:</p></div>
+<div class="paragraph"><p>FAA Mode Indicator
+     A = Autonomous mode
+     D = Differential Mode
+     E = Estimated (dead-reckoning) mode
+     M = Manual Input Mode
+     S = Simulated Mode
+     N = Data Not Valid
+     P = Precise (4.00 and later)</p></div>
+<div class="paragraph"><p>This field may be empty.  In pre-2.3 versions it is omitted. <a href="#NTUM">[NTUM]</a>
+ says
+that according to the NMEA specification, it dominates the Status 
+field — the Status field will be set to "A" (data valid) for Mode 
+Indicators A
+and D, and to "V" (data invalid) for all other values of the Mode
+Indicator.  This is confirmed by <a href="#IEC">[IEC]</a>.</p></div>
+<div class="paragraph"><p>In NMEA 3.0, the GBS sentence reports a complete set of error estimates. Note
+however that many receivers claiming to emit "3.0" or "3.01" don’t
+actually ship this sentence.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_nmea_encoding_conventions">NMEA Encoding Conventions</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Data is transmitted in serial async, 1 start-bit, 8 data-bits,
+1 stop-bit, no parity.  Data-bits are in least-significant-bit
+order.  The standard specifies 4800 as the speed, but this is no
+longer common. The most-signifacant-bit is always zero.</p></div>
+<div class="paragraph"><p>An NMEA sentence consists of a start delimiter, followed by a
+comma-separated sequence of fields, followed by the character <em>*</em>
+(ASCII 42), the checksum and an end-of-line marker.</p></div>
+<div class="paragraph"><p>The start delimiter is normally <em>$</em> (ASCII 36). Packets of AIVDM/AIVDO
+data, which are otherwise formatted like NMEA, use <em>!</em>.  Up to 4.00
+these are the only permitted start characters <a href="#ANON">[ANON]</a>.</p></div>
+<div class="paragraph"><p>The first field of a sentence is called the "tag" and normally
+consists of a two-letter talker ID followed by a three-letter
+type code.</p></div>
+<div class="paragraph"><p>Where a numeric latitude or longitude is given, the two digits
+immediately to the left of the decimal point are whole minutes, to the
+right are decimals of minutes, and the remaining digits to the left of
+the whole minutes are whole degrees.</p></div>
+<div class="paragraph"><p>Eg. 4533.35 is 45 degrees and 33.35 minutes. ".35" of a minute is
+exactly 21 seconds.</p></div>
+<div class="paragraph"><p>Eg. 16708.033 is 167 degrees and 8.033 minutes. ".033" of a minute is
+about 2 seconds.</p></div>
+<div class="paragraph"><p>In NMEA 3.01 (and possibly some earlier versions), the character "^"
+(HEX 5E) is reserved as an introducer for two-character hex escapes
+using 0-9 and A-F, expressing an ISO 8859-1 (Latin-1) character <a href="#ANON">[ANON]</a>.</p></div>
+<div class="paragraph"><p>The Checksum is mandatory, and the last field in a sentance.  It is
+the 8-bit XOR of all characters in the sentance, exclusing the "$", "I",
+or "*" characters; but including all "," and "^".  It is encoded as
+two hexadecimal characters (0-9, A-F), the most-significant-nibble
+being sent first.</p></div>
+<div class="paragraph"><p>Sentences are terminated by a &lt;CR&gt;&lt;LF&gt; sequence.</p></div>
+<div class="paragraph"><p>Maximum sentence length, including the $ and &lt;CR&gt;&lt;LF&gt; is 82 bytes.</p></div>
+<div class="paragraph"><p>According to <a href="#UNMEA">[UNMEA]</a>, the NMEA standard requires that a field (such as
+altitude, latitude, or longitude) must be left empty when the GPS has
+no valid data for it.  However, many receivers violate this.  It’s
+common, for example, to see latitude/longitude/altitude figures filled
+with zeros when the GPS has no valid data.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_dates_and_times">Dates and times</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>NMEA devices report date and time in UTC, aka GMT, aka Zulu time (as
+opposed to local time).  But the way this report is computed results
+in some odd bugs and inaccuracies.</p></div>
+<div class="paragraph"><p>Date and time in GPS is represented as number of weeks from the start
+of zero second of 6 January 1980, plus number of seconds into the
+week.  GPS time is not leap-second corrected, though satellites also
+broadcast a current leap-second correction which may be updated on
+three-month boundaries according to rotational bulletins issued by the
+International Earth Rotation and Reference Systems Service (IERS).</p></div>
+<div class="paragraph"><p>The leap-second correction is only included in the satellite subframre
+broadcast, roughly once ever 20 minutes.  While the satellites do
+notify GPSes of upcoming leap-seconds, this notification is not
+necessarily processed correctly on consumer-grade devices, and will
+not be available at all when a GPS receiver has just
+cold-booted. Thus, reported UTC time may be slightly inaccurate
+between a cold boot or leap second and the following subframe
+broadcast.</p></div>
+<div class="paragraph"><p>GPS date and time are subject to a rollover problem in the 10-bit week
+number counter, which will re-zero every 1024 weeks (roughly every 20
+years). The last rollover (and the first since GPS went live in 1980)
+was in 1999; the next would fall in 2019, but plans are afoot to
+upgrade the satellite counters to 13 bits; this will delay the next
+rollover until 2173.</p></div>
+<div class="paragraph"><p>For accurate time reporting, therefore, a GPS requires a supplemental
+time references sufficient to identify the current rollover period,
+e.g. accurate to within 512 weeks.  Many NMEA GPSes have a wired-in
+assumption about the UTC time of the last rollover and will thus report
+incorrect times outside the rollover period they were designed in.</p></div>
+<div class="paragraph"><p>For these reasons, NMEA GPSes should not be considered high-quality
+references for absolute time.  Some do, however, emit pulse-per-second
+RS232 signals which can be used to improve the precision of an
+external clock. See <a href="#PPS">[PPS]</a> for discussion.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_error_status_indications">Error status indications</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The NMEA sentences in the normal GPS inventory return four kinds of
+validity flags: Mode, Status, the Active/Void bit, and in later
+versions the FAA indicator mode.  The FAA mode field is legally
+required and orthogonal to the others. Here’s how the first three used
+in various sentences:</p></div>
+<table class="tableblock frame-topbot grid-all" style="
+width:100%;
+">
+<colgroup><col style="width:20%;">
+<col style="width:20%;">
+<col style="width:20%;">
+<col style="width:20%;">
+<col style="width:20%;">
+</colgroup><thead>
+<tr>
+<th class="tableblock halign-left valign-top">               </th>
+<th class="tableblock halign-left valign-top"> GPRMC  </th>
+<th class="tableblock halign-left valign-top">   GPGLL  </th>
+<th class="tableblock halign-left valign-top">   GPGGA  </th>
+<th class="tableblock halign-left valign-top">   GPGSA</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Returns A/V</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">No</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">No</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Returns mode</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">No</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">No</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">No</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Yes</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Returns status</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">No</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">No</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph"><p>The "Navigation receiver warning" is <em>A</em> for Active and <em>V</em> for Void.
+(or warning).  You will see it when either there is no satellite lock,
+or to indicate a valid fix that has a DOP too high, or which fails an
+elevation test. In the latter case the visible sats are below some
+fixed elevation of the horizon (usually 15%, but some GPSes make this
+adjustable) making position unreliable due to poor geometry and more
+variable signal lag induced by lengthened atmosphere transit.</p></div>
+<div class="paragraph"><p>Mode is associated with the GSA sentence associated with the last fix.
+It reports whether the fix was no good, sufficient for 2D, or
+sufficient for 3D (values 1, 2, and 3).</p></div>
+<div class="paragraph"><p>Status will be 0 when the sample from from which the reporting
+sentence was generated does not have a valid fix, 1 when it has
+a valid (normal-precision) fix, and 2 when the fig is DGPS corrected
+(reducing the base error).</p></div>
+<div class="paragraph"><p>In addition, some sentences may use empty fields to signify invalid
+data. It is not clear whether NMEA 0183 allows this, but real-world
+software must cope.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_talker_ids">Talker IDs</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>NMEA sentences do not identify the individual device that issued
+them; the format was originally designed for shipboard multidrop
+networks on which it’s possible only to broadcast to all devices, not
+address a specific one.</p></div>
+<div class="paragraph"><p>NMEA sentences do, however, include a "talker ID" a two-character
+prefix that identifies the type of the transmitting unit.  By far the
+most common talker ID is "GP", identifying a generic GPS, but all of
+the following are well known:</p></div>
+<table class="tableblock frame-all grid-all" style="
+width:100%;
+">
+<caption class="title">Table 1. Common talker IDs</caption>
+<colgroup><col style="width:50%;">
+<col style="width:50%;">
+</colgroup><tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">GP</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Global Positioning System receiver</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">LC</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Loran-C receiver</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">II</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Integrated Instrumentation</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">IN</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Integrated Navigation</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">EC</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Electronic Chart Display &amp; Information System (ECDIS)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CD</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Digital Selective Calling (DSC)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">GA</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Galileo Positioning System</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">GL</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">GLONASS, according to IEIC 61162-1</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">GN</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Mixed GPS and GLONASS data, according to IEIC 61162-1</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">GB</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">BeiDou (China)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">BD</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">BeiDou (China)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">QZ</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">QZSS regional GPS augmentation system (Japan)</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph"><p>LC - Loran-C is a marine navigation system run by the U.S. government,
+which is planning to shut it down in favor of GPS.  Some non-Loran
+devices emit GLL but use this talker ID for backward-compatibility
+reasons, so it may outlast the actual Loran system.</p></div>
+<div class="paragraph"><p>II - II is emitted by the NMEA interfaces of several widely-used lines
+of marine-navigation electronics. One is the AutoHelm system by
+Raymarine; see also <a href="#SEATALK">[SEATALK]</a> for the native protocol of these
+devices.</p></div>
+<div class="paragraph"><p>IN — Some Garmin GPS units use an IN talker ID.</p></div>
+<div class="paragraph"><p>EC — ECDIS is a specialized geographical information system intended
+to support professional maritime navigation.  NMEA talker units
+meeting the ECDIS standard use this prefix.  Some of these emit GLL.</p></div>
+<div class="paragraph"><p>CD — Modern marine VHF radios use conventions collectively known as
+Digital Selective Calling (DSC).  These radios typically take data
+from a local position indicating device.  This data is used in
+conjunction with a unique (FCC assigned) ID to cause your radio to
+broadcast your position data to others.  Conversely, these radios are
+capable of recieving position data of other stations and emitting
+sentences indicating other station positions.  This lets you plot the
+position of other vessels on a chart, for instance.  There has been at
+least one instance of a DSC enabled radio overloading (mis-using) the
+LC talker prefix for this purpose.  Otherwise they use the CD prefix.
+A vessel’s nav system is likely to have both CD and some other
+position indicating talker on its bus(es).</p></div>
+<div class="paragraph"><p>Until the U.S. Coast Guard terminated the Omega Navigation System in
+1997, another common talker prefix was "OM" for an Omega Navigation
+System receiver.</p></div>
+<div class="paragraph"><p>Here is a more complete list of talker ID prefixes.  Most are not
+relevant to GPS systems.</p></div>
+<div class="paragraph"><p>Note that talker IDs made obsolete by newer revisions of the
+standards may still be emitted by older devices.  Support
+for them may be present in the GPSD project.</p></div>
+<table class="tableblock frame-all grid-all" style="
+width:100%;
+">
+<caption class="title">Table 2. Big list of talker IDs</caption>
+<colgroup><col style="width:50%;">
+<col style="width:50%;">
+</colgroup><tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">AB</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Independent AIS Base Station</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">AD</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Dependent AIS Base Station</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">AG</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Autopilot - General</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">AP</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Autopilot - Magnetic</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">BN</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Bridge navigational watch alarm system</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CC</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Computer - Programmed Calculator (obsolete)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CD</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Communications - Digital Selective Calling (DSC)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CM</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Computer - Memory Data (obsolete)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CS</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Communications - Satellite</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CT</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Communications - Radio-Telephone (MF/HF)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CV</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Communications - Radio-Telephone (VHF)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CX</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Communications - Scanning Receiver</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">DE</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">DECCA Navigation (obsolete)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">DF</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Direction Finder</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">DU</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Duplex repeater station</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">EC</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Electronic Chart Display &amp; Information System (ECDIS)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">EP</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Emergency Position Indicating Beacon (EPIRB)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ER</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Engine Room Monitoring Systems</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">GP</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Global Positioning System (GPS)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">HC</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Heading - Magnetic Compass</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">HE</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Heading - North Seeking Gyro</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">HN</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Heading - Non North Seeking Gyro</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">II</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Integrated Instrumentation</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">IN</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Integrated Navigation</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">LA</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Loran A (obsolete)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">LC</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Loran C (obsolete)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">MP</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Microwave Positioning System (obsolete)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">NL</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Navigation light controller</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">OM</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">OMEGA Navigation System (obsolete)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">OS</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Distress Alarm System (obsolete)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">RA</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">RADAR and/or ARPA</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SD</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Sounder, Depth</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SN</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Electronic Positioning System, other/general</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SS</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Sounder, Scanning</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">TI</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Turn Rate Indicator</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">TR</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">TRANSIT Navigation System</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">U#</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>#</em> is a digit 0 … 9; User Configured</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">UP</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Microprocessor controller</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">VD</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Velocity Sensor, Doppler, other/general</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">DM</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Velocity Sensor, Speed Log, Water, Magnetic</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">VW</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Velocity Sensor, Speed Log, Water, Mechanical</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">WI</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Weather Instruments</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">YC</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Transducer - Temperature (obsolete)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">YD</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Transducer - Displacement, Angular or Linear (obsolete)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">YF</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Transducer - Frequency (obsolete)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">YL</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Transducer - Level (obsolete)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">YP</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Transducer - Pressure (obsolete)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">YR</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Transducer - Flow Rate (obsolete)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">YT</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Transducer - Tachometer (obsolete)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">YV</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Transducer - Volume (obsolete)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">YX</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Transducer</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ZA</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Timekeeper - Atomic Clock</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ZC</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Timekeeper - Chronometer</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ZQ</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Timekeeper - Quartz</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ZV</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Timekeeper - Radio Update, WWV or WWVH</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_satellite_ids">Satellite IDs</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Satellites may be identified by one of two different numbers in
+sentences such as GSV: a PRN number associated with their radio code,
+or an NMEA-ID.</p></div>
+<div class="paragraph"><p>For satellites 1-32, the GPS constellation, these numbers are the
+same. For satellites associated with WAAS (Wide Area Augmentation
+System), EGNOS (European Geostationary Navigation Overlay Service),
+and MSAS (Multi-functional Satellite Augmentation System), they are
+different.</p></div>
+<div class="paragraph"><p>Here is a table of NMEA-ID allocations above 32 as of March 2010:</p></div>
+<table class="tableblock frame-topbot grid-all" style="
+width:100%;
+">
+<colgroup><col style="width:25%;">
+<col style="width:25%;">
+<col style="width:25%;">
+<col style="width:25%;">
+</colgroup><thead>
+<tr>
+<th class="tableblock halign-left valign-top">System     </th>
+<th class="tableblock halign-left valign-top">Satellite       </th>
+<th class="tableblock halign-left valign-top">PRN            </th>
+<th class="tableblock halign-left valign-top">NMEA-ID</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">EGNOS</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">AOR-E</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">120</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">33</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">EGNOS</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Artemis</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">124</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">37</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">EGNOS</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">IOR-W</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">126</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">39</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">MSAS</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">MTSAT-1</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">129</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">42</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">EGNOS</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">IOR-E</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">131</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">44</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">WAAS</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">AMR</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">133</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">46</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">WAAS</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">PanAm</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">135</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">48</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">MSAS</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">MTSAT-2</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">137</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">50</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">WAAS</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Anik</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">138</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">51</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph"><p>In general, NMEA-ID = PRN - 87. Theoretically, all NMEA-emitting
+devices should emit NMEA-IDs. In practice, some pass through PRNs.</p></div>
+<div class="paragraph"><p>Documentation on IDs for GLONASS satellites is scanty.
+The manual for one GLONASS-capable receiver has this to say:</p></div>
+<div class="paragraph"><p>To avoid possible confusion caused by repetition of satellite ID
+numbers when using multiple satellite systems, the following
+convention has been adopted:</p></div>
+<div class="olist loweralpha"><ol class="loweralpha">
+<li>
+<p>
+GPS satellites are identified by their PRN numbers, which range from 1 to 32.
+</p>
+</li>
+<li>
+<p>
+The numbers 33-64 are reserved for WAAS satellites. The WAAS system
+PRN numbers are 120-138. The offset from NMEA WAAS SV ID to WAAS PRN
+number is 87. A WAAS PRN number of 120 minus 87 yields the SV ID of 33.
+The addition of 87 to the SV ID yields the WAAS PRN number.
+</p>
+</li>
+<li>
+<p>
+The numbers 65-96 are reserved for GLONASS satellites. GLONASS
+satellites are identified by 64+satellite slot number. The slot
+numbers are 1 through 24 for the full constellation of 24 satellites,
+this gives a range of 65 through 88. The numbers 89 through 96 are
+available if slot numbers above 24 are allocated to on-orbit spares.
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>Other sources such as <a href="#SATSTAT">[SATSTAT]</a> confirm that the NMEA standard
+assigns NMEA IDs 65-96 to GLONASS.  It goes on with the following
+table:</p></div>
+<table class="tableblock frame-topbot grid-all" style="
+width:100%;
+">
+<colgroup><col style="width:50%;">
+<col style="width:50%;">
+</colgroup><thead>
+<tr>
+<th class="tableblock halign-left valign-top"> 1 - 32    </th>
+<th class="tableblock halign-left valign-top"> GPS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">33 - 54</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Various SBAS systems (EGNOS, WAAS, SDCM, GAGAN, MSAS)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">55 - 64</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">not used (might be assigned to further SBAS systems)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">65 - 88</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">GLONASS</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">89 - 96</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">GLONASS (future extensions?)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">97 - 119</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">not used</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">120 - 151</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">not used (SBAS PRNs occupy this range)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">152 - 192</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">not used</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">193 - 195</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">QZSS</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">196 - 200</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">QZSS (future extensions?)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">201 - 235</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">BeiDou</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph"><p>GLONASS satellite numbers come in two flavors.  If a sentence
+has a GL talker ID, expect the skyviews to be GLONASS-only and
+in the range 1-32; you must add 64 to get a globally-unique
+NMEA ID.  If the sentence has a GN talker ID, the device emits
+a multi-constellation skyview with GLONASS IDs aleady in
+the 65-96 range.</p></div>
+<div class="paragraph"><p>QZSS is a  geosynchronous (<strong>not geostationary</strong>) system of three
+(possibly four) satellites in highly eliptical, inclined,
+orbits.  It is designed to provide coverage in Japan’s
+urban canyons.</p></div>
+<div class="paragraph"><p>BeiDou-1 consists of 4 geostationary satellites operated by China,
+operational since 2004.  Coverage area is the Chinese mainland.
+gpsd does not support this, as this requires special hardware,
+and prior arrangements with the operator, who calculates and
+returns the position fix.</p></div>
+<div class="paragraph"><p>BeiDou-2 (earlier known as COMPASS) is a system of 35 satellites,
+including 5 geostationary for compatability with BeiDou-1.
+As of late 2015, coverage is complete over most of Asia and the
+West Pacific.  It is expected to be fully operational by 2020, by
+when coverage area is expected to be worldwide.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_obsolete_sentences">Obsolete sentences</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Note that sentances made obsolete by newer revisions of the
+standards may still be emitted by devices.
+Support for them may be present in the GPSD project.</p></div>
+<div class="paragraph"><p>The following NMEA sentences have been designated "obsolete" in a
+publicly available NMEA document dated 2009.</p></div>
+<table class="tableblock frame-all grid-all" style="
+width:100%;
+">
+<colgroup><col style="width:50%;">
+<col style="width:50%;">
+</colgroup><tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">APA</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Autopilot Sentence "A"</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">BER</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Bearing &amp; Distance to Waypoint, Dead Reckoning, Rhumb Line</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">BPI</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Bearing &amp; Distance to Point of Interest</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">DBK</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Depth Below Keel</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">DBS</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Depth Below Surface</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">DRU</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Dual Doppler Auxiliary Data</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">GDA</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Dead Reckoning Positions</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">GLA</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Loran-C Positions</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">GOA</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">OMEGA Positions</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">GXA</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">TRANSIT Positions</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">GTD</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Geographical Position, Loran-C TDs</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">GXA</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">TRANSIT Position</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">HCC</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Compass Heading</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">HCD</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Heading and Deviation</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">HDM</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Heading, Magnetic</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">HDT</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Heading, True</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">HVD</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Magnetic Variation, Automatic</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">HVM</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Magnetic Variation, Manually Set</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">IMA</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Vessel Identification</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">MDA</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Meteorological Composite</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">MHU</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Humidity</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">MMB</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Barometer</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">MTA</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Air Temperature</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">MWH</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Wave Height</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">MWS</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Wind &amp; Sea State</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Rnn</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Routes</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SBK</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Loran-C Blink Status</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SCY</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">oran-C Cycle Lock Status</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SCD</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Loran-C ECDs</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SDB</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Loran-C Signal Strength</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SGD</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Position Accuracy Estimate</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SGR</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Loran-C Chain Identifier</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SIU</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Loran-C Stations in Use</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SLC</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Loran-C Status</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SNC</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Navigation Calculation Basis</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SNU</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Loran-C SNR Status</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SPS</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Loran-C Predicted Signal Strength</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SSF</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Position Correction Offset</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">STC</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Time Constant</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">STR</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Tracking Reference</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SYS</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Hybrid System Configuration</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_nmea_standard_sentences">NMEA-Standard Sentences</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Here are the NMEA-standard sentences we know about:</p></div>
+<div class="sect2">
+<h3 id="_aam_waypoint_arrival_alarm">AAM - Waypoint Arrival Alarm</h3>
+<div class="paragraph"><p>This sentence is generated by some units to indicate the status of
+arrival (entering the arrival circle, or passing the perpendicular of
+the course line) at the destination waypoint.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1 2 3   4 5    6
+        | | |   | |    |
+ $--AAM,A,A,x.x,N,c--c*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Status, BOOLEAN, A = Arrival circle entered, V = not passed
+</p>
+</li>
+<li>
+<p>
+Status, BOOLEAN, A = perpendicular passed at waypoint, V = not passed
+</p>
+</li>
+<li>
+<p>
+Arrival circle radius
+</p>
+</li>
+<li>
+<p>
+Units of radius, nautical miles
+</p>
+</li>
+<li>
+<p>
+Waypoint ID
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>Example: GPAAM,A,A,0.10,N,WPTNME*43</p></div>
+<div class="paragraph"><p>WPTNME is the waypoint name.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_alm_gps_almanac_data">ALM - GPS Almanac Data</h3>
+<div class="paragraph"><p>This sentence expresses orbital data for a specified GPS satellite.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1   2   3  4   5  6    7  8    9    10     11     12     13     14  15   16
+        |   |   |  |   |  |    |  |    |    |      |      |      |      |   |    |
+ $--ALM,x.x,x.x,xx,x.x,hh,hhhh,hh,hhhh,hhhh,hhhhhh,hhhhhh,hhhhhh,hhhhhh,hhh,hhh,*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Total number of messages
+</p>
+</li>
+<li>
+<p>
+Message Number
+</p>
+</li>
+<li>
+<p>
+Satellite PRN number (01 to 32)
+</p>
+</li>
+<li>
+<p>
+GPS Week Number
+</p>
+</li>
+<li>
+<p>
+SV health, bits 17-24 of each almanac page
+</p>
+</li>
+<li>
+<p>
+Eccentricity
+</p>
+</li>
+<li>
+<p>
+Almanac Reference Time
+</p>
+</li>
+<li>
+<p>
+Inclination Angle
+</p>
+</li>
+<li>
+<p>
+Rate of Right Ascension
+</p>
+</li>
+<li>
+<p>
+Root of semi-major axis
+</p>
+</li>
+<li>
+<p>
+Argument of perigee
+</p>
+</li>
+<li>
+<p>
+Longitude of ascension node
+</p>
+</li>
+<li>
+<p>
+Mean anomaly
+</p>
+</li>
+<li>
+<p>
+F0 Clock Parameter
+</p>
+</li>
+<li>
+<p>
+F1 Clock Parameter
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>Fields 5 through 15 are dumped as raw hex.</p></div>
+<div class="paragraph"><p>Example: $GPALM,1,1,15,1159,00,441d,4e,16be,fd5e,a10c9f,4a2da4,686e81,58cbe1,0a4,001*5B</p></div>
+</div>
+<div class="sect2">
+<h3 id="_apa_autopilot_sentence_a">APA - Autopilot Sentence "A"</h3>
+<div class="paragraph"><p>This sentence is sent by some GPS receivers to allow them to be used
+to control an autopilot unit. This sentence is commonly used by
+autopilots and contains navigation receiver warning flag status,
+cross-track-error, waypoint arrival status, initial bearing from
+origin waypoint to the destination, continuous bearing from present
+position to destination and recommended heading-to-steer to
+destination waypoint for the active navigation leg of the journey.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1 2  3   4 5 6 7  8  9 10    11
+        | |  |   | | | |  |  | |     |
+ $--APA,A,A,x.xx,L,N,A,A,xxx,M,c---c*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Status
+     V = Loran-C Blink or SNR warning
+     V = general warning flag or other navigation systems when a reliable
+         fix is not available
+</p>
+</li>
+<li>
+<p>
+Status
+     V = Loran-C Cycle Lock warning flag
+     A = OK or not used
+</p>
+</li>
+<li>
+<p>
+Cross Track Error Magnitude
+</p>
+</li>
+<li>
+<p>
+Direction to steer, L or R
+</p>
+</li>
+<li>
+<p>
+Cross Track Units (Nautic miles or kilometers)
+</p>
+</li>
+<li>
+<p>
+Status
+     A = Arrival Circle Entered
+</p>
+</li>
+<li>
+<p>
+Status
+     A = Perpendicular passed at waypoint
+</p>
+</li>
+<li>
+<p>
+Bearing origin to destination
+</p>
+</li>
+<li>
+<p>
+M = Magnetic, T = True
+</p>
+</li>
+<li>
+<p>
+Destination Waypoint ID
+</p>
+</li>
+<li>
+<p>
+checksum
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>Example: $GPAPA,A,A,0.10,R,N,V,V,011,M,DEST,011,M*82</p></div>
+</div>
+<div class="sect2">
+<h3 id="_apb_autopilot_sentence_b">APB - Autopilot Sentence "B"</h3>
+<div class="paragraph"><p>This is a fixed form of the APA sentence with some ambiguities removed.</p></div>
+<div class="paragraph"><p>Note: Some autopilots, Robertson in particular, misinterpret "bearing
+from origin to destination" as "bearing from present position to
+destination". This is likely due to the difference between the APB
+sentence and the APA sentence. for the APA sentence this would be the
+correct thing to do for the data in the same field. APA only differs
+from APB in this one field and APA leaves off the last two fields
+where this distinction is clearly spelled out. This will result in
+poor performance if the boat is sufficiently off-course that the two
+bearings are different.
+                                         13    15</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1 2 3   4 5 6 7 8   9 10   11  12|   14|
+        | | |   | | | | |   | |    |   | |   | |
+ $--APB,A,A,x.x,a,N,A,A,x.x,a,c--c,x.x,a,x.x,a*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Status
+     V = Loran-C Blink or SNR warning
+     V = general warning flag or other navigation systems when a reliable
+         fix is not available
+</p>
+</li>
+<li>
+<p>
+Status
+     V = Loran-C Cycle Lock warning flag
+     A = OK or not used
+</p>
+</li>
+<li>
+<p>
+Cross Track Error Magnitude
+</p>
+</li>
+<li>
+<p>
+Direction to steer, L or R
+</p>
+</li>
+<li>
+<p>
+Cross Track Units, N = Nautical Miles
+</p>
+</li>
+<li>
+<p>
+Status
+     A = Arrival Circle Entered
+</p>
+</li>
+<li>
+<p>
+Status
+     A = Perpendicular passed at waypoint
+</p>
+</li>
+<li>
+<p>
+Bearing origin to destination
+</p>
+</li>
+<li>
+<p>
+M = Magnetic, T = True
+</p>
+</li>
+<li>
+<p>
+Destination Waypoint ID
+</p>
+</li>
+<li>
+<p>
+Bearing, present position to Destination
+</p>
+</li>
+<li>
+<p>
+M = Magnetic, T = True
+</p>
+</li>
+<li>
+<p>
+Heading to steer to destination waypoint
+</p>
+</li>
+<li>
+<p>
+M = Magnetic, T = True
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>Example: $GPAPB,A,A,0.10,R,N,V,V,011,M,DEST,011,M,011,M*82</p></div>
+</div>
+<div class="sect2">
+<h3 id="_bod_bearing_waypoint_to_waypoint">BOD - Bearing - Waypoint to Waypoint</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1   2 3   4 5    6    7
+        |   | |   | |    |    |
+ $--BOD,x.x,T,x.x,M,c--c,c--c*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Bearing Degrees, TRUE
+</p>
+</li>
+<li>
+<p>
+T = True
+</p>
+</li>
+<li>
+<p>
+Bearing Degrees, Magnetic
+</p>
+</li>
+<li>
+<p>
+M = Magnetic
+</p>
+</li>
+<li>
+<p>
+TO Waypoint
+</p>
+</li>
+<li>
+<p>
+FROM Waypoint
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>Example 1: $GPBOD,099.3,T,105.6,M,POINTB,*01</p></div>
+<div class="paragraph"><p>Waypoint ID: "POINTB" Bearing 99.3 True, 105.6 Magnetic This sentence
+is transmitted in the GOTO mode, without an active route on your
+GPS. WARNING: this is the bearing from the moment you press enter in
+the GOTO page to the destination waypoint and is NOT updated
+dynamically! To update the information, (current bearing to waypoint),
+you will have to press enter in the GOTO page again.</p></div>
+<div class="paragraph"><p>Example 2: $GPBOD,097.0,T,103.2,M,POINTB,POINTA*52</p></div>
+<div class="paragraph"><p>This sentence is transmitted when a route is active. It contains the
+active leg information: origin waypoint "POINTA" and destination
+waypoint "POINTB", bearing between the two points 97.0 True, 103.2
+Magnetic. It does NOT display the bearing from current location to
+destination waypoint! WARNING Again this information does not change
+until you are on the next leg of the route. (The bearing from POINTA
+to POINTB does not change during the time you are on this leg.)</p></div>
+<div class="paragraph"><p>This sentence has been replaced by BWW in NMEA 4.00 (and posssibly
+earlier versions) <a href="#ANON">[ANON]</a>.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_bwc_bearing_amp_distance_to_waypoint_great_circle">BWC - Bearing &amp; Distance to Waypoint - Great Circle</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>                                                         12
+        1         2       3 4        5 6   7 8   9 10  11|    13 14
+        |         |       | |        | |   | |   | |   | |    |   |
+ $--BWC,hhmmss.ss,llll.ll,a,yyyyy.yy,a,x.x,T,x.x,M,x.x,N,c--c,m,*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+UTCTime
+</p>
+</li>
+<li>
+<p>
+Waypoint Latitude
+</p>
+</li>
+<li>
+<p>
+N = North, S = South
+</p>
+</li>
+<li>
+<p>
+Waypoint Longitude
+</p>
+</li>
+<li>
+<p>
+E = East, W = West
+</p>
+</li>
+<li>
+<p>
+Bearing, True
+</p>
+</li>
+<li>
+<p>
+T = True
+</p>
+</li>
+<li>
+<p>
+Bearing, Magnetic
+</p>
+</li>
+<li>
+<p>
+M = Magnetic
+</p>
+</li>
+<li>
+<p>
+Nautical Miles
+</p>
+</li>
+<li>
+<p>
+N = Nautical Miles
+</p>
+</li>
+<li>
+<p>
+Waypoint ID
+</p>
+</li>
+<li>
+<p>
+FAA mode indicator (NMEA 2.3 and later, optional)
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>Example 1: $GPBWC,081837,,,,,,T,,M,,N,*13</p></div>
+<div class="paragraph"><p>Example 2: GPBWC,220516,5130.02,N,00046.34,W,213.8,T,218.0,M,0004.6,N,EGLM*11</p></div>
+</div>
+<div class="sect2">
+<h3 id="_bwr_bearing_and_distance_to_waypoint_rhumb_line">BWR - Bearing and Distance to Waypoint - Rhumb Line</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>                                                   11
+        1         2       3 4        5 6   7 8   9 10  | 12   13
+        |         |       | |        | |   | |   | |   | |    |
+ $--BWR,hhmmss.ss,llll.ll,a,yyyyy.yy,a,x.x,T,x.x,M,x.x,N,c--c*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+UTCTime
+</p>
+</li>
+<li>
+<p>
+Waypoint Latitude
+</p>
+</li>
+<li>
+<p>
+N = North, S = South
+</p>
+</li>
+<li>
+<p>
+Waypoint Longitude
+</p>
+</li>
+<li>
+<p>
+E = East, W = West
+</p>
+</li>
+<li>
+<p>
+Bearing, True
+</p>
+</li>
+<li>
+<p>
+T = True
+</p>
+</li>
+<li>
+<p>
+Bearing, Magnetic
+</p>
+</li>
+<li>
+<p>
+M = Magnetic
+</p>
+</li>
+<li>
+<p>
+Nautical Miles
+</p>
+</li>
+<li>
+<p>
+N = Nautical Miles
+</p>
+</li>
+<li>
+<p>
+Waypoint ID
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+</div>
+<div class="sect2">
+<h3 id="_bww_bearing_waypoint_to_waypoint">BWW - Bearing - Waypoint to Waypoint</h3>
+<div class="paragraph"><p>Bearing calculated at the FROM waypoint.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1   2 3   4 5    6    7
+        |   | |   | |    |    |
+ $--BWW,x.x,T,x.x,M,c--c,c--c*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre> Field Number:
+1. Bearing Degrees, TRUE
+2. T = True
+3. Bearing Degrees, Magnetic
+4. M = Magnetic
+5. TO Waypoint
+6. FROM Waypoint
+7. Checksum</pre>
+</div></div>
+</div>
+<div class="sect2">
+<h3 id="_dbk_depth_below_keel">DBK - Depth Below Keel</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1   2 3   4 5   6 7
+        |   | |   | |   | |
+ $--DBK,x.x,f,x.x,M,x.x,F*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Depth, feet
+</p>
+</li>
+<li>
+<p>
+f = feet
+</p>
+</li>
+<li>
+<p>
+Depth, meters
+</p>
+</li>
+<li>
+<p>
+M = meters
+</p>
+</li>
+<li>
+<p>
+Depth, Fathoms
+</p>
+</li>
+<li>
+<p>
+F = Fathoms
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+</div>
+<div class="sect2">
+<h3 id="_dbs_depth_below_surface">DBS - Depth Below Surface</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1   2 3   4 5   6 7
+        |   | |   | |   | |
+ $--DBS,x.x,f,x.x,M,x.x,F*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Depth, feet
+</p>
+</li>
+<li>
+<p>
+f = feet
+</p>
+</li>
+<li>
+<p>
+Depth, meters
+</p>
+</li>
+<li>
+<p>
+M = meters
+</p>
+</li>
+<li>
+<p>
+Depth, Fathoms
+</p>
+</li>
+<li>
+<p>
+F = Fathoms
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+</div>
+<div class="sect2">
+<h3 id="_dbt_depth_below_transducer">DBT - Depth below transducer</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1   2 3   4 5   6 7
+        |   | |   | |   | |
+ $--DBT,x.x,f,x.x,M,x.x,F*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Depth, feet
+</p>
+</li>
+<li>
+<p>
+f = feet
+</p>
+</li>
+<li>
+<p>
+Depth, meters
+</p>
+</li>
+<li>
+<p>
+M = meters
+</p>
+</li>
+<li>
+<p>
+Depth, Fathoms
+</p>
+</li>
+<li>
+<p>
+F = Fathoms
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>In real-world sensors, sometimes not all three conversions are reported.
+So you night see something like $SDDBT,,f,22.5,M,,F*cs</p></div>
+</div>
+<div class="sect2">
+<h3 id="_dcn_decca_position">DCN - Decca Position</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>                                      11  13      16
+        1  2  3   4 5  6   7 8  9   10| 12| 14  15| 17
+        |  |  |   | |  |   | |  |   | | | | |   | | |
+ $--DCN,xx,cc,x.x,A,cc,x.x,A,cc,x.x,A,A,A,A,x.x,N,x*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Decca chain identifier
+</p>
+</li>
+<li>
+<p>
+Red Zone Identifier
+</p>
+</li>
+<li>
+<p>
+Red Line Of Position
+</p>
+</li>
+<li>
+<p>
+Red Master Line Status
+</p>
+</li>
+<li>
+<p>
+Green Zone Identifier
+</p>
+</li>
+<li>
+<p>
+Green Line Of Position
+</p>
+</li>
+<li>
+<p>
+Green Master Line Status
+</p>
+</li>
+<li>
+<p>
+Purple Zone Identifier
+</p>
+</li>
+<li>
+<p>
+Purple Line Of Position
+</p>
+</li>
+<li>
+<p>
+Purple Master Line Status
+</p>
+</li>
+<li>
+<p>
+Red Line Navigation Use
+</p>
+</li>
+<li>
+<p>
+Green Line Navigation Use
+</p>
+</li>
+<li>
+<p>
+Purple Line Navigation Use
+</p>
+</li>
+<li>
+<p>
+Position Uncertainity
+</p>
+</li>
+<li>
+<p>
+N = Nautical Miles
+</p>
+</li>
+<li>
+<p>
+Fix Data Basis
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+1 = Normal Pattern
+</p>
+</li>
+<li>
+<p>
+2 = Lane Identification Pattern
+</p>
+</li>
+<li>
+<p>
+3 = Lane Identification Transmissions
+</p>
+</li>
+</ul></div>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>(The DCN sentence is obsolete as of 3.01)</p></div>
+</div>
+<div class="sect2">
+<h3 id="_dpt_depth_of_water">DPT - Depth of Water</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1   2   3
+        |   |   |
+ $--DPT,x.x,x.x*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Depth, meters
+</p>
+</li>
+<li>
+<p>
+Offset from transducer,
+     positive means distance from tansducer to water line
+     negative means distance from transducer to keel
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>This sentence was incorrectly titled "Heading - Deviation &amp; Variation"
+in <a href="#BETKE">[BETKE]</a>.  It’s documented at
+<a href="http://www.humminbird.com/normal.asp?id=853">http://www.humminbird.com/normal.asp?id=853</a></p></div>
+</div>
+<div class="sect2">
+<h3 id="_dtm_datum_reference">DTM - Datum Reference</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>          1  2  3   4  5   6  7  8    9
+          |  |  |   |  |   |  |  |    |
+ $ --DTM,ref,x,llll,c,llll,c,aaa,ref*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Local datum code.
+</p>
+</li>
+<li>
+<p>
+Local datum subcode.  May be blank.
+</p>
+</li>
+<li>
+<p>
+Latitude offset (minutes)
+</p>
+</li>
+<li>
+<p>
+N or S
+</p>
+</li>
+<li>
+<p>
+Longitude offset (minutes)
+</p>
+</li>
+<li>
+<p>
+E or W
+</p>
+</li>
+<li>
+<p>
+Altitude offset in meters
+</p>
+</li>
+<li>
+<p>
+Datum name. What’s usually seen here is "W84", the standard
+   WGS84 datum used by GPS.
+</p>
+</li>
+<li>
+<p>
+Checksum.
+</p>
+</li>
+</ol></div>
+</div>
+<div class="sect2">
+<h3 id="_fsi_frequency_set_information">FSI - Frequency Set Information</h3>
+<div class="paragraph"><p>Set (or report) frequency, mode of operation and transmitter power level of a
+radiotelephone.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1      2      3 4 5
+        |      |      | | |
+ $--FSI,xxxxxx,xxxxxx,c,x*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre> Field Number:
+1. Transmitting Frequency
+2. Receiving Frequency
+3. Communications Mode (NMEA Syntax 2)
+4. Power Level
+5. Checksum</pre>
+</div></div>
+</div>
+<div class="sect2">
+<h3 id="_gbs_gps_satellite_fault_detection">GBS - GPS Satellite Fault Detection</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>            1      2   3   4   5   6   7   8   9
+            |      |   |   |   |   |   |   |   |
+ $--GBS,hhmmss.ss,x.x,x.x,x.x,x.x,x.x,x.x,x.x*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+UTC time of the GGA or GNS fix associated with this sentence
+</p>
+</li>
+<li>
+<p>
+Expected error in latitude (meters)
+</p>
+</li>
+<li>
+<p>
+Expected error in longitude (meters)
+</p>
+</li>
+<li>
+<p>
+Expected error in altitude (meters)
+</p>
+</li>
+<li>
+<p>
+PRN of most likely failed satellite
+</p>
+</li>
+<li>
+<p>
+Probability of missed detection for most likely failed satellite
+</p>
+</li>
+<li>
+<p>
+Estimate of bias in meters on most likely failed satellite
+</p>
+</li>
+<li>
+<p>
+Standard deviation of bias estimate
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>Note: Source <a href="#MX521">[MX521]</a> describes a proprietary extension of GBS with
+a 9th data field. The 8-field version is in NMEA 3.0.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_gga_global_positioning_system_fix_data">GGA - Global Positioning System Fix Data</h3>
+<div class="paragraph"><p>This is one of the sentences commonly emitted by GPS units.</p></div>
+<div class="paragraph"><p>Time, Position and fix related data for a GPS receiver.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>                                                      11
+        1         2       3 4        5 6 7  8   9  10 |  12 13  14   15
+        |         |       | |        | | |  |   |   | |   | |   |    |
+ $--GGA,hhmmss.ss,llll.ll,a,yyyyy.yy,a,x,xx,x.x,x.x,M,x.x,M,x.x,xxxx*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Universal Time Coordinated (UTC)
+</p>
+</li>
+<li>
+<p>
+Latitude
+</p>
+</li>
+<li>
+<p>
+N or S (North or South)
+</p>
+</li>
+<li>
+<p>
+Longitude
+</p>
+</li>
+<li>
+<p>
+E or W (East or West)
+</p>
+</li>
+<li>
+<p>
+GPS Quality Indicator,
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+0 - fix not available,
+</p>
+</li>
+<li>
+<p>
+1 - GPS fix,
+</p>
+</li>
+<li>
+<p>
+2 - Differential GPS fix
+           (values above 2 are 2.3 features)
+</p>
+</li>
+<li>
+<p>
+3 = PPS fix
+</p>
+</li>
+<li>
+<p>
+4 = Real Time Kinematic
+</p>
+</li>
+<li>
+<p>
+5 = Float RTK
+</p>
+</li>
+<li>
+<p>
+6 = estimated (dead reckoning)
+</p>
+</li>
+<li>
+<p>
+7 = Manual input mode
+</p>
+</li>
+<li>
+<p>
+8 = Simulation mode
+</p>
+</li>
+</ul></div>
+</li>
+<li>
+<p>
+Number of satellites in view, 00 - 12
+</p>
+</li>
+<li>
+<p>
+Horizontal Dilution of precision (meters)
+</p>
+</li>
+<li>
+<p>
+Antenna Altitude above/below mean-sea-level (geoid) (in meters)
+</p>
+</li>
+<li>
+<p>
+Units of antenna altitude, meters
+</p>
+</li>
+<li>
+<p>
+Geoidal separation, the difference between the WGS-84 earth
+     ellipsoid and mean-sea-level (geoid), "-" means mean-sea-level
+     below ellipsoid
+</p>
+</li>
+<li>
+<p>
+Units of geoidal separation, meters
+</p>
+</li>
+<li>
+<p>
+Age of differential GPS data, time in seconds since last SC104
+     type 1 or 9 update, null field when DGPS is not used
+</p>
+</li>
+<li>
+<p>
+Differential reference station ID, 0000-1023
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+</div>
+<div class="sect2">
+<h3 id="_glc_geographic_position_loran_c">GLC - Geographic Position, Loran-C</h3>
+<div class="paragraph"><p>This sentence is obsolete over most of its former coverage area.  The
+US/Canadian/Russian Loran-C network was shut down in 2010; it is still
+as of 2015 in limited use in Europe.  Loran-C operations in Norway
+will cease from 1st Jan 2016. <a href="#NORWAY">[NORWAY]</a></p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>                                           12    14
+        1    2   3 4   5 6   7 8   9 10  11|   13|
+        |    |   | |   | |   | |   | |   | |   | |
+ $--GLC,xxxx,x.x,a,x.x,a,x.x,a.x,x,a,x.x,a,x.x,a*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+GRI Microseconds/10
+</p>
+</li>
+<li>
+<p>
+Master TOA Microseconds
+</p>
+</li>
+<li>
+<p>
+Master TOA Signal Status
+</p>
+</li>
+<li>
+<p>
+Time Difference 1 Microseconds
+</p>
+</li>
+<li>
+<p>
+Time Difference 1 Signal Status
+</p>
+</li>
+<li>
+<p>
+Time Difference 2 Microseconds
+</p>
+</li>
+<li>
+<p>
+Time Difference 2 Signal Status
+</p>
+</li>
+<li>
+<p>
+Time Difference 3 Microseconds
+</p>
+</li>
+<li>
+<p>
+Time Difference 3 Signal Status
+</p>
+</li>
+<li>
+<p>
+Time Difference 4 Microseconds
+</p>
+</li>
+<li>
+<p>
+Time Difference 4 Signal Status
+</p>
+</li>
+<li>
+<p>
+Time Difference 5 Microseconds
+</p>
+</li>
+<li>
+<p>
+Time Difference 5 Signal Status
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+</div>
+<div class="sect2">
+<h3 id="_gll_geographic_position_latitude_longitude">GLL - Geographic Position - Latitude/Longitude</h3>
+<div class="paragraph"><p>This is one of the sentences commonly emitted by GPS units.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1       2 3        4 5         6 7   8
+        |       | |        | |         | |   |
+ $--GLL,llll.ll,a,yyyyy.yy,a,hhmmss.ss,a,m,*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Latitude
+</p>
+</li>
+<li>
+<p>
+N or S (North or South)
+</p>
+</li>
+<li>
+<p>
+Longitude
+</p>
+</li>
+<li>
+<p>
+E or W (East or West)
+</p>
+</li>
+<li>
+<p>
+Universal Time Coordinated (UTC)
+</p>
+</li>
+<li>
+<p>
+Status A - Data Valid, V - Data Invalid
+</p>
+</li>
+<li>
+<p>
+FAA mode indicator (NMEA 2.3 and later)
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+</div>
+<div class="sect2">
+<h3 id="_gns_fix_data">GNS - Fix data</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>       1         2       3 4        5 6    7  8   9   10  11  12  13
+       |         |       | |        | |    |  |   |   |   |   |   |
+$--GNS,hhmmss.ss,llll.ll,a,yyyyy.yy,a,c--c,xx,x.x,x.x,x.x,x.x,x.x*hh</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+UTC
+</p>
+</li>
+<li>
+<p>
+Latitude
+</p>
+</li>
+<li>
+<p>
+N or S (North or South)
+</p>
+</li>
+<li>
+<p>
+Longitude
+</p>
+</li>
+<li>
+<p>
+E or W (East or West)
+</p>
+</li>
+<li>
+<p>
+Mode indicator (non-null)
+</p>
+</li>
+<li>
+<p>
+Total number of satelites in use,00-99
+</p>
+</li>
+<li>
+<p>
+HDROP
+</p>
+</li>
+<li>
+<p>
+Antenna altitude, meters, re:mean-sea-level(geoid.
+</p>
+</li>
+<li>
+<p>
+Goeidal separation meters
+</p>
+</li>
+<li>
+<p>
+Age of diferential data
+</p>
+</li>
+<li>
+<p>
+Differential reference station ID
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>The Mode indicator is two or more characters, with the first and second
+defined for GPS and GLONASS.  Further characters may be defined.  For
+each system, the character can have a value (table may be incomplete):</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+N = Constellation not in use, or no valid fix
+</p>
+</li>
+<li>
+<p>
+A = Autonomous (non-differential)
+</p>
+</li>
+<li>
+<p>
+D = Differential mode
+</p>
+</li>
+<li>
+<p>
+P = Precise (no degradation, like Selective Availability)
+</p>
+</li>
+<li>
+<p>
+R = Real Time Kinematic
+</p>
+</li>
+<li>
+<p>
+F = Float RTK
+</p>
+</li>
+<li>
+<p>
+E = Estimated (dead reckoning) Mode
+</p>
+</li>
+<li>
+<p>
+M = Manual Input Mode
+</p>
+</li>
+<li>
+<p>
+S = Simulator Mode
+</p>
+</li>
+</ul></div>
+</div>
+<div class="sect2">
+<h3 id="_grs_gps_range_residuals">GRS - GPS Range Residuals</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>              1    2  3  4  5  6  7  8  9 10 11 12 13 14  15
+              |    |  |  |  |  |  |  |  |  |  |  |  |  |   |
+ $ --GRS,hhmmss.ss,m,xx,xx,xx,xx,xx,xx,xx,xx,xx,xx,xx,xx,*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+TC time of associated GGA fix
+</p>
+</li>
+<li>
+<p>
+0 = Residuals used in GGA, 1 = residuals calculated after GGA
+</p>
+</li>
+<li>
+<p>
+Satellite 1 residual in meters
+</p>
+</li>
+<li>
+<p>
+Satellite 2 residual in meters
+</p>
+</li>
+<li>
+<p>
+Satellite 3 residual in meters
+</p>
+</li>
+<li>
+<p>
+Satellite 4 residual in meters (blank if unused)
+</p>
+</li>
+<li>
+<p>
+Satellite 5 residual in meters (blank if unused)
+</p>
+</li>
+<li>
+<p>
+Satellite 6 residual in meters (blank if unused)
+</p>
+</li>
+<li>
+<p>
+Satellite 7 residual in meters (blank if unused)
+</p>
+</li>
+<li>
+<p>
+Satellite 8 residual in meters (blank if unused)
+</p>
+</li>
+<li>
+<p>
+Satellite 9 residual in meters (blank if unused)
+</p>
+</li>
+<li>
+<p>
+Satellite 10 residual in meters (blank if unused)
+</p>
+</li>
+<li>
+<p>
+Satellite 11 residual in meters (blank if unused)
+</p>
+</li>
+<li>
+<p>
+Satellite 12 residual in meters (blank if unused)
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>The order of satellites MUST match those in the last GSA.</p></div>
+<div class="paragraph"><p>Example: $GPGRS,024603.00,1,-1.8,-2.7,0.3,,,,,,,,,*6C</p></div>
+<div class="paragraph"><p>Note that the talker ID may be GP, GL, or GN, depending on if the residuals
+are for GPS-only, GLONASS-only, or combined solution, respectively.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_gst_gps_pseudorange_noise_statistics">GST - GPS Pseudorange Noise Statistics</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>              1    2 3 4 5 6 7 8   9
+              |    | | | | | | |   |
+ $ --GST,hhmmss.ss,x,x,x,x,x,x,x,*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+TC time of associated GGA fix
+</p>
+</li>
+<li>
+<p>
+Total RMS standard deviation of ranges inputs to the navigation solution
+</p>
+</li>
+<li>
+<p>
+Standard deviation (meters) of semi-major axis of error ellipse
+</p>
+</li>
+<li>
+<p>
+Standard deviation (meters) of semi-minor axis of error ellipse
+</p>
+</li>
+<li>
+<p>
+Orientation of semi-major axis of error ellipse (true north degrees)
+</p>
+</li>
+<li>
+<p>
+Standard deviation (meters) of latitude error
+</p>
+</li>
+<li>
+<p>
+Standard deviation (meters) of longitude error
+</p>
+</li>
+<li>
+<p>
+Standard deviation (meters) of altitude error
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+</div>
+<div class="sect2">
+<h3 id="_gsa_gps_dop_and_active_satellites">GSA - GPS DOP and active satellites</h3>
+<div class="paragraph"><p>This is one of the sentences commonly emitted by GPS units.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1 2 3                        14 15  16  17  18
+        | | |                         |  |   |   |   |
+ $--GSA,a,a,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x.x,x.x,x.x*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Selection mode: M=Manual, forced to operate in 2D or 3D, A=Automatic, 3D/2D
+</p>
+</li>
+<li>
+<p>
+Mode (1 = no fix, 2 = 2D fix, 3 = 3D fix)
+</p>
+</li>
+<li>
+<p>
+ID of 1st satellite used for fix
+</p>
+</li>
+<li>
+<p>
+ID of 2nd satellite used for fix
+</p>
+</li>
+<li>
+<p>
+ID of 3rd satellite used for fix
+</p>
+</li>
+<li>
+<p>
+ID of 4th satellite used for fix
+</p>
+</li>
+<li>
+<p>
+ID of 5th satellite used for fix
+</p>
+</li>
+<li>
+<p>
+ID of 6th satellite used for fix
+</p>
+</li>
+<li>
+<p>
+ID of 7th satellite used for fix
+</p>
+</li>
+<li>
+<p>
+ID of 8th satellite used for fix
+</p>
+</li>
+<li>
+<p>
+ID of 9th satellite used for fix
+</p>
+</li>
+<li>
+<p>
+ID of 10th satellite used for fix
+</p>
+</li>
+<li>
+<p>
+ID of 11th satellite used for fix
+</p>
+</li>
+<li>
+<p>
+ID of 12th satellite used for fix
+</p>
+</li>
+<li>
+<p>
+PDOP
+</p>
+</li>
+<li>
+<p>
+HDOP
+</p>
+</li>
+<li>
+<p>
+VDOP
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+</div>
+<div class="sect2">
+<h3 id="_gsv_satellites_in_view">GSV - Satellites in view</h3>
+<div class="paragraph"><p>This is one of the sentences commonly emitted by GPS units.</p></div>
+<div class="paragraph"><p>These sentences describe the sky position of a UPS satellite in view.
+Typically they’re shipped in a group of 2 or 3.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1 2 3 4 5 6 7     n
+        | | | | | | |     |
+ $--GSV,x,x,x,x,x,x,x,...*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+total number of GSV messages to be transmitted in this group
+</p>
+</li>
+<li>
+<p>
+1-origin number of this GSV message  within current group
+</p>
+</li>
+<li>
+<p>
+total number of satellites in view (leading zeros sent)
+</p>
+</li>
+<li>
+<p>
+satellite PRN number (leading zeros sent)
+</p>
+</li>
+<li>
+<p>
+elevation in degrees (00-90) (leading zeros sent)
+</p>
+</li>
+<li>
+<p>
+azimuth in degrees to true north (000-359) (leading zeros sent)
+</p>
+</li>
+<li>
+<p>
+SNR in dB (00-99) (leading zeros sent)
+   more satellite info quadruples like 4-7
+   n) checksum
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>Example:
+    $GPGSV,3,1,11,03,03,111,00,04,15,270,00,06,01,010,00,13,06,292,00*74
+    $GPGSV,3,2,11,14,25,170,00,16,57,208,39,18,67,296,40,19,40,246,00*74
+    $GPGSV,3,3,11,22,42,067,42,24,14,311,43,27,05,244,00,,,,*4D</p></div>
+<div class="paragraph"><p>Some GPS receivers may emit more than 12 quadruples (more than three
+GPGSV sentences), even though NMEA-0813 doesn’t allow this.  (The
+extras might be WAAS satellites, for example.) Receivers may also
+report quads for satellites they aren’t tracking, in which case the
+SNR field will be null; we don’t know whether this is formally allowed
+or not.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_gtd_geographic_location_in_time_differences">GTD - Geographic Location in Time Differences</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>         1   2   3   4   5  6
+         |   |   |   |   |  |
+ $--GTD,x.x,x.x,x.x,x.x,x.x*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+time difference
+</p>
+</li>
+<li>
+<p>
+time difference
+</p>
+</li>
+<li>
+<p>
+time difference
+</p>
+</li>
+<li>
+<p>
+time difference
+</p>
+</li>
+<li>
+<p>
+time difference
+   n) checksum
+</p>
+</li>
+</ol></div>
+</div>
+<div class="sect2">
+<h3 id="_gxa_transit_position_latitude_longitude">GXA - TRANSIT Position - Latitude/Longitude</h3>
+<div class="paragraph"><p>Location and time of TRANSIT fix at waypoint</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1         2       3 4        5 6    7 8
+        |         |       | |        | |    | |
+ $--GXA,hhmmss.ss,llll.ll,a,yyyyy.yy,a,c--c,X*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+UTC of position fix
+</p>
+</li>
+<li>
+<p>
+Latitude
+</p>
+</li>
+<li>
+<p>
+East or West
+</p>
+</li>
+<li>
+<p>
+Longitude
+</p>
+</li>
+<li>
+<p>
+North or South
+</p>
+</li>
+<li>
+<p>
+Waypoint ID
+</p>
+</li>
+<li>
+<p>
+Satelite number
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>(The GXA sentence is obsolete as of 3.01.)</p></div>
+</div>
+<div class="sect2">
+<h3 id="_hdg_heading_deviation_amp_variation">HDG - Heading - Deviation &amp; Variation</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1   2   3 4   5 6
+        |   |   | |   | |
+ $--HDG,x.x,x.x,a,x.x,a*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Magnetic Sensor heading in degrees
+</p>
+</li>
+<li>
+<p>
+Magnetic Deviation, degrees
+</p>
+</li>
+<li>
+<p>
+Magnetic Deviation direction, E = Easterly, W = Westerly
+</p>
+</li>
+<li>
+<p>
+Magnetic Variation degrees
+</p>
+</li>
+<li>
+<p>
+Magnetic Variation direction, E = Easterly, W = Westerly
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+</div>
+<div class="sect2">
+<h3 id="_hdm_heading_magnetic">HDM - Heading - Magnetic</h3>
+<div class="paragraph"><p>Vessel heading in degrees with respect to magnetic north produced by
+any device or system producing magnetic heading.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1   2 3
+        |   | |
+ $--HDM,x.x,M*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Heading Degrees, magnetic
+</p>
+</li>
+<li>
+<p>
+M = magnetic
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+</div>
+<div class="sect2">
+<h3 id="_hdt_heading_true">HDT - Heading - True</h3>
+<div class="paragraph"><p>Actual vessel heading in degrees true produced by any device or system
+producing true heading.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1   2 3
+        |   | |
+ $--HDT,x.x,T*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Heading Degrees, true
+</p>
+</li>
+<li>
+<p>
+T = True
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+</div>
+<div class="sect2">
+<h3 id="_hfb_trawl_headrope_to_footrope_and_bottom">HFB - Trawl Headrope to Footrope and Bottom</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>         1  2  3  4 5
+         |  |  |  | |
+ $--HFB,x.x,M,y.y,M*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Distance from headrope to footrope
+</p>
+</li>
+<li>
+<p>
+Meters (0-100)
+</p>
+</li>
+<li>
+<p>
+Distance from headrope to bottom
+</p>
+</li>
+<li>
+<p>
+Meters (0-100)
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>From <a href="#GLOBALSAT">[GLOBALSAT]</a>. Shown with a "@II" leader rather than "$GP".</p></div>
+</div>
+<div class="sect2">
+<h3 id="_hsc_heading_steering_command">HSC - Heading Steering Command</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1   2 3   4  5
+        |   | |   |  |
+ $--HSC,x.x,T,x.x,M,*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Heading Degrees, True
+</p>
+</li>
+<li>
+<p>
+T = True
+</p>
+</li>
+<li>
+<p>
+Heading Degrees, Magnetic
+</p>
+</li>
+<li>
+<p>
+M = Magnetic
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p><a href="#GLOBALSAT">[GLOBALSAT]</a> describes a completely different meaning for this
+sentence, having to do with water temperature sensors.  It is
+unclear which is correct.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_its_trawl_door_spread_2_distance">ITS - Trawl Door Spread 2 Distance</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>         1  2 3
+         |  | |
+ $--ITS,x.x,M*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number)</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Second spread distance
+</p>
+</li>
+<li>
+<p>
+Meters
+</p>
+</li>
+<li>
+<p>
+Checksum.
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>From <a href="#GLOBALSAT">[GLOBALSAT]</a>. Shown with a "@II" leader rather than "$GP".</p></div>
+</div>
+<div class="sect2">
+<h3 id="_lcd_loran_c_signal_data">LCD - Loran-C Signal Data</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1    2   3   4   5   6   7   8   9   10  11  12  13  14
+        |    |   |   |   |   |   |   |   |   |   |   |   |   |
+ $--LCD,xxxx,xxx,xxx,xxx,xxx,xxx,xxx,xxx,xxx,xxx,xxx,xxx,xxx*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+GRI Microseconds/10
+</p>
+</li>
+<li>
+<p>
+Master Relative SNR
+</p>
+</li>
+<li>
+<p>
+Master Relative ECD
+</p>
+</li>
+<li>
+<p>
+Time Difference 1 Microseconds
+</p>
+</li>
+<li>
+<p>
+Time Difference 1 Signal Status
+</p>
+</li>
+<li>
+<p>
+Time Difference 2 Microseconds
+</p>
+</li>
+<li>
+<p>
+Time Difference 2 Signal Status
+</p>
+</li>
+<li>
+<p>
+Time Difference 3 Microseconds
+</p>
+</li>
+<li>
+<p>
+Time Difference 3 Signal Status
+</p>
+</li>
+<li>
+<p>
+Time Difference 4 Microseconds
+</p>
+</li>
+<li>
+<p>
+Time Difference 4 Signal Status
+</p>
+</li>
+<li>
+<p>
+Time Difference 5 Microseconds
+</p>
+</li>
+<li>
+<p>
+Time Difference 5 Signal Status
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+</div>
+<div class="sect2">
+<h3 id="_msk_control_for_a_beacon_receiver">MSK - Control for a Beacon Receiver</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>         1  2  3  4  5   6
+         |  |  |  |  |   |
+ $--MSK,nnn,m,nnn,m,nnn*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Frequency to use
+</p>
+</li>
+<li>
+<p>
+Frequency mode, A=auto, M=manual
+</p>
+</li>
+<li>
+<p>
+Beacon bit rate
+</p>
+</li>
+<li>
+<p>
+Bitrate, A=auto, M=manual
+</p>
+</li>
+<li>
+<p>
+Frequency for MSS message status (null for no status)
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+</div>
+<div class="sect2">
+<h3 id="_mss_beacon_receiver_status">MSS - Beacon Receiver Status</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>         1  2  3  4    5   6
+         |  |  |  |    |   |
+ $--MSS,nn,nn,fff,bbb,xxx*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Signal strength (dB 1uV)
+</p>
+</li>
+<li>
+<p>
+Signal to noise ratio (dB)
+</p>
+</li>
+<li>
+<p>
+Beacon frequency (kHz)
+</p>
+</li>
+<li>
+<p>
+Beacon data rate (BPS)
+</p>
+</li>
+<li>
+<p>
+Unknown integer value
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+</div>
+<div class="sect2">
+<h3 id="_mtw_mean_temperature_of_water">MTW - Mean Temperature of Water</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1   2 3
+        |   | |
+ $--MTW,x.x,C*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Degrees
+</p>
+</li>
+<li>
+<p>
+Unit of Measurement, Celcius
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p><a href="#GLOBALSAT">[GLOBALSAT]</a> lists this as "Meteorological Temperature of Water", which
+is probably incorrect.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_mwv_wind_speed_and_angle">MWV - Wind Speed and Angle</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1   2 3   4 5
+        |   | |   | |
+ $--MWV,x.x,a,x.x,a*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Wind Angle, 0 to 360 degrees
+</p>
+</li>
+<li>
+<p>
+Reference, R = Relative, T = True
+</p>
+</li>
+<li>
+<p>
+Wind Speed
+</p>
+</li>
+<li>
+<p>
+Wind Speed Units, K/M/N
+</p>
+</li>
+<li>
+<p>
+Status, A = Data Valid
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+</div>
+<div class="sect2">
+<h3 id="_oln_omega_lane_numbers">OLN - Omega Lane Numbers</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1          2          3          4
+        |--------+ |--------+ |--------+ |
+ $--OLN,aa,xxx,xxx,aa,xxx,xxx,aa,xxx,xxx*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Omega Pair 1
+</p>
+</li>
+<li>
+<p>
+Omega Pair 1
+</p>
+</li>
+<li>
+<p>
+Omega Pair 1
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>(The OLN sentence is obsolete as of 2.30)</p></div>
+</div>
+<div class="sect2">
+<h3 id="_osd_own_ship_data">OSD - Own Ship Data</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1   2 3   4 5   6 7   8   9 10
+        |   | |   | |   | |   |   | |
+ $--OSD,x.x,A,x.x,a,x.x,a,x.x,x.x,a*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Heading, degrees true
+</p>
+</li>
+<li>
+<p>
+Status, A = Data Valid
+</p>
+</li>
+<li>
+<p>
+Vessel Course, degrees True
+</p>
+</li>
+<li>
+<p>
+Course Reference
+</p>
+</li>
+<li>
+<p>
+Vessel Speed
+</p>
+</li>
+<li>
+<p>
+Speed Reference
+</p>
+</li>
+<li>
+<p>
+Vessel Set, degrees True
+</p>
+</li>
+<li>
+<p>
+Vessel drift (speed)
+</p>
+</li>
+<li>
+<p>
+Speed Units
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+</div>
+<div class="sect2">
+<h3 id="_r00_waypoints_in_active_route">R00 - Waypoints in active route</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1                n
+        |                |
+ $--R00,c---c,c---c,....*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+waypoint ID
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>…</p></div>
+<div class="paragraph"><p>n) checksum</p></div>
+</div>
+<div class="sect2">
+<h3 id="_rma_recommended_minimum_navigation_information">RMA - Recommended Minimum Navigation Information</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>                                                    12
+        1 2       3 4        5 6   7   8   9   10  11|
+        | |       | |        | |   |   |   |   |   | |
+ $--RMA,A,llll.ll,a,yyyyy.yy,a,x.x,x.x,x.x,x.x,x.x,a*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Blink Warning
+</p>
+</li>
+<li>
+<p>
+Latitude
+</p>
+</li>
+<li>
+<p>
+N or S
+</p>
+</li>
+<li>
+<p>
+Longitude
+</p>
+</li>
+<li>
+<p>
+E or W
+</p>
+</li>
+<li>
+<p>
+Time Difference A, uS
+</p>
+</li>
+<li>
+<p>
+Time Difference B, uS
+</p>
+</li>
+<li>
+<p>
+Speed Over Ground, Knots
+</p>
+</li>
+<li>
+<p>
+Track Made Good, degrees true
+</p>
+</li>
+<li>
+<p>
+Magnetic Variation, degrees
+</p>
+</li>
+<li>
+<p>
+E or W
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+</div>
+<div class="sect2">
+<h3 id="_rmb_recommended_minimum_navigation_information">RMB - Recommended Minimum Navigation Information</h3>
+<div class="paragraph"><p>To be sent by a navigation receiver when a destination waypoint is active.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>                                                             14
+        1 2   3 4    5    6       7 8        9 10  11  12  13|  15
+        | |   | |    |    |       | |        | |   |   |   | |   |
+ $--RMB,A,x.x,a,c--c,c--c,llll.ll,a,yyyyy.yy,a,x.x,x.x,x.x,A,m,*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Status, A= Active, V = Void
+</p>
+</li>
+<li>
+<p>
+Cross Track error - nautical miles
+</p>
+</li>
+<li>
+<p>
+Direction to Steer, Left or Right
+</p>
+</li>
+<li>
+<p>
+TO Waypoint ID
+</p>
+</li>
+<li>
+<p>
+FROM Waypoint ID
+</p>
+</li>
+<li>
+<p>
+Destination Waypoint Latitude
+</p>
+</li>
+<li>
+<p>
+N or S
+</p>
+</li>
+<li>
+<p>
+Destination Waypoint Longitude
+</p>
+</li>
+<li>
+<p>
+E or W
+</p>
+</li>
+<li>
+<p>
+Range to destination in nautical miles
+</p>
+</li>
+<li>
+<p>
+Bearing to destination in degrees True
+</p>
+</li>
+<li>
+<p>
+Destination closing velocity in knots
+</p>
+</li>
+<li>
+<p>
+Arrival Status, A = Arrival Circle Entered
+</p>
+</li>
+<li>
+<p>
+FAA mode indicator (NMEA 2.3 and later)
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>Example: $GPRMB,A,0.66,L,003,004,4917.24,N,12309.57,W,001.3,052.5,000.5,V*0B</p></div>
+</div>
+<div class="sect2">
+<h3 id="_rmc_recommended_minimum_navigation_information">RMC - Recommended Minimum Navigation Information</h3>
+<div class="paragraph"><p>This is one of the sentences commonly emitted by GPS units.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>                                                          12
+        1         2 3       4 5        6  7   8   9    10 11|  13
+        |         | |       | |        |  |   |   |    |  | |   |
+ $--RMC,hhmmss.ss,A,llll.ll,a,yyyyy.yy,a,x.x,x.x,xxxx,x.x,a,m,*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+UTC Time
+</p>
+</li>
+<li>
+<p>
+Status, V=Navigation receiver warning A=Valid
+</p>
+</li>
+<li>
+<p>
+Latitude
+</p>
+</li>
+<li>
+<p>
+N or S
+</p>
+</li>
+<li>
+<p>
+Longitude
+</p>
+</li>
+<li>
+<p>
+E or W
+</p>
+</li>
+<li>
+<p>
+Speed over ground, knots
+</p>
+</li>
+<li>
+<p>
+Track made good, degrees true
+</p>
+</li>
+<li>
+<p>
+Date, ddmmyy
+</p>
+</li>
+<li>
+<p>
+Magnetic Variation, degrees
+</p>
+</li>
+<li>
+<p>
+E or W
+</p>
+</li>
+<li>
+<p>
+FAA mode indicator (NMEA 2.3 and later)
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>A status of V means the GPS has a valid fix that is below an internal
+quality threshold, e.g. because the dilution of precision is too high
+or an elevation mask test failed.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_rot_rate_of_turn">ROT - Rate Of Turn</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1   2 3
+        |   | |
+ $--ROT,x.x,A*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Rate Of Turn, degrees per minute, "-" means bow turns to port
+</p>
+</li>
+<li>
+<p>
+Status, A means data is valid
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+</div>
+<div class="sect2">
+<h3 id="_rpm_revolutions">RPM - Revolutions</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1 2 3   4   5 6
+        | | |   |   | |
+ $--RPM,a,x,x.x,x.x,A*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Sourse, S = Shaft, E = Engine
+</p>
+</li>
+<li>
+<p>
+Engine or shaft number
+</p>
+</li>
+<li>
+<p>
+Speed, Revolutions per minute
+</p>
+</li>
+<li>
+<p>
+Propeller pitch, % of maximum, "-" means astern
+</p>
+</li>
+<li>
+<p>
+Status, A means data is valid
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+</div>
+<div class="sect2">
+<h3 id="_rsa_rudder_sensor_angle">RSA - Rudder Sensor Angle</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1   2 3   4 5
+        |   | |   | |
+ $--RSA,x.x,A,x.x,A*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Starboard (or single) rudder sensor, "-" means Turn To Port
+</p>
+</li>
+<li>
+<p>
+Status, A means data is valid
+</p>
+</li>
+<li>
+<p>
+Port rudder sensor
+</p>
+</li>
+<li>
+<p>
+Status, A means data is valid
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+</div>
+<div class="sect2">
+<h3 id="_rsd_radar_system_data">RSD - RADAR System Data</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>                                                        14
+        1   2   3   4   5   6   7   8   9   10  11 12 13|
+        |   |   |   |   |   |   |   |   |   |   |   | | |
+ $--RSD,x.x,x.x,x.x,x.x,x.x,x.x,x.x,x.x,x.x,x.x,x.x,a,a*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>(Some fields are missing from this description.)</p></div>
+<div class="paragraph"><p>Field Number:
+1. Unknown
+2. Unknown
+3. Unknown
+4. Unknown
+5. Unknown
+6. Unknown
+7. Unknown
+8. Unknown
+9. Cursor Range From Own Ship
+10. Cursor Bearing Degrees Clockwise From Zero
+11. Range Scale
+12. Range Units
+13  Unknown
+14. Checksum</p></div>
+</div>
+<div class="sect2">
+<h3 id="_rte_routes">RTE - Routes</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1   2   3 4    5           x    n
+        |   |   | |    |           |    |
+ $--RTE,x.x,x.x,a,c--c,c--c, ..... c--c*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Total number of messages being transmitted
+</p>
+</li>
+<li>
+<p>
+Message Number
+</p>
+</li>
+<li>
+<p>
+Message mode
+     c = complete route, all waypoints
+     w = working route, the waypoint you just left, the waypoint
+     you’re heading to, then all the rest
+</p>
+</li>
+<li>
+<p>
+Waypoint ID
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>More waypoints follow.  Last field is a checksum as usual.</p></div>
+<div class="paragraph"><p>The Garmin 65 and possibly other units report a $GPR00 in the same format.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_sfi_scanning_frequency_information">SFI - Scanning Frequency Information</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1   2   3      4                     x
+        |   |   |      |                     |
+ $--SFI,x.x,x.x,xxxxxx,c .......... xxxxxx,c*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:
+1. Total Number Of Messages
+2. Message Number
+3. Frequency 1
+4. Mode 1
+x. Checksum</p></div>
+</div>
+<div class="sect2">
+<h3 id="_stn_multiple_data_id">STN - Multiple Data ID</h3>
+<div class="paragraph"><p>This sentence is transmitted before each individual sentence where
+there is a need for the Listener to determine the exact source of data
+in the system. Examples might include dual-frequency depthsounding
+equipment or equipment that integrates data from a number of sources
+and produces a single output.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1   2
+        |   |
+ $--STN,x.x,*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Talker ID Number
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+</div>
+<div class="sect2">
+<h3 id="_tds_trawl_door_spread_distance">TDS - Trawl Door Spread Distance</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>         1  2 3
+         |  | |
+ $--TDS,x.x,M*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number)</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Distance between trawl doors
+</p>
+</li>
+<li>
+<p>
+Meters (0-300)
+</p>
+</li>
+<li>
+<p>
+Checksum.
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>From <a href="#GLOBALSAT">[GLOBALSAT]</a>.  Shown with a "@II" leader rather than "$GP".</p></div>
+</div>
+<div class="sect2">
+<h3 id="_tfi_trawl_filling_indicator">TFI - Trawl Filling Indicator</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1 2 3 4
+        | | | |
+ $--TFI,x,y,z*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Catch sensor #1 (0 = off, 1 = on, 2 = no answer)
+</p>
+</li>
+<li>
+<p>
+Catch sensor #2 (0 = off, 1 = on, 2 = no answer)
+</p>
+</li>
+<li>
+<p>
+Catch sensor #3 (0 = off, 1 = on, 2 = no answer)
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>From <a href="#GLOBALSAT">[GLOBALSAT]</a>.  Shown with a "@II" leader rather than "$GP".</p></div>
+</div>
+<div class="sect2">
+<h3 id="_tpc_trawl_position_cartesian_coordinates">TPC - Trawl Position Cartesian Coordinates</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1 2 3 4  5  6 7
+        | | | |  |  | |
+ $--TPC,x,M,y,P,z.z,M*hh,&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Horizontal distance from the vessel center line
+</p>
+</li>
+<li>
+<p>
+Meters
+</p>
+</li>
+<li>
+<p>
+Horizontal distance from the transducer to the trawl along the
+     vessel center line. The value is normally positive assuming the
+     trawl is located behind the vessel.
+</p>
+</li>
+<li>
+<p>
+Meters
+</p>
+</li>
+<li>
+<p>
+Depth of the trawl below the surface
+</p>
+</li>
+<li>
+<p>
+Meters
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>From <a href="#GLOBALSAT">[GLOBALSAT]</a>. Shown with a "@II" leader rather than "$GP".
+This entry actually merges their TPC description with another
+entry labeled (apparently incorrectly) TPT, which differs from the
+TPT shown below.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_tpr_trawl_position_relative_vessel">TPR - Trawl Position Relative Vessel</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1 2 3 4  5  6 7
+        | | | |  |  | |
+ $--TPR,x,M,y,P,z.z,M*hh,&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Horizontal range relative to target
+</p>
+</li>
+<li>
+<p>
+Meters (0-4000)
+</p>
+</li>
+<li>
+<p>
+Bearing to target relative to vessel heading.  Resolution is one degree.
+</p>
+</li>
+<li>
+<p>
+Separator
+</p>
+</li>
+<li>
+<p>
+Depth of trawl below the surface
+</p>
+</li>
+<li>
+<p>
+Meters (0-2000)
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>From <a href="#GLOBALSAT">[GLOBALSAT]</a>. Shown with a "@II" leader rather than "$GP".</p></div>
+</div>
+<div class="sect2">
+<h3 id="_tpt_trawl_position_true">TPT - Trawl Position True</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1 2 3 4  5  6 7
+        | | | |  |  | |
+ $--TPT,x,M,y,P,z.z,M*hh,&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Horizontal range relative to target
+</p>
+</li>
+<li>
+<p>
+Meters (0-4000)
+</p>
+</li>
+<li>
+<p>
+True bearing to taget (ie. relative north).  Resolution is one degree.
+</p>
+</li>
+<li>
+<p>
+Separator
+</p>
+</li>
+<li>
+<p>
+Depth of trawl below the surface
+</p>
+</li>
+<li>
+<p>
+Meters (0-2000)
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>From <a href="#GLOBALSAT">[GLOBALSAT]</a>. Shown with a "@II" leader rather than "$GP".</p></div>
+</div>
+<div class="sect2">
+<h3 id="_trf_transit_fix_data">TRF - TRANSIT Fix Data</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>                                                                    13
+        1         2      3       4 5        6 7   8   9   10  11  12|
+        |         |      |       | |        | |   |   |   |   |   | |
+ $--TRF,hhmmss.ss,xxxxxx,llll.ll,a,yyyyy.yy,a,x.x,x.x,x.x,x.x,xxx,A*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+UTC Time
+</p>
+</li>
+<li>
+<p>
+Date, ddmmyy
+</p>
+</li>
+<li>
+<p>
+Latitude
+</p>
+</li>
+<li>
+<p>
+N or S
+</p>
+</li>
+<li>
+<p>
+Longitude
+</p>
+</li>
+<li>
+<p>
+E or W
+</p>
+</li>
+<li>
+<p>
+Elevation Angle
+</p>
+</li>
+<li>
+<p>
+Number of iterations
+</p>
+</li>
+<li>
+<p>
+Number of Doppler intervals
+</p>
+</li>
+<li>
+<p>
+Update distance, nautical miles
+</p>
+</li>
+<li>
+<p>
+Satellite ID
+</p>
+</li>
+<li>
+<p>
+Data Validity
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>(The TRF sentence is obsolete as of 2.3.0)</p></div>
+</div>
+<div class="sect2">
+<h3 id="_ttm_tracked_target_message">TTM - Tracked Target Message</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>                                         11     13
+        1  2   3   4 5   6   7 8   9   10|    12| 14
+        |  |   |   | |   |   | |   |   | |    | | |
+ $--TTM,xx,x.x,x.x,a,x.x,x.x,a,x.x,x.x,a,c--c,a,a*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Target Number (0-99)
+</p>
+</li>
+<li>
+<p>
+Target Distance
+</p>
+</li>
+<li>
+<p>
+Bearing from own ship
+</p>
+</li>
+<li>
+<p>
+Bearing Units
+</p>
+</li>
+<li>
+<p>
+Target Speed
+</p>
+</li>
+<li>
+<p>
+Target Course
+</p>
+</li>
+<li>
+<p>
+Course Units
+</p>
+</li>
+<li>
+<p>
+Distance of closest-point-of-approach
+</p>
+</li>
+<li>
+<p>
+Time until closest-point-of-approach "-" means increasing
+</p>
+</li>
+<li>
+<p>
+"-" means increasing
+</p>
+</li>
+<li>
+<p>
+Target name
+</p>
+</li>
+<li>
+<p>
+Target Status
+</p>
+</li>
+<li>
+<p>
+Reference Target
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p><a href="#GLOBALSAT">[GLOBALSAT]</a> gives this in a slightly different form, with 14th and
+15th fields conveying time of observation and whether target
+acquisition was automatic or manual.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_vbw_dual_ground_water_speed">VBW - Dual Ground/Water Speed</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1   2   3 4   5   6 7
+        |   |   | |   |   | |
+ $--VBW,x.x,x.x,A,x.x,x.x,A*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Longitudinal water speed, "-" means astern
+</p>
+</li>
+<li>
+<p>
+Transverse water speed, "-" means port
+</p>
+</li>
+<li>
+<p>
+Status, A = Data Valid
+</p>
+</li>
+<li>
+<p>
+Longitudinal ground speed, "-" means astern
+</p>
+</li>
+<li>
+<p>
+Transverse ground speed, "-" means port
+</p>
+</li>
+<li>
+<p>
+Status, A = Data Valid
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+</div>
+<div class="sect2">
+<h3 id="_vdr_set_and_drift">VDR - Set and Drift</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1   2 3   4 5   6 7
+        |   | |   | |   | |
+ $--VDR,x.x,T,x.x,M,x.x,N*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Degress True
+</p>
+</li>
+<li>
+<p>
+T = True
+</p>
+</li>
+<li>
+<p>
+Degrees Magnetic
+</p>
+</li>
+<li>
+<p>
+M = Magnetic
+</p>
+</li>
+<li>
+<p>
+Knots (speed of current)
+</p>
+</li>
+<li>
+<p>
+N = Knots
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+</div>
+<div class="sect2">
+<h3 id="_vhw_water_speed_and_heading">VHW - Water speed and heading</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1   2 3   4 5   6 7   8 9
+        |   | |   | |   | |   | |
+ $--VHW,x.x,T,x.x,M,x.x,N,x.x,K*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Degress True
+</p>
+</li>
+<li>
+<p>
+T = True
+</p>
+</li>
+<li>
+<p>
+Degrees Magnetic
+</p>
+</li>
+<li>
+<p>
+M = Magnetic
+</p>
+</li>
+<li>
+<p>
+Knots (speed of vessel relative to the water)
+</p>
+</li>
+<li>
+<p>
+N = Knots
+</p>
+</li>
+<li>
+<p>
+Kilometers (speed of vessel relative to the water)
+</p>
+</li>
+<li>
+<p>
+K = Kilometers
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p><a href="#GLOBALSAT">[GLOBALSAT]</a> describes a different format in which the first three
+fields are water-temperature measurements.  It’s not clear which
+is correct.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_vlw_distance_traveled_through_water">VLW - Distance Traveled through Water</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1   2 3   4 5
+        |   | |   | |
+ $--VLW,x.x,N,x.x,N*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Total cumulative distance
+</p>
+</li>
+<li>
+<p>
+N = Nautical Miles
+</p>
+</li>
+<li>
+<p>
+Distance since Reset
+</p>
+</li>
+<li>
+<p>
+N = Nautical Miles
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+</div>
+<div class="sect2">
+<h3 id="_vpw_speed_measured_parallel_to_wind">VPW - Speed - Measured Parallel to Wind</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1   2 3   4 5
+        |   | |   | |
+ $--VPW,x.x,N,x.x,M*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Speed, "-" means downwind
+</p>
+</li>
+<li>
+<p>
+N = Knots
+</p>
+</li>
+<li>
+<p>
+Speed, "-" means downwind
+</p>
+</li>
+<li>
+<p>
+M = Meters per second
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+</div>
+<div class="sect2">
+<h3 id="_vtg_track_made_good_and_ground_speed">VTG - Track made good and Ground speed</h3>
+<div class="paragraph"><p>This is one of the sentences commonly emitted by GPS units.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>         1  2  3  4  5  6  7  8 9   10
+         |  |  |  |  |  |  |  | |   |
+ $--VTG,x.x,T,x.x,M,x.x,N,x.x,K,m,*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Track Degrees
+</p>
+</li>
+<li>
+<p>
+T = True
+</p>
+</li>
+<li>
+<p>
+Track Degrees
+</p>
+</li>
+<li>
+<p>
+M = Magnetic
+</p>
+</li>
+<li>
+<p>
+Speed Knots
+</p>
+</li>
+<li>
+<p>
+N = Knots
+</p>
+</li>
+<li>
+<p>
+Speed Kilometers Per Hour
+</p>
+</li>
+<li>
+<p>
+K = Kilometers Per Hour
+</p>
+</li>
+<li>
+<p>
+FAA mode indicator (NMEA 2.3 and later)
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>Note: in some older versions of NMEA 0183, the sentence looks like this:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>         1  2  3   4  5
+         |  |  |   |  |
+ $--VTG,x.x,x,x.x,x.x,*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+True course over ground (degrees) 000 to 359
+</p>
+</li>
+<li>
+<p>
+Magnetic course over ground 000 to 359
+</p>
+</li>
+<li>
+<p>
+Speed over ground (knots) 00.0 to 99.9
+</p>
+</li>
+<li>
+<p>
+Speed over ground (kilometers) 00.0 to 99.9
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>The two forms can be distinguished by field 2, which will be
+the fixed text <em>T</em> in the newer form.  The new form appears
+to have been introduced with NMEA 3.01 in 2002.</p></div>
+<div class="paragraph"><p>Some devices, such as those described in <a href="#GLOBALSAT">[GLOBALSAT]</a>, leave the
+magnetic-bearing fields 3 and 4 empty.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_vwr_relative_wind_speed_and_angle">VWR - Relative Wind Speed and Angle</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>         1  2  3  4  5  6  7  8 9
+         |  |  |  |  |  |  |  | |
+ $--VWR,x.x,a,x.x,N,x.x,M,x.x,K*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Wind direction magnitude in degrees
+</p>
+</li>
+<li>
+<p>
+Wind direction Left/Right of bow
+</p>
+</li>
+<li>
+<p>
+Speed
+</p>
+</li>
+<li>
+<p>
+N = Knots
+</p>
+</li>
+<li>
+<p>
+Speed
+</p>
+</li>
+<li>
+<p>
+M = Meters Per Second
+</p>
+</li>
+<li>
+<p>
+Speed
+</p>
+</li>
+<li>
+<p>
+K = Kilometers Per Hour
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+</div>
+<div class="sect2">
+<h3 id="_wcv_waypoint_closure_velocity">WCV - Waypoint Closure Velocity</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1   2 3    4
+        |   | |    |
+ $--WCV,x.x,N,c--c*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Velocity
+</p>
+</li>
+<li>
+<p>
+N = knots
+</p>
+</li>
+<li>
+<p>
+Waypoint ID
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+</div>
+<div class="sect2">
+<h3 id="_wnc_distance_waypoint_to_waypoint">WNC - Distance - Waypoint to Waypoint</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1   2 3   4 5    6    7
+        |   | |   | |    |    |
+ $--WNC,x.x,N,x.x,K,c--c,c--c*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Distance, Nautical Miles
+</p>
+</li>
+<li>
+<p>
+N = Nautical Miles
+</p>
+</li>
+<li>
+<p>
+Distance, Kilometers
+</p>
+</li>
+<li>
+<p>
+K = Kilometers
+</p>
+</li>
+<li>
+<p>
+TO Waypoint
+</p>
+</li>
+<li>
+<p>
+FROM Waypoint
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+</div>
+<div class="sect2">
+<h3 id="_wpl_waypoint_location">WPL - Waypoint Location</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1       2 3        4 5    6
+        |       | |        | |    |
+ $--WPL,llll.ll,a,yyyyy.yy,a,c--c*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Latitude
+</p>
+</li>
+<li>
+<p>
+N or S (North or South)
+</p>
+</li>
+<li>
+<p>
+Longitude
+</p>
+</li>
+<li>
+<p>
+E or W (East or West)
+</p>
+</li>
+<li>
+<p>
+Waypoint name
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+</div>
+<div class="sect2">
+<h3 id="_xdr_transducer_measurement">XDR - Transducer Measurement</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1 2   3 4            n
+        | |   | |            |
+ $--XDR,a,x.x,a,c--c, ..... *hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Transducer Type
+</p>
+</li>
+<li>
+<p>
+Measurement Data
+</p>
+</li>
+<li>
+<p>
+Units of measurement
+</p>
+</li>
+<li>
+<p>
+Name of transducer
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>There may be any number of quadruplets like this, each describing a
+sensor.  The last field will be a checksum as usual.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_xte_cross_track_error_measured">XTE - Cross-Track Error, Measured</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1 2 3   4 5 6   7
+        | | |   | | |   |
+ $--XTE,A,A,x.x,a,N,m,*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Status
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+V = Loran-C Blink or SNR warning
+</p>
+</li>
+<li>
+<p>
+V = general warning flag or other navigation systems when a reliable
+         fix is not available
+</p>
+</li>
+</ul></div>
+</li>
+<li>
+<p>
+Status
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+V = Loran-C Cycle Lock warning flag
+</p>
+</li>
+<li>
+<p>
+A = OK or not used
+</p>
+</li>
+</ul></div>
+</li>
+<li>
+<p>
+Cross Track Error Magnitude
+</p>
+</li>
+<li>
+<p>
+Direction to steer, L or R
+</p>
+</li>
+<li>
+<p>
+Cross Track Units, N = Nautical Miles
+</p>
+</li>
+<li>
+<p>
+FAA mode indicator (NMEA 2.3 and later, optional)
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+</div>
+<div class="sect2">
+<h3 id="_xtr_cross_track_error_dead_reckoning">XTR - Cross Track Error - Dead Reckoning</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1   2 3 4
+        |   | | |
+ $--XTR,x.x,a,N*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Magnitude of cross track error
+</p>
+</li>
+<li>
+<p>
+Direction to steer, L or R
+</p>
+</li>
+<li>
+<p>
+Units, N = Nautical Miles
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+</div>
+<div class="sect2">
+<h3 id="_zda_time_amp_date_utc_day_month_year_and_local_time_zone">ZDA - Time &amp; Date - UTC, day, month, year and local time zone</h3>
+<div class="paragraph"><p>This is one of the sentences commonly emitted by GPS units.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1         2  3  4    5  6  7
+        |         |  |  |    |  |  |
+ $--ZDA,hhmmss.ss,xx,xx,xxxx,xx,xx*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+UTC time (hours, minutes, seconds, may have fractional subsecond)
+</p>
+</li>
+<li>
+<p>
+Day, 01 to 31
+</p>
+</li>
+<li>
+<p>
+Month, 01 to 12
+</p>
+</li>
+<li>
+<p>
+Year (4 digits)
+</p>
+</li>
+<li>
+<p>
+Local zone description, 00 to +- 13 hours
+</p>
+</li>
+<li>
+<p>
+Local zone minutes description, apply same sign as local hours
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>Example: $GPZDA,160012.71,11,03,2004,-1,00*7D</p></div>
+</div>
+<div class="sect2">
+<h3 id="_zfo_utc_amp_time_from_origin_waypoint">ZFO - UTC &amp; Time from origin Waypoint</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1         2         3    4
+        |         |         |    |
+ $--ZFO,hhmmss.ss,hhmmss.ss,c--c*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Universal Time Coordinated (UTC)
+</p>
+</li>
+<li>
+<p>
+Elapsed Time
+</p>
+</li>
+<li>
+<p>
+Origin Waypoint ID
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+</div>
+<div class="sect2">
+<h3 id="_ztg_utc_amp_time_to_destination_waypoint">ZTG - UTC &amp; Time to Destination Waypoint</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1         2         3    4
+        |         |         |    |
+ $--ZTG,hhmmss.ss,hhmmss.ss,c--c*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Universal Time Coordinated (UTC)
+</p>
+</li>
+<li>
+<p>
+Time Remaining
+</p>
+</li>
+<li>
+<p>
+Destination Waypoint ID
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+</div>
+<div class="sect2">
+<h3 id="_other_sentences">Other sentences</h3>
+<div class="paragraph"><p>There is evidence for the existence of the following NMEA sentences
+on the Web:</p></div>
+<table class="tableblock frame-all grid-all" style="
+width:100%;
+">
+<colgroup><col style="width:100%;">
+</colgroup><tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ACK - Alarm Acknowldgement</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ADS - Automatic Device Status</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">AKD - Acknowledge Detail Alarm Condition</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ALA - Set Detail Alarm Condition</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ASD - Autopilot System Data</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">BEC - Bearing &amp; Distance to Waypoint - Dead Reckoning</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CEK - Configure Encryption Key Command</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">COP - Configure the Operational Period, Command</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CUR - Water Current Layer</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">DCR - Device Capability Report</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">DDC - Display Dimming Control</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">DOR - Door Status Detection</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">DSC - Digital Selective Calling Information</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">DSE - Extended DSC</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">DSI - DSC Transponder Initiate</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">DSR - DSC Transponder Response</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ETL - Engine Telegraph Operation Status</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">EVE - General Event Message</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">FIR - Fire Detection</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">MWD - Wind Direction &amp; Speed</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">TLL - Target Latitude and Longitude</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">WDR - Distance to Waypoint - Rhumb Line</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">WDC - Distance to Waypoint - Great Circle</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ZDL - Time and Distance to Variable Point</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph"><p>$CDDSC is described in <a href="#CDDSC">[CDDSC]</a>.</p></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_vendor_extensions">Vendor extensions</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>This list is very incomplete.</p></div>
+<div class="sect2">
+<h3 id="_pashr_rt300_proprietary_roll_and_pitch_sentence">PASHR - RT300 proprietary roll and pitch sentence</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>         1           2   3    4      5      6     7     8     9  10 11 12
+         |           |   |    |      |      |     |     |     |   | |  |
+$PASHR,hhmmss.sss,hhh.hh,T,rrr.rr,ppp.pp,xxx.xx,a.aaa,b.bbb,c.ccc,d,e*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+hhmmss.sss - UTC time
+</p>
+</li>
+<li>
+<p>
+hhh.hh - Heading in degrees
+</p>
+</li>
+<li>
+<p>
+T - flag to indicate that the Heading is True Heading (i.e. to True North)
+</p>
+</li>
+<li>
+<p>
+rrr.rr - Roll Angle in degrees
+</p>
+</li>
+<li>
+<p>
+ppp.pp - Pitch Angle in degrees
+</p>
+</li>
+<li>
+<p>
+xxx.xx - Heave
+</p>
+</li>
+<li>
+<p>
+a.aaa - Roll Angle Accuracy Estimate (Stdev) in degrees
+</p>
+</li>
+<li>
+<p>
+b.bbb - Pitch Angle Accuracy Estimate (Stdev) in degrees
+</p>
+</li>
+<li>
+<p>
+c.ccc - Heading Angle Accuracy Estimate (Stdev) in degrees
+</p>
+</li>
+<li>
+<p>
+d - Aiding Status
+</p>
+</li>
+<li>
+<p>
+e - IMU Status
+</p>
+</li>
+<li>
+<p>
+hh - Checksum
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p><a href="#PASHR">[PASHR]</a> describes this sentence as NMEA, though other sources say it
+is Ashtech proprietary and describe a different format.</p></div>
+<div class="paragraph"><p>Example:</p></div>
+<div class="paragraph"><p>$PASHR,085335.000,224.19,T,-01.26,+00.83,+00.00,0.101,0.113,0.267,1,0*06</p></div>
+</div>
+<div class="sect2">
+<h3 id="_pgrme_garmin_estimated_error">PGRME - Garmin Estimated Error</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>        1  2  3  4  5  6  7
+        |  |  |  |  |  |  |
+ $PGRME,hhh,M,vvv,M,ttt,M*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Estimated horizontal position error (HPE),
+</p>
+</li>
+<li>
+<p>
+M=meters
+</p>
+</li>
+<li>
+<p>
+Estimated vertical position error (VPE)
+</p>
+</li>
+<li>
+<p>
+M=meters
+</p>
+</li>
+<li>
+<p>
+Overall spherical equivalent position error
+</p>
+</li>
+<li>
+<p>
+M=meters
+</p>
+</li>
+<li>
+<p>
+Checksum
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>Example: $PGRME,15.0,M,45.0,M,25.0,M*22</p></div>
+</div>
+<div class="sect2">
+<h3 id="_pmgnst_magellan_status">PMGNST - Magellan Status</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>          1   2 3  4    5    6  7    8
+          |   | |  |    |    |  |    |
+ $PMGNST,xx.xx,m,t,nnn,xx.xx,nnn,nn,c</pre>
+</div></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Firmware version number?
+</p>
+</li>
+<li>
+<p>
+Mode (1 = no fix, 2 = 2D fix, 3 = 3D fix)
+</p>
+</li>
+<li>
+<p>
+T if we have a fix
+</p>
+</li>
+<li>
+<p>
+numbers change - unknown
+</p>
+</li>
+<li>
+<p>
+time left on the GPS battery in hours
+</p>
+</li>
+<li>
+<p>
+numbers change (freq. compensation?)
+</p>
+</li>
+<li>
+<p>
+PRN number receiving current focus
+</p>
+</li>
+<li>
+<p>
+nmea_checksum
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>Only supported on Magellan GPSes.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_prwizch_rockwell_channel_status">PRWIZCH - Rockwell Channel Status</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre> $PRWIZCH,n,s,n,s,n,s,n,s,n,s,n,s,n,s,n,s,n,s,n,s,n,s,n,s,c*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Fields consist of 12 pairs of a satellite PRN followed by a
+signal quality number in the range 0-7 (0 worst, 7 best).</p></div>
+<div class="paragraph"><p>Only emitted by the now-obsolete Zodiac (Rockwell) chipset.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_pubx_00_u_blox_lat_long_position_data">PUBX 00 - u-blox Lat/Long Position Data</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre> $PUBX,00,hhmmss.ss,Latitude,N,Longitude,E,AltRef,NavStat,Hacc,Vacc,SOG,COG,Vvel,+ageC,HDOP,VDOP,TDOP,GU,RU,DR,*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Example:
+$PUBX,00,081350.00,4717.113210,N,00833.915187,E,546.589,G3,2.1,2.0,0.007,77.52,0+.007,,0.92,1.19,0.77,9,0,0*5F&lt;CR&gt;&lt;LF&gt;</p></div>
+<div class="paragraph"><p>Only emitted by u-blox Antaris chipset.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_pubx_01_u_blox_utm_position_data">PUBX 01 - u-blox UTM Position Data</h3>
+<div class="paragraph"><p>The $PUBX,01 is a UTM (Universal Transverse Mercator projection) version
+of the $PUBX,00 sentence.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>$PUBX,01,hhmmss.ss,Easting,E,Northing,N,AltMSL,NavStat,Hacc,Vacc,SOG,COG,Vvel,ag+eC,HDOP,VDOP,TDOP,GU,RU,DR,*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Example:
+$PUBX,01,075142.00,467125.245,E,5236949.763,N,498.235,G3,2.1,1.9,0.005,85.63,0.0+00,,0.78,0.90,0.52,12,0,0*65</p></div>
+<div class="paragraph"><p>Only emitted by u-blox Antaris chipset.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_pubx_03_u_blox_satellite_status">PUBX 03 - u-blox Satellite Status</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre> $PUBX,03,GT{,ID,s,AZM,EL,SN,LK},*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Example:
+$PUBX,03,11,23,-,,,45,010,29,-,,,46,013,07,-,,,42,015,08,U,067,31,42,025,10,U,19+5,33,46,026,18,U,326,08,39,026,17,-,,,32,015,26,U,306,66,48,025,27,U,073,10,36,+026,28,U,089,61,46,024,15,-,,,39,014*0D</p></div>
+<div class="paragraph"><p>Only emitted by u-blox Antaris chipset.</p></div>
+<div class="paragraph"><p>(There’s no PUBX 02)</p></div>
+</div>
+<div class="sect2">
+<h3 id="_pubx_04_u_blox_time_of_day_and_clock_information">PUBX 04 - u-blox Time of Day and Clock Information</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>$PUBX,04,hhmmss.ss,ddmmyy,UTC_TOW,week,reserved,Clk_B,Clk_D,PG,*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>Example:</p></div>
+<div class="paragraph"><p>$PUBX,04,073731.00,091202,113851.00,1196,113851.00,1930035,-2660.664,43,*3C&lt;CR&gt;&lt;+LF&gt;</p></div>
+<div class="paragraph"><p>Only emitted by u-blox Antaris chipset.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_tmvtd_transas_vts_sml_tracking_system_report">TMVTD - Transas VTS / SML tracking system report</h3>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>$TMVTD,DDMMYY,hhmmss.ss,a,xxxx,c—c,llll.llll,a,yyyyy.yyyy,a,x.x,a,x.x,a,a*hh&lt;CR&gt;&lt;LF&gt;</pre>
+</div></div>
+<div class="paragraph"><p>‘TM’ indicates message generated by SML tracking system.  ‘VTD’ is
+name of the message.</p></div>
+<div class="paragraph"><p>Field Number:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Day/month/year (two-digit year, unknown base century)
+</p>
+</li>
+<li>
+<p>
+Hour/minute/second to 0.1 sec precion, UTC.
+</p>
+</li>
+<li>
+<p>
+‘R’ indicates that this is an update for a radar track. No other
+   values are valid
+</p>
+</li>
+<li>
+<p>
+Internal unique ID number. Can’t be changed even when target is
+   re-identified
+</p>
+</li>
+<li>
+<p>
+Target alias. Can be changed when the target identification data is
+   edited.  Symbols “$”, “*” “,” and “.”  are not allowed to be used
+   within the alias word. This field is variable length, at most 21v
+   characters.
+</p>
+</li>
+<li>
+<p>
+Latitude in degrees (two leading digits) and decimal minutes
+   (trailing digits).
+</p>
+</li>
+<li>
+<p>
+N or S for North or South latitude.
+</p>
+</li>
+<li>
+<p>
+Longitude in degrees (three leading digits) and decimal minutes
+   (trailing digits).
+</p>
+</li>
+<li>
+<p>
+E or W for East or West longitude.
+</p>
+</li>
+<li>
+<p>
+Target course in decimal degrees.
+</p>
+</li>
+<li>
+<p>
+Fixed to T, indicates true course.
+</p>
+</li>
+<li>
+<p>
+Target speed in decimal knots.
+</p>
+</li>
+<li>
+<p>
+Fixed to N, indicates decimal speed in knots.
+</p>
+</li>
+<li>
+<p>
+T or D. T = tracked, D = dropped. Message with status
+    “dropped” is sent only once after target is dropped.
+</p>
+</li>
+<li>
+<p>
+NMEA checksum.
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>Transas is a mnanufacturer of proprietary ECDIS systems.</p></div>
+<div class="paragraph"><p>Described in <a href="#MALTESE">[MALTESE]</a>, actually a Maltese government document.</p></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_references">References</h2>
+<div class="sectionbody">
+<div class="ulist bibliography"><ul>
+<li>
+<p>
+<a id="BETKE"></a>[BETKE]
+    "The NMEA 0183 protocol"
+    <a href="http://www.scribd.com/mcocco/d/6365285-The-NMEA-0183-Protocol">http://www.scribd.com/mcocco/d/6365285-The-NMEA-0183-Protocol</a>
+    Probably the ancestor of this document. Compiled by Klaus Betke
+    and dated May 2000 with a revision in 2001.
+</p>
+</li>
+<li>
+<p>
+<a id="CANBUS"></a>[CANBUS]
+  "Wikipedia: CAN bus"
+  <a href="http://en.wikipedia.org/wiki/CAN_bus">http://en.wikipedia.org/wiki/CAN_bus</a>
+</p>
+</li>
+<li>
+<p>
+<a id="NMEA2000"></a>[NMEA2000]
+  "Wikipedia: NMEA 2000"
+  <a href="http://en.wikipedia.org/wiki/NMEA_2000">http://en.wikipedia.org/wiki/NMEA_2000</a>
+</p>
+</li>
+<li>
+<p>
+<a id="KEVERSOFT"></a>[KEVERSOFT]
+  <a href="http://www.keversoft.com/downloads/packetlogger_20120305_explain.txt">http://www.keversoft.com/downloads/packetlogger_20120305_explain.txt</a>
+</p>
+</li>
+<li>
+<p>
+<a id="DEPRIEST"></a>[DEPRIEST]
+    "NMEA data"
+    <a href="http://www.gpsinformation.org/dale/nmea.htm">http://www.gpsinformation.org/dale/nmea.htm</a>
+    Used for PMGNST and the FAA mode code.
+</p>
+</li>
+<li>
+<p>
+<a id="MX521"></a>[MX521]
+    "MX521 GPS/DGPS Sensor Installation Manual"
+    <a href="http://www.mx-marine.com/downloads/MX521_Install_manual_051804.pdf">http://www.mx-marine.com/downloads/MX521_Install_manual_051804.pdf</a>
+    Used for GBS, GRS.
+</p>
+</li>
+<li>
+<p>
+<a id="MX535"></a>[MX535]
+    "MX535 UAIS Ship Borne Class A Transponder Unit Techical &amp; Installation Manual"
+    <a href="http://www.mx-marine.com/downloads/mx535/MX535_Tech_Manual_Rev_E.pdf">http://www.mx-marine.com/downloads/mx535/MX535_Tech_Manual_Rev_E.pdf</a>
+    Used for GNS.
+</p>
+</li>
+<li>
+<p>
+<a id="ZODIAC"></a>[ZODIAC]
+    "Zodiac Serial Data Interface Specification"
+    <a href="http://users.rcn.com/mardor/serial.pdf">http://users.rcn.com/mardor/serial.pdf</a>
+    Used for PRWIZCH.
+</p>
+</li>
+<li>
+<p>
+<a id="GH79L4N"></a>[GH79L4N]
+    "Specifications for GPS Receiver GH-79L4-N"
+    <a href="http://www.tecsys.de/db/gps/gh79l1an_intant.pdf">http://www.tecsys.de/db/gps/gh79l1an_intant.pdf</a>
+    Used for GPDTM.
+</p>
+</li>
+<li>
+<p>
+<a id="GIDS"></a>[GIDS]
+    "GPS - NMEA sentence information"
+    <a href="http://aprs.gids.nl/nmea/">http://aprs.gids.nl/nmea/</a>
+    Used for BWC, MSK, MSS.
+</p>
+</li>
+<li>
+<p>
+<a id="NMEAFAQ"></a>[NMEAFAQ]
+    "The NMEA FAQ"
+    <a href="http://vancouver-webpages.com/peter/nmeafaq.txt">http://vancouver-webpages.com/peter/nmeafaq.txt</a>
+    Used for R00.
+</p>
+</li>
+<li>
+<p>
+<a id="UNMEA"></a>[UNMEA]
+    "Understanding NMEA 0183"
+    <a href="http://pcptpp030.psychologie.uni-regensburg.de/trafficresearch/NMEA0183/">http://pcptpp030.psychologie.uni-regensburg.de/trafficresearch/NMEA0183/</a>
+    Source for the claim that NMEA requires undefined data fields to
+    be empty.
+</p>
+</li>
+<li>
+<p>
+<a id="NTUM"></a>[NTUM]
+    "NemaTalker User Manual"
+    <a href="http://www.sailsoft.nl/NemaTalker/UserManual/InstrGPS.htm">http://www.sailsoft.nl/NemaTalker/UserManual/InstrGPS.htm</a>
+    Source for the claim that Mode Indicator dominates Status.
+</p>
+</li>
+<li>
+<p>
+<a id="IEC61162-1"></a>[IEC61162-1]
+    "International Standard IEC 61162-1" (preview)
+    <a href="http://domino.iec.ch/preview/info_iec61162-1%7Bed2.0%7Den.pdf">http://domino.iec.ch/preview/info_iec61162-1%7Bed2.0%7Den.pdf</a>
+</p>
+</li>
+<li>
+<p>
+<a id="SEATALK"></a>[SEATALK]
+    "SeaTalk Technical Reference"
+    <a href="http://www.thomasknauf.de/seatalk.htm">http://www.thomasknauf.de/seatalk.htm</a>
+</p>
+</li>
+<li>
+<p>
+<a id="SATSTAT"></a>[SATSTAT] "NMEA IDs" <a href="https://github.com/mvglasow/satstat/wiki/NMEA-IDs">https://github.com/mvglasow/satstat/wiki/NMEA-IDs</a>
+</p>
+</li>
+<li>
+<p>
+<a id="GLOBALSAT"></a>[GLOBALSAT]
+    "NMEA (National Marine Electronics Association) 0183 Protocol"
+    <a href="http://www.usglobalsat.com/faq_details/NMEA.htm">http://www.usglobalsat.com/faq_details/NMEA.htm</a>
+</p>
+</li>
+<li>
+<p>
+<a id="PASHR"></a>[PASHR]
+    "News - NMEA PASHR Output Format Added"
+    <a href="http://www.oxts.com/default.asp?pageRef=76&amp;newsID=69">http://www.oxts.com/default.asp?pageRef=76&amp;newsID=69</a>
+</p>
+</li>
+<li>
+<p>
+<a id="WAAS"></a>[WAAS]
+    "WAAS Information"
+    <a href="http://gpsinformation.net/exe/waas.html">http://gpsinformation.net/exe/waas.html</a>
+</p>
+</li>
+<li>
+<p>
+<a id="PPS"></a>[PPS]
+    "Pulse per second"
+    <a href="http://en.wikipedia.org/wiki/Pulse_per_second">http://en.wikipedia.org/wiki/Pulse_per_second</a>
+</p>
+</li>
+<li>
+<p>
+<a id="MALTESE"></a>[MALTESE]
+  "Procurement of a Fixed-Wing Maritime Patrol Aircraft"
+  <a href="https://secure2.gov.mt/eprocurement/Tenders/file.ashx?f=9832DB05E65C774258580284031EC72CC315D954A7108B5E">https://secure2.gov.mt/eprocurement/Tenders/file.ashx?f=9832DB05E65C774258580284031EC72CC315D954A7108B5E</a>.
+</p>
+</li>
+<li>
+<p>
+<a id="NMEA-ADVANCE"></a>
+  "NMEA 0183 Advancements" (describes <em>P</em> value of FAA mode)
+  <a href="http://www.nmea.org/Assets/0183_advancements_nmea_oct_1_2010%20%282%29.pdf">http://www.nmea.org/Assets/0183_advancements_nmea_oct_1_2010%20(2).pdf</a>
+</p>
+</li>
+<li>
+<p>
+<a id="CDDSC"></a>
+  "Data Interface in Digital Selective Calling Class-D Radios"
+  <a href="http://continuouswave.com/whaler/reference/DSC_Datagrams.html">http://continuouswave.com/whaler/reference/DSC_Datagrams.html</a>
+</p>
+</li>
+<li>
+<p>
+<a id="ANON"></a>
+  Anonymous commentator(s) are persons who have volunteered information
+  about the NMEA standard(s) but do not wish to be identified.
+</p>
+</li>
+<li>
+<p>
+<a id="NORWAY"></a>[NORWAY]
+  "Etterretninger for sjøfarende" Notoces for Mariners, see p26
+  <a href="http://kartverket.no/efs-documents/editions/2015/efs01-2015.pdf">http://kartverket.no/efs-documents/editions/2015/efs01-2015.pdf</a>
+</p>
+</li>
+</ul></div>
+</div>
+</div>
+</div>
+
+<div id="footer">
+<div id="footer-text">
+Version 2.21<br>
+Last updated
+ 2016-01-05 04:10:58 EST
+</div>
+</div>
+
+
+</body></html>

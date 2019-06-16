@@ -15,26 +15,26 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, sys, socket, time, webbrowser
-from classes.conf import Conf
-from classes.language import Language
+import wx, sys, os, socket, time, webbrowser
+op_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../..')
+sys.path.append(op_folder+'/classes')
+from conf import Conf
+from language import Language
 
 class MyFrame(wx.Frame):
 		
 	def __init__(self):
 		self.ttimer=100
-		
-		self.conf = Conf()
-		self.home = self.conf.home
-		self.currentpath = self.conf.get('GENERAL', 'op_folder')
-
-		Language(self.conf)
+		conf = Conf()
+		self.currentpath = op_folder
+		Language(conf)
 
 		self.list_iter=[]
 
 		titleadd=''
-		if len(sys.argv)>2:
-			titleadd=sys.argv[2]
+		if len(sys.argv)>0:
+			if sys.argv[1] == '10112': titleadd = _('NMEA 0183 input diagnostic')
+			elif sys.argv[1] == '10113': titleadd = _('NMEA 0183 output diagnostic')
 		
 		wx.Frame.__init__(self, None, title=titleadd, size=(650,435))
 		self.Bind(wx.EVT_CLOSE, self.OnClose)
@@ -45,16 +45,16 @@ class MyFrame(wx.Frame):
 					
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 		
-		self.icon = wx.Icon(self.currentpath+'/static/icons/openplotter.ico', wx.BITMAP_TYPE_ICO)
+		self.icon = wx.Icon(self.currentpath+'/static/icons/kplex.ico', wx.BITMAP_TYPE_ICO)
 		self.SetIcon(self.icon)
 
 		self.logger = wx.TextCtrl(panel, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_DONTWRAP|wx.LC_SORT_ASCENDING)
 
 		self.list = wx.ListCtrl(panel, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
-		self.list.InsertColumn(0, _('Device'), width=50)
+		self.list.InsertColumn(0, _('Device'), width=70)
 		self.list.InsertColumn(1, _('Type'), width=50)
-		self.list.InsertColumn(2, _('Interval'), wx.LIST_FORMAT_RIGHT, width=50)
-		self.list.InsertColumn(3, _('Data'), width=500)
+		self.list.InsertColumn(2, _('Interval'), wx.LIST_FORMAT_RIGHT, width=70)
+		self.list.InsertColumn(3, _('Data'), width=430)
 
 		self.button_pause =wx.Button(panel, label=_('Pause'), pos=(555, 160))
 		self.button_pause.Bind(wx.EVT_BUTTON, self.pause)
@@ -84,10 +84,8 @@ class MyFrame(wx.Frame):
 		vbox.Add(hbox, 0, wx.ALL|wx.EXPAND, 0)	
 		panel.SetSizer(vbox)
 		
-
 		self.CreateStatusBar()
-
-		self.Show(True)
+		self.Centre()
 
 		self.s2=''
 		self.status=''
@@ -189,7 +187,7 @@ class MyFrame(wx.Frame):
 		self.timer.Start(self.ttimer)
 			
 	def nmea_info(self, e):
-		url = self.currentpath+'/docs/NMEA.html'
+		url = self.currentpath+'/tools/kplex/NMEA.html'
 		webbrowser.open(url,new=2)
 				
 	def OnClose(self, event):
