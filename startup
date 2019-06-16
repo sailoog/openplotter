@@ -203,6 +203,35 @@ class MyFrame(wx.Frame):
 
 		######################################
 
+		try:
+			out = subprocess.check_output(['more','product'],cwd='/proc/device-tree/hat')
+		except: pass
+		else:
+			if 'Moitessier' in out:
+				self.add_logger_data(_('\nChecking Moitessier HAT setup...'))
+				if not os.path.isfile(self.home+'/moitessier/app/moitessier_ctrl/moitessier_ctrl'):
+					self.add_warnings_data(_('\n\nMoitessier HAT package is not installed!'))
+					self.add_logger_data(_(' See warning.'))
+				else:
+					package = subprocess.check_output(['dpkg','-s','moitessier'])
+					kernel = subprocess.check_output(['uname','-r'])
+					kernel = kernel.split('-')
+					kernel = kernel[0]
+					package = package.split('\n')
+					for i in package:
+						if 'Version:' in i:
+							version = i.split(':')
+							version = version[1]
+							version = version.strip()
+							version = version.split('-')
+							version = version[2]
+					if kernel != version:
+						self.add_warnings_data(_('\n\nThe installed Moitessier HAT package does not match the kernel version.'))
+						self.add_logger_data(_(' See warning.'))
+					else: self.add_logger_data(_(' Done.'))
+
+		######################################
+
 		if platform.machine()[0:3]=='arm':
 			self.add_logger_data(_('\nChecking pi password...'))
 			out = subprocess.check_output(['sudo', '-n', 'grep', '-E', '^pi:', '/etc/shadow'])

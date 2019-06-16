@@ -16,7 +16,9 @@
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
 import wx, wx.lib.scrolledpanel, sys, os, ConfigParser, re, subprocess, time
+import wx.richtext as rt
 import xml.etree.ElementTree as ET
+import urllib
 
 op_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../..')
 sys.path.append(op_folder+'/classes')
@@ -33,13 +35,13 @@ class MyFrame(wx.Frame):
 
 			Language(self.conf)
 			
-			title = _('Moitessier HAT Settings')
+			title = _('Moitessier HAT Setup')
 
 			wx.Frame.__init__(self, None, title=title, size=(710,460))
 			
 			self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 			
-			self.icon = wx.Icon(op_folder+'/static/icons/openplotter.ico', wx.BITMAP_TYPE_ICO)
+			self.icon = wx.Icon(op_folder+'/static/icons/moitessier_hat.ico', wx.BITMAP_TYPE_ICO)
 			self.SetIcon(self.icon)
 
 			self.p = wx.lib.scrolledpanel.ScrolledPanel(self, -1, style=wx.TAB_TRAVERSAL | wx.SUNKEN_BORDER)
@@ -49,18 +51,20 @@ class MyFrame(wx.Frame):
 			self.p_info = wx.Panel(self.nb)
 			self.p_settings = wx.Panel(self.nb)
 			self.p_update = wx.Panel(self.nb)
+			self.p_configure = wx.Panel(self.nb)
 			self.nb.AddPage(self.p_info, _('Info'))
-			self.nb.AddPage(self.p_settings, _('Settings'))
 			self.nb.AddPage(self.p_update, _('Install'))
+			self.nb.AddPage(self.p_configure, _('Configure'))
+			self.nb.AddPage(self.p_settings, _('Settings'))
 			sizer = wx.BoxSizer()
 			sizer.Add(self.nb, 1, wx.EXPAND)
 			self.p.SetSizer(sizer)
 
 ##################################################################### info
 
-			info_box = wx.StaticBox(self.p_info, -1, _(' Info '))
+			info_box = wx.StaticBox(self.p_info, -1, _(' HAT info '))
 
-			self.button_get_info =wx.Button(self.p_info, label= _('HAT info'))
+			self.button_get_info =wx.Button(self.p_info, label= _('Settings'))
 			self.Bind(wx.EVT_BUTTON, self.on_get_info, self.button_get_info)
 
 			self.button_statistics =wx.Button(self.p_info, label= _('Statistics'))
@@ -69,7 +73,7 @@ class MyFrame(wx.Frame):
 			self.button_reset_statistics =wx.Button(self.p_info, label= _('Reset statistics'))
 			self.Bind(wx.EVT_BUTTON, self.on_reset_statistics, self.button_reset_statistics)
 
-			sensors_box = wx.StaticBox(self.p_info, -1, _(' Sensors '))
+			sensors_box = wx.StaticBox(self.p_info, -1, _(' Test sensors '))
 
 			self.button_MPU9250 =wx.Button(self.p_info, label= _('MPU-9250'))
 			self.Bind(wx.EVT_BUTTON, self.on_MPU9250, self.button_MPU9250)
@@ -80,7 +84,11 @@ class MyFrame(wx.Frame):
 			self.button_Si7020A20 =wx.Button(self.p_info, label= _('Si7020-A20'))
 			self.Bind(wx.EVT_BUTTON, self.on_Si7020A20, self.button_Si7020A20)
 
-			self.logger = wx.TextCtrl(self.p_info, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_DONTWRAP|wx.LC_SORT_ASCENDING)
+			self.logger = rt.RichTextCtrl(self.p_info, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_DONTWRAP|wx.LC_SORT_ASCENDING)
+			self.logger.SetMargins((10,10))
+
+			checkB =wx.Button(self.p_info, label=_('Check'))
+			self.Bind(wx.EVT_BUTTON, self.onCheck, checkB)
 
 			button_ok =wx.Button(self.p_info, label=_('Close'))
 			self.Bind(wx.EVT_BUTTON, self.on_ok, button_ok)
@@ -103,7 +111,8 @@ class MyFrame(wx.Frame):
 
 			buttons = wx.BoxSizer(wx.HORIZONTAL)
 			buttons.Add((0,0), 1, wx.ALL | wx.EXPAND, 0)
-			buttons.Add(button_ok, 0, wx.ALL | wx.EXPAND, 0)
+			buttons.Add(checkB, 0, wx.ALL | wx.EXPAND, 0)
+			buttons.Add(button_ok, 0, wx.LEFT | wx.EXPAND, 10)
 
 			vbox3 = wx.BoxSizer(wx.VERTICAL)
 			vbox3.Add(buttons_up, 0, wx.ALL | wx.EXPAND, 5)
@@ -138,34 +147,24 @@ class MyFrame(wx.Frame):
 			self.interval = wx.SpinCtrl(self.p_settings, min=1, max=9999, initial=1000)
 
 			mmsi1_label = wx.StaticText(self.p_settings, -1, _('MMSI boat 1'))
-			self.mmsi1 = wx.SpinCtrl(self.p_settings, min=111111, max=999999999, initial=222222222)
+			self.mmsi1 = wx.SpinCtrl(self.p_settings, min=111111, max=999999999, initial=5551122)
 
 			mmsi2_label = wx.StaticText(self.p_settings, -1, _('MMSI boat 2'))
-			self.mmsi2 = wx.SpinCtrl(self.p_settings, min=111111, max=999999999, initial=333333333)
+			self.mmsi2 = wx.SpinCtrl(self.p_settings, min=111111, max=999999999, initial=6884120)
 
-			receiver1_label = wx.StaticText(self.p_settings, -1, '1')
-			receiver2_label = wx.StaticText(self.p_settings, -1, '2')
-			empty_label = wx.StaticText(self.p_settings, -1, ' ')
-
-			freq1_label = wx.StaticText(self.p_settings, -1, _('frequency 1'))
-			freq2_label = wx.StaticText(self.p_settings, -1, _('frequency 2'))
-			metamask_label = wx.StaticText(self.p_settings, -1, 'metamask')
-			afcRange_label = wx.StaticText(self.p_settings, -1, 'afcRange')
-			tcxoFreq_label = wx.StaticText(self.p_settings, -1, 'tcxoFreq')
+			freq1_label = wx.StaticText(self.p_settings, -1, _('channel A [Hz]'))
+			freq2_label = wx.StaticText(self.p_settings, -1, _('channel B [Hz]'))
+			metamask_label = wx.StaticText(self.p_settings, -1, 'meta data')
+			afcRange_label = wx.StaticText(self.p_settings, -1, 'AFC range [Hz]')
 
 			self.rec1_freq1 = wx.SpinCtrl(self.p_settings, min=159000000, max=162025000, initial=161975000)
 			self.rec1_freq2 = wx.SpinCtrl(self.p_settings, min=159000000, max=162025000, initial=162025000)
-			self.rec1_metamask = wx.SpinCtrl(self.p_settings, min=0, max=99, initial=0)
-			self.rec1_afcRange = wx.SpinCtrl(self.p_settings, min=500, max=2000, initial=1000)
-			self.rec1_tcxoFreq = wx.SpinCtrl(self.p_settings, min=10000000, max=20000000, initial=13000000)
+			self.rec1_metamask = wx.Choice(self.p_settings, choices=(_('none'),'RSSI'), style=wx.CB_READONLY)
+			self.rec1_metamask.SetSelection(0)
+			self.rec1_afcRange = wx.SpinCtrl(self.p_settings, min=500, max=2000, initial=1500)
 
-			self.rec2_freq1 = wx.SpinCtrl(self.p_settings, min=159000000, max=162025000, initial=161975000)
-			self.rec2_freq2 = wx.SpinCtrl(self.p_settings, min=159000000, max=162025000, initial=162025000)
-			self.rec2_metamask = wx.SpinCtrl(self.p_settings, min=0, max=99, initial=0)
-			self.rec2_afcRange = wx.SpinCtrl(self.p_settings, min=500, max=2000, initial=1000)
-			self.rec2_tcxoFreq = wx.SpinCtrl(self.p_settings, min=10000000, max=20000000, initial=13000000)
-
-			self.logger2 = wx.TextCtrl(self.p_settings, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_DONTWRAP|wx.LC_SORT_ASCENDING)
+			self.logger2 = rt.RichTextCtrl(self.p_settings, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_DONTWRAP|wx.LC_SORT_ASCENDING)
+			self.logger2.SetMargins((10,10))
 
 			self.button_apply =wx.Button(self.p_settings, label=_('Apply changes'))
 			self.Bind(wx.EVT_BUTTON, self.on_apply, self.button_apply)
@@ -200,28 +199,16 @@ class MyFrame(wx.Frame):
 			h_boxSizer7.Add(self.mmsi2, 1, wx.ALL | wx.EXPAND, 5)
 
 			rec1_labels = wx.BoxSizer(wx.HORIZONTAL)
-			rec1_labels.Add(empty_label, 0, wx.LEFT | wx.EXPAND, 15)
 			rec1_labels.Add(freq1_label, 1, wx.LEFT | wx.EXPAND, 5)
 			rec1_labels.Add(freq2_label, 1, wx.LEFT | wx.EXPAND, 5)
 			rec1_labels.Add(metamask_label, 1, wx.LEFT | wx.EXPAND, 5)
 			rec1_labels.Add(afcRange_label, 1, wx.LEFT | wx.EXPAND, 5)
-			rec1_labels.Add(tcxoFreq_label, 1, wx.LEFT | wx.EXPAND, 5)
 
 			receiver1 = wx.BoxSizer(wx.HORIZONTAL)
-			receiver1.Add(receiver1_label, 0, wx.UP | wx.LEFT | wx.EXPAND, 10)
 			receiver1.Add(self.rec1_freq1, 1, wx.ALL | wx.EXPAND, 5)
 			receiver1.Add(self.rec1_freq2, 1, wx.ALL | wx.EXPAND, 5)
 			receiver1.Add(self.rec1_metamask, 1, wx.ALL | wx.EXPAND, 5)
 			receiver1.Add(self.rec1_afcRange, 1, wx.ALL | wx.EXPAND, 5)
-			receiver1.Add(self.rec1_tcxoFreq, 1, wx.ALL | wx.EXPAND, 5)
-
-			receiver2 = wx.BoxSizer(wx.HORIZONTAL)
-			receiver2.Add(receiver2_label, 0, wx.UP | wx.LEFT | wx.EXPAND, 10)
-			receiver2.Add(self.rec2_freq1, 1, wx.ALL | wx.EXPAND, 5)
-			receiver2.Add(self.rec2_freq2, 1, wx.ALL | wx.EXPAND, 5)
-			receiver2.Add(self.rec2_metamask, 1, wx.ALL | wx.EXPAND, 5)
-			receiver2.Add(self.rec2_afcRange, 1, wx.ALL | wx.EXPAND, 5)
-			receiver2.Add(self.rec2_tcxoFreq, 1, wx.ALL | wx.EXPAND, 5)
 
 			v_boxSizer8 = wx.StaticBoxSizer(ais_box, wx.VERTICAL)
 			v_boxSizer8.Add(h_boxSizer6, 0, wx.ALL | wx.EXPAND, 0)
@@ -229,7 +216,7 @@ class MyFrame(wx.Frame):
 			v_boxSizer8.AddSpacer(15)
 			v_boxSizer8.Add(rec1_labels, 0, wx.ALL | wx.EXPAND, 0)
 			v_boxSizer8.Add(receiver1, 0, wx.ALL | wx.EXPAND, 0)
-			v_boxSizer8.Add(receiver2, 0, wx.ALL | wx.EXPAND, 0)
+	
 
 			buttons2 = wx.BoxSizer(wx.HORIZONTAL)
 			buttons2.Add((0,0), 1, wx.ALL | wx.EXPAND, 0)
@@ -246,20 +233,24 @@ class MyFrame(wx.Frame):
 
 ##################################################################### settings
 
-			kernel_box = wx.StaticBox(self.p_update, -1, _(' Current Kernel version '))
+			kernel_box = wx.StaticBox(self.p_update, -1, _(' Current kernel version '))
 
 			self.kernel_label = wx.StaticText(self.p_update, -1)
 
 			packages_box = wx.StaticBox(self.p_update, -1, _(' Available packages '))
 
-			self.packages_list = os.listdir(self.op_folder+'/tools/moitessier_hat/packages')
+			self.packages_list = []
 			self.packages_select = wx.Choice(self.p_update, choices=self.packages_list, style=wx.CB_READONLY)
-			self.packages_select.SetSelection(0)
+			self.readAvailable()
 
 			self.button_install =wx.Button(self.p_update, label=_('Install'))
 			self.Bind(wx.EVT_BUTTON, self.on_install, self.button_install)
 
-			self.logger3 = wx.TextCtrl(self.p_update, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_DONTWRAP|wx.LC_SORT_ASCENDING)
+			downloadB =wx.Button(self.p_update, label=_('Download'))
+			self.Bind(wx.EVT_BUTTON, self.onDownload, downloadB)
+
+			self.logger3 = rt.RichTextCtrl(self.p_update, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_DONTWRAP|wx.LC_SORT_ASCENDING)
+			self.logger3.SetMargins((10,10))
 
 			button_ok3 =wx.Button(self.p_update, label=_('Close'))
 			self.Bind(wx.EVT_BUTTON, self.on_ok, button_ok3)
@@ -271,6 +262,7 @@ class MyFrame(wx.Frame):
 			h_packages_box = wx.StaticBoxSizer(packages_box, wx.HORIZONTAL)
 			h_packages_box.Add(self.packages_select, 1, wx.ALL | wx.EXPAND, 5)
 			h_packages_box.Add(self.button_install, 0, wx.ALL | wx.EXPAND, 5)
+			h_packages_box.Add(downloadB, 0, wx.ALL | wx.EXPAND, 5)
 
 			buttons3 = wx.BoxSizer(wx.HORIZONTAL)
 			buttons3.Add((0,0), 1, wx.ALL | wx.EXPAND, 0)
@@ -287,70 +279,159 @@ class MyFrame(wx.Frame):
 #####################################################################
 
 			self.Centre()
-
 			self.read()
 
+		def onDownload(self,e):
+			self.logger3.Clear()
+			self.logger3.BeginTextColour((55, 55, 55))
+			kernel = subprocess.check_output(['uname','-r'])
+			kernel = kernel.split('-')
+			kernel = kernel[0]
+			file = 'moitessier_'+kernel+'_armhf.deb'
+			self.logger3.WriteText(_('Searching file '))
+			self.logger3.BeginBold()
+			self.logger3.WriteText(file)
+			self.logger3.EndBold()
+			self.logger3.WriteText(' ...')
+			self.logger3.Newline()
+			if os.path.isfile(self.op_folder+'/tools/moitessier_hat/packages/'+file):
+				self.logger3.WriteText(_('This file already exists!'))
+			else:
+				try:
+					out = subprocess.check_output(['wget','https://get.rooco.tech/moitessier/release/'+kernel+'/latest/'+file, '-P', self.op_folder+'/tools/moitessier_hat/packages'])
+					self.logger3.WriteText(_('File downloaded!'))
+				except:
+					self.logger3.WriteText(_('File not found!'))
+			self.logger3.EndTextColour()
+			self.readAvailable()
 
-		def read(self):
-			self.current_kernel = subprocess.check_output(['uname','-r','-v'])
-			self.kernel_label.SetLabel(self.current_kernel)
+		def readAvailable(self):
+			self.packages_select.Clear()
+			self.packages_list = []
+			kernel = subprocess.check_output(['uname','-r'])
+			kernel = kernel.split('.')
+			kernelA = int(kernel[0])
+			kernelB = int(kernel[1])
+			kernelC = kernel[2].split('-')
+			kernelC = int(kernelC[0])
+			tmp = os.listdir(self.op_folder+'/tools/moitessier_hat/packages')
+			for i in tmp:
+				package = i.split('_')
+				package = package[1]
+				package = package.split('.')
+				packageA = int(package[0])
+				packageB = int(package[1])
+				packageC = int(package[2])
+				if packageA >= kernelA:
+					if packageB >= kernelB:
+						if packageC >= kernelC: self.packages_list.append(i)
+			self.packages_select.AppendItems(self.packages_list)
+			if len(self.packages_list)>0: self.packages_select.SetSelection(0)
+
+		def onCheck(self,e=0):
+			self.logger.Clear()
+			self.logger.BeginBold()
 			try:
 				out = subprocess.check_output(['more','product'],cwd='/proc/device-tree/hat')
 			except:
-				self.logger.SetValue(_('Moitessier HAT is not attached!'))
-				self.disable_all_buttons()
-				return
+				self.logger.BeginTextColour((255, 0, 0))
+				self.logger.WriteText(_('Moitessier HAT is not attached!\n'))
+				self.logger.EndTextColour()
+				self.disable_info_settings_buttons()
 			else:
 				if not 'Moitessier' in out: 
-					self.logger.SetValue(_('Moitessier HAT is not attached!'))
-					self.disable_all_buttons()
-					return
-				else: self.logger.SetValue(_('Moitessier HAT is attached.\n'))
+					self.logger.BeginTextColour((255, 0, 0))
+					self.logger.WriteText(_('Moitessier HAT is not attached!\n'))
+					self.logger.EndTextColour()
+					self.disable_info_settings_buttons()
+				else: 
+					self.logger.BeginTextColour((0, 255, 0))
+					self.logger.WriteText(_('Moitessier HAT is attached.\n'))
+					self.logger.EndTextColour()
 
 			if not os.path.isfile(self.home+'/moitessier/app/moitessier_ctrl/moitessier_ctrl'):
-				self.logger.AppendText(_('Moitessier HAT package is not installed!'))
+				self.logger.BeginTextColour((255, 0, 0))
+				self.logger.WriteText(_('Moitessier HAT package is not installed!\n'))
+				self.logger.EndTextColour()
 				self.disable_info_settings_buttons()
-				return
 			else:
-				self.logger.AppendText(_('Moitessier HAT package is installed.\n'))
-				self.logger2.SetValue(_('All changes will be temporal.\nDefault settings will be loaded after rebooting.\n'))
-				self.logger3.SetValue(_('Select the package that matches the current Kernel version.\nBefore installing, be sure the HAT is not being used by any service (kplex, GPSD, OpenCPN ...).\nIf installation fails, you may have to try to install the package several times.'))
+				self.logger.BeginTextColour((0, 255, 0))
+				self.logger.WriteText(_('Moitessier HAT package is installed.\n'))
+				self.logger.EndTextColour()
+				self.logger.EndBold()
+				self.logger.BeginTextColour((55, 55, 55))
+				package = subprocess.check_output(['dpkg','-s','moitessier'])
+				self.logger.WriteText(package)
+				self.logger.EndTextColour()
 
+				kernel = subprocess.check_output(['uname','-r'])
+				kernel = kernel.split('-')
+				kernel = kernel[0]
+				package = package.split('\n')
+				for i in package:
+					if 'Version:' in i:
+						version = self.extract_value(i)
+						version = version.split('-')
+						version = version[2]
+				if kernel != version:
+					self.logger.BeginBold()
+					self.logger.BeginTextColour((255, 0, 0))
+					self.logger.WriteText(_('The installed package does not match the kernel version. Go to "install" tab to update the package.'))
+					self.logger.EndTextColour()
+					self.logger.EndBold()
+
+		def extract_value(self, data):
+			option, value = data.split(':')
+			value = value.strip()
+			return value
+
+		def read(self):
+			self.onCheck()
 			try:
-				tree = ET.parse(self.home+'/moitessier/app/moitessier_ctrl/config.xml')
-				root = tree.getroot()
-				for item in root.iter("simulator"):
-					for subitem in item.iter("enabled"):
-						if subitem.text == '1': self.simulator.SetValue(True)
+				settings = subprocess.check_output([self.home+'/moitessier/app/moitessier_ctrl/moitessier_ctrl','/dev/moitessier.ctrl','1'])
+				settings = settings.replace('\t','')
+				settings = settings.split('\n')
+				for i in settings:
+					if 'enabled:' in i:
+						if self.extract_value(i) == '1': self.simulator.SetValue(True)
 						else: self.simulator.SetValue(False)
-					for subitem in item.iter("interval"):
-						self.interval.SetValue(int(subitem.text))
-					for subitem in item.iter("mmsi"):
-						self.mmsi1.SetValue(int(subitem[0].text)) 
-						self.mmsi2.SetValue(int(subitem[1].text))
-				for item in root.iterfind('receiver[@name="receiver1"]'):
-					for subitem in item.iter("channelFreq"):
-						self.rec1_freq1.SetValue(int(subitem[0].text)) 
-						self.rec1_freq2.SetValue(int(subitem[1].text))
-					for subitem in item.iter("metamask"):
-						self.rec1_metamask.SetValue(int(subitem.text))
-					for subitem in item.iter("afcRange"):
-						self.rec1_afcRange.SetValue(int(subitem.text))
-					for subitem in item.iter("tcxoFreq"):
-						self.rec1_tcxoFreq.SetValue(int(subitem.text))
-				for item in root.iterfind('receiver[@name="receiver2"]'):
-					for subitem in item.iter("channelFreq"):
-						self.rec2_freq1.SetValue(int(subitem[0].text)) 
-						self.rec2_freq2.SetValue(int(subitem[1].text))
-					for subitem in item.iter("metamask"):
-						self.rec2_metamask.SetValue(int(subitem.text))
-					for subitem in item.iter("afcRange"):
-						self.rec2_afcRange.SetValue(int(subitem.text))
-					for subitem in item.iter("tcxoFreq"):
-						self.rec2_tcxoFreq.SetValue(int(subitem.text))
-			except: 
-				self.logger2.AppendText(_('Failure reading config.xml file!'))
-				self.disable_all_buttons()
+					if 'interval:' in i:
+						self.interval.SetValue(int(self.extract_value(i)))
+					if 'mmsi:' in i:
+						data = self.extract_value(i)
+						data = data.split(' ')
+						self.mmsi1.SetValue(int(data[0])) 
+						self.mmsi2.SetValue(int(data[1]))
+					if 'channel frequency 1 [Hz]:' in i:
+						self.rec1_freq1.SetValue(int(self.extract_value(i)))
+					if 'channel frequency 2 [Hz]:' in i:
+						self.rec1_freq2.SetValue(int(self.extract_value(i)))
+					if 'meta data mask:' in i:
+						if self.extract_value(i) == '0x00': self.rec1_metamask.SetSelection(0)
+						else: self.rec1_metamask.SetSelection(1)
+					if 'afc range [Hz]:' in i and not 'default' in i:
+						self.rec1_afcRange.SetValue(int(self.extract_value(i)))
+			except:
+				self.logger2.BeginTextColour((255, 0, 0))
+				self.logger2.WriteText(_('Failure reading HAT settings!'))
+				self.logger2.EndTextColour()
+				self.disable_info_settings_buttons()
+			else:
+				self.logger2.BeginTextColour((55, 55, 55))
+				self.logger2.WriteText(_('All changes will be temporal.\nDefault settings will be loaded after rebooting.\n'))
+				self.logger2.EndTextColour()
+
+			self.current_kernel = subprocess.check_output(['uname','-r','-v'])
+			self.kernel_label.SetLabel(self.current_kernel)
+			self.logger3.BeginTextColour((55, 55, 55))
+			self.logger3.WriteText(_('Select the package that fits to the current kernel version.'))
+			self.logger3.Newline()
+			self.logger3.WriteText(_('If there is no matching package, connect to internet and try to download it.'))
+			self.logger3.Newline()
+			self.logger3.WriteText(_('Before installing, be sure the HAT is not being used by any service (Signal K, Kplex, GPSD, OpenCPN ...).'))
+			self.logger3.Newline()
+			self.logger3.WriteText(_('If installation fails, you may have to try to reboot and install the package again.'))
+			self.logger3.EndTextColour()
 
 		def on_install(self,e):
 			if self.packages_select.GetStringSelection() == '':
@@ -358,11 +439,6 @@ class MyFrame(wx.Frame):
 			else:
 				subprocess.Popen(['lxterminal', '-e', 'bash', self.op_folder+'/tools/moitessier_hat/install.sh', self.op_folder+'/tools/moitessier_hat/packages/'+self.packages_select.GetStringSelection()])
 				self.logger3.SetValue(_('Updating Moitessier Hat modules and firmware...'))
-
-		def disable_all_buttons(self):
-			self.disable_info_settings_buttons()
-			self.packages_select.Disable()
-			self.button_install.Disable()
 
 		def disable_info_settings_buttons(self):
 			self.button_get_info.Disable()
@@ -383,32 +459,40 @@ class MyFrame(wx.Frame):
 			self.rec1_freq2.Disable()
 			self.rec1_metamask.Disable()
 			self.rec1_afcRange.Disable()
-			self.rec1_tcxoFreq.Disable()
-			self.rec2_freq1.Disable()
-			self.rec2_freq2.Disable()
-			self.rec2_metamask.Disable()
-			self.rec2_afcRange.Disable()
-			self.rec2_tcxoFreq.Disable()
 			self.button_apply.Disable()
 
 		def on_defaults(self,e):
-			subprocess.call([self.home+'/moitessier/app/moitessier_ctrl/moitessier_ctrl','/dev/moitessier.ctrl','4','1'])
-			self.simulator.SetValue(False)
-			self.interval.SetValue(1000)
-			self.mmsi1.SetValue(222222222) 
-			self.mmsi2.SetValue(333333333)
-			self.rec1_freq1.SetValue(161975000) 
-			self.rec1_freq2.SetValue(162025000)
-			self.rec1_metamask.SetValue(0)
-			self.rec1_afcRange.SetValue(1000)
-			self.rec1_tcxoFreq.SetValue(13000000)
-			self.rec2_freq1.SetValue(161975000) 
-			self.rec2_freq2.SetValue(162025000)
-			self.rec2_metamask.SetValue(0)
-			self.rec2_afcRange.SetValue(1000)
-			self.rec2_tcxoFreq.SetValue(13000000)
-			self.on_apply()
-			self.logger2.AppendText(_('Defaults loaded.\n'))
+			try:
+				tree = ET.parse(self.home+'/moitessier/app/moitessier_ctrl/default_config.xml')
+				root = tree.getroot()
+				for item in root.iter("simulator"):
+					for subitem in item.iter("enabled"):
+						if subitem.text == '1': self.simulator.SetValue(True)
+						else: self.simulator.SetValue(False)
+					for subitem in item.iter("interval"):
+						self.interval.SetValue(int(subitem.text))
+					for subitem in item.iter("mmsi"):
+						self.mmsi1.SetValue(int(subitem[0].text)) 
+						self.mmsi2.SetValue(int(subitem[1].text))
+				for item in root.iterfind('receiver[@name="receiver1"]'):
+					for subitem in item.iter("channelFreq"):
+						self.rec1_freq1.SetValue(int(subitem[0].text)) 
+						self.rec1_freq2.SetValue(int(subitem[1].text))
+					for subitem in item.iter("metamask"):
+						if subitem.text == '0': self.rec1_metamask.SetSelection(0)
+						else: self.rec1_metamask.SetSelection(1)
+					for subitem in item.iter("afcRange"):
+						self.rec1_afcRange.SetValue(int(subitem.text)) 
+			except:
+				self.logger2.Clear()
+				self.logger2.BeginTextColour((255, 0, 0))
+				self.logger2.WriteText(_('Failure reading default_config.xml file!'))
+				self.logger2.EndTextColour()
+			else:
+				self.logger2.Clear()
+				self.logger2.BeginTextColour((55, 55, 55))
+				self.logger2.WriteText(_('Defaults loaded. Apply changes.'))
+				self.logger2.EndTextColour()
 
 		def on_apply(self,e=0):
 			try: 
@@ -428,61 +512,97 @@ class MyFrame(wx.Frame):
 						subitem[0].text = str(self.rec1_freq1.GetValue())
 						subitem[1].text = str(self.rec1_freq2.GetValue())
 					for subitem in item.iter("metamask"):
-						subitem.text = str(self.rec1_metamask.GetValue())
+						if self.rec1_metamask.GetSelection() == 0: subitem.text = '0'
+						else: subitem.text = '16'
 					for subitem in item.iter("afcRange"):
 						subitem.text = str(self.rec1_afcRange.GetValue())
-					for subitem in item.iter("tcxoFreq"):
-						subitem.text = str(self.rec1_tcxoFreq.GetValue())
 				for item in root.iterfind('receiver[@name="receiver2"]'):
 					for subitem in item.iter("channelFreq"):
-						subitem[0].text = str(self.rec2_freq1.GetValue())
-						subitem[1].text = str(self.rec2_freq2.GetValue())
+						subitem[0].text = str(self.rec1_freq1.GetValue())
+						subitem[1].text = str(self.rec1_freq2.GetValue())
 					for subitem in item.iter("metamask"):
-						subitem.text = str(self.rec2_metamask.GetValue())
+						if self.rec1_metamask.GetSelection() == 0: subitem.text = '0'
+						else: subitem.text = '16'
 					for subitem in item.iter("afcRange"):
-						subitem.text = str(self.rec2_afcRange.GetValue())
-					for subitem in item.iter("tcxoFreq"):
-						subitem.text = str(self.rec2_tcxoFreq.GetValue())
+						subitem.text = str(self.rec1_afcRange.GetValue())
 				tree.write(self.home+'/moitessier/app/moitessier_ctrl/config.xml',encoding='utf-8', xml_declaration=True)
 				subprocess.call([self.home+'/moitessier/app/moitessier_ctrl/moitessier_ctrl','/dev/moitessier.ctrl','5',self.home+'/moitessier/app/moitessier_ctrl/config.xml'])
-				self.logger2.SetValue(_('Changes applied.\n'))
-			except: self.logger2.SetValue(_('Apply changes failed!\n'))
+				self.logger2.Clear()
+				self.logger2.BeginTextColour((55, 55, 55))
+				self.logger2.WriteText(_('Changes applied.'))
+				self.logger2.EndTextColour()
+			except: 
+				self.logger2.Clear()
+				self.logger2.BeginTextColour((255, 0, 0))
+				self.logger2.WriteText(_('Apply changes failed!'))
+				self.logger2.EndTextColour()
 
 		def on_get_info(self, e):
+			self.logger.Clear()
+			self.logger.BeginTextColour((55, 55, 55))
 			output = subprocess.check_output([self.home+'/moitessier/app/moitessier_ctrl/moitessier_ctrl','/dev/moitessier.ctrl','1'])
-			self.logger.SetValue(output)
+			self.logger.WriteText(output)
+			self.logger.EndTextColour()
 
 		def on_statistics(self, e):
+			self.logger.Clear()
+			self.logger.BeginTextColour((55, 55, 55))
 			output = subprocess.check_output([self.home+'/moitessier/app/moitessier_ctrl/moitessier_ctrl','/dev/moitessier.ctrl','0'])
-			self.logger.SetValue(output)
+			self.logger.WriteText(output)
+			self.logger.EndTextColour()
 
 		def on_reset_statistics(self, e):
+			self.logger.Clear()
+			self.logger.BeginTextColour((55, 55, 55))
 			output = subprocess.check_output([self.home+'/moitessier/app/moitessier_ctrl/moitessier_ctrl','/dev/moitessier.ctrl','3'])
-			self.logger.SetValue(output)
+			self.logger.WriteText(output)
+			self.logger.EndTextColour()
 
 		def on_enable_gnss(self, e):
+			self.logger2.Clear()
+			self.logger2.BeginTextColour((55, 55, 55))
 			output = subprocess.check_output([self.home+'/moitessier/app/moitessier_ctrl/moitessier_ctrl','/dev/moitessier.ctrl','4','1'])
-			self.logger2.SetValue(output)
+			self.logger2.WriteText(output)
+			self.logger2.EndTextColour()
 
 		def on_disable_gnss(self, e):
+			self.logger2.Clear()
+			self.logger2.BeginTextColour((55, 55, 55))
 			output = subprocess.check_output([self.home+'/moitessier/app/moitessier_ctrl/moitessier_ctrl','/dev/moitessier.ctrl','4','0'])
-			self.logger2.SetValue(output)
+			self.logger2.WriteText(output)
+			self.logger2.EndTextColour()
 
 		def on_MPU9250(self, e):
+			self.logger.Clear()
+			self.logger.BeginTextColour((55, 55, 55))
 			output = subprocess.check_output([self.home+'/moitessier/app/sensors/MPU-9250', '/dev/i2c-1'])
-			self.logger.SetValue(output)
+			self.logger.WriteText(_('MPU-9250 temperature: ')+output)
+			self.logger.WriteText(_('To get accurate readings, make sure the sensor is not being read by another application.'))
+			self.logger.EndTextColour()
 
 		def on_MS560702BA03(self, e):
+			self.logger.Clear()
+			self.logger.BeginTextColour((55, 55, 55))
 			output = subprocess.check_output([self.home+'/moitessier/app/sensors/MS5607-02BA03', '/dev/i2c-1'])
-			self.logger.SetValue(output)
+			self.logger.WriteText(_('MS5607-02BA03 pressure: ')+output)
+			self.logger.WriteText(_('To get accurate readings, make sure the sensor is not being read by another application.'))
+			self.logger.EndTextColour()
 
 		def on_Si7020A20(self, e):
+			self.logger.Clear()
+			self.logger.BeginTextColour((55, 55, 55))
 			output = subprocess.check_output([self.home+'/moitessier/app/sensors/Si7020-A20', '/dev/i2c-1'])
-			self.logger.SetValue(output)
+			if 'Firmware' in output: output = _('This sensor is not mounted on this HAT\n')
+			self.logger.WriteText(_('Si7020-A20 humidity: ')+output)
+			self.logger.WriteText(_('To get accurate readings, make sure the sensor is not being read by another application.'))
+			self.logger.EndTextColour()
 			
 		def on_reset(self, e):
+			self.logger2.Clear()
+			self.logger2.BeginTextColour((55, 55, 55))
 			output = subprocess.check_output([self.home+'/moitessier/app/moitessier_ctrl/moitessier_ctrl','/dev/moitessier.ctrl','2'])
-			self.logger2.SetValue(output)
+			self.logger2.WriteText(output)
+			self.logger2.EndTextColour()
 
 		def on_ok(self, e):
 			self.Close()

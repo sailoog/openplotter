@@ -113,9 +113,12 @@ class MainFrame(wx.Frame):
 
 		self.deviation_table = self.settings.Append(wx.ID_ANY, _('Deviation Table'),_('Create a deviation table for your boat'))
 		self.Bind(wx.EVT_MENU, self.on_deviation_table, self.deviation_table)
-		self.filter_SK = self.settings.Append(wx.ID_ANY, _('Filter SignalK'),
-													_('blocks unwanted SignalK sources before they get into SignalK server node'))
+
+		self.filter_SK = self.settings.Append(wx.ID_ANY, _('Filter SignalK'),_('blocks unwanted SignalK sources before they get into SignalK server node'))
 		self.Bind(wx.EVT_MENU, self.on_filter_SK, self.filter_SK)
+
+		self.moitessierHat = self.settings.Append(wx.ID_ANY, _('Moitessier HAT'),_('Install and configure the Moitessier HAT (GNSS, AIS, compass, heel, trim and pressure)'))
+		self.Bind(wx.EVT_MENU, self.onMoitessierHat, self.moitessierHat)
 
 		self.settings.AppendSeparator()
 
@@ -267,6 +270,10 @@ class MainFrame(wx.Frame):
 	def on_filter_SK(self, e):
 		subprocess.call(['pkill', '-f', 'SK_filter.py'])
 		subprocess.Popen(['python', self.currentpath + '/tools/SK_filter/SK_filter.py'])
+
+	def onMoitessierHat(self, e):
+		subprocess.call(['pkill', '-f', 'moitessier_hat.py'])
+		subprocess.Popen(['python', self.currentpath + '/tools/moitessier_hat/moitessier_hat.py'])
 
 	def tool10(self, event):
 		menuId = event.Id
