@@ -5,15 +5,15 @@ Welcome to OpenPlotter's documentation!
 
 .. toctree::
    :maxdepth: 1
-   :caption: General
-   :name: sec-general
+   :caption: Description
+   :name: sec-description
 
-   general/what_is_openplotter
-   general/features
-   general/examples
-   general/what_do_you_need
-   general/how_does_it_work
-   general/how_to_collaborate
+   description/what_is_openplotter
+   description/features
+   description/examples
+   description/what_do_you_need
+   description/how_does_it_work
+   description/how_to_collaborate
 
 .. toctree::
    :maxdepth: 1
@@ -23,10 +23,38 @@ Welcome to OpenPlotter's documentation!
    getting_started/downloading
    getting_started/installing
    getting_started/first_boot
+   getting_started/settings
    getting_started/updating
    getting_started/backup
    getting_started/recovery_system
-   getting_started/settings
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Connecting with the boat
+   :name: sec-connecting_with_the_boat
+
+   connecting/connection_types
+   connecting/network
+   connecting/serial
+   connecting/can
+   connecting/pypilot
+   connecting/i2c
+   connecting/1w
+   connecting/spi
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Tools
+   :name: sec-tools
+
+   tools/what_are_tools
+   tools/sdr_receiver
+   tools/kplex
+   tools/filter_signalk_inputs
+   tools/moitessier_hat
+   tools/deviation_table
+   tools/ads1115
+   tools/firmata
 
 .. toctree::
    :maxdepth: 1
@@ -52,12 +80,13 @@ Welcome to OpenPlotter's documentation!
 
 .. toctree::
    :maxdepth: 1
-   :caption: Sensors
-   :name: sec-sensors
+   :caption: OpenCPN
+   :name: sec-opencpn
 
-   sensors/i2c
-   sensors/1w
-   sensors/spi
+   opencpn/what_is_opencpn
+   opencpn/connections
+   opencpn/charts
+   opencpn/opengl
 
 .. toctree::
    :maxdepth: 1
@@ -69,15 +98,3 @@ Welcome to OpenPlotter's documentation!
    dashboards/kip
    dashboards/nodered_dashboard
    dashboards/influxdb_grafana
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Tools
-   :name: sec-tools
-
-   tools/demo_tool
-   tools/sdr_receiver
-   tools/moitessier_hat
-   tools/deviation_table
-   tools/ads1115
-   tools/firmata

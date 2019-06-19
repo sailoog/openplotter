@@ -610,7 +610,7 @@ class MyFrame(wx.Frame):
 		self.read_triggers()
 
 	def on_help_filter(self, e):
-		url = self.currentpath+"/docs/html/filter/what_are_filter.html"
+		url = self.currentpath+"/docs/html/tools/filter_signalk_inputs.html"
 		webbrowser.open(url, new=2)
 		
 	def start_SK(self):
