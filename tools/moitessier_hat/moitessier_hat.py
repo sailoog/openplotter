@@ -15,15 +15,16 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, wx.lib.scrolledpanel, sys, os, ConfigParser, re, subprocess, time
+import wx, wx.lib.scrolledpanel, sys, os, re, subprocess, time, ujson, webbrowser
 import wx.richtext as rt
 import xml.etree.ElementTree as ET
-import urllib
 
 op_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../..')
 sys.path.append(op_folder+'/classes')
 from conf import Conf
 from language import Language
+from SK_settings import SK_settings
+from opencpnSettings import opencpnSettings
 
 class MyFrame(wx.Frame):
 		
@@ -43,6 +44,7 @@ class MyFrame(wx.Frame):
 			
 			self.icon = wx.Icon(op_folder+'/static/icons/moitessier_hat.ico', wx.BITMAP_TYPE_ICO)
 			self.SetIcon(self.icon)
+			self.help_bmp = wx.Bitmap(self.op_folder + "/static/icons/help-browser.png", wx.BITMAP_TYPE_ANY)
 
 			self.p = wx.lib.scrolledpanel.ScrolledPanel(self, -1, style=wx.TAB_TRAVERSAL | wx.SUNKEN_BORDER)
 			self.p.SetAutoLayout(1)
@@ -52,17 +54,17 @@ class MyFrame(wx.Frame):
 			self.p_settings = wx.Panel(self.nb)
 			self.p_update = wx.Panel(self.nb)
 			self.p_configure = wx.Panel(self.nb)
-			self.nb.AddPage(self.p_info, _('Info'))
-			self.nb.AddPage(self.p_update, _('Install'))
-			self.nb.AddPage(self.p_configure, _('Configure'))
-			self.nb.AddPage(self.p_settings, _('Settings'))
+			self.nb.AddPage(self.p_info, _('HAT info'))
+			self.nb.AddPage(self.p_update, _('Install drivers'))
+			self.nb.AddPage(self.p_configure, _('OpenPlotter configuration'))
+			self.nb.AddPage(self.p_settings, _('Play with settings'))
 			sizer = wx.BoxSizer()
 			sizer.Add(self.nb, 1, wx.EXPAND)
 			self.p.SetSizer(sizer)
 
 ##################################################################### info
 
-			info_box = wx.StaticBox(self.p_info, -1, _(' HAT info '))
+			info_box = wx.StaticBox(self.p_info, -1, _(' Info '))
 
 			self.button_get_info =wx.Button(self.p_info, label= _('Settings'))
 			self.Bind(wx.EVT_BUTTON, self.on_get_info, self.button_get_info)
@@ -87,6 +89,12 @@ class MyFrame(wx.Frame):
 			self.logger = rt.RichTextCtrl(self.p_info, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_DONTWRAP|wx.LC_SORT_ASCENDING)
 			self.logger.SetMargins((10,10))
 
+			help_button = wx.BitmapButton(self.p_info, bitmap=self.help_bmp, size=(self.help_bmp.GetWidth()+40, self.help_bmp.GetHeight()+10))
+			help_button.Bind(wx.EVT_BUTTON, self.on_help)
+
+			shop =wx.Button(self.p_info, label=_('Shop'))
+			self.Bind(wx.EVT_BUTTON, self.onShop, shop)
+
 			checkB =wx.Button(self.p_info, label=_('Check'))
 			self.Bind(wx.EVT_BUTTON, self.onCheck, checkB)
 
@@ -110,7 +118,9 @@ class MyFrame(wx.Frame):
 			buttons_up.Add(h_boxSizer3, 1, wx.LEFT | wx.EXPAND, 10)
 
 			buttons = wx.BoxSizer(wx.HORIZONTAL)
-			buttons.Add((0,0), 1, wx.ALL | wx.EXPAND, 0)
+			buttons.Add(help_button, 0, wx.ALL | wx.EXPAND, 0)
+			buttons.Add(shop, 0, wx.LEFT | wx.EXPAND, 10)
+			buttons.AddStretchSpacer(1)
 			buttons.Add(checkB, 0, wx.ALL | wx.EXPAND, 0)
 			buttons.Add(button_ok, 0, wx.LEFT | wx.EXPAND, 10)
 
@@ -166,6 +176,9 @@ class MyFrame(wx.Frame):
 			self.logger2 = rt.RichTextCtrl(self.p_settings, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_DONTWRAP|wx.LC_SORT_ASCENDING)
 			self.logger2.SetMargins((10,10))
 
+			help_button = wx.BitmapButton(self.p_settings, bitmap=self.help_bmp, size=(self.help_bmp.GetWidth()+40, self.help_bmp.GetHeight()+10))
+			help_button.Bind(wx.EVT_BUTTON, self.on_help)
+
 			self.button_apply =wx.Button(self.p_settings, label=_('Apply changes'))
 			self.Bind(wx.EVT_BUTTON, self.on_apply, self.button_apply)
 
@@ -219,7 +232,8 @@ class MyFrame(wx.Frame):
 	
 
 			buttons2 = wx.BoxSizer(wx.HORIZONTAL)
-			buttons2.Add((0,0), 1, wx.ALL | wx.EXPAND, 0)
+			buttons2.Add(help_button, 0, wx.ALL | wx.EXPAND, 0)
+			buttons2.AddStretchSpacer(1)
 			buttons2.Add(self.button_apply, 0, wx.RIGHT | wx.EXPAND, 10)
 			buttons2.Add(button_ok2, 0, wx.ALL | wx.EXPAND, 0)
 
@@ -231,7 +245,7 @@ class MyFrame(wx.Frame):
 
 			self.p_settings.SetSizer(vbox4)
 
-##################################################################### settings
+##################################################################### install
 
 			kernel_box = wx.StaticBox(self.p_update, -1, _(' Current kernel version '))
 
@@ -249,8 +263,14 @@ class MyFrame(wx.Frame):
 			downloadB =wx.Button(self.p_update, label=_('Download'))
 			self.Bind(wx.EVT_BUTTON, self.onDownload, downloadB)
 
+			drivers =wx.Button(self.p_update, label=_('All drivers'))
+			self.Bind(wx.EVT_BUTTON, self.onDrivers, drivers)
+
 			self.logger3 = rt.RichTextCtrl(self.p_update, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_DONTWRAP|wx.LC_SORT_ASCENDING)
 			self.logger3.SetMargins((10,10))
+
+			help_button = wx.BitmapButton(self.p_update, bitmap=self.help_bmp, size=(self.help_bmp.GetWidth()+40, self.help_bmp.GetHeight()+10))
+			help_button.Bind(wx.EVT_BUTTON, self.on_help)
 
 			button_ok3 =wx.Button(self.p_update, label=_('Close'))
 			self.Bind(wx.EVT_BUTTON, self.on_ok, button_ok3)
@@ -263,9 +283,11 @@ class MyFrame(wx.Frame):
 			h_packages_box.Add(self.packages_select, 1, wx.ALL | wx.EXPAND, 5)
 			h_packages_box.Add(self.button_install, 0, wx.ALL | wx.EXPAND, 5)
 			h_packages_box.Add(downloadB, 0, wx.ALL | wx.EXPAND, 5)
+			h_packages_box.Add(drivers, 0, wx.ALL | wx.EXPAND, 5)
 
 			buttons3 = wx.BoxSizer(wx.HORIZONTAL)
-			buttons3.Add((0,0), 1, wx.ALL | wx.EXPAND, 0)
+			buttons3.Add(help_button, 0, wx.ALL | wx.EXPAND, 0)
+			buttons3.AddStretchSpacer(1)
 			buttons3.Add(button_ok3, 0, wx.ALL | wx.EXPAND, 0)
 
 			update_final = wx.BoxSizer(wx.VERTICAL)
@@ -276,10 +298,253 @@ class MyFrame(wx.Frame):
 
 			self.p_update.SetSizer(update_final)
 
+##################################################################### configure
+
+			checkConfB =wx.Button(self.p_configure, label= _('Check'))
+			self.Bind(wx.EVT_BUTTON, self.onCheckConfB, checkConfB)
+
+			self.logger4 = rt.RichTextCtrl(self.p_configure, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_DONTWRAP|wx.LC_SORT_ASCENDING)
+			self.logger4.SetMargins((10,10))
+
+			help_button = wx.BitmapButton(self.p_configure, bitmap=self.help_bmp, size=(self.help_bmp.GetWidth()+40, self.help_bmp.GetHeight()+10))
+			help_button.Bind(wx.EVT_BUTTON, self.on_help)
+
+			button_ok4 =wx.Button(self.p_configure, label=_('Close'))
+			self.Bind(wx.EVT_BUTTON, self.on_ok, button_ok4)
+
+			buttons4 = wx.BoxSizer(wx.HORIZONTAL)
+			buttons4.Add(help_button, 0, wx.ALL | wx.EXPAND, 0)
+			buttons4.AddStretchSpacer(1)
+			buttons4.Add(checkConfB, 0, wx.ALL | wx.EXPAND, 0)
+			buttons4.Add(button_ok4, 0, wx.LEFT | wx.EXPAND, 10)
+
+			vbox5 = wx.BoxSizer(wx.VERTICAL)
+			vbox5.Add(self.logger4, 1, wx.ALL | wx.EXPAND, 5)
+			vbox5.Add(buttons4, 0, wx.ALL | wx.EXPAND, 5)
+
+			self.p_configure.SetSizer(vbox5)
+
 #####################################################################
 
 			self.Centre()
 			self.read()
+
+		def onCheckConfB(self,e=0):
+			self.conf = Conf()
+			self.SK_settings = SK_settings(self.conf)
+			self.opencpnSettings = opencpnSettings()
+			self.logger4.Clear()
+
+			serialInst = self.conf.get('UDEV', 'Serialinst')
+			try: serialInst = eval(serialInst)
+			except: serialInst = {}
+			serialalias = ''
+			assignment = ''
+			device = ''
+			for alias in serialInst:
+				if serialInst[alias]['device'] == '/dev/moitessier.tty' and serialInst[alias]['data'] == 'NMEA 0183': 
+					serialalias = alias
+					assignment = serialInst[alias]['assignment']
+					device = self.SK_settings.check_device(alias)
+
+			pypilot = self.conf.get('PYPILOT', 'mode')
+			heading = self.conf.get('PYPILOT', 'translation_magnetic_h')
+			attitude = self.conf.get('PYPILOT', 'translation_attitude')
+
+			i2c = self.conf.get('I2C', 'sensors')
+			try: i2c = eval(i2c)
+			except: i2c = {}
+			pressure = ''
+			temperature = ''
+			for sensor in i2c:
+				if sensor[0] == 'MS5607-02BA03' and sensor[1] == '0x77':
+					pressure = sensor[2][0][0]
+					temperature = sensor[2][1][0]
+
+			XDRBaro = False
+			SKplugin = False
+			setting_file = self.home+'/.signalk/plugin-config-data/sk-to-nmea0183.json'
+			if os.path.isfile(setting_file):
+				with open(setting_file) as data_file:
+					data = ujson.load(data_file)
+				if 'enabled' in data: SKplugin = data['enabled']
+				if 'configuration' in data:
+					if 'XDRBaro' in data['configuration']: XDRBaro = data['configuration']['XDRBaro']
+
+			opencpnConnection = self.opencpnSettings.getConnectionState()
+
+			self.logger4.BeginTextColour((55, 55, 55))
+			self.logger4.BeginBold()
+			self.logger4.WriteText('AIS - GNSS')
+			self.logger4.EndBold()
+			self.logger4.Newline()
+			self.logger4.WriteText(_('Serial alias: '))
+			self.logger4.EndTextColour()
+			if serialalias:
+				self.logger4.BeginTextColour((0, 255, 0))
+				self.logger4.WriteText(serialalias)
+			else:
+				self.logger4.BeginTextColour((255, 0, 0))
+				self.logger4.WriteText(_('none'))
+			self.logger4.EndTextColour()
+			self.logger4.Newline()
+			self.logger4.BeginTextColour((55, 55, 55))
+			self.logger4.WriteText(_('Assignment: '))
+			self.logger4.EndTextColour()
+			if not assignment:
+				self.logger4.BeginTextColour((255, 0, 0))
+				self.logger4.WriteText(_('none'))
+			elif assignment != 'GPSD':
+				if assignment == '0': x = _('manual')
+				else: x = assignment
+				self.logger4.BeginTextColour((0, 255, 0))
+				self.logger4.WriteText(x)
+			else:
+				self.logger4.BeginTextColour((255, 0, 0))
+				self.logger4.WriteText(assignment)
+			self.logger4.EndTextColour()
+			self.logger4.Newline()
+			self.logger4.BeginTextColour((55, 55, 55))
+			self.logger4.WriteText(_('Signal K connection status: '))
+			self.logger4.EndTextColour()
+			if not assignment:
+				self.logger4.BeginTextColour((255, 0, 0))
+				self.logger4.WriteText(_('none'))
+			elif assignment == '0' or assignment == 'GPSD' or assignment == 'Signal K > OpenCPN':
+				if device == 'enabled':
+					self.logger4.BeginTextColour((0, 255, 0))
+					self.logger4.WriteText(_('enabled'))
+				elif device == 'disabled':
+					self.logger4.BeginTextColour((255, 0, 0))
+					self.logger4.WriteText(_('disabled'))
+				else:
+					self.logger4.BeginTextColour((255, 0, 0))
+					self.logger4.WriteText(_('connection does not exist'))
+			elif 'pypilot' in assignment:
+				if self.SK_settings.pypilot_enabled == True:
+					self.logger4.BeginTextColour((0, 255, 0))
+					self.logger4.WriteText(_('enabled'))
+				else:
+					self.logger4.BeginTextColour((255, 0, 0))
+					self.logger4.WriteText(_('disabled'))
+			else:
+				self.logger4.BeginTextColour((255, 0, 0))
+				self.logger4.WriteText(_('none'))
+			self.logger4.EndTextColour()
+
+			self.logger4.BeginTextColour((55, 55, 55))
+			self.logger4.Newline()
+			self.logger4.BeginBold()
+			self.logger4.WriteText(_('Compass - Heel - Trim'))
+			self.logger4.EndBold()
+			self.logger4.Newline()
+			self.logger4.WriteText(_('Pypilot status: '))
+			self.logger4.EndTextColour()
+			if pypilot == 'basic autopilot' or pypilot == 'imu':
+				self.logger4.BeginTextColour((0, 255, 0))
+				self.logger4.WriteText(_('enabled'))
+			else:
+				self.logger4.BeginTextColour((255, 0, 0))
+				self.logger4.WriteText(_('disabled'))
+			self.logger4.EndTextColour()
+			self.logger4.Newline()
+			self.logger4.BeginTextColour((55, 55, 55))
+			self.logger4.WriteText(_('Heading: '))
+			self.logger4.EndTextColour()
+			if pypilot != 'disabled' and heading == '1':
+				self.logger4.BeginTextColour((0, 255, 0))
+				self.logger4.WriteText(_('enabled'))
+			else:
+				self.logger4.BeginTextColour((255, 0, 0))
+				self.logger4.WriteText(_('disabled'))
+			self.logger4.EndTextColour()
+			self.logger4.Newline()
+			self.logger4.BeginTextColour((55, 55, 55))
+			self.logger4.WriteText(_('Pitch, Roll: '))
+			self.logger4.EndTextColour()
+			if pypilot != 'disabled' and attitude == '1':
+				self.logger4.BeginTextColour((0, 255, 0))
+				self.logger4.WriteText(_('enabled'))
+			else:
+				self.logger4.BeginTextColour((255, 0, 0))
+				self.logger4.WriteText(_('disabled'))
+			self.logger4.EndTextColour()
+
+			self.logger4.Newline()
+			self.logger4.BeginTextColour((55, 55, 55))
+			self.logger4.BeginBold()
+			self.logger4.WriteText(_('Pressure - Temperature'))
+			self.logger4.EndBold()
+			self.logger4.Newline()
+			self.logger4.WriteText(_('I2C - Signal K key for pressure: '))
+			self.logger4.EndTextColour()
+			if pressure:
+				self.logger4.BeginTextColour((0, 255, 0))
+				self.logger4.WriteText(pressure)
+			else:
+				self.logger4.BeginTextColour((255, 0, 0))
+				self.logger4.WriteText(_('none'))
+			self.logger4.EndTextColour()
+			self.logger4.Newline()
+			self.logger4.BeginTextColour((55, 55, 55))
+			self.logger4.WriteText(_('I2C - Signal K key for temperature: '))
+			self.logger4.EndTextColour()
+			if temperature:
+				self.logger4.BeginTextColour((0, 255, 0))
+				self.logger4.WriteText(temperature)
+			else:
+				self.logger4.BeginTextColour((255, 0, 0))
+				self.logger4.WriteText(_('none'))
+			self.logger4.EndTextColour()
+			self.logger4.Newline()
+			self.logger4.BeginTextColour((55, 55, 55))
+			self.logger4.WriteText(_('Signal K to NMEA 0183 plugin: '))
+			self.logger4.EndTextColour()
+			if SKplugin:
+				self.logger4.BeginTextColour((0, 255, 0))
+				self.logger4.WriteText(_('enabled'))
+			else:
+				self.logger4.BeginTextColour((255, 0, 0))
+				self.logger4.WriteText(_('disabled'))
+			self.logger4.EndTextColour()
+			self.logger4.Newline()
+			self.logger4.BeginTextColour((55, 55, 55))
+			self.logger4.WriteText(_('XDR (Barometer) conversion: '))
+			self.logger4.EndTextColour()
+			if SKplugin and XDRBaro:
+				self.logger4.BeginTextColour((0, 255, 0))
+				self.logger4.WriteText(_('enabled'))
+			else:
+				self.logger4.BeginTextColour((255, 0, 0))
+				self.logger4.WriteText(_('disabled'))
+			self.logger4.EndTextColour()
+
+			self.logger4.Newline()
+			self.logger4.BeginTextColour((55, 55, 55))
+			self.logger4.BeginBold()
+			self.logger4.WriteText(_('OpenCPN'))
+			self.logger4.EndBold()
+			self.logger4.Newline()
+			self.logger4.WriteText(_('Signal K connection: '))
+			self.logger4.EndTextColour()
+			if opencpnConnection:
+				self.logger4.BeginTextColour((0, 255, 0))
+				self.logger4.WriteText(_('TCP localhost 10110 input'))
+			else:
+				self.logger4.BeginTextColour((255, 0, 0))
+				self.logger4.WriteText(_('missing TCP localhost 10110 input'))
+			self.logger4.EndTextColour()
+			self.logger4.Newline()
+			self.logger4.BeginTextColour((55, 55, 55))
+			self.logger4.WriteText(_('Status: '))
+			self.logger4.EndTextColour()
+			if not opencpnConnection or opencpnConnection == 'disabled':
+				self.logger4.BeginTextColour((255, 0, 0))
+				self.logger4.WriteText(_('disabled'))
+			if opencpnConnection == 'enabled':
+				self.logger4.BeginTextColour((0, 255, 0))
+				self.logger4.WriteText(_('enabled'))
+
 
 		def onDownload(self,e):
 			self.logger3.Clear()
@@ -432,6 +697,7 @@ class MyFrame(wx.Frame):
 			self.logger3.Newline()
 			self.logger3.WriteText(_('If installation fails, you may have to try to reboot and install the package again.'))
 			self.logger3.EndTextColour()
+			self.onCheckConfB()
 
 		def on_install(self,e):
 			if self.packages_select.GetStringSelection() == '':
@@ -603,6 +869,18 @@ class MyFrame(wx.Frame):
 			output = subprocess.check_output([self.home+'/moitessier/app/moitessier_ctrl/moitessier_ctrl','/dev/moitessier.ctrl','2'])
 			self.logger2.WriteText(output)
 			self.logger2.EndTextColour()
+
+		def on_help(self, e):
+			url = self.op_folder+"/docs/html/tools/moitessier_hat.html"
+			webbrowser.open(url, new=2)
+
+		def onShop(self, e):
+			url = "https://shop.sailoog.com/openplotter/4-moitessier-hat.html"
+			webbrowser.open(url, new=2)
+
+		def onDrivers(self, e):
+			url = "https://www.rooco.eu/2018/06/13/firmware-and-drivers-for-raspberry-pi-moitessier-hat/"
+			webbrowser.open(url, new=2)
 
 		def on_ok(self, e):
 			self.Close()
