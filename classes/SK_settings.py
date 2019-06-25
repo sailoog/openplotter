@@ -272,6 +272,17 @@ class SK_settings:
 		if write: self.write_settings()
 		return write
 
+	def check_device(self,device):
+		exists = False
+		for i in self.data['pipedProviders']:
+			if 'device' in i['pipeElements'][0]['options']['subOptions']:
+				if i['pipeElements'][0]['options']['subOptions']['device'] == device: 
+					exists = True
+					if i['enabled']: status = 'enabled'
+					else: status = 'disabled'
+		if exists: return status
+		else: return exists
+
 	def write_settings(self):
 		data = ujson.dumps(self.data, indent=4, sort_keys=True)
 		try:

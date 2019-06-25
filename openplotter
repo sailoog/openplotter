@@ -111,11 +111,14 @@ class MainFrame(wx.Frame):
 		self.kplexTool = self.settings.Append(wx.ID_ANY, _('Kplex GUI'),_('Graphical user interface for NMEA 0183 multiplexer kplex'))
 		self.Bind(wx.EVT_MENU, self.onKplexTool, self.kplexTool)
 
-		self.deviation_table = self.settings.Append(wx.ID_ANY, _('Deviation Table'),_('Create a deviation table for your boat'))
-		self.Bind(wx.EVT_MENU, self.on_deviation_table, self.deviation_table)
-		self.filter_SK = self.settings.Append(wx.ID_ANY, _('Filter SignalK'),
-													_('blocks unwanted SignalK sources before they get into SignalK server node'))
+		self.filter_SK = self.settings.Append(wx.ID_ANY, _('Filter Signal K inputs'),_('Blocks unwanted Signal K data before getting into Signal K server'))
 		self.Bind(wx.EVT_MENU, self.on_filter_SK, self.filter_SK)
+
+		self.moitessierHat = self.settings.Append(wx.ID_ANY, _('Moitessier HAT'),_('Install and configure the Moitessier HAT (GNSS, AIS, compass, heel, trim and pressure)'))
+		self.Bind(wx.EVT_MENU, self.onMoitessierHat, self.moitessierHat)
+
+		self.deviation_table = self.settings.Append(wx.ID_ANY, _('Deviation table'),_('Create a deviation table for your boat'))
+		self.Bind(wx.EVT_MENU, self.on_deviation_table, self.deviation_table)
 
 		self.settings.AppendSeparator()
 
@@ -267,6 +270,10 @@ class MainFrame(wx.Frame):
 	def on_filter_SK(self, e):
 		subprocess.call(['pkill', '-f', 'SK_filter.py'])
 		subprocess.Popen(['python', self.currentpath + '/tools/SK_filter/SK_filter.py'])
+
+	def onMoitessierHat(self, e):
+		subprocess.call(['pkill', '-f', 'moitessier_hat.py'])
+		subprocess.Popen(['python', self.currentpath + '/tools/moitessier_hat/moitessier_hat.py'])
 
 	def tool10(self, event):
 		menuId = event.Id
@@ -1918,7 +1925,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 				c = c + 1
 
 	def on_help_i2c(self, e):
-		url = self.currentpath+"/docs/html/sensors/i2c.html"
+		url = self.currentpath+"/docs/html/connecting/i2c.html"
 		webbrowser.open(url, new=2)
 
 	###########################################SPI
@@ -4331,7 +4338,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		if reset == True : os.system('sudo shutdown -r now')
 
 	def on_help_serial(self, e):
-		url = self.currentpath+"/docs/html/getting_started/connecting_serial_devices.html"
+		url = self.currentpath+"/docs/html/connecting/serial.html"
 		webbrowser.open(url, new=2)
 
 	###########################################CAN
