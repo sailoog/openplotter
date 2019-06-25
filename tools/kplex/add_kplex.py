@@ -25,13 +25,13 @@ class addkplex(wx.Dialog):
 		self.op_folder = parent.op_folder
 		if edit == 0: title = _('Add kplex interface')
 		else: title = _('Edit kplex interface')
-		wx.Dialog.__init__(self, None, title=title, size=(550, 400))
+		wx.Dialog.__init__(self, None, title=title, size=(550, 450))
 		self.extkplex = extkplex
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 		self.result = 0
 		self.index = -1
 		if edit != 0:
-			self.index = edit[9]
+			self.index = edit[11]
 
 		panel = wx.Panel(self)
 
@@ -123,15 +123,26 @@ class addkplex(wx.Dialog):
 		self.otalker.SetValue('**')
 		self.osent.SetValue('***')
 
-		self.gpsd_examp_b = wx.Button(panel, label=_('Add GPSD input'), pos=(220, 320))
+		self.optional = wx.CheckBox(panel, label=_('set optional'), pos=(20, 365))
+
+		self.gpsd_examp_b = wx.Button(panel, label=_('Add GPSD in'), pos=(20, 320))
 		self.Bind(wx.EVT_BUTTON, self.gpsd_examp, self.gpsd_examp_b)
 
-		self.ok = wx.Button(panel, label=_('OK'), pos=(425, 320))
+		self.SK_examp_b = wx.Button(panel, label=_('Add SignalK out'), pos=(155, 320))
+		self.SK_examp_b.Bind(wx.EVT_BUTTON, self.SK_examp)
+
+		self.GPS_examp_b = wx.Button(panel, label=_('Add GPS in'), pos=(290, 320))
+		self.GPS_examp_b.Bind(wx.EVT_BUTTON, self.GPS_examp)
+
+		self.AP_examp_b = wx.Button(panel, label=_('Add Autopilot'), pos=(425, 320))
+		self.AP_examp_b.Bind(wx.EVT_BUTTON, self.AP_examp)
+
+		self.ok = wx.Button(panel, label=_('OK'), pos=(425, 360))
 		self.Bind(wx.EVT_BUTTON, self.ok_conn, self.ok)
-		cancelBtn = wx.Button(panel, wx.ID_CANCEL, pos=(330, 320))
+		cancelBtn = wx.Button(panel, wx.ID_CANCEL, pos=(330, 360))
 
 		if edit == 0:
-			edit = ['0', '0', '0', '0', '0', '0', '0', '0', '0', -1]
+			edit = ['0', '0', '0', '0', '0', '0', '0', '0', '0', -1,0]
 			self.kplex_type.SetValue('Serial')
 			self.kplex_baud_select.SetValue('4800')
 			self.kplex_io_ser.SetValue('in')
@@ -139,37 +150,55 @@ class addkplex(wx.Dialog):
 			self.switch_ser_net(True)
 			self.switch_io_out(False)
 		else:
-			self.kplex_name.SetValue(edit[0])
-			self.kplex_type.SetValue(edit[1])
-			if edit[1] == 'Serial':
-				self.kplex_io_ser.SetValue(edit[2])
+			self.kplex_name.SetValue(edit[1])
+			self.kplex_type.SetValue(edit[2])
+			if edit[2] == 'Serial':
+				self.kplex_io_ser.SetValue(edit[3])
 				self.switch_ser_net(True)
-				self.kplex_device_select.SetValue(edit[3])
-				self.kplex_baud_select.SetValue(edit[4])
+				self.kplex_device_select.SetValue(edit[4])
+				self.kplex_baud_select.SetValue(edit[5])
 			else:
-				self.kplex_io_net.SetValue(edit[2])
+				self.kplex_io_net.SetValue(edit[3])
 				self.switch_ser_net(False)
-				self.kplex_address.SetValue(edit[3])
-				self.kplex_netport.SetValue(edit[4])
+				self.kplex_address.SetValue(edit[4])
+				self.kplex_netport.SetValue(edit[5])
 			self.on_kplex_io_change(0)
-			if edit[5] != _('none').decode("utf-8"):
-				if edit[5] == _('accept').decode("utf-8"):
+			if edit[6] != _('none').decode("utf-8"):
+				if edit[6] == _('accept').decode("utf-8"):
 					self.ifilter_select.SetValue(self.mode_ifilter[1])
-				if edit[5] == _('ignore').decode("utf-8"):
+				if edit[6] == _('ignore').decode("utf-8"):
 					self.ifilter_select.SetValue(self.mode_ifilter[2])
-				self.ifilter_sentences.SetValue(edit[6])
+				self.ifilter_sentences.SetValue(edit[7])
 			else:
 				self.ifilter_select.SetValue(self.mode_ifilter[0])
-			if edit[7] != _('none').decode("utf-8"):
-				if edit[7] == _('accept').decode("utf-8"):
+			if edit[8] != _('none').decode("utf-8"):
+				if edit[8] == _('accept').decode("utf-8"):
 					self.ofilter_select.SetValue(self.mode_ofilter[1])
-				if edit[7] == _('ignore').decode("utf-8"):
+				if edit[8] == _('ignore').decode("utf-8"):
 					self.ofilter_select.SetValue(self.mode_ofilter[2])
 				self.ofilter_sentences.SetValue(edit[8])
 			else:
 				self.ofilter_select.SetValue(self.mode_ofilter[0])
+			if edit[10] == '1':
+				self.optional.SetValue(True)
+			else:
+				self.optional.SetValue(False)
 
-	'''
+	def SK_examp(self, e):
+		self.kplex_type.SetValue('TCP')
+		self.kplex_io_net.SetValue('out')
+		self.switch_ser_net(False)
+		self.switch_io_out(True)
+		self.switch_io_in(False)
+		self.kplex_address.SetValue('')
+		self.kplex_netport.SetValue('30330')
+		self.kplex_baud_select.SetValue('4800')
+		self.kplex_name.SetValue('signalk')
+		self.ifilter_select.SetValue(self.mode_ifilter[0])
+		self.ifilter_sentences.SetValue(_('nothing'))
+		self.ofilter_select.SetValue(self.mode_ifilter[0])
+		self.ofilter_sentences.SetValue(_('nothing'))
+
 	def GPS_examp(self, e):
 		self.kplex_type.SetValue('Serial')
 		self.kplex_io_ser.SetValue('in')
@@ -182,6 +211,7 @@ class addkplex(wx.Dialog):
 		self.ifilter_sentences.SetValue(_('nothing'))
 		self.ofilter_select.SetValue(self.mode_ifilter[0])
 		self.ofilter_sentences.SetValue(_('nothing'))
+		self.optional.SetValue(True)
 
 	def AP_examp(self, e):
 		self.kplex_type.SetValue('Serial')
@@ -195,7 +225,8 @@ class addkplex(wx.Dialog):
 		self.ifilter_sentences.SetValue('**HDM,**RSA')
 		self.ofilter_select.SetValue(self.mode_ifilter[1])
 		self.ofilter_sentences.SetValue('**RM*,**VHW,**VWR')
-	'''
+		self.optional.SetValue(True)
+
 	def gpsd_examp(self, e):
 		self.kplex_type.SetValue('TCP')
 		self.kplex_io_net.SetValue('in')
@@ -211,6 +242,7 @@ class addkplex(wx.Dialog):
 		self.ifilter_sentences.SetValue(_('nothing'))
 		self.ofilter_select.SetValue(self.mode_ifilter[0])
 		self.ofilter_sentences.SetValue(_('nothing'))
+		self.optional.SetValue(True)
 
 	def ifilter_del(self, event):
 		self.ifilter_sentences.SetValue(_('nothing'))
@@ -370,7 +402,7 @@ class addkplex(wx.Dialog):
 		if not re.match('^[_0-9a-z]{1,13}$', name):
 			self.ShowMessage(_('"Name" must be a unique word between 1 and 13 lowercase letters and/or numbers.'))
 			return
-
+		
 		for index, sublist in enumerate(self.extkplex):
 			if sublist[1] == name and index != self.index:
 				self.ShowMessage(_('This name is already in use.'))
@@ -384,7 +416,7 @@ class addkplex(wx.Dialog):
 				return
 			bauds_port = str(self.kplex_baud_select.GetValue())
 			for index, sublist in enumerate(self.extkplex):
-				if sublist[4] == port_address and index != self.index:
+				if sublist[4] == port_address and sublist[4] != '' and index != self.index:
 					self.ShowMessage(_('This output is already in use.'))
 					return
 
@@ -466,10 +498,13 @@ class addkplex(wx.Dialog):
 			for index, item in enumerate(l):
 				if index != 0: ofiltering += ':'
 				ofiltering += '-' + item
-
+		
+		optio = '0'
+		if self.optional.GetValue() == 1:
+			optio = '1'
+		
 		self.add_kplex_out = ['None', name, type_conn, in_out, port_address, bauds_port, filter_type, filtering,
-							  ofilter_type, ofiltering, '1', self.index]
-		# print self.add_kplex_out
+							  ofilter_type, ofiltering, optio, self.index]
 		self.result = self.add_kplex_out
 		self.Destroy()
 

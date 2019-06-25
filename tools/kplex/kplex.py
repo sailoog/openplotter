@@ -53,6 +53,7 @@ class MyFrame(wx.Frame):
 		self.list_kplex.InsertColumn(6, _('Filtering'), width=80)
 		self.list_kplex.InsertColumn(7, _('outFilter'), width=60)
 		self.list_kplex.InsertColumn(8, _('Filtering'), width=80)
+		self.list_kplex.InsertColumn(9, _('Optional'), width=10)
 		self.list_kplex.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.edit_kplex)
 
 		diagnostic = wx.Button(self, label=_('Diagnostic'))
@@ -133,7 +134,8 @@ class MyFrame(wx.Frame):
 	def edit_kplex(self, e):
 		idx = e.GetIndex()
 		edit = []
-		for i in range(9):
+		edit.append(self.list_kplex.IsChecked(idx))
+		for i in range(10):
 			edit.append(self.list_kplex.GetItem(idx, i).GetText())
 		edit.append(idx)
 		self.edit_add_kplex(edit)
@@ -146,75 +148,96 @@ class MyFrame(wx.Frame):
 		dlg.ShowModal()
 		result = dlg.result
 		dlg.Destroy()
-
 		if result != 0:
 			k = int(result[11])
 			if edit == 0:
 				self.kplex.append(result)
 				self.set_list_kplex()
 			else:
-				for i in range(10):
-					self.kplex[k][i] = result[i]
+				for i in range(12):
+					self.kplex[k][i] = result[i]				
 				self.set_list_kplex()
 
 	def read_kplex_conf(self):
 		self.kplex = []
 		try:
+		#if True:
 			file = open(self.home + '/.kplex.conf', 'r')
 			data = file.readlines()
 			file.close()
-
-			l_tmp = [None] * 8
+			#active, name, type_conn, in_out, port_address, bauds_port, filter_type, filtering, ofilter_type, ofiltering, optio, self.index
+			#	0	   1	2			3		4				5			6			7			8			9			10		11
+			active = False
+			name = ''
+			type_conn =''
+			in_out = ''
+			port_address = ''
+			bauds_port = ''
+			filter_type = ''
+			filtering = ''
+			ofilter_type = ''
+			ofiltering = ''
+			optio = '0'
+			self.index = -1
+			
 			self.manual_settings = ''
 			for index, item in enumerate(data):
-
 				if self.manual_settings:
 					if item != '\n': self.manual_settings += item
 				else:
 					if re.search('\[*\]', item):
-						if l_tmp[3] == 'in' or l_tmp[3] == 'out' or l_tmp[3] == 'both':
-							self.kplex.append(l_tmp)
-						l_tmp = [None] * 11
-						l_tmp[6] = 'none'
-						l_tmp[7] = 'nothing'
-						l_tmp[8] = 'none'
-						l_tmp[9] = 'nothing'
-						if '[serial]' in item: l_tmp[2] = 'Serial'
-						if '[tcp]' in item: l_tmp[2] = 'TCP'
-						if '[udp]' in item: l_tmp[2] = 'UDP'
+						if in_out in ['in','out','both']:
+							self.kplex.append([active, name, type_conn, in_out, port_address, bauds_port, filter_type, filtering, ofilter_type, ofiltering, optio, self.index])
+						optio = '0'
+						filter_type = 'none'
+						filtering = 'nothing'
+						ofilter_type = 'none'
+						ofiltering = 'nothing'
+						if '[serial]' in item: 
+							type_conn = 'Serial'
+							self.index += 1
+						if '[tcp]' in item: 
+							type_conn = 'TCP'
+							self.index += 1
+						if '[udp]' in item: 
+							type_conn = 'UDP'
+							self.index += 1
 						if '#[' in item:
-							l_tmp[10] = '0'
+							active = False
+							self.index += 1
 						else:
-							l_tmp[10] = '1'
+							active = True
 					if 'direction=in' in item:
-						l_tmp[3] = 'in'
+						in_out = 'in'
 					if 'direction=out' in item:
-						l_tmp[3] = 'out'
+						in_out = 'out'
 					if 'direction=both' in item:
-						l_tmp[3] = 'both'
+						in_out = 'both'
 					if 'name=' in item and 'filename=' not in item:
-						l_tmp[1] = self.extract_value(item)
+						name = self.extract_value(item)
 					if 'address=' in item or 'filename=' in item:
-						l_tmp[4] = self.extract_value(item)
+						port_address = self.extract_value(item)
 					if 'port=' in item or 'baud=' in item:
-						l_tmp[5] = self.extract_value(item)
+						bauds_port = self.extract_value(item)
 					if 'ifilter=' in item and '-all' in item:
-						l_tmp[6] = 'accept'
-						l_tmp[7] = self.extract_value(item)
+						filter_type = 'accept'
+						filtering = self.extract_value(item)
 					if 'ifilter=' in item and '-all' not in item:
-						l_tmp[6] = 'ignore'
-						l_tmp[7] = self.extract_value(item)
+						filter_type = 'ignore'
+						filtering = self.extract_value(item)
 					if 'ofilter=' in item and '-all' in item:
-						l_tmp[8] = 'accept'
-						l_tmp[9] = self.extract_value(item)
+						ofilter_type = 'accept'
+						ofiltering = self.extract_value(item)
 					if 'ofilter=' in item and '-all' not in item:
-						l_tmp[8] = 'ignore'
-						l_tmp[9] = self.extract_value(item)
+						ofilter_type = 'ignore'
+						ofiltering = self.extract_value(item)
+					if 'optional=yes' in item:
+						optio = '1'
 					if '###Manual settings' in item:
 						self.manual_settings = '###Manual settings\n\n'
 
-			if l_tmp[3] == 'in' or l_tmp[3] == 'out' or l_tmp[3] == 'both':
-				self.kplex.append(l_tmp)
+			if in_out in ['in','out','both']:
+				self.kplex.append([active, name, type_conn, in_out, port_address, bauds_port, filter_type, filtering, ofilter_type, ofiltering, optio, self.index])
 
 			self.set_list_kplex()
 
@@ -261,7 +284,8 @@ class MyFrame(wx.Frame):
 				filters = filters.replace('-', '')
 				filters = filters.replace(':', ',')
 				self.list_kplex.SetStringItem(index, 8, filters)
-			if i[10] == '1': 
+			self.list_kplex.SetStringItem(index, 9,i[10])
+			if i[0]: 
 				self.list_kplex.CheckItem(index)
 				self.list_kplex.SetItemBackgroundColour(index,(102,205,170))
 
@@ -275,14 +299,18 @@ class MyFrame(wx.Frame):
 				state = ''
 			else:
 				state = '#'
+				
+			optional=''
+			if item[10] == '1':
+				optional = 'optional=yes\n'
 
 			if 'Serial' in item[2]:
 				data += state + '[serial]\n' + state + 'name=' + item[1] + '\n' + state + 'direction=' + item[
-					3] + '\n' + state + 'optional=yes\n'
+					3] + '\n' + state + optional
 				data += state + 'filename=' + item[4] + '\n' + state + 'baud=' + item[5] + '\n'
 			if 'TCP' in item[2]:
 				data += state + '[tcp]\n' + state + 'name=' + item[1] + '\n' + state + 'direction=' + item[
-					3] + '\n' + state + 'optional=yes\n'
+					3] + '\n' + state + optional
 				if item[1] == 'gpsd': data += state + 'gpsd=yes\n'
 				if item[3] <> 'out':
 					data += state + 'mode=client\n'
@@ -293,7 +321,7 @@ class MyFrame(wx.Frame):
 				data += state + 'port=' + str(item[5]) + '\n'
 			if 'UDP' in item[2]:
 				data += state + '[udp]\n' + state + 'name=' + item[1] + '\n' + state + 'direction=' + item[
-					3] + '\n' + state + 'optional=yes\n'
+					3] + '\n' + state + optional
 				data += state + 'address=' + item[4] + '\n' + state + 'port=' + item[5] + '\n'
 
 			if not (item[6] == _('none') or item[6] == 'none') and not (item[7] == _('nothing') or item[7] == 'nothing'): 
