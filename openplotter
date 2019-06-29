@@ -4400,6 +4400,19 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		mcp2515 = wx.StaticBox(self.p_n2k, label=_(' MCP2515 '))
 
+		canInterfaceLabel = wx.StaticText(self.p_n2k, label=_('Interface'))
+		canInterface = wx.Choice(self.p_n2k, choices=('can0', 'can1'), style=wx.CB_READONLY)
+
+		canOscillatorLabel = wx.StaticText(self.p_n2k, label=_('Oscillator'))
+		canOscillator = wx.Choice(self.p_n2k, choices=('8000000', '16000000'), style=wx.CB_READONLY)
+
+		self.allowed_pins = ['22','29','31','32','33','35','36','37','38','40']
+		canInterruptLabel = wx.StaticText(self.p_n2k, label=_('Interrupt'))
+		canInterrupt = wx.Choice(self.p_n2k, choices=self.allowed_pins, style=wx.CB_READONLY)
+
+		mcp2515Apply = wx.Button(self.p_n2k, label=_('Apply'))
+		mcp2515Apply.Bind(wx.EVT_BUTTON, self.onMcp2515Apply)
+
 		'''
 		self.n2k_can0_enable = wx.CheckBox(self.p_n2k, label=_('Input/Output can0'))
 		self.n2k_can0_enable.Bind(wx.EVT_CHECKBOX, self.on_n2k_can0_enable)	
@@ -4446,8 +4459,31 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		canboatBox.Add(canboatH2, 0, wx.ALL, 0)
 		canboatBox.AddSpacer(5)
 
-		mcp2515Box = wx.StaticBoxSizer(mcp2515, wx.VERTICAL)
+		mcp2515H1 = wx.BoxSizer(wx.HORIZONTAL)
+		mcp2515H1.AddSpacer(10)
+		mcp2515H1.Add(canInterfaceLabel, 0, wx.UP, 5)
+		mcp2515H1.Add(canInterface, 0, wx.LEFT, 5)
+		mcp2515H1.AddSpacer(10)
 
+		mcp2515H2 = wx.BoxSizer(wx.HORIZONTAL)
+		mcp2515H2.AddSpacer(10)
+		mcp2515H2.Add(canOscillatorLabel, 0, wx.UP, 5)
+		mcp2515H2.Add(canOscillator, 0, wx.LEFT, 5)
+		mcp2515H2.AddSpacer(10)
+
+		mcp2515H3 = wx.BoxSizer(wx.HORIZONTAL)
+		mcp2515H3.AddSpacer(10)
+		mcp2515H3.Add(canInterruptLabel, 0, wx.UP, 5)
+		mcp2515H3.Add(canInterrupt, 0, wx.LEFT, 5)
+		mcp2515H3.AddSpacer(10)
+
+		mcp2515Box = wx.StaticBoxSizer(mcp2515, wx.VERTICAL)
+		mcp2515Box.Add(mcp2515H1, 0, wx.ALL, 3)
+		mcp2515Box.Add(mcp2515H2, 0, wx.ALL, 3)
+		mcp2515Box.Add(mcp2515H3, 0, wx.ALL, 3)
+		mcp2515Box.AddSpacer(3)
+		mcp2515Box.Add(mcp2515Apply, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
+		mcp2515Box.AddSpacer(3)
 
 		hbox2 = wx.BoxSizer(wx.HORIZONTAL)
 		hbox2.Add(canboatBox, 1, wx.ALL | wx.EXPAND, 5)
@@ -4460,6 +4496,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		main.Add(hbox, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 5)
 
 		self.p_n2k.SetSizer(main) 
+
+	def onMcp2515Apply(self,e):
+		pass
 
 	def on_SK_to_N2K(self,e):
 		dlg = addSKtoN2K()
