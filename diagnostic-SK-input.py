@@ -76,6 +76,12 @@ class MyFrame(wx.Frame):
 		self.list.InsertColumn(4, _('Interval'), wx.LIST_FORMAT_RIGHT, width=55)
 		self.list.InsertColumn(5, _('Status'), width=50)
 		self.list.InsertColumn(6, _('Description'), width=500)
+		self.list.InsertColumn(7, _('label'), width=100)
+		self.list.InsertColumn(8, _('type'), width=90)
+		self.list.InsertColumn(9, _('pgn'), width=70)
+		self.list.InsertColumn(10, _('src'), width=50)
+		self.list.InsertColumn(11, _('sentence'), width=50)
+		self.list.InsertColumn(12, _('talker'), width=50)
 
 		sort_SRC = wx.Button(panel, label=_('Sort SRC'))
 		sort_SRC.Bind(wx.EVT_BUTTON, self.on_sort_SRC)
@@ -369,6 +375,12 @@ class MyFrame(wx.Frame):
 			self.list.SetStringItem(index, 4, str('%.1f' % i[4]))
 			self.list.SetStringItem(index, 5, str(i[5]))
 			self.list.SetStringItem(index, 6, str(i[6]))
+			self.list.SetStringItem(index, 7, str(i[12]))
+			self.list.SetStringItem(index, 8, str(i[13]))
+			self.list.SetStringItem(index, 9, str(i[14]))
+			self.list.SetStringItem(index,10, str(i[15]))
+			self.list.SetStringItem(index,11, str(i[16]))
+			self.list.SetStringItem(index,12, str(i[17]))
 			index += 1
 
 	def on_unit_setting(self, e):
@@ -383,20 +395,28 @@ class MyFrame(wx.Frame):
 		self.Destroy()
 
 	def on_message(self, ws, message):
+		type = ''
+		talker = ''
+		sentence = ''
+		src_ = ''
+		pgn = ''
+		label = ''
+		src = ''
+		type = ''
+		value = ''
+
+	
 		if self.endlive:
 			self.on_close(ws)
 			self.ende=True
 			return
 			js_upb=''
+		#if True:
 		try:
 			js_upb = ujson.loads(message)
 			if 'updates' not in js_upb:
 				return
 			js_up = js_upb['updates'][0]
-			label = ''
-			src = ''
-			type = ''
-			value = ''
 			
 			if 'source' in js_up.keys():
 				source=js_up['source']
@@ -404,13 +424,19 @@ class MyFrame(wx.Frame):
 				if 'type' in source:
 					type = source['type']
 					if type == 'NMEA0183':
-						if 'talker' in source: 
-							src =label+'.'+source['talker']
-							if 'sentence' in source: src =label+'.'+source['sentence']
+						if 'talker' in source:
+							talker = source['talker']
+							src =label+'.'+talker
+							if 'sentence' in source: 
+								sentence = source['sentence']
+								src =label+'.'+sentence
 					elif type == 'NMEA2000':
 						if 'src' in source: 
-							src =label+'.'+source['src']
-							if 'pgn' in source: src +='.'+str(source['pgn'])
+							src_ = source['src']
+							src =label+'.'+src_									
+							if 'pgn' in source: 
+								pgn = source['pgn']
+								src +='.'+str(pgn)
 			if '$source' in js_up and src=='':
 				src = js_up['$source']
 			if 'timestamp' in js_up.keys():
@@ -418,13 +444,11 @@ class MyFrame(wx.Frame):
 			else:
 				timestamp = '2000-01-01T00:00:00.000Z'
 			values_ = js_up['values']
-
 			for values in values_:
 				path = values['path']
 				value = values['value']
 				src2 = src
 				timestamp2 = timestamp
-				
 				if isinstance(value, dict):
 					if 'timestamp' in value: timestamp2 = value['timestamp']
 					if '$source' in value and src=='':
@@ -435,37 +459,46 @@ class MyFrame(wx.Frame):
 						if 'type' in source:
 							type = source['type']
 							if type == 'NMEA0183':
-								if 'talker' in source: 
-									src =label+'.'+source['talker']
-									if 'sentence' in source: src =label+'.'+source['sentence']
+								if 'talker' in source:
+									talker = source['talker']
+									src =label+'.'+talker
+									if 'sentence' in source: 
+										sentence = source['sentence']
+										src =label+'.'+sentence
 							elif type == 'NMEA2000':
 								if 'src' in source: 
-									src =label+'.'+source['src']
-									if 'pgn' in source: src +='.'+str(source['pgn'])
-
+									src_ = source['src']
+									src =label+'.'+src_									
+									if 'pgn' in source: 
+										pgn = source['pgn']
+										src +='.'+str(pgn)
 					for lvalue in value:
 						result = True
 						if lvalue in ['source', '$source', 'method']:
 							result = False
 						elif lvalue == 'timestamp':
 							if 'position' in path and 'RMC' in src2:
-								self.update_add(timestamp2, 'navigation.datetime', src2, timestamp2)
+								self.update_add(timestamp2, 'navigation.datetime', src2, timestamp2,label,type,pgn,src_,sentence,talker)
 							result = False
 						if result:
 							path2 = path + '.' + lvalue
 							value2 = value[lvalue]
-							self.update_add(value2, path2, src2, timestamp2)
+							self.update_add(value2, path2, src2, timestamp2,label,type,pgn,src_,sentence,talker)
+					
 				else:
-					self.update_add(value, path, src, timestamp)
+					self.update_add(value, path, src, timestamp,label,type,pgn,src_,sentence,talker)
+					
+					
 		except:
 			print 'Error when parsing this sentence:'
 			print js_upb
 
 				
-	def update_add(self, value, path, src, timestamp):
-		# SRC SignalK Value Unit Interval Status Description timestamp	private_Unit private_Value priv_Faktor priv_Offset
-		#  0    1      2     3      4        5        6          7           8             9           10          11
-		if type(value) is list: value = value[0]
+	def update_add(self, value, path, src, timestamp,label,type,pgn,src_,sentence,talker):
+		# SRC SignalK Value Unit Interval Status Description timestamp	private_Unit private_Value priv_Faktor priv_Offset label type pgn src_ sentence talker
+		#  0    1      2     3      4        5        6          7           8             9           10          11		12	  13   14  15	  16	  17
+		if isinstance(value, list): value = value[0]
+		#if type(value) is list: value = value[0]
 		
 		if isinstance(value, float): pass
 		elif isinstance(value, basestring): value = str(value)
@@ -483,15 +516,17 @@ class MyFrame(wx.Frame):
 				if i[4] == 0.0:
 					i[4] = self.json_interval(i[7], timestamp)
 				else:
-					i[4] = i[4] * .8 + 0.2 * self.json_interval(i[7], timestamp)
+					i[4] = i[4] * .6 + 0.4 * self.json_interval(i[7], timestamp)
 				i[7] = timestamp
 				self.buffer.append([index, 0, i[0]])
 				self.buffer.append([index, 4, str('%.2f' % i[4])])
-				if type(i[2]) is str:
+				if isinstance(i[2], str):
+				#if type(i[2]) is str:
 					self.buffer.append([index, 2, i[2]])
 					self.buffer.append([index, 3, i[3]])
 					break
-				elif type(i[2]) is float:
+				elif isinstance(i[2], float):
+				#elif type(i[2]) is float:
 					pass
 				else:
 					i[2] = 0.0
@@ -508,7 +543,7 @@ class MyFrame(wx.Frame):
 			self.lookup_star(path)
 			self.list_SK.append(
 				[src, path, value, str(self.SK_unit), 0.0, 1, self.SK_description, timestamp, str(self.SK_unit_priv), 0,
-				 self.SK_Faktor_priv, self.SK_Offset_priv])
+				 self.SK_Faktor_priv, self.SK_Offset_priv,label,type,str(pgn),src_,sentence,talker])
 			self.buffer.append([-1, 0, ''])
 
 	def on_private_unit(self, e):
@@ -540,7 +575,6 @@ class MyFrame(wx.Frame):
 
 		self.thread = threading.Thread(target=run)
 		self.thread.start()
-
 
 app = wx.App()
 MyFrame().Show()
