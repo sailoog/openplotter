@@ -1458,7 +1458,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		connections_box = wx.StaticBox(self.p_pypilot, label= _(' Autopilot '))
 
-		serial_ports_label = wx.StaticText(self.p_pypilot, label=_('Serial ports (Controller/Wind/GPS)'))
+		serial_ports_label = wx.StaticText(self.p_pypilot, label=_('Serial ports'))
 		self.pypilot_nmea = wx.TextCtrl(self.p_pypilot,style=wx.TE_MULTILINE | wx.VSCROLL | wx.TE_READONLY)
 
 		self.pypilot_webapp_cb = wx.CheckBox(self.p_pypilot, False, _('Enable webapp'))
@@ -2759,7 +2759,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	######################################Actions
 
 	def page_action(self):
-		self.list_triggers = CheckListCtrl(self.p_action, -1,90)
+		self.list_triggers = CheckListCtrl(self.p_action, -1,85)
 		self.list_triggers.InsertColumn(0, _('Triggers'), width=120)
 		self.list_triggers.InsertColumn(1, _(' '), width= 130)
 		self.list_triggers.InsertColumn(2, _(' '), width= 130)
@@ -2789,7 +2789,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.available_conditions = ['=', '!=', '<', '<=', '>', '>=', _('is between'), _('contains'), _('is true'), ('is false'), _('is null'), _('is not null'), _('is empty'), _('is not empty')]
 		#self.available_operators_select = wx.Choice(self.p_action, choices=self.available_conditions, style=wx.CB_READONLY)
 
-		self.list_conditions = wx.ListCtrl(self.p_action, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(-1,90))
+		self.list_conditions = wx.ListCtrl(self.p_action, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(-1,85))
 		self.list_conditions.InsertColumn(0, _('Conditions'), width= 100)
 		self.list_conditions.InsertColumn(1, _(' '), width= 150)
 		self.list_conditions.InsertColumn(2, _(' '), width= 150)
@@ -2804,7 +2804,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		delete_condition = wx.Button(self.p_action, label=_('delete'))
 		delete_condition.Bind(wx.EVT_BUTTON, self.on_delete_condition)
 
-		self.list_actions = wx.ListCtrl(self.p_action, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(-1,90))
+		self.list_actions = wx.ListCtrl(self.p_action, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(-1,85))
 		self.list_actions.InsertColumn(0, _('Actions'), width= 150)
 		self.list_actions.InsertColumn(1, _(' '), width= 170)
 		self.list_actions.InsertColumn(2, _(' '), width= 100)
@@ -2886,6 +2886,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		vbox.Add(hlistbox, 1, wx.ALL | wx.EXPAND, 0)
 		vbox.Add(hlistbox2, 1, wx.ALL | wx.EXPAND, 0)
 		vbox.Add(hlistbox3, 1, wx.ALL | wx.EXPAND, 0)
+		hbox.AddStretchSpacer(0)
 		vbox.Add(hbox, 0, wx.ALL | wx.EXPAND, 5)
 
 		self.p_action.SetSizer(vbox)
@@ -3737,7 +3738,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	###########################################Serial
 
 	def page_serial(self):
-		self.list_Serialinst = wx.ListCtrl(self.p_serial, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER | wx.LC_SINGLE_SEL)
+		self.list_Serialinst = wx.ListCtrl(self.p_serial, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER | wx.LC_SINGLE_SEL, size=(-1,85))
 		self.list_Serialinst.InsertColumn(0, _('alias'), width=150)
 		self.list_Serialinst.InsertColumn(1, _('device'), width=100)
 		self.list_Serialinst.InsertColumn(2, _('vendor'), width=60)
@@ -4346,7 +4347,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 	def page_n2k(self):	
 		canboatjs = wx.StaticBox(self.p_n2k, label=_(' Managed by Signal K '))
 		self.listSKcan = wx.ListCtrl(self.p_n2k, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER | wx.LC_SINGLE_SEL, size=(-1,70))
-		self.listSKcan.InsertColumn(0, _('alias'), width=300)
+		self.listSKcan.InsertColumn(0, _('alias'), width=250)
 		self.listSKcan.InsertColumn(1, _('bauds'), width=250)
 		self.listSKcan.Bind(wx.EVT_LIST_ITEM_SELECTED, self.onListSKcanSelected)
 		self.listSKcan.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.onListSKcanDeselected)
