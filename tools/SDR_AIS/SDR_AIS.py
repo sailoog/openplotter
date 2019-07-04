@@ -312,7 +312,7 @@ class MyFrame(wx.Frame):
 			self.ShowStatusBarGREEN(_('Saved PPM'))
 
 		def open_gqrx(self):
-			subprocess.Popen('/opt/gqrx/gqrx')
+			subprocess.Popen('gqrx')
 
 		def on_help_sdr(self, e):
 			url = self.op_folder+"/docs/html/tools/sdr_receiver.html"
