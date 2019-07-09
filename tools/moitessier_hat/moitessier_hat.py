@@ -113,10 +113,6 @@ class MyFrame(wx.Frame):
 			h_boxSizer3.Add(self.button_MS560702BA03, 0, wx.ALL | wx.EXPAND, 5)
 			h_boxSizer3.Add(self.button_Si7020A20, 0, wx.ALL | wx.EXPAND, 5)
 
-			buttons_up = wx.BoxSizer(wx.HORIZONTAL)
-			buttons_up.Add(h_boxSizer1, 1, wx.ALL | wx.EXPAND, 0)
-			buttons_up.Add(h_boxSizer3, 1, wx.LEFT | wx.EXPAND, 10)
-
 			buttons = wx.BoxSizer(wx.HORIZONTAL)
 			buttons.Add(help_button, 0, wx.ALL | wx.EXPAND, 0)
 			buttons.Add(shop, 0, wx.LEFT | wx.EXPAND, 10)
@@ -125,7 +121,8 @@ class MyFrame(wx.Frame):
 			buttons.Add(button_ok, 0, wx.LEFT | wx.EXPAND, 10)
 
 			vbox3 = wx.BoxSizer(wx.VERTICAL)
-			vbox3.Add(buttons_up, 0, wx.ALL | wx.EXPAND, 5)
+			vbox3.Add(h_boxSizer1, 0, wx.ALL | wx.EXPAND, 5)
+			vbox3.Add(h_boxSizer3, 0, wx.ALL | wx.EXPAND, 5)
 			vbox3.Add(self.logger, 1, wx.ALL | wx.EXPAND, 5)
 			vbox3.Add(buttons, 0, wx.ALL | wx.EXPAND, 5)
 

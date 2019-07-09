@@ -36,7 +36,7 @@ class MyFrame(wx.Frame):
 			self.SK_settings = SK_settings(self.conf)
 			self.opencpnSettings = opencpnSettings()
 
-			wx.Frame.__init__(self, None, title=_('SDR receiver'), size=(710,460))
+			wx.Frame.__init__(self, None, title=_('SDR receiver'), size=(710,380))
 			
 			self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 			
