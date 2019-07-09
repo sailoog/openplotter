@@ -4134,53 +4134,56 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 			self.read_pypilot()
 			self.on_apply_changes_pypilot()
 
-		# check klex interfaces
-		file = open(self.home +'/.kplex.conf', 'r')
-		file1 = open(self.home+'/.kplex.tmp', 'w')
-		interface = ''
-		device = ''
-		while True:
-			line = file.readline()
-			if '[serial]' in line or interface != '':
-				if 'filename=' in line:
-					option, value = line.split('=')
-					device = value.strip()
-				if '[serial]' in line and interface == '':
-					interface = line
-					device = ''
-				elif not line or re.search('\[*\]', line) or '###' in line:
-					exists = False
-					for alias in self.Serialinst:
-						if alias == device and self.Serialinst[alias]['data'] == 'NMEA 0183' and self.Serialinst[alias]['assignment'] == '0': exists = True
-					if exists: 
-						file1.write(interface)
-					if not line: break
-					elif '[serial]' in line:
+		# check kplex interfaces
+		try:
+			file = open(self.home +'/.kplex.conf', 'r')
+			file1 = open(self.home+'/.kplex.tmp', 'w')
+		except:pass
+		else:
+			interface = ''
+			device = ''
+			while True:
+				line = file.readline()
+				if '[serial]' in line or interface != '':
+					if 'filename=' in line:
+						option, value = line.split('=')
+						device = value.strip()
+					if '[serial]' in line and interface == '':
 						interface = line
 						device = ''
-					else: 
-						file1.write(line)
-						interface = ''
-						device = ''
-				else: interface += line
-			else:
-				if not line: break
-				else: file1.write(line)
-		file.close()
-		file1.close()
-		if os.system('diff '+self.home+'/.kplex.tmp '+self.home+'/.kplex.conf > /dev/null'):
-			os.system('mv '+self.home+'/.kplex.tmp '+self.home+'/.kplex.conf')
-			msg = _('Restarting kplex... ')
-			seconds = 5
-			subprocess.call(['pkill', '-f', 'diagnostic-NMEA.py'])
-			subprocess.call(['pkill', '-f', 'kplex.py'])
-			subprocess.call(['pkill', '-15', 'kplex'])
-			for i in range(seconds, 0, -1):
-				self.ShowStatusBarYELLOW(msg+str(i))
-				time.sleep(1)
-			subprocess.Popen('kplex')
-			self.ShowStatusBarGREEN(_('Kplex restarted'))
-		else: os.system('rm -f '+self.home+'/.kplex.tmp')
+					elif not line or re.search('\[*\]', line) or '###' in line:
+						exists = False
+						for alias in self.Serialinst:
+							if alias == device and self.Serialinst[alias]['data'] == 'NMEA 0183' and self.Serialinst[alias]['assignment'] == '0': exists = True
+						if exists: 
+							file1.write(interface)
+						if not line: break
+						elif '[serial]' in line:
+							interface = line
+							device = ''
+						else: 
+							file1.write(line)
+							interface = ''
+							device = ''
+					else: interface += line
+				else:
+					if not line: break
+					else: file1.write(line)
+			file.close()
+			file1.close()
+			if os.system('diff '+self.home+'/.kplex.tmp '+self.home+'/.kplex.conf > /dev/null'):
+				os.system('mv '+self.home+'/.kplex.tmp '+self.home+'/.kplex.conf')
+				msg = _('Restarting kplex... ')
+				seconds = 5
+				subprocess.call(['pkill', '-f', 'diagnostic-NMEA.py'])
+				subprocess.call(['pkill', '-f', 'kplex.py'])
+				subprocess.call(['pkill', '-15', 'kplex'])
+				for i in range(seconds, 0, -1):
+					self.ShowStatusBarYELLOW(msg+str(i))
+					time.sleep(1)
+				subprocess.Popen('kplex')
+				self.ShowStatusBarGREEN(_('Kplex restarted'))
+			else: os.system('rm -f '+self.home+'/.kplex.tmp')
 
 		# check SK devices
 		resetSK = False
