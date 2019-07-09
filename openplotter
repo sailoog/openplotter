@@ -577,8 +577,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		hbox = wx.BoxSizer(wx.HORIZONTAL)
 		hbox.Add(help_button, 0, wx.ALL, 0)
 		hbox.Add((0, 0), 1, wx.RIGHT | wx.LEFT, 5)
-		hbox.Add(apply_changes, 0, wx.RIGHT | wx.LEFT, 5)
-		hbox.Add(cancel_changes, 0, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add(apply_changes, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 5)
+		hbox.Add(cancel_changes, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 5)
 
 		vbox = wx.BoxSizer(wx.VERTICAL)
 		vbox.Add(v_general, 0, wx.ALL | wx.EXPAND, 5)
@@ -766,8 +766,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		hbox = wx.BoxSizer(wx.HORIZONTAL)
 		hbox.Add(help_button, 0, wx.ALL, 0)
 		hbox.AddStretchSpacer(1)
-		hbox.Add(apply_changes, 0, wx.RIGHT | wx.LEFT, 5)
-		hbox.Add(cancel_changes, 0, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add(apply_changes, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 5)
+		hbox.Add(cancel_changes, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 5)
 
 		vbox = wx.BoxSizer(wx.VERTICAL)
 		vbox.Add(hboth, 0, wx.ALL | wx.EXPAND, 0)
@@ -1757,8 +1757,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 
 		hbox = wx.BoxSizer(wx.HORIZONTAL)
 		hbox.Add(help_button, 0, wx.RIGHT, 5)
-		hbox.Add(diagnostic, 0, wx.RIGHT | wx.LEFT, 5)
-		hbox.Add(reset_i2c, 0, wx.RIGHT | wx.LEFT, 5)
+		hbox.AddStretchSpacer(1)
+		hbox.Add(diagnostic, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 5)
+		hbox.Add(reset_i2c, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 5)
 
 		vbox = wx.BoxSizer(wx.VERTICAL)
 		vbox.Add(title, 0, wx.ALL | wx.EXPAND, 5)
@@ -2062,14 +2063,14 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		self.twitterid = 'openplot.twitt'
 		self.telegramid = 'openplot.teleg'
 		
-		self.localmqtt = wx.CheckBox(self.p_credentials, label=_('Enable local MQTT broker'))
+		self.localmqtt = wx.CheckBox(self.p_credentials, label=_('Local MQTT broker'))
 		self.localmqtt.Bind(wx.EVT_CHECKBOX, self.on_localmqtt)
 		userlocalmqttlabel = wx.StaticText(self.p_credentials, label=_('Username'))
 		self.userlocalmqtt = wx.TextCtrl(self.p_credentials)
 		passlocalmqttlabel = wx.StaticText(self.p_credentials, label=_('Password'))
 		self.passlocalmqtt = wx.TextCtrl(self.p_credentials, style=wx.TE_PASSWORD)
 
-		self.remotemqtt = wx.CheckBox(self.p_credentials, label=_('Enable remote MQTT broker'))
+		self.remotemqtt = wx.CheckBox(self.p_credentials, label=_('Remote MQTT broker'))
 		self.remotemqtt.Bind(wx.EVT_CHECKBOX, self.on_remotemqtt)
 		serverremotemqttlabel = wx.StaticText(self.p_credentials, label=_('Server'))
 		self.serverremotemqtt = wx.TextCtrl(self.p_credentials)
@@ -2080,7 +2081,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		passremotemqttlabel = wx.StaticText(self.p_credentials, label=_('Password'))
 		self.passremotemqtt = wx.TextCtrl(self.p_credentials, style=wx.TE_PASSWORD)
 
-		self.twitter = wx.CheckBox(self.p_credentials, label=_('Enable Twitter account'))
+		self.twitter = wx.CheckBox(self.p_credentials, label=_('Twitter account'))
 		self.twitter.Bind(wx.EVT_CHECKBOX, self.on_twitter)
 		twitteraccountlabel = wx.StaticText(self.p_credentials, label=_('Twitter ID'))
 		self.twitteraccount = wx.TextCtrl(self.p_credentials)
@@ -2093,7 +2094,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		accesstokensecretlabel = wx.StaticText(self.p_credentials, label=_('Access token secret'))
 		self.accesstokensecret = wx.TextCtrl(self.p_credentials, style=wx.TE_PASSWORD)
 
-		self.telegram = wx.CheckBox(self.p_credentials, label=_('Enable Telegram bot'))
+		self.telegram = wx.CheckBox(self.p_credentials, label=_('Telegram bot'))
 		self.telegram.Bind(wx.EVT_CHECKBOX, self.on_telegram)
 		tokenlabel = wx.StaticText(self.p_credentials, label=_('Token'))
 		self.token = wx.TextCtrl(self.p_credentials, style=wx.TE_PASSWORD)
@@ -2164,19 +2165,17 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		telegram0.AddSpacer(10)
 		telegram0.Add(tokenlabel, 0, wx.TOP | wx.BOTTOM, 6)
 		telegram0.Add(self.token, 1, wx.LEFT, 5)
-
-		telegram1 = wx.BoxSizer(wx.HORIZONTAL)
-		telegram1.AddSpacer(25)
-		telegram1.Add(userslabel, 0, wx.TOP | wx.BOTTOM, 6)
-		telegram1.Add(self.users, 1, wx.LEFT, 5)
+		telegram0.AddSpacer(10)
+		telegram0.Add(userslabel, 0, wx.TOP | wx.BOTTOM, 6)
+		telegram0.Add(self.users, 1, wx.LEFT, 5)
 
 		buttons = wx.BoxSizer(wx.HORIZONTAL)
 		buttons.Add(help_button, 0, wx.RIGHT, 5)
-		buttons.Add(self.encrypt, 0, wx.RIGHT | wx.LEFT, 5)
-		buttons.Add(self.decrypt, 0, wx.RIGHT | wx.LEFT, 5)
-		buttons.Add((0, 0), 1, wx.RIGHT | wx.LEFT, 5)
-		buttons.Add(self.apply_changes_cre, 0, wx.RIGHT | wx.LEFT, 5)
-		buttons.Add(self.cancel_changes_cre, 0, wx.RIGHT | wx.LEFT, 5)
+		buttons.Add(self.encrypt, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 5)
+		buttons.Add(self.decrypt, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 5)
+		buttons.AddStretchSpacer(1)
+		buttons.Add(self.apply_changes_cre, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 5)
+		buttons.Add(self.cancel_changes_cre, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 5)
 
 		main = wx.BoxSizer(wx.VERTICAL)
 		main.Add(self.localmqtt, 0, wx.TOP | wx.BOTTOM, 2)
@@ -2193,8 +2192,6 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		main.Add(twitter2, 0, wx.RIGHT | wx.EXPAND, 5)
 		main.AddSpacer(10)		
 		main.Add(telegram0, 0, wx.RIGHT | wx.EXPAND, 5)
-		main.AddSpacer(3)		
-		main.Add(telegram1, 0, wx.RIGHT | wx.EXPAND, 5)
 		main.AddStretchSpacer(1)		
 		main.Add(buttons, 0, wx.ALL | wx.EXPAND, 5)
 
@@ -2879,8 +2876,8 @@ along with this program.  If not, see http://www.gnu.org/licenses/"""
 		hbox = wx.BoxSizer(wx.HORIZONTAL)
 		hbox.Add(help_button, 0, wx.ALL, 0)
 		hbox.AddStretchSpacer(1)
-		hbox.Add(apply_changes, 0, wx.RIGHT | wx.LEFT, 5)
-		hbox.Add(cancel_changes, 0, wx.RIGHT | wx.LEFT, 5)
+		hbox.Add(apply_changes, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 5)
+		hbox.Add(cancel_changes, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 5)
 
 		vbox = wx.BoxSizer(wx.VERTICAL)
 		vbox.Add(hlistbox, 1, wx.ALL | wx.EXPAND, 0)
