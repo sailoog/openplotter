@@ -66,7 +66,7 @@ class addkplex(wx.Dialog):
 		self.kplex_net_T1 = wx.StaticText(panel, label=_('Address'), pos=(235, 35))
 		self.kplex_address = wx.TextCtrl(panel, -1, size=(120, 32), pos=(230, 55))
 		self.kplex_net_T2 = wx.StaticText(panel, label=_('Port'), pos=(375, 35))
-		self.kplex_netport = wx.TextCtrl(panel, -1, size=(55, 32), pos=(370, 55))
+		self.kplex_netport = wx.TextCtrl(panel, -1, size=(75, 32), pos=(370, 55))
 
 		self.ser_io_list = ['in', 'out', 'both']
 		self.net_io_list = ['in', 'out', 'both']
@@ -83,14 +83,12 @@ class addkplex(wx.Dialog):
 
 		self.ifilter_T1 = wx.StaticBox(panel, label=_('in Filter '), size=(530, 100), pos=(10, 105))
 		self.mode_ifilter = [_('none'), _('Accept only sentences:'), _('Ignore sentences:')]
-		self.ifilter_select = wx.ComboBox(panel, choices=self.mode_ifilter, style=wx.CB_READONLY, size=(195, 32),
-										  pos=(20, 125))
+		self.ifilter_select = wx.ComboBox(panel, choices=self.mode_ifilter, style=wx.CB_READONLY, size=(195, 32),pos=(20, 125))
 		self.ifilter_select.SetValue(self.mode_ifilter[0])
-		self.italker = wx.TextCtrl(panel, -1, size=(29, 32), pos=(226, 125))
-		self.ifilter_T2 = wx.StaticText(panel, label=_('-'), pos=(253, 130))
-		self.isent = wx.TextCtrl(panel, -1, size=(39, 32), pos=(260, 125))
+		self.italker = wx.TextCtrl(panel, -1, size=(40, 32), pos=(230, 125))
+		self.isent = wx.TextCtrl(panel, -1, size=(50, 32), pos=(270, 125))
 		# self.name_ifilter_select = wx.ComboBox(panel, choices=self.name_ifilter_list, style=wx.CB_READONLY, size=(110, 32), pos=(305, 125))
-		self.ifilter_add_b = wx.Button(panel, label=_('Add sentence'), pos=(425, 125))
+		self.ifilter_add_b = wx.Button(panel, label=_('Add'), pos=(425, 125))
 		self.Bind(wx.EVT_BUTTON, self.ifilter_add, self.ifilter_add_b)
 		self.ifilter_sentences = wx.TextCtrl(panel, -1, style=wx.CB_READONLY, size=(395, 32), pos=(20, 165))
 		self.ifilter_sentences.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_INACTIVECAPTION))
@@ -100,15 +98,12 @@ class addkplex(wx.Dialog):
 		a = 105
 		self.ofilter_T1 = wx.StaticBox(panel, label=_('out Filter '), size=(530, 100), pos=(10, 105 + a))
 		self.mode_ofilter = [_('none'), _('Accept only sentences:'), _('Ignore sentences:')]
-		self.ofilter_select = wx.ComboBox(panel, choices=self.mode_ofilter, style=wx.CB_READONLY, size=(195, 32),
-										  pos=(20, 125 + a))
+		self.ofilter_select = wx.ComboBox(panel, choices=self.mode_ofilter, style=wx.CB_READONLY, size=(170, 32), pos=(20, 125 + a))
 		self.ofilter_select.SetValue(self.mode_ofilter[0])
-		self.otalker = wx.TextCtrl(panel, -1, size=(29, 32), pos=(226, 125 + a))
-		self.ofilter_T2 = wx.StaticText(panel, label=_('-'), pos=(253, 130 + a))
-		self.osent = wx.TextCtrl(panel, -1, size=(39, 32), pos=(260, 125 + a))
-		self.name_ofilter_select = wx.ComboBox(panel, choices=self.name_ifilter_list, style=wx.CB_READONLY,
-											   size=(110, 32), pos=(305, 125 + a))
-		self.ofilter_add_b = wx.Button(panel, label=_('Add sentence'), pos=(425, 125 + a))
+		self.otalker = wx.TextCtrl(panel, -1, size=(40, 32), pos=(200, 125 + a))
+		self.osent = wx.TextCtrl(panel, -1, size=(50, 32), pos=(240, 125 + a))
+		self.name_ofilter_select = wx.ComboBox(panel, choices=self.name_ifilter_list, style=wx.CB_READONLY, size=(120, 32), pos=(300, 125 + a))
+		self.ofilter_add_b = wx.Button(panel, label=_('Add'), pos=(425, 125 + a))
 		self.Bind(wx.EVT_BUTTON, self.ofilter_add, self.ofilter_add_b)
 		self.ofilter_sentences = wx.TextCtrl(panel, -1, style=wx.CB_READONLY, size=(395, 32), pos=(20, 165 + a))
 		self.ofilter_sentences.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_INACTIVECAPTION))
@@ -125,20 +120,17 @@ class addkplex(wx.Dialog):
 
 		self.optional = wx.CheckBox(panel, label=_('set optional'), pos=(20, 365))
 
-		self.gpsd_examp_b = wx.Button(panel, label=_('Add GPSD in'), pos=(20, 320))
-		self.Bind(wx.EVT_BUTTON, self.gpsd_examp, self.gpsd_examp_b)
+		gpsd_examp_b = wx.Button(panel, label=_('Add GPSD input'), pos=(10, 320))
+		gpsd_examp_b.Bind(wx.EVT_BUTTON, self.gpsd_examp)
 
-		self.SK_examp_b = wx.Button(panel, label=_('Add SignalK out'), pos=(155, 320))
-		self.SK_examp_b.Bind(wx.EVT_BUTTON, self.SK_examp)
+		SKin_examp_b = wx.Button(panel, label=_('Add Signal K input'), pos=(170, 320))
+		SKin_examp_b.Bind(wx.EVT_BUTTON, self.SKin_examp)
 
-		self.GPS_examp_b = wx.Button(panel, label=_('Add GPS in'), pos=(290, 320))
-		self.GPS_examp_b.Bind(wx.EVT_BUTTON, self.GPS_examp)
+		SKout_examp_b = wx.Button(panel, label=_('Add Signal K output'), pos=(350, 320))
+		SKout_examp_b.Bind(wx.EVT_BUTTON, self.SKout_examp)
 
-		self.AP_examp_b = wx.Button(panel, label=_('Add Autopilot'), pos=(425, 320))
-		self.AP_examp_b.Bind(wx.EVT_BUTTON, self.AP_examp)
-
-		self.ok = wx.Button(panel, label=_('OK'), pos=(425, 360))
-		self.Bind(wx.EVT_BUTTON, self.ok_conn, self.ok)
+		ok = wx.Button(panel, label=_('OK'), pos=(425, 360))
+		ok.Bind(wx.EVT_BUTTON, self.ok_conn)
 		cancelBtn = wx.Button(panel, wx.ID_CANCEL, pos=(330, 360))
 
 		if edit == 0:
@@ -149,6 +141,7 @@ class addkplex(wx.Dialog):
 			self.kplex_io_net.SetValue('in')
 			self.switch_ser_net(True)
 			self.switch_io_out(False)
+			self.optional.SetValue(True)
 		else:
 			self.kplex_name.SetValue(edit[1])
 			self.kplex_type.SetValue(edit[2])
@@ -184,48 +177,33 @@ class addkplex(wx.Dialog):
 			else:
 				self.optional.SetValue(False)
 
-	def SK_examp(self, e):
-		self.kplex_type.SetValue('TCP')
+	def SKout_examp(self, e):
+		self.kplex_type.SetValue('UDP')
 		self.kplex_io_net.SetValue('out')
 		self.switch_ser_net(False)
 		self.switch_io_out(True)
 		self.switch_io_in(False)
 		self.kplex_address.SetValue('')
 		self.kplex_netport.SetValue('30330')
-		self.kplex_baud_select.SetValue('4800')
-		self.kplex_name.SetValue('signalk')
+		self.kplex_name.SetValue('signalk_out')
 		self.ifilter_select.SetValue(self.mode_ifilter[0])
 		self.ifilter_sentences.SetValue(_('nothing'))
 		self.ofilter_select.SetValue(self.mode_ifilter[0])
 		self.ofilter_sentences.SetValue(_('nothing'))
 
-	def GPS_examp(self, e):
-		self.kplex_type.SetValue('Serial')
-		self.kplex_io_ser.SetValue('in')
-		self.switch_ser_net(True)
+	def SKin_examp(self, e):
+		self.kplex_type.SetValue('TCP')
+		self.kplex_io_net.SetValue('in')
+		self.switch_ser_net(False)
 		self.switch_io_out(False)
 		self.switch_io_in(True)
-		self.kplex_baud_select.SetValue('4800')
-		self.kplex_name.SetValue('gps')
+		self.kplex_address.SetValue('localhost')
+		self.kplex_netport.SetValue('10110')
+		self.kplex_name.SetValue('signalk_in')
 		self.ifilter_select.SetValue(self.mode_ifilter[0])
 		self.ifilter_sentences.SetValue(_('nothing'))
 		self.ofilter_select.SetValue(self.mode_ifilter[0])
 		self.ofilter_sentences.SetValue(_('nothing'))
-		self.optional.SetValue(True)
-
-	def AP_examp(self, e):
-		self.kplex_type.SetValue('Serial')
-		self.kplex_io_ser.SetValue('both')
-		self.switch_ser_net(True)
-		self.switch_io_out(True)
-		self.switch_io_in(True)
-		self.kplex_baud_select.SetValue('4800')
-		self.kplex_name.SetValue('ap')
-		self.ifilter_select.SetValue(self.mode_ifilter[1])
-		self.ifilter_sentences.SetValue('**HDM,**RSA')
-		self.ofilter_select.SetValue(self.mode_ifilter[1])
-		self.ofilter_sentences.SetValue('**RM*,**VHW,**VWR')
-		self.optional.SetValue(True)
 
 	def gpsd_examp(self, e):
 		self.kplex_type.SetValue('TCP')
@@ -234,7 +212,7 @@ class addkplex(wx.Dialog):
 		self.switch_io_out(False)
 		self.switch_io_in(True)
 		self.switch_ser_net(False)
-		self.kplex_address.SetValue('127.0.0.1')
+		self.kplex_address.SetValue('localhost')
 		self.kplex_netport.SetValue('2947')
 		self.kplex_baud_select.SetValue('4800')
 		self.kplex_name.SetValue('gpsd')
@@ -338,7 +316,6 @@ class addkplex(wx.Dialog):
 			self.ifilter_T1.Enable()
 			self.ifilter_select.Enable()
 			self.italker.Enable()
-			self.ifilter_T2.Enable()
 			self.isent.Enable()
 			# self.name_ifilter_select.Enable()
 			self.ifilter_add_b.Enable()
@@ -348,7 +325,6 @@ class addkplex(wx.Dialog):
 			self.ifilter_T1.Disable()
 			self.ifilter_select.Disable()
 			self.italker.Disable()
-			self.ifilter_T2.Disable()
 			self.isent.Disable()
 			# self.name_ifilter_select.Disable()
 			self.ifilter_add_b.Disable()
@@ -362,7 +338,6 @@ class addkplex(wx.Dialog):
 			self.ofilter_T1.Enable()
 			self.ofilter_select.Enable()
 			self.otalker.Enable()
-			self.ofilter_T2.Enable()
 			self.osent.Enable()
 			self.name_ofilter_select.Enable()
 			self.ofilter_add_b.Enable()
@@ -372,7 +347,6 @@ class addkplex(wx.Dialog):
 			self.ofilter_T1.Disable()
 			self.ofilter_select.Disable()
 			self.otalker.Disable()
-			self.ofilter_T2.Disable()
 			self.osent.Disable()
 			self.name_ofilter_select.Disable()
 			self.ofilter_add_b.Disable()
