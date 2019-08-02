@@ -24,7 +24,8 @@ class editMCP(wx.Dialog):
 	def __init__(self,aktiv,channel,sk,convert,parent):
 		self.conf = parent.conf
 		self.channel = channel
-
+		self.parent = parent
+		
 		title = _('Edit').decode('utf8')+(' MCP3008-channel '+str(channel)).encode('utf-8')
 
 		wx.Dialog.__init__(self, None, title=title, size=(450, 270))
@@ -98,7 +99,7 @@ class editMCP(wx.Dialog):
 
 	def onEditSkkey(self,e):
 		key = self.SKkey.GetValue()
-		dlg = selectKey(key,'self')
+		dlg = selectKey(key)
 		
 		res = dlg.ShowModal()
 		if res == wx.OK:
