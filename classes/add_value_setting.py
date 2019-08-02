@@ -142,7 +142,7 @@ class addvaluesetting(wx.Dialog):
 		self.read_list()
 
 	def on_graph(self, e):
-   		subprocess.Popen(['python', self.parent.currentpath+'/show_raw_adc_convert.py', str(self.edit)])
+   		subprocess.Popen(['python', self.parent.parent.currentpath+'/show_raw_adc_convert.py', str(self.edit)])
 
 	def on_close(self, e):
 		self.Destroy()
